@@ -120,6 +120,11 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_widgetDescription': '快速打开物品管理',
   'goods_overviewName': '物品概览',
   'goods_overviewDescription': '显示物品统计信息',
+  'goods_warehouseSelector': '仓库选择器',
+  'goods_warehouseSelectorDesc': '选择仓库并查看物品列表',
+  'goods_itemSelector': '物品选择器',
+  'goods_itemSelectorDesc': '选择物品并查看详情',
+  'home_tapToViewDetails': '点击查看详情',
 
   // Multi-Filter Strings
   'goods_purchaseDateRange': '购入日期',

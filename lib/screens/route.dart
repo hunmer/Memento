@@ -1,5 +1,7 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
+import 'package:Memento/plugins/notes/screens/note_edit_screen.dart';
+import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:Memento/plugins/store/widgets/product_items_page.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
@@ -135,6 +137,7 @@ class AppRoutes extends NavigatorObserver {
   static const String nodes = '/nodes';
   static const String tts = '/tts';
   static const String notes = '/notes';
+  static const String notesCreate = '/notes/create';
   static const String openai = '/openai';
   static const String scriptsCenter = '/scripts_center';
   static const String store = '/store';
@@ -464,6 +467,25 @@ class AppRoutes extends NavigatorObserver {
       case '/notes':
       case 'notes':
         return _createRoute(const NotesMainView());
+      case '/notes/create':
+      case 'notes/create':
+        // 快速创建笔记页面
+        String? folderId;
+        if (settings.arguments is Map<String, dynamic>) {
+          folderId = (settings.arguments as Map<String, dynamic>)['folderId'] as String?;
+        }
+        return _createRoute(NoteEditScreen(
+          onSave: (title, content) async {
+            final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
+            if (plugin != null) {
+              await plugin.controller.createNote(
+                title.isEmpty ? 'untitled'.tr : title,
+                content,
+                folderId ?? 'root',
+              );
+            }
+          },
+        ));
       case '/openai':
       case 'openai':
         return _createRoute(const OpenAIMainView());

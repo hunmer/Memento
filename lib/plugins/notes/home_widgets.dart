@@ -20,62 +20,93 @@ class NotesHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'notes_icon',
-      pluginId: 'notes',
-      name: 'notes_widgetName'.tr,
-      description: 'notes_widgetDescription'.tr,
-      icon: Icons.note_alt_outlined,
-      color: _notesColor,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'notes_icon',
+        pluginId: 'notes',
+        name: 'notes_widgetName'.tr,
+        description: 'notes_widgetDescription'.tr,
         icon: Icons.note_alt_outlined,
         color: _notesColor,
-        name: 'notes_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.note_alt_outlined,
+              color: _notesColor,
+              name: 'notes_widgetName'.tr,
+            ),
       ),
-    ));
+    );
+
+    // 1x1 文件夹快捷创建组件 - 选择文件夹后快速新建笔记
+    registry.register(
+      HomeWidget(
+        id: 'notes_folder_quick_create',
+        pluginId: 'notes',
+        name: 'notes_quickCreate'.tr,
+        description: 'notes_quickCreateDesc'.tr,
+        icon: Icons.add_circle_outline,
+        color: _notesColor,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
+        selectorId: 'notes.folder',
+        dataRenderer: _renderQuickCreateData,
+        navigationHandler: _navigateToQuickCreate,
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('notes_folder_quick_create')!,
+            config: config,
+          );
+        },
+      ),
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'notes_overview',
-      pluginId: 'notes',
-      name: 'notes_overviewName'.tr,
-      description: 'notes_overviewDescription'.tr,
-      icon: Icons.notes,
-      color: _notesColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'notes_overview',
+        pluginId: 'notes',
+        name: 'notes_overviewName'.tr,
+        description: 'notes_overviewDescription'.tr,
+        icon: Icons.notes,
+        color: _notesColor,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
     // 文件夹选择器小组件 - 快速访问指定文件夹
-    registry.register(HomeWidget(
-      id: 'notes_folder_selector',
-      pluginId: 'notes',
-      name: 'notes_folderQuickAccess'.tr,
-      description: 'notes_folderQuickAccessDesc'.tr,
-      icon: Icons.folder_open,
-      color: _notesColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
+    registry.register(
+      HomeWidget(
+        id: 'notes_folder_selector',
+        pluginId: 'notes',
+        name: 'notes_folderQuickAccess'.tr,
+        description: 'notes_folderQuickAccessDesc'.tr,
+        icon: Icons.folder_open,
+        color: _notesColor,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
 
-      // 选择器配置
-      selectorId: 'notes.folder',
-      dataRenderer: _renderFolderData,
-      navigationHandler: _navigateToFolder,
+        // 选择器配置
+        selectorId: 'notes.folder',
+        dataRenderer: _renderFolderData,
+        navigationHandler: _navigateToFolder,
 
-      builder: (context, config) {
-        return GenericSelectorWidget(
-          widgetDefinition: registry.getWidget('notes_folder_selector')!,
-          config: config,
-        );
-      },
-    ));
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('notes_folder_selector')!,
+            config: config,
+          );
+        },
+      ),
+    );
   }
 
   /// 获取可用的统计项
@@ -108,9 +139,11 @@ class NotesHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -161,7 +194,7 @@ class NotesHomeWidgets {
 
   // ===== 选择器小组件相关方法 =====
 
-  /// 渲染文件夹数据
+  /// 渲染文件夹数据 - 使用列表样式展示笔记
   static Widget _renderFolderData(
     BuildContext context,
     SelectorResult result,
@@ -170,18 +203,62 @@ class NotesHomeWidgets {
     final theme = Theme.of(context);
     final folderData = result.data as Map<String, dynamic>;
 
+    final folderId = folderData['id'] as String? ?? '';
     final name = folderData['name'] as String? ?? '未命名文件夹';
     final notesCount = folderData['notesCount'] as int? ?? 0;
     final folderPath = folderData['folderPath'] as String? ?? '';
     final iconCodePoint = folderData['icon'] as int?;
     final colorValue = folderData['color'] as int?;
 
-    final folderIcon = iconCodePoint != null
-        ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-        : Icons.folder;
-    final folderColor = colorValue != null
-        ? Color(colorValue)
-        : _notesColor;
+    final folderIcon =
+        iconCodePoint != null
+            ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+            : Icons.folder;
+    final folderColor = colorValue != null ? Color(colorValue) : _notesColor;
+
+    // 获取小组件尺寸
+    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
+    final isMediumSize = widgetSize == HomeWidgetSize.medium;
+
+    // 通过插件获取笔记列表
+    List<Map<String, dynamic>> notes = [];
+    try {
+      final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
+      if (plugin != null) {
+        final notesController = plugin.controller;
+        final allNotes = notesController.getFolderNotes(folderId);
+        // 取最近的 3-5 条笔记
+        notes =
+            allNotes
+                .take(isMediumSize ? 3 : 5)
+                .map(
+                  (note) => {
+                    'title': note.title,
+                    'updatedAt': note.updatedAt.toIso8601String(),
+                  },
+                )
+                .toList();
+      }
+    } catch (e) {
+      debugPrint('[NotesHomeWidgets] 获取笔记列表失败: $e');
+    }
+
+    // 格式化时间
+    String formatNoteTime(String isoTime) {
+      try {
+        final date = DateTime.parse(isoTime);
+        final now = DateTime.now();
+        final diff = now.difference(date);
+
+        if (diff.inMinutes < 1) return '刚刚';
+        if (diff.inHours < 1) return '${diff.inMinutes}分钟前';
+        if (diff.inDays < 1) return '${diff.inHours}小时前';
+        if (diff.inDays < 7) return '${diff.inDays}天前';
+        return '${date.month}/${date.day}';
+      } catch (e) {
+        return '';
+      }
+    }
 
     return Material(
       color: Colors.transparent,
@@ -196,18 +273,14 @@ class NotesHomeWidgets {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 顶部图标和路径
+              // 顶部文件夹信息
               Row(
                 children: [
-                  Icon(
-                    folderIcon,
-                    size: 24,
-                    color: folderColor,
-                  ),
+                  Icon(folderIcon, size: 20, color: folderColor),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      folderPath,
+                      folderPath.isNotEmpty ? folderPath : name,
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -215,50 +288,98 @@ class NotesHomeWidgets {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  // 笔记数量徽章
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: folderColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$notesCount',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: folderColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
+
               const SizedBox(height: 12),
-              const Spacer(),
-              // 文件夹名称
-              Text(
-                name,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onPrimaryContainer,
+
+              // 笔记列表（使用滚动容器防止溢出）
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (notes.isNotEmpty) ...[
+                        ...notes.map(
+                          (note) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.note_alt_outlined,
+                                  size: 14,
+                                  color: theme.colorScheme.onPrimaryContainer
+                                      .withOpacity(0.5),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    note['title'] as String,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onPrimaryContainer,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  formatNoteTime(note['updatedAt'] as String),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onPrimaryContainer
+                                        .withOpacity(0.5),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (notesCount > notes.length)
+                          Text(
+                            'notes_andMore'.trParams({
+                              'count': '${notesCount - notes.length}',
+                            }),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer.withOpacity(
+                                0.5,
+                              ),
+                            ),
+                          ),
+                      ] else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Text(
+                              'empty_folder'.tr,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer.withOpacity(
+                                  0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              // 笔记数量
-              Row(
-                children: [
-                  Icon(
-                    Icons.note_outlined,
-                    size: 16,
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'notes_notesCount'.trParams({'count': '$notesCount'}),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'notes_clickToView'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward,
-                    size: 16,
-                    color: theme.colorScheme.primary,
-                  ),
-                ],
               ),
             ],
           ),
@@ -267,11 +388,107 @@ class NotesHomeWidgets {
     );
   }
 
-  /// 导航到选中的文件夹
-  static void _navigateToFolder(
+  // ===== 1x1 快捷创建小组件 =====
+
+  /// 渲染快捷创建小组件数据
+  static Widget _renderQuickCreateData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+    final folderData = result.data as Map<String, dynamic>;
+
+    final name = folderData['name'] as String? ?? '未命名文件夹';
+    final folderPath = folderData['folderPath'] as String? ?? '';
+    final iconCodePoint = folderData['icon'] as int?;
+    final colorValue = folderData['color'] as int?;
+
+    final folderIcon =
+        iconCodePoint != null
+            ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+            : Icons.folder;
+    final folderColor = colorValue != null ? Color(colorValue) : _notesColor;
+
+    final displayName = folderPath.isNotEmpty ? folderPath : name;
+
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 图标在中间，标题在下边，图标右上角带加号 badge
+              Stack(
+                alignment: Alignment.topRight,
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(folderIcon, size: 40, color: folderColor),
+                  // 图标右上角加号 badge
+                  Positioned(
+                    top: -4,
+                    right: -4,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: folderColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: theme.colorScheme.primaryContainer,
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                displayName,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 导航到快捷创建笔记
+  static void _navigateToQuickCreate(
     BuildContext context,
     SelectorResult result,
   ) {
+    final folderData = result.data as Map<String, dynamic>;
+    final folderId = folderData['id'] as String? ?? 'root';
+
+    // 通过路由跳转到笔记编辑页面
+    NavigationHelper.pushNamed(
+      context,
+      '/notes/create',
+      arguments: {'folderId': folderId},
+    );
+  }
+
+  /// 导航到选中的文件夹
+  static void _navigateToFolder(BuildContext context, SelectorResult result) {
     final folderData = result.data as Map<String, dynamic>;
     final folderId = folderData['id'] as String;
 

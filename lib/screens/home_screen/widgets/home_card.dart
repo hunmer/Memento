@@ -185,7 +185,7 @@ class _HomeCardState extends State<HomeCard> {
       final backgroundImagePath =
           widgetItem.config['backgroundImage'] as String?;
 
-      Widget content = widgetDef.build(context, widgetItem.config);
+      Widget content = widgetDef.build(context, widgetItem.config, widgetItem.size);
 
       // 总是添加背景装饰容器（因为总是有背景颜色）
       content = Container(

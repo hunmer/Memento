@@ -164,9 +164,7 @@ class ActivityHomeWidgets {
   }
 }
 
-/// 创建活动快捷入口小组件
-///
-/// 点击后直接打开活动创建界面,无需选择器
+/// 创建活动快捷入口小组件（1x1）
 class ActivityCreateShortcutWidget extends StatelessWidget {
   const ActivityCreateShortcutWidget({super.key});
 
@@ -174,72 +172,43 @@ class ActivityCreateShortcutWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () => _navigateToCreateActivity(context),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.pink.withOpacity(0.1),
-                Colors.pink.withOpacity(0.05),
-              ],
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.maxWidth.clamp(0.0, constraints.maxHeight);
+        final iconSize = size * 0.4;
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
             borderRadius: BorderRadius.circular(16),
+            onTap: () => _navigateToCreateActivity(context),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add_circle, size: iconSize, color: Colors.pink),
+                  SizedBox(height: size * 0.05),
+                  Text(
+                    'activity_createActivity'.tr,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontSize: (size * 0.12).clamp(10.0, 14.0),
+                      fontWeight: FontWeight.w500,
+                      color: theme.textTheme.bodyMedium?.color,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 图标
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.pink.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.add_circle,
-                  size: 32,
-                  color: Colors.pink,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // 主标题
-              Text(
-                'activity_createActivity'.tr,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.pink,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-
-              // 副标题
-              Text(
-                'activity_quickCreateActivityDesc'.tr,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
-  /// 导航到活动创建界面
   void _navigateToCreateActivity(BuildContext context) {
     try {
       final plugin =
@@ -252,7 +221,6 @@ class ActivityCreateShortcutWidget extends StatelessWidget {
       final activityService = plugin.activityService;
       final now = DateTime.now();
 
-      // 打开活动编辑界面(创建模式)
       Navigator.of(context).push(
         MaterialPageRoute(
           builder:
@@ -271,3 +239,4 @@ class ActivityCreateShortcutWidget extends StatelessWidget {
     }
   }
 }
+

@@ -105,8 +105,12 @@ class HomeWidget {
   });
 
   /// 构建小组件
-  Widget build(BuildContext context, Map<String, dynamic> config) {
-    return builder(context, config);
+  ///
+  /// 注意：config 中会自动注入 'widgetSize' 字段，表示当前小组件尺寸
+  Widget build(BuildContext context, Map<String, dynamic> config, [HomeWidgetSize? size]) {
+    // 将尺寸信息注入 config，供 builder 使用
+    final effectiveConfig = size != null ? {...config, 'widgetSize': size} : config;
+    return builder(context, effectiveConfig);
   }
 
   /// 是否支持指定尺寸

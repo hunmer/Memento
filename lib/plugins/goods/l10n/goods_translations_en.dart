@@ -120,6 +120,11 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_widgetDescription': 'Quick access to goods management',
   'goods_overviewName': 'Goods Overview',
   'goods_overviewDescription': 'Display goods statistics',
+  'goods_warehouseSelector': 'Warehouse Selector',
+  'goods_warehouseSelectorDesc': 'Select a warehouse to view items',
+  'goods_itemSelector': 'Item Selector',
+  'goods_itemSelectorDesc': 'Select an item to view details',
+  'home_tapToViewDetails': 'Tap to view details',
 
   // Multi-Filter Strings
   'goods_purchaseDateRange': 'Purchase Date',
