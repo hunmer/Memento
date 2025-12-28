@@ -142,6 +142,17 @@ class ChatTranslationsEn {
     'chat_overviewDescription': 'Display channel and message statistics',
     'chat_communicationCategory': 'Communication',
     'chat_loadFailed': 'Load Failed',
+    'chat_channelQuickAccess': 'Channel Quick Access',
+    'chat_channelQuickAccessDesc': 'Quickly open a specific channel',
+    'chat_clickToEnter': 'Click to enter',
+    'chat_untitled': 'Untitled Channel',
+    'chat_noMessages': 'No messages',
+
+    // Selector related
+    'chat_channelSelectorName': 'Select Channel',
+    'chat_channelSelectorDesc': 'Choose a chat channel',
+    'chat_selectChannel': 'Select Channel',
+    'chat_noChannels': 'No channels, please create one first',
 
     // Other UI elements
     'chat_editMessageTitle': 'Edit Message Title',

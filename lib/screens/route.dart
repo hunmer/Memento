@@ -1,6 +1,8 @@
 import 'package:Memento/plugins/chat/chat_plugin.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
+import 'package:Memento/plugins/store/widgets/product_items_page.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/todo/views/todo_bottombar_view.dart';
 import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
 import 'package:Memento/plugins/webview/screens/webview_browser_screen.dart';
@@ -362,23 +364,46 @@ class AppRoutes extends NavigatorObserver {
 
       case '/bill':
       case 'bill':
-        // 检查是否来自快捷记账小组件（带有预填充参数）
+        // 检查是否带有参数
         if (settings.arguments is Map<String, dynamic> ||
             settings.arguments is Map<String, String>) {
           final args = settings.arguments as Map<String, dynamic>;
 
-          // 如果有category参数，说明是从快捷记账小组件打开的
-          if (args.containsKey('category')) {
-            // 获取 BillPlugin 实例
-            final billPlugin =
-                PluginManager.instance.getPlugin('bill') as BillPlugin?;
+          // 获取 BillPlugin 实例
+          final billPlugin =
+              PluginManager.instance.getPlugin('bill') as BillPlugin?;
 
-            if (billPlugin == null) {
-              // 如果插件未初始化，回退到主视图
-              debugPrint('BillPlugin 未初始化，回退到主视图');
+          if (billPlugin == null) {
+            // 如果插件未初始化，回退到主视图
+            debugPrint('BillPlugin 未初始化，回退到主视图');
+            return _createRoute(const BillMainView());
+          }
+
+          // 1. 检查是否是创建账单动作（来自创建账单快捷入口小组件）
+          if (args['action'] == 'create') {
+            final String? accountId = args['accountId'] as String?;
+
+            // 如果缺少 accountId，使用默认账户
+            final finalAccountId = accountId ??
+                (billPlugin.selectedAccount?.id ??
+                 (billPlugin.accounts.isNotEmpty ? billPlugin.accounts.first.id : ''));
+
+            if (finalAccountId.isEmpty) {
+              debugPrint('没有可用账户，回退到主视图');
               return _createRoute(const BillMainView());
             }
 
+            // 直接打开账单编辑页面（创建模式）
+            return _createRoute(
+              BillEditScreen(
+                billPlugin: billPlugin,
+                accountId: finalAccountId,
+              ),
+            );
+          }
+
+          // 2. 检查是否来自快捷记账小组件（带有预填充参数）
+          if (args.containsKey('category')) {
             // 解析参数
             final String? accountId = args['accountId'] as String?;
             final String? category = args['category'] as String?;
@@ -448,6 +473,47 @@ class AppRoutes extends NavigatorObserver {
       case '/store':
       case 'store':
         return _createRoute(const StoreMainView());
+      case '/store/product_items':
+      case 'store/product_items':
+        // 商品物品列表页面
+        String? productId;
+        String? productName;
+
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          productId = args['productId'] as String?;
+          productName = args['productName'] as String?;
+        }
+
+        if (productId == null) {
+          debugPrint('错误: 缺少必需参数 productId');
+          return _createRoute(
+            const Scaffold(
+              body: Center(child: Text('参数错误：缺少商品ID')),
+            ),
+          );
+        }
+
+        debugPrint('打开商品物品列表: productId=$productId, productName=$productName');
+
+        final storePlugin =
+            PluginManager.instance.getPlugin('store') as StorePlugin?;
+        if (storePlugin == null) {
+          debugPrint('错误: Store 插件未初始化');
+          return _createRoute(
+            const Scaffold(
+              body: Center(child: Text('Store 插件未初始化')),
+            ),
+          );
+        }
+
+        return _createRoute(
+          ProductItemsPage(
+            productId: productId,
+            productName: productName ?? '商品',
+            controller: storePlugin.controller,
+          ),
+        );
       case '/timer':
       case 'timer':
         return _createRoute(const TimerMainView());
@@ -538,6 +604,25 @@ class AppRoutes extends NavigatorObserver {
           channelId = settings.arguments as String;
         }
         return _createRoute(ChatMainView(channelId: channelId));
+
+      case '/chat/channel':
+      case 'chat/channel':
+        // 专门用于从选择器小组件导航到频道
+        String? chatChannelId;
+
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          chatChannelId = args['channelId'] as String?;
+        }
+
+        if (chatChannelId == null) {
+          debugPrint('错误: 缺少必需参数 channelId');
+          return _createRoute(const ChatMainView());
+        }
+
+        debugPrint('打开 Chat 频道: channelId=$chatChannelId');
+        return _createRoute(ChatMainView(channelId: chatChannelId));
+
       case '/calendar_month_selector':
       case 'calendar_month_selector':
         // 日历月视图小组件配置界面

@@ -878,7 +878,8 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       SelectorDefinition(
         id: 'store.product',
         pluginId: id,
-        name: '选择商品',
+        name: 'store_productSelectorName'.tr,
+        description: 'store_productSelectorDesc'.tr,
         icon: icon,
         color: color,
         searchable: true,
@@ -886,20 +887,20 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         steps: [
           SelectorStep(
             id: 'product',
-            title: '选择商品',
+            title: 'store_selectProduct'.tr,
             viewType: SelectorViewType.grid,
             isFinalStep: true,
             dataLoader: (_) async {
               return controller.products.map((product) {
                 // 构建副标题：价格 + 库存
-                final subtitle = '${product.price} 积分 · 库存: ${product.stock}';
+                final subtitle = '${product.price} ${'store_points'.tr} · ${'store_stockLabel'.tr}: ${product.stock}';
 
                 return SelectableItem(
                   id: product.id,
                   title: product.name,
                   subtitle: subtitle,
                   icon: Icons.shopping_bag,
-                  rawData: product,
+                  rawData: product.toJson(),
                 );
               }).toList();
             },
@@ -910,8 +911,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                 final matchesTitle = item.title.toLowerCase().contains(
                   lowerQuery,
                 );
-                final product = item.rawData as Product;
-                final matchesDescription = product.description
+                final productData = item.rawData as Map<String, dynamic>;
+                final description = productData['description'] as String? ?? '';
+                final matchesDescription = description
                     .toLowerCase()
                     .contains(lowerQuery);
                 return matchesTitle || matchesDescription;

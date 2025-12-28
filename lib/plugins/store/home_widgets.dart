@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'store_plugin.dart';
 
 /// 积分商店插件的主页小组件注册
@@ -46,6 +49,33 @@ class StoreHomeWidgets {
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
     ));
+
+    // 商品选择器小组件 - 快速访问特定商品的物品列表
+    registry.register(
+      HomeWidget(
+        id: 'store_product_selector',
+        pluginId: 'store',
+        name: 'store_productQuickAccess'.tr,
+        description: 'store_productQuickAccessDesc'.tr,
+        icon: Icons.shopping_bag,
+        color: Colors.pinkAccent,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryTool'.tr,
+
+        // 选择器配置
+        selectorId: 'store.product',
+        dataRenderer: _renderProductData,
+        navigationHandler: _navigateToProductItems,
+
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('store_product_selector')!,
+            config: config,
+          );
+        },
+      ),
+    );
   }
 
   /// 获取可用的统计项
@@ -142,6 +172,170 @@ class StoreHomeWidgets {
           ),
         ],
       ),
+    );
+  }
+
+  // ===== 选择器小组件相关方法 =====
+
+  /// 渲染商品数据
+  static Widget _renderProductData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    // 从 result.data 获取商品数据
+    if (result.data == null) {
+      return _buildErrorWidget(context, '数据不存在');
+    }
+
+    final productData = result.data as Map<String, dynamic>;
+    final name = productData['name'] as String? ?? '未知商品';
+    final description = productData['description'] as String? ?? '';
+    final price = productData['price'] as int? ?? 0;
+    final stock = productData['stock'] as int? ?? 0;
+
+    // 获取该商品的已兑换物品数量
+    int itemCount = 0;
+    try {
+      final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
+      if (plugin != null) {
+        final productId = productData['id'] as String?;
+        if (productId != null) {
+          itemCount = plugin.controller.userItems
+              .where((item) => item.productId == productId)
+              .length;
+        }
+      }
+    } catch (e) {
+      // 忽略错误
+    }
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 顶部标签行
+            Row(
+              children: [
+                Icon(
+                  Icons.shopping_bag,
+                  size: 20,
+                  color: Colors.pinkAccent,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'store_productQuickAccess'.tr,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // 库存状态标签
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: stock > 0
+                        ? Colors.green.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    stock > 0 ? 'store_stockLabel'.tr + ': $stock' : 'store_outOfStock'.tr,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: stock > 0 ? Colors.green : Colors.grey,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            // 商品名称
+            Text(
+              name,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            // 商品描述
+            if (description.isNotEmpty) ...[
+              Text(
+                description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+            ],
+            // 底部信息栏
+            Row(
+              children: [
+                // 价格
+                Icon(
+                  Icons.monetization_on,
+                  size: 16,
+                  color: Colors.orange,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '$price ${'store_points'.tr}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                // 已兑换物品数量
+                Icon(
+                  Icons.inventory_2,
+                  size: 16,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${'store_itemQuantity'.tr}: $itemCount',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 导航到商品物品列表
+  static void _navigateToProductItems(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final productData = result.data as Map<String, dynamic>;
+    final productId = productData['id'] as String;
+    final productName = productData['name'] as String? ?? '未知商品';
+
+    // 跳转到商品物品列表页面
+    NavigationHelper.pushNamed(
+      context,
+      '/store/product_items',
+      arguments: {
+        'productId': productId,
+        'productName': productName,
+      },
     );
   }
 }

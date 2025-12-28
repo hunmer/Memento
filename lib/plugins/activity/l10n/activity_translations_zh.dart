@@ -10,6 +10,10 @@ class ActivityTranslationsZh {
     'activity_widgetDescription': '快速打开活动记录',
     'activity_overviewName': '活动概览',
     'activity_overviewDescription': '显示今日活动数和时长',
+    'activity_createActivityShortcut': '创建活动',
+    'activity_createActivityShortcutDesc': '快速创建新活动记录',
+    'activity_createActivity': '创建活动',
+    'activity_quickCreateActivityDesc': '点击快速创建新活动',
 
     // 导航和标题
     'activity_timeline': '时间线',

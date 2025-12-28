@@ -10,6 +10,10 @@ class ActivityTranslationsEn {
     'activity_widgetDescription': 'Quick access to activity records',
     'activity_overviewName': 'Activity Overview',
     'activity_overviewDescription': 'Display today\'s activity count and duration',
+    'activity_createActivityShortcut': 'Create Activity',
+    'activity_createActivityShortcutDesc': 'Quickly create new activity record',
+    'activity_createActivity': 'Create Activity',
+    'activity_quickCreateActivityDesc': 'Tap to create new activity',
 
     // Navigation and titles
     'activity_timeline': 'Timeline',

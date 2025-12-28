@@ -82,4 +82,13 @@ final Map<String, String> notesTranslationsZh = {
 
   // 导航
   'notes_backToParent': '返回上一级',
+
+  // 选择器小组件
+  'notes_folderSelectorName': '选择文件夹',
+  'notes_folderSelectorDesc': '选择一个笔记文件夹',
+  'notes_selectFolderTitle': '选择文件夹',
+  'notes_folderQuickAccess': '文件夹快速访问',
+  'notes_folderQuickAccessDesc': '快速访问指定笔记文件夹',
+  'notes_notesCount': '@count 条笔记',
+  'notes_clickToView': '点击查看',
 };

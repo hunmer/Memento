@@ -150,28 +150,44 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     pluginDataSelectorService.registerSelector(SelectorDefinition(
       id: 'chat.channel',
       pluginId: id,
-      name: '选择频道',
-      description: '选择一个聊天频道',
+      name: 'chat_channelSelectorName'.tr,
+      description: 'chat_channelSelectorDesc'.tr,
       icon: Icons.chat_bubble_outline,
       color: color,
       steps: [
         SelectorStep(
           id: 'channel',
-          title: '频道列表',
+          title: 'chat_selectChannel'.tr,
           viewType: SelectorViewType.list,
           isFinalStep: true,
-          emptyText: '暂无频道，请先创建',
+          emptyText: 'chat_noChannels'.tr,
           dataLoader: (_) async {
-            return dataService.channels.map((channel) => SelectableItem(
-              id: channel.id,
-              title: channel.title,
-              icon: channel.icon,
-              color: channel.backgroundColor,
-              subtitle: channel.messages.isNotEmpty
+            return dataService.channels.map((channel) {
+              // 准备 rawData - 包含完整的频道信息
+              final lastMessage = channel.messages.isNotEmpty
                   ? channel.messages.last.content
-                  : null,
-              rawData: channel,
-            )).toList();
+                  : null;
+              final lastMessageTime = channel.messages.isNotEmpty
+                  ? channel.messages.last.date.toIso8601String()
+                  : DateTime.now().toIso8601String();
+
+              return SelectableItem(
+                id: channel.id,
+                title: channel.title,
+                icon: channel.icon,
+                color: channel.backgroundColor,
+                subtitle: lastMessage,
+                rawData: {
+                  'id': channel.id,
+                  'title': channel.title,
+                  'icon': channel.icon.codePoint,
+                  'backgroundColor': channel.backgroundColor.value,
+                  'lastMessage': lastMessage,
+                  'lastMessageTime': lastMessageTime,
+                  'messageCount': channel.messages.length,
+                },
+              );
+            }).toList();
           },
           searchFilter: (items, query) {
             final lowerQuery = query.toLowerCase();

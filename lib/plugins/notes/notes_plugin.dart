@@ -857,6 +857,7 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   // ==================== 数据选择器注册 ====================
 
   void _registerDataSelectors() {
+    // 注册笔记选择器
     pluginDataSelectorService.registerSelector(SelectorDefinition(
       id: 'notes.note',
       pluginId: id,
@@ -902,6 +903,67 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
                      (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
             }).toList();
           },
+        ),
+      ],
+    ));
+
+    // 注册文件夹选择器
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'notes.folder',
+      pluginId: id,
+      name: 'notes_folderSelectorName'.tr,
+      description: 'notes_folderSelectorDesc'.tr,
+      icon: Icons.folder,
+      color: color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'select_folder',
+          title: 'notes_selectFolderTitle'.tr,
+          viewType: SelectorViewType.list,
+          dataLoader: (previousSelections) async {
+            if (!_isInitialized) return [];
+
+            // 获取所有文件夹（不包括 root）
+            final allFolders = controller.getAllFolders()
+                .where((folder) => folder.id != 'root')
+                .toList();
+
+            return allFolders.map((folder) {
+              // 获取文件夹中的笔记数量
+              final notesCount = controller.getFolderNotes(folder.id).length;
+
+              // 构建文件夹路径
+              final folderPath = _buildFolderPath(folder.id);
+
+              return SelectableItem(
+                id: folder.id,
+                title: folder.name,
+                subtitle: '$folderPath • $notesCount ${'notes_notesCount'.tr}',
+                icon: folder.icon,
+                color: folder.color,
+                rawData: {
+                  'id': folder.id,
+                  'name': folder.name,
+                  'parentId': folder.parentId,
+                  'notesCount': notesCount,
+                  'folderPath': folderPath,
+                  'icon': folder.icon.codePoint,
+                  'color': folder.color.value,
+                },
+              );
+            }).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              return item.title.toLowerCase().contains(lowerQuery) ||
+                     (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
+            }).toList();
+          },
+          isFinalStep: true,
         ),
       ],
     ));
