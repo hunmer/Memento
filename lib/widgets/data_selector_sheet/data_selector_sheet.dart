@@ -184,11 +184,21 @@ class _DataSelectorSheetState extends State<DataSelectorSheet> {
   }
 
   void _completeSelection(dynamic data) {
+    // 多步选择时，将每一步的 rawData 保存为数组
+    final dataList = _selectionPath.map((item) {
+      final rawData = item.selectedItem.rawData;
+      // 如果是 Map，转换为 toMap() 格式便于序列化
+      if (rawData is Map<String, dynamic>) {
+        return rawData;
+      }
+      return rawData;
+    }).toList();
+
     final result = SelectorResult(
       pluginId: widget.definition.pluginId,
       selectorId: widget.definition.id,
       path: _selectionPath,
-      data: data,
+      data: dataList,
     );
     Navigator.of(context).pop(result);
   }

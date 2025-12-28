@@ -416,6 +416,11 @@ class _HomeCardState extends State<HomeCard> {
     HomeWidgetItem widgetItem,
     HomeWidget widgetDef,
   ) async {
+    debugPrint('[HomeCard] ========== _handleSelectorWidgetTap 开始 ==========');
+    debugPrint('[HomeCard] widgetId: ${widgetItem.widgetId}');
+    debugPrint('[HomeCard] isSelectorWidget: ${widgetDef.isSelectorWidget}');
+    debugPrint('[HomeCard] navigationHandler: ${widgetDef.navigationHandler}');
+
     // 解析选择器配置
     SelectorWidgetConfig? selectorConfig;
     try {
@@ -423,6 +428,10 @@ class _HomeCardState extends State<HomeCard> {
         selectorConfig = SelectorWidgetConfig.fromJson(
           widgetItem.config['selectorWidgetConfig'] as Map<String, dynamic>,
         );
+        debugPrint('[HomeCard] selectorConfig: $selectorConfig');
+        debugPrint('[HomeCard] isConfigured: ${selectorConfig.isConfigured}');
+      } else {
+        debugPrint('[HomeCard] config 中没有 selectorWidgetConfig');
       }
     } catch (e) {
       debugPrint('[HomeCard] 解析选择器配置失败: $e');
@@ -430,19 +439,26 @@ class _HomeCardState extends State<HomeCard> {
 
     // 判断是否已配置
     if (selectorConfig == null || !selectorConfig.isConfigured) {
+      debugPrint('[HomeCard] 未配置，打开数据选择器');
       // 未配置：打开数据选择器
       await _showDataSelector(context, widgetItem, widgetDef);
     } else {
+      debugPrint('[HomeCard] 已配置，执行导航处理器');
       // 已配置：执行导航处理器
       final result = selectorConfig.toSelectorResult();
+      debugPrint('[HomeCard] result: $result');
+      debugPrint('[HomeCard] result.data: ${result?.data}');
       if (result != null && widgetDef.navigationHandler != null) {
         try {
+          debugPrint('[HomeCard] 调用 navigationHandler...');
           widgetDef.navigationHandler!(context, result);
+          debugPrint('[HomeCard] navigationHandler 调用完成');
         } catch (e) {
           debugPrint('[HomeCard] 导航处理器执行失败: $e');
           Toast.error('打开失败: $e');
         }
       } else {
+        debugPrint('[HomeCard] result: $result, navigationHandler: ${widgetDef.navigationHandler}');
         Toast.warning('未配置导航处理器');
       }
     }

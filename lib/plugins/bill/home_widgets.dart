@@ -9,7 +9,9 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/core/app_initializer.dart';
 import 'bill_plugin.dart';
+import 'screens/bill_edit_screen.dart';
 
 /// 账单插件的主页小组件注册
 class BillHomeWidgets {
@@ -18,57 +20,82 @@ class BillHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'bill_icon',
-      pluginId: 'bill',
-      name: 'bill_widgetName'.tr,
-      description: 'bill_widgetDescription'.tr,
-      icon: Icons.account_balance_wallet,
-      color: Colors.green,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'bill_icon',
+        pluginId: 'bill',
+        name: 'bill_widgetName'.tr,
+        description: 'bill_widgetDescription'.tr,
         icon: Icons.account_balance_wallet,
         color: Colors.green,
-        name: 'bill_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.account_balance_wallet,
+              color: Colors.green,
+              name: 'bill_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'bill_overview',
-      pluginId: 'bill',
-      name: 'bill_overviewName'.tr,
-      description: 'bill_overviewDescription'.tr,
-      icon: Icons.account_balance_wallet_outlined,
-      color: Colors.green,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'bill_overview',
+        pluginId: 'bill',
+        name: 'bill_overviewName'.tr,
+        description: 'bill_overviewDescription'.tr,
+        icon: Icons.account_balance_wallet_outlined,
+        color: Colors.green,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
     // 创建账单快捷入口 - 选择账户和时间范围后显示收支统计
-    registry.register(HomeWidget(
-      id: 'bill_create_shortcut',
-      pluginId: 'bill',
-      name: 'bill_createShortcutName'.tr,
-      description: 'bill_createShortcutDescription'.tr,
-      icon: Icons.add_card,
-      color: Colors.green,
-      defaultSize: HomeWidgetSize.medium,
-      supportedSizes: [HomeWidgetSize.small, HomeWidgetSize.medium],
-      category: 'home_categoryRecord'.tr,
-      selectorId: 'bill.account_with_period',
-      dataRenderer: _renderBillStatsData,
-      navigationHandler: _navigateToCreateBill,
-      builder: (context, config) => GenericSelectorWidget(
-        widgetDefinition: registry.getWidget('bill_create_shortcut')!,
-        config: config,
+    registry.register(
+      HomeWidget(
+        id: 'bill_create_shortcut',
+        pluginId: 'bill',
+        name: 'bill_createShortcutName'.tr,
+        description: 'bill_createShortcutDescription'.tr,
+        icon: Icons.add_card,
+        color: Colors.green,
+        defaultSize: HomeWidgetSize.medium,
+        supportedSizes: [HomeWidgetSize.small, HomeWidgetSize.medium],
+        category: 'home_categoryRecord'.tr,
+        selectorId: 'bill.account_with_period',
+        dataRenderer: _renderBillStatsData,
+        navigationHandler: _navigateToCreateBill,
+        dataSelector: _extractBillWidgetData,
+        builder:
+            (context, config) => GenericSelectorWidget(
+              widgetDefinition: registry.getWidget('bill_create_shortcut')!,
+              config: config,
+            ),
       ),
-    ));
+    );
+  }
+
+  /// 从选择器数据数组中提取小组件需要的数据
+  static Map<String, dynamic> _extractBillWidgetData(List<dynamic> dataArray) {
+    final accountData = dataArray[0] as Map<String, dynamic>;
+    final periodData = dataArray[1] as Map<String, dynamic>;
+
+    return {
+      'accountId': accountData['id'] as String,
+      'accountTitle': accountData['title'] as String,
+      'accountIcon': accountData['icon'] as int,
+      'periodId': periodData['id'] as String,
+      'periodLabel': periodData['label'] as String,
+      'periodStart': periodData['start'] as String,
+      'periodEnd': periodData['end'] as String,
+    };
   }
 
   /// 获取可用的统计项
@@ -108,9 +135,11 @@ class BillHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -167,42 +196,30 @@ class BillHomeWidgets {
   ) {
     final theme = Theme.of(context);
 
-    // 使用 getPathRawData 安全获取指定步骤的原始数据
-    final accountData = result.getPathRawData<Map<String, dynamic>>('account');
-    final periodData = result.getPathRawData<Map<String, dynamic>>('period');
+    // 从 result.data 获取已转换的数据（由 dataSelector 处理）
+    final data =
+        result.data is Map<String, dynamic>
+            ? result.data as Map<String, dynamic>
+            : {};
 
-    // 如果 path 为空，尝试从 result.data 获取（兼容旧数据）
-    if (accountData == null && result.data is Map<String, dynamic>) {
-      final data = result.data as Map<String, dynamic>;
-      if (data.containsKey('title') && !data.containsKey('label')) {
-        // 这是账户数据
-        // ignore: avoid_as
-      } else if (data.containsKey('label')) {
-        // 这是时间范围数据
-      }
-    }
-
-    final accountId = accountData?['id'] as String? ?? '';
-    final accountTitle = accountData?['title'] as String? ?? '未知账户';
-    final accountIconData = accountData?['icon'] as int?;
-    final accountIcon = accountIconData != null
-        ? IconData(accountIconData, fontFamily: 'MaterialIcons')
-        : Icons.account_balance_wallet;
-    final periodLabel = periodData?['label'] as String? ?? '本月';
+    final accountId = data['accountId'] as String? ?? '';
+    final accountTitle = data['accountTitle'] as String? ?? '未知账户';
+    final accountIconData = data['accountIcon'] as int?;
+    final accountIcon =
+        accountIconData != null
+            ? IconData(accountIconData, fontFamily: 'MaterialIcons')
+            : Icons.account_balance_wallet;
+    final periodLabel = data['periodLabel'] as String? ?? '本月';
+    final periodStart = data['periodStart'] as String?;
+    final periodEnd = data['periodEnd'] as String?;
 
     // 支出卡片颜色（红色系）
-    const expenseGradient = [
-      Color(0xFFEF5350),
-      Color(0xFFE53935),
-    ];
+    const expenseGradient = [Color(0xFFEF5350), Color(0xFFE53935)];
     // 收入卡片颜色（绿色系）
-    const incomeGradient = [
-      Color(0xFF66BB6A),
-      Color(0xFF43A047),
-    ];
+    const incomeGradient = [Color(0xFF66BB6A), Color(0xFF43A047)];
 
     return FutureBuilder<Map<String, double>>(
-      future: _loadBillStats(accountId, periodData),
+      future: _loadBillStats(accountId, periodStart, periodEnd),
       builder: (context, snapshot) {
         final expense = snapshot.data?['expense'] ?? 0.0;
         final income = snapshot.data?['income'] ?? 0.0;
@@ -229,8 +246,8 @@ class BillHomeWidgets {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           accountTitle,
@@ -286,7 +303,8 @@ class BillHomeWidgets {
   /// 加载账单统计数据
   static Future<Map<String, double>> _loadBillStats(
     String accountId,
-    Map<String, dynamic>? periodData,
+    String? periodStart,
+    String? periodEnd,
   ) async {
     try {
       final plugin = PluginManager.instance.getPlugin('bill') as BillPlugin?;
@@ -295,12 +313,8 @@ class BillHomeWidgets {
       DateTime? startDate;
       DateTime? endDate = DateTime.now();
 
-      if (periodData != null) {
-        final startStr = periodData['start'] as String?;
-        final endStr = periodData['end'] as String?;
-        if (startStr != null) startDate = DateTime.parse(startStr);
-        if (endStr != null) endDate = DateTime.parse(endStr);
-      }
+      if (periodStart != null) startDate = DateTime.parse(periodStart);
+      if (periodEnd != null) endDate = DateTime.parse(periodEnd);
 
       final controller = plugin.controller;
 
@@ -310,7 +324,8 @@ class BillHomeWidgets {
           startDate: startDate,
           endDate: endDate,
         );
-        final accountBills = allBills.where((b) => b.accountId == accountId).toList();
+        final accountBills =
+            allBills.where((b) => b.accountId == accountId).toList();
 
         final income = accountBills
             .where((b) => b.amount > 0)
@@ -351,20 +366,29 @@ class BillHomeWidgets {
     final symbolIcon = isExpense ? Icons.remove : Icons.add;
     final amountStr = amount > 0 ? '¥${amount.toStringAsFixed(0)}' : '¥0';
 
+    // 获取正确的 BuildContext 用于导航
+    final navContext = navigatorKey.currentContext ?? context;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          // 打开创建账单界面
-          NavigationHelper.pushNamed(
-            context,
-            '/bill',
-            arguments: {
-              'action': 'create',
-              'accountId': accountId.isNotEmpty ? accountId : null,
-              'isExpense': isExpense,
-            },
-          );
+          // 使用与 diary 插件相同的方式：直接 push BillEditScreen
+          final billPlugin =
+              PluginManager.instance.getPlugin('bill') as BillPlugin?;
+          if (billPlugin != null) {
+            NavigationHelper.push(
+              navContext,
+              BillEditScreen(
+                billPlugin: billPlugin,
+                accountId:
+                    accountId.isNotEmpty
+                        ? accountId
+                        : billPlugin.selectedAccount?.id ?? '',
+                initialIsExpense: isExpense,
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -397,23 +421,6 @@ class BillHomeWidgets {
                   ),
                 ),
               ),
-              // 右下角图标
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    symbolIcon,
-                    size: 14,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -426,23 +433,17 @@ class BillHomeWidgets {
     BuildContext context,
     SelectorResult result,
   ) {
-    // 使用 getPathRawData 安全获取账户ID
-    final accountData = result.getPathRawData<Map<String, dynamic>>('account');
-    final accountId = accountData?['id'] as String?;
+    // 从 result.data 获取已转换的数据（由 dataSelector 处理）
+    final data =
+        result.data is Map<String, dynamic>
+            ? result.data as Map<String, dynamic>
+            : {};
+    final accountId = data['accountId'] as String?;
 
-    // 如果 path 为空，尝试从 result.data 获取
-    if (accountId == null && result.data is Map<String, dynamic>) {
-      final data = result.data as Map<String, dynamic>;
-      if (data.containsKey('title')) {
-        // 这是账户数据
-      } else if (data.containsKey('id')) {
-        // 这可能是旧版本的账户数据
-      }
-    }
-
-    // 默认打开支出账单
+    // 使用 navigatorKey.currentContext 确保导航正常工作
+    final navContext = navigatorKey.currentContext ?? context;
     NavigationHelper.pushNamed(
-      context,
+      navContext,
       '/bill',
       arguments: {
         'action': 'create',
