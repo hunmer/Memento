@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import '../form_field_wrapper.dart';
 import '../config.dart';
-import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/plugins/timer/views/add_timer_item_dialog.dart';
 import 'package:Memento/plugins/contact/models/custom_activity_event_model.dart';
@@ -25,14 +24,14 @@ Widget buildPromptEditorField(FormFieldConfig config, GlobalKey fieldKey) {
   final extra = config.extra ?? {};
   final labelText = extra['labelText'] as String? ?? config.labelText;
 
-  return FormBuilderField<List<Prompt>>(
+  return FormBuilderField<List<dynamic>>(
     key: fieldKey,
     name: config.name,
-    initialValue: (config.initialValue as List<dynamic>? ?? []).cast<Prompt>(),
+    initialValue: config.initialValue as List<dynamic>?,
     enabled: config.enabled,
     builder: (fieldState) => PromptEditorField(
       name: config.name,
-      initialValue: fieldState.value ?? [],
+      initialValue: fieldState.value,
       enabled: config.enabled,
       labelText: labelText,
       onChanged: (v) {

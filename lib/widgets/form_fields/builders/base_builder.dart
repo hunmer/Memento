@@ -140,6 +140,18 @@ Widget buildSelectField(FormFieldConfig config, GlobalKey fieldKey, BuildContext
     initialValue: config.initialValue,
     enabled: config.enabled,
     builder: (fieldState) {
+      // 如果items列表不为空,但当前value不在items中,自动设置为initialValue或第一项
+      if ((config.items != null && config.items!.isNotEmpty) &&
+          (fieldState.value == null || !config.items!.any((item) => item.value == fieldState.value))) {
+        // 使用 Future.microtask 避免在 build 期间调用 setState
+        Future.microtask(() {
+          if (fieldState.mounted) {
+            final newValue = config.initialValue ?? config.items!.first.value;
+            fieldState.didChange(newValue);
+          }
+        });
+      }
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

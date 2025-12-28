@@ -505,7 +505,10 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                 FormFieldConfig(
                   name: 'promptEditor',
                   type: FormFieldType.promptEditor,
-                  initialValue: widget.agent?.messages ?? [],
+                  initialValue: widget.agent?.messages
+                      ?.map((p) => p.toJson())
+                      .toList() as List<dynamic>? ??
+                  [],
                 ),
                 // BaseUrl
                 FormFieldConfig(

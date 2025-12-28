@@ -10,14 +10,14 @@ class PromptEditorField extends StatefulWidget {
   /// 字段名称
   final String name;
 
-  /// 初始提示词列表
-  final List<Prompt> initialValue;
+  /// 初始提示词列表 (List dynamic 内部转换为 Prompt)
+  final List<dynamic>? initialValue;
 
   /// 是否启用
   final bool enabled;
 
   /// 值变化回调
-  final ValueChanged<List<Prompt>>? onChanged;
+  final ValueChanged<List<dynamic>>? onChanged;
 
   /// 字段标签（可选，为 null 时不显示标题）
   final String? labelText;
@@ -25,7 +25,7 @@ class PromptEditorField extends StatefulWidget {
   const PromptEditorField({
     super.key,
     required this.name,
-    required this.initialValue,
+    this.initialValue,
     this.enabled = true,
     this.onChanged,
     this.labelText,
@@ -39,10 +39,17 @@ class _PromptEditorFieldState extends State<PromptEditorField> {
   late List<Prompt> _prompts;
   late TextEditingController _systemPromptController;
 
+  /// 将 List dynamic 转换为 List Prompt
+  List<Prompt> _parsePrompts(List<dynamic>? values) {
+    return (values ?? [])
+        .map((e) => Prompt.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
   @override
   void initState() {
     super.initState();
-    _prompts = List.from(widget.initialValue);
+    _prompts = _parsePrompts(widget.initialValue);
     _systemPromptController = TextEditingController();
 
     // 分离 system prompt 和其他消息
@@ -64,20 +71,21 @@ class _PromptEditorFieldState extends State<PromptEditorField> {
     setState(() {
       _prompts = prompts;
     });
-    widget.onChanged?.call(prompts);
+    // 转换为 List<dynamic> 返回
+    widget.onChanged?.call(prompts.map((p) => p.toJson()).toList());
   }
 
   /// 获取当前值
-  List<Prompt> getValue() {
-    return _prompts;
+  List<dynamic> getValue() {
+    return _prompts.map((p) => p.toJson()).toList();
   }
 
   /// 重置为初始值
   void reset() {
     setState(() {
-      _prompts = List.from(widget.initialValue);
+      _prompts = _parsePrompts(widget.initialValue);
       _systemPromptController.clear();
-      for (final prompt in widget.initialValue) {
+      for (final prompt in _prompts) {
         if (prompt.type == 'system') {
           _systemPromptController.text = prompt.content;
           break;
@@ -90,6 +98,7 @@ class _PromptEditorFieldState extends State<PromptEditorField> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         // 标题（仅在提供 labelText 时显示）
         if (widget.labelText != null) ...[
@@ -99,23 +108,23 @@ class _PromptEditorFieldState extends State<PromptEditorField> {
           ),
           const SizedBox(height: 8),
         ],
-        // PromptEditor
-        SizedBox(
-          height: 400,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
-              ),
-              borderRadius: BorderRadius.circular(8),
+        // PromptEditor（自适应高度，最大500）
+        Container(
+          constraints: const BoxConstraints(
+            maxHeight: 500,
+          ),
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
             ),
-            child: PromptEditor(
-              prompts: _prompts,
-              onPromptsChanged: widget.enabled ? _onPromptsChanged : (_) {},
-              separateSystemPrompt: true,
-              systemPromptController: _systemPromptController,
-            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: PromptEditor(
+            prompts: _prompts,
+            onPromptsChanged: widget.enabled ? _onPromptsChanged : (_) {},
+            separateSystemPrompt: true,
+            systemPromptController: _systemPromptController,
           ),
         ),
       ],
@@ -129,13 +138,13 @@ class WrappedPromptEditorField extends StatefulWidget {
   final String name;
 
   /// 初始值
-  final List<Prompt> initialValue;
+  final List<dynamic>? initialValue;
 
   /// 是否启用
   final bool enabled;
 
   /// 值变化回调
-  final ValueChanged<List<Prompt>>? onChanged;
+  final ValueChanged<List<dynamic>>? onChanged;
 
   /// 字段标签（可选，为 null 时不显示标题）
   final String? labelText;
@@ -143,7 +152,7 @@ class WrappedPromptEditorField extends StatefulWidget {
   const WrappedPromptEditorField({
     super.key,
     required this.name,
-    required this.initialValue,
+    this.initialValue,
     this.enabled = true,
     this.onChanged,
     this.labelText,
@@ -162,14 +171,14 @@ class _WrappedPromptEditorFieldState extends State<WrappedPromptEditorField> {
       name: widget.name,
       initialValue: widget.initialValue,
       enabled: widget.enabled,
-      onChanged: (v) => widget.onChanged?.call(v as List<Prompt>),
+      onChanged: widget.onChanged as dynamic,
       builder: (context, value, setValue) {
         return PromptEditorField(
           key: _fieldKey,
           name: widget.name,
-          initialValue: (value as List<dynamic>? ?? []).cast<Prompt>(),
+          initialValue: value,
           enabled: widget.enabled,
-          onChanged: (v) => setValue(v),
+          onChanged: setValue,
           labelText: widget.labelText,
         );
       },
