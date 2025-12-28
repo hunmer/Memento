@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 /// 统计项数据
 class StatItemData {
-  final String id;          // 唯一标识
-  final String label;       // 显示标签
-  final String value;       // 显示数值
-  final bool highlight;     // 是否高亮显示
-  final Color? color;       // 自定义颜色
+  final String id; // 唯一标识
+  final String label; // 显示标签
+  final String value; // 显示数值
+  final bool highlight; // 是否高亮显示
+  final Color? color; // 自定义颜色
 
   const StatItemData({
     required this.id,
@@ -37,7 +37,7 @@ class StatItemData {
 
 /// 小组件显示风格
 enum PluginWidgetDisplayStyle {
-  oneColumn,  // 一列文字
+  oneColumn, // 一列文字
   twoColumns, // 两列文字
 }
 
@@ -59,7 +59,7 @@ class PluginWidgetConfig {
   Color? backgroundColor;
 
   PluginWidgetConfig({
-    this.displayStyle = PluginWidgetDisplayStyle.twoColumns,
+    this.displayStyle = PluginWidgetDisplayStyle.oneColumn,
     List<String>? selectedItemIds,
     this.backgroundImagePath,
     this.iconColor,
@@ -76,19 +76,19 @@ class PluginWidgetConfig {
 
   factory PluginWidgetConfig.fromJson(Map<String, dynamic> json) {
     return PluginWidgetConfig(
-      displayStyle: PluginWidgetDisplayStyle.values[
-        json['displayStyle'] as int? ?? 1
-      ],
-      selectedItemIds: (json['selectedItemIds'] as List<dynamic>?)
-        ?.map((e) => e as String)
-        .toList(),
+      displayStyle:
+          PluginWidgetDisplayStyle.values[json['displayStyle'] as int? ?? 1],
+      selectedItemIds:
+          (json['selectedItemIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList(),
       backgroundImagePath: json['backgroundImagePath'] as String?,
-      iconColor: json['iconColor'] != null
-        ? Color(json['iconColor'] as int)
-        : null,
-      backgroundColor: json['backgroundColor'] != null
-        ? Color(json['backgroundColor'] as int)
-        : null,
+      iconColor:
+          json['iconColor'] != null ? Color(json['iconColor'] as int) : null,
+      backgroundColor:
+          json['backgroundColor'] != null
+              ? Color(json['backgroundColor'] as int)
+              : null,
     );
   }
 
@@ -105,15 +105,13 @@ class PluginWidgetConfig {
     return PluginWidgetConfig(
       displayStyle: displayStyle ?? this.displayStyle,
       selectedItemIds: selectedItemIds ?? this.selectedItemIds,
-      backgroundImagePath: clearBackgroundImage
-        ? null
-        : backgroundImagePath ?? this.backgroundImagePath,
-      iconColor: clearIconColor
-        ? null
-        : iconColor ?? this.iconColor,
-      backgroundColor: clearBackgroundColor
-        ? null
-        : backgroundColor ?? this.backgroundColor,
+      backgroundImagePath:
+          clearBackgroundImage
+              ? null
+              : backgroundImagePath ?? this.backgroundImagePath,
+      iconColor: clearIconColor ? null : iconColor ?? this.iconColor,
+      backgroundColor:
+          clearBackgroundColor ? null : backgroundColor ?? this.backgroundColor,
     );
   }
 }

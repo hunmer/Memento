@@ -91,4 +91,8 @@ final Map<String, String> notesTranslationsZh = {
   'notes_folderQuickAccessDesc': '快速访问指定笔记文件夹',
   'notes_notesCount': '@count 条笔记',
   'notes_clickToView': '点击查看',
+
+  // 快捷创建小组件
+  'notes_quickCreate': '快速创建',
+  'notes_quickCreateDesc': '快速创建笔记到指定文件夹',
 };

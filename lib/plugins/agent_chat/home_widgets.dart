@@ -19,61 +19,69 @@ class AgentChatHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'agent_chat_icon',
-      pluginId: 'agent_chat',
-      name: 'agent_chat_name'.tr,
-      description: 'agent_chat_description'.tr,
-      icon: Icons.chat_bubble_outline,
-      color: const Color(0xFF2196F3),
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryTools'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'agent_chat_icon',
+        pluginId: 'agent_chat',
+        name: 'agent_chat_name'.tr,
+        description: 'agent_chat_description'.tr,
         icon: Icons.chat_bubble_outline,
         color: const Color(0xFF2196F3),
-        name: 'agent_chat_name'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryTools'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.chat_bubble_outline,
+              color: const Color(0xFF2196F3),
+              name: 'agent_chat_name'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'agent_chat_overview',
-      pluginId: 'agent_chat',
-      name: 'agent_chat_overview'.tr,
-      description: 'agent_chat_overviewDescription'.tr,
-      icon: Icons.analytics_outlined,
-      color: const Color(0xFF2196F3),
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryTools'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'agent_chat_overview',
+        pluginId: 'agent_chat',
+        name: 'agent_chat_overview'.tr,
+        description: 'agent_chat_overviewDescription'.tr,
+        icon: Icons.analytics_outlined,
+        color: const Color(0xFF2196F3),
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryTools'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
     // 选择器小组件 - 快速进入指定频道
-    registry.register(HomeWidget(
-      id: 'agent_chat_conversation_selector',
-      pluginId: 'agent_chat',
-      name: 'agent_chat_conversationQuickAccess'.tr,
-      description: 'agent_chat_conversationQuickAccessDesc'.tr,
-      icon: Icons.chat,
-      color: const Color(0xFF2196F3),
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-      category: 'home_categoryTools'.tr,
+    registry.register(
+      HomeWidget(
+        id: 'agent_chat_conversation_selector',
+        pluginId: 'agent_chat',
+        name: 'agent_chat_conversationQuickAccess'.tr,
+        description: 'agent_chat_conversationQuickAccessDesc'.tr,
+        icon: Icons.chat,
+        color: const Color(0xFF2196F3),
+        defaultSize: HomeWidgetSize.medium,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryTools'.tr,
 
-      selectorId: 'agent_chat.conversation',
-      dataRenderer: _renderConversationData,
-      navigationHandler: _navigateToConversation,
+        selectorId: 'agent_chat.conversation',
+        dataRenderer: _renderConversationData,
+        navigationHandler: _navigateToConversation,
 
-      builder: (context, config) {
-        return GenericSelectorWidget(
-          widgetDefinition: registry.getWidget('agent_chat_conversation_selector')!,
-          config: config,
-        );
-      },
-    ));
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition:
+                registry.getWidget('agent_chat_conversation_selector')!,
+            config: config,
+          );
+        },
+      ),
+    );
   }
 
   /// 渲染选中的会话数据
@@ -88,9 +96,14 @@ class AgentChatHomeWidgets {
     final isPinned = convData['isPinned'] as bool? ?? false;
     final lastMessageAtStr = convData['lastMessageAt'] as String?;
 
-    final lastMessageAt = lastMessageAtStr != null
-        ? DateTime.parse(lastMessageAtStr)
-        : DateTime.now();
+    final lastMessageAt =
+        lastMessageAtStr != null
+            ? DateTime.parse(lastMessageAtStr)
+            : DateTime.now();
+
+    // 获取小组件尺寸
+    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
+    final isMediumSize = widgetSize == HomeWidgetSize.medium;
 
     return Material(
       color: Colors.transparent,
@@ -125,30 +138,29 @@ class AgentChatHomeWidgets {
                     ),
                   ),
                   if (isPinned)
-                    Icon(
-                      Icons.push_pin,
-                      size: 16,
-                      color: Colors.amber,
-                    ),
+                    Icon(Icons.push_pin, size: 16, color: Colors.amber),
                 ],
               ),
 
               const SizedBox(height: 12),
 
-              // 最后一条消息预览
-              if (lastMessagePreview.isNotEmpty)
+              // 最后一条消息预览（仅在非 medium 尺寸时显示）
+              if (lastMessagePreview.isNotEmpty && !isMediumSize)
                 Expanded(
                   child: Text(
                     lastMessagePreview,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer.withOpacity(0.7),
                     ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
 
-              const Spacer(),
+              // medium 尺寸下使用提示文字替代消息预览
+              if (isMediumSize) const Spacer(),
 
               // 时间和提示
               Row(
@@ -157,7 +169,9 @@ class AgentChatHomeWidgets {
                   Text(
                     _formatDateTime(lastMessageAt),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer.withOpacity(0.6),
                     ),
                   ),
                   Row(
@@ -208,7 +222,9 @@ class AgentChatHomeWidgets {
     if (difference.inMinutes < 1) {
       return 'agent_chat_justNow'.tr;
     } else if (difference.inHours < 1) {
-      return 'agent_chat_minutesAgo'.trParams({'count': '${difference.inMinutes}'});
+      return 'agent_chat_minutesAgo'.trParams({
+        'count': '${difference.inMinutes}',
+      });
     } else if (difference.inDays < 1) {
       return 'agent_chat_hoursAgo'.trParams({'count': '${difference.inHours}'});
     } else if (difference.inDays < 7) {
@@ -221,7 +237,8 @@ class AgentChatHomeWidgets {
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-      final plugin = PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
       if (plugin == null || !plugin.isInitialized) {
         return [];
       }
@@ -276,9 +293,11 @@ class AgentChatHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {

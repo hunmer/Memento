@@ -1,11 +1,15 @@
+import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'goods_plugin.dart';
 
 const Color _goodsColor = Color.fromARGB(255, 207, 77, 116);
@@ -47,6 +51,46 @@ class GoodsHomeWidgets {
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
+    ));
+
+    // 仓库选择器小组件
+    registry.register(HomeWidget(
+      id: 'goods_warehouse_selector',
+      pluginId: 'goods',
+      name: 'goods_warehouseSelector'.tr,
+      description: 'goods_warehouseSelectorDesc'.tr,
+      icon: Icons.warehouse,
+      color: _goodsColor,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      category: 'home_categoryRecord'.tr,
+      selectorId: 'goods.warehouse',
+      dataRenderer: _renderWarehouseData,
+      navigationHandler: _navigateToWarehouse,
+      builder: (context, config) => GenericSelectorWidget(
+        widgetDefinition: registry.getWidget('goods_warehouse_selector')!,
+        config: config,
+      ),
+    ));
+
+    // 物品选择器小组件
+    registry.register(HomeWidget(
+      id: 'goods_item_selector',
+      pluginId: 'goods',
+      name: 'goods_itemSelector'.tr,
+      description: 'goods_itemSelectorDesc'.tr,
+      icon: Icons.inventory_2,
+      color: _goodsColor,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      category: 'home_categoryRecord'.tr,
+      selectorId: 'goods.item',
+      dataRenderer: _renderItemData,
+      navigationHandler: _navigateToItem,
+      builder: (context, config) => GenericSelectorWidget(
+        widgetDefinition: registry.getWidget('goods_item_selector')!,
+        config: config,
+      ),
     ));
   }
 
@@ -135,6 +179,351 @@ class GoodsHomeWidgets {
           ),
         ],
       ),
+    );
+  }
+
+  /// 渲染选中的仓库数据
+  static Widget _renderWarehouseData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    // 从 result.data 获取仓库数据（rawData 应该是 Map）
+    final data = result.data as Map<String, dynamic>?;
+    if (data == null) {
+      return _buildErrorWidget(context, '请选择仓库');
+    }
+
+    final title = data['title'] as String? ?? '未知仓库';
+    final itemCount = (data['items'] as List?)?.length ?? 0;
+    final iconData = data['iconData'] as int?;
+    final iconColorValue = data['iconColor'] as int?;
+
+    final icon = iconData != null
+        ? IconData(iconData, fontFamily: 'MaterialIcons')
+        : Icons.warehouse;
+    final color = iconColorValue != null
+        ? Color(iconColorValue)
+        : _goodsColor;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 顶部图标和标题
+              Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: color.withAlpha(50),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 28,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '$itemCount 件物品',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              // 底部提示
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'home_tapToViewDetails'.tr,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 导航到仓库详情页面
+  static void _navigateToWarehouse(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final data = result.data as Map<String, dynamic>?;
+    final warehouseId = data?['id'] as String?;
+    final warehouseName = data?['title'] as String?;
+
+    if (warehouseId == null || warehouseId.isEmpty) {
+      debugPrint('仓库ID为空');
+      return;
+    }
+
+    // 尝试获取最新数据
+    final plugin = GoodsPlugin.instance;
+    final warehouse = plugin.getWarehouse(warehouseId);
+    final name = warehouse?.title ?? warehouseName ?? '未知仓库';
+
+    NavigationHelper.pushNamed(
+      context,
+      '/goods/warehouse_detail',
+      arguments: {
+        'warehouseId': warehouseId,
+        'warehouseName': name,
+      },
+    );
+  }
+
+  /// 渲染选中的物品数据
+  static Widget _renderItemData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    // 从 result.data 获取物品数据（rawData 应该是 Map）
+    final data = result.data as Map<String, dynamic>?;
+    if (data == null) {
+      return _buildErrorWidget(context, '请选择物品');
+    }
+
+    final title = data['title'] as String? ?? '未知物品';
+    final price = data['purchasePrice'] as num?;
+    final tags = (data['tags'] as List?)?.cast<String>() ?? [];
+    final imageUrl = data['imageUrl'] as String?;
+    final iconData = data['iconData'] as int?;
+    final iconColorValue = data['iconColor'] as int?;
+
+    final icon = iconData != null
+        ? IconData(iconData, fontFamily: 'MaterialIcons')
+        : Icons.inventory_2;
+    final iconColor = iconColorValue != null ? Color(iconColorValue) : null;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 图片和基本信息
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 物品图片或图标
+                  _buildItemImage(imageUrl, icon, iconColor),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (price != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '¥${price.toStringAsFixed(2)}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                        if (tags.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: tags.take(2).map((tag) {
+                              return Chip(
+                                label: Text(
+                                  tag,
+                                  style: theme.textTheme.labelSmall,
+                                ),
+                                padding: EdgeInsets.zero,
+                                visualDensity: VisualDensity.compact,
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              // 底部提示
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    'home_tapToViewDetails'.tr,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_forward,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建物品图片组件
+  static Widget _buildItemImage(String? imageUrl, IconData icon, Color? iconColor) {
+    final effectiveColor = iconColor ?? _goodsColor;
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return FutureBuilder<String?>(
+        future: _getImageAbsolutePath(imageUrl),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            return Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: FileImage(File(snapshot.data!)),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            );
+          }
+          return Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: effectiveColor.withAlpha(50),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 32,
+              color: effectiveColor,
+            ),
+          );
+        },
+      );
+    }
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: effectiveColor.withAlpha(50),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        icon,
+        size: 32,
+        color: effectiveColor,
+      ),
+    );
+  }
+
+  /// 获取图片绝对路径
+  static Future<String?> _getImageAbsolutePath(String relativePath) async {
+    try {
+      final appDir = File('').parent.path;
+      return '$appDir/$relativePath';
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 导航到物品详情页面
+  static void _navigateToItem(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    final data = result.data as Map<String, dynamic>?;
+    final itemId = data?['id'] as String?;
+
+    if (itemId == null || itemId.isEmpty) {
+      debugPrint('物品ID为空');
+      return;
+    }
+
+    // 尝试从 GoodsPlugin 获取最新数据以获取仓库ID
+    final plugin = GoodsPlugin.instance;
+    final findResult = plugin.findGoodsItemById(itemId);
+
+    if (findResult == null) {
+      debugPrint('未找到物品: $itemId');
+      return;
+    }
+
+    NavigationHelper.pushNamed(
+      context,
+      '/goods/item_detail',
+      arguments: {
+        'itemId': itemId,
+        'warehouseId': findResult.warehouseId,
+        'itemTitle': findResult.item.title,
+      },
     );
   }
 }

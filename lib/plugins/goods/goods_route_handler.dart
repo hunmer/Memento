@@ -4,6 +4,8 @@ import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/goods/dialogs/add_usage_record_dialog.dart';
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/models/usage_record.dart';
+import 'package:Memento/plugins/goods/screens/warehouse_detail_screen.dart';
+import 'package:Memento/plugins/goods/screens/goods_item_detail_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 /// 物品插件路由处理器
@@ -15,6 +17,20 @@ class GoodsRouteHandler extends PluginRouteHandler {
   Route<dynamic>? handleRoute(RouteSettings settings) {
     final routeName = settings.name ?? '';
 
+    // 处理仓库详情路由
+    // 格式: /goods/warehouse_detail?warehouseId={id}
+    if (routeName.startsWith('/goods/warehouse_detail') ||
+        routeName.startsWith('goods/warehouse_detail')) {
+      return _handleWarehouseDetailRoute(settings.arguments);
+    }
+
+    // 处理物品详情路由
+    // 格式: /goods/item_detail?itemId={id}&warehouseId={warehouseId}
+    if (routeName.startsWith('/goods/item_detail') ||
+        routeName.startsWith('goods/item_detail')) {
+      return _handleItemDetailRoute(settings.arguments);
+    }
+
     // 处理物品使用记录路由
     // 格式: /goods/usage?itemId={itemId}&action=add_usage
     // 或者深度链接格式: memento://goods/usage?itemId={itemId}&action=add_usage
@@ -24,6 +40,68 @@ class GoodsRouteHandler extends PluginRouteHandler {
     }
 
     return null;
+  }
+
+  /// 处理仓库详情路由
+  Route<dynamic> _handleWarehouseDetailRoute(Object? arguments) {
+    String? warehouseId;
+    String? warehouseName;
+
+    // 从 arguments 中获取参数
+    if (arguments is Map<String, dynamic>) {
+      warehouseId = arguments['warehouseId'] as String?;
+      warehouseName = arguments['warehouseName'] as String?;
+    } else if (arguments is Map<String, String>) {
+      warehouseId = arguments['warehouseId'];
+      warehouseName = arguments['warehouseName'];
+    }
+
+    debugPrint('打开仓库详情: warehouseId=$warehouseId, warehouseName=$warehouseName');
+
+    if (warehouseId == null || warehouseId.isEmpty) {
+      // 没有仓库ID，回退到物品插件主视图
+      return createRoute(const GoodsMainView());
+    }
+
+    // 获取仓库数据
+    final plugin = GoodsPlugin.instance;
+    final warehouse = plugin.getWarehouse(warehouseId);
+
+    if (warehouse == null) {
+      debugPrint('未找到仓库: $warehouseId');
+      return createRoute(const GoodsMainView());
+    }
+
+    return createRoute(WarehouseDetailScreen(warehouse: warehouse));
+  }
+
+  /// 处理物品详情路由
+  Route<dynamic> _handleItemDetailRoute(Object? arguments) {
+    String? itemId;
+    String? warehouseId;
+
+    // 从 arguments 中获取参数
+    if (arguments is Map<String, dynamic>) {
+      itemId = arguments['itemId'] as String?;
+      warehouseId = arguments['warehouseId'] as String?;
+    } else if (arguments is Map<String, String>) {
+      itemId = arguments['itemId'];
+      warehouseId = arguments['warehouseId'];
+    }
+
+    debugPrint('打开物品详情: itemId=$itemId, warehouseId=$warehouseId');
+
+    if (itemId == null || itemId.isEmpty || warehouseId == null || warehouseId.isEmpty) {
+      // 参数不完整，回退到物品插件主视图
+      return createRoute(const GoodsMainView());
+    }
+
+    return createRoute(
+      GoodsItemDetailScreen(
+        itemId: itemId,
+        warehouseId: warehouseId,
+      ),
+    );
   }
 
   /// 处理物品使用记录路由

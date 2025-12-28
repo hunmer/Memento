@@ -91,4 +91,8 @@ final Map<String, String> notesTranslationsEn = {
   'notes_folderQuickAccessDesc': 'Quick access to specific notes folder',
   'notes_notesCount': '@count notes',
   'notes_clickToView': 'Click to view',
+
+  // Quick create widget
+  'notes_quickCreate': 'Quick Create',
+  'notes_quickCreateDesc': 'Create note in selected folder',
 };
