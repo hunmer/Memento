@@ -82,4 +82,13 @@ final Map<String, String> notesTranslationsEn = {
 
   // Navigation
   'notes_backToParent': 'Back to Parent',
+
+  // Selector widget
+  'notes_folderSelectorName': 'Select Folder',
+  'notes_folderSelectorDesc': 'Select a notes folder',
+  'notes_selectFolderTitle': 'Select Folder',
+  'notes_folderQuickAccess': 'Folder Quick Access',
+  'notes_folderQuickAccessDesc': 'Quick access to specific notes folder',
+  'notes_notesCount': '@count notes',
+  'notes_clickToView': 'Click to view',
 };

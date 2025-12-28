@@ -11,6 +11,9 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/plugins/diary/utils/diary_utils.dart';
+import 'package:Memento/plugins/diary/screens/diary_editor_screen.dart';
+import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'folder_dialog.dart';
 
 /// 主页卡片组件
@@ -343,6 +346,12 @@ class _HomeCardState extends State<HomeCard> {
 
     if (widgetDef == null) return;
 
+    // 特殊处理：今日日记快捷入口
+    if (widgetItem.widgetId == 'diary_today_quick') {
+      await _openTodayDiaryEditor(context);
+      return;
+    }
+
     // 检查是否为选择器小组件
     if (widgetDef.isSelectorWidget) {
       await _handleSelectorWidgetTap(context, widgetItem, widgetDef);
@@ -365,6 +374,39 @@ class _HomeCardState extends State<HomeCard> {
           borderRadius: BorderRadius.all(Radius.circular(12.0)),
         ),
       );
+    }
+  }
+
+  /// 打开今日日记编辑界面
+  Future<void> _openTodayDiaryEditor(BuildContext context) async {
+    try {
+      // 获取 DiaryPlugin 实例
+      final plugin = globalPluginManager.getPlugin('diary');
+      if (plugin == null) {
+        Toast.error('日记插件未加载');
+        return;
+      }
+
+      final diaryPlugin = plugin as DiaryPlugin;
+      final today = DateTime.now();
+      final normalizedDate = DateTime(today.year, today.month, today.day);
+
+      // 加载今日日记（如果存在）
+      final todayEntry = await DiaryUtils.loadDiaryEntry(normalizedDate);
+
+      // 打开编辑器
+      NavigationHelper.push(
+        context,
+        DiaryEditorScreen(
+          date: normalizedDate,
+          storage: diaryPlugin.storage,
+          initialTitle: todayEntry?.title ?? '',
+          initialContent: todayEntry?.content ?? '',
+        ),
+      );
+    } catch (e) {
+      debugPrint('[HomeCard] 打开今日日记编辑器失败: $e');
+      Toast.error('打开失败: $e');
     }
   }
 

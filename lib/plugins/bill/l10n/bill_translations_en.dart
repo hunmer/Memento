@@ -111,6 +111,9 @@ class BillTranslationsEn {
     'bill_widgetDescription': 'Quick access to bills',
     'bill_overviewName': 'Bill Overview',
     'bill_overviewDescription': 'Display income and expense statistics',
+    'bill_createShortcutName': 'Create Bill',
+    'bill_createShortcutDescription': 'Quick create new bill',
+    'bill_createBill': 'Create Bill',
 
     // Interface search
     'bill_searchPlaceholder': 'Search bills by name, category, or note',

@@ -6,7 +6,9 @@ import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'activity_plugin.dart';
+import 'screens/activity_edit_screen.dart';
 
 /// 活动插件的主页小组件注册
 class ActivityHomeWidgets {
@@ -45,6 +47,20 @@ class ActivityHomeWidgets {
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildOverviewWidget(context, config),
       availableStatsProvider: _getAvailableStats,
+    ));
+
+    // 2x2 创建活动快捷入口 - 直接跳转
+    registry.register(HomeWidget(
+      id: 'activity_create_shortcut',
+      pluginId: 'activity',
+      name: 'activity_createActivityShortcut'.tr,
+      description: 'activity_createActivityShortcutDesc'.tr,
+      icon: Icons.add_circle,
+      color: Colors.pink,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+      category: 'home_categoryRecord'.tr,
+      builder: (context, config) => const ActivityCreateShortcutWidget(),
     ));
   }
 
@@ -135,5 +151,111 @@ class ActivityHomeWidgets {
         ],
       ),
     );
+  }
+}
+
+/// 创建活动快捷入口小组件
+///
+/// 点击后直接打开活动创建界面,无需选择器
+class ActivityCreateShortcutWidget extends StatelessWidget {
+  const ActivityCreateShortcutWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _navigateToCreateActivity(context),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.pink.withOpacity(0.1),
+                Colors.pink.withOpacity(0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 图标
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.pink.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.add_circle,
+                  size: 32,
+                  color: Colors.pink,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // 主标题
+              Text(
+                'activity_createActivity'.tr,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.pink,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+
+              // 副标题
+              Text(
+                'activity_quickCreateActivityDesc'.tr,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 导航到活动创建界面
+  void _navigateToCreateActivity(BuildContext context) {
+    try {
+      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      if (plugin == null) {
+        toastService.showToast('activity_loadFailed'.tr);
+        return;
+      }
+
+      final activityService = plugin.activityService;
+      final now = DateTime.now();
+
+      // 打开活动编辑界面(创建模式)
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ActivityEditScreen(
+            activityService: activityService,
+            selectedDate: now,
+            onTagsUpdated: (tags) async {
+              await activityService.saveRecentTags(tags);
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      toastService.showToast('activity_operationFailed'.tr);
+      debugPrint('[ActivityCreateShortcut] 打开创建界面失败: $e');
+    }
   }
 }

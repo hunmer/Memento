@@ -159,4 +159,12 @@ const Map<String, String> storeTranslationsEn = {
   'store_widgetDescription': 'Quick access to store',
   'store_overviewName': 'Store Overview',
   'store_overviewDescription': 'Display points and products statistics',
+
+  // Selector Widget Strings
+  'store_productSelectorName': 'Select Product',
+  'store_productSelectorDesc': 'Select a product to view redeemed items',
+  'store_selectProduct': 'Select Product',
+  'store_productQuickAccess': 'Product Quick Access',
+  'store_productQuickAccessDesc': 'Quick access to specific product items list',
+  'store_outOfStock': 'Out of Stock',
 };

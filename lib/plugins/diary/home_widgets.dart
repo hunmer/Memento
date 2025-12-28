@@ -34,6 +34,26 @@ class DiaryHomeWidgets {
                 ),
     ));
 
+    // 1x1 今日日记快捷入口
+    registry.register(HomeWidget(
+      id: 'diary_today_quick',
+      pluginId: 'diary',
+      name: 'diary_todayQuickName'.tr,
+      description: 'diary_todayQuickDescription'.tr,
+      icon: Icons.edit_calendar,
+      color: Colors.indigo,
+      defaultSize: HomeWidgetSize.small,
+      supportedSizes: [HomeWidgetSize.small],
+      category: 'home_categoryRecord'.tr,
+        builder:
+            (context, config) =>
+                GenericIconWidget(
+                  icon: Icons.edit_calendar,
+                  color: Colors.indigo,
+                  name: 'diary_todayQuickName'.tr,
+                ),
+    ));
+
     // 2x2 详细卡片 - 显示统计信息
     registry.register(HomeWidget(
       id: 'diary_overview',

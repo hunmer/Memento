@@ -159,4 +159,12 @@ const Map<String, String> storeTranslationsZh = {
   'store_widgetDescription': '快速打开积分商店',
   'store_overviewName': '积分商店概览',
   'store_overviewDescription': '显示积分和商品统计',
+
+  // Selector Widget Strings
+  'store_productSelectorName': '选择商品',
+  'store_productSelectorDesc': '选择一个商品查看已兑换物品',
+  'store_selectProduct': '选择商品',
+  'store_productQuickAccess': '商品快速访问',
+  'store_productQuickAccessDesc': '快速访问特定商品的物品列表',
+  'store_outOfStock': '已售罄',
 };

@@ -137,6 +137,17 @@ class ChatTranslationsZh {
     'chat_overviewDescription': '显示频道和消息统计',
     'chat_communicationCategory': '通讯',
     'chat_loadFailed': '加载失败',
+    'chat_channelQuickAccess': '频道快速访问',
+    'chat_channelQuickAccessDesc': '快速打开指定频道',
+    'chat_clickToEnter': '点击进入',
+    'chat_untitled': '未命名频道',
+    'chat_noMessages': '暂无消息',
+
+    // 选择器相关
+    'chat_channelSelectorName': '选择频道',
+    'chat_channelSelectorDesc': '选择一个聊天频道',
+    'chat_selectChannel': '选择频道',
+    'chat_noChannels': '暂无频道，请先创建',
 
     // 其他UI元素
     'chat_editMessageTitle': '编辑消息标题',
