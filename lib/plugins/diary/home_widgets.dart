@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
@@ -7,6 +9,9 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:get/get.dart';
 import 'diary_plugin.dart';
+import 'models/diary_entry.dart';
+import 'utils/diary_utils.dart';
+import 'screens/diary_editor_screen.dart';
 
 /// 日记插件的主页小组件注册
 class DiaryHomeWidgets {
@@ -15,59 +20,79 @@ class DiaryHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'diary_icon',
-      pluginId: 'diary',
-      name: 'diary_widgetName'.tr,
-      description: 'diary_widgetDescription'.tr,
-      icon: Icons.book,
-      color: Colors.indigo,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryRecord'.tr,
+    registry.register(
+      HomeWidget(
+        id: 'diary_icon',
+        pluginId: 'diary',
+        name: 'diary_widgetName'.tr,
+        description: 'diary_widgetDescription'.tr,
+        icon: Icons.book,
+        color: Colors.indigo,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
         builder:
-            (context, config) =>
-                GenericIconWidget(
-                  icon: Icons.book,
-                  color: Colors.indigo,
-                  name: 'diary_widgetName'.tr,
-                ),
-    ));
+            (context, config) => GenericIconWidget(
+              icon: Icons.book,
+              color: Colors.indigo,
+              name: 'diary_widgetName'.tr,
+            ),
+      ),
+    );
 
     // 1x1 今日日记快捷入口
-    registry.register(HomeWidget(
-      id: 'diary_today_quick',
-      pluginId: 'diary',
-      name: 'diary_todayQuickName'.tr,
-      description: 'diary_todayQuickDescription'.tr,
-      icon: Icons.edit_calendar,
-      color: Colors.indigo,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryRecord'.tr,
+    registry.register(
+      HomeWidget(
+        id: 'diary_today_quick',
+        pluginId: 'diary',
+        name: 'diary_todayQuickName'.tr,
+        description: 'diary_todayQuickDescription'.tr,
+        icon: Icons.edit_calendar,
+        color: Colors.indigo,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
         builder:
-            (context, config) =>
-                GenericIconWidget(
-                  icon: Icons.edit_calendar,
-                  color: Colors.indigo,
-                  name: 'diary_todayQuickName'.tr,
-                ),
-    ));
+            (context, config) => GenericIconWidget(
+              icon: Icons.edit_calendar,
+              color: Colors.indigo,
+              name: 'diary_todayQuickName'.tr,
+            ),
+      ),
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'diary_overview',
-      pluginId: 'diary',
-      name: 'diary_overviewName'.tr,
-      description: 'diary_overviewDescription'.tr,
-      icon: Icons.menu_book,
-      color: Colors.indigo,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
+    registry.register(
+      HomeWidget(
+        id: 'diary_overview',
+        pluginId: 'diary',
+        name: 'diary_overviewName'.tr,
+        description: 'diary_overviewDescription'.tr,
+        icon: Icons.menu_book,
+        color: Colors.indigo,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
-    ));
+      ),
+    );
+
+    // 4x1 宽屏卡片 - 七日日记（占满宽度）
+    registry.register(
+      HomeWidget(
+        id: 'diary_weekly',
+        pluginId: 'diary',
+        name: 'diary_weeklyName'.tr,
+        description: 'diary_weeklyDescription'.tr,
+        icon: Icons.calendar_view_week,
+        color: Colors.indigo,
+        defaultSize: HomeWidgetSize.wide2,
+        supportedSizes: [HomeWidgetSize.wide, HomeWidgetSize.wide2],
+        category: 'home_categoryRecord'.tr,
+        builder: (context, config) => _buildWeeklyWidget(context, config),
+      ),
+    );
   }
 
   /// 获取可用的统计项
@@ -158,6 +183,149 @@ class DiaryHomeWidgets {
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
+      ),
+    );
+  }
+
+  /// 构建七日日记小组件
+  static Widget _buildWeeklyWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
+    return FutureBuilder<Map<DateTime, DiaryEntry>>(
+      future: DiaryUtils.loadDiaryEntries(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final entries = snapshot.data ?? {};
+        final now = DateTime.now();
+        final weekDays = _getCurrentWeekDays(now);
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 七天卡片
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children:
+                      weekDays.map((date) {
+                        final entry = entries[date];
+                        return _buildDayCard(context, date, entry);
+                      }).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// 获取当前周的周一到周日日期
+  static List<DateTime> _getCurrentWeekDays(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    // Monday = 1, Sunday = 7
+    final weekday = normalizedDate.weekday;
+    // 计算周一
+    final monday = normalizedDate.subtract(Duration(days: weekday - 1));
+    // 生成周一到周日的日期列表
+    return List.generate(7, (index) => monday.add(Duration(days: index)));
+  }
+
+  /// 构建单日卡片
+  static Widget _buildDayCard(
+    BuildContext context,
+    DateTime date,
+    DiaryEntry? entry,
+  ) {
+    final isToday = DateUtils.isSameDay(date, DateTime.now());
+    final weekdayFormat = DateFormat('E');
+    final dayFormat = DateFormat('d');
+
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        decoration: BoxDecoration(
+          color:
+              isToday
+                  ? Colors.indigo.withValues(alpha: 0.1)
+                  : Colors.grey.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: isToday ? Border.all(color: Colors.indigo, width: 1.5) : null,
+        ),
+        child: InkWell(
+          onTap: () => _openDiaryEditor(context, date),
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 星期几
+                Text(
+                  weekdayFormat.format(date),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: isToday ? Colors.indigo : Colors.grey,
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                // 日期数字
+                Text(
+                  dayFormat.format(date),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isToday ? Colors.indigo : Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // 心情
+                if (entry?.mood != null)
+                  Text(entry!.mood!, style: const TextStyle(fontSize: 18))
+                else
+                  const SizedBox(height: 18),
+                // 标题（如果有）
+                Text(
+                  entry?.title ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    color: entry != null ? Colors.black87 : Colors.grey[400],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 打开日记编辑器
+  static Future<void> _openDiaryEditor(
+    BuildContext context,
+    DateTime date,
+  ) async {
+    final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
+    if (plugin == null) return;
+
+    // 加载现有日记（如果存在）
+    final entry = await DiaryUtils.loadDiaryEntry(date);
+
+    NavigationHelper.push(
+      context,
+      DiaryEditorScreen(
+        date: date,
+        storage: plugin.storage,
+        initialTitle: entry?.title ?? '',
+        initialContent: entry?.content ?? '',
       ),
     );
   }

@@ -18,67 +18,73 @@ class ChatHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'chat_icon',
-      pluginId: 'chat',
-      name: 'chat_widgetName'.tr,
-      description: 'chat_widgetDescription'.tr,
-      icon: Icons.chat_bubble,
-      color: Colors.indigoAccent,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryCommunication'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'chat_icon',
+        pluginId: 'chat',
+        name: 'chat_widgetName'.tr,
+        description: 'chat_widgetDescription'.tr,
         icon: Icons.chat_bubble,
         color: Colors.indigoAccent,
-        name: 'chat_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryCommunication'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.chat_bubble,
+              color: Colors.indigoAccent,
+              name: 'chat_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'chat_overview',
-      pluginId: 'chat',
-      name: 'chat_overviewName'.tr,
-      description: 'chat_overviewDescription'.tr,
-      icon: Icons.chat_bubble_outline,
-      color: Colors.indigoAccent,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryCommunication'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'chat_overview',
+        pluginId: 'chat',
+        name: 'chat_overviewName'.tr,
+        description: 'chat_overviewDescription'.tr,
+        icon: Icons.chat_bubble_outline,
+        color: Colors.indigoAccent,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryCommunication'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
     // 选择器小组件 - 快速进入指定频道
-    registry.register(HomeWidget(
-      id: 'chat_channel_selector',
-      pluginId: 'chat',
-      name: 'chat_channelQuickAccess'.tr,
-      description: 'chat_channelQuickAccessDesc'.tr,
-      icon: Icons.chat,
-      color: Colors.indigoAccent,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-      category: 'home_categoryCommunication'.tr,
+    registry.register(
+      HomeWidget(
+        id: 'chat_channel_selector',
+        pluginId: 'chat',
+        name: 'chat_channelQuickAccess'.tr,
+        description: 'chat_channelQuickAccessDesc'.tr,
+        icon: Icons.chat,
+        color: Colors.indigoAccent,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryCommunication'.tr,
 
-      selectorId: 'chat.channel',
-      dataRenderer: _renderChannelData,
-      navigationHandler: _navigateToChannel,
+        selectorId: 'chat.channel',
+        dataRenderer: _renderChannelData,
+        navigationHandler: _navigateToChannel,
 
-      builder: (context, config) {
-        return GenericSelectorWidget(
-          widgetDefinition: registry.getWidget('chat_channel_selector')!,
-          config: config,
-        );
-      },
-    ));
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('chat_channel_selector')!,
+            config: config,
+          );
+        },
+      ),
+    );
   }
 
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-
       final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
       if (plugin == null) return [];
 
@@ -113,9 +119,11 @@ class ChatHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -149,7 +157,6 @@ class ChatHomeWidgets {
 
   /// 构建错误提示组件
   static Widget _buildErrorWidget(BuildContext context, String error) {
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -179,17 +186,20 @@ class ChatHomeWidgets {
     final iconCodePoint = channelData['icon'] as int?;
     final backgroundColorValue = channelData['backgroundColor'] as int?;
 
-    final lastMessageTime = lastMessageTimeStr != null
-        ? DateTime.parse(lastMessageTimeStr)
-        : DateTime.now();
+    final lastMessageTime =
+        lastMessageTimeStr != null
+            ? DateTime.parse(lastMessageTimeStr)
+            : DateTime.now();
 
-    final channelIcon = iconCodePoint != null
-        ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-        : Icons.chat_bubble;
+    final channelIcon =
+        iconCodePoint != null
+            ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
+            : Icons.chat_bubble;
 
-    final channelColor = backgroundColorValue != null
-        ? Color(backgroundColorValue)
-        : Colors.indigoAccent;
+    final channelColor =
+        backgroundColorValue != null
+            ? Color(backgroundColorValue)
+            : Colors.indigoAccent;
 
     return Material(
       color: Colors.transparent,
@@ -200,10 +210,7 @@ class ChatHomeWidgets {
           decoration: BoxDecoration(
             color: channelColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: channelColor.withOpacity(0.3),
-              width: 2,
-            ),
+            border: Border.all(color: channelColor.withOpacity(0.3), width: 2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,11 +224,7 @@ class ChatHomeWidgets {
                       color: channelColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
-                      channelIcon,
-                      size: 20,
-                      color: Colors.white,
-                    ),
+                    child: Icon(channelIcon, size: 20, color: Colors.white),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -245,7 +248,9 @@ class ChatHomeWidgets {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -264,7 +269,9 @@ class ChatHomeWidgets {
                     child: Text(
                       'chat_noMessages'.tr,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
                       ),
                     ),
                   ),
@@ -276,42 +283,21 @@ class ChatHomeWidgets {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 左侧：时间和消息数
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _formatDateTime(lastMessageTime),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'chat_messageCount'.trParams({'count': '$messageCount'}),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+                  // 左侧：消息数
+                  Text(
+                    'chat_messageCount'.trParams({
+                      'count': '$messageCount',
+                    }),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                  // 右侧：点击提示
-                  Row(
-                    children: [
-                      Text(
-                        'chat_clickToEnter'.tr,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: channelColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: channelColor,
-                      ),
-                    ],
+                  // 右侧：时间
+                  Text(
+                    _formatDateTime(lastMessageTime),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -323,10 +309,7 @@ class ChatHomeWidgets {
   }
 
   /// 导航到选中的频道
-  static void _navigateToChannel(
-    BuildContext context,
-    SelectorResult result,
-  ) {
+  static void _navigateToChannel(BuildContext context, SelectorResult result) {
     final channelData = result.data as Map<String, dynamic>;
     final channelId = channelData['id'] as String;
 

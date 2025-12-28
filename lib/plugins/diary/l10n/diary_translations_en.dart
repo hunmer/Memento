@@ -12,6 +12,9 @@ class DiaryTranslationsEn {
     'diary_todayQuickDescription': 'Quick access to today\'s diary editor',
     'diary_overviewName': 'Diary Overview',
     'diary_overviewDescription': 'Display today\'s word count and monthly progress',
+    'diary_weeklyName': 'Weekly Diary',
+    'diary_weeklyDescription': 'Show this week\'s diary titles and moods',
+    'diary_weeklyTitle': 'This Week',
 
     // 统计信息
     'diary_todayWordCount': '1d word',
