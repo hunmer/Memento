@@ -47,7 +47,13 @@ const Map<String, String> calendarTranslationsEn = {
   'calendar_overviewName': 'Calendar Overview',
   'calendar_overviewDescription': 'Display schedule statistics',
 
-  // Interface search
-  'calendar_widgetSelector': 'Calendar Widget',
-  'calendar_searchPlaceholder': 'Search event title or description...',
+  // Quick add event widget
+  'calendar_quickAddEvent': 'Add Event',
+  'calendar_quickAddEventDesc': 'Quickly create new event',
+
+  // 7-day event list widget
+  'calendar_eventListName': 'Upcoming Events',
+  'calendar_eventListDesc': 'Show events within 7 days',
+  'calendar_emptyEvents': 'No upcoming events',
+  'calendar_upcomingEvents': 'Coming Up',
 };
