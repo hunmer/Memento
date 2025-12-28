@@ -1,10 +1,8 @@
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/routing/plugin_route_handler.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/screens/todo_list_selector_screen.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
-import 'package:Memento/plugins/todo/models/task.dart';
 
 /// 待办插件路由处理器
 class TodoRouteHandler extends PluginRouteHandler {
@@ -36,7 +34,8 @@ class TodoRouteHandler extends PluginRouteHandler {
 
     // 处理待办列表小组件点击路由（已配置状态）
     // 格式: /todo_list?taskId={taskId}
-    if (routeName.startsWith('/todo_list') && !routeName.contains('_selector')) {
+    if (routeName.startsWith('/todo_list') &&
+        !routeName.contains('_selector')) {
       return _handleListClickRoute();
     }
 

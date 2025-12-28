@@ -1005,7 +1005,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
               subtitle: '${warehouse.items.length} 件物品',
               icon: warehouse.icon,
               color: warehouse.iconColor,
-              rawData: warehouse,
+              rawData: warehouse.toJson(),
             )).toList();
           },
         ),
@@ -1033,7 +1033,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
               subtitle: '${warehouse.items.length} 件物品',
               icon: warehouse.icon,
               color: warehouse.iconColor,
-              rawData: warehouse,
+              rawData: warehouse.toJson(),
             )).toList();
           },
         ),
@@ -1062,7 +1062,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
         subtitle: item.purchasePrice != null ? '¥${item.purchasePrice!.toStringAsFixed(2)}' : null,
         icon: item.icon,
         color: item.iconColor,
-        rawData: item,
+        rawData: item.toJson(),
       ));
       // 递归处理子物品
       if (item.subItems.isNotEmpty) {

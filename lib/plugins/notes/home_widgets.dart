@@ -476,8 +476,9 @@ class NotesHomeWidgets {
     BuildContext context,
     SelectorResult result,
   ) {
-    final folderData = result.data as Map<String, dynamic>;
-    final folderId = folderData['id'] as String? ?? 'root';
+    // 从 result.data 获取 folderId
+    final folderData = result.data as Map<String, dynamic>?;
+    final folderId = folderData?['id'] as String? ?? 'root';
 
     // 通过路由跳转到笔记编辑页面
     NavigationHelper.pushNamed(
@@ -489,13 +490,34 @@ class NotesHomeWidgets {
 
   /// 导航到选中的文件夹
   static void _navigateToFolder(BuildContext context, SelectorResult result) {
-    final folderData = result.data as Map<String, dynamic>;
-    final folderId = folderData['id'] as String;
+    // 从 result.data 获取 folderId
+    final folderData = result.data as Map<String, dynamic>?;
+    final folderId = folderData?['id'] as String?;
 
-    NavigationHelper.pushNamed(
-      context,
-      '/notes',
-      arguments: {'folderId': folderId},
-    );
+    if (folderId == null || folderId.isEmpty) {
+      debugPrint('[NotesHomeWidgets] 文件夹ID为空');
+      return;
+    }
+
+    // 尝试从控制器获取最新数据
+    try {
+      final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
+      final folder = plugin?.controller.getFolder(folderId);
+      final actualFolderId = folder?.id ?? folderId;
+
+      NavigationHelper.pushNamed(
+        context,
+        '/notes',
+        arguments: {'folderId': actualFolderId},
+      );
+    } catch (e) {
+      debugPrint('[NotesHomeWidgets] 获取文件夹失败: $e');
+      // 回退到使用原始 folderId
+      NavigationHelper.pushNamed(
+        context,
+        '/notes',
+        arguments: {'folderId': folderId},
+      );
+    }
   }
 }

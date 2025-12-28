@@ -11,6 +11,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'goods_plugin.dart';
+import 'models/goods_item.dart';
 
 const Color _goodsColor = Color.fromARGB(255, 207, 77, 116);
 
@@ -21,77 +22,88 @@ class GoodsHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'goods_icon',
-      pluginId: 'goods',
-      name: 'goods_widgetName'.tr,
-      description: 'goods_widgetDescription'.tr,
-      icon: Icons.inventory_2,
-      color: _goodsColor,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'goods_icon',
+        pluginId: 'goods',
+        name: 'goods_widgetName'.tr,
+        description: 'goods_widgetDescription'.tr,
         icon: Icons.inventory_2,
         color: _goodsColor,
-        name: 'goods_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.inventory_2,
+              color: _goodsColor,
+              name: 'goods_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'goods_overview',
-      pluginId: 'goods',
-      name: 'goods_overviewName'.tr,
-      description: 'goods_overviewDescription'.tr,
-      icon: Icons.dashboard,
-      color: _goodsColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'goods_overview',
+        pluginId: 'goods',
+        name: 'goods_overviewName'.tr,
+        description: 'goods_overviewDescription'.tr,
+        icon: Icons.dashboard,
+        color: _goodsColor,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
     // 仓库选择器小组件
-    registry.register(HomeWidget(
-      id: 'goods_warehouse_selector',
-      pluginId: 'goods',
-      name: 'goods_warehouseSelector'.tr,
-      description: 'goods_warehouseSelectorDesc'.tr,
-      icon: Icons.warehouse,
-      color: _goodsColor,
-      defaultSize: HomeWidgetSize.medium,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      selectorId: 'goods.warehouse',
-      dataRenderer: _renderWarehouseData,
-      navigationHandler: _navigateToWarehouse,
-      builder: (context, config) => GenericSelectorWidget(
-        widgetDefinition: registry.getWidget('goods_warehouse_selector')!,
-        config: config,
+    registry.register(
+      HomeWidget(
+        id: 'goods_warehouse_selector',
+        pluginId: 'goods',
+        name: 'goods_warehouseSelector'.tr,
+        description: 'goods_warehouseSelectorDesc'.tr,
+        icon: Icons.warehouse,
+        color: _goodsColor,
+        defaultSize: HomeWidgetSize.medium,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        selectorId: 'goods.warehouse',
+        dataRenderer: _renderWarehouseData,
+        navigationHandler: _navigateToWarehouse,
+        builder:
+            (context, config) => GenericSelectorWidget(
+              widgetDefinition: registry.getWidget('goods_warehouse_selector')!,
+              config: config,
+            ),
       ),
-    ));
+    );
 
     // 物品选择器小组件
-    registry.register(HomeWidget(
-      id: 'goods_item_selector',
-      pluginId: 'goods',
-      name: 'goods_itemSelector'.tr,
-      description: 'goods_itemSelectorDesc'.tr,
-      icon: Icons.inventory_2,
-      color: _goodsColor,
-      defaultSize: HomeWidgetSize.medium,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      selectorId: 'goods.item',
-      dataRenderer: _renderItemData,
-      navigationHandler: _navigateToItem,
-      builder: (context, config) => GenericSelectorWidget(
-        widgetDefinition: registry.getWidget('goods_item_selector')!,
-        config: config,
+    registry.register(
+      HomeWidget(
+        id: 'goods_item_selector',
+        pluginId: 'goods',
+        name: 'goods_itemSelector'.tr,
+        description: 'goods_itemSelectorDesc'.tr,
+        icon: Icons.inventory_2,
+        color: _goodsColor,
+        defaultSize: HomeWidgetSize.medium,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        selectorId: 'goods.item',
+        dataRenderer: _renderItemData,
+        navigationHandler: _navigateToItem,
+        builder:
+            (context, config) => GenericSelectorWidget(
+              widgetDefinition: registry.getWidget('goods_item_selector')!,
+              config: config,
+            ),
       ),
-    ));
+    );
   }
 
   /// 获取可用的统计项
@@ -131,9 +143,11 @@ class GoodsHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -190,23 +204,27 @@ class GoodsHomeWidgets {
   ) {
     final theme = Theme.of(context);
 
-    // 从 result.data 获取仓库数据（rawData 应该是 Map）
+    // 从 result.data 获取仓库 ID
     final data = result.data as Map<String, dynamic>?;
     if (data == null) {
       return _buildErrorWidget(context, '请选择仓库');
     }
 
-    final title = data['title'] as String? ?? '未知仓库';
-    final itemCount = (data['items'] as List?)?.length ?? 0;
-    final iconData = data['iconData'] as int?;
-    final iconColorValue = data['iconColor'] as int?;
+    final warehouseId = data['id'] as String?;
 
-    final icon = iconData != null
-        ? IconData(iconData, fontFamily: 'MaterialIcons')
-        : Icons.warehouse;
-    final color = iconColorValue != null
-        ? Color(iconColorValue)
-        : _goodsColor;
+    // 从 GoodsPlugin 获取最新数据
+    final plugin = GoodsPlugin.instance;
+    final warehouse =
+        warehouseId != null ? plugin.getWarehouse(warehouseId) : null;
+
+    if (warehouse == null) {
+      return _buildErrorWidget(context, '仓库不存在');
+    }
+
+    final title = warehouse.title;
+    final itemCount = warehouse.items.length;
+    final icon = warehouse.icon;
+    final color = warehouse.iconColor;
 
     return Material(
       color: Colors.transparent,
@@ -231,11 +249,7 @@ class GoodsHomeWidgets {
                       color: color.withAlpha(50),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      icon,
-                      size: 28,
-                      color: color,
-                    ),
+                    child: Icon(icon, size: 28, color: color),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -258,25 +272,6 @@ class GoodsHomeWidgets {
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              // 底部提示
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'home_tapToViewDetails'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward,
-                    size: 16,
-                    color: theme.colorScheme.primary,
                   ),
                 ],
               ),
@@ -309,10 +304,7 @@ class GoodsHomeWidgets {
     NavigationHelper.pushNamed(
       context,
       '/goods/warehouse_detail',
-      arguments: {
-        'warehouseId': warehouseId,
-        'warehouseName': name,
-      },
+      arguments: {'warehouseId': warehouseId, 'warehouseName': name},
     );
   }
 
@@ -324,23 +316,25 @@ class GoodsHomeWidgets {
   ) {
     final theme = Theme.of(context);
 
-    // 从 result.data 获取物品数据（rawData 应该是 Map）
+    // 从 result.data 获取物品 ID
     final data = result.data as Map<String, dynamic>?;
     if (data == null) {
       return _buildErrorWidget(context, '请选择物品');
     }
 
-    final title = data['title'] as String? ?? '未知物品';
-    final price = data['purchasePrice'] as num?;
-    final tags = (data['tags'] as List?)?.cast<String>() ?? [];
-    final imageUrl = data['imageUrl'] as String?;
-    final iconData = data['iconData'] as int?;
-    final iconColorValue = data['iconColor'] as int?;
+    final itemId = data['id'] as String?;
 
-    final icon = iconData != null
-        ? IconData(iconData, fontFamily: 'MaterialIcons')
-        : Icons.inventory_2;
-    final iconColor = iconColorValue != null ? Color(iconColorValue) : null;
+    // 从 GoodsPlugin 获取最新数据
+    final plugin = GoodsPlugin.instance;
+    final findResult = itemId != null ? plugin.findGoodsItemById(itemId) : null;
+    final item = findResult?.item;
+
+    if (item == null) {
+      return _buildErrorWidget(context, '物品不存在');
+    }
+
+    final title = item.title;
+    final price = item.purchasePrice;
 
     return Material(
       color: Colors.transparent,
@@ -360,7 +354,7 @@ class GoodsHomeWidgets {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 物品图片或图标
-                  _buildItemImage(imageUrl, icon, iconColor),
+                  _buildItemImage(item),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -384,44 +378,8 @@ class GoodsHomeWidgets {
                             ),
                           ),
                         ],
-                        if (tags.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 4,
-                            runSpacing: 4,
-                            children: tags.take(2).map((tag) {
-                              return Chip(
-                                label: Text(
-                                  tag,
-                                  style: theme.textTheme.labelSmall,
-                                ),
-                                padding: EdgeInsets.zero,
-                                visualDensity: VisualDensity.compact,
-                              );
-                            }).toList(),
-                          ),
-                        ],
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              // 底部提示
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    'home_tapToViewDetails'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.arrow_forward,
-                    size: 16,
-                    color: theme.colorScheme.primary,
                   ),
                 ],
               ),
@@ -433,72 +391,41 @@ class GoodsHomeWidgets {
   }
 
   /// 构建物品图片组件
-  static Widget _buildItemImage(String? imageUrl, IconData icon, Color? iconColor) {
-    final effectiveColor = iconColor ?? _goodsColor;
+  static Widget _buildItemImage(GoodsItem item) {
+    final effectiveColor = item.iconColor ?? _goodsColor;
+    final icon = item.icon ?? Icons.inventory_2;
 
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      return FutureBuilder<String?>(
-        future: _getImageAbsolutePath(imageUrl),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data != null) {
-            return Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                image: DecorationImage(
-                  image: FileImage(File(snapshot.data!)),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            );
-          }
+    return FutureBuilder<String?>(
+      future: item.getImageUrl(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
           return Container(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: effectiveColor.withAlpha(50),
               borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              size: 32,
-              color: effectiveColor,
+              image: DecorationImage(
+                image: FileImage(File(snapshot.data!)),
+                fit: BoxFit.cover,
+              ),
             ),
           );
-        },
-      );
-    }
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        color: effectiveColor.withAlpha(50),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        icon,
-        size: 32,
-        color: effectiveColor,
-      ),
+        }
+        return Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: effectiveColor.withAlpha(50),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, size: 32, color: effectiveColor),
+        );
+      },
     );
   }
 
-  /// 获取图片绝对路径
-  static Future<String?> _getImageAbsolutePath(String relativePath) async {
-    try {
-      final appDir = File('').parent.path;
-      return '$appDir/$relativePath';
-    } catch (e) {
-      return null;
-    }
-  }
-
   /// 导航到物品详情页面
-  static void _navigateToItem(
-    BuildContext context,
-    SelectorResult result,
-  ) {
+  static void _navigateToItem(BuildContext context, SelectorResult result) {
     final data = result.data as Map<String, dynamic>?;
     final itemId = data?['id'] as String?;
 

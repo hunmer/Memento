@@ -1,7 +1,6 @@
 import 'package:Memento/widgets/form_fields/config.dart';
 import 'package:Memento/widgets/form_fields/types.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
@@ -95,7 +94,8 @@ class _WarehouseFormState extends State<WarehouseForm> {
                             validationMessage: 'goods_warehouseName'.tr,
                           ),
                         ],
-                        submitButtonText: isEdit ? 'goods_save'.tr : 'goods_confirm'.tr,
+                        submitButtonText:
+                            isEdit ? 'goods_save'.tr : 'goods_confirm'.tr,
                         showResetButton: false,
                         onSubmit: (values) => _handleSubmit(context, values),
                         onValidationFailed: (errors) {
@@ -115,14 +115,18 @@ class _WarehouseFormState extends State<WarehouseForm> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: const StadiumBorder(),
                                   elevation: 4,
                                   shadowColor: theme.colorScheme.primary
                                       .withValues(alpha: 0.4),
                                 ),
                                 child: Text(
-                                  isEdit ? ('goods_save'.tr) : ('goods_confirm'.tr),
+                                  isEdit
+                                      ? ('goods_save'.tr)
+                                      : ('goods_confirm'.tr),
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
