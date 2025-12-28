@@ -18,37 +18,42 @@ class StoreHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'store_icon',
-      pluginId: 'store',
-      name: 'store_widgetName'.tr,
-      description: 'store_widgetDescription'.tr,
-      icon: Icons.store,
-      color: Colors.pinkAccent,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryTool'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'store_icon',
+        pluginId: 'store',
+        name: 'store_widgetName'.tr,
+        description: 'store_widgetDescription'.tr,
         icon: Icons.store,
         color: Colors.pinkAccent,
-        name: 'store_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryTools'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.store,
+              color: Colors.pinkAccent,
+              name: 'store_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'store_overview',
-      pluginId: 'store',
-      name: 'store_overviewName'.tr,
-      description: 'store_overviewDescription'.tr,
-      icon: Icons.shopping_bag_outlined,
-      color: Colors.pinkAccent,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryTool'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'store_overview',
+        pluginId: 'store',
+        name: 'store_overviewName'.tr,
+        description: 'store_overviewDescription'.tr,
+        icon: Icons.shopping_bag_outlined,
+        color: Colors.pinkAccent,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryTools'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
     // 商品选择器小组件 - 快速访问特定商品的物品列表
     registry.register(
@@ -61,7 +66,7 @@ class StoreHomeWidgets {
         color: Colors.pinkAccent,
         defaultSize: HomeWidgetSize.large,
         supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-        category: 'home_categoryTool'.tr,
+        category: 'home_categoryTools'.tr,
 
         // 选择器配置
         selectorId: 'store.product',
@@ -88,7 +93,7 @@ class StoreHomeWidgets {
         color: Colors.pinkAccent,
         defaultSize: HomeWidgetSize.medium,
         supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-        category: 'home_categoryTool'.tr,
+        category: 'home_categoryTools'.tr,
 
         // 选择器配置
         selectorId: 'store.userItem',
@@ -151,9 +156,11 @@ class StoreHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -230,9 +237,10 @@ class StoreHomeWidgets {
       if (plugin != null) {
         final productId = productData['id'] as String?;
         if (productId != null) {
-          itemCount = plugin.controller.userItems
-              .where((item) => item.productId == productId)
-              .length;
+          itemCount =
+              plugin.controller.userItems
+                  .where((item) => item.productId == productId)
+                  .length;
         }
       }
     } catch (e) {
@@ -250,11 +258,7 @@ class StoreHomeWidgets {
             // 顶部标签行
             Row(
               children: [
-                Icon(
-                  Icons.shopping_bag,
-                  size: 20,
-                  color: Colors.pinkAccent,
-                ),
+                Icon(Icons.shopping_bag, size: 20, color: Colors.pinkAccent),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -267,15 +271,21 @@ class StoreHomeWidgets {
                 ),
                 // 库存状态标签
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: stock > 0
-                        ? Colors.green.withOpacity(0.2)
-                        : Colors.grey.withOpacity(0.2),
+                    color:
+                        stock > 0
+                            ? Colors.green.withOpacity(0.2)
+                            : Colors.grey.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    stock > 0 ? '${'store_stockLabel'.tr}: $stock' : 'store_outOfStock'.tr,
+                    stock > 0
+                        ? '${'store_stockLabel'.tr}: $stock'
+                        : 'store_outOfStock'.tr,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: stock > 0 ? Colors.green : Colors.grey,
                       fontSize: 10,
@@ -311,11 +321,7 @@ class StoreHomeWidgets {
             Row(
               children: [
                 // 价格
-                Icon(
-                  Icons.monetization_on,
-                  size: 16,
-                  color: Colors.orange,
-                ),
+                Icon(Icons.monetization_on, size: 16, color: Colors.orange),
                 const SizedBox(width: 4),
                 Text(
                   '$price ${'store_points'.tr}',
@@ -359,10 +365,7 @@ class StoreHomeWidgets {
     NavigationHelper.pushNamed(
       context,
       '/store/product_items',
-      arguments: {
-        'productId': productId,
-        'productName': productName,
-      },
+      arguments: {'productId': productId, 'productName': productName},
     );
   }
 
@@ -381,7 +384,8 @@ class StoreHomeWidgets {
     }
 
     final itemData = result.data as Map<String, dynamic>;
-    final productSnapshot = itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+    final productSnapshot =
+        itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
     final productName = productSnapshot['name'] as String? ?? '未知物品';
     final purchasePrice = itemData['purchasePrice'] as int? ?? 0;
     final remaining = itemData['remaining'] as int? ?? 0;
@@ -405,7 +409,8 @@ class StoreHomeWidgets {
 
     // 检查是否已过期
     final isExpired = remainingDays != null && remainingDays < 0;
-    final isExpiringSoon = remainingDays != null && remainingDays >= 0 && remainingDays <= 7;
+    final isExpiringSoon =
+        remainingDays != null && remainingDays >= 0 && remainingDays <= 7;
 
     return Material(
       color: theme.colorScheme.surfaceContainerHighest,
@@ -417,11 +422,7 @@ class StoreHomeWidgets {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.inventory_2,
-                  size: 20,
-                  color: Colors.pinkAccent,
-                ),
+                Icon(Icons.inventory_2, size: 20, color: Colors.pinkAccent),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -433,19 +434,26 @@ class StoreHomeWidgets {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: isExpired
-                        ? Colors.red.withOpacity(0.2)
-                        : (isExpiringSoon ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2)),
+                    color:
+                        isExpired
+                            ? Colors.red.withOpacity(0.2)
+                            : (isExpiringSoon
+                                ? Colors.orange.withOpacity(0.2)
+                                : Colors.green.withOpacity(0.2)),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    isExpired
-                        ? '已过期'
-                        : (isExpiringSoon ? '即将过期' : '有效'),
+                    isExpired ? '已过期' : (isExpiringSoon ? '即将过期' : '有效'),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isExpired ? Colors.red : (isExpiringSoon ? Colors.orange : Colors.green),
+                      color:
+                          isExpired
+                              ? Colors.red
+                              : (isExpiringSoon ? Colors.orange : Colors.green),
                       fontSize: 10,
                     ),
                   ),
@@ -466,7 +474,10 @@ class StoreHomeWidgets {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
@@ -486,7 +497,10 @@ class StoreHomeWidgets {
                         ? 'store_itemExpired'.tr
                         : '${'store_expireIn'.tr} $remainingDays ${'store_days'.tr}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: isExpired ? Colors.red : (isExpiringSoon ? Colors.orange : Colors.green),
+                      color:
+                          isExpired
+                              ? Colors.red
+                              : (isExpiringSoon ? Colors.orange : Colors.green),
                     ),
                   ),
               ],
@@ -495,11 +509,7 @@ class StoreHomeWidgets {
             // 价格信息
             Row(
               children: [
-                Icon(
-                  Icons.monetization_on,
-                  size: 16,
-                  color: Colors.orange,
-                ),
+                Icon(Icons.monetization_on, size: 16, color: Colors.orange),
                 const SizedBox(width: 4),
                 Text(
                   '$purchasePrice ${'store_points'.tr}',
@@ -528,17 +538,15 @@ class StoreHomeWidgets {
   ) {
     final itemData = result.data as Map<String, dynamic>;
     final itemId = itemData['id'] as String?;
-    final productSnapshot = itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+    final productSnapshot =
+        itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
     final productName = productSnapshot['name'] as String? ?? '未知物品';
 
     if (itemId != null) {
       NavigationHelper.pushNamed(
         context,
         '/store',
-        arguments: {
-          'itemId': itemId,
-          'productName': productName,
-        },
+        arguments: {'itemId': itemId, 'productName': productName},
       );
     }
   }

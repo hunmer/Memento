@@ -17,57 +17,65 @@ class ActivityHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'activity_icon',
-      pluginId: 'activity',
-      name: 'activity_widgetName'.tr,
-      description: 'activity_widgetDescription'.tr,
-      icon: Icons.timeline,
-      color: Colors.pink,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'activity_icon',
+        pluginId: 'activity',
+        name: 'activity_widgetName'.tr,
+        description: 'activity_widgetDescription'.tr,
         icon: Icons.timeline,
         color: Colors.pink,
-        name: 'activity_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.timeline,
+              color: Colors.pink,
+              name: 'activity_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'activity_overview',
-      pluginId: 'activity',
-      name: 'activity_overviewName'.tr,
-      description: 'activity_overviewDescription'.tr,
-      icon: Icons.access_time,
-      color: Colors.pink,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'activity_overview',
+        pluginId: 'activity',
+        name: 'activity_overviewName'.tr,
+        description: 'activity_overviewDescription'.tr,
+        icon: Icons.access_time,
+        color: Colors.pink,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
 
-    // 2x2 创建活动快捷入口 - 直接跳转
-    registry.register(HomeWidget(
-      id: 'activity_create_shortcut',
-      pluginId: 'activity',
-      name: 'activity_createActivityShortcut'.tr,
-      description: 'activity_createActivityShortcutDesc'.tr,
-      icon: Icons.add_circle,
-      color: Colors.pink,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryRecord'.tr,
-      builder: (context, config) => const ActivityCreateShortcutWidget(),
-    ));
+    // 1x1 创建活动快捷入口 - 直接跳转
+    registry.register(
+      HomeWidget(
+        id: 'activity_create_shortcut',
+        pluginId: 'activity',
+        name: 'activity_createActivityShortcut'.tr,
+        description: 'activity_createActivityShortcutDesc'.tr,
+        icon: Icons.add_circle,
+        color: Colors.pink,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryRecord'.tr,
+        builder: (context, config) => const ActivityCreateShortcutWidget(),
+      ),
+    );
   }
 
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) return [];
 
       final activityCount = plugin.getTodayActivityCountSync();
@@ -102,9 +110,11 @@ class ActivityHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -232,7 +242,8 @@ class ActivityCreateShortcutWidget extends StatelessWidget {
   /// 导航到活动创建界面
   void _navigateToCreateActivity(BuildContext context) {
     try {
-      final plugin = PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
       if (plugin == null) {
         toastService.showToast('activity_loadFailed'.tr);
         return;
@@ -244,13 +255,14 @@ class ActivityCreateShortcutWidget extends StatelessWidget {
       // 打开活动编辑界面(创建模式)
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ActivityEditScreen(
-            activityService: activityService,
-            selectedDate: now,
-            onTagsUpdated: (tags) async {
-              await activityService.saveRecentTags(tags);
-            },
-          ),
+          builder:
+              (context) => ActivityEditScreen(
+                activityService: activityService,
+                selectedDate: now,
+                onTagsUpdated: (tags) async {
+                  await activityService.saveRecentTags(tags);
+                },
+              ),
         ),
       );
     } catch (e) {

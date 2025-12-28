@@ -7,7 +7,16 @@ enum HomeWidgetSize {
   medium(2, 1),
 
   /// 2x2 大卡片
-  large(2, 2);
+  large(2, 2),
+
+  /// 4x1 宽屏卡片（占满所有宽度）
+  wide(4, 1),
+
+  /// 4x2 全宽卡片（占满所有宽度，高度2）
+  wide2(4, 2),
+
+  /// 4x3 全宽卡片（占满所有宽度，高度3）
+  wide3(4, 3);
 
   /// 宽度（占用的网格列数）
   final int width;

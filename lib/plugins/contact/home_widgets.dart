@@ -15,44 +15,48 @@ class ContactHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'contact_icon',
-      pluginId: 'contact',
-      name: 'contact_widgetName'.tr,
-      description: 'contact_widgetDescription'.tr,
-      icon: Icons.contacts,
-      color: Colors.deepPurple,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryTool'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'contact_icon',
+        pluginId: 'contact',
+        name: 'contact_widgetName'.tr,
+        description: 'contact_widgetDescription'.tr,
         icon: Icons.contacts,
         color: Colors.deepPurple,
-        name: 'contact_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryTools'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.contacts,
+              color: Colors.deepPurple,
+              name: 'contact_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'contact_overview',
-      pluginId: 'contact',
-      name: 'contact_overviewName'.tr,
-      description: 'contact_overviewDescription'.tr,
-      icon: Icons.people,
-      color: Colors.deepPurple,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryTool'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'contact_overview',
+        pluginId: 'contact',
+        name: 'contact_overviewName'.tr,
+        description: 'contact_overviewDescription'.tr,
+        icon: Icons.people,
+        color: Colors.deepPurple,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryTools'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
   }
 
   /// 获取可用的统计项
   /// 返回联系人插件支持的所有统计项类型定义
   /// 实际数据值由 _buildOverviewWidget 在 FutureBuilder 中异步获取并更新
   static List<StatItemData> _getAvailableStats(BuildContext context) {
-
     return [
       StatItemData(
         id: 'total_contacts',
@@ -71,9 +75,11 @@ class ContactHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
@@ -111,9 +117,12 @@ class ContactHomeWidgets {
   }
 
   /// 异步加载联系人统计数据
-  static Future<List<StatItemData>> _loadContactStats(BuildContext context) async {
+  static Future<List<StatItemData>> _loadContactStats(
+    BuildContext context,
+  ) async {
     try {
-      final plugin = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('contact') as ContactPlugin?;
       if (plugin == null) return _getAvailableStats(context);
 
       final controller = plugin.controller;

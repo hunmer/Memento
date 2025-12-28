@@ -12,6 +12,9 @@ class DiaryTranslationsZh {
     'diary_todayQuickDescription': '快捷打开今日日记编辑',
     'diary_overviewName': '日记概览',
     'diary_overviewDescription': '显示今日字数和本月进度',
+    'diary_weeklyName': '七日日记',
+    'diary_weeklyDescription': '展示本周每日日记标题和心情',
+    'diary_weeklyTitle': '本周日记',
 
     // 统计信息
     'diary_todayWordCount': '今日文字数',

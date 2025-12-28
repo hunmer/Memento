@@ -68,36 +68,38 @@ class GenericSelectorWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final color = widgetDefinition.color ?? theme.colorScheme.primary;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            widgetDefinition.icon,
-            size: 48,
-            color: color.withOpacity(0.6),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '点击配置',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              widgetDefinition.icon,
+              size: 48,
+              color: color.withOpacity(0.6),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            widgetDefinition.name,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.outline,
+            const SizedBox(height: 12),
+            Text(
+              '点击配置',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              widgetDefinition.name,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -123,55 +125,57 @@ class GenericSelectorWidget extends StatelessWidget {
       subtitle = result.path.last.selectedItem.subtitle;
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                widgetDefinition.icon,
-                size: 24,
-                color: color,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  widgetDefinition.name,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  widgetDefinition.icon,
+                  size: 24,
+                  color: color,
                 ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widgetDefinition.name,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 4),
+            const Spacer(),
             Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.outline,
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -180,29 +184,31 @@ class GenericSelectorWidget extends StatelessWidget {
   Widget _buildErrorWidget(BuildContext context, String message) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.errorContainer,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 32,
-            color: theme.colorScheme.error,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            message,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onErrorContainer,
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 32,
+              color: theme.colorScheme.error,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onErrorContainer,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

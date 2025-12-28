@@ -15,43 +15,49 @@ class CalendarHomeWidgets {
     final registry = HomeWidgetRegistry();
 
     // 1x1 简单图标组件 - 快速访问
-    registry.register(HomeWidget(
-      id: 'calendar_icon',
-      pluginId: 'calendar',
-      name: 'calendar_widgetName'.tr,
-      description: 'calendar_widgetDescription'.tr,
-      icon: Icons.calendar_month,
-      color: const Color.fromARGB(255, 211, 91, 91),
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
-      category: 'home_categoryTool'.tr,
-      builder: (context, config) => GenericIconWidget(
+    registry.register(
+      HomeWidget(
+        id: 'calendar_icon',
+        pluginId: 'calendar',
+        name: 'calendar_widgetName'.tr,
+        description: 'calendar_widgetDescription'.tr,
         icon: Icons.calendar_month,
         color: const Color.fromARGB(255, 211, 91, 91),
-        name: 'calendar_widgetName'.tr,
+        defaultSize: HomeWidgetSize.small,
+        supportedSizes: [HomeWidgetSize.small],
+        category: 'home_categoryTools'.tr,
+        builder:
+            (context, config) => GenericIconWidget(
+              icon: Icons.calendar_month,
+              color: const Color.fromARGB(255, 211, 91, 91),
+              name: 'calendar_widgetName'.tr,
+            ),
       ),
-    ));
+    );
 
     // 2x2 详细卡片 - 显示统计信息
-    registry.register(HomeWidget(
-      id: 'calendar_overview',
-      pluginId: 'calendar',
-      name: 'calendar_overviewName'.tr,
-      description: 'calendar_overviewDescription'.tr,
-      icon: Icons.calendar_today,
-      color: const Color.fromARGB(255, 211, 91, 91),
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-      category: 'home_categoryTool'.tr,
-      builder: (context, config) => _buildOverviewWidget(context, config),
-      availableStatsProvider: _getAvailableStats,
-    ));
+    registry.register(
+      HomeWidget(
+        id: 'calendar_overview',
+        pluginId: 'calendar',
+        name: 'calendar_overviewName'.tr,
+        description: 'calendar_overviewDescription'.tr,
+        icon: Icons.calendar_today,
+        color: const Color.fromARGB(255, 211, 91, 91),
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large],
+        category: 'home_categoryTools'.tr,
+        builder: (context, config) => _buildOverviewWidget(context, config),
+        availableStatsProvider: _getAvailableStats,
+      ),
+    );
   }
 
   /// 获取可用的统计项
   static List<StatItemData> _getAvailableStats(BuildContext context) {
     try {
-      final plugin = PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('calendar') as CalendarPlugin?;
       if (plugin == null) return [];
 
       final allEvents = plugin.controller.getAllEvents();
@@ -61,15 +67,17 @@ class CalendarHomeWidgets {
 
       final now = DateTime.now();
       final sevenDaysLater = now.add(const Duration(days: 7));
-      final upcomingEventCount = allEvents.where((event) {
-        return event.startTime.isAfter(now) &&
-            event.startTime.isBefore(sevenDaysLater);
-      }).length;
+      final upcomingEventCount =
+          allEvents.where((event) {
+            return event.startTime.isAfter(now) &&
+                event.startTime.isBefore(sevenDaysLater);
+          }).length;
 
       // 获取过期活动数量
-      final expiredEventCount = allEvents.where((event) {
-        return event.startTime.isBefore(now);
-      }).length;
+      final expiredEventCount =
+          allEvents.where((event) {
+            return event.startTime.isBefore(now);
+          }).length;
 
       return [
         StatItemData(
@@ -99,9 +107,11 @@ class CalendarHomeWidgets {
   }
 
   /// 构建 2x2 详细卡片组件
-  static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+  static Widget _buildOverviewWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
-
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
       try {
