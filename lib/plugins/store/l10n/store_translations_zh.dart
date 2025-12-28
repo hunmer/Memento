@@ -167,4 +167,12 @@ const Map<String, String> storeTranslationsZh = {
   'store_productQuickAccess': '商品快速访问',
   'store_productQuickAccessDesc': '快速访问特定商品的物品列表',
   'store_outOfStock': '已售罄',
+  'store_userItemSelectorName': '选择物品',
+  'store_userItemSelectorDesc': '选择一个物品查看详情',
+  'store_selectUserItem': '选择物品',
+  'store_userItemQuickAccess': '物品快速访问',
+  'store_userItemQuickAccessDesc': '快速访问指定物品信息',
+  'store_times': '次',
+  'store_expireIn': '剩余',
+  'store_days': '天',
 };

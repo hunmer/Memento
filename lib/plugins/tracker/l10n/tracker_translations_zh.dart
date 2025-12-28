@@ -83,5 +83,10 @@ class TrackerTranslationsZh {
     'tracker_configured': '已配置',
     'tracker_configurationFailed': '配置失败',
     'tracker_searchPlaceholder': '搜索目标...',
+
+    // Selector Widget Strings
+    'tracker_quickAccess': '快速访问',
+    'tracker_quickAccessDesc': '点击跳转到指定目标详情',
+    'viewDetail': '查看详情',
   };
 }

@@ -8,7 +8,6 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/screens/store_settings_screen.dart';
-import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 
@@ -913,6 +912,71 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                 );
                 final productData = item.rawData as Map<String, dynamic>;
                 final description = productData['description'] as String? ?? '';
+                final matchesDescription = description
+                    .toLowerCase()
+                    .contains(lowerQuery);
+                return matchesTitle || matchesDescription;
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
+
+    // 注册用户物品选择器
+    selectorService.registerSelector(
+      SelectorDefinition(
+        id: 'store.userItem',
+        pluginId: id,
+        name: 'store_userItemSelectorName'.tr,
+        description: 'store_userItemSelectorDesc'.tr,
+        icon: Icons.inventory_2,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'userItem',
+            title: 'store_selectUserItem'.tr,
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              return controller.userItems.map((item) {
+                final productSnapshot = item.productSnapshot;
+                final productName = productSnapshot['name'] as String? ?? '未知物品';
+                final remaining = item.remaining;
+                final expireDate = item.expireDate;
+                final remainingDays = expireDate.difference(DateTime.now()).inDays;
+
+                // 构建副标题：剩余次数 + 过期信息
+                String subtitle;
+                if (remainingDays < 0) {
+                  subtitle = '$remaining ${'store_times'.tr} · 已过期';
+                } else if (remainingDays <= 7) {
+                  subtitle = '$remaining ${'store_times'.tr} · 剩余 $remainingDays 天';
+                } else {
+                  subtitle = '$remaining ${'store_times'.tr}';
+                }
+
+                return SelectableItem(
+                  id: item.id,
+                  title: productName,
+                  subtitle: subtitle,
+                  icon: Icons.inventory_2,
+                  rawData: item.toJson(),
+                );
+              }).toList();
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items.where((item) {
+                final matchesTitle = item.title.toLowerCase().contains(
+                  lowerQuery,
+                );
+                final itemData = item.rawData as Map<String, dynamic>;
+                final productSnapshot = itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+                final description = productSnapshot['description'] as String? ?? '';
                 final matchesDescription = description
                     .toLowerCase()
                     .contains(lowerQuery);
