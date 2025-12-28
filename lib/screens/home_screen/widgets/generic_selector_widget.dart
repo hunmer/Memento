@@ -44,10 +44,13 @@ class GenericSelectorWidget extends StatelessWidget {
     }
 
     // 恢复 SelectorResult
-    final result = selectorConfig.toSelectorResult();
-    if (result == null) {
+    final originalResult = selectorConfig.toSelectorResult();
+    if (originalResult == null) {
       return _buildErrorWidget(context, '无法解析选择的数据');
     }
+
+    // 如果提供了 dataSelector，使用它转换数据
+    final result = _transformResult(originalResult);
 
     // 使用 dataRenderer 渲染数据
     if (widgetDefinition.dataRenderer != null) {
@@ -61,6 +64,43 @@ class GenericSelectorWidget extends StatelessWidget {
 
     // 如果未提供 dataRenderer，显示默认视图
     return _buildDefaultConfiguredWidget(context, result);
+  }
+
+  /// 转换 SelectorResult，使用 dataSelector 处理数据
+  SelectorResult _transformResult(SelectorResult original) {
+    // 如果有 dataSelector 函数，使用它转换数据数组
+    if (widgetDefinition.dataSelector != null && original.data is List) {
+      final dataArray = original.data as List<dynamic>;
+      final transformedData = widgetDefinition.dataSelector!(dataArray);
+
+      return SelectorResult(
+        pluginId: original.pluginId,
+        selectorId: original.selectorId,
+        path: original.path,
+        data: transformedData,
+      );
+    }
+
+    // 默认行为：将数组转换为合并的 Map
+    if (original.data is List) {
+      final dataArray = original.data as List<dynamic>;
+      final mergedData = <String, dynamic>{};
+
+      for (final item in dataArray) {
+        if (item is Map<String, dynamic>) {
+          mergedData.addAll(item);
+        }
+      }
+
+      return SelectorResult(
+        pluginId: original.pluginId,
+        selectorId: original.selectorId,
+        path: original.path,
+        data: mergedData,
+      );
+    }
+
+    return original;
   }
 
   /// 构建未配置状态的占位小组件

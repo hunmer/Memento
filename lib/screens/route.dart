@@ -367,28 +367,44 @@ class AppRoutes extends NavigatorObserver {
 
       case '/bill':
       case 'bill':
-        // 检查是否带有参数
-        if (settings.arguments is Map<String, dynamic> ||
-            settings.arguments is Map<String, String>) {
-          final args = settings.arguments as Map<String, dynamic>;
+        // 调试：打印传入的参数
+        debugPrint('[Route] ========== /bill 路由开始 ==========');
+        debugPrint('[Route] settings.name: ${settings.name}');
+        debugPrint('[Route] settings.arguments: ${settings.arguments}');
+        debugPrint('[Route] 参数类型: ${settings.arguments?.runtimeType}');
 
-          // 获取 BillPlugin 实例
-          final billPlugin =
-              PluginManager.instance.getPlugin('bill') as BillPlugin?;
+        // 获取 BillPlugin 实例
+        final billPlugin =
+            PluginManager.instance.getPlugin('bill') as BillPlugin?;
 
-          if (billPlugin == null) {
-            // 如果插件未初始化，回退到主视图
-            debugPrint('BillPlugin 未初始化，回退到主视图');
-            return _createRoute(const BillMainView());
+        if (billPlugin == null) {
+          debugPrint('[Route] BillPlugin 未初始化，回退到主视图');
+          return _createRoute(const BillMainView(), settings: settings);
+        }
+
+        // 检查参数并处理
+        if (settings.arguments != null) {
+          debugPrint('[Route] 开始解析参数...');
+          Map<String, dynamic> args;
+          try {
+            args = Map<String, dynamic>.from(settings.arguments as Map);
+          } catch (e) {
+            debugPrint('[Route] 参数转换失败: $e，使用空 Map');
+            args = {};
           }
+
+          debugPrint('[Route] 解析后的参数: $args');
 
           // 1. 检查是否是创建账单动作（来自创建账单快捷入口小组件）
           if (args['action'] == 'create') {
+            debugPrint('[Route] 检测到 action=create，开始创建账单');
             final String? accountId = args['accountId'] as String?;
             final bool? isExpense =
                 args['isExpense'] != null
                     ? (args['isExpense'].toString().toLowerCase() == 'true')
                     : null;
+
+            debugPrint('[Route] accountId: $accountId, isExpense: $isExpense');
 
             // 如果缺少 accountId，使用默认账户
             final finalAccountId = accountId ??
@@ -396,10 +412,11 @@ class AppRoutes extends NavigatorObserver {
                  (billPlugin.accounts.isNotEmpty ? billPlugin.accounts.first.id : ''));
 
             if (finalAccountId.isEmpty) {
-              debugPrint('没有可用账户，回退到主视图');
-              return _createRoute(const BillMainView());
+              debugPrint('[Route] 没有可用账户，回退到主视图');
+              return _createRoute(const BillMainView(), settings: settings);
             }
 
+            debugPrint('[Route] 打开 BillEditScreen，accountId: $finalAccountId');
             // 直接打开账单编辑页面（创建模式）
             return _createRoute(
               BillEditScreen(
@@ -407,12 +424,13 @@ class AppRoutes extends NavigatorObserver {
                 accountId: finalAccountId,
                 initialIsExpense: isExpense,
               ),
+              settings: settings,
             );
           }
 
           // 2. 检查是否来自快捷记账小组件（带有预填充参数）
           if (args.containsKey('category')) {
-            // 解析参数
+            debugPrint('[Route] 检测到 category 参数');
             final String? accountId = args['accountId'] as String?;
             final String? category = args['category'] as String?;
             final double? amount =
@@ -424,13 +442,11 @@ class AppRoutes extends NavigatorObserver {
                     ? (args['isExpense'].toString().toLowerCase() == 'true')
                     : null;
 
-            // 如果缺少必需的 accountId，回退到主视图
             if (accountId == null || accountId.isEmpty) {
-              debugPrint('缺少 accountId 参数，回退到主视图');
-              return _createRoute(const BillMainView());
+              debugPrint('[Route] 缺少 accountId 参数，回退到主视图');
+              return _createRoute(const BillMainView(), settings: settings);
             }
 
-            // 打开账单编辑页面并传递预填充参数
             return _createRoute(
               BillEditScreen(
                 billPlugin: billPlugin,
@@ -439,12 +455,16 @@ class AppRoutes extends NavigatorObserver {
                 initialAmount: amount,
                 initialIsExpense: isExpense,
               ),
+              settings: settings,
             );
           }
+
+          debugPrint('[Route] 未匹配任何特殊参数，打开默认视图');
         }
 
         // 默认打开账单主视图
-        return _createRoute(const BillMainView());
+        debugPrint('[Route] 打开 BillMainView');
+        return _createRoute(const BillMainView(), settings: settings);
       case '/calendar':
       case 'calendar':
         return _createRoute(const CalendarMainView());

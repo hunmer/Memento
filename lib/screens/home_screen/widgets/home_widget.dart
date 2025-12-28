@@ -22,6 +22,33 @@ typedef SelectorNavigationHandler = void Function(
   SelectorResult result,
 );
 
+/// 数据选择器结果处理器（可选）
+///
+/// 将选择器返回的数据数组转换为小组件需要的格式
+/// 返回一个 Map，包含小组件需要的所有数据字段
+///
+/// 参数：
+/// - dataArray: 选择器返回的数据数组，每项对应一个选择步骤的结果
+///
+/// 返回：
+/// - `Map<String, dynamic>`：小组件需要的数据，字段名自定义
+///
+/// 示例：
+/// ```dart
+/// dataSelector: (dataArray) {
+///   final accountData = dataArray[0] as Map<String, dynamic>;
+///   final periodData = dataArray[1] as Map<String, dynamic>;
+///   return {
+///     'accountId': accountData['id'],
+///     'accountTitle': accountData['title'],
+///     'periodLabel': periodData['label'],
+///     'startDate': periodData['start'],
+///     'endDate': periodData['end'],
+///   };
+/// }
+/// ```
+typedef SelectorDataSelector = Map<String, dynamic> Function(List<dynamic> dataArray);
+
 /// 主页小组件定义
 ///
 /// 每个插件可以注册多个小组件，这些小组件会在"添加组件"对话框中显示
@@ -86,6 +113,12 @@ class HomeWidget {
   /// 仅在 selectorId 不为 null 时有效
   final SelectorNavigationHandler? navigationHandler;
 
+  /// 数据选择器结果处理器（可选）
+  ///
+  /// 将选择器返回的数据数组转换为小组件需要的格式
+  /// 如果未提供，默认将 dataArray 合并为一个 Map
+  final SelectorDataSelector? dataSelector;
+
   const HomeWidget({
     required this.id,
     required this.pluginId,
@@ -102,6 +135,7 @@ class HomeWidget {
     this.selectorId,
     this.dataRenderer,
     this.navigationHandler,
+    this.dataSelector,
   });
 
   /// 构建小组件
