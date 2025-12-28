@@ -47,7 +47,13 @@ const Map<String, String> calendarTranslationsZh = {
   'calendar_overviewName': '日历概览',
   'calendar_overviewDescription': '显示日程统计信息',
 
-  // 界面搜索
-  'calendar_widgetSelector': '日历小组件',
-  'calendar_searchPlaceholder': '搜索事件标题或描述...',
+  // 快速添加事件小组件
+  'calendar_quickAddEvent': '添加活动',
+  'calendar_quickAddEventDesc': '快速创建新活动',
+
+  // 七天事件列表小组件
+  'calendar_eventListName': '近期活动',
+  'calendar_eventListDesc': '显示未来7天内的活动',
+  'calendar_emptyEvents': '近期无活动',
+  'calendar_upcomingEvents': '即将开始',
 };
