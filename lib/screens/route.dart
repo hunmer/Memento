@@ -385,6 +385,10 @@ class AppRoutes extends NavigatorObserver {
           // 1. 检查是否是创建账单动作（来自创建账单快捷入口小组件）
           if (args['action'] == 'create') {
             final String? accountId = args['accountId'] as String?;
+            final bool? isExpense =
+                args['isExpense'] != null
+                    ? (args['isExpense'].toString().toLowerCase() == 'true')
+                    : null;
 
             // 如果缺少 accountId，使用默认账户
             final finalAccountId = accountId ??
@@ -401,6 +405,7 @@ class AppRoutes extends NavigatorObserver {
               BillEditScreen(
                 billPlugin: billPlugin,
                 accountId: finalAccountId,
+                initialIsExpense: isExpense,
               ),
             );
           }
