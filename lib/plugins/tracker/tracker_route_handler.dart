@@ -13,6 +13,17 @@ class TrackerRouteHandler extends PluginRouteHandler {
   @override
   Route<dynamic>? handleRoute(RouteSettings settings) {
     final routeName = settings.name ?? '';
+    debugPrint('[TrackerRouteHandler] handleRoute called: routeName=$routeName, arguments=${settings.arguments}');
+
+    // 处理目标追踪路由 - 格式: /tracker?goalId={goalId}
+    // 用于小组件点击跳转到目标详情/计时器界面
+    if (routeName == '/tracker' ||
+        routeName.startsWith('/tracker?')) {
+      debugPrint('[TrackerRouteHandler] 匹配 /tracker 路由');
+      return _handleTrackerRoute(routeName, settings.arguments);
+    }
+
+    debugPrint('[TrackerRouteHandler] 未匹配任何路由，返回 null');
 
     // 处理目标追踪进度路由
     // 格式: /tracker/progress?goalId={goalId}&value={value}
@@ -23,6 +34,43 @@ class TrackerRouteHandler extends PluginRouteHandler {
     }
 
     return null;
+  }
+
+  /// 处理目标追踪主路由
+  Route<dynamic> _handleTrackerRoute(String routeName, Object? arguments) {
+    String? goalId;
+
+    debugPrint('[TrackerRouteHandler] _handleTrackerRoute: routeName=$routeName, arguments=$arguments');
+
+    // 从 arguments 中获取 goalId
+    if (arguments is Map<String, String>) {
+      goalId = arguments['goalId'];
+      debugPrint('[TrackerRouteHandler] 从 Map<String, String> 获取: goalId=$goalId');
+    } else if (arguments is Map<String, dynamic>) {
+      goalId = arguments['goalId']?.toString();
+      debugPrint('[TrackerRouteHandler] 从 Map<String, dynamic> 获取: goalId=$goalId');
+    } else {
+      debugPrint('[TrackerRouteHandler] arguments 类型: ${arguments?.runtimeType}');
+    }
+
+    // 从 URI 中解析
+    if (goalId == null) {
+      final uri = Uri.parse(routeName);
+      goalId = uri.queryParameters['goalId'];
+      debugPrint('[TrackerRouteHandler] 从 URI 解析: goalId=$goalId, queryParams=${uri.queryParameters}');
+    }
+
+    debugPrint('[TrackerRouteHandler] 最终 goalId=$goalId');
+
+    // 如果有 goalId，跳转到目标详情页面
+    if (goalId != null) {
+      debugPrint('[TrackerRouteHandler] 创建 TrackerMainView(initialGoalId: $goalId)');
+      return createRoute(TrackerMainView(initialGoalId: goalId));
+    }
+
+    // 没有 goalId，正常打开目标追踪插件
+    debugPrint('[TrackerRouteHandler] 没有 goalId，创建普通 TrackerMainView');
+    return createRoute(const TrackerMainView());
   }
 
   /// 处理目标追踪进度路由

@@ -28,7 +28,9 @@ export 'utils/date_utils.dart';
 export 'utils/tracker_notification_utils.dart';
 
 class TrackerMainView extends StatefulWidget {
-  const TrackerMainView({super.key});
+  final String? initialGoalId;
+
+  const TrackerMainView({super.key, this.initialGoalId});
 
   @override
   State<TrackerMainView> createState() => _TrackerMainViewState();
@@ -36,6 +38,25 @@ class TrackerMainView extends StatefulWidget {
 
 class _TrackerMainViewState extends State<TrackerMainView> {
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // 如果有 initialGoalId，在初始化后跳转到目标详情
+    if (widget.initialGoalId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _navigateToGoalDetail(widget.initialGoalId!);
+      });
+    }
+  }
+
+  void _navigateToGoalDetail(String goalId) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => GoalDetailScreen(goalId: goalId),
+      ),
+    );
+  }
 
   void _onSearchChanged(String query) {
     setState(() {

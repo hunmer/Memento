@@ -789,9 +789,68 @@ return FutureBuilder<Item?>(
 ### 问题 4: 导航到详情页失败
 
 **检查**:
-- 路由是否在 `route.dart` 中注册？
-- 路由路径是否与 `navigationHandler` 中的一致？
-- 参数是否正确传递？
+
+1. **路由配置检查** - 最常见问题！
+
+   `route.dart` 中有两套路由机制：
+   - `routes` Map（静态路由定义）
+   - `onGenerateRoute`（动态路由处理）
+
+   如果 `routes` 中定义了路由，`onGenerateRoute` 不会被调用！
+
+   ```dart
+   // ❌ 错误：routes 中定义了 /tracker，导致 onGenerateRoute 不会执行
+   static Map<String, WidgetBuilder> get routes => {
+     // ...
+     tracker: (context) => const TrackerMainView(),  // 移除这行！
+   };
+
+   // ✅ 正确：让 onGenerateRoute 处理（可接收参数）
+   case '/tracker':
+   case 'tracker':
+     String? goalId;
+     if (settings.arguments is Map<String, dynamic>) {
+       goalId = (settings.arguments as Map<String, dynamic>)['goalId'] as String?;
+     }
+     if (goalId != null) {
+       return _createRoute(GoalDetailScreen(goalId: goalId));
+     }
+     return _createRoute(const TrackerMainView());
+   ```
+
+2. **导航上下文检查**
+
+   小组件回调中的 context 可能不在导航树中，使用 `navigatorKey.currentContext`：
+
+   ```dart
+   // ✅ 推荐：使用 navigatorKey
+   final navContext = navigatorKey.currentContext ?? context;
+   NavigationHelper.pushNamed(navContext, '/route', arguments: {...});
+   ```
+
+3. **参数类型检查**
+
+   id 可能是 `int` 或 `String`：
+
+   ```dart
+   final id = data['id']?.toString();  // 安全处理
+   ```
+
+4. **详情页 Provider 依赖检查**
+
+   如果详情页使用 `Consumer<Controller>` 或 `context.read<Controller>()`：
+   - 需要在路由中用 `ChangeNotifierProvider.value` 包裹
+   - 或让详情页直接使用 `Plugin.instance.controller` 单例
+
+## Route Configuration Checklist
+
+为新小组件添加路由时检查：
+
+- [ ] 从 `routes` Map 中移除该路由（如果有）
+- [ ] 在 `onGenerateRoute` 的 switch case 中添加路由处理
+- [ ] 正确解析 `settings.arguments` 中的参数
+- [ ] 使用 `navigatorKey.currentContext` 进行导航
+- [ ] 详情页能正确获取 controller（使用单例或 Provider）
 
 ## Notes
 
