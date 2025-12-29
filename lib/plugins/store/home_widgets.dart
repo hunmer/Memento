@@ -471,7 +471,7 @@ class StoreHomeWidgets {
         arguments: {
           'productId': productId,
           'productName': productName,
-          'autoUse': true, // 跳转到过滤页后自动弹出使用对话框
+          'autoBuy': true, // 跳转后自动弹出购买对话框
         },
       );
     }
@@ -702,17 +702,13 @@ class StoreHomeWidgets {
     if (savedData == null) return;
 
     final itemId = savedData['id'] as String?;
-    final productSnapshot =
-        savedData['product_snapshot'] as Map<String, dynamic>? ?? {};
-    final productName = productSnapshot['name'] as String? ?? '未知物品';
 
     if (itemId != null) {
       NavigationHelper.pushNamed(
         context,
-        '/store',
+        '/store/user_item',
         arguments: {
           'itemId': itemId,
-          'productName': productName,
           'autoUse': true, // 跳转到详情页后自动弹出使用对话框
         },
       );

@@ -531,6 +531,7 @@ class AppRoutes extends NavigatorObserver {
           itemId = args['itemId'] as String?;
           autoUse = args['autoUse'] as bool? ?? false;
         }
+        debugPrint('[Route] /store: itemId=$itemId, autoUse=$autoUse');
         if (itemId != null) {
           return _createRoute(
             _StoreUserItemRoute(itemId: itemId, autoUse: autoUse),
@@ -543,12 +544,14 @@ class AppRoutes extends NavigatorObserver {
         String? productId;
         String? productName;
         bool autoUse = false;
+        bool autoBuy = false;
 
         if (settings.arguments is Map<String, dynamic>) {
           final args = settings.arguments as Map<String, dynamic>;
           productId = args['productId'] as String?;
           productName = args['productName'] as String?;
           autoUse = args['autoUse'] as bool? ?? false;
+          autoBuy = args['autoBuy'] as bool? ?? false;
         }
 
         if (productId == null) {
@@ -560,7 +563,7 @@ class AppRoutes extends NavigatorObserver {
           );
         }
 
-        debugPrint('打开商品物品列表: productId=$productId, productName=$productName, autoUse=$autoUse');
+        debugPrint('打开商品物品列表: productId=$productId, productName=$productName, autoUse=$autoUse, autoBuy=$autoBuy');
 
         final storePlugin =
             PluginManager.instance.getPlugin('store') as StorePlugin?;
@@ -578,6 +581,68 @@ class AppRoutes extends NavigatorObserver {
             productId: productId,
             productName: productName ?? '商品',
             controller: storePlugin.controller,
+            autoUse: autoUse,
+            autoBuy: autoBuy,
+          ),
+        );
+      case '/store/user_item':
+      case 'store/user_item':
+        // 用户物品详情页面
+        String? itemId;
+        bool autoUse = false;
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          itemId = args['itemId'] as String?;
+          autoUse = args['autoUse'] as bool? ?? false;
+        }
+
+        if (itemId == null) {
+          debugPrint('错误: 缺少必需参数 itemId');
+          return _createRoute(
+            const Scaffold(
+              body: Center(child: Text('参数错误：缺少物品ID')),
+            ),
+          );
+        }
+
+        debugPrint('[Route] /store/user_item: itemId=$itemId, autoUse=$autoUse');
+
+        final storePlugin =
+            PluginManager.instance.getPlugin('store') as StorePlugin?;
+        if (storePlugin == null) {
+          debugPrint('错误: Store 插件未初始化');
+          return _createRoute(
+            const Scaffold(
+              body: Center(child: Text('Store 插件未初始化')),
+            ),
+          );
+        }
+
+        debugPrint('[Route] 当前 userItems 数量: ${storePlugin.controller.userItems.length}');
+        for (var item in storePlugin.controller.userItems) {
+          debugPrint('[Route]  - item.id: ${item.id} (类型: ${item.id.runtimeType})');
+        }
+
+        // 根据 itemId 查找用户物品
+        final userItem = storePlugin.controller.userItems.firstWhereOrNull(
+          (item) => item.id.toString() == itemId.toString(),
+        );
+
+        if (userItem == null) {
+          debugPrint('[Route] 物品不存在: itemId=$itemId');
+          return _createRoute(
+            const Scaffold(
+              body: Center(child: Text('物品不存在')),
+            ),
+          );
+        }
+
+        debugPrint('[Route] 创建 UserItemDetailPage: autoUse=$autoUse, itemName=${userItem.productName}');
+        return _createRoute(
+          UserItemDetailPage(
+            controller: storePlugin.controller,
+            items: [userItem],
+            initialIndex: 0,
             autoUse: autoUse,
           ),
         );
@@ -1293,8 +1358,10 @@ class _StoreUserItemRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('[Route] _StoreUserItemRoute.build: itemId=$itemId, autoUse=$autoUse');
     final storePlugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (storePlugin == null) {
+      debugPrint('[Route] Store 插件未初始化');
       return const Scaffold(
         body: Center(child: Text('Store 插件未初始化')),
       );
@@ -1306,11 +1373,13 @@ class _StoreUserItemRoute extends StatelessWidget {
     );
 
     if (userItem == null) {
+      debugPrint('[Route] 物品不存在: itemId=$itemId');
       return const Scaffold(
         body: Center(child: Text('物品不存在')),
       );
     }
 
+    debugPrint('[Route] 创建 UserItemDetailPage: autoUse=$autoUse');
     return UserItemDetailPage(
       controller: storePlugin.controller,
       items: [userItem],
