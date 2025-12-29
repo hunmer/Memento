@@ -20,6 +20,8 @@ const Map<String, String> storeTranslationsZh = {
   'store_confirmClearPointsMessage': '确定要清空所有积分记录吗?此操作不可撤销。',
   'store_confirmClearPointsHistory': '确定要清空所有积分历史记录吗?此操作不可撤销。',
   'store_redeemConfirmation': '确定要兑换这个商品吗?',
+  'store_redeemConfirmationMessage': '确定要兑换 %s 吗？需要消耗 %d 积分',
+  'store_insufficientPoints': '积分不足',
 
   // 积分设置
   'store_pointSettingsTitle': '积分奖励设置',
@@ -124,7 +126,7 @@ const Map<String, String> storeTranslationsZh = {
   'store_myItems': '我的物品',
   'store_itemDetailsTitle': '物品详情',
   'store_useConfirmationTitle': '使用确认',
-  'store_useConfirmationMessage': '确定要使用@s吗?',
+  'store_useConfirmationMessage': '确定要使用%s吗?',
   'store_purchaseDateLabel': '购买日期',
   'store_expiryDateLabel': '过期日期',
   'store_purchasePriceLabel': '购买价格',

@@ -36,8 +36,11 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
 
+    debugPrint('[UserItemDetailPage] initState: autoUse=${widget.autoUse}, items.length=${widget.items.length}');
+
     // 自动使用逻辑
     if (widget.autoUse && !_hasShownAutoUseDialog) {
+      debugPrint('[UserItemDetailPage] 触发自动使用对话框');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _hasShownAutoUseDialog = true;
         _showUseDialog();
@@ -54,13 +57,16 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
   /// 弹出使用对话框（使用已有的使用逻辑）
   void _showUseDialog() {
     final currentItem = widget.items[_currentIndex];
+    debugPrint('[UserItemDetailPage] _showUseDialog: itemName=${currentItem.productName}, expireDate=${currentItem.expireDate}');
 
     // 检查是否过期
     if (currentItem.expireDate.isBefore(DateTime.now())) {
+      debugPrint('[UserItemDetailPage] 物品已过期');
       Toast.error('store_itemExpired'.tr);
       return;
     }
 
+    debugPrint('[UserItemDetailPage] 显示使用确认对话框');
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

@@ -8,27 +8,38 @@ const Map<String, String> storeTranslationsEn = {
   'store_confirmUseMessage': 'Are you sure you want to use @productName?',
   'store_confirmUseItem': 'Are you sure you want to use this item?',
   'store_confirmArchiveTitle': 'Confirm Archive',
-  'store_confirmArchiveMessage': 'Are you sure you want to archive this product? Archived products can be viewed in the filter.',
+  'store_confirmArchiveMessage':
+      'Are you sure you want to archive this product? Archived products can be viewed in the filter.',
   'store_confirmDeleteTitle': 'Confirm Delete',
-  'store_confirmDeleteMessage': 'Are you sure you want to delete this product? This action cannot be undone.',
+  'store_confirmDeleteMessage':
+      'Are you sure you want to delete this product? This action cannot be undone.',
   'store_confirmRestoreTitle': 'Confirm Restore',
-  'store_confirmRestoreMessage': 'Are you sure you want to restore this product?',
+  'store_confirmRestoreMessage':
+      'Are you sure you want to restore this product?',
   'store_confirmClearTitle': 'Confirm Clear',
   'store_confirmClearItemsTitle': 'Confirm Clear',
-  'store_confirmClearItemsMessage': 'Are you sure you want to clear all item records? This action cannot be undone.',
+  'store_confirmClearItemsMessage':
+      'Are you sure you want to clear all item records? This action cannot be undone.',
   'store_confirmClearPointsTitle': 'Confirm Clear',
-  'store_confirmClearPointsMessage': 'Are you sure you want to clear all point records? This action cannot be undone.',
-  'store_confirmClearPointsHistory': 'Are you sure you want to clear all points history? This action cannot be undone.',
+  'store_confirmClearPointsMessage':
+      'Are you sure you want to clear all point records? This action cannot be undone.',
+  'store_confirmClearPointsHistory':
+      'Are you sure you want to clear all points history? This action cannot be undone.',
   'store_redeemConfirmation': 'Are you sure you want to redeem this item?',
+  'store_redeemConfirmationMessage':
+      'Are you sure you want to redeem %s? It will cost %d points',
+  'store_insufficientPoints': 'Insufficient points',
 
   // Points settings
   'store_pointSettingsTitle': 'Point Reward Settings',
   'store_pointSettingsSubtitle': 'Set point rewards for various actions',
   'store_storeSettings': 'Store Settings',
   'store_enablePointsNotification': 'Points Change Notification',
-  'store_enablePointsNotificationDescription': 'Show notification when points change',
+  'store_enablePointsNotificationDescription':
+      'Show notification when points change',
   'store_enableExpiringReminder': 'Expiry Reminder',
-  'store_enableExpiringReminderDescription': 'Send reminder when items are about to expire',
+  'store_enableExpiringReminderDescription':
+      'Send reminder when items are about to expire',
   'store_addPointsTitle': 'Add Points',
   'store_addPointsDialogTitle': 'Add Points',
   'store_pointsAmountLabel': 'Points Amount',
@@ -124,14 +135,15 @@ const Map<String, String> storeTranslationsEn = {
   'store_myItems': 'My Items',
   'store_itemDetailsTitle': 'Item Details',
   'store_useConfirmationTitle': 'Use Confirmation',
-  'store_useConfirmationMessage': 'Are you sure you want to use @s?',
+  'store_useConfirmationMessage': 'Are you sure you want to use %s?',
   'store_purchaseDateLabel': 'Purchase Date',
   'store_expiryDateLabel': 'Expiry Date',
   'store_purchasePriceLabel': 'Purchase Price',
   'store_remainingQuantityLabel': 'Remaining Quantity',
   'store_viewProductInfo': 'View Product Info',
   'store_productNotFound': 'Product not found or deleted',
-  'store_confirmDeleteItemMessage': 'Are you sure you want to delete this item? This action cannot be undone.',
+  'store_confirmDeleteItemMessage':
+      'Are you sure you want to delete this item? This action cannot be undone.',
 
   // Records related
   'store_noRecords': 'No records',

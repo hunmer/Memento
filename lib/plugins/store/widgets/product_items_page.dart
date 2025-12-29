@@ -15,6 +15,7 @@ class ProductItemsPage extends StatefulWidget {
   final String productName;
   final StoreController controller;
   final bool autoUse; // 是否自动弹出使用对话框
+  final bool autoBuy; // 是否自动弹出购买对话框
 
   const ProductItemsPage({
     super.key,
@@ -22,6 +23,7 @@ class ProductItemsPage extends StatefulWidget {
     required this.productName,
     required this.controller,
     this.autoUse = false,
+    this.autoBuy = false,
   });
 
   @override
@@ -31,14 +33,22 @@ class ProductItemsPage extends StatefulWidget {
 class _ProductItemsPageState extends State<ProductItemsPage> {
   int _statusIndex = 0; // 0: 全部, 1: 可使用, 2: 已过期
   bool _hasShownAutoUseDialog = false; // 防止重复弹出
+  bool _hasShownAutoBuyDialog = false; // 防止重复弹出
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerUpdate);
 
+    // 自动购买逻辑
+    if (widget.autoBuy && !_hasShownAutoBuyDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _hasShownAutoBuyDialog = true;
+        _showBuyDialog();
+      });
+    }
     // 自动使用逻辑
-    if (widget.autoUse && !_hasShownAutoUseDialog) {
+    else if (widget.autoUse && !_hasShownAutoUseDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _hasShownAutoUseDialog = true;
         _showUseDialog();
@@ -58,9 +68,10 @@ class _ProductItemsPageState extends State<ProductItemsPage> {
 
   /// 弹出使用对话框（使用已有的 onUse 逻辑）
   void _showUseDialog() {
-    final availableItems = _getFilteredItems().where(
-      (item) => item.expireDate.isAfter(DateTime.now()),
-    ).toList();
+    final availableItems =
+        _getFilteredItems()
+            .where((item) => item.expireDate.isAfter(DateTime.now()))
+            .toList();
 
     if (availableItems.isEmpty) {
       Toast.warning('暂无可使用的物品');
@@ -72,31 +83,90 @@ class _ProductItemsPageState extends State<ProductItemsPage> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('store_useConfirmationTitle'.tr),
-        content: Text(
-          'store_useConfirmationMessage'.tr
-              .replaceFirst('%s', itemToUse.productName),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('app_cancel'.tr),
+      builder:
+          (context) => AlertDialog(
+            title: Text('store_useConfirmationTitle'.tr),
+            content: Text(
+              'store_useConfirmationMessage'.tr.replaceFirst(
+                '%s',
+                itemToUse.productName,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('app_cancel'.tr),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  if (await widget.controller.useItem(itemToUse)) {
+                    Toast.success('store_useSuccess'.tr);
+                  } else {
+                    Toast.error('store_itemExpired'.tr);
+                  }
+                  setState(() {});
+                },
+                child: Text('app_ok'.tr),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              if (await widget.controller.useItem(itemToUse)) {
-                Toast.success('store_useSuccess'.tr);
-              } else {
-                Toast.error('store_itemExpired'.tr);
-              }
-              setState(() {});
-            },
-            child: Text('app_ok'.tr),
+    );
+  }
+
+  /// 弹出购买对话框
+  void _showBuyDialog() {
+    // 获取商品信息
+    final product = widget.controller.products.firstWhereOrNull(
+      (p) => p.id == widget.productId,
+    );
+
+    if (product == null) {
+      Toast.warning('store_productNotFound'.tr);
+      return;
+    }
+
+    // 检查库存
+    if (product.stock <= 0) {
+      Toast.error('store_outOfStock'.tr);
+      return;
+    }
+
+    // 检查积分是否足够
+    if (widget.controller.userPoints < product.price) {
+      Toast.error('store_insufficientPoints'.tr);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('store_redeemConfirmation'.tr),
+            content: Text(
+              'store_redeemConfirmationMessage'.tr
+                  .replaceFirst('%s', product.name)
+                  .replaceFirst('%d', '${product.price}'),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('app_cancel'.tr),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  if (await widget.controller.exchangeProduct(product)) {
+                    setState(() {});
+                    Toast.success('store_redeemSuccess'.tr);
+                  } else {
+                    Toast.error('store_redeemFailed'.tr);
+                  }
+                },
+                child: Text('app_ok'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -184,96 +254,106 @@ class _ProductItemsPageState extends State<ProductItemsPage> {
           const Divider(height: 1),
           // 物品列表
           Expanded(
-            child: groupedItems.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 64,
-                          color: theme.colorScheme.outline,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'store_noItems'.tr,
-                          style: theme.textTheme.titleMedium?.copyWith(
+            child:
+                groupedItems.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inventory_2_outlined,
+                            size: 64,
                             color: theme.colorScheme.outline,
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                : MasonryGridView.count(
-                    padding: const EdgeInsets.all(8),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    itemCount: groupedItems.length,
-                    itemBuilder: (context, index) {
-                      final group = groupedItems[index];
-                      return GestureDetector(
-                        onTap: () {
-                          final sameTypeItems = items
-                              .where((item) => item.productId == group.item.productId)
-                              .toList();
-
-                          NavigationHelper.push(
-                            context,
-                            UserItemDetailPage(
-                              controller: widget.controller,
-                              items: sameTypeItems,
+                          const SizedBox(height: 16),
+                          Text(
+                            'store_noItems'.tr,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.outline,
                             ),
-                          ).then((_) {
-                            if (mounted) setState(() {});
-                          });
-                        },
-                        child: UserItemCard(
-                          item: group.item,
-                          count: group.count,
-                          onUse: () async {
-                            final itemToUse = items.firstWhere(
-                              (item) => item.productId == group.item.productId,
-                            );
+                          ),
+                        ],
+                      ),
+                    )
+                    : MasonryGridView.count(
+                      padding: const EdgeInsets.all(8),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      itemCount: groupedItems.length,
+                      itemBuilder: (context, index) {
+                        final group = groupedItems[index];
+                        return GestureDetector(
+                          onTap: () {
+                            final sameTypeItems =
+                                items
+                                    .where(
+                                      (item) =>
+                                          item.productId ==
+                                          group.item.productId,
+                                    )
+                                    .toList();
 
-                            if (await widget.controller.useItem(itemToUse)) {
+                            NavigationHelper.push(
+                              context,
+                              UserItemDetailPage(
+                                controller: widget.controller,
+                                items: sameTypeItems,
+                              ),
+                            ).then((_) {
+                              if (mounted) setState(() {});
+                            });
+                          },
+                          child: UserItemCard(
+                            item: group.item,
+                            count: group.count,
+                            onUse: () async {
+                              final itemToUse = items.firstWhere(
+                                (item) =>
+                                    item.productId == group.item.productId,
+                              );
+
+                              if (await widget.controller.useItem(itemToUse)) {
+                                setState(() {});
+                                Toast.success('store_useSuccess'.tr);
+                              } else {
+                                Toast.error('store_itemExpired'.tr);
+                              }
+                            },
+                            onDelete: () async {
+                              final itemToDelete = items.firstWhere(
+                                (item) =>
+                                    item.productId == group.item.productId,
+                              );
+                              await widget.controller.deleteUserItem(
+                                itemToDelete,
+                              );
                               setState(() {});
-                              Toast.success('store_useSuccess'.tr);
-                            } else {
-                              Toast.error('store_itemExpired'.tr);
-                            }
-                          },
-                          onDelete: () async {
-                            final itemToDelete = items.firstWhere(
-                              (item) => item.productId == group.item.productId,
-                            );
-                            await widget.controller.deleteUserItem(itemToDelete);
-                            setState(() {});
-                            Toast.success('app_deleteSuccess'.tr);
-                          },
-                          onViewProduct: () {
-                            final product = widget.controller.products
-                                .firstWhereOrNull(
-                              (p) => p.id == group.item.productId,
-                            );
-                            if (product != null) {
-                              NavigationHelper.push(
-                                context,
-                                AddProductPage(
-                                  controller: widget.controller,
-                                  product: product,
-                                ),
-                              ).then((_) {
-                                if (mounted) setState(() {});
-                              });
-                            } else {
-                              Toast.warning('store_productNotFound'.tr);
-                            }
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                              Toast.success('app_deleteSuccess'.tr);
+                            },
+                            onViewProduct: () {
+                              final product = widget.controller.products
+                                  .firstWhereOrNull(
+                                    (p) => p.id == group.item.productId,
+                                  );
+                              if (product != null) {
+                                NavigationHelper.push(
+                                  context,
+                                  AddProductPage(
+                                    controller: widget.controller,
+                                    product: product,
+                                  ),
+                                ).then((_) {
+                                  if (mounted) setState(() {});
+                                });
+                              } else {
+                                Toast.warning('store_productNotFound'.tr);
+                              }
+                            },
+                          ),
+                        );
+                      },
+                    ),
           ),
         ],
       ),
@@ -285,10 +365,7 @@ class _ProductItemsPageState extends State<ProductItemsPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Text(
-            'store_itemStatus'.tr,
-            style: theme.textTheme.titleSmall,
-          ),
+          Text('store_itemStatus'.tr, style: theme.textTheme.titleSmall),
           const SizedBox(width: 16),
           Expanded(
             child: SingleChildScrollView(
