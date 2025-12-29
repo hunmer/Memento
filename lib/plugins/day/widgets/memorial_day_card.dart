@@ -37,17 +37,15 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
   @override
   void didUpdateWidget(covariant MemorialDayCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // 比较 avatarUrl 或 backgroundImageUrl 的变化
-    final oldUrl = oldWidget.memorialDay.avatarUrl ?? oldWidget.memorialDay.backgroundImageUrl;
-    final newUrl = widget.memorialDay.avatarUrl ?? widget.memorialDay.backgroundImageUrl;
+    final oldUrl = oldWidget.memorialDay.backgroundImageUrl;
+    final newUrl = widget.memorialDay.backgroundImageUrl;
     if (oldUrl != newUrl) {
       _loadImage();
     }
   }
 
   Future<void> _loadImage() async {
-    // 优先使用 avatarUrl，其次使用 backgroundImageUrl
-    final imageUrl = widget.memorialDay.avatarUrl ?? widget.memorialDay.backgroundImageUrl;
+    final imageUrl = widget.memorialDay.backgroundImageUrl;
     if (imageUrl == null) {
       setState(() {
         _imageProvider = null;
@@ -114,9 +112,10 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
       elevation: 4,
       child: InkWell(
         onTap: widget.onTap,
-        onLongPress: widget.onEdit != null || widget.onDelete != null
-            ? () => _showBottomSheetMenu(context)
-            : null,
+        onLongPress:
+            widget.onEdit != null || widget.onDelete != null
+                ? () => _showBottomSheetMenu(context)
+                : null,
         child: Container(
           decoration: BoxDecoration(
             color: widget.memorialDay.backgroundColor,
@@ -140,7 +139,9 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: widget.memorialDay.iconColor ?? Colors.white.withOpacity(0.3),
+                              color:
+                                  widget.memorialDay.iconColor ??
+                                  Colors.white.withOpacity(0.3),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -149,7 +150,8 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                               size: 20,
                             ),
                           ),
-                        if (widget.memorialDay.icon != null) const SizedBox(width: 8),
+                        if (widget.memorialDay.icon != null)
+                          const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             widget.memorialDay.title,
@@ -190,7 +192,8 @@ class _MemorialDayCardState extends State<MemorialDayCard> {
                             'count': widget.memorialDay.daysPassed.toString(),
                           })
                           : 'day_daysRemaining'.trParams({
-                            'count': widget.memorialDay.daysRemaining.toString(),
+                            'count':
+                                widget.memorialDay.daysRemaining.toString(),
                           }),
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: Colors.white,

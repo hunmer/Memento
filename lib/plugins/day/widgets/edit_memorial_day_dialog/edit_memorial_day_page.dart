@@ -30,7 +30,6 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
   String? _backgroundImageUrl;
   IconData? _selectedIcon;
   Color? _selectedIconColor;
-  String? _avatarUrl;
 
   @override
   void initState() {
@@ -38,15 +37,14 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
     _titleController = TextEditingController(text: widget.memorialDay?.title);
     _noteController = TextEditingController();
     _selectedDate = widget.memorialDay?.targetDate ?? DateTime.now();
-    _noteItems = (widget.memorialDay?.notes ?? [])
-        .map((note) => _NoteItem(content: note))
-        .toList();
+    _noteItems =
+        (widget.memorialDay?.notes ?? [])
+            .map((note) => _NoteItem(content: note))
+            .toList();
     _selectedColor = widget.memorialDay?.backgroundColor ?? Colors.blue[300]!;
     _backgroundImageUrl = widget.memorialDay?.backgroundImageUrl;
     _selectedIcon = widget.memorialDay?.icon;
     _selectedIconColor = widget.memorialDay?.iconColor;
-    _avatarUrl = widget.memorialDay?.avatarUrl;
-
     _updateRouteContext();
   }
 
@@ -64,11 +62,7 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
       RouteHistoryManager.updateCurrentContext(
         pageId: "/day_detail",
         title: '纪念日详情 - ${memorial.title}',
-        params: {
-          'id': memorial.id,
-          'title': memorial.title,
-          'date': dateStr,
-        },
+        params: {'id': memorial.id, 'title': memorial.title, 'date': dateStr},
       );
     }
   }
@@ -122,15 +116,13 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
 
   void _save() {
     if (_titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('请输入标题')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('请输入标题')));
       return;
     }
-
-    debugPrint('Saving memorial day - icon: $_selectedIcon, iconColor: $_selectedIconColor, avatarUrl: $_avatarUrl');
-
-    final filteredNotes = _getNotes().where((note) => note.trim().isNotEmpty).toList();
+    final filteredNotes =
+        _getNotes().where((note) => note.trim().isNotEmpty).toList();
 
     final memorialDay = MemorialDay(
       id: widget.memorialDay?.id ?? const Uuid().v4(),
@@ -142,13 +134,11 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
       creationDate: widget.memorialDay?.creationDate ?? DateTime.now(),
       icon: _selectedIcon,
       iconColor: _selectedIconColor,
-      avatarUrl: _avatarUrl,
     );
 
-    debugPrint('MemorialDay created - icon: ${memorialDay.icon}, iconColor: ${memorialDay.iconColor}, avatarUrl: ${memorialDay.avatarUrl}');
-    debugPrint('MemorialDay toJson - icon: ${memorialDay.toJson()['icon']}, iconColor: ${memorialDay.toJson()['iconColor']}, avatarUrl: ${memorialDay.toJson()['avatarUrl']}');
-
-    Navigator.of(context).pop(DialogResult(action: DialogAction.save, memorialDay: memorialDay));
+    Navigator.of(
+      context,
+    ).pop(DialogResult(action: DialogAction.save, memorialDay: memorialDay));
   }
 
   void _confirmDelete() {
@@ -185,13 +175,12 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
               name: 'memorial_icon',
               initialIcon: _selectedIcon,
               initialIconColor: _selectedIconColor,
-              initialAvatarUrl: _avatarUrl,
+              initialAvatarUrl: _backgroundImageUrl,
               onChanged: (value) {
                 setState(() {
                   _selectedIcon = value['icon'] as IconData?;
                   _selectedIconColor = value['iconColor'] as Color?;
-                  _avatarUrl = value['avatarUrl'] as String?;
-                  debugPrint('Icon changed: $_selectedIcon, Color: $_selectedIconColor, Avatar: $_avatarUrl');
+                  _backgroundImageUrl = value['avatarUrl'] as String?;
                 });
               },
             ),
@@ -216,10 +205,7 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
             const SizedBox(height: 24),
 
             // 笔记区域
-            Text(
-              'day_notes'.tr,
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('day_notes'.tr, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             ListAddField<String>(
               items: _noteItems.map((item) => item.content).toList(),
@@ -257,8 +243,8 @@ class _EditMemorialDayPageState extends State<EditMemorialDayPage> {
                                 child: Text(
                                   'day_delete'.tr,
                                   style: const TextStyle(color: Colors.red),
-                            ),
-                          ),
+                                ),
+                              ),
                             ],
                           ),
                     );

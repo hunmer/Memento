@@ -49,4 +49,8 @@ final Map<String, String> dayTranslationsEn = {
   'day_widgetDescription': 'Quick access to memorial days',
   'day_overviewName': 'Memorial Day Overview',
   'day_overviewDescription': 'Display memorial day statistics',
+
+  // Selector Widget Strings
+  'day_memorialSelectorName': 'Countdown',
+  'day_memorialSelectorDescription': 'Select a memorial day and show countdown',
 };

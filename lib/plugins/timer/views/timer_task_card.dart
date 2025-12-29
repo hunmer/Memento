@@ -84,22 +84,11 @@ class _TimerTaskCardState extends State<TimerTaskCard> {
         ),
         child: InkWell(
           onTap: () async {
-            final returnedTask = await NavigationHelper.openContainer<TimerTask>(
+            await NavigationHelper.push(
               context,
-              (context) => TimerTaskDetailsPage(
-                task: task,
-                onReset: () => widget.onReset(task),
-                onResume: () {
-                  task.start();
-                  setState(() {});
-                },
-              ),
-              transitionDuration: const Duration(milliseconds: 300),
+              TimerTaskDetailsPage(taskId: task.id),
             );
-            if (returnedTask != null) {
-              // 处理返回的任务
-              setState(() {});
-            }
+            setState(() {});
           },
           onLongPress: () => _showContextMenu(context, task),
           child: Container(
