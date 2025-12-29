@@ -931,42 +931,157 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
 
     final supportedSizes = widget.supportedSizes;
 
-    if (supportedSizes.length <= 1) {
+    // 检查是否包含 custom 尺寸
+    final hasCustom = supportedSizes.contains(HomeWidgetSize.custom);
+
+    // 如果只有一个尺寸且不是 custom，则不支持调整大小
+    if (supportedSizes.length <= 1 && !hasCustom) {
       Toast.warning('该小组件不支持调整大小');
       return;
     }
 
+    // 获取当前自定义尺寸（如果当前是 custom）
+    int customWidth = 2;
+    int customHeight = 2;
+    if (item.size == HomeWidgetSize.custom) {
+      customWidth = item.config['customWidth'] as int? ?? 2;
+      customHeight = item.config['customHeight'] as int? ?? 2;
+    }
+
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
             title: Text('screens_selectWidgetSize'.tr),
             content: Column(
               mainAxisSize: MainAxisSize.min,
-              children:
-                  supportedSizes.map((size) {
-                    final isSelected = size == item.size;
-                    final sizeLabel = _getSizeLabel(size);
+              children: [
+                ...supportedSizes.map((size) {
+                  final isSelected = size == item.size;
+                  final sizeLabel = _getSizeLabel(size);
 
-                    return RadioListTile<HomeWidgetSize>(
-                      title: Text(sizeLabel),
-                      subtitle: Text(
-                        'screens_widgetSize'.trParams({
-                          'width': size.width.toString(),
-                          'height': size.height.toString(),
-                        }),
+                  return RadioListTile<HomeWidgetSize>(
+                    title: Text(sizeLabel),
+                    subtitle: size == HomeWidgetSize.custom
+                        ? Text('screens_customSizeDesc'.tr)
+                        : Text(
+                            'screens_widgetSize'.trParams({
+                              'width': size.width.toString(),
+                              'height': size.height.toString(),
+                            }),
+                          ),
+                    value: size,
+                    groupValue: item.size,
+                    selected: isSelected,
+                    onChanged: (HomeWidgetSize? newSize) {
+                      if (newSize != null) {
+                        setDialogState(() {
+                          // 更新本地状态
+                        });
+                        Navigator.pop(context);
+                        _saveWidgetSize(item, newSize, customWidth, customHeight);
+                      }
+                    },
+                  );
+                }),
+                // 如果包含 custom 尺寸且当前选择了 custom，显示范围选择器
+                if (hasCustom && item.size == HomeWidgetSize.custom) ...[
+                  const SizedBox(height: 16),
+                  Divider(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'screens_customSizeAdjust'.tr,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  // 宽度滑块
+                  Row(
+                    children: [
+                      Text('screens_width'.tr),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Slider(
+                          value: customWidth.toDouble(),
+                          min: 1,
+                          max: 4,
+                          divisions: 3,
+                          label: customWidth.toString(),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              customWidth = value.toInt();
+                            });
+                          },
+                        ),
                       ),
-                      value: size,
-                      groupValue: item.size,
-                      selected: isSelected,
-                      onChanged: (HomeWidgetSize? newSize) {
-                        if (newSize != null) {
-                          Navigator.pop(context);
-                          _saveWidgetSize(item, newSize);
-                        }
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 32,
+                        child: Text(
+                          customWidth.toString(),
+                          style: Theme.of(context).textTheme.titleSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  // 高度滑块
+                  Row(
+                    children: [
+                      Text('screens_height'.tr),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Slider(
+                          value: customHeight.toDouble(),
+                          min: 1,
+                          max: 4,
+                          divisions: 3,
+                          label: customHeight.toString(),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              customHeight = value.toInt();
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 32,
+                        child: Text(
+                          customHeight.toString(),
+                          style: Theme.of(context).textTheme.titleSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'screens_customSizePreview'.trParams({
+                      'width': customWidth.toString(),
+                      'height': customHeight.toString(),
+                    }),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  // 应用按钮
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _saveWidgetSize(
+                          item,
+                          HomeWidgetSize.custom,
+                          customWidth,
+                          customHeight,
+                        );
                       },
-                    );
-                  }).toList(),
+                      child: Text('screens_applyCustomSize'.tr),
+                    ),
+                  ),
+                ],
+              ],
             ),
             actions: [
               TextButton(
@@ -974,7 +1089,9 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
                 child: Text('screens_cancel'.tr),
               ),
             ],
-          ),
+          );
+        },
+      ),
     );
   }
 
@@ -995,15 +1112,30 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         return 'screens_wide2Size'.tr;
       case HomeWidgetSize.wide3:
         return 'screens_wide3Size'.tr;
+      case HomeWidgetSize.custom:
+        return 'screens_customSize'.tr;
     }
   }
 
   /// 保存组件大小
   Future<void> _saveWidgetSize(
     HomeWidgetItem item,
-    HomeWidgetSize newSize,
-  ) async {
-    final updatedItem = item.copyWith(size: newSize);
+    HomeWidgetSize newSize, [
+    int customWidth = 2,
+    int customHeight = 2,
+  ]) async {
+    final updatedConfig = Map<String, dynamic>.from(item.config);
+
+    // 如果是自定义尺寸，保存自定义宽高
+    if (newSize == HomeWidgetSize.custom) {
+      updatedConfig['customWidth'] = customWidth;
+      updatedConfig['customHeight'] = customHeight;
+    }
+
+    final updatedItem = item.copyWith(
+      size: newSize,
+      config: updatedConfig,
+    );
 
     _layoutManager.updateItem(item.id, updatedItem);
     await _layoutManager.saveLayout();

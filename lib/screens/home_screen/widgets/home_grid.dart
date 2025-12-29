@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
@@ -117,8 +118,15 @@ class _HomeGridState extends State<HomeGrid> {
     int mainAxisCellCount = 1;
 
     if (item is HomeWidgetItem) {
-      crossAxisCellCount = item.size.width;
-      mainAxisCellCount = item.size.height;
+      // 处理自定义尺寸
+      if (item.size == HomeWidgetSize.custom) {
+        // 从 config 中读取自定义宽高
+        crossAxisCellCount = item.config['customWidth'] as int? ?? 2;
+        mainAxisCellCount = item.config['customHeight'] as int? ?? 2;
+      } else {
+        crossAxisCellCount = item.size.width;
+        mainAxisCellCount = item.size.height;
+      }
     } else if (item is HomeFolderItem) {
       // 文件夹固定为 1x1
       crossAxisCellCount = 1;

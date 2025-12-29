@@ -131,4 +131,13 @@ const Map<String, String> webviewTranslationsEn = {
   'webview_widgetDescription': 'Quick access to Browser',
   'webview_overviewName': 'Browser Overview',
   'webview_overviewDescription': 'Display browser statistics',
+  'webview_cardQuickAccess': 'URL Quick Access',
+  'webview_cardQuickAccessDesc': 'Tap to select a URL card to display',
+  'webview_embeddedName': 'Embedded WebView',
+  'webview_embeddedDesc': 'Display web content directly in the widget',
+  'webview_selectCard': 'Select URL Card',
+  'webview_quickAccess': 'Quick Access',
+  'webview_localFile': 'Local File',
+  'webview_cardSelectorName': 'URL Card',
+  'webview_cardSelectorDesc': 'Select a URL card to add to home screen',
 };
