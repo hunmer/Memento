@@ -129,6 +129,16 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         .length;
   }
 
+  /// 根据 ID 获取纪念日（供小组件使用）
+  MemorialDay? getMemorialDayById(String id) {
+    if (!_isInitialized) return null;
+    try {
+      return _controller.memorialDays.firstWhere((day) => day.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget? buildCardView(BuildContext context) {
     if (!_isInitialized) return null;

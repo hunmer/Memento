@@ -97,7 +97,9 @@ class _HomeCardState extends State<HomeCard> {
                       width: 2,
                     )
                     : BorderSide(
-                      color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                      color: Theme.of(
+                        context,
+                      ).dividerColor.withValues(alpha: 0.3),
                       width: 1,
                     ),
           ),
@@ -185,7 +187,11 @@ class _HomeCardState extends State<HomeCard> {
       final backgroundImagePath =
           widgetItem.config['backgroundImage'] as String?;
 
-      Widget content = widgetDef.build(context, widgetItem.config, widgetItem.size);
+      Widget content = widgetDef.build(
+        context,
+        widgetItem.config,
+        widgetItem.size,
+      );
 
       // 总是添加背景装饰容器（因为总是有背景颜色）
       content = Container(
@@ -296,10 +302,7 @@ class _HomeCardState extends State<HomeCard> {
             duration: const Duration(milliseconds: 600),
             tween: Tween(begin: 0.0, end: 1.0),
             builder: (context, opacity, child) {
-              return Opacity(
-                opacity: opacity,
-                child: child,
-              );
+              return Opacity(opacity: opacity, child: child);
             },
             child: SizedBox(
               width: 32,
@@ -471,9 +474,6 @@ class _HomeCardState extends State<HomeCard> {
           debugPrint('[HomeCard] 导航处理器执行失败: $e');
           Toast.error('打开失败: $e');
         }
-      } else {
-        debugPrint('[HomeCard] result: $result, navigationHandler: ${widgetDef.navigationHandler}');
-        Toast.warning('未配置导航处理器');
       }
     }
   }

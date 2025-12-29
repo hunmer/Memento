@@ -71,6 +71,8 @@ class TrackerTranslationsEn {
 
     // Widget Home Strings
     'tracker_name': 'Goal Tracker',
+    'tracker_widgetName': 'Goal Tracker Icon',
+    'tracker_widgetDescription': 'Quick access to Goal Tracker',
     'tracker_iconDescription': 'Quick access to Goal Tracker',
     'tracker_overview': 'Goal Tracker Overview',
     'tracker_overviewDescription': 'Display today and monthly completion statistics',

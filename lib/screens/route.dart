@@ -6,6 +6,7 @@ import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:Memento/plugins/store/widgets/product_items_page.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/todo/views/todo_bottombar_view.dart';
+import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
 import 'package:Memento/plugins/tts/screens/tts_services_screen.dart';
 import 'package:Memento/plugins/webview/screens/webview_browser_screen.dart';
 import 'package:flutter/material.dart';
@@ -563,6 +564,13 @@ class AppRoutes extends NavigatorObserver {
         );
       case '/timer':
       case 'timer':
+        return _createRoute(const TimerMainView());
+      case '/timer_details':
+        final arguments = settings.arguments as Map<String, dynamic>?;
+        final taskId = arguments?['taskId'] as String?;
+        if (taskId != null) {
+          return _createRoute(_TimerDetailsRoute(taskId: taskId));
+        }
         return _createRoute(const TimerMainView());
       case '/todo':
       case 'todo':
@@ -1187,6 +1195,18 @@ class AppRoutes extends NavigatorObserver {
   };
 
   static String get initialRoute => home;
+}
+
+/// 计时器详情页面路由
+class _TimerDetailsRoute extends StatelessWidget {
+  final String taskId;
+
+  const _TimerDetailsRoute({required this.taskId});
+
+  @override
+  Widget build(BuildContext context) {
+    return TimerTaskDetailsPage(taskId: taskId);
+  }
 }
 
 /// 将 Todo 任务转换为日历事件

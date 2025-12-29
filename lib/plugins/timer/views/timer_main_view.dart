@@ -204,17 +204,7 @@ class _TimerMainViewState extends State<TimerMainView> {
   void _showTaskDetails(TimerTask task) async {
     await NavigationHelper.push(
       context,
-      TimerTaskDetailsPage(
-        task: task,
-        onReset: () {
-          task.reset();
-          setState(() {});
-        },
-        onResume: () {
-          task.toggle();
-          setState(() {});
-        },
-      ),
+      TimerTaskDetailsPage(taskId: task.id),
     );
     setState(() {
       _updateTasksAndGroups();

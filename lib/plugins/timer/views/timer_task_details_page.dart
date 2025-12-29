@@ -2,19 +2,17 @@ import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
-import '../../../../core/event/event_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/plugins/timer/timer_plugin.dart';
 
 class TimerTaskDetailsPage extends StatefulWidget {
-  final TimerTask task;
-  final VoidCallback onReset;
-  final VoidCallback onResume;
+  final String taskId;
 
   const TimerTaskDetailsPage({
     super.key,
-    required this.task,
-    required this.onReset,
-    required this.onResume,
+    required this.taskId,
   });
 
   @override
@@ -22,58 +20,69 @@ class TimerTaskDetailsPage extends StatefulWidget {
 }
 
 class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
+  late TimerPlugin _plugin;
   late TimerTask _currentTask;
-  late int _currentTimerIndex = 0;
-  late bool _isRunning = false;
+  late int _currentTimerIndex;
+  late bool _isRunning;
 
   @override
   void initState() {
     super.initState();
-    _currentTask = widget.task;
-    _currentTimerIndex = _currentTask.getCurrentIndex();
-    if (_currentTimerIndex == -1) _currentTimerIndex = 0;
-    _isRunning = _currentTask.isRunning;
-    // 订阅任务变更事件
-    EventManager.instance.subscribe('timer_task_changed', onTimerTaskChanged);
-    // 订阅计时器进度更新事件
-    EventManager.instance.subscribe('timer_item_progress', onTimerItemProgress);
-    // 订阅计时器开始事件
-    EventManager.instance.subscribe('timer_item_changed', onTimerItemChanged);
-
-    // 初始化时设置路由上下文
+    _plugin = PluginManager.instance.getPlugin('timer') as TimerPlugin;
+    _loadTask();
+    _subscribeToEvents();
     _updateRouteContext();
   }
 
-  onTimerItemProgress(EventArgs args) {
+  void _loadTask() {
+    final tasks = _plugin.getTasks();
+    final task = tasks.firstWhereOrNull((t) => t.id == widget.taskId);
+    if (task != null) {
+      _currentTask = task;
+      _currentTimerIndex = _currentTask.getCurrentIndex();
+      if (_currentTimerIndex == -1) _currentTimerIndex = 0;
+      _isRunning = _currentTask.isRunning;
+    }
+  }
+
+  void _subscribeToEvents() {
+    EventManager.instance.subscribe('timer_task_changed', onTimerTaskChanged);
+    EventManager.instance.subscribe('timer_item_progress', onTimerItemProgress);
+    EventManager.instance.subscribe('timer_item_changed', onTimerItemChanged);
+  }
+
+  void onTimerItemProgress(EventArgs args) {
     if (args is TimerItemEventArgs &&
-        _currentTask.timerItems.contains(args.timer)) {
-      setState(() {});
+        _currentTask.timerItems.any((item) => item.id == args.timer.id)) {
+      if (mounted) setState(() {});
     }
   }
 
   void onTimerTaskChanged(EventArgs args) {
     if (args is TimerTaskEventArgs && args.task.id == _currentTask.id) {
-      setState(() {
-        _currentTask = args.task;
-        _isRunning = _currentTask.isRunning;
-      });
-      // 任务状态变化时更新路由上下文
-      _updateRouteContext();
+      if (mounted) {
+        setState(() {
+          _currentTask = args.task;
+          _isRunning = _currentTask.isRunning;
+        });
+        _updateRouteContext();
+      }
     }
   }
 
   void onTimerItemChanged(EventArgs args) {
     if (args is TimerItemEventArgs &&
-        _currentTask.timerItems.contains(args.timer)) {
-      setState(() {
-        _currentTimerIndex = _currentTask.timerItems.indexOf(args.timer);
-      });
-      // 计时器项变化时更新路由上下文
-      _updateRouteContext();
+        _currentTask.timerItems.any((item) => item.id == args.timer.id)) {
+      if (mounted) {
+        setState(() {
+          _currentTimerIndex = _currentTask.timerItems
+              .indexWhere((item) => item.id == args.timer.id);
+        });
+        _updateRouteContext();
+      }
     }
   }
 
-  /// 更新路由上下文，使"询问当前上下文"功能能获取到当前计时器任务信息
   void _updateRouteContext() {
     final currentTimer = _currentTask.timerItems[_currentTimerIndex];
     RouteHistoryManager.updateCurrentContext(
@@ -90,14 +99,28 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
 
   @override
   void dispose() {
-    // 取消所有订阅
     EventManager.instance.unsubscribe('timer_task_changed', onTimerTaskChanged);
-    EventManager.instance.unsubscribe(
-      'timer_item_progress',
-      onTimerItemProgress,
-    );
+    EventManager.instance.unsubscribe('timer_item_progress', onTimerItemProgress);
     EventManager.instance.unsubscribe('timer_item_changed', onTimerItemChanged);
     super.dispose();
+  }
+
+  void _handlePlayPause() {
+    if (_isRunning) {
+      _currentTask.pause();
+    } else {
+      _currentTask.start();
+    }
+    // 立即更新本地状态
+    setState(() {
+      _isRunning = _currentTask.isRunning;
+    });
+    _plugin.updateTask(_currentTask);
+  }
+
+  void _handleReset() {
+    _currentTask.reset();
+    _plugin.updateTask(_currentTask);
   }
 
   String _formatRemainingTime(Duration duration) {
@@ -108,6 +131,12 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_currentTask.timerItems.isEmpty) {
+      return Scaffold(
+        body: Center(child: Text('timer_taskEmpty'.tr)),
+      );
+    }
+
     final currentTimer = _currentTask.timerItems[_currentTimerIndex];
     final progress = (currentTimer.completedDuration.inSeconds /
             currentTimer.duration.inSeconds)
@@ -125,7 +154,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.restore),
-            onPressed: widget.onReset,
+            onPressed: _handleReset,
             tooltip: 'timer_reset'.tr,
           ),
         ],
@@ -147,8 +176,8 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
                   const SizedBox(height: 4),
                   Text(
                     currentTimer.name,
-                    style: theme.textTheme.titleLarge
-                        ?.copyWith(color: theme.textTheme.titleLarge?.color?.withOpacity(0.7)),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.textTheme.titleLarge?.color?.withOpacity(0.7)),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -231,10 +260,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
                 ? primaryColor
                 : theme.colorScheme.onSurface.withOpacity(0.2),
             border: isActive
-                ? Border.all(
-                    color: primaryColor,
-                    width: 2,
-                  )
+                ? Border.all(color: primaryColor, width: 2)
                 : null,
           ),
         );
@@ -245,7 +271,7 @@ class _TimerTaskDetailsPageState extends State<TimerTaskDetailsPage> {
   Widget _buildControlButton(Color primaryColor) {
     final theme = Theme.of(context);
     return ElevatedButton.icon(
-      onPressed: widget.onResume,
+      onPressed: _handlePlayPause,
       icon: Icon(
         _isRunning ? Icons.pause : Icons.play_arrow,
         size: 36,

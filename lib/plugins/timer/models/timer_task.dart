@@ -257,6 +257,12 @@ class TimerTask {
     if (isRunning) {
       // 使用统一计时器控制器暂停
       unifiedTimerController.pauseTimer(id);
+      // 暂停所有 TimerItem 的内部计时器
+      for (var timer in timerItems) {
+        if (timer.isRunning) {
+          timer.pause();
+        }
+      }
       isRunning = false;
       EventManager.instance.broadcast(
         'timer_task_changed',

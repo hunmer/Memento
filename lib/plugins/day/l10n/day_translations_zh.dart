@@ -49,4 +49,8 @@ final Map<String, String> dayTranslationsZh = {
   'day_widgetDescription': '快速打开纪念日',
   'day_overviewName': '纪念日概览',
   'day_overviewDescription': '显示纪念日统计信息',
+
+  // Selector Widget Strings
+  'day_memorialSelectorName': '纪念日倒计时',
+  'day_memorialSelectorDescription': '选择纪念日并显示倒计时',
 };
