@@ -1044,7 +1044,7 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (previousSelections) async {
-            final warehouse = previousSelections['warehouse'] as Warehouse;
+            final warehouse = Warehouse.fromJson(previousSelections['warehouse'] as Map<String, dynamic>);
             return _getAllItemsRecursively(warehouse.items);
           },
         ),
