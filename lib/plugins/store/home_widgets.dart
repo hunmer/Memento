@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
@@ -72,6 +73,14 @@ class StoreHomeWidgets {
         selectorId: 'store.product',
         dataRenderer: _renderProductData,
         navigationHandler: _navigateToProductItems,
+        dataSelector: (dataArray) {
+          final productData = dataArray[0] as Map<String, dynamic>;
+          return {
+            'id': productData['id'] as String,
+            'name': productData['name'] as String?,
+            'image': productData['image'] as String?,
+          };
+        },
 
         builder: (context, config) {
           return GenericSelectorWidget(
@@ -99,6 +108,16 @@ class StoreHomeWidgets {
         selectorId: 'store.userItem',
         dataRenderer: _renderUserItemData,
         navigationHandler: _navigateToUserItemDetail,
+        dataSelector: (dataArray) {
+          final itemData = dataArray[0] as Map<String, dynamic>;
+          return {
+            'id': itemData['id'] as String,
+            'purchase_price': itemData['purchase_price'] as int?,
+            'remaining': itemData['remaining'] as int?,
+            'expire_date': itemData['expire_date'] as String?,
+            'product_snapshot': itemData['product_snapshot'] as Map<String, dynamic>?,
+          };
+        },
 
         builder: (context, config) {
           return GenericSelectorWidget(
@@ -211,6 +230,40 @@ class StoreHomeWidgets {
 
   // ===== 选择器小组件相关方法 =====
 
+  /// 加载最新的商品数据
+  static Future<Map<String, dynamic>?> _loadLatestProductData(
+    String productId,
+  ) async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
+      if (plugin == null) return null;
+      final product = plugin.controller.products.firstWhereOrNull(
+        (p) => p.id == productId,
+      );
+      return product?.toJson();
+    } catch (e) {
+      debugPrint('加载商品数据失败: $e');
+      return null;
+    }
+  }
+
+  /// 加载最新的用户物品数据
+  static Future<Map<String, dynamic>?> _loadLatestUserItemData(
+    String itemId,
+  ) async {
+    try {
+      final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
+      if (plugin == null) return null;
+      final item = plugin.controller.userItems.firstWhereOrNull(
+        (item) => item.id == itemId,
+      );
+      return item?.toJson();
+    } catch (e) {
+      debugPrint('加载用户物品数据失败: $e');
+      return null;
+    }
+  }
+
   /// 渲染商品数据
   static Widget _renderProductData(
     BuildContext context,
@@ -219,137 +272,185 @@ class StoreHomeWidgets {
   ) {
     final theme = Theme.of(context);
 
-    // 从 result.data 获取商品数据
-    if (result.data == null) {
+    // 从 result.data 获取保存的商品 ID
+    final savedData = result.data as Map<String, dynamic>?;
+    if (savedData == null) {
       return _buildErrorWidget(context, '数据不存在');
     }
 
-    final productData = result.data as Map<String, dynamic>;
-    final name = productData['name'] as String? ?? '未知商品';
-    final description = productData['description'] as String? ?? '';
-    final price = productData['price'] as int? ?? 0;
-    final stock = productData['stock'] as int? ?? 0;
-
-    // 获取该商品的已兑换物品数量
-    int itemCount = 0;
-    try {
-      final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
-      if (plugin != null) {
-        final productId = productData['id'] as String?;
-        if (productId != null) {
-          itemCount =
-              plugin.controller.userItems
-                  .where((item) => item.productId == productId)
-                  .length;
-        }
-      }
-    } catch (e) {
-      // 忽略错误
+    final productId = savedData['id'] as String? ?? '';
+    if (productId.isEmpty) {
+      return _buildErrorWidget(context, '商品ID不存在');
     }
 
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部标签行
-            Row(
-              children: [
-                Icon(Icons.shopping_bag, size: 20, color: Colors.pinkAccent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'store_productQuickAccess'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                // 库存状态标签
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: _loadLatestProductData(productId),
+      builder: (context, snapshot) {
+        // 使用最新数据，如果没有则使用保存的数据
+        final productData = snapshot.data ?? savedData;
+        final name =
+            productData['name'] as String? ??
+            savedData['name'] as String? ??
+            '未知商品';
+        final description =
+            productData['description'] as String? ??
+            savedData['description'] as String? ??
+            '';
+        final price =
+            productData['price'] as int? ?? savedData['price'] as int? ?? 0;
+        final stock =
+            productData['stock'] as int? ?? savedData['stock'] as int? ?? 0;
+        final imagePath =
+            productData['image'] as String? ?? savedData['image'] as String?;
+
+        return FutureBuilder<String?>(
+          future: _getProductImagePath(imagePath),
+          builder: (context, imageSnapshot) {
+            final hasImage =
+                imageSnapshot.hasData &&
+                imageSnapshot.data != null &&
+                imageSnapshot.data!.isNotEmpty;
+
+            return Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => _navigateToProductItems(context, result),
+                child: Container(
                   decoration: BoxDecoration(
-                    color:
-                        stock > 0
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.grey.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(16),
+                    image:
+                        hasImage
+                            ? DecorationImage(
+                              image: ImageUtils.createImageProvider(
+                                imageSnapshot.data,
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                            : null,
+                    gradient:
+                        hasImage
+                            ? null
+                            : LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.pinkAccent.withAlpha(30),
+                                Colors.pinkAccent.withAlpha(10),
+                              ],
+                            ),
                   ),
-                  child: Text(
-                    stock > 0
-                        ? '${'store_stockLabel'.tr}: $stock'
-                        : 'store_outOfStock'.tr,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: stock > 0 ? Colors.green : Colors.grey,
-                      fontSize: 10,
-                    ),
+                  child: Stack(
+                    children: [
+                      // 半透明遮罩（确保文字可读性）
+                      if (hasImage)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.black.withOpacity(0.4),
+                            ),
+                          ),
+                        ),
+                      // 内容区域（带 padding）
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 商品名称
+                            Text(
+                              name,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: hasImage ? Colors.white : null,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            // 商品描述
+                            if (description.isNotEmpty) ...[
+                              Text(
+                                description,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color:
+                                      (hasImage
+                                          ? Colors.white70
+                                          : theme.colorScheme.outline),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                            ],
+                            const Spacer(),
+                            // 底部信息栏 - 价格和库存
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.monetization_on,
+                                  size: 16,
+                                  color:
+                                      hasImage ? Colors.orange : Colors.orange,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$price ${'store_points'.tr}',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color:
+                                        hasImage
+                                            ? Colors.orange
+                                            : Colors.orange,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const Spacer(),
+                                // 库存状态
+                                Text(
+                                  stock > 0
+                                      ? '${'store_stockLabel'.tr}: $stock'
+                                      : 'store_outOfStock'.tr,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color:
+                                        hasImage
+                                            ? (stock > 0
+                                                ? Colors.green
+                                                : Colors.grey)
+                                            : (stock > 0
+                                                ? Colors.green
+                                                : Colors.grey),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const Spacer(),
-            // 商品名称
-            Text(
-              name,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            // 商品描述
-            if (description.isNotEmpty) ...[
-              Text(
-                description,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.outline,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-            ],
-            // 底部信息栏
-            Row(
-              children: [
-                // 价格
-                Icon(Icons.monetization_on, size: 16, color: Colors.orange),
-                const SizedBox(width: 4),
-                Text(
-                  '$price ${'store_points'.tr}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                // 已兑换物品数量
-                Icon(
-                  Icons.inventory_2,
-                  size: 16,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${'store_itemQuantity'.tr}: $itemCount',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  /// 获取商品的图片绝对路径
+  static Future<String?> _getProductImagePath(String? imagePath) async {
+    if (imagePath == null || imagePath.isEmpty) return null;
+
+    // 如果是绝对路径，直接返回
+    if (imagePath.startsWith('/') || imagePath.startsWith('http')) {
+      return imagePath;
+    }
+
+    // 如果是相对路径，使用 ImageUtils 转换
+    return ImageUtils.getAbsolutePath(imagePath);
   }
 
   /// 导航到商品物品列表
@@ -357,16 +458,23 @@ class StoreHomeWidgets {
     BuildContext context,
     SelectorResult result,
   ) {
-    final productData = result.data as Map<String, dynamic>;
-    final productId = productData['id'] as String;
-    final productName = productData['name'] as String? ?? '未知商品';
+    final savedData = result.data as Map<String, dynamic>?;
+    if (savedData == null) return;
 
-    // 跳转到商品物品列表页面
-    NavigationHelper.pushNamed(
-      context,
-      '/store/product_items',
-      arguments: {'productId': productId, 'productName': productName},
-    );
+    final productId = savedData['id'] as String? ?? '';
+    final productName = savedData['name'] as String? ?? '未知商品';
+
+    if (productId.isNotEmpty) {
+      NavigationHelper.pushNamed(
+        context,
+        '/store/product_items',
+        arguments: {
+          'productId': productId,
+          'productName': productName,
+          'autoUse': true, // 跳转到过滤页后自动弹出使用对话框
+        },
+      );
+    }
   }
 
   // ===== 用户物品选择器小组件相关方法 =====
@@ -379,155 +487,209 @@ class StoreHomeWidgets {
   ) {
     final theme = Theme.of(context);
 
-    if (result.data == null) {
+    // 从 result.data 获取保存的物品 ID
+    final savedData = result.data as Map<String, dynamic>?;
+    if (savedData == null) {
       return _buildErrorWidget(context, '数据不存在');
     }
 
-    final itemData = result.data as Map<String, dynamic>;
-    final productSnapshot =
-        itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
-    final productName = productSnapshot['name'] as String? ?? '未知物品';
-    final purchasePrice = itemData['purchasePrice'] as int? ?? 0;
-    final remaining = itemData['remaining'] as int? ?? 0;
-    final expireDateStr = itemData['expireDate'] as String?;
-
-    // 解析过期日期
-    DateTime? expireDate;
-    if (expireDateStr != null) {
-      try {
-        expireDate = DateTime.parse(expireDateStr);
-      } catch (e) {
-        expireDate = null;
-      }
+    final itemId = savedData['id'] as String? ?? '';
+    if (itemId.isEmpty) {
+      return _buildErrorWidget(context, '物品ID不存在');
     }
 
-    // 计算剩余天数
-    int? remainingDays;
-    if (expireDate != null) {
-      remainingDays = expireDate.difference(DateTime.now()).inDays;
-    }
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: _loadLatestUserItemData(itemId),
+      builder: (context, snapshot) {
+        // 使用最新数据，如果没有则使用保存的数据
+        final itemData = snapshot.data ?? savedData;
+        final productSnapshot =
+            itemData['product_snapshot'] as Map<String, dynamic>? ??
+            savedData['product_snapshot'] as Map<String, dynamic>? ??
+            {};
+        final productName =
+            productSnapshot['name'] as String? ??
+            savedData['product_snapshot']?['name'] as String? ??
+            '未知物品';
+        final productImage =
+            productSnapshot['image'] as String? ??
+            savedData['product_snapshot']?['image'] as String?;
+        final purchasePrice =
+            itemData['purchasePrice'] as int? ??
+            savedData['purchasePrice'] as int? ??
+            0;
+        final remaining =
+            itemData['remaining'] as int? ??
+            savedData['remaining'] as int? ??
+            0;
+        final expireDateStr =
+            itemData['expireDate'] as String? ??
+            savedData['expireDate'] as String?;
 
-    // 检查是否已过期
-    final isExpired = remainingDays != null && remainingDays < 0;
-    final isExpiringSoon =
-        remainingDays != null && remainingDays >= 0 && remainingDays <= 7;
+        // 解析过期日期
+        DateTime? expireDate;
+        if (expireDateStr != null) {
+          try {
+            expireDate = DateTime.parse(expireDateStr);
+          } catch (e) {
+            expireDate = null;
+          }
+        }
 
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.inventory_2, size: 20, color: Colors.pinkAccent),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'store_myItems'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
+        // 计算剩余天数
+        int? remainingDays;
+        if (expireDate != null) {
+          remainingDays = expireDate.difference(DateTime.now()).inDays;
+        }
+
+        // 检查是否已过期
+        final isExpired = remainingDays != null && remainingDays < 0;
+        final isExpiringSoon =
+            remainingDays != null && remainingDays >= 0 && remainingDays <= 7;
+
+        return FutureBuilder<String?>(
+          future: _getProductImagePath(productImage),
+          builder: (context, imageSnapshot) {
+            final hasImage =
+                imageSnapshot.hasData &&
+                imageSnapshot.data != null &&
+                imageSnapshot.data!.isNotEmpty;
+
+            return Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
                   decoration: BoxDecoration(
-                    color:
-                        isExpired
-                            ? Colors.red.withOpacity(0.2)
-                            : (isExpiringSoon
-                                ? Colors.orange.withOpacity(0.2)
-                                : Colors.green.withOpacity(0.2)),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(16),
+                    image:
+                        hasImage
+                            ? DecorationImage(
+                              image: ImageUtils.createImageProvider(
+                                imageSnapshot.data,
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                            : null,
                   ),
-                  child: Text(
-                    isExpired ? '已过期' : (isExpiringSoon ? '即将过期' : '有效'),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                          isExpired
-                              ? Colors.red
-                              : (isExpiringSoon ? Colors.orange : Colors.green),
-                      fontSize: 10,
-                    ),
+                  child: Stack(
+                    children: [
+                      // 半透明遮罩
+                      if (hasImage)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.black.withOpacity(0.4),
+                            ),
+                          ),
+                        ),
+                      // 内容区域
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 物品名称和剩余次数（在同一行）
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    productName,
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: hasImage ? Colors.white : null,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                // 剩余次数（标题右侧）
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        (hasImage
+                                            ? Colors.white.withOpacity(0.2)
+                                            : Colors.pinkAccent.withOpacity(
+                                              0.2,
+                                            )),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    '$remaining ${'store_times'.tr}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color:
+                                          hasImage
+                                              ? Colors.white
+                                              : Colors.pinkAccent,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Spacer(),
+                            // 底部区域：价格（左）和过期信息（右）
+                            Row(
+                              children: [
+                                // 价格信息
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.monetization_on,
+                                      size: 16,
+                                      color: Colors.orange,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$purchasePrice ${'store_points'.tr}',
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(color: Colors.orange),
+                                    ),
+                                  ],
+                                ),
+                                const Spacer(),
+                                // 过期信息（右下角）
+                                if (remainingDays != null)
+                                  Text(
+                                    isExpired
+                                        ? 'store_itemExpired'.tr
+                                        : '${'store_expireIn'.tr} $remainingDays ${'store_days'.tr}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color:
+                                          hasImage
+                                              ? (isExpired
+                                                  ? Colors.red.shade300
+                                                  : (isExpiringSoon
+                                                      ? Colors.orange.shade300
+                                                      : Colors.green.shade300))
+                                              : (isExpired
+                                                  ? Colors.red
+                                                  : (isExpiringSoon
+                                                      ? Colors.orange
+                                                      : Colors.green)),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const Spacer(),
-            Text(
-              productName,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-            // 剩余次数和过期信息
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.pinkAccent.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '$remaining ${'store_times'.tr}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.pinkAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if (remainingDays != null)
-                  Text(
-                    isExpired
-                        ? 'store_itemExpired'.tr
-                        : '${'store_expireIn'.tr} $remainingDays ${'store_days'.tr}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color:
-                          isExpired
-                              ? Colors.red
-                              : (isExpiringSoon ? Colors.orange : Colors.green),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // 价格信息
-            Row(
-              children: [
-                Icon(Icons.monetization_on, size: 16, color: Colors.orange),
-                const SizedBox(width: 4),
-                Text(
-                  '$purchasePrice ${'store_points'.tr}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.orange,
-                  ),
-                ),
-                const Spacer(),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: theme.colorScheme.outline,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -536,17 +698,23 @@ class StoreHomeWidgets {
     BuildContext context,
     SelectorResult result,
   ) {
-    final itemData = result.data as Map<String, dynamic>;
-    final itemId = itemData['id'] as String?;
+    final savedData = result.data as Map<String, dynamic>?;
+    if (savedData == null) return;
+
+    final itemId = savedData['id'] as String?;
     final productSnapshot =
-        itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+        savedData['product_snapshot'] as Map<String, dynamic>? ?? {};
     final productName = productSnapshot['name'] as String? ?? '未知物品';
 
     if (itemId != null) {
       NavigationHelper.pushNamed(
         context,
         '/store',
-        arguments: {'itemId': itemId, 'productName': productName},
+        arguments: {
+          'itemId': itemId,
+          'productName': productName,
+          'autoUse': true, // 跳转到详情页后自动弹出使用对话框
+        },
       );
     }
   }

@@ -11,12 +11,14 @@ class UserItemDetailPage extends StatefulWidget {
   final StoreController controller;
   final List<UserItem> items;
   final int initialIndex;
+  final bool autoUse; // 是否自动弹出使用对话框
 
   const UserItemDetailPage({
     super.key,
     required this.controller,
     required this.items,
     this.initialIndex = 0,
+    this.autoUse = false,
   });
 
   @override
@@ -26,18 +28,62 @@ class UserItemDetailPage extends StatefulWidget {
 class _UserItemDetailPageState extends State<UserItemDetailPage> {
   late int _currentIndex;
   late PageController _pageController;
+  bool _hasShownAutoUseDialog = false; // 防止重复弹出
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+
+    // 自动使用逻辑
+    if (widget.autoUse && !_hasShownAutoUseDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _hasShownAutoUseDialog = true;
+        _showUseDialog();
+      });
+    }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  /// 弹出使用对话框（使用已有的使用逻辑）
+  void _showUseDialog() {
+    final currentItem = widget.items[_currentIndex];
+
+    // 检查是否过期
+    if (currentItem.expireDate.isBefore(DateTime.now())) {
+      Toast.error('store_itemExpired'.tr);
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('store_useConfirmationTitle'.tr),
+        content: Text(
+          'store_useConfirmationMessage'.tr
+              .replaceFirst('%s', currentItem.productName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('app_cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _useCurrentItem();
+            },
+            child: Text('app_ok'.tr),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

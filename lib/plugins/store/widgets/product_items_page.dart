@@ -14,12 +14,14 @@ class ProductItemsPage extends StatefulWidget {
   final String productId;
   final String productName;
   final StoreController controller;
+  final bool autoUse; // 是否自动弹出使用对话框
 
   const ProductItemsPage({
     super.key,
     required this.productId,
     required this.productName,
     required this.controller,
+    this.autoUse = false,
   });
 
   @override
@@ -28,11 +30,20 @@ class ProductItemsPage extends StatefulWidget {
 
 class _ProductItemsPageState extends State<ProductItemsPage> {
   int _statusIndex = 0; // 0: 全部, 1: 可使用, 2: 已过期
+  bool _hasShownAutoUseDialog = false; // 防止重复弹出
 
   @override
   void initState() {
     super.initState();
     widget.controller.addListener(_onControllerUpdate);
+
+    // 自动使用逻辑
+    if (widget.autoUse && !_hasShownAutoUseDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _hasShownAutoUseDialog = true;
+        _showUseDialog();
+      });
+    }
   }
 
   @override
@@ -43,6 +54,50 @@ class _ProductItemsPageState extends State<ProductItemsPage> {
 
   void _onControllerUpdate() {
     if (mounted) setState(() {});
+  }
+
+  /// 弹出使用对话框（使用已有的 onUse 逻辑）
+  void _showUseDialog() {
+    final availableItems = _getFilteredItems().where(
+      (item) => item.expireDate.isAfter(DateTime.now()),
+    ).toList();
+
+    if (availableItems.isEmpty) {
+      Toast.warning('暂无可使用的物品');
+      return;
+    }
+
+    // 使用 UserItemCard 的 onUse 逻辑
+    final itemToUse = availableItems.first;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('store_useConfirmationTitle'.tr),
+        content: Text(
+          'store_useConfirmationMessage'.tr
+              .replaceFirst('%s', itemToUse.productName),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('app_cancel'.tr),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              if (await widget.controller.useItem(itemToUse)) {
+                Toast.success('store_useSuccess'.tr);
+              } else {
+                Toast.error('store_itemExpired'.tr);
+              }
+              setState(() {});
+            },
+            child: Text('app_ok'.tr),
+          ),
+        ],
+      ),
+    );
   }
 
   List<UserItem> _getFilteredItems() {

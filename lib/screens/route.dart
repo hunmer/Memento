@@ -4,6 +4,7 @@ import 'package:Memento/plugins/notes/screens/note_edit_screen.dart';
 import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
 import 'package:Memento/plugins/store/widgets/product_items_page.dart';
+import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/todo/views/todo_bottombar_view.dart';
 import 'package:Memento/plugins/timer/views/timer_task_details_page.dart';
@@ -522,17 +523,32 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const ScriptsCenterMainView());
       case '/store':
       case 'store':
+        // 支持通过 itemId 参数跳转到用户物品详情
+        String? itemId;
+        bool autoUse = false;
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          itemId = args['itemId'] as String?;
+          autoUse = args['autoUse'] as bool? ?? false;
+        }
+        if (itemId != null) {
+          return _createRoute(
+            _StoreUserItemRoute(itemId: itemId, autoUse: autoUse),
+          );
+        }
         return _createRoute(const StoreMainView());
       case '/store/product_items':
       case 'store/product_items':
         // 商品物品列表页面
         String? productId;
         String? productName;
+        bool autoUse = false;
 
         if (settings.arguments is Map<String, dynamic>) {
           final args = settings.arguments as Map<String, dynamic>;
           productId = args['productId'] as String?;
           productName = args['productName'] as String?;
+          autoUse = args['autoUse'] as bool? ?? false;
         }
 
         if (productId == null) {
@@ -544,7 +560,7 @@ class AppRoutes extends NavigatorObserver {
           );
         }
 
-        debugPrint('打开商品物品列表: productId=$productId, productName=$productName');
+        debugPrint('打开商品物品列表: productId=$productId, productName=$productName, autoUse=$autoUse');
 
         final storePlugin =
             PluginManager.instance.getPlugin('store') as StorePlugin?;
@@ -562,6 +578,7 @@ class AppRoutes extends NavigatorObserver {
             productId: productId,
             productName: productName ?? '商品',
             controller: storePlugin.controller,
+            autoUse: autoUse,
           ),
         );
       case '/timer':
@@ -1265,4 +1282,40 @@ CalendarEvent _convertTaskToEvent(Task task) {
     color: priorityColor,
     source: 'todo', // 标记为来自 Todo 插件
   );
+}
+
+/// Store 插件用户物品详情路由
+class _StoreUserItemRoute extends StatelessWidget {
+  final String itemId;
+  final bool autoUse;
+
+  const _StoreUserItemRoute({required this.itemId, this.autoUse = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final storePlugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
+    if (storePlugin == null) {
+      return const Scaffold(
+        body: Center(child: Text('Store 插件未初始化')),
+      );
+    }
+
+    // 根据 itemId 查找用户物品
+    final userItem = storePlugin.controller.userItems.firstWhereOrNull(
+      (item) => item.id == itemId,
+    );
+
+    if (userItem == null) {
+      return const Scaffold(
+        body: Center(child: Text('物品不存在')),
+      );
+    }
+
+    return UserItemDetailPage(
+      controller: storePlugin.controller,
+      items: [userItem],
+      initialIndex: 0,
+      autoUse: autoUse,
+    );
+  }
 }
