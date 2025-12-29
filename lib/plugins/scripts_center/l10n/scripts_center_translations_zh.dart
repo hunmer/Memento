@@ -42,4 +42,16 @@ const Map<String, String> scriptsCenterTranslationsZh = {
   'scripts_center_widgetDescription': '快速打开脚本中心',
   'scripts_center_overviewName': '脚本概览',
   'scripts_center_overviewDescription': '显示脚本统计信息',
+
+  // 脚本快速执行小组件
+  'scripts_center_scriptExecutorName': '脚本快速执行',
+  'scripts_center_scriptExecutorDescription': '选择并快速执行脚本',
+  'scripts_center_selectScript': '选择脚本',
+  'scripts_center_script': '脚本',
+  'scripts_center_tapToExecute': '点击执行',
+  'scripts_center_clickToExecute': '点击执行脚本',
+  'scripts_center_scriptNotFound': '脚本未找到',
+  'scripts_center_scriptExecuted': '脚本执行成功',
+  'scripts_center_scriptExecuteFailed': '脚本执行失败',
+  'scripts_center_scriptExecuteError': '脚本执行错误',
 };

@@ -679,75 +679,55 @@ class _PhotoCarouselWidgetState extends State<_PhotoCarouselWidget>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: double.infinity,
-      child: InfiniteCarousel.builder(
-        itemCount: widget.photos.length,
-        itemExtent: 136, // 120图片宽度 + 16左右间距(每边8)
-        center: true,
-        anchor: 0.15,
-        velocityFactor: 0.2,
-        controller: _controller,
-        axisDirection: Axis.horizontal,
-        loop: true,
-        itemBuilder: (context, itemIndex, realIndex) {
-          final photo = widget.photos[itemIndex];
-          return _buildCarouselPhotoItem(photo, itemIndex);
-        },
-      ),
-    );
-  }
-
-  /// 构建轮播图片项
-  Widget _buildCarouselPhotoItem(_PhotoItem photo, int index) {
-    final imageFile = _loadedImages[photo.imageUrl];
-
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: GestureDetector(
-        onTap: () => _openPhotoDetail(photo),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: SizedBox.expand(
-            child: imageFile != null
-                ? Image.file(
-                    imageFile,
-                    fit: BoxFit.cover,
-                  )
-                : Stack(
-                    children: [
-                      const Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      FutureBuilder<String>(
-                        future: ImageUtils.getAbsolutePath(photo.imageUrl),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                                  ConnectionState.done &&
-                              snapshot.data != null &&
-                              snapshot.data!.isNotEmpty) {
-                            WidgetsBinding.instance.addPostFrameCallback((
-                              _,
-                            ) async {
-                              final path = snapshot.data!;
-                              final file = File(path);
-                              if (file.existsSync() && mounted) {
-                                setState(() {
-                                  _loadedImages[photo.imageUrl] = file;
-                                });
-                              }
-                            });
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
-                    ],
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: SizedBox(
+        height: double.infinity,
+        child: InfiniteCarousel.builder(
+          itemCount: widget.photos.length,
+          itemExtent: 150,
+          loop: true,
+          controller: _controller,
+          itemBuilder: (context, itemIndex, realIndex) {
+            final photo = widget.photos[itemIndex];
+            final imageFile = _loadedImages[photo.imageUrl];
+
+            // 如果图片未加载，触发加载
+            if (imageFile == null) {
+              _loadImageAsync(photo.imageUrl);
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: GestureDetector(
+                onTap: () => _openPhotoDetail(photo),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    // boxShadow: kElevationToShadow[2],
+                    image:
+                        imageFile != null
+                            ? DecorationImage(
+                              image: FileImage(imageFile),
+                              fit: BoxFit.fitHeight,
+                            )
+                            : null,
                   ),
-          ),
+                  child:
+                      imageFile == null
+                          ? const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                          : null,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
