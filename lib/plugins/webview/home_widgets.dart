@@ -202,11 +202,7 @@ class WebviewHomeWidgets {
             // 顶部标签行
             Row(
               children: [
-                Icon(
-                  Icons.link,
-                  size: 20,
-                  color: const Color(0xFF4285F4),
-                ),
+                Icon(Icons.link, size: 20, color: const Color(0xFF4285F4)),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -219,7 +215,10 @@ class WebviewHomeWidgets {
                 ),
                 if (isLocalFile)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4),
@@ -282,10 +281,7 @@ class WebviewHomeWidgets {
     NavigationHelper.pushNamed(
       context,
       '/webview/browser',
-      arguments: {
-        'url': url,
-        'cardId': cardId,
-      },
+      arguments: {'url': url, 'cardId': cardId},
     );
   }
 }

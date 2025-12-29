@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_folder.dart';
+import 'package:Memento/plugins/scripts_center/models/script_input.dart';
+import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
 import 'script_loader.dart';
 
 /// 脚本管理器服务
@@ -410,6 +412,80 @@ class ScriptManager extends ChangeNotifier {
       'exportTime': DateTime.now().toIso8601String(),
       'scripts': _scripts.map((s) => s.toJson()).toList(),
     };
+  }
+
+  /// 从编辑界面的结果数据保存脚本（统一处理创建和更新）
+  ///
+  /// [result] - 从 ScriptEditScreen 返回的数据
+  /// [existingScript] - 如果为 null 则创建新脚本，否则更新现有脚本
+  Future<void> saveScriptFromEditResult(
+    Map<String, dynamic> result, {
+    ScriptInfo? existingScript,
+  }) async {
+    // 解析触发器数据
+    final triggersData = result['triggers'] as List<dynamic>? ?? [];
+    final triggers = triggersData
+        .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
+        .toList();
+
+    // 解析输入参数数据
+    final inputsData = (result['inputs'] as List<dynamic>? ?? [])
+        .map((e) => e as ScriptInput)
+        .toList();
+
+    if (existingScript == null) {
+      // 创建新脚本
+      await createScript(
+        scriptId: result['id'] as String,
+        name: result['name'] as String,
+        description: result['description'] as String,
+        version: result['version'] as String,
+        icon: result['icon'] as String,
+        author: result['author'] as String,
+      );
+
+      // 获取新创建的脚本并更新其他属性
+      final newScript = getScriptById(result['id'] as String);
+      if (newScript != null) {
+        await saveScriptMetadata(
+          newScript.id,
+          newScript.copyWith(
+            enabled: result['enabled'] as bool,
+            type: result['type'] as String,
+            updateUrl: result['updateUrl'] as String?,
+            inputs: inputsData,
+            triggers: triggers,
+          ),
+        );
+
+        // 保存代码
+        final code = result['code'] as String? ?? '';
+        if (code.isNotEmpty) {
+          await saveScriptCode(newScript.id, code);
+        }
+      }
+    } else {
+      // 编辑现有脚本
+      final updatedScript = existingScript.copyWith(
+        name: result['name'] as String,
+        description: result['description'] as String,
+        version: result['version'] as String,
+        icon: result['icon'] as String,
+        author: result['author'] as String,
+        enabled: result['enabled'] as bool,
+        type: result['type'] as String,
+        updateUrl: result['updateUrl'] as String?,
+        inputs: inputsData,
+        triggers: triggers,
+        updatedAt: DateTime.now(),
+      );
+
+      await saveScriptMetadata(existingScript.id, updatedScript);
+
+      // 保存代码
+      final code = result['code'] as String? ?? '';
+      await saveScriptCode(existingScript.id, code);
+    }
   }
 
   @override

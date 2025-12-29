@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/services/script_executor.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
-import 'package:Memento/plugins/scripts_center/models/script_input.dart';
-import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_card.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_run_dialog.dart';
 import 'script_edit_screen.dart';
@@ -31,19 +29,12 @@ class ScriptsListScreen extends StatefulWidget {
 }
 
 class _ScriptsListScreenState extends State<ScriptsListScreen> {
-  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  final bool _showOnlyEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _searchQuery = widget.searchQuery ?? '';
-    _searchController.addListener(() {
-      setState(() {
-        _searchQuery = _searchController.text;
-      });
-    });
   }
 
   @override
@@ -56,20 +47,9 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   /// 获取筛选后的脚本列表
   List<ScriptInfo> _getFilteredScripts() {
     var scripts = widget.scriptManager.scripts;
-
-    // 按启用状态筛选
-    if (_showOnlyEnabled) {
-      scripts = scripts.where((s) => s.enabled).toList();
-    }
 
     // 按搜索关键词筛选
     if (_searchQuery.isNotEmpty) {
@@ -116,84 +96,16 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
     if (result == null || !mounted) return;
 
     try {
-      if (script == null) {
-        // 创建新脚本
-        await widget.scriptManager.createScript(
-          scriptId: result['id'] as String,
-          name: result['name'] as String,
-          description: result['description'] as String,
-          version: result['version'] as String,
-          icon: result['icon'] as String,
-          author: result['author'] as String,
+      // 使用统一的保存方法
+      await widget.scriptManager.saveScriptFromEditResult(
+        result,
+        existingScript: script,
+      );
+
+      if (mounted) {
+        Toast.success(
+          script == null ? '脚本创建成功！' : '脚本更新成功！',
         );
-
-        // 更新启用状态和其他属性（包括代码和触发器）
-        final newScript = widget.scriptManager.getScriptById(result['id'] as String);
-        if (newScript != null) {
-          // 解析触发器数据
-          final triggersData = result['triggers'] as List<dynamic>? ?? [];
-          final triggers = triggersData
-              .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
-              .toList();
-
-          // 解析输入参数数据
-          final inputsData = result['inputs'] as List<ScriptInput>? ?? [];
-
-          await widget.scriptManager.saveScriptMetadata(
-            newScript.id,
-            newScript.copyWith(
-              enabled: result['enabled'] as bool,
-              type: result['type'] as String,
-              updateUrl: result['updateUrl'] as String?,
-              inputs: inputsData,
-              triggers: triggers,
-            ),
-          );
-
-          // 保存代码
-          final code = result['code'] as String? ?? '';
-          if (code.isNotEmpty) {
-            await widget.scriptManager.saveScriptCode(newScript.id, code);
-          }
-        }
-
-        if (mounted) {
-          Toast.success('脚本创建成功！');
-        }
-      } else {
-        // 解析触发器数据
-        final triggersData = result['triggers'] as List<dynamic>? ?? [];
-        final triggers = triggersData
-            .map((t) => ScriptTrigger.fromJson(t as Map<String, dynamic>))
-            .toList();
-
-        // 解析输入参数数据
-        final inputsData = result['inputs'] as List<ScriptInput>? ?? [];
-
-        // 编辑现有脚本
-        final updatedScript = script.copyWith(
-          name: result['name'] as String,
-          description: result['description'] as String,
-          version: result['version'] as String,
-          icon: result['icon'] as String,
-          author: result['author'] as String,
-          enabled: result['enabled'] as bool,
-          type: result['type'] as String,
-          updateUrl: result['updateUrl'] as String?,
-          inputs: inputsData,
-          triggers: triggers,
-          updatedAt: DateTime.now(),
-        );
-
-        await widget.scriptManager.saveScriptMetadata(script.id, updatedScript);
-
-        // 保存代码
-        final code = result['code'] as String? ?? '';
-        await widget.scriptManager.saveScriptCode(script.id, code);
-
-        if (mounted) {
-          Toast.success('脚本更新成功！');
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -272,31 +184,6 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
       value: widget.scriptManager,
       child: Column(
         children: [
-          // 搜索栏
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '搜索脚本...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
-                fillColor: Colors.grey[100],
-              ),
-            ),
-          ),
-
           // 脚本列表
           Expanded(
             child: Consumer<ScriptManager>(

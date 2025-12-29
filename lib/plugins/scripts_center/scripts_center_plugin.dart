@@ -7,6 +7,11 @@ import 'package:Memento/core/event/event_args.dart' as event_args;
 import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_definition.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_step.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';
@@ -176,10 +181,77 @@ class ScriptsCenterPlugin extends BasePlugin {
       print('✅ ScriptsCenterPlugin初始化成功');
       print('   - 已加载 ${_scriptManager.scriptCount} 个脚本');
       print('   - 已启用 ${_scriptManager.enabledScriptCount} 个脚本');
+
+      // 注册数据选择器
+      _registerDataSelectors();
     } catch (e) {
       print('❌ ScriptsCenterPlugin初始化失败: $e');
       rethrow;
     }
+  }
+
+  /// 注册数据选择器
+  void _registerDataSelectors() {
+    final pluginDataSelectorService = PluginDataSelectorService.instance;
+
+    // 注册脚本选择器
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'scripts_center.script',
+        pluginId: id,
+        name: 'scripts_center_selectScript'.tr,
+        icon: icon,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'select_script',
+            title: 'scripts_center_selectScript'.tr,
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              // 获取所有启用的脚本
+              final scripts = await _scriptManager.loadAllScripts();
+              final enabledScripts = scripts.where((s) => s.enabled).toList();
+
+              return enabledScripts.map((script) {
+                // 解析图标
+                IconData scriptIcon;
+                try {
+                  scriptIcon = IconData(
+                    int.parse(script.icon, radix: 16),
+                    fontFamily: 'MaterialIcons',
+                  );
+                } catch (e) {
+                  scriptIcon = Icons.code;
+                }
+
+                return SelectableItem(
+                  id: script.id,
+                  title: script.name,
+                  subtitle: script.description.isNotEmpty
+                      ? script.description
+                      : 'v${script.version}',
+                  icon: scriptIcon,
+                  rawData: {
+                    'id': script.id,
+                    'name': script.name,
+                    'description': script.description,
+                    'icon': script.icon,
+                    'version': script.version,
+                    'type': script.type,
+                    'hasInputs': script.hasInputs,
+                  },
+                );
+              }).toList();
+            },
+          ),
+        ],
+      ),
+    );
+
+    print('✅ 脚本选择器注册成功');
   }
 
   /// 初始化默认文件夹
@@ -466,9 +538,17 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       ScriptEditScreen(script: null, scriptManager: _plugin.scriptManager),
     );
 
-    if (result != null && result['success'] == true) {
+    if (result == null) return;
+
+    try {
+      // 使用统一的保存方法
+      await _plugin.scriptManager.saveScriptFromEditResult(result);
+
       // 刷新列表
       await _plugin.scriptManager.loadScripts();
+      Toast.success('脚本创建成功！');
+    } catch (e) {
+      Toast.error('操作失败: $e');
     }
   }
 }

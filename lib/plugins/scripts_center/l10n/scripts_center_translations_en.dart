@@ -42,4 +42,16 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_widgetDescription': 'Quick access to Script Center',
   'scripts_center_overviewName': 'Script Overview',
   'scripts_center_overviewDescription': 'Display script statistics',
+
+  // Script Executor Widget
+  'scripts_center_scriptExecutorName': 'Script Quick Execute',
+  'scripts_center_scriptExecutorDescription': 'Select and quickly execute a script',
+  'scripts_center_selectScript': 'Select Script',
+  'scripts_center_script': 'Script',
+  'scripts_center_tapToExecute': 'Tap to Execute',
+  'scripts_center_clickToExecute': 'Click to execute script',
+  'scripts_center_scriptNotFound': 'Script not found',
+  'scripts_center_scriptExecuted': 'Script executed successfully',
+  'scripts_center_scriptExecuteFailed': 'Script execution failed',
+  'scripts_center_scriptExecuteError': 'Script execution error',
 };
