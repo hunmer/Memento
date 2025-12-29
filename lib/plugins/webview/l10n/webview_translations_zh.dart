@@ -131,4 +131,13 @@ const Map<String, String> webviewTranslationsZh = {
   'webview_widgetDescription': '快速打开内置浏览器',
   'webview_overviewName': '浏览器概览',
   'webview_overviewDescription': '显示浏览器统计信息',
+  'webview_cardQuickAccess': '网址快捷访问',
+  'webview_cardQuickAccessDesc': '点击选择要显示的网址卡片',
+  'webview_embeddedName': '内置网页',
+  'webview_embeddedDesc': '在小组件中直接显示网页内容',
+  'webview_selectCard': '选择网址卡片',
+  'webview_quickAccess': '快捷访问',
+  'webview_localFile': '本地文件',
+  'webview_cardSelectorName': '网址卡片',
+  'webview_cardSelectorDesc': '选择一个网址卡片添加到主页',
 };

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
-import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
-import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
-import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'webview_plugin.dart';
-import 'package:get/get.dart';
+import 'widgets/embedded_webview.dart';
 
 /// WebView插件的主页小组件注册
 class WebviewHomeWidgets {
@@ -70,6 +71,7 @@ class WebviewHomeWidgets {
 
         // 选择器配置
         selectorId: 'webview.card',
+        dataSelector: _extractCardData,
         dataRenderer: _renderCardData,
         navigationHandler: _navigateToCard,
 
@@ -78,6 +80,34 @@ class WebviewHomeWidgets {
           // 点击事件由 HomeCard 处理
           return GenericSelectorWidget(
             widgetDefinition: registry.getWidget('webview_card_selector')!,
+            config: config,
+          );
+        },
+      ),
+    );
+
+    // 内置网页小组件 - 在小组件中直接显示网页
+    registry.register(
+      HomeWidget(
+        id: 'webview_embedded',
+        pluginId: 'webview',
+        name: 'webview_embeddedName'.tr,
+        description: 'webview_embeddedDesc'.tr,
+        icon: Icons.web,
+        color: const Color(0xFF4285F4),
+        defaultSize: HomeWidgetSize.custom,
+        supportedSizes: [HomeWidgetSize.custom],
+        category: 'home_categoryTools'.tr,
+
+        // 选择器配置
+        selectorId: 'webview.card',
+        dataSelector: _extractCardData,
+        dataRenderer: _renderEmbeddedWebView,
+        navigationHandler: _navigateToCard,
+
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('webview_embedded')!,
             config: config,
           );
         },
@@ -172,6 +202,22 @@ class WebviewHomeWidgets {
 
   // ===== 选择器小组件相关方法 =====
 
+  /// 从选择器数据中提取必要字段保存到本地存储
+  static Map<String, dynamic> _extractCardData(List<dynamic> dataArray) {
+    if (dataArray.isEmpty) {
+      return {};
+    }
+
+    final itemData = dataArray[0] as Map<String, dynamic>;
+
+    return {
+      'id': itemData['id'] as String?,
+      'title': itemData['title'] as String?,
+      'url': itemData['url'] as String?,
+      'type': itemData['type'] as String?,
+    };
+  }
+
   /// 渲染卡片数据
   static Widget _renderCardData(
     BuildContext context,
@@ -180,9 +226,9 @@ class WebviewHomeWidgets {
   ) {
     final theme = Theme.of(context);
 
-    // 从 result.data 获取卡片数据
-    if (result.data == null) {
-      return _buildErrorWidget(context, '数据不存在');
+    // dataSelector 已经将数据转换为 Map，直接使用
+    if (result.data == null || result.data is! Map) {
+      return _buildErrorWidget(context, '数据不存在或格式错误');
     }
 
     final cardData = result.data as Map<String, dynamic>;
@@ -271,17 +317,166 @@ class WebviewHomeWidgets {
     );
   }
 
+  /// 渲染内置 WebView 小组件
+  static Widget _renderEmbeddedWebView(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    // dataSelector 已经将数据转换为 Map，直接使用
+    if (result.data == null || result.data is! Map) {
+      return _buildErrorWidget(context, '数据不存在或格式错误');
+    }
+
+    final cardData = result.data as Map<String, dynamic>;
+    final url = cardData['url'] as String? ?? '';
+    final title = cardData['title'] as String? ?? '未知卡片';
+
+    if (url.isEmpty) {
+      return _buildErrorWidget(context, 'URL 为空');
+    }
+
+    // 获取自定义尺寸
+    final customWidth = config['customWidth'] as int? ?? 2;
+    final customHeight = config['customHeight'] as int? ?? 2;
+
+    return _EmbeddedWebViewWidget(
+      url: url,
+      title: title,
+      width: customWidth,
+      height: customHeight,
+    );
+  }
+
   /// 导航到卡片
   static void _navigateToCard(BuildContext context, SelectorResult result) {
+    // dataSelector 已经将数据转换为 Map，直接使用
+    if (result.data == null || result.data is! Map) {
+      return;
+    }
+
     final cardData = result.data as Map<String, dynamic>;
-    final cardId = cardData['id'] as String;
-    final url = cardData['url'] as String;
+    final cardId = cardData['id'] as String?;
+    final url = cardData['url'] as String?;
+
+    if (cardId == null || url == null) return;
 
     // 跳转到 WebView 浏览器，直接打开该 URL
     NavigationHelper.pushNamed(
       context,
       '/webview/browser',
       arguments: {'url': url, 'cardId': cardId},
+    );
+  }
+}
+
+/// 嵌入式 WebView 小组件件
+class _EmbeddedWebViewWidget extends StatefulWidget {
+  final String url;
+  final String title;
+  final int width;
+  final int height;
+
+  const _EmbeddedWebViewWidget({
+    required this.url,
+    required this.title,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  State<_EmbeddedWebViewWidget> createState() => _EmbeddedWebViewWidgetState();
+}
+
+class _EmbeddedWebViewWidgetState extends State<_EmbeddedWebViewWidget> {
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // 添加超时机制：10 秒后自动隐藏加载指示器
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted && _isLoading) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // 使用可复用的 EmbeddedWebView 组件
+            EmbeddedWebView(
+              url: widget.url,
+              onLoadingChanged: (isLoading) {
+                if (mounted && _isLoading != isLoading) {
+                  setState(() {
+                    _isLoading = isLoading;
+                  });
+                }
+              },
+            ),
+            // 加载进度指示器
+            if (_isLoading)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '加载中...',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            // 标题标签（半透明）
+            if (!_isLoading && widget.title.isNotEmpty)
+              Positioned(
+                top: 8,
+                left: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    widget.title,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.white,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
