@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
@@ -226,55 +226,95 @@ class GoodsHomeWidgets {
     final icon = warehouse.icon;
     final color = warehouse.iconColor;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 顶部图标和标题
-              Row(
+    return FutureBuilder<String?>(
+      future: warehouse.getImageUrl(),
+      builder: (context, snapshot) {
+        final hasImage = snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty;
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => _navigateToWarehouse(context, result),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: hasImage
+                    ? DecorationImage(
+                        image: ImageUtils.createImageProvider(snapshot.data),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+                gradient: hasImage
+                    ? null
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          color.withAlpha(30),
+                          color.withAlpha(10),
+                        ],
+                      ),
+              ),
+              child: Stack(
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: color.withAlpha(50),
-                      borderRadius: BorderRadius.circular(12),
+                  // 半透明遮罩（确保文字可读性）
+                  if (hasImage)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.black.withOpacity(0.3),
+                      ),
                     ),
-                    child: Icon(icon, size: 28, color: color),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 顶部图标和标题
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: (hasImage ? Colors.white : color).withAlpha(hasImage ? 200 : 50),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(icon, size: 28, color: hasImage ? color : color),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          '$itemCount 件物品',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: hasImage ? Colors.white : null,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '$itemCount 件物品',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: (hasImage ? Colors.white70 : theme.colorScheme.onSurfaceVariant),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -332,89 +372,112 @@ class GoodsHomeWidgets {
     final title = item.title;
     final price = item.purchasePrice;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 图片和基本信息
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 物品图片或图标
-                  _buildItemImage(item),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (price != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            '¥${price.toStringAsFixed(2)}',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 构建物品图片组件
-  static Widget _buildItemImage(GoodsItem item) {
-    final effectiveColor = item.iconColor ?? _goodsColor;
-    final icon = item.icon ?? Icons.inventory_2;
-
     return FutureBuilder<String?>(
       future: item.getImageUrl(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data != null) {
-          return Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(
-                image: FileImage(File(snapshot.data!)),
-                fit: BoxFit.cover,
+        final hasImage = snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty;
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => _navigateToItem(context, result),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                image: hasImage
+                    ? DecorationImage(
+                        image: ImageUtils.createImageProvider(snapshot.data),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+                gradient: hasImage
+                    ? null
+                    : LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          _goodsColor.withAlpha(30),
+                          _goodsColor.withAlpha(10),
+                        ],
+                      ),
+              ),
+              child: Stack(
+                children: [
+                  // 半透明遮罩（确保文字可读性）
+                  if (hasImage)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.black.withOpacity(0.3),
+                      ),
+                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 图片和基本信息
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 物品图片或图标
+                          _buildItemImageWidget(item, hasImage: hasImage),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: hasImage ? Colors.white : null,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (price != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '¥${price.toStringAsFixed(2)}',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: hasImage ? Colors.white : theme.colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        }
-        return Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: effectiveColor.withAlpha(50),
-            borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, size: 32, color: effectiveColor),
         );
       },
     );
   }
+
+  /// 构建物品图片组件（支持图片背景）
+  static Widget _buildItemImageWidget(GoodsItem item, {bool hasImage = false}) {
+    final effectiveColor = item.iconColor ?? _goodsColor;
+    final icon = item.icon ?? Icons.inventory_2;
+
+    return Container(
+      width: 64,
+      height: 64,
+      decoration: BoxDecoration(
+        color: (hasImage ? Colors.white : effectiveColor).withAlpha(hasImage ? 200 : 50),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, size: 32, color: effectiveColor),
+    );
+  }
+
 
   /// 导航到物品详情页面
   static void _navigateToItem(BuildContext context, SelectorResult result) {
