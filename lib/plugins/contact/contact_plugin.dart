@@ -627,7 +627,7 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
                     'email': contact.email,
                     'tags': contact.tags.join(', '),
                   },
-                  rawData: contact,
+                  rawData: contact.toJson(), // 保存为 Map 而不是 Contact 对象
                 );
               }).toList();
             },

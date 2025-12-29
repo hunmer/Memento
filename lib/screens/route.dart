@@ -65,10 +65,11 @@ import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
-import 'package:provider/provider.dart';
 import 'package:Memento/plugins/calendar_album/screens/calendar_album_weekly_selector_screen.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
+import 'package:Memento/plugins/contact/widgets/contact_form.dart';
+import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
@@ -477,6 +478,22 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const CalendarAlbumMainView());
       case '/contact':
       case 'contact':
+        return _createRoute(const ContactMainView());
+      case '/contact/detail':
+      case 'contact/detail':
+        // 联系人详情页（从小组件打开）
+        String? contactId;
+        if (settings.arguments is Map<String, dynamic>) {
+          contactId = (settings.arguments as Map<String, dynamic>)['contactId'] as String?;
+        }
+
+        // 异步加载联系人数据并打开编辑表单
+        if (contactId != null && contactId.isNotEmpty) {
+          // 使用 FutureBuilder 来处理异步加载
+          return _createRoute(
+            _ContactDetailLoader(contactId: contactId),
+          );
+        }
         return _createRoute(const ContactMainView());
       case '/database':
       case 'database':
@@ -1386,5 +1403,86 @@ class _StoreUserItemRoute extends StatelessWidget {
       initialIndex: 0,
       autoUse: autoUse,
     );
+  }
+}
+
+/// 联系人详情页加载器
+/// 用于从小组件导航到联系人编辑页面
+class _ContactDetailLoader extends StatelessWidget {
+  final String contactId;
+
+  const _ContactDetailLoader({required this.contactId});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<ContactPlugin?>(
+      future: _loadContactPlugin(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final plugin = snapshot.data;
+        if (plugin == null) {
+          return Scaffold(
+            body: Center(
+              child: Text('contact_pluginNotFound'.tr),
+            ),
+          );
+        }
+
+        return FutureBuilder<Contact?>(
+          future: plugin.controller.getContact(contactId),
+          builder: (context, contactSnapshot) {
+            if (contactSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final contact = contactSnapshot.data;
+            if (contact == null) {
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.person_off, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text('contact_notFound'.tr),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // 导航到联系人编辑表单
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => ContactForm(
+                    contact: contact,
+                    onSave: (savedContact) async {
+                      await plugin.controller.updateContact(savedContact);
+                    },
+                  ),
+                ),
+              );
+            });
+
+            // 显示加载界面
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<ContactPlugin?> _loadContactPlugin() async {
+    return PluginManager.instance.getPlugin('contact') as ContactPlugin?;
   }
 }

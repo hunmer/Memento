@@ -9,6 +9,9 @@ enum HomeWidgetSize {
   /// 2x2 大卡片
   large(2, 2),
 
+  /// 2x3 高卡片（宽度2，高度3）
+  large3(2, 3),
+
   /// 4x1 宽屏卡片（占满所有宽度）
   wide(4, 1),
 

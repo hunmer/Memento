@@ -213,6 +213,7 @@ final Map<String, String> screensTranslationsEn = {
   'screens_smallSize': 'Small (Icon)',
   'screens_mediumSize': 'Medium (Horizontal Card)',
   'screens_largeSize': 'Large (Square Card)',
+  'screens_large3Size': 'Tall (Vertical Card)',
   'screens_wideSize': 'Wide (Full Width x1)',
   'screens_wide2Size': 'Wide (Full Width x2)',
   'screens_wide3Size': 'Wide (Full Width x3)',
