@@ -64,6 +64,7 @@ import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
+import 'package:provider/provider.dart';
 import 'package:Memento/plugins/calendar_album/screens/calendar_album_weekly_selector_screen.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
@@ -82,6 +83,7 @@ import 'package:Memento/plugins/openai/openai_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
 import 'package:Memento/plugins/timer/views/timer_main_view.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
+import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:Memento/plugins/tracker/screens/tracker_goal_selector_screen.dart';
 import 'package:Memento/plugins/tracker/screens/tracker_goal_progress_selector_screen.dart';
 
@@ -577,6 +579,21 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const TodoBottomBarView());
       case '/tracker':
       case 'tracker':
+        // 支持通过 goalId 参数跳转到目标详情页面
+        String? goalId;
+        if (settings.arguments is Map<String, dynamic>) {
+          goalId = (settings.arguments as Map<String, dynamic>)['goalId'] as String?;
+        }
+        debugPrint('[Route] /tracker: goalId=$goalId');
+
+        // 如果有 goalId，直接打开目标详情页面
+        if (goalId != null) {
+          return _createRoute(
+            GoalDetailScreen(goalId: goalId),
+            settings: settings,
+          );
+        }
+        // 没有 goalId，打开主视图
         return _createRoute(const TrackerMainView());
       case '/floating_ball':
       case 'floating_ball':
@@ -1183,7 +1200,6 @@ class AppRoutes extends NavigatorObserver {
     scriptsCenter: (context) => const ScriptsCenterMainView(),
     timer: (context) => const TimerMainView(),
     todo: (context) => const TodoBottomBarView(),
-    tracker: (context) => const TrackerMainView(),
     floatingBall: (context) => const FloatingBallScreen(),
     activityDailyConfig:
         (context) => const ActivityDailyConfigScreen(widgetId: 0),
