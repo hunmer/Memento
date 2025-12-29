@@ -146,5 +146,9 @@ class CalendarAlbumTranslationsEn {
     'calendar_album_widget_description': 'Quick access to calendar album',
     'calendar_album_overview_name': 'Calendar Album Overview',
     'calendar_album_overview_description': 'Display album statistics',
+    'calendar_album_weekly_name': 'Weekly Album',
+    'calendar_album_weekly_description': 'Show photos from this week',
+    'calendar_album_photo_carousel_name': 'Photo Carousel',
+    'calendar_album_photo_carousel_description': 'Recent 30 days photo carousel',
   };
 }

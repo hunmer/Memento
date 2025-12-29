@@ -143,5 +143,9 @@ class CalendarAlbumTranslationsZh {
     'calendar_album_widget_description': '快速打开日历相册',
     'calendar_album_overview_name': '日历相册概览',
     'calendar_album_overview_description': '显示相册统计信息',
+    'calendar_album_weekly_name': '本周相册',
+    'calendar_album_weekly_description': '展示本周七天的日记图片',
+    'calendar_album_photo_carousel_name': '照片轮播',
+    'calendar_album_photo_carousel_description': '最近30天的照片轮播',
   };
 }
