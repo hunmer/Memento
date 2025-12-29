@@ -9,6 +9,7 @@ final Map<String, String> nodesTranslationsEn = {
 
   // Notebook management
   'nodes_notebooks': 'Notebooks',
+  'nodes_notebook': 'Notebook',
   'nodes_addNotebook': 'Add notebook',
   'nodes_editNotebook': 'Edit notebook',
   'nodes_deleteNotebook': 'Delete notebook',
@@ -93,4 +94,11 @@ final Map<String, String> nodesTranslationsEn = {
   'nodes_widgetDescription': 'Quick access to Nodes',
   'nodes_overviewName': 'Nodes Overview',
   'nodes_overviewDescription': 'Display nodes statistics',
+
+  // Node List Widget
+  'nodes_selectNotebook': 'Select notebook',
+  'nodes_notebookListName': 'Node List',
+  'nodes_notebookListDescription': 'Display nodes from selected notebook',
+  'nodes_nodeCount': 'count nodes',
+  'nodes_noNodes': 'No nodes',
 };

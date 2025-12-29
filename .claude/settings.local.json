@@ -31,7 +31,9 @@
       "Skill(skill-creator)",
       "Skill(add-route-context)",
       "Skill(add-multi-filter)",
-      "Skill(refactor-form-to-builder)"
+      "Skill(refactor-form-to-builder)",
+      "Skill(add-home-widget-selector)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

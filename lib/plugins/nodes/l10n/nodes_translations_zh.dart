@@ -9,6 +9,7 @@ final Map<String, String> nodesTranslationsZh = {
 
   // 笔记本管理
   'nodes_notebooks': '笔记本',
+  'nodes_notebook': '笔记本',
   'nodes_addNotebook': '添加笔记本',
   'nodes_editNotebook': '编辑笔记本',
   'nodes_deleteNotebook': '删除笔记本',
@@ -94,4 +95,11 @@ final Map<String, String> nodesTranslationsZh = {
   'nodes_widgetDescription': '快速打开节点笔记本',
   'nodes_overviewName': '节点概览',
   'nodes_overviewDescription': '显示节点统计信息',
+
+  // 节点列表小组件
+  'nodes_selectNotebook': '选择笔记本',
+  'nodes_notebookListName': '节点列表',
+  'nodes_notebookListDescription': '显示选定笔记本的节点列表',
+  'nodes_nodeCount': 'count 个节点',
+  'nodes_noNodes': '暂无节点',
 };

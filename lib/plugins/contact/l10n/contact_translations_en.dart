@@ -115,4 +115,12 @@ const Map<String, String> contactTranslationsEn = {
   'contact_widgetDescription': 'Quick access to contacts',
   'contact_overviewName': 'Contacts Overview',
   'contact_overviewDescription': 'Display contacts statistics',
+  'contact_personCardName': 'Contact Card',
+  'contact_personCardDescription': 'Select a contact to display on home',
+  'contact_today': 'Today',
+  'contact_yesterday': 'Yesterday',
+  'contact_daysAgo': '@days days ago',
+  'contact_notFound': 'Contact not found',
+  'contact_unknownContact': 'Unknown Contact',
+  'contact_pluginNotFound': 'Contacts plugin not initialized',
 };

@@ -1085,6 +1085,7 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   // ========== 数据选择器 ==========
 
   void _registerDataSelectors() {
+    // 注册节点选择器
     pluginDataSelectorService.registerSelector(
       SelectorDefinition(
         id: 'nodes.node',
@@ -1148,6 +1149,59 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
               }
 
               return items;
+            },
+            searchFilter: (items, query) {
+              if (query.isEmpty) return items;
+              final lowerQuery = query.toLowerCase();
+              return items
+                  .where(
+                    (item) =>
+                        item.title.toLowerCase().contains(lowerQuery) ||
+                        (item.subtitle?.toLowerCase().contains(lowerQuery) ??
+                            false),
+                  )
+                  .toList();
+            },
+          ),
+        ],
+      ),
+    );
+
+    // 注册笔记本选择器（用于节点列表小组件）
+    pluginDataSelectorService.registerSelector(
+      SelectorDefinition(
+        id: 'nodes.notebook',
+        pluginId: id,
+        name: 'nodes_selectNotebook'.tr,
+        icon: Icons.book,
+        color: color,
+        searchable: true,
+        selectionMode: SelectionMode.single,
+        steps: [
+          SelectorStep(
+            id: 'notebook',
+            title: 'nodes_selectNotebook'.tr,
+            viewType: SelectorViewType.list,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              return _controller.notebooks.map((notebook) {
+                // 计算节点数量
+                final nodeCount = _countAllNodes(notebook.nodes);
+
+                return SelectableItem(
+                  id: notebook.id,
+                  title: notebook.title,
+                  subtitle: 'nodes_nodeCount'.trParams({'count': '$nodeCount'}),
+                  icon: notebook.icon,
+                  rawData: {
+                    'id': notebook.id,
+                    'title': notebook.title,
+                    'icon': notebook.icon.codePoint,
+                    'color': notebook.color.value,
+                    'nodeCount': nodeCount,
+                  },
+                );
+              }).toList();
             },
             searchFilter: (items, query) {
               if (query.isEmpty) return items;

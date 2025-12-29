@@ -987,6 +987,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         return 'screens_mediumSize'.tr;
       case HomeWidgetSize.large:
         return 'screens_largeSize'.tr;
+      case HomeWidgetSize.large3:
+        return 'screens_large3Size'.tr;
       case HomeWidgetSize.wide:
         return 'screens_wideSize'.tr;
       case HomeWidgetSize.wide2:

@@ -213,6 +213,7 @@ final Map<String, String> screensTranslationsZh = {
   'screens_smallSize': '小 (图标)',
   'screens_mediumSize': '中 (横向卡片)',
   'screens_largeSize': '大 (方形卡片)',
+  'screens_large3Size': '高 (竖长卡片)',
   'screens_wideSize': '宽 (全宽1行)',
   'screens_wide2Size': '宽 (全宽2行)',
   'screens_wide3Size': '宽 (全宽3行)',
