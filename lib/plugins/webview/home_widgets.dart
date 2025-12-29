@@ -238,27 +238,16 @@ class WebviewHomeWidgets {
     final isLocalFile = type == 'local';
 
     return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // 顶部标签行
             Row(
               children: [
-                Icon(Icons.link, size: 20, color: const Color(0xFF4285F4)),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'webview_quickAccess'.tr,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.outline,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
                 if (isLocalFile)
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -279,7 +268,6 @@ class WebviewHomeWidgets {
                   ),
               ],
             ),
-            const Spacer(),
             // 卡片标题
             Text(
               title,
@@ -288,6 +276,7 @@ class WebviewHomeWidgets {
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             // URL 或路径
@@ -441,36 +430,8 @@ class _EmbeddedWebViewWidgetState extends State<_EmbeddedWebViewWidget> {
                         color: theme.colorScheme.primary,
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        '加载中...',
-                        style: theme.textTheme.bodySmall,
-                      ),
+                      Text('加载中...', style: theme.textTheme.bodySmall),
                     ],
-                  ),
-                ),
-              ),
-            // 标题标签（半透明）
-            if (!_isLoading && widget.title.isNotEmpty)
-              Positioned(
-                top: 8,
-                left: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    widget.title,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.white,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),

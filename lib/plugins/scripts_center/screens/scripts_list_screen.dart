@@ -225,6 +225,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
                 return RefreshIndicator(
                   onRefresh: _refreshScripts,
                   child: ListView.builder(
+                    padding: EdgeInsets.zero,
                     itemCount: scripts.length,
                     itemBuilder: (context, index) {
                       final script = scripts[index];
