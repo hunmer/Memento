@@ -18,14 +18,22 @@ import 'package:Memento/plugins/habits/repositories/client_habits_repository.dar
 import 'package:shared_models/usecases/habits/habits_usecase.dart';
 
 /// 习惯追踪插件主视图
-class HabitsMainView extends StatelessWidget {
-  const HabitsMainView({super.key});
+class HabitsMainView extends StatefulWidget {
+  /// 可选的习惯ID，用于从小组件跳转时自动显示习惯详情
+  final String? habitId;
 
+  const HabitsMainView({super.key, this.habitId});
+
+  @override
+  State<HabitsMainView> createState() => _HabitsMainViewState();
+}
+
+class _HabitsMainViewState extends State<HabitsMainView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: HabitsBottomBar(plugin: HabitsPlugin.instance),
+      body: HabitsBottomBar(plugin: HabitsPlugin.instance, habitId: widget.habitId),
     );
   }
 }

@@ -53,6 +53,11 @@ class HabitsRouteHandler extends PluginRouteHandler {
       return _handleStartTimer(habitId);
     }
 
+    // 如果 action=show_dialog，显示计时器对话框
+    if (action == 'show_dialog' && habitId != null) {
+      return _handleShowDialog(habitId);
+    }
+
     // 没有有效参数，正常打开习惯插件
     return createRoute(const HabitsMainView());
   }
@@ -63,6 +68,14 @@ class HabitsRouteHandler extends PluginRouteHandler {
 
     // 创建一个包装器 Widget 来启动计时器并显示对话框
     return createRoute(_StartTimerScreen(habitId: habitId));
+  }
+
+  /// 处理显示计时器对话框逻辑
+  Route<dynamic> _handleShowDialog(String habitId) {
+    debugPrint('显示习惯计时器对话框: habitId=$habitId');
+
+    // 创建一个包装器 Widget 来显示对话框
+    return createRoute(_ShowTimerDialogScreen(habitId: habitId));
   }
 }
 
@@ -286,5 +299,77 @@ class _StartTimerScreenState extends State<_StartTimerScreen> {
         ),
       ),
     );
+  }
+}
+
+/// 显示计时器页面屏幕
+/// 用于处理小组件点击触发的计时器页面显示
+class _ShowTimerDialogScreen extends StatefulWidget {
+  final String habitId;
+
+  const _ShowTimerDialogScreen({required this.habitId});
+
+  @override
+  State<_ShowTimerDialogScreen> createState() =>
+      _ShowTimerDialogScreenState();
+}
+
+class _ShowTimerDialogScreenState extends State<_ShowTimerDialogScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 延迟到第一帧之后执行，避免在 initState 中访问 InheritedWidget
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showTimerDialog();
+    });
+  }
+
+  Future<void> _showTimerDialog() async {
+    try {
+      final habitsPlugin =
+          PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
+
+      if (habitsPlugin == null) {
+        Toast.error('习惯插件未找到');
+        return;
+      }
+
+      // 查找对应的 Habit
+      final habitController = habitsPlugin.getHabitController();
+      final habits = habitController.getHabits();
+      final habit = habits.cast<dynamic>().firstWhere(
+            (h) => h.id == widget.habitId,
+            orElse: () => null,
+          );
+
+      if (habit == null) {
+        Toast.error('习惯不存在');
+        return;
+      }
+
+      // 显示计时器对话框
+      if (mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (dialogContext) => TimerDialog(
+            habit: habit,
+            controller: habitController,
+            initialTimerData: habitsPlugin.timerController.getTimerData(
+              widget.habitId,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('显示计时器对话框失败: $e');
+      Toast.error('加载失败: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 显示完整的习惯页面，但不传递 habitId，避免自动打开编辑表单
+    return const HabitsMainView();
   }
 }
