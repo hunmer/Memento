@@ -11,7 +11,7 @@ class ProductDto {
   final String id;
   final String name;
   final String description;
-  final String image;
+  final String? image;
   final int stock;
   final int price;
   final DateTime exchangeStart;
@@ -22,7 +22,7 @@ class ProductDto {
     required this.id,
     required this.name,
     required this.description,
-    required this.image,
+    this.image,
     required this.stock,
     required this.price,
     required this.exchangeStart,
@@ -36,7 +36,7 @@ class ProductDto {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
-      image: json['image'] as String,
+      image: json['image'] as String?,
       stock: json['stock'] as int,
       price: json['price'] as int,
       exchangeStart: DateTime.parse(json['exchangeStart'] as String),

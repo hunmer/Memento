@@ -73,6 +73,7 @@ class TrackerTranslationsZh {
     'tracker_widgetDescription': '快速访问目标追踪',
     'tracker_iconDescription': '快速打开目标追踪',
     'tracker_overview': '目标追踪概览',
+    'tracker_overviewName': '目标追踪概览',
     'tracker_overviewDescription': '显示今日和本月完成统计',
     'tracker_loadFailed': '加载失败',
 

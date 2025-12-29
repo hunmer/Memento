@@ -49,72 +49,69 @@ class SelectorHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-            width: 0.5,
-          ),
+          bottom: BorderSide(color: theme.dividerColor, width: 0.5),
         ),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: SizedBox(
-          height: stepTitle != null ? 72 : 56,
-          child: Stack(
-            children: [
-              // 标题居中
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+      child: SizedBox(
+        height: stepTitle != null ? 72 : 56,
+        child: Stack(
+          children: [
+            // 标题居中
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (stepTitle != null) ...[
+                    const SizedBox(height: 2),
                     Text(
-                      title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      stepTitle!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: effectiveColor,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    if (stepTitle != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        stepTitle!,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: effectiveColor,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
                   ],
-                ),
-              ),
-              // 左侧和右侧按钮
-              Row(
-                children: [
-                  if (showBackButton && onBack != null)
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: onBack,
-                      tooltip: '返回',
-                    )
-                  else if (showCloseButton && onClose != null)
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: onClose,
-                      tooltip: '关闭',
-                    )
-                  else
-                    const SizedBox(width: 48),
-                  const Spacer(),
-                  if (actions != null) ...actions!,
-                  if (showCloseButton && onClose != null && showBackButton && onBack != null)
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: onClose,
-                      tooltip: '关闭',
-                    ),
                 ],
               ),
-            ],
-          ),
+            ),
+            // 左侧和右侧按钮
+            Row(
+              children: [
+                if (showBackButton && onBack != null)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: onBack,
+                    tooltip: '返回',
+                  )
+                else if (showCloseButton && onClose != null)
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: onClose,
+                    tooltip: '关闭',
+                  )
+                else
+                  const SizedBox(width: 48),
+                const Spacer(),
+                if (actions != null) ...actions!,
+                if (showCloseButton &&
+                    onClose != null &&
+                    showBackButton &&
+                    onBack != null)
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: onClose,
+                    tooltip: '关闭',
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );
