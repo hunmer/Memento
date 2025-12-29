@@ -207,13 +207,6 @@ class DayHomeWidgets {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
             // 使用背景图片或渐变背景
             image:
                 useImageBackground
@@ -226,11 +219,7 @@ class DayHomeWidgets {
           // 根据是否有背景图片添加不同的叠加层
           child: Container(
             decoration: BoxDecoration(
-              color:
-                  useImageBackground
-                      ? Colors.black.withOpacity(0.4)
-                      : (backgroundColor?.withOpacity(0.7) ??
-                          theme.colorScheme.surfaceContainerHighest),
+              color: useImageBackground ? Colors.black.withOpacity(0.4) : null,
               borderRadius: BorderRadius.circular(16),
             ),
             padding: const EdgeInsets.all(16),

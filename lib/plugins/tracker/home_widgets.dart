@@ -42,7 +42,7 @@ class TrackerHomeWidgets {
     // 2x2 详细卡片 - 显示统计信息
     registry.register(
       HomeWidget(
-        id: 'tracker_overview',
+        id: 'view',
         pluginId: 'tracker',
         name: 'tracker_overviewName'.tr,
         description: 'tracker_overviewDescription'.tr,

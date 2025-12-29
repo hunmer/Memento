@@ -229,7 +229,10 @@ class GoodsHomeWidgets {
     return FutureBuilder<String?>(
       future: warehouse.getImageUrl(),
       builder: (context, snapshot) {
-        final hasImage = snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty;
+        final hasImage =
+            snapshot.hasData &&
+            snapshot.data != null &&
+            snapshot.data!.isNotEmpty;
 
         return Material(
           color: Colors.transparent,
@@ -237,79 +240,73 @@ class GoodsHomeWidgets {
             borderRadius: BorderRadius.circular(16),
             onTap: () => _navigateToWarehouse(context, result),
             child: Container(
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: hasImage
-                    ? DecorationImage(
-                        image: ImageUtils.createImageProvider(snapshot.data),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-                gradient: hasImage
-                    ? null
-                    : LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          color.withAlpha(30),
-                          color.withAlpha(10),
-                        ],
-                      ),
+                image:
+                    hasImage
+                        ? DecorationImage(
+                          image: ImageUtils.createImageProvider(snapshot.data),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
               ),
-              child: Stack(
-                children: [
-                  // 半透明遮罩（确保文字可读性）
-                  if (hasImage)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.black.withOpacity(0.3),
-                      ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: hasImage ? Colors.black.withOpacity(0.3) : null,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 顶部图标和标题
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: (hasImage ? Colors.white : color).withAlpha(
+                              hasImage ? 200 : 50,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            icon,
+                            size: 28,
+                            color: hasImage ? color : color,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: hasImage ? Colors.white : null,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '$itemCount 件物品',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color:
+                                      (hasImage
+                                          ? Colors.white70
+                                          : theme.colorScheme.onSurfaceVariant),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 顶部图标和标题
-                      Row(
-                        children: [
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: (hasImage ? Colors.white : color).withAlpha(hasImage ? 200 : 50),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(icon, size: 28, color: hasImage ? color : color),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: hasImage ? Colors.white : null,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  '$itemCount 件物品',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: (hasImage ? Colors.white70 : theme.colorScheme.onSurfaceVariant),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -375,7 +372,10 @@ class GoodsHomeWidgets {
     return FutureBuilder<String?>(
       future: item.getImageUrl(),
       builder: (context, snapshot) {
-        final hasImage = snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty;
+        final hasImage =
+            snapshot.hasData &&
+            snapshot.data != null &&
+            snapshot.data!.isNotEmpty;
 
         return Material(
           color: Colors.transparent,
@@ -383,77 +383,76 @@ class GoodsHomeWidgets {
             borderRadius: BorderRadius.circular(16),
             onTap: () => _navigateToItem(context, result),
             child: Container(
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: hasImage
-                    ? DecorationImage(
-                        image: ImageUtils.createImageProvider(snapshot.data),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-                gradient: hasImage
-                    ? null
-                    : LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          _goodsColor.withAlpha(30),
-                          _goodsColor.withAlpha(10),
-                        ],
-                      ),
+                image:
+                    hasImage
+                        ? DecorationImage(
+                          image: ImageUtils.createImageProvider(snapshot.data),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
+                gradient:
+                    hasImage
+                        ? null
+                        : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            _goodsColor.withAlpha(30),
+                            _goodsColor.withAlpha(10),
+                          ],
+                        ),
               ),
-              child: Stack(
-                children: [
-                  // 半透明遮罩（确保文字可读性）
-                  if (hasImage)
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.black.withOpacity(0.3),
-                      ),
-                    ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 图片和基本信息
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 物品图片或图标
-                          _buildItemImageWidget(item, hasImage: hasImage),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  title,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: hasImage ? Colors.white : null,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: hasImage ? Colors.black.withOpacity(0.3) : null,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 图片和基本信息
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 物品图片或图标
+                        _buildItemImageWidget(item, hasImage: hasImage),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: hasImage ? Colors.white : null,
                                 ),
-                                if (price != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '¥${price.toStringAsFixed(2)}',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: hasImage ? Colors.white : theme.colorScheme.primary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (price != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  '¥${price.toStringAsFixed(2)}',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color:
+                                        hasImage
+                                            ? Colors.white
+                                            : theme.colorScheme.primary,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                ],
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -471,13 +470,14 @@ class GoodsHomeWidgets {
       width: 64,
       height: 64,
       decoration: BoxDecoration(
-        color: (hasImage ? Colors.white : effectiveColor).withAlpha(hasImage ? 200 : 50),
+        color: (hasImage ? Colors.white : effectiveColor).withAlpha(
+          hasImage ? 200 : 50,
+        ),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(icon, size: 32, color: effectiveColor),
     );
   }
-
 
   /// 导航到物品详情页面
   static void _navigateToItem(BuildContext context, SelectorResult result) {

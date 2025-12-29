@@ -207,11 +207,6 @@ class ChatHomeWidgets {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: channelColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: channelColor.withOpacity(0.3), width: 2),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -285,9 +280,7 @@ class ChatHomeWidgets {
                 children: [
                   // 左侧：消息数
                   Text(
-                    'chat_messageCount'.trParams({
-                      'count': '$messageCount',
-                    }),
+                    'chat_messageCount'.trParams({'count': '$messageCount'}),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
