@@ -115,7 +115,8 @@ class StoreHomeWidgets {
             'purchase_price': itemData['purchase_price'] as int?,
             'remaining': itemData['remaining'] as int?,
             'expire_date': itemData['expire_date'] as String?,
-            'product_snapshot': itemData['product_snapshot'] as Map<String, dynamic>?,
+            'product_snapshot':
+                itemData['product_snapshot'] as Map<String, dynamic>?,
           };
         },
 
@@ -329,17 +330,6 @@ class StoreHomeWidgets {
                               fit: BoxFit.cover,
                             )
                             : null,
-                    gradient:
-                        hasImage
-                            ? null
-                            : LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.pinkAccent.withAlpha(30),
-                                Colors.pinkAccent.withAlpha(10),
-                              ],
-                            ),
                   ),
                   child: Stack(
                     children: [
@@ -349,7 +339,7 @@ class StoreHomeWidgets {
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              color: Colors.black.withOpacity(0.4),
+                              color: Colors.black.withOpacity(0.2),
                             ),
                           ),
                         ),
@@ -364,7 +354,10 @@ class StoreHomeWidgets {
                               name,
                               style: theme.textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: hasImage ? Colors.white : null,
+                                color:
+                                    hasImage
+                                        ? Colors.white
+                                        : theme.colorScheme.onSurface,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -378,7 +371,7 @@ class StoreHomeWidgets {
                                   color:
                                       (hasImage
                                           ? Colors.white70
-                                          : theme.colorScheme.outline),
+                                          : theme.colorScheme.onSurfaceVariant),
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,

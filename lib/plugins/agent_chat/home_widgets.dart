@@ -11,6 +11,8 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'agent_chat_plugin.dart';
 import 'controllers/conversation_controller.dart';
+import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 
 /// Agent Chat插件的主页小组件注册
 class AgentChatHomeWidgets {
@@ -93,8 +95,8 @@ class AgentChatHomeWidgets {
     final convData = result.data as Map<String, dynamic>;
     final title = convData['title'] as String? ?? 'Untitled';
     final lastMessagePreview = convData['lastMessagePreview'] as String? ?? '';
-    final isPinned = convData['isPinned'] as bool? ?? false;
     final lastMessageAtStr = convData['lastMessageAt'] as String?;
+    final agentId = convData['agentId'] as String?;
 
     final lastMessageAt =
         lastMessageAtStr != null
@@ -111,10 +113,6 @@ class AgentChatHomeWidgets {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(16),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -137,8 +135,6 @@ class AgentChatHomeWidgets {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isPinned)
-                    Icon(Icons.push_pin, size: 16, color: Colors.amber),
                 ],
               ),
 
@@ -162,7 +158,7 @@ class AgentChatHomeWidgets {
               // medium 尺寸下使用提示文字替代消息预览
               if (isMediumSize) const Spacer(),
 
-              // 时间和提示
+              // 时间和 Agent 信息
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -174,22 +170,39 @@ class AgentChatHomeWidgets {
                       ).colorScheme.onPrimaryContainer.withOpacity(0.6),
                     ),
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        'agent_chat_clickToEnter'.tr,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
+                  // Agent 信息（异步加载）
+                  if (agentId != null)
+                    FutureBuilder<AIAgent?>(
+                      future: _getAgentById(agentId),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.smart_toy_outlined,
+                                size: 12,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                snapshot.data!.name,
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                 ],
               ),
             ],
@@ -197,6 +210,20 @@ class AgentChatHomeWidgets {
         ),
       ),
     );
+  }
+
+  /// 根据 ID 获取 Agent
+  static Future<AIAgent?> _getAgentById(String agentId) async {
+    try {
+      final openAIPlugin =
+          PluginManager.instance.getPlugin('openai') as OpenAIPlugin?;
+      if (openAIPlugin != null) {
+        return await openAIPlugin.controller.getAgent(agentId);
+      }
+    } catch (e) {
+      debugPrint('获取 Agent 失败: $e');
+    }
+    return null;
   }
 
   /// 导航到选中的会话

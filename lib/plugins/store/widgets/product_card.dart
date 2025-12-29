@@ -88,7 +88,7 @@ class ProductCard extends StatelessWidget {
                     child: Center(
                       // 添加居中对齐
                       child:
-                          product.image.isEmpty
+                          (product.image?.isEmpty ?? true)
                               ? _buildErrorImage()
                               : FutureBuilder<String>(
                                 future: ImageUtils.getAbsolutePath(

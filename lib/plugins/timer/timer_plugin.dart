@@ -1020,7 +1020,7 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
                   subtitle:
                       '分组: ${task.group} · 时长: ${formatDuration(totalDuration)} · ${task.timerItems.length}个计时器',
                   icon: task.icon,
-                  rawData: task,
+                  rawData: task.toJson(),
                 );
               }).toList();
             },

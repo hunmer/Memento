@@ -13,12 +13,10 @@ List<Product> getDefaultProducts() {
   final oneYearFromNow = DateTime(now.year + 1, now.month, now.day);
 
   return [
-    // 学习用品类
     Product(
       id: '1705123456789',
       name: '免作业卡',
       description: '可免除一次作业任务',
-      image: 'assets/store/homework_card.png',
       stock: 10,
       price: 50,
       exchangeStart: now,
@@ -29,7 +27,6 @@ List<Product> getDefaultProducts() {
       id: '1705123456790',
       name: '专注力提升剂',
       description: '提高30分钟专注力，学习效率倍增',
-      image: 'assets/store/focus_potion.png',
       stock: 20,
       price: 80,
       exchangeStart: now,
@@ -40,7 +37,6 @@ List<Product> getDefaultProducts() {
       id: '1705123456791',
       name: '知识胶囊',
       description: '快速掌握一个知识点的精华内容',
-      image: 'assets/store/knowledge_pill.png',
       stock: 15,
       price: 120,
       exchangeStart: now,
@@ -64,7 +60,7 @@ List<UserItem> getDefaultUserItems() {
     // 已过期但仍保留的物品（用于演示）
     UserItem(
       id: '1705130000001',
-      productId: products[0].id, // 免作业卡
+      productId: products[0].id,
       remaining: 0,
       expireDate: yesterday,
       purchaseDate: fiveDaysAgo,
@@ -75,23 +71,23 @@ List<UserItem> getDefaultUserItems() {
     // 即将过期的物品
     UserItem(
       id: '1705130000002',
-      productId: products[6].id, // 体力恢复包
+      productId: products[1].id,
       remaining: 1,
       expireDate: now.add(const Duration(days: 2)),
       purchaseDate: now.subtract(const Duration(days: 5)),
-      purchasePrice: 60,
-      productSnapshot: products[6].toJson(),
+      purchasePrice: 80,
+      productSnapshot: products[1].toJson(),
     ),
 
     // 正常使用中的物品
     UserItem(
       id: '1705130000003',
-      productId: products[13].id, // 快乐源泉饮料
+      productId: products[2].id,
       remaining: 1,
       expireDate: now.add(const Duration(days: 30)),
       purchaseDate: threeDaysAgo,
-      purchasePrice: 40,
-      productSnapshot: products[13].toJson(),
+      purchasePrice: 120,
+      productSnapshot: products[2].toJson(),
     ),
   ];
 }
@@ -181,9 +177,9 @@ List<UsedItem> getDefaultUsedItems() {
     ),
     UsedItem(
       id: '1705150000002',
-      productId: products[13].id,
+      productId: products[1].id,
       useDate: now.subtract(const Duration(days: 2)),
-      productSnapshot: products[13].toJson(),
+      productSnapshot: products[1].toJson(),
     ),
   ];
 }

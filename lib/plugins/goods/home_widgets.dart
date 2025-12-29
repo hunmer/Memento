@@ -369,6 +369,9 @@ class GoodsHomeWidgets {
     final title = item.title;
     final price = item.purchasePrice;
 
+    // 获取 widget size
+    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
+
     return FutureBuilder<String?>(
       future: item.getImageUrl(),
       builder: (context, snapshot) {
@@ -376,6 +379,9 @@ class GoodsHomeWidgets {
             snapshot.hasData &&
             snapshot.data != null &&
             snapshot.data!.isNotEmpty;
+
+        // 判断是否为 large 模式
+        final isLarge = widgetSize == HomeWidgetSize.large;
 
         return Material(
           color: Colors.transparent,
@@ -410,54 +416,108 @@ class GoodsHomeWidgets {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 图片和基本信息
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 物品图片或图标
-                        _buildItemImageWidget(item, hasImage: hasImage),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: hasImage ? Colors.white : null,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              if (price != null) ...[
-                                const SizedBox(height: 4),
-                                Text(
-                                  '¥${price.toStringAsFixed(2)}',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color:
-                                        hasImage
-                                            ? Colors.white
-                                            : theme.colorScheme.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                child: isLarge
+                    ? _buildLargeLayout(item, title, price, hasImage, theme)
+                    : _buildMediumLayout(item, title, price, hasImage, theme),
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  /// 构建大尺寸布局（图标居中，标题和价格在下方）
+  static Widget _buildLargeLayout(
+    GoodsItem item,
+    String title,
+    double? price,
+    bool hasImage,
+    ThemeData theme,
+  ) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // 物品图片或图标（居中）
+        Center(child: _buildItemImageWidget(item, hasImage: hasImage)),
+        const SizedBox(height: 16),
+        // 标题（居中）
+        Text(
+          title,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: hasImage ? Colors.white : null,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+        if (price != null) ...[
+          const SizedBox(height: 8),
+          // 价格（居中）
+          Text(
+            '¥${price.toStringAsFixed(2)}',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color:
+                  hasImage ? Colors.white : theme.colorScheme.primary,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// 构建中等尺寸布局（图标和标题价格横向排列）
+  static Widget _buildMediumLayout(
+    GoodsItem item,
+    String title,
+    double? price,
+    bool hasImage,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 物品图片或图标
+            _buildItemImageWidget(item, hasImage: hasImage),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: hasImage ? Colors.white : null,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (price != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '¥${price.toStringAsFixed(2)}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color:
+                            hasImage
+                                ? Colors.white
+                                : theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

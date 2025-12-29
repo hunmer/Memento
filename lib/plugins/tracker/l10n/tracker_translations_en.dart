@@ -75,6 +75,7 @@ class TrackerTranslationsEn {
     'tracker_widgetDescription': 'Quick access to Goal Tracker',
     'tracker_iconDescription': 'Quick access to Goal Tracker',
     'tracker_overview': 'Goal Tracker Overview',
+    'tracker_overviewName': 'Goal Tracker Overview',
     'tracker_overviewDescription': 'Display today and monthly completion statistics',
     'tracker_loadFailed': 'Load Failed',
 

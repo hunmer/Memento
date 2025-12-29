@@ -294,15 +294,18 @@ class TimerHomeWidgets {
 
   // ===== 计时器选择器小组件相关方法 =====
 
-  /// 从 SelectorResult 获取任务数据 Map（单选时取第一个）
-  static Map<String, dynamic>? _getTaskData(SelectorResult result) {
+  /// 从 SelectorResult 获取任务 ID
+  static String? _getTaskId(SelectorResult result) {
     if (result.data == null) return null;
-    // result.data 是 List，取第一个元素
+    // result.data 是 List，取第一个元素的 id
     if (result.data is List && result.data.isNotEmpty) {
-      return result.data.first as Map<String, dynamic>;
+      final first = result.data.first;
+      if (first is Map<String, dynamic>) {
+        return first['id'] as String?;
+      }
     }
     if (result.data is Map<String, dynamic>) {
-      return result.data as Map<String, dynamic>;
+      return (result.data as Map<String, dynamic>)['id'] as String?;
     }
     return null;
   }
@@ -314,23 +317,37 @@ class TimerHomeWidgets {
     Map<String, dynamic> config,
   ) {
     final theme = Theme.of(context);
-    final taskData = _getTaskData(result);
+    final taskId = _getTaskId(result);
 
-    if (taskData == null) {
-      return _buildErrorWidget(context, '数据不存在');
+    if (taskId == null) {
+      return _buildErrorWidget(context, '计时器ID不存在');
     }
 
-    final colorValue = taskData['color'] as int? ?? 4284513675;
-    final taskColor = Color(colorValue);
-    final taskId = taskData['id'] as String?;
+    // 从 TimerPlugin 获取最新数据
+    final plugin = PluginManager.instance.getPlugin('timer') as TimerPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, '计时器插件未加载');
+    }
+
+    final tasks = plugin.getTasks();
+    final task = tasks.cast<TimerTask?>().firstWhere(
+      (t) => t?.id == taskId,
+      orElse: () => null,
+    );
+
+    if (task == null) {
+      return _buildErrorWidget(context, '计时器不存在');
+    }
+
+    final taskColor = task.color;
 
     // 获取计时器信息
-    final timerItems = taskData['timerItems'] as List? ?? [];
+    final timerItems = task.timerItems;
     String timerType = '';
     if (timerItems.isNotEmpty) {
       final firstTimer = timerItems.first;
-      final type = firstTimer['type'] as int? ?? 0;
-      final duration = firstTimer['duration'] as int? ?? 0;
+      final type = firstTimer.type.index;
+      final duration = firstTimer.duration.inSeconds;
 
       switch (type) {
         case 0: // 正计时
@@ -352,19 +369,14 @@ class TimerHomeWidgets {
           children: [
             // 图标
             Icon(
-              taskData['icon'] != null
-                  ? IconData(
-                    taskData['icon'] as int,
-                    fontFamily: 'MaterialIcons',
-                  )
-                  : Icons.timer,
+              task.icon,
               size: 32,
               color: taskColor,
             ),
             const SizedBox(height: 8),
             // 计时器名称
             Text(
-              taskData['name'] as String? ?? '未知计时器',
+              task.name,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -386,7 +398,7 @@ class TimerHomeWidgets {
             ),
             const SizedBox(height: 8),
             // 计时显示 (00:00) - 实时更新
-            _TimerDisplayWidget(taskId: taskId ?? '', taskColor: taskColor),
+            _TimerDisplayWidget(taskId: taskId, taskColor: taskColor),
           ],
         ),
       ),
@@ -398,8 +410,7 @@ class TimerHomeWidgets {
     BuildContext context,
     SelectorResult result,
   ) {
-    final taskData = _getTaskData(result);
-    final taskId = taskData?['id'] as String?;
+    final taskId = _getTaskId(result);
     if (taskId == null) return;
 
     NavigationHelper.pushNamed(
