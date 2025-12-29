@@ -153,6 +153,8 @@ class HabitsTranslationsEn {
     'habits_widgetDescription': 'Quick access to habits tracker',
     'habits_overviewName': 'Habits Overview',
     'habits_overviewDescription': 'Display habits statistics',
+    'habits_heatmapWidgetName': 'Habit Heatmap',
+    'habits_heatmapWidgetDescription': 'Display completion record heatmap for a single habit',
     'habits_searchSkillPlaceholder': 'Search skill title, description or group',
     'habits_searchHabitPlaceholder': 'Search habit title',
   };

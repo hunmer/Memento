@@ -61,8 +61,9 @@ class HabitSearchResultsWidget extends StatelessWidget {
 
 class CombinedHabitsView extends StatefulWidget {
   final HabitController controller;
+  final String? habitId;
 
-  const CombinedHabitsView({super.key, required this.controller});
+  const CombinedHabitsView({super.key, required this.controller, this.habitId});
 
   @override
   State<CombinedHabitsView> createState() => _CombinedHabitsViewState();
@@ -92,6 +93,13 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
 
     // 设置路由上下文
     _updateRouteContext();
+
+    // 如果有 habitId，在加载完成后显示习惯详情
+    if (widget.habitId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showHabitDetailById(widget.habitId!);
+      });
+    }
   }
 
   @override
@@ -201,6 +209,22 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     });
     // 更新路由上下文
     _updateRouteContext();
+  }
+
+  /// 根据 ID 显示习惯详情（用于从小组件跳转）
+  Future<void> _showHabitDetailById(String habitId) async {
+    // 等待习惯数据加载完成
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
+
+    final habit = _habits.cast<Habit?>().firstWhere(
+      (h) => h?.id == habitId,
+      orElse: () => null,
+    );
+
+    if (habit != null && mounted) {
+      _showHabitForm(context, habit);
+    }
   }
 
   /// 根据选中的分组过滤习惯

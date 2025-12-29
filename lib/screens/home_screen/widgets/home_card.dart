@@ -501,8 +501,21 @@ class _HomeCardState extends State<HomeCard> {
         return;
       }
 
+      // 如果有 dataSelector，使用它转换数据后再保存
+      var finalResult = result;
+      if (widgetDef.dataSelector != null && result.data is List) {
+        final dataArray = result.data as List<dynamic>;
+        final transformedData = widgetDef.dataSelector!(dataArray);
+        finalResult = SelectorResult(
+          pluginId: result.pluginId,
+          selectorId: result.selectorId,
+          path: result.path,
+          data: transformedData,
+        );
+      }
+
       // 保存选择结果到配置
-      final selectorConfig = SelectorWidgetConfig.fromSelectorResult(result);
+      final selectorConfig = SelectorWidgetConfig.fromSelectorResult(finalResult);
       final updatedConfig = Map<String, dynamic>.from(widgetItem.config);
       updatedConfig['selectorWidgetConfig'] = selectorConfig.toJson();
 

@@ -17,8 +17,9 @@ import 'package:Memento/core/widgets/custom_bottom_bar.dart';
 /// 提供习惯列表和技能列表两个 Tab 的切换功能
 class HabitsBottomBar extends StatefulWidget {
   final HabitsPlugin plugin;
+  final String? habitId;
 
-  const HabitsBottomBar({super.key, required this.plugin});
+  const HabitsBottomBar({super.key, required this.plugin, this.habitId});
 
   @override
   State<HabitsBottomBar> createState() => _HabitsBottomBarState();
@@ -138,7 +139,7 @@ class _HabitsBottomBarState extends State<HabitsBottomBar>
         physics: const NeverScrollableScrollPhysics(),
         children: [
           KeepAliveWrapper(
-            child: CombinedHabitsView(controller: _habitController),
+            child: CombinedHabitsView(controller: _habitController, habitId: widget.habitId),
           ),
           KeepAliveWrapper(
             child: SkillsList(

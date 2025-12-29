@@ -147,6 +147,8 @@ class HabitsTranslationsZh {
     'habits_widgetDescription': '快速打开习惯追踪',
     'habits_overviewName': '习惯概览',
     'habits_overviewDescription': '显示习惯统计信息',
+    'habits_heatmapWidgetName': '习惯热力图',
+    'habits_heatmapWidgetDescription': '显示单个习惯的完成记录热力图',
     'habits_searchSkillPlaceholder': '搜索技能标题、描述或分组',
     'habits_searchHabitPlaceholder': '搜索习惯标题',
   };

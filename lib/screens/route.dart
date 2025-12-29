@@ -506,7 +506,12 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const GoodsMainView());
       case '/habits':
       case 'habits':
-        return _createRoute(const HabitsMainView());
+        // 支持从小组件跳转并传递 habitId 参数
+        String? habitId;
+        if (settings.arguments is Map<String, dynamic>) {
+          habitId = (settings.arguments as Map<String, dynamic>)['habitId'] as String?;
+        }
+        return _createRoute(HabitsMainView(habitId: habitId));
       case '/nodes':
       case 'nodes':
         return _createRoute(const NodesMainView());
