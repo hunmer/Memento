@@ -411,6 +411,13 @@ class HomeLayoutManager extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 直接设置 items 列表（用于缓存恢复）
+  void setItems(List<HomeItem> newItems) {
+    _items.clear();
+    _items.addAll(newItems);
+    notifyListeners();
+  }
+
   /// 获取所有小组件项（递归，包括文件夹内的）
   List<HomeWidgetItem> getAllWidgetItems() {
     final List<HomeWidgetItem> widgets = [];
