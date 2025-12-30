@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_folder.dart';
@@ -155,6 +156,9 @@ class ScriptManager extends ChangeNotifier {
       // 按名称排序
       _scripts.sort((a, b) => a.name.compareTo(b.name));
 
+      // 同步本地文件代码
+      await _syncLocalScriptFiles();
+
       print('✅ 从文件夹 ${_currentFolder!.name} 加载了 ${_scripts.length} 个脚本');
     } catch (e) {
       _lastError = '加载脚本失败: $e';
@@ -162,6 +166,42 @@ class ScriptManager extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// 同步本地脚本文件代码
+  ///
+  /// 遍历所有脚本，如果脚本配置了 localScriptPath，
+  /// 则从本地文件同步最新代码到脚本（方便调试）
+  Future<void> _syncLocalScriptFiles() async {
+    for (final script in _scripts) {
+      if (script.localScriptPath == null || script.localScriptPath!.isEmpty) {
+        continue;
+      }
+
+      try {
+        final file = File(script.localScriptPath!);
+        if (!await file.exists()) {
+          print('⚠️ 本地脚本文件不存在: ${script.localScriptPath}');
+          continue;
+        }
+
+        // 读取本地文件内容
+        final localCode = await file.readAsString();
+
+        // 获取当前脚本代码
+        final currentCode = await loader.loadScriptCode(script.id);
+
+        // 如果代码不同，则同步
+        if (currentCode != localCode) {
+          await loader.saveScriptCode(script.id, localCode);
+          // 清除缓存，确保下次加载使用新代码
+          _codeCache.remove(script.id);
+          print('🔄 已同步本地文件代码: ${script.id} <- ${script.localScriptPath}');
+        }
+      } catch (e) {
+        print('⚠️ 同步本地脚本文件失败 ${script.id}: $e');
+      }
     }
   }
 
@@ -455,6 +495,7 @@ class ScriptManager extends ChangeNotifier {
             updateUrl: result['updateUrl'] as String?,
             inputs: inputsData,
             triggers: triggers,
+            localScriptPath: result['localScriptPath'] as String?,
           ),
         );
 
@@ -478,6 +519,7 @@ class ScriptManager extends ChangeNotifier {
         inputs: inputsData,
         triggers: triggers,
         updatedAt: DateTime.now(),
+        localScriptPath: result['localScriptPath'] as String?,
       );
 
       await saveScriptMetadata(existingScript.id, updatedScript);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import 'package:Memento/plugins/scripts_center/services/script_executor.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_card.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_run_dialog.dart';
+import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'script_edit_screen.dart';
 
 /// 脚本列表界面
@@ -178,6 +180,73 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
     }
   }
 
+  /// 删除脚本
+  Future<void> _deleteScript(ScriptInfo script) async {
+    // 确认删除
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('scripts_center_delete_confirm'.tr),
+        content: Text('${'scripts_center_delete_script_confirm'.tr}: ${script.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('app_cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text('app_delete'.tr),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await widget.scriptManager.deleteScript(script.id);
+      if (mounted) {
+        Toast.success('scripts_center_delete_success'.tr);
+      }
+    } catch (e) {
+      if (mounted) {
+        Toast.error('${'scripts_center_operation_failed'.tr}: $e');
+      }
+    }
+  }
+
+  /// 显示底部操作菜单
+  void _showActionSheet(ScriptInfo script) {
+    SmoothBottomSheet.show(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: Text('app_edit'.tr),
+            onTap: () {
+              Navigator.pop(context);
+              _showScriptDialog(script: script);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: Text(
+              'app_delete'.tr,
+              style: const TextStyle(color: Colors.red),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _deleteScript(script);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
@@ -232,6 +301,7 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
                       return ScriptCard(
                         script: script,
                         onTap: () => _showScriptDialog(script: script),
+                        onLongPress: () => _showActionSheet(script),
                         onToggle: (enabled) => _toggleScript(script),
                         onRun: () => _runScript(script),
                       );

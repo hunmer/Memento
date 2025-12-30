@@ -64,6 +64,10 @@ enum FormFieldType {
 
   // 提醒日期选择器
   reminderDate,
+
+  // 脚本中心专用字段
+  pluginDataSelector,
+  eventMultiSelect,
 }
 
 /// 输入框组按钮

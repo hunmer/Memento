@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
@@ -12,10 +15,12 @@ import 'package:Memento/core/services/plugin_data_selector/models/selector_defin
 import 'package:Memento/core/services/plugin_data_selector/models/selector_step.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/utils/file_picker_helper.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';
 import 'models/script_folder.dart';
+import 'models/script_input.dart';
 import 'screens/scripts_list_screen.dart';
 import 'screens/script_edit_screen.dart';
 import 'package:get/get.dart';
@@ -518,10 +523,39 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       onSearchSubmitted: _setSearchQuery,
 
       actions: [
-        IconButton(
+        PopupMenuButton<String>(
           icon: const Icon(Icons.add_circle_outline, size: 24),
           tooltip: 'scripts_center_newScript'.tr,
-          onPressed: () => _showCreateScriptDialog(context),
+          onSelected: (value) async {
+            if (value == 'new') {
+              _showCreateScriptDialog(context);
+            } else if (value == 'import') {
+              await _showImportScriptDialog(context);
+            }
+          },
+          itemBuilder:
+              (context) => [
+                PopupMenuItem(
+                  value: 'new',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.add, size: 20),
+                      const SizedBox(width: 12),
+                      Text('scripts_center_newScript'.tr),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'import',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.file_upload, size: 20),
+                      const SizedBox(width: 12),
+                      Text('导入JS文件'),
+                    ],
+                  ),
+                ),
+              ],
         ),
       ],
       body: ScriptsListScreen(
@@ -549,6 +583,83 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       Toast.success('脚本创建成功！');
     } catch (e) {
       Toast.error('操作失败: $e');
+    }
+  }
+
+  /// 显示导入脚本对话框
+  Future<void> _showImportScriptDialog(BuildContext context) async {
+    // 选择JS文件
+    final files = await FilePickerHelper.pickFiles(multiple: false);
+    if (files.isEmpty) return;
+
+    final file = files.first;
+
+    try {
+      // 读取JS文件内容
+      final jsContent = await file.readAsString();
+
+      // 检查同目录下是否有metadata.json
+      Map<String, dynamic>? metadata;
+      String? localScriptPath = file.path;
+
+      final metadataFile = File('${file.parent.path}/metadata.json');
+      if (await metadataFile.exists()) {
+        try {
+          final metadataContent = await metadataFile.readAsString();
+          metadata = jsonDecode(metadataContent) as Map<String, dynamic>;
+        } catch (e) {
+          print('读取metadata.json失败: $e');
+        }
+      }
+
+      // 解析metadata中的数据
+      Map<String, dynamic>? initialData;
+      if (metadata != null) {
+        initialData = {
+          'id': metadata['id'], // 添加id字段
+          'name': metadata['name'],
+          'description': metadata['description'],
+          'author': metadata['author'],
+          'version': metadata['version'],
+          'icon': metadata['icon'],
+          'code': jsContent,
+          'configFormFields': metadata['configFormFields'],
+          'localScriptPath': localScriptPath,
+          // 解析inputs
+          if (metadata['inputs'] != null)
+            'inputs':
+                (metadata['inputs'] as List<dynamic>)
+                    .map((e) => ScriptInput.fromJson(e as Map<String, dynamic>))
+                    .toList(),
+          // 解析triggers
+          if (metadata['triggers'] != null) 'triggers': metadata['triggers'],
+          // 解析config
+          if (metadata['config'] != null) 'config': metadata['config'],
+        };
+      } else {
+        initialData = {'code': jsContent, 'localScriptPath': localScriptPath};
+      }
+
+      // 跳转到编辑页面，传入初始数据
+      final result = await NavigationHelper.push<Map<String, dynamic>>(
+        context,
+        ScriptEditScreen(
+          script: null,
+          scriptManager: _plugin.scriptManager,
+          initialData: initialData,
+        ),
+      );
+
+      if (result == null) return;
+
+      // 使用统一的保存方法
+      await _plugin.scriptManager.saveScriptFromEditResult(result);
+
+      // 刷新列表
+      await _plugin.scriptManager.loadScripts();
+      Toast.success('脚本导入成功！');
+    } catch (e) {
+      Toast.error('导入失败: $e');
     }
   }
 }

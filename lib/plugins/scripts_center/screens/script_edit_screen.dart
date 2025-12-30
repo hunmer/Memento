@@ -1,9 +1,16 @@
+import 'package:Memento/core/services/plugin_data_selector/models/selector_config.dart';
+import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
 import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
 import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_input_edit_dialog.dart';
+import 'package:Memento/utils/file_picker_helper.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:get/get.dart';
 
@@ -21,34 +28,54 @@ class ScriptEditScreen extends StatefulWidget {
   /// 脚本管理器（用于加载代码）
   final ScriptManager scriptManager;
 
+  /// 初始数据（用于导入模式）
+  final Map<String, dynamic>? initialData;
+
   const ScriptEditScreen({
     super.key,
     this.script,
     required this.scriptManager,
+    this.initialData,
   });
 
   @override
   State<ScriptEditScreen> createState() => _ScriptEditScreenState();
 }
 
+/// 事件选项
+class _EventOption {
+  final String eventName;
+  final String category;
+  final String description;
+
+  _EventOption(this.eventName, this.category, this.description);
+}
+
 class _ScriptEditScreenState extends State<ScriptEditScreen>
     with SingleTickerProviderStateMixin {
-  final _formKey = GlobalKey<FormState>();
   late TabController _tabController;
 
-  // 表单控制器
-  late final TextEditingController _nameController;
-  late final TextEditingController _idController;
-  late final TextEditingController _descController;
-  late final TextEditingController _authorController;
-  late final TextEditingController _versionController;
-  late final TextEditingController _updateUrlController;
-  late final TextEditingController _codeController;
+  // 基本信息 Tab 的表单状态
+  final GlobalKey<FormBuilderState> _basicInfoFormKey =
+      GlobalKey<FormBuilderState>();
+  FormBuilderWrapperState? _basicInfoWrapperState;
 
-  // 表单值
-  String _selectedIcon = 'code';
-  String _selectedType = 'module';
-  bool _enabled = true;
+  // 高级设置 Tab 的表单状态
+  final GlobalKey<FormBuilderState> _advancedFormKey =
+      GlobalKey<FormBuilderState>();
+  FormBuilderWrapperState? _advancedWrapperState;
+
+  // 配置 Tab 的状态
+  final GlobalKey<FormBuilderState> _configFormKey =
+      GlobalKey<FormBuilderState>();
+  FormBuilderWrapperState? _configWrapperState;
+  Map<String, dynamic>? _currentConfig;
+
+  // 配置表单字段定义（用于动态渲染配置界面）
+  List<FormFieldConfig> _configFormFields = [];
+
+  // 代码编辑器控制器
+  late final TextEditingController _codeController;
 
   // 输入参数列表
   List<ScriptInput> _inputs = [];
@@ -56,21 +83,40 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   // 触发条件列表
   List<ScriptTrigger> _triggers = [];
 
-  // 可用图标列表
-  final List<_IconOption> _availableIcons = [
-    _IconOption('code', Icons.code, '代码'),
-    _IconOption('backup', Icons.backup, '备份'),
-    _IconOption('analytics', Icons.analytics, '分析'),
-    _IconOption('settings', Icons.settings, '设置'),
-    _IconOption('sync', Icons.sync, '同步'),
-    _IconOption('schedule', Icons.schedule, '定时'),
-    _IconOption('notification', Icons.notifications, '通知'),
-    _IconOption('data', Icons.storage, '数据'),
-    _IconOption('auto', Icons.autorenew, '自动'),
-    _IconOption('star', Icons.star, '星标'),
-    _IconOption('favorite', Icons.favorite, '喜欢'),
-    _IconOption('build', Icons.build, '构建'),
-  ];
+  // 本地脚本文件路径
+  String? _localScriptPath;
+
+  // 图标名称到 IconData 的映射
+  static const Map<String, IconData> _iconMap = {
+    'code': Icons.code,
+    'backup': Icons.backup,
+    'analytics': Icons.analytics,
+    'settings': Icons.settings,
+    'sync': Icons.sync,
+    'schedule': Icons.schedule,
+    'notification': Icons.notifications,
+    'data': Icons.storage,
+    'auto': Icons.autorenew,
+    'star': Icons.star,
+    'favorite': Icons.favorite,
+    'build': Icons.build,
+  };
+
+  // IconData 到图标名称的反向映射（不能是 const，因为 IconData 重写了 == 和 hashCode）
+  static final Map<IconData, String> _iconNameMap = {
+    Icons.code: 'code',
+    Icons.backup: 'backup',
+    Icons.analytics: 'analytics',
+    Icons.settings: 'settings',
+    Icons.sync: 'sync',
+    Icons.schedule: 'schedule',
+    Icons.notifications: 'notification',
+    Icons.storage: 'data',
+    Icons.autorenew: 'auto',
+    Icons.star: 'star',
+    Icons.favorite: 'favorite',
+    Icons.build: 'build',
+  };
 
   // 可用事件列表（从项目中收集的所有事件）
   final List<_EventOption> _availableEvents = [
@@ -147,33 +193,108 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
   bool get isEditMode => widget.script != null;
 
+  /// 根据图标名称获取 IconData
+  IconData _getIconData(String iconName) {
+    return _iconMap[iconName] ?? Icons.code;
+  }
+
+  /// 根据 IconData 获取图标名称
+  String _getIconName(IconData icon) {
+    return _iconNameMap[icon] ?? 'code';
+  }
+
   @override
   void initState() {
     super.initState();
 
     // 初始化Tab控制器
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
-    // 初始化控制器
-    final script = widget.script;
-    _nameController = TextEditingController(text: script?.name ?? '');
-    _idController = TextEditingController(text: script?.id ?? '');
-    _descController = TextEditingController(text: script?.description ?? '');
-    _authorController = TextEditingController(text: script?.author ?? '');
-    _versionController = TextEditingController(text: script?.version ?? '1.0.0');
-    _updateUrlController = TextEditingController(text: script?.updateUrl ?? '');
+    // 初始化代码控制器
     _codeController = TextEditingController();
 
-    // 初始化下拉选择值
-    if (script != null) {
-      _selectedIcon = script.icon;
-      _selectedType = script.type;
-      _enabled = script.enabled;
-      _inputs = List.from(script.inputs);
-      _triggers = List.from(script.triggers);
+    // 处理初始数据（导入模式）或编辑模式
+    if (widget.initialData != null) {
+      // 导入模式
+      _localScriptPath = widget.initialData!['localScriptPath'] as String?;
+      _codeController.text = widget.initialData!['code'] as String? ?? '';
+
+      if (widget.initialData!['inputs'] != null) {
+        _inputs =
+            (widget.initialData!['inputs'] as List<dynamic>)
+                .cast<ScriptInput>();
+      }
+
+      if (widget.initialData!['triggers'] != null) {
+        _triggers =
+            (widget.initialData!['triggers'] as List<dynamic>)
+                .map((e) => ScriptTrigger.fromJson(e as Map<String, dynamic>))
+                .toList();
+      }
+
+      if (widget.initialData!['config'] != null) {
+        _currentConfig = widget.initialData!['config'] as Map<String, dynamic>;
+      }
+
+      // 解析 configFormFields
+      if (widget.initialData!['configFormFields'] != null) {
+        _configFormFields = _parseConfigFormFieldsFromJson(
+            widget.initialData!['configFormFields']);
+      }
+    } else if (widget.script != null) {
+      // 编辑模式
+      _inputs = List.from(widget.script!.inputs);
+      _triggers = List.from(widget.script!.triggers);
+      _localScriptPath = widget.script!.localScriptPath;
+      _configFormFields = widget.script!.configFormFields;
 
       // 异步加载代码
       _loadScriptCode();
+      // 异步加载配置
+      _loadScriptConfig();
+    }
+
+    // 强制构建所有tabs，确保表单wrapper被初始化
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // 遍历所有tabs，触发构建
+      for (int i = 0; i < _tabController.length; i++) {
+        _tabController.animateTo(i);
+      }
+      // 最后跳回第一个tab
+      _tabController.animateTo(0);
+    });
+  }
+
+  /// 加载脚本配置
+  Future<void> _loadScriptConfig() async {
+    if (widget.script == null) return;
+
+    try {
+      final configPath =
+          'configs/scripts_center/${widget.script!.id}_config.json';
+      final storageManager = widget.scriptManager.loader.storage;
+      final data = await storageManager.read(configPath);
+      if (data != null && mounted) {
+        // 正确处理 Map 类型转换
+        Map<String, dynamic> config;
+        if (data is Map<String, dynamic>) {
+          config = data;
+        } else if (data is Map<dynamic, dynamic>) {
+          // 转换键的类型
+          config = data.map<String, dynamic>(
+            (key, value) => MapEntry(key.toString(), value),
+          );
+        } else {
+          // 如果数据格式不正确，返回默认配置
+          config = {};
+        }
+        setState(() {
+          _currentConfig = config;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to load script config: $e');
     }
   }
 
@@ -195,43 +316,116 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _nameController.dispose();
-    _idController.dispose();
-    _descController.dispose();
-    _authorController.dispose();
-    _versionController.dispose();
-    _updateUrlController.dispose();
     _codeController.dispose();
     super.dispose();
   }
 
+  /// 存储基本信息表单的值（用于提交时合并）
+  Map<String, dynamic>? _basicInfoValues;
+
   /// 验证并保存
   void _saveScript() {
-    if (!_formKey.currentState!.validate()) {
-      // 切换到包含错误的Tab
-      toastService.showToast('请检查并修正表单中的错误');
+    _basicInfoWrapperState?.submitForm();
+  }
+
+  /// 处理基本信息表单提交
+  void _handleBasicInfoSubmit(Map<String, dynamic> values) {
+    // 检查widget是否仍然mounted
+    if (!mounted) return;
+
+    // 保存基本信息表单的值
+    _basicInfoValues = values;
+
+    // 继续提交高级设置表单
+    _advancedWrapperState?.submitForm();
+  }
+
+  /// 处理高级设置表单提交（最终提交）
+  void _handleAdvancedSubmit(Map<String, dynamic> advancedValues) {
+    // 检查widget是否仍然mounted
+    if (!mounted) return;
+
+    // 在保存前，获取配置表单的最新值
+    if (_configWrapperState != null) {
+      final configValues = _configWrapperState!.currentValues;
+      if (configValues.isNotEmpty) {
+        setState(() {
+          _currentConfig = configValues;
+        });
+      }
+    }
+
+    // 获取保存的基本信息表单的值
+    final basicValues = _basicInfoValues ?? {};
+
+    // 验证必填字段
+    final name = basicValues['name']?.toString().trim() ?? '';
+    if (name.isEmpty && widget.initialData == null) {
+      toastService.showToast('请输入脚本名称');
       return;
     }
 
-    // 返回脚本数据
+    // 在新建模式下，id必填；如果没有填写，自动从name生成
+    String id = basicValues['id']?.toString().trim() ?? '';
+    if (id.isEmpty && !isEditMode) {
+      // 使用拼音或简化名称生成id（这里简化为使用小写+下划线）
+      id = name
+          .toLowerCase()
+          .replaceAll(RegExp(r'[\s\u4e00-\u9fa5]+'), '_')
+          .replaceAll(RegExp(r'_+'), '_')
+          .replaceAll(RegExp(r'^_|_$'), '');
+      if (id.isEmpty) {
+        id = 'script_${DateTime.now().millisecondsSinceEpoch}';
+      }
+      toastService.showToast('已自动生成脚本ID: $id');
+    }
+
+    // 从 icon 字段中提取图标名称（circleIconPicker 返回 Map）
+    String iconValue = 'code';
+    if (basicValues['icon'] != null) {
+      if (basicValues['icon'] is Map) {
+        final iconMap = basicValues['icon'] as Map;
+        final iconData = iconMap['icon'] as IconData?;
+        iconValue = iconData != null ? _getIconName(iconData) : 'code';
+      } else if (basicValues['icon'] is String) {
+        iconValue = basicValues['icon'] as String;
+      }
+    }
+
+    // 合并两个表单的数据
     final scriptData = {
-      'name': _nameController.text.trim(),
-      'id': _idController.text.trim(),
-      'description': _descController.text.trim(),
-      'author': _authorController.text.trim(),
-      'version': _versionController.text.trim(),
-      'icon': _selectedIcon,
-      'type': _selectedType,
-      'enabled': _enabled,
+      'name': name,
+      'id': id,
+      'description': basicValues['description']?.toString().trim() ?? '',
+      'author': basicValues['author']?.toString().trim() ?? '',
+      'version': basicValues['version']?.toString().trim() ?? '1.0.0',
+      'icon': iconValue,
+      'type': advancedValues['type']?.toString() ?? 'module',
+      'enabled': advancedValues['enabled'] as bool? ?? true,
       'code': _codeController.text,
       'inputs': _inputs,
       'triggers': _triggers.map((t) => t.toJson()).toList(),
-      'updateUrl': _updateUrlController.text.trim().isEmpty
-          ? null
-          : _updateUrlController.text.trim(),
+      'updateUrl':
+          advancedValues['updateUrl']?.toString().trim().isEmpty == true
+              ? null
+              : advancedValues['updateUrl']?.toString().trim(),
+      'localScriptPath': _localScriptPath,
     };
 
-    Navigator.of(context).pop(scriptData);
+    // 保存配置（如果有）
+    if (_currentConfig != null && _currentConfig!.isNotEmpty) {
+      scriptData['config'] = _currentConfig;
+    }
+
+    // 保存配置表单字段定义（如果有）
+    if (_configFormFields.isNotEmpty) {
+      scriptData['configFormFields'] = _configFormFields;
+    }
+
+    // 再次检查mounted，因为这是在异步回调中
+    if (mounted) {
+      Navigator.of(context).pop(scriptData);
+    }
   }
 
   /// 添加输入参数
@@ -285,11 +479,176 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
     }
   }
 
+  /// 选择本地脚本文件
+  Future<void> _pickLocalScriptFile() async {
+    final files = await FilePickerHelper.pickFiles(multiple: false);
+    if (files.isNotEmpty) {
+      final file = files.first;
+      setState(() {
+        _localScriptPath = file.path;
+      });
+
+      // 自动加载文件内容
+      try {
+        final content = await file.readAsString();
+        _codeController.text = content;
+        toastService.showToast('已加载文件内容');
+      } catch (e) {
+        toastService.showToast('加载文件失败: $e');
+      }
+    }
+  }
+
+  /// 清除本地文件路径
+  void _clearLocalScriptPath() {
+    setState(() {
+      _localScriptPath = null;
+    });
+  }
+
+  /// 获取基本信息表单字段配置
+  List<FormFieldConfig> _getBasicInfoFields() {
+    final script = widget.script;
+    final initialData = widget.initialData;
+
+    // 优先使用initialData中的值，其次使用script中的值
+    final iconName = initialData?['icon'] as String? ?? script?.icon ?? 'code';
+    final iconData = _getIconData(iconName);
+
+    return [
+      // 图标选择 - 使用 circleIconPicker
+      FormFieldConfig(
+        name: 'icon',
+        type: FormFieldType.circleIconPicker,
+        labelText: 'scripts_center_icon'.tr,
+        initialValue: {'icon': iconData, 'color': Colors.deepPurple},
+        extra: {
+          'initialBackgroundColor': Colors.deepPurple,
+          'showLabel': true,
+          'labelText': 'scripts_center_selectIcon'.tr,
+        },
+      ),
+
+      // 脚本名称
+      FormFieldConfig(
+        name: 'name',
+        type: FormFieldType.text,
+        labelText: 'scripts_center_scriptName'.tr,
+        hintText: '例如：自动备份助手',
+        prefixIcon: Icons.title,
+        initialValue: initialData?['name'] as String? ?? script?.name ?? '',
+        required: true,
+        validationMessage: '请输入脚本名称',
+      ),
+
+      // 脚本ID
+      FormFieldConfig(
+        name: 'id',
+        type: FormFieldType.text,
+        labelText: 'scripts_center_scriptId'.tr,
+        hintText: '例如：auto_backup',
+        prefixIcon: Icons.fingerprint,
+        initialValue: initialData?['id'] as String? ?? script?.id ?? '',
+        required: true,
+        enabled: !isEditMode, // 编辑模式下不可修改
+        validationMessage: '请输入脚本ID',
+        extra: {
+          'inputFormatters': [RegExp(r'^[a-z0-9_]+$')],
+        },
+      ),
+
+      // 描述
+      FormFieldConfig(
+        name: 'description',
+        type: FormFieldType.textArea,
+        labelText: 'scripts_center_description'.tr,
+        hintText: '简短描述脚本的功能',
+        prefixIcon: Icons.description,
+        initialValue:
+            initialData?['description'] as String? ?? script?.description ?? '',
+        extra: {'maxLines': 3},
+      ),
+
+      // 作者
+      FormFieldConfig(
+        name: 'author',
+        type: FormFieldType.text,
+        labelText: 'scripts_center_author'.tr,
+        hintText: '例如：张三',
+        prefixIcon: Icons.person,
+        initialValue: initialData?['author'] as String? ?? script?.author ?? '',
+      ),
+
+      // 版本号
+      FormFieldConfig(
+        name: 'version',
+        type: FormFieldType.text,
+        labelText: 'scripts_center_version'.tr,
+        hintText: '例如：1.0.0',
+        prefixIcon: Icons.tag,
+        initialValue:
+            initialData?['version'] as String? ?? script?.version ?? '1.0.0',
+        required: true,
+        validationMessage: '请输入版本号',
+      ),
+    ];
+  }
+
+  /// 获取高级设置表单字段配置
+  List<FormFieldConfig> _getAdvancedFields() {
+    final script = widget.script;
+    return [
+      // 脚本类型
+      FormFieldConfig(
+        name: 'type',
+        type: FormFieldType.select,
+        labelText: 'scripts_center_scriptType'.tr,
+        prefixIcon: Icons.category,
+        initialValue: script?.type ?? 'module',
+        required: true,
+        items: [
+          DropdownMenuItem(
+            value: 'module',
+            child: Text('scripts_center_moduleType'.tr),
+          ),
+          DropdownMenuItem(
+            value: 'standalone',
+            child: Text('scripts_center_standaloneType'.tr),
+          ),
+        ],
+      ),
+
+      // 更新地址
+      FormFieldConfig(
+        name: 'updateUrl',
+        type: FormFieldType.text,
+        labelText: 'scripts_center_updateUrl'.tr,
+        hintText: '例如：https://example.com/script.js',
+        prefixIcon: Icons.cloud_download,
+        initialValue: script?.updateUrl ?? '',
+      ),
+
+      // 启用开关
+      FormFieldConfig(
+        name: 'enabled',
+        type: FormFieldType.switchField,
+        labelText: 'scripts_center_enableScript'.tr,
+        hintText: script?.enabled == true ? '脚本将在触发条件满足时执行' : '脚本已禁用，不会执行',
+        prefixIcon: script?.enabled == true ? Icons.check_circle : Icons.cancel,
+        initialValue: script?.enabled ?? true,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? '编辑脚本' : '创建新脚本'),
+        title: Text(
+          isEditMode
+              ? 'scripts_center_editScript'.tr
+              : 'scripts_center_createNewScript'.tr,
+        ),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         actions: [
@@ -300,7 +659,9 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               color: Colors.white,
             ),
             label: Text(
-              isEditMode ? '保存' : '创建',
+              isEditMode
+                  ? 'scripts_center_save'.tr
+                  : 'scripts_center_create'.tr,
               style: const TextStyle(color: Colors.white),
             ),
           ),
@@ -311,25 +672,39 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.info_outline), text: '基本信息'),
-            Tab(icon: Icon(Icons.code), text: '代码编辑'),
-            Tab(icon: Icon(Icons.bolt), text: '触发条件'),
-            Tab(icon: Icon(Icons.settings_outlined), text: '高级设置'),
+          tabs: [
+            Tab(
+              icon: const Icon(Icons.info_outline),
+              text: 'scripts_center_basicInfo'.tr,
+            ),
+            Tab(
+              icon: const Icon(Icons.code),
+              text: 'scripts_center_codeEditor'.tr,
+            ),
+            Tab(
+              icon: const Icon(Icons.bolt),
+              text: 'scripts_center_triggers'.tr,
+            ),
+            Tab(
+              icon: const Icon(Icons.settings_outlined),
+              text: 'scripts_center_advancedSettings'.tr,
+            ),
+            Tab(
+              icon: const Icon(Icons.tune_outlined),
+              text: 'scripts_center_config'.tr,
+            ),
           ],
         ),
       ),
-      body: Form(
-        key: _formKey,
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildBasicInfoTab(),
-            _buildCodeEditorTab(),
-            _buildTriggersTab(),
-            _buildAdvancedTab(),
-          ],
-        ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _KeepAliveTab(child: _buildBasicInfoTab()),
+          _KeepAliveTab(child: _buildCodeEditorTab()),
+          _KeepAliveTab(child: _buildTriggersTab()),
+          _KeepAliveTab(child: _buildAdvancedTab()),
+          _KeepAliveTab(child: _buildConfigTab()),
+        ],
       ),
     );
   }
@@ -338,104 +713,16 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   Widget _buildBasicInfoTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 脚本名称
-          TextFormField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: '脚本名称 *',
-              hintText: '例如：自动备份助手',
-              prefixIcon: Icon(Icons.title),
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return '请输入脚本名称';
-              }
-              return null;
-            },
-            autofocus: !isEditMode,
-          ),
-          const SizedBox(height: 16),
-
-          // 脚本ID
-          TextFormField(
-            controller: _idController,
-            decoration: InputDecoration(
-              labelText: '脚本ID *',
-              hintText: '例如：auto_backup',
-              helperText: '仅支持小写字母、数字和下划线',
-              prefixIcon: const Icon(Icons.fingerprint),
-              border: const OutlineInputBorder(),
-              enabled: !isEditMode, // 编辑模式下不可修改
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return '请输入脚本ID';
-              }
-              if (!RegExp(r'^[a-z0-9_]+$').hasMatch(value)) {
-                return '只能包含小写字母、数字和下划线';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // 描述
-          TextFormField(
-            controller: _descController,
-            decoration: const InputDecoration(
-              labelText: '描述',
-              hintText: '简短描述脚本的功能',
-              prefixIcon: Icon(Icons.description),
-              border: OutlineInputBorder(),
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 24),
-
-          // 图标选择
-          _buildIconSelector(),
-          const SizedBox(height: 24),
-
-          // 作者信息
-          const Divider(),
-          const SizedBox(height: 16),
-          _buildSectionTitle('作者信息', Icons.person_outline),
-          const SizedBox(height: 16),
-
-          // 作者
-          TextFormField(
-            controller: _authorController,
-            decoration: const InputDecoration(
-              labelText: '作者',
-              hintText: '例如：张三',
-              prefixIcon: Icon(Icons.person),
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 版本号
-          TextFormField(
-            controller: _versionController,
-            decoration: const InputDecoration(
-              labelText: '版本号',
-              hintText: '例如：1.0.0',
-              helperText: '推荐使用语义化版本号',
-              prefixIcon: Icon(Icons.tag),
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return '请输入版本号';
-              }
-              return null;
-            },
-          ),
-        ],
+      child: FormBuilderWrapper(
+        formKey: _basicInfoFormKey,
+        onStateReady: (state) => _basicInfoWrapperState = state,
+        config: FormConfig(
+          fields: _getBasicInfoFields(),
+          showSubmitButton: false,
+          showResetButton: false,
+          fieldSpacing: 16,
+          onSubmit: _handleBasicInfoSubmit,
+        ),
       ),
     );
   }
@@ -479,12 +766,10 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               controller: _codeController,
               maxLines: null,
               expands: true,
-              style: const TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 14),
               decoration: const InputDecoration(
-                hintText: '// 在此输入 JavaScript 代码\n'
+                hintText:
+                    '// 在此输入 JavaScript 代码\n'
                     '// 例如：\n'
                     '// function execute(context, args) {\n'
                     '//   console.log("Hello from script!");\n'
@@ -495,6 +780,82 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               ),
               textAlignVertical: TextAlignVertical.top,
             ),
+          ),
+        ),
+        // 本地文件路径选择
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          color: Colors.grey[50],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.link, size: 18, color: Colors.deepPurple),
+                  const SizedBox(width: 8),
+                  Text(
+                    '本地文件链接',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                      fontSize: 14,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_localScriptPath != null)
+                    TextButton.icon(
+                      onPressed: _clearLocalScriptPath,
+                      icon: const Icon(Icons.clear, size: 16),
+                      label: const Text('清除'),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    ),
+                  TextButton.icon(
+                    onPressed: _pickLocalScriptFile,
+                    icon: const Icon(Icons.folder_open, size: 16),
+                    label: const Text('选择文件'),
+                  ),
+                ],
+              ),
+              if (_localScriptPath != null) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(
+                      color: Colors.deepPurple.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.insert_drive_file,
+                        size: 16,
+                        color: Colors.deepPurple,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _localScriptPath!,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '初始化时将从此文件同步最新代码',
+                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                ),
+              ],
+            ],
           ),
         ),
         // 提示信息
@@ -554,63 +915,65 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
         // 触发器列表
         Expanded(
-          child: _triggers.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.bolt_outlined,
-                        size: 64,
-                        color: Colors.grey[400],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        '暂无触发条件',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
+          child:
+              _triggers.isEmpty
+                  ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.bolt_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '点击上方按钮添加触发条件',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _triggers.length,
-                  itemBuilder: (context, index) {
-                    final trigger = _triggers[index];
-                    final eventOption = _availableEvents.firstWhere(
-                      (e) => e.eventName == trigger.event,
-                      orElse: () => _EventOption(
-                        trigger.event,
-                        '未知',
-                        trigger.event,
-                      ),
-                    );
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.deepPurple,
-                          child: Text(
-                            '${index + 1}',
-                            style: const TextStyle(color: Colors.white),
+                        const SizedBox(height: 16),
+                        Text(
+                          '暂无触发条件',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
                           ),
                         ),
-                        title: Text(eventOption.eventName),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          '点击上方按钮添加触发条件',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                  : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _triggers.length,
+                    itemBuilder: (context, index) {
+                      final trigger = _triggers[index];
+                      final eventOption = _availableEvents.firstWhere(
+                        (e) => e.eventName == trigger.event,
+                        orElse:
+                            () => _EventOption(
+                              trigger.event,
+                              '未知',
+                              trigger.event,
+                            ),
+                      );
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.deepPurple,
+                            child: Text(
+                              '${index + 1}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          title: Text(eventOption.eventName),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                               Text(
                                 'scripts_center_categoryLabel'.trParams({
                                   'category': eventOption.category,
@@ -621,27 +984,27 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                                   'description': eventOption.description,
                                 }),
                               ),
-                            if (trigger.delay != null && trigger.delay! > 0)
+                              if (trigger.delay != null && trigger.delay! > 0)
                                 Text(
                                   'scripts_center_delayLabel'.trParams({
                                     'delay': trigger.delay!.toString(),
                                   }),
                                 ),
-                          ],
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                _triggers.removeAt(index);
+                              });
+                            },
+                          ),
+                          isThreeLine: true,
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _triggers.removeAt(index);
-                            });
-                          },
-                        ),
-                        isThreeLine: true,
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
         ),
       ],
     );
@@ -654,232 +1017,178 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 脚本类型
-          DropdownButtonFormField<String>(
-            initialValue: _selectedType,
-            decoration: const InputDecoration(
-              labelText: '脚本类型',
-              prefixIcon: Icon(Icons.category),
-              border: OutlineInputBorder(),
+          // 使用 FormBuilderWrapper 构建高级设置表单
+          FormBuilderWrapper(
+            formKey: _advancedFormKey,
+            onStateReady: (state) => _advancedWrapperState = state,
+            config: FormConfig(
+              fields: _getAdvancedFields(),
+              showSubmitButton: false,
+              showResetButton: false,
+              fieldSpacing: 24,
+              onSubmit: _handleAdvancedSubmit,
             ),
-            items: [
-              DropdownMenuItem(
-                value: 'module',
-                child: Text('scripts_center_moduleType'.tr),
-              ),
-              DropdownMenuItem(
-                value: 'standalone',
-                child: Text('scripts_center_standaloneType'.tr),
-              ),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _selectedType = value!;
-              });
-            },
           ),
+
           const SizedBox(height: 24),
 
-          // 输入参数设置（仅用于 module 类型）
-          if (_selectedType == 'module') ...[
-            Row(
+          // 输入参数设置（保留原有逻辑）
+          _buildInputsSection(),
+        ],
+      ),
+    );
+  }
+
+  /// 构建输入参数部分
+  Widget _buildInputsSection() {
+    final scriptType =
+        _advancedFormKey.currentState?.value['type'] ??
+        widget.script?.type ??
+        'module';
+
+    if (scriptType != 'module') {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.input_outlined,
+              size: 20,
+              color: Colors.deepPurple,
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              '输入参数',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // 参数列表
+        if (_inputs.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
               children: [
-                const Icon(Icons.input_outlined, size: 20, color: Colors.deepPurple),
-                const SizedBox(width: 8),
-                const Text(
-                  '输入参数',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
-                  ),
+                Icon(Icons.info_outline, size: 48, color: Colors.grey[400]),
+                const SizedBox(height: 12),
+                Text(
+                  '暂无输入参数',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '为 Module 类型脚本添加输入参数，执行时会显示表单收集用户输入',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // 参数列表
-            if (_inputs.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 48,
-                      color: Colors.grey[400],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '暂无输入参数',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '为 Module 类型脚本添加输入参数，执行时会显示表单收集用户输入',
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 12,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              )
-            else
-              ..._inputs.asMap().entries.map((entry) {
-                final index = entry.key;
-                final input = entry.value;
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
+          )
+        else
+          ..._inputs.asMap().entries.map((entry) {
+            final index = entry.key;
+            final input = entry.value;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
+                  child: Icon(
+                    _getInputTypeIcon(input.type),
+                    color: Colors.deepPurple,
+                    size: 20,
                   ),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.deepPurple.withValues(alpha: 0.1),
-                      child: Icon(
-                        _getInputTypeIcon(input.type),
-                        color: Colors.deepPurple,
-                        size: 20,
-                      ),
+                ),
+                title: Row(
+                  children: [
+                    Text(
+                      input.label,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    title: Row(
-                      children: [
-                        Text(
-                          input.label,
-                          style: const TextStyle(
+                    const SizedBox(width: 8),
+                    Text(
+                      '(${input.key})',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
+                    if (input.required) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          '必填',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '(${input.key})',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 12,
-                          ),
-                        ),
-                        if (input.required) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              '必填',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    subtitle: Text(
-                      input.description ?? '类型: ${input.type}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
                       ),
+                    ],
+                  ],
+                ),
+                subtitle: Text(
+                  input.description ?? '类型: ${input.type}',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 20),
+                      onPressed: () => _editInput(index),
+                      tooltip: '编辑',
                     ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit, size: 20),
-                          onPressed: () => _editInput(index),
-                          tooltip: '编辑',
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete, size: 20),
-                          color: Colors.red,
-                          onPressed: () => _deleteInput(index),
-                          tooltip: '删除',
-                        ),
-                      ],
+                    IconButton(
+                      icon: const Icon(Icons.delete, size: 20),
+                      color: Colors.red,
+                      onPressed: () => _deleteInput(index),
+                      tooltip: '删除',
                     ),
-                  ),
-                );
-              }),
-
-            const SizedBox(height: 12),
-
-            // 添加参数按钮
-            OutlinedButton.icon(
-              onPressed: _addInput,
-              icon: const Icon(Icons.add),
-              label: Text('scripts_center_addInputParameter'.tr),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.deepPurple,
-                side: const BorderSide(color: Colors.deepPurple),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-          ],
+            );
+          }),
 
-          // 更新地址
-          TextFormField(
-            controller: _updateUrlController,
-            decoration: const InputDecoration(
-              labelText: '更新地址（可选）',
-              hintText: '例如：https://example.com/script.js',
-              helperText: '用于未来的自动更新功能',
-              prefixIcon: Icon(Icons.cloud_download),
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value != null && value.trim().isNotEmpty) {
-                final uri = Uri.tryParse(value);
-                if (uri == null || !uri.hasAbsolutePath) {
-                  return '请输入有效的URL';
-                }
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 24),
+        const SizedBox(height: 12),
 
-          // 启用开关
-          Card(
-            child: SwitchListTile(
-              value: _enabled,
-              onChanged: (value) {
-                setState(() {
-                  _enabled = value;
-                });
-              },
-              title: Text('scripts_center_enableScript'.tr),
-              subtitle: Text(
-                _enabled ? '脚本将在触发条件满足时执行' : '脚本已禁用，不会执行',
-              ),
-              secondary: Icon(
-                _enabled ? Icons.check_circle : Icons.cancel,
-                color: _enabled ? Colors.green : Colors.grey,
-              ),
-            ),
+        // 添加参数按钮
+        OutlinedButton.icon(
+          onPressed: _addInput,
+          icon: const Icon(Icons.add),
+          label: Text('scripts_center_addInputParameter'.tr),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.deepPurple,
+            side: const BorderSide(color: Colors.deepPurple),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -891,205 +1200,277 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text('scripts_center_addTriggerCondition'.tr),
-          content: SizedBox(
-            width: 500,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 事件选择
-                const Text(
-                  '选择事件 *',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
+      builder:
+          (context) => StatefulBuilder(
+            builder:
+                (context, setDialogState) => AlertDialog(
+                  title: Text('scripts_center_addTriggerCondition'.tr),
+                  content: SizedBox(
+                    width: 500,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 事件选择
+                        const Text(
+                          '选择事件 *',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<String>(
                           initialValue: selectedEvent,
-                  decoration: const InputDecoration(
-                    hintText: '请选择一个事件',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  items: _availableEvents.map((event) {
-                    return DropdownMenuItem(
-                      value: event.eventName,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(event.eventName),
-                          Text(
-                            '${event.category} - ${event.description}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                          decoration: const InputDecoration(
+                            hintText: '请选择一个事件',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setDialogState(() {
-                      selectedEvent = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
+                          items:
+                              _availableEvents.map((event) {
+                                return DropdownMenuItem(
+                                  value: event.eventName,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(event.eventName),
+                                      Text(
+                                        '${event.category} - ${event.description}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                          onChanged: (value) {
+                            setDialogState(() {
+                              selectedEvent = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
 
-                // 延迟设置
-                TextField(
-                  controller: delayController,
-                  decoration: const InputDecoration(
-                    labelText: '延迟（毫秒）',
-                    hintText: '0',
-                    helperText: '触发后延迟多久执行脚本',
-                    border: OutlineInputBorder(),
+                        // 延迟设置
+                        TextField(
+                          controller: delayController,
+                          decoration: const InputDecoration(
+                            labelText: '延迟（毫秒）',
+                            hintText: '0',
+                            helperText: '触发后延迟多久执行脚本',
+                            border: OutlineInputBorder(),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            delay = int.tryParse(value) ?? 0;
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (value) {
-                    delay = int.tryParse(value) ?? 0;
-                  },
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text('scripts_center_cancel'.tr),
+                    ),
+                    ElevatedButton(
+                      onPressed:
+                          selectedEvent == null
+                              ? null
+                              : () => Navigator.of(context).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('scripts_center_add'.tr),
+                    ),
+                  ],
                 ),
-              ],
-            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('scripts_center_cancel'.tr),
-            ),
-            ElevatedButton(
-              onPressed: selectedEvent == null
-                  ? null
-                  : () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                foregroundColor: Colors.white,
-              ),
-              child: Text('scripts_center_add'.tr),
-            ),
-          ],
-        ),
-      ),
     );
 
     if (result == true && selectedEvent != null) {
       setState(() {
-        _triggers.add(ScriptTrigger(
-          event: selectedEvent!,
-          delay: delay > 0 ? delay : null,
-        ));
+        _triggers.add(
+          ScriptTrigger(event: selectedEvent!, delay: delay > 0 ? delay : null),
+        );
       });
     }
 
     delayController.dispose();
   }
 
-  /// 构建区域标题
-  Widget _buildSectionTitle(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.deepPurple),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
+  /// 构建配置标签页
+  Widget _buildConfigTab() {
+    // 优先使用导入的configFormFields，其次使用script的configFormFields
+    final configFormFields = _configFormFields.isNotEmpty
+        ? _configFormFields
+        : widget.script?.configFormFields ?? [];
+
+    final hasConfigFormFields = configFormFields.isNotEmpty;
+
+    if (hasConfigFormFields) {
+      // 使用 FormBuilderWrapper 动态渲染配置表单
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: FormBuilderWrapper(
+          formKey: _configFormKey,
+          onStateReady: (state) => _configWrapperState = state,
+          config: FormConfig(
+            fields: _getConfigFormFields(),
+            showSubmitButton: false,
+            showResetButton: false,
+            fieldSpacing: 16,
+            onSubmit: _handleConfigSubmit,
           ),
         ),
-      ],
+      );
+    }
+
+    // 没有配置表单字段定义时显示说明界面
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            '该脚本无需配置',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '此脚本没有定义配置选项，可以直接使用',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey[500]),
+          ),
+        ],
+      ),
     );
   }
 
-  /// 构建图标选择器
-  Widget _buildIconSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle('选择图标', Icons.palette_outlined),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _availableIcons.map((iconOption) {
-              final isSelected = _selectedIcon == iconOption.name;
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedIcon = iconOption.name;
-                  });
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? Colors.deepPurple.withValues(alpha: 0.1)
-                        : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected ? Colors.deepPurple : Colors.grey[300]!,
-                      width: isSelected ? 2 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        iconOption.icon,
-                        size: 28,
-                        color: isSelected ? Colors.deepPurple : Colors.grey[700],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        iconOption.label,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: isSelected ? Colors.deepPurple : Colors.grey[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+  /// 获取配置表单字段
+  List<FormFieldConfig> _getConfigFormFields() {
+    // 优先使用导入的configFormFields，其次使用script的configFormFields
+    final fields = _configFormFields.isNotEmpty
+        ? _configFormFields
+        : widget.script?.configFormFields ?? [];
+
+    // 为需要可用事件列表的字段添加 extra 数据
+    return fields.map((field) {
+      if (field.type == FormFieldType.eventMultiSelect) {
+        // 添加可用事件列表到 extra
+        final availableEvents =
+            _availableEvents
+                .map(
+                  (e) => {
+                    'eventName': e.eventName,
+                    'category': e.category,
+                    'description': e.description,
+                  },
+                )
+                .toList();
+
+        return FormFieldConfig(
+          name: field.name,
+          type: field.type,
+          labelText: field.labelText,
+          hintText: field.hintText,
+          initialValue: _currentConfig?[field.name],
+          required: field.required,
+          validationMessage: field.validationMessage,
+          enabled: field.enabled,
+          prefixIcon: field.prefixIcon,
+          extra: {'eventMultiSelect': true, 'availableEvents': availableEvents},
+        );
+      }
+
+      // 设置初始值
+      return FormFieldConfig(
+        name: field.name,
+        type: field.type,
+        labelText: field.labelText,
+        hintText: field.hintText,
+        initialValue: _currentConfig?[field.name] ?? field.initialValue,
+        required: field.required,
+        validationMessage: field.validationMessage,
+        enabled: field.enabled,
+        prefixIcon: field.prefixIcon,
+        extra: field.extra,
+      );
+    }).toList();
+  }
+
+  /// 处理配置表单提交
+  void _handleConfigSubmit(Map<String, dynamic> values) {
+    setState(() {
+      _currentConfig = values;
+    });
+  }
+
+  /// 从JSON解析配置表单字段
+  List<FormFieldConfig> _parseConfigFormFieldsFromJson(dynamic jsonList) {
+    if (jsonList == null) return [];
+
+    if (jsonList is! List) return [];
+
+    return jsonList.map<FormFieldConfig>((item) {
+      final json = item as Map<String, dynamic>;
+      final typeName = json['type'] as String?;
+
+      // 解析基础字段
+      return FormFieldConfig(
+        name: json['name'] as String,
+        type: FormFieldType.values.firstWhere(
+          (e) => e.name == typeName,
+          orElse: () => FormFieldType.text,
         ),
-      ],
-    );
+        labelText: json['labelText'] as String?,
+        hintText: json['hintText'] as String?,
+        initialValue: json['initialValue'],
+        required: json['required'] as bool? ?? false,
+        validationMessage: json['validationMessage'] as String?,
+        enabled: json['enabled'] as bool? ?? true,
+        prefixIcon: _parseIconData(json['prefixIcon'] as String?),
+        extra: json['extra'] as Map<String, dynamic>?,
+      );
+    }).toList();
+  }
+
+  /// 解析图标名称为IconData
+  IconData? _parseIconData(String? iconName) {
+    if (iconName == null) return null;
+    return _iconMap[iconName];
   }
 }
 
-/// 图标选项
-class _IconOption {
-  final String name;
-  final IconData icon;
-  final String label;
 
-  _IconOption(this.name, this.icon, this.label);
+/// 保持Tab存活的Wrapper
+class _KeepAliveTab extends StatefulWidget {
+  final Widget child;
+
+  const _KeepAliveTab({required this.child});
+
+  @override
+  State<_KeepAliveTab> createState() => _KeepAliveTabState();
 }
 
-/// 事件选项
-class _EventOption {
-  final String eventName;
-  final String category;
-  final String description;
+class _KeepAliveTabState extends State<_KeepAliveTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
 
-  _EventOption(this.eventName, this.category, this.description);
+  @override
+  Widget build(BuildContext context) {
+    super.build(context); // 必须调用
+    return widget.child;
+  }
 }

@@ -5,6 +5,10 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
+import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
+import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/scripts_center/models/script_execution_result.dart';
 import 'script_manager.dart';
 
@@ -89,34 +93,174 @@ class ScriptExecutor {
   /// 注意：Memento 的插件 API（如 Memento.chat.* 等）已由 JSBridgeManager 自动注册
   /// 这里只需要注入脚本中心特有的功能
   Future<void> _injectScriptCenterAPI() async {
-    // 创建一个临时的"插件"来注册 runScript API
+    // 创建一个临时的"插件"来注册脚本中心特有的 API
     // 这样可以利用 JSBridgeManager 的标准 API 注册机制
     final _ScriptExecutorPlugin tempPlugin = _ScriptExecutorPlugin(this);
 
     final apis = {
       'runScript': _handleRunScript,
+      'getConfig': _handleGetConfig,
+      'setConfig': _handleSetConfig,
+      'sendToAgent': _handleSendToAgent,
+      'showToast': _handleShowToast,
+      'log': _handleLog,
+      'emit': _handleEmit,
     };
 
     // 使用 JSBridgeManager 的标准 API 注册机制
     await _jsBridge.registerPlugin(tempPlugin, apis);
 
-    // 在全局作用域也提供 runScript（便于脚本使用）
+    // 额外暴露到 Memento.script_executor（便于脚本使用）
     await _jsBridge.evaluate('''
       (function() {
-        // 将 Memento.script_executor.runScript 映射到全局 runScript
         if (typeof globalThis.Memento !== 'undefined' &&
-            typeof globalThis.Memento.script_executor !== 'undefined') {
-          globalThis.runScript = globalThis.Memento.script_executor.runScript;
+            typeof globalThis.Memento.plugins !== 'undefined' &&
+            typeof globalThis.Memento.plugins.script_executor !== 'undefined') {
+          // 将 API 直接暴露到 Memento.script_executor
+          globalThis.Memento.script_executor = globalThis.Memento.plugins.script_executor;
+
+          // 同时暴露全局函数（便于脚本使用）
+          globalThis.runScript = globalThis.Memento.plugins.script_executor.runScript;
+          globalThis.log = globalThis.Memento.plugins.script_executor.log;
+          globalThis.emit = globalThis.Memento.plugins.script_executor.emit;
 
           // 兼容浏览器环境
           if (typeof window !== 'undefined') {
+            window.Memento = globalThis.Memento;
             window.runScript = globalThis.runScript;
+            window.log = globalThis.log;
+            window.emit = globalThis.emit;
           }
         }
       })();
     ''');
 
     print('✅ 脚本中心 API 注入成功');
+  }
+
+  /// 处理获取脚本配置
+  Future<String> _handleGetConfig(String scriptId) async {
+    try {
+      final configPath = 'configs/scripts_center/${scriptId}_config.json';
+      final data = await storage.read(configPath);
+
+      if (data == null) {
+        // 返回默认配置
+        return jsonEncode({
+          'scriptId': scriptId,
+          'enabled': false,
+          'agentId': null,
+          'enabledEvents': [],
+          'eventTemplates': {},
+          'promptTemplate': '根据以下事件，用一句话鼓励用户：{eventDescription}',
+        });
+      }
+
+      return jsonEncode(data);
+    } catch (e) {
+      return jsonEncode({'error': e.toString()});
+    }
+  }
+
+  /// 处理保存脚本配置
+  Future<String> _handleSetConfig(
+    String scriptId,
+    Map<String, dynamic> config,
+  ) async {
+    try {
+      final configPath = 'configs/scripts_center/${scriptId}_config.json';
+
+      // 确保目录存在
+      await storage.createDirectory('configs/scripts_center');
+
+      // 保存配置
+      await storage.write(configPath, config);
+
+      return jsonEncode({'success': true});
+    } catch (e) {
+      return jsonEncode({'error': e.toString()});
+    }
+  }
+
+  /// 处理发送消息给 AI 并获取回复
+  Future<String> _handleSendToAgent(String agentId, String message) async {
+    try {
+      // 获取 agent_chat 插件
+      final agentChatPlugin =
+          PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
+      if (agentChatPlugin == null) {
+        throw Exception('agent_chat 插件未找到');
+      }
+
+      // 创建临时会话
+      final conversation = await agentChatPlugin
+          .getOrCreateTemporaryConversation(
+            routeName: 'scripts_center.encouragement',
+            title: 'AI 鼓励助手',
+            agentId: agentId,
+          );
+
+      // 获取消息服务
+      final messageService =
+          agentChatPlugin.conversationController?.messageService;
+      if (messageService == null) {
+        throw Exception('消息服务未初始化');
+      }
+
+      // 添加用户消息
+      final userMessage = ChatMessage(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        conversationId: conversation.id,
+        isUser: true,
+        content: message,
+        timestamp: DateTime.now(),
+      );
+      await messageService.addMessage(userMessage);
+
+      // 简化实现：返回会话信息，脚本可以通过监听消息获取回复
+      return jsonEncode({
+        'success': true,
+        'conversationId': conversation.id,
+        'messageId': userMessage.id,
+        'note': 'AI 回复需要通过消息监听获取',
+      });
+    } catch (e) {
+      return jsonEncode({'error': e.toString()});
+    }
+  }
+
+  /// 处理显示 Toast
+  void _handleShowToast(String message, {String type = 'normal'}) {
+    ToastType toastType = ToastType.normal;
+    switch (type) {
+      case 'success':
+        toastType = ToastType.success;
+        break;
+      case 'error':
+        toastType = ToastType.error;
+        break;
+      case 'warning':
+        toastType = ToastType.warning;
+        break;
+      case 'info':
+        toastType = ToastType.info;
+        break;
+    }
+    Toast.show(message, type: toastType);
+  }
+
+  /// 处理日志输出
+  void _handleLog(String message, [String level = 'info']) {
+    final emoji =
+        {'info': 'ℹ️', 'warn': '⚠️', 'error': '❌', 'debug': '🐛'}[level] ??
+        'ℹ️';
+    print('$emoji [Script] $message');
+    onLog?.call(message, level);
+  }
+
+  /// 处理事件触发
+  void _handleEmit(String eventName, [dynamic data]) async {
+    eventManager.broadcast(eventName, data);
   }
 
   /// 处理脚本互调

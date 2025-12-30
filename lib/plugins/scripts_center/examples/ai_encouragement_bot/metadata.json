@@ -1,0 +1,41 @@
+{
+  "name": "AI 鼓励助手",
+  "id": "ai_encouragement_bot",
+  "version": "1.0.0",
+  "description": "监听用户活动，触发事件后发送简要信息给 AI，返回鼓励的话并用 toast 展示",
+  "icon": "favorite",
+  "author": "Memento Team",
+  "enabled": false,
+  "type": "standalone",
+  "inputs": [],
+  "triggers": [
+    {"event": "habit_checked"},
+    {"event": "task_completed"},
+    {"event": "diary_entry_created"}
+  ],
+  "configFormFields": [
+    {
+      "name": "agentId",
+      "type": "pluginDataSelector",
+      "labelText": "AI 助手",
+      "pluginDataType": "openai.agent",
+      "required": true,
+      "validationMessage": "请选择 AI 助手"
+    },
+    {
+      "name": "enabledEvents",
+      "type": "eventMultiSelect",
+      "labelText": "监听的事件",
+      "required": true,
+      "validationMessage": "请选择至少一个事件"
+    },
+    {
+      "name": "promptTemplate",
+      "type": "textArea",
+      "labelText": "提示词模板",
+      "hintText": "使用 {eventDescription} 作为事件描述的占位符",
+      "initialValue": "根据以下事件，用一句话鼓励用户：{eventDescription}",
+      "required": false
+    }
+  ]
+}
