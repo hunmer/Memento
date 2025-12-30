@@ -71,8 +71,8 @@ class AppStoreManager extends ChangeNotifier {
     final localSource = AppStoreSource(
       id: const Uuid().v4(),
       name: '本地开发仓库',
-      url: 'http://127.0.0.1:8080/apps.json',
-      baseUrl: 'http://127.0.0.1:8080',
+      url: 'http://127.0.0.1:8080/apps/apps.json',
+      baseUrl: 'http://127.0.0.1:8080/apps',
       createdAt: DateTime.now(),
     );
     await addSource(localSource);

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ai_encouragement_bot",
+    "name": "AI 鼓励助手",
+    "icon": "💬",
+    "description": "监听用户活动，触发事件后发送简要信息给 AI，返回鼓励的话并用 toast 展示",
+    "files": "ai_encouragement_bot/files.json",
+    "version": "1.0.0",
+    "author": "Memento Team",
+    "homepage": "",
+    "tags": ["AI", "鼓励", "自动化"],
+    "permissions": ["agent_chat"]
+  }
+]
