@@ -199,6 +199,7 @@ class TimerHomeWidgets {
         selectorId: 'timer.task',
         dataRenderer: _renderTimerData,
         navigationHandler: _navigateToTimerDetail,
+        dataSelector: _extractTimerData,
         builder:
             (context, config) => GenericSelectorWidget(
               widgetDefinition: registry.getWidget('timer_task_selector')!,
@@ -206,6 +207,28 @@ class TimerHomeWidgets {
             ),
       ),
     );
+  }
+
+  /// 从选择器数据数组中提取小组件需要的数据
+  static Map<String, dynamic> _extractTimerData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['name'] = itemData['name'] as String?;
+    result['icon'] = itemData['icon'] as int?;
+    result['color'] = itemData['color'] as int?;
+    return result;
   }
 
   /// 获取可用的统计项

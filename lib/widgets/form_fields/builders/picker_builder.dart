@@ -241,7 +241,7 @@ Widget buildImagePickerField(FormFieldConfig config, GlobalKey fieldKey) {
   final showSelectButton = extra['showSelectButton'] as bool? ?? true;
 
   // 获取初始图片路径（单图模式）
-  dynamic _getInitialImagePath(dynamic value) {
+  dynamic getInitialImagePath(dynamic value) {
     if (value == null) return null;
     if (multiple && value is List && value.isNotEmpty) {
       // 多图模式返回第一张图的 URL
@@ -264,7 +264,7 @@ Widget buildImagePickerField(FormFieldConfig config, GlobalKey fieldKey) {
     enabled: config.enabled,
     onChanged: config.onChanged,
     builder: (context, value, setValue) => ImagePickerField(
-      currentImage: _getInitialImagePath(value),
+          currentImage: getInitialImagePath(value),
       labelText: config.labelText,
       hintText: config.hintText,
       enabled: config.enabled,

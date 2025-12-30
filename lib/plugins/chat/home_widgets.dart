@@ -71,6 +71,7 @@ class ChatHomeWidgets {
         selectorId: 'chat.channel',
         dataRenderer: _renderChannelData,
         navigationHandler: _navigateToChannel,
+        dataSelector: _extractChannelData,
 
         builder: (context, config) {
           return GenericSelectorWidget(
@@ -80,6 +81,31 @@ class ChatHomeWidgets {
         },
       ),
     );
+  }
+
+  /// 从选择器数据数组中提取小组件需要的数据
+  static Map<String, dynamic> _extractChannelData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['title'] = itemData['title'] as String?;
+    result['lastMessage'] = itemData['lastMessage'] as String?;
+    result['lastMessageTime'] = itemData['lastMessageTime'] as String?;
+    result['messageCount'] = itemData['messageCount'] as int?;
+    result['icon'] = itemData['icon'] as int?;
+    result['backgroundColor'] = itemData['backgroundColor'] as int?;
+    return result;
   }
 
   /// 获取可用的统计项

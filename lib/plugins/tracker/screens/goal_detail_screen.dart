@@ -4,11 +4,6 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart'
     as flutter
     show ListTile, Row, Center, SizedBox;
-import 'package:Memento/plugins/tracker/models/goal.dart';
-import 'package:Memento/plugins/tracker/models/record.dart';
-import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
-import 'package:Memento/plugins/tracker/widgets/goal_edit_page.dart';
-import 'package:Memento/plugins/tracker/widgets/record_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 

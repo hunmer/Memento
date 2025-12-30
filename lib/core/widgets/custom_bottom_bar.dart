@@ -265,30 +265,18 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
 ///
 /// 适用于不需要悬浮按钮的场景
 class SimpleCustomBottomBar extends CustomBottomBar {
-  SimpleCustomBottomBar({
+  const SimpleCustomBottomBar({
     super.key,
-    required List<Color> colors,
-    required int currentIndex,
-    required TabController tabController,
-    required Widget Function(BuildContext context, ScrollController controller) body,
-    required List<Widget> children,
-    double widthRatio = 0.85,
-    double offset = 12,
-    GlobalKey? bottomBarKey,
-    bool hideOnScroll = true,
-    EdgeInsetsDirectional? indicatorPadding,
-    List<Widget> Function(BuildContext context, int currentIndex)? extraChildren,
-  }) : super(
-         colors: colors,
-         currentIndex: currentIndex,
-         tabController: tabController,
-         body: body,
-         children: children,
-         widthRatio: widthRatio,
-         offset: offset,
-         bottomBarKey: bottomBarKey,
-         hideOnScroll: hideOnScroll,
-         indicatorPadding: indicatorPadding,
-         extraChildren: extraChildren,
-       );
+    required super.colors,
+    required super.currentIndex,
+    required super.tabController,
+    required super.body,
+    required super.children,
+    super.widthRatio,
+    super.offset,
+    super.bottomBarKey,
+    super.hideOnScroll,
+    super.indicatorPadding,
+    super.extraChildren,
+  });
 }
