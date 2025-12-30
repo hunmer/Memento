@@ -6,8 +6,6 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
-import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/scripts_center/models/script_execution_result.dart';
 import 'script_manager.dart';
@@ -101,7 +99,6 @@ class ScriptExecutor {
       'runScript': _handleRunScript,
       'getConfig': _handleGetConfig,
       'setConfig': _handleSetConfig,
-      'sendToAgent': _handleSendToAgent,
       'showToast': _handleShowToast,
       'log': _handleLog,
       'emit': _handleEmit,
@@ -139,35 +136,72 @@ class ScriptExecutor {
   }
 
   /// 处理获取脚本配置
-  Future<String> _handleGetConfig(String scriptId) async {
+  Future<Map<String, dynamic>> _handleGetConfig(
+    Map<String, dynamic> params,
+  ) async {
     try {
+      // 支持两种调用方式：
+      // 1. getConfig({scriptId: 'xxx'}) - 对象参数
+      // 2. getConfig('xxx') - 位置参数（会被包装成 {_value: 'xxx'}）
+      final scriptId =
+          (params['scriptId'] as String?) ?? (params['_value'] as String?);
+
+      if (scriptId == null || scriptId.isEmpty) {
+        return {'error': 'scriptId 参数缺失'};
+      }
+
       final configPath = 'configs/scripts_center/${scriptId}_config.json';
       final data = await storage.read(configPath);
 
+      // 默认配置
+      final defaultConfig = {
+        'scriptId': scriptId,
+        'enabled': false,
+        'agentId': null,
+        'enabledEvents': <String>[],
+        'eventTemplates': <String, dynamic>{},
+        'promptTemplate': '根据以下事件，用一句话鼓励用户：{eventDescription}',
+      };
+
       if (data == null) {
         // 返回默认配置
-        return jsonEncode({
-          'scriptId': scriptId,
-          'enabled': false,
-          'agentId': null,
-          'enabledEvents': [],
-          'eventTemplates': {},
-          'promptTemplate': '根据以下事件，用一句话鼓励用户：{eventDescription}',
-        });
+        return defaultConfig;
       }
 
-      return jsonEncode(data);
+      // 合并存储的配置和默认配置（确保所有字段都存在）
+      final storedConfig = data as Map<String, dynamic>;
+      return {
+        ...defaultConfig,
+        ...storedConfig,
+        'scriptId': scriptId, // 确保 scriptId 正确
+      };
     } catch (e) {
-      return jsonEncode({'error': e.toString()});
+      return {'error': e.toString()};
     }
   }
 
   /// 处理保存脚本配置
-  Future<String> _handleSetConfig(
-    String scriptId,
-    Map<String, dynamic> config,
+  ///
+  /// 支持两种调用方式：
+  /// 1. setConfig({scriptId: 'xxx', config: {...}}) - 对象参数
+  /// 2. setConfig('xxx', {...}) - 两个位置参数
+  Future<Map<String, dynamic>> _handleSetConfig(
+    Map<String, dynamic> params,
   ) async {
     try {
+      final scriptId =
+          (params['scriptId'] as String?) ?? (params['_pos0'] as String?);
+      final config =
+          (params['config'] as Map<String, dynamic>?) ??
+          (params['_pos1'] as Map<String, dynamic>?);
+
+      if (scriptId == null || scriptId.isEmpty) {
+        return {'error': 'scriptId 参数缺失'};
+      }
+      if (config == null) {
+        return {'error': 'config 参数缺失'};
+      }
+
       final configPath = 'configs/scripts_center/${scriptId}_config.json';
 
       // 确保目录存在
@@ -176,61 +210,30 @@ class ScriptExecutor {
       // 保存配置
       await storage.write(configPath, config);
 
-      return jsonEncode({'success': true});
+      return {'success': true};
     } catch (e) {
-      return jsonEncode({'error': e.toString()});
-    }
-  }
-
-  /// 处理发送消息给 AI 并获取回复
-  Future<String> _handleSendToAgent(String agentId, String message) async {
-    try {
-      // 获取 agent_chat 插件
-      final agentChatPlugin =
-          PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
-      if (agentChatPlugin == null) {
-        throw Exception('agent_chat 插件未找到');
-      }
-
-      // 创建临时会话
-      final conversation = await agentChatPlugin
-          .getOrCreateTemporaryConversation(
-            routeName: 'scripts_center.encouragement',
-            title: 'AI 鼓励助手',
-            agentId: agentId,
-          );
-
-      // 获取消息服务
-      final messageService =
-          agentChatPlugin.conversationController?.messageService;
-      if (messageService == null) {
-        throw Exception('消息服务未初始化');
-      }
-
-      // 添加用户消息
-      final userMessage = ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        conversationId: conversation.id,
-        isUser: true,
-        content: message,
-        timestamp: DateTime.now(),
-      );
-      await messageService.addMessage(userMessage);
-
-      // 简化实现：返回会话信息，脚本可以通过监听消息获取回复
-      return jsonEncode({
-        'success': true,
-        'conversationId': conversation.id,
-        'messageId': userMessage.id,
-        'note': 'AI 回复需要通过消息监听获取',
-      });
-    } catch (e) {
-      return jsonEncode({'error': e.toString()});
+      return {'error': e.toString()};
     }
   }
 
   /// 处理显示 Toast
-  void _handleShowToast(String message, {String type = 'normal'}) {
+  ///
+  /// 支持两种调用方式：
+  /// 1. showToast({message: 'xxx', type: 'success'}) - 对象参数
+  /// 2. showToast('xxx') - 单个位置参数（默认类型）
+  /// 3. showToast('xxx', 'success') - 两个位置参数
+  void _handleShowToast(Map<String, dynamic> params) {
+    final message =
+        (params['message'] as String?) ??
+        (params['_value'] as String?) ??
+        (params['_pos0'] as String?);
+    final type =
+        (params['type'] as String?) ?? (params['_pos1'] as String?) ?? 'normal';
+
+    if (message == null || message.isEmpty) {
+      return;
+    }
+
     ToastType toastType = ToastType.normal;
     switch (type) {
       case 'success':
@@ -250,7 +253,23 @@ class ScriptExecutor {
   }
 
   /// 处理日志输出
-  void _handleLog(String message, [String level = 'info']) {
+  ///
+  /// 支持两种调用方式：
+  /// 1. log({message: 'xxx', level: 'info'}) - 对象参数
+  /// 2. log('xxx') - 单个位置参数（默认 info 级别）
+  /// 3. log('xxx', 'error') - 两个位置参数
+  void _handleLog(Map<String, dynamic> params) {
+    final message =
+        (params['message'] as String?) ??
+        (params['_value'] as String?) ??
+        (params['_pos0'] as String?);
+    final level =
+        (params['level'] as String?) ?? (params['_pos1'] as String?) ?? 'info';
+
+    if (message == null || message.isEmpty) {
+      return;
+    }
+
     final emoji =
         {'info': 'ℹ️', 'warn': '⚠️', 'error': '❌', 'debug': '🐛'}[level] ??
         'ℹ️';
@@ -259,7 +278,22 @@ class ScriptExecutor {
   }
 
   /// 处理事件触发
-  void _handleEmit(String eventName, [dynamic data]) async {
+  ///
+  /// 支持两种调用方式：
+  /// 1. emit({eventName: 'xxx', data: {...}}) - 对象参数
+  /// 2. emit('xxx') - 单个位置参数（只有事件名）
+  /// 3. emit('xxx', {...}) - 两个位置参数
+  void _handleEmit(Map<String, dynamic> params) {
+    final eventName =
+        (params['eventName'] as String?) ??
+        (params['_value'] as String?) ??
+        (params['_pos0'] as String?);
+    final data = params['data'] ?? params['_pos1'];
+
+    if (eventName == null || eventName.isEmpty) {
+      return;
+    }
+
     eventManager.broadcast(eventName, data);
   }
 
@@ -267,14 +301,30 @@ class ScriptExecutor {
   ///
   /// 此方法由 JS 环境中的 runScript() 函数调用
   /// 支持真正的异步执行和脚本间调用
-  Future<dynamic> _handleRunScript(String scriptId, [dynamic params]) async {
+  ///
+  /// 支持两种调用方式：
+  /// 1. runScript({scriptId: 'xxx', params: {...}}) - 对象参数
+  /// 2. runScript('xxx') - 单个位置参数
+  /// 3. runScript('xxx', {...}) - 两个位置参数
+  Future<dynamic> _handleRunScript(Map<String, dynamic> params) async {
+    // 支持位置参数：runScript('scriptId', 'params')
+    final scriptId =
+        (params['scriptId'] as String?) ??
+        (params['_value'] as String?) ??
+        (params['_pos0'] as String?);
+    final runParams = params['params'] ?? params['_pos1'];
+
+    if (scriptId == null || scriptId.isEmpty) {
+      return {'success': false, 'error': 'scriptId 参数缺失'};
+    }
+
     // 检测循环调用
     if (_executingScripts.contains(scriptId)) {
       print('❌ 检测到循环调用: $scriptId');
-      return jsonEncode({
+      return {
         'success': false,
         'error': '检测到循环调用: $scriptId',
-      });
+      };
     }
 
     try {
@@ -282,7 +332,7 @@ class ScriptExecutor {
 
       // 准备参数
       final Map<String, dynamic> args = {
-        'params': params ?? [],
+        'params': runParams ?? [],
         'calledFrom': 'runScript',
       };
 
@@ -295,17 +345,17 @@ class ScriptExecutor {
         return result.result;
       } else {
         print('⚠️ 脚本互调失败: $scriptId - ${result.error}');
-        return jsonEncode({
+        return {
           'success': false,
           'error': result.error,
-        });
+        };
       }
     } catch (e) {
       print('❌ 脚本互调异常: $scriptId - $e');
-      return jsonEncode({
+      return {
         'success': false,
         'error': e.toString(),
-      });
+      };
     }
   }
 
@@ -367,7 +417,7 @@ class ScriptExecutor {
           try {
             // 执行脚本代码
             const result = await (async function() {
-              $code
+               $code
             })();
 
             return result;
