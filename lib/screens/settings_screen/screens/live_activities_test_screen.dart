@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:live_activities/models/activity_update.dart';
-import 'package:live_activities/models/url_scheme_data.dart';
 import 'package:uuid/uuid.dart';
 import '../controllers/live_activities_controller.dart';
 

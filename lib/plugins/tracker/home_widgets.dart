@@ -71,6 +71,7 @@ class TrackerHomeWidgets {
         selectorId: 'tracker.goal',
         dataRenderer: _renderGoalData,
         navigationHandler: _navigateToGoalDetail,
+        dataSelector: _extractGoalData,
         builder:
             (context, config) => GenericSelectorWidget(
               widgetDefinition: registry.getWidget('tracker_goal_selector')!,
@@ -78,6 +79,31 @@ class TrackerHomeWidgets {
             ),
       ),
     );
+  }
+
+  /// 从选择器数据数组中提取小组件需要的数据
+  static Map<String, dynamic> _extractGoalData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['name'] = itemData['name'] as String?;
+    result['icon'] = itemData['icon'] as String?;
+    result['iconColor'] = itemData['iconColor'] as int?;
+    result['currentValue'] = itemData['currentValue'] as double?;
+    result['targetValue'] = itemData['targetValue'] as double?;
+    result['unitType'] = itemData['unitType'] as String?;
+    return result;
   }
 
   /// 获取可用的统计项

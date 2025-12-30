@@ -72,14 +72,14 @@ Widget buildColorField(FormFieldConfig config, GlobalKey fieldKey) {
   final extra = config.extra ?? {};
 
   // 安全转换值为 Color
-  Color _toColor(dynamic value) {
+  Color toColor(dynamic value) {
     if (value is Color) return value;
     if (value is int) return Color(value);
     return Colors.blue;
   }
 
   // 安全获取 double 值（兼容 int 类型）
-  double _toDouble(dynamic value) {
+  double toDouble(dynamic value) {
     if (value == null) return 100;
     if (value is double) return value;
     if (value is int) return value.toDouble();
@@ -89,16 +89,16 @@ Widget buildColorField(FormFieldConfig config, GlobalKey fieldKey) {
   return WrappedFormField(
     key: fieldKey,
     name: config.name,
-    initialValue: _toColor(config.initialValue),
+    initialValue: toColor(config.initialValue),
     enabled: config.enabled,
     onChanged: config.onChanged,
     builder: (context, value, setValue) => ColorSelectorField(
       labelText: config.labelText ?? '选择颜色',
-      selectedColor: _toColor(value),
+          selectedColor: toColor(value),
       onColorChanged: config.enabled ? setValue : (_) {},
       inline: (extra['inline'] as bool?) ?? false,
       scrollable: (extra['scrollable'] as bool?) ?? false,
-      labelWidth: _toDouble(extra['labelWidth']),
+          labelWidth: toDouble(extra['labelWidth']),
     ),
   );
 }

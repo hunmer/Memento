@@ -74,6 +74,7 @@ class GoodsHomeWidgets {
         selectorId: 'goods.warehouse',
         dataRenderer: _renderWarehouseData,
         navigationHandler: _navigateToWarehouse,
+        dataSelector: _extractWarehouseData,
         builder:
             (context, config) => GenericSelectorWidget(
               widgetDefinition: registry.getWidget('goods_warehouse_selector')!,
@@ -97,6 +98,7 @@ class GoodsHomeWidgets {
         selectorId: 'goods.item',
         dataRenderer: _renderItemData,
         navigationHandler: _navigateToItem,
+        dataSelector: _extractItemData,
         builder:
             (context, config) => GenericSelectorWidget(
               widgetDefinition: registry.getWidget('goods_item_selector')!,
@@ -104,6 +106,51 @@ class GoodsHomeWidgets {
             ),
       ),
     );
+  }
+
+  /// 从选择器数据数组中提取仓库数据
+  static Map<String, dynamic> _extractWarehouseData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['title'] = itemData['title'] as String?;
+    result['icon'] = itemData['icon'] as int?;
+    result['iconColor'] = itemData['iconColor'] as int?;
+    return result;
+  }
+
+  /// 从选择器数据数组中提取物品数据
+  static Map<String, dynamic> _extractItemData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['title'] = itemData['title'] as String?;
+    result['icon'] = itemData['icon'] as int?;
+    result['iconColor'] = itemData['iconColor'] as int?;
+    result['purchasePrice'] = itemData['purchasePrice'] as double?;
+    return result;
   }
 
   /// 获取可用的统计项

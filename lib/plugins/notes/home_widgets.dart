@@ -55,6 +55,7 @@ class NotesHomeWidgets {
         selectorId: 'notes.folder',
         dataRenderer: _renderQuickCreateData,
         navigationHandler: _navigateToQuickCreate,
+        dataSelector: _extractFolderData,
         builder: (context, config) {
           return GenericSelectorWidget(
             widgetDefinition: registry.getWidget('notes_folder_quick_create')!,
@@ -98,6 +99,7 @@ class NotesHomeWidgets {
         selectorId: 'notes.folder',
         dataRenderer: _renderFolderData,
         navigationHandler: _navigateToFolder,
+        dataSelector: _extractFolderData,
 
         builder: (context, config) {
           return GenericSelectorWidget(
@@ -107,6 +109,30 @@ class NotesHomeWidgets {
         },
       ),
     );
+  }
+
+  /// 从选择器数据数组中提取文件夹数据
+  static Map<String, dynamic> _extractFolderData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['name'] = itemData['name'] as String?;
+    result['folderPath'] = itemData['folderPath'] as String?;
+    result['icon'] = itemData['icon'] as int?;
+    result['color'] = itemData['color'] as int?;
+    result['notesCount'] = itemData['notesCount'] as int?;
+    return result;
   }
 
   /// 获取可用的统计项

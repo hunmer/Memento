@@ -74,6 +74,7 @@ class AgentChatHomeWidgets {
         selectorId: 'agent_chat.conversation',
         dataRenderer: _renderConversationData,
         navigationHandler: _navigateToConversation,
+        dataSelector: _extractConversationData,
 
         builder: (context, config) {
           return GenericSelectorWidget(
@@ -84,6 +85,29 @@ class AgentChatHomeWidgets {
         },
       ),
     );
+  }
+
+  /// 从选择器数据数组中提取小组件需要的数据
+  static Map<String, dynamic> _extractConversationData(List<dynamic> dataArray) {
+    Map<String, dynamic> itemData = {};
+    final rawData = dataArray[0];
+
+    if (rawData is Map<String, dynamic>) {
+      itemData = rawData;
+    } else if (rawData is dynamic && rawData.toJson != null) {
+      final jsonResult = rawData.toJson();
+      if (jsonResult is Map<String, dynamic>) {
+        itemData = jsonResult;
+      }
+    }
+
+    final result = <String, dynamic>{};
+    result['id'] = itemData['id'] as String?;
+    result['title'] = itemData['title'] as String?;
+    result['lastMessagePreview'] = itemData['lastMessagePreview'] as String?;
+    result['lastMessageAt'] = itemData['lastMessageAt'] as String?;
+    result['agentId'] = itemData['agentId'] as String?;
+    return result;
   }
 
   /// 渲染选中的会话数据
