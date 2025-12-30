@@ -19,10 +19,14 @@ import 'package:Memento/utils/file_picker_helper.dart';
 import 'services/script_loader.dart';
 import 'services/script_manager.dart';
 import 'services/script_executor.dart';
+import 'services/script_store_manager.dart';
+import 'services/script_download_manager.dart';
 import 'models/script_folder.dart';
 import 'models/script_input.dart';
 import 'screens/scripts_list_screen.dart';
 import 'screens/script_edit_screen.dart';
+import 'screens/script_store_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 
 /// 深度序列化对象为 JSON 兼容的 Map/List/基本类型（异步版本）
@@ -137,6 +141,8 @@ class ScriptsCenterPlugin extends BasePlugin {
   late ScriptLoader _scriptLoader;
   late ScriptManager _scriptManager;
   late ScriptExecutor _scriptExecutor;
+  late ScriptStoreManager _scriptStoreManager;
+  late ScriptDownloadManager _scriptDownloadManager;
 
   // 事件订阅ID列表
   final List<String> _subscriptionIds = [];
@@ -158,6 +164,8 @@ class ScriptsCenterPlugin extends BasePlugin {
   // 获取服务实例的访问器
   ScriptManager get scriptManager => _scriptManager;
   ScriptExecutor get scriptExecutor => _scriptExecutor;
+  ScriptStoreManager get scriptStoreManager => _scriptStoreManager;
+  ScriptDownloadManager get scriptDownloadManager => _scriptDownloadManager;
 
   @override
   Future<void> initialize() async {
@@ -172,6 +180,14 @@ class ScriptsCenterPlugin extends BasePlugin {
         storage: storage,
         eventManager: EventManager.instance,
       );
+      _scriptStoreManager = ScriptStoreManager(
+        storage: storage,
+        scriptLoader: _scriptLoader,
+      );
+      _scriptDownloadManager = ScriptDownloadManager(
+        scriptLoader: _scriptLoader,
+        scriptStoreManager: _scriptStoreManager,
+      );
 
       // 初始化JS引擎
       await _scriptExecutor.initialize();
@@ -181,6 +197,9 @@ class ScriptsCenterPlugin extends BasePlugin {
 
       // 加载当前文件夹的脚本
       await _scriptManager.loadScripts();
+
+      // 初始化脚本商场
+      await _scriptStoreManager.initialize();
 
       print('✅ ScriptsCenterPlugin初始化成功');
       print('   - 已加载 ${_scriptManager.scriptCount} 个脚本');
@@ -234,9 +253,10 @@ class ScriptsCenterPlugin extends BasePlugin {
                 return SelectableItem(
                   id: script.id,
                   title: script.name,
-                  subtitle: script.description.isNotEmpty
-                      ? script.description
-                      : 'v${script.version}',
+                  subtitle:
+                      script.description.isNotEmpty
+                          ? script.description
+                          : 'v${script.version}',
                   icon: scriptIcon,
                   rawData: {
                     'id': script.id,
@@ -311,9 +331,10 @@ class ScriptsCenterPlugin extends BasePlugin {
       final allScripts = await _scriptManager.loadAllScripts();
 
       // 筛选已启用且开启了自动运行的脚本
-      final autoRunScripts = allScripts
-          .where((script) => script.enabled && script.autoRun)
-          .toList();
+      final autoRunScripts =
+          allScripts
+              .where((script) => script.enabled && script.autoRun)
+              .toList();
 
       if (autoRunScripts.isEmpty) {
         print('ℹ️ 没有自动运行脚本');
@@ -523,6 +544,8 @@ class ScriptsCenterPlugin extends BasePlugin {
     _clearTriggers();
     _scriptExecutor.dispose();
     _scriptManager.dispose();
+    _scriptStoreManager.dispose();
+    _scriptDownloadManager.dispose();
   }
 }
 
@@ -564,6 +587,29 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       onSearchSubmitted: _setSearchQuery,
 
       actions: [
+        // 脚本商场按钮
+        IconButton(
+          icon: const Icon(Icons.store, size: 24),
+          tooltip: 'scripts_center_scriptStore'.tr,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider.value(
+                      value: _plugin.scriptStoreManager,
+                    ),
+                    ChangeNotifierProvider.value(
+                      value: _plugin.scriptDownloadManager,
+                    ),
+                  ],
+                  child: const ScriptStoreScreen(),
+                ),
+              ),
+            );
+          },
+        ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.add_circle_outline, size: 24),
           tooltip: 'scripts_center_newScript'.tr,

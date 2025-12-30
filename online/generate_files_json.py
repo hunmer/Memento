@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-Memento 小应用仓库 - 文件列表生成工具
+Memento 仓库 - 文件列表生成工具
 
 功能：
-- 自动扫描指定目录下的所有小应用
+- 自动扫描指定目录下的所有应用和脚本
 - 计算每个文件的 MD5 和大小
 - 生成 files.json 文件
 
 使用方法：
     python3 generate_files_json.py
+    python3 generate_files_json.py --type apps           # 只处理 apps
+    python3 generate_files_json.py --type scripts        # 只处理 scripts
     python3 generate_files_json.py --app password_manager  # 只处理指定应用
+    python3 generate_files_json.py --script ai_encouragement_bot  # 只处理指定脚本
     python3 generate_files_json.py --dry-run              # 预览不写入
 """
 
@@ -68,12 +71,12 @@ def should_ignore_file(file_name: str) -> bool:
     return False
 
 
-def scan_app_directory(app_path: Path) -> List[Dict[str, any]]:
+def scan_item_directory(item_path: Path) -> List[Dict[str, any]]:
     """
-    扫描应用目录，生成文件列表
+    扫描应用/脚本目录，生成文件列表
 
     Args:
-        app_path: 应用目录路径
+        item_path: 应用/脚本目录路径
 
     Returns:
         文件信息列表
@@ -81,7 +84,7 @@ def scan_app_directory(app_path: Path) -> List[Dict[str, any]]:
     files_info = []
 
     # 递归遍历目录
-    for root, dirs, files in os.walk(app_path):
+    for root, dirs, files in os.walk(item_path):
         # 排除隐藏目录
         dirs[:] = [d for d in dirs if not d.startswith('.')]
 
@@ -91,9 +94,9 @@ def scan_app_directory(app_path: Path) -> List[Dict[str, any]]:
 
             file_path = Path(root) / file_name
 
-            # 计算相对于应用目录的路径
+            # 计算相对于应用/脚本目录的路径
             try:
-                relative_path = file_path.relative_to(app_path)
+                relative_path = file_path.relative_to(item_path)
             except ValueError:
                 continue
 
@@ -119,51 +122,58 @@ def scan_app_directory(app_path: Path) -> List[Dict[str, any]]:
     return files_info
 
 
-def generate_files_json(base_path: Path, app_name: Optional[str] = None, dry_run: bool = False) -> int:
+def generate_files_json_for_type(base_path: Path, item_type: str, item_name: Optional[str] = None, dry_run: bool = False) -> int:
     """
-    生成应用的 files.json 文件
+    生成指定类型（apps/scripts）的 files.json 文件
 
     Args:
         base_path: 仓库根目录
-        app_name: 指定应用名称（可选）
+        item_type: 类型 (apps/scripts)
+        item_name: 指定应用/脚本名称（可选）
         dry_run: 是否为预览模式
 
     Returns:
-        处理的应用数量
+        处理的应用/脚本数量
     """
     processed_count = 0
+    type_path = base_path / item_type
 
-    # 如果指定了应用名称，只处理该应用
-    if app_name:
-        app_dirs = [app_name]
+    if not type_path.exists():
+        print(f"\n⚠️  跳过: {item_type} 目录不存在")
+        return 0
+
+    # 如果指定了名称，只处理该应用/脚本
+    if item_name:
+        item_dirs = [item_name]
     else:
         # 获取所有子目录（排除特殊目录）
-        app_dirs = [
-            d for d in os.listdir(base_path)
-            if os.path.isdir(base_path / d) and not d.startswith('.')
+        item_dirs = [
+            d for d in os.listdir(type_path)
+            if os.path.isdir(type_path / d) and not d.startswith('.')
         ]
 
-    for app_dir in sorted(app_dirs):
-        app_path = base_path / app_dir
+    for item_dir in sorted(item_dirs):
+        item_path = type_path / item_dir
 
         # 确认目录存在
-        if not app_path.exists() or not app_path.is_dir():
-            print(f"\n⚠️  跳过: {app_dir} (不是有效目录)")
+        if not item_path.exists() or not item_path.is_dir():
+            print(f"\n⚠️  跳过: {item_dir} (不是有效目录)")
             continue
 
         print(f"\n{'='*60}")
-        print(f"📦 处理应用: {app_dir}")
+        item_label = "应用" if item_type == "apps" else "脚本"
+        print(f"📦 处理{item_label}: {item_dir}")
         print(f"{'='*60}")
 
         # 扫描目录
-        files_info = scan_app_directory(app_path)
+        files_info = scan_item_directory(item_path)
 
         if not files_info:
             print(f"  ⚠️  未找到有效文件，跳过")
             continue
 
         # 生成 JSON
-        json_path = app_path / "files.json"
+        json_path = item_path / "files.json"
         json_content = json.dumps(files_info, indent=2, ensure_ascii=False)
 
         if dry_run:
@@ -187,21 +197,37 @@ def generate_files_json(base_path: Path, app_name: Optional[str] = None, dry_run
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Memento 小应用仓库 - 文件列表生成工具',
+        description='Memento 仓库 - 文件列表生成工具',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例:
-  %(prog)s                          # 处理所有应用
-  %(prog)s --app password_manager   # 只处理密码管理器
-  %(prog)s --dry-run                # 预览模式，不实际写入文件
-  %(prog)s --app my_app --dry-run   # 预览指定应用
+  %(prog)s                                    # 处理所有应用和脚本
+  %(prog)s --type apps                        # 只处理应用
+  %(prog)s --type scripts                     # 只处理脚本
+  %(prog)s --app password_manager             # 只处理密码管理器
+  %(prog)s --script ai_encouragement_bot      # 只处理 AI 鼓励助手
+  %(prog)s --dry-run                          # 预览模式，不实际写入文件
         """
+    )
+
+    parser.add_argument(
+        '--type',
+        type=str,
+        choices=['apps', 'scripts', 'all'],
+        default='all',
+        help='指定要处理的类型 (apps/scripts/all)，默认为 all'
     )
 
     parser.add_argument(
         '--app',
         type=str,
         help='指定要处理的应用名称（目录名）'
+    )
+
+    parser.add_argument(
+        '--script',
+        type=str,
+        help='指定要处理的脚本名称（目录名）'
     )
 
     parser.add_argument(
@@ -223,14 +249,23 @@ def main():
     base_path = Path(args.base_path).resolve()
 
     print("="*60)
-    print("🚀 Memento 小应用仓库 - 文件列表生成工具")
+    print("🚀 Memento 仓库 - 文件列表生成工具")
     print("="*60)
     print(f"📁 仓库路径: {base_path}")
 
+    # 确定处理类型
     if args.app:
+        types_to_process = ['apps']
         print(f"🎯 目标应用: {args.app}")
+    elif args.script:
+        types_to_process = ['scripts']
+        print(f"🎯 目标脚本: {args.script}")
+    elif args.type == 'all':
+        types_to_process = ['apps', 'scripts']
+        print(f"🎯 目标类型: 全部 (apps + scripts)")
     else:
-        print(f"🎯 目标应用: 全部")
+        types_to_process = [args.type]
+        print(f"🎯 目标类型: {args.type}")
 
     if args.dry_run:
         print(f"🔍 运行模式: 预览模式（不写入文件）")
@@ -244,15 +279,24 @@ def main():
 
     # 生成文件列表
     try:
-        processed_count = generate_files_json(base_path, args.app, args.dry_run)
+        total_processed = 0
+        for item_type in types_to_process:
+            item_name = args.app if item_type == 'apps' else args.script
+            processed_count = generate_files_json_for_type(
+                base_path,
+                item_type,
+                item_name,
+                args.dry_run
+            )
+            total_processed += processed_count
 
         print(f"\n{'='*60}")
         print(f"✨ 完成!")
-        print(f"📊 处理应用数: {processed_count}")
+        print(f"📊 处理总数: {total_processed}")
         print(f"{'='*60}\n")
 
-        if processed_count == 0:
-            print("⚠️  警告: 未处理任何应用，请检查目录结构")
+        if total_processed == 0:
+            print("⚠️  警告: 未处理任何项目，请检查目录结构")
             sys.exit(1)
 
     except KeyboardInterrupt:
