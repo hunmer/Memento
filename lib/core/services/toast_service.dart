@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart' as fluttertoast;
+import 'package:flutter_styled_toast/flutter_styled_toast.dart' as styled_toast;
 
 /// Toast 消息类型
 enum ToastType {
@@ -18,10 +19,74 @@ enum ToastGravity {
   BOTTOM,
 }
 
+/// Toast 动画类型（flutter_styled_toast）
+enum ToastAnimation {
+  fade,
+  slideFromTop,
+  slideFromBottom,
+  slideFromLeft,
+  slideFromRight,
+  scale,
+  fadeScale,
+  rotate,
+  fadeRotate,
+  scaleRotate,
+}
+
 /// Toast 服务接口
 abstract class IToastService {
   /// 显示 Toast 消息
   void showToast(
+    String message, {
+    ToastType type = ToastType.normal,
+    Duration? duration,
+    ToastGravity? gravity,
+    Color? backgroundColor,
+    Color? textColor,
+    double? fontSize,
+
+    // flutter_styled_toast 扩展参数
+    ToastAnimation? animation,
+    ToastAnimation? reverseAnimation,
+    AlignmentGeometry? alignment,
+    Curve? curve,
+    Curve? reverseCurve,
+    Duration? animDuration,
+    bool? dismissOtherOnShow,
+    bool? fullWidth,
+    bool? isIgnoring,
+    Axis? axis,
+    Offset? startOffset,
+    Offset? endOffset,
+    Offset? reverseStartOffset,
+    Offset? reverseEndOffset,
+    TextAlign? textAlign,
+  });
+
+  /// 显示自定义 Widget Toast
+  void showCustomWidget(
+    Widget widget, {
+    BuildContext? context,
+    Duration? duration,
+    ToastGravity? position,
+    ToastAnimation? animation,
+    ToastAnimation? reverseAnimation,
+    AlignmentGeometry? alignment,
+    Curve? curve,
+    Curve? reverseCurve,
+    Duration? animDuration,
+    bool? dismissOtherOnShow,
+    bool? isIgnoring,
+    Axis? axis,
+    Offset? startOffset,
+    Offset? endOffset,
+    Offset? reverseStartOffset,
+    Offset? reverseEndOffset,
+    VoidCallback? onDismiss,
+  });
+
+  /// 使用 FlutterToast 显示消息（支持全局显示，app外也能显示）
+  void showToastGlobal(
     String message, {
     ToastType type = ToastType.normal,
     Duration? duration,
@@ -60,7 +125,8 @@ abstract class IToastServiceWithInit extends IToastService {
 }
 
 /// Toast 服务实现
-/// 在移动端使用 FlutterToast，其他平台使用 SnackBar
+/// 默认使用 flutter_styled_toast，支持丰富自定义
+/// showToastGlobal 使用 FlutterToast，支持 app 外显示（仅移动端）
 class ToastService implements IToastServiceWithInit {
   static ToastService? _instance;
   static ToastService get instance => _instance ??= ToastService._();
@@ -83,16 +149,143 @@ class ToastService implements IToastServiceWithInit {
     Color? backgroundColor,
     Color? textColor,
     double? fontSize,
+
+    // flutter_styled_toast 扩展参数
+    ToastAnimation? animation,
+    ToastAnimation? reverseAnimation,
+    AlignmentGeometry? alignment,
+    Curve? curve,
+    Curve? reverseCurve,
+    Duration? animDuration,
+    bool? dismissOtherOnShow,
+    bool? fullWidth,
+    bool? isIgnoring,
+    Axis? axis,
+    Offset? startOffset,
+    Offset? endOffset,
+    Offset? reverseStartOffset,
+    Offset? reverseEndOffset,
+    TextAlign? textAlign,
   }) {
     if (message.isEmpty) return;
 
-    // 根据平台选择不同的实现方式
+    final context = _navigatorKey.currentContext;
+    if (context == null) {
+      debugPrint('ToastService: No context available, fallback to FlutterToast');
+      _showFlutterToast(
+        message,
+        type: type,
+        duration: duration ?? const Duration(seconds: 2),
+        gravity: gravity,
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+        fontSize: fontSize,
+      );
+      return;
+    }
+
+    final bgColor = backgroundColor ?? _getBackgroundColor(type);
+    final txtColor = textColor ?? Colors.white;
+
+    // 转换 ToastGravity 到 StyledToastPosition
+    final toastPosition = _convertToastPosition(gravity);
+
+    // 转换动画类型
+    final toastAnimation = _convertAnimation(animation);
+
+    styled_toast.showToast(
+      message,
+      context: context,
+      duration: duration ?? const Duration(seconds: 2),
+      position: toastPosition,
+      backgroundColor: bgColor,
+      textStyle: TextStyle(color: txtColor, fontSize: fontSize ?? 16),
+      animation: toastAnimation,
+      reverseAnimation: _convertAnimation(reverseAnimation),
+      alignment: alignment as Alignment?,
+      curve: curve ?? Curves.linear,
+      reverseCurve: reverseCurve ?? Curves.linear,
+      animDuration: animDuration ?? const Duration(milliseconds: 400),
+      isIgnoring: isIgnoring ?? true,
+      axis: axis ?? Axis.vertical,
+      startOffset: startOffset,
+      endOffset: endOffset,
+      reverseStartOffset: reverseStartOffset,
+      reverseEndOffset: reverseEndOffset,
+      textAlign: textAlign ?? TextAlign.center,
+    );
+  }
+
+  @override
+  void showCustomWidget(
+    Widget widget, {
+    BuildContext? context,
+    Duration? duration,
+    ToastGravity? position,
+    ToastAnimation? animation,
+    ToastAnimation? reverseAnimation,
+    AlignmentGeometry? alignment,
+    Curve? curve,
+    Curve? reverseCurve,
+    Duration? animDuration,
+    bool? dismissOtherOnShow,
+    bool? isIgnoring,
+    Axis? axis,
+    Offset? startOffset,
+    Offset? endOffset,
+    Offset? reverseStartOffset,
+    Offset? reverseEndOffset,
+    VoidCallback? onDismiss,
+  }) {
+    final ctx = context ?? _navigatorKey.currentContext;
+    if (ctx == null) {
+      debugPrint('ToastService: No context available for custom widget');
+      return;
+    }
+
+    final toastPosition = _convertToastPosition(position);
+    final toastAnimation = _convertAnimation(animation);
+
+    styled_toast.showToastWidget(
+      widget,
+      context: ctx,
+      duration: duration ?? const Duration(seconds: 2),
+      position: toastPosition,
+      animation: toastAnimation,
+      reverseAnimation: _convertAnimation(reverseAnimation),
+      alignment: alignment as Alignment?,
+      curve: curve ?? Curves.linear,
+      reverseCurve: reverseCurve ?? Curves.linear,
+      animDuration: animDuration ?? const Duration(milliseconds: 400),
+      isIgnoring: isIgnoring ?? true,
+      axis: axis ?? Axis.vertical,
+      startOffset: startOffset,
+      endOffset: endOffset,
+      reverseStartOffset: reverseStartOffset,
+      reverseEndOffset: reverseEndOffset,
+      onDismiss: onDismiss,
+    );
+  }
+
+  @override
+  void showToastGlobal(
+    String message, {
+    ToastType type = ToastType.normal,
+    Duration? duration,
+    ToastGravity? gravity,
+    Color? backgroundColor,
+    Color? textColor,
+    double? fontSize,
+  }) {
+    if (message.isEmpty) return;
+
+    // 使用 FlutterToast，支持 app 外显示（仅移动端）
     if (kIsWeb || ![
       TargetPlatform.android,
       TargetPlatform.iOS,
       TargetPlatform.fuchsia,
     ].contains(defaultTargetPlatform)) {
-      // Web 和桌面平台使用 SnackBar
+      // Web 和桌面平台回退到 SnackBar
       _showSnackBar(
         message,
         type: type,
@@ -101,7 +294,6 @@ class ToastService implements IToastServiceWithInit {
         textColor: textColor,
       );
     } else {
-      // 移动端使用 FlutterToast
       _showFlutterToast(
         message,
         type: type,
@@ -155,27 +347,17 @@ class ToastService implements IToastServiceWithInit {
     showToast(
       message,
       type: ToastType.info,
-      duration: const Duration(seconds: 10), // 加载提示显示更长时间
+      duration: const Duration(seconds: 10),
     );
   }
 
   @override
   void cancel() {
-    if (kIsWeb || ![
-      TargetPlatform.android,
-      TargetPlatform.iOS,
-      TargetPlatform.fuchsia,
-    ].contains(defaultTargetPlatform)) {
-      // SnackBar 会自动消失，不支持手动取消
-      // 可以通过 ScaffoldMessengerController 来清除所有 SnackBar
-      final context = _navigatorKey.currentContext;
-      if (context != null) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      }
-    } else {
-      // 取消 FlutterToast
-      fluttertoast.Fluttertoast.cancel();
-    }
+    // 取消 flutter_styled_toast
+    styled_toast.ToastManager().dismissAll();
+
+    // 同时也取消 FlutterToast
+    fluttertoast.Fluttertoast.cancel();
   }
 
   @override
@@ -183,7 +365,7 @@ class ToastService implements IToastServiceWithInit {
     cancel();
   }
 
-  /// 使用 FlutterToast 显示消息（移动端）
+  /// 使用 FlutterToast 显示消息（移动端，支持 app 外显示）
   void _showFlutterToast(
     String message, {
     ToastType type = ToastType.normal,
@@ -196,7 +378,6 @@ class ToastService implements IToastServiceWithInit {
     final bgColor = backgroundColor ?? _getBackgroundColor(type);
     final txtColor = textColor ?? Colors.white;
 
-    // 转换自定义的 ToastGravity 到 fluttertoast 的 ToastGravity
     var toastGravity = fluttertoast.ToastGravity.BOTTOM;
     if (gravity != null) {
       switch (gravity) {
@@ -319,6 +500,48 @@ class ToastService implements IToastServiceWithInit {
       size: 20,
     );
   }
+
+  /// 转换 ToastGravity 到 StyledToastPosition
+  styled_toast.StyledToastPosition _convertToastPosition(ToastGravity? gravity) {
+    if (gravity == null) return styled_toast.StyledToastPosition.bottom;
+
+    switch (gravity) {
+      case ToastGravity.TOP:
+        return styled_toast.StyledToastPosition.top;
+      case ToastGravity.CENTER:
+        return styled_toast.StyledToastPosition.center;
+      case ToastGravity.BOTTOM:
+        return styled_toast.StyledToastPosition.bottom;
+    }
+  }
+
+  /// 转换 ToastAnimation 到 StyledToastAnimation
+  styled_toast.StyledToastAnimation? _convertAnimation(ToastAnimation? animation) {
+    if (animation == null) return null;
+
+    switch (animation) {
+      case ToastAnimation.fade:
+        return styled_toast.StyledToastAnimation.fade;
+      case ToastAnimation.slideFromTop:
+        return styled_toast.StyledToastAnimation.slideFromTop;
+      case ToastAnimation.slideFromBottom:
+        return styled_toast.StyledToastAnimation.slideFromBottom;
+      case ToastAnimation.slideFromLeft:
+        return styled_toast.StyledToastAnimation.slideFromLeft;
+      case ToastAnimation.slideFromRight:
+        return styled_toast.StyledToastAnimation.slideFromRight;
+      case ToastAnimation.scale:
+        return styled_toast.StyledToastAnimation.scale;
+      case ToastAnimation.fadeScale:
+        return styled_toast.StyledToastAnimation.fadeScale;
+      case ToastAnimation.rotate:
+        return styled_toast.StyledToastAnimation.rotate;
+      case ToastAnimation.fadeRotate:
+        return styled_toast.StyledToastAnimation.fadeRotate;
+      case ToastAnimation.scaleRotate:
+        return styled_toast.StyledToastAnimation.scaleRotate;
+    }
+  }
 }
 
 /// Toast 服务的全局实例
@@ -346,10 +569,110 @@ class Toast {
     Color? backgroundColor,
     Color? textColor,
     double? fontSize,
+    ToastAnimation? animation,
+    ToastAnimation? reverseAnimation,
+    AlignmentGeometry? alignment,
+    Curve? curve,
+    Curve? reverseCurve,
+    Duration? animDuration,
+    bool? dismissOtherOnShow,
+    bool? fullWidth,
+    bool? isIgnoring,
+    Axis? axis,
+    Offset? startOffset,
+    Offset? endOffset,
+    Offset? reverseStartOffset,
+    Offset? reverseEndOffset,
+    TextAlign? textAlign,
   }) {
     final service = _service;
     if (service is ToastService) {
       service.showToast(
+        message,
+        type: type,
+        duration: duration,
+        gravity: gravity,
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+        fontSize: fontSize,
+        animation: animation,
+        reverseAnimation: reverseAnimation,
+        alignment: alignment,
+        curve: curve,
+        reverseCurve: reverseCurve,
+        animDuration: animDuration,
+        dismissOtherOnShow: dismissOtherOnShow,
+        fullWidth: fullWidth,
+        isIgnoring: isIgnoring,
+        axis: axis,
+        startOffset: startOffset,
+        endOffset: endOffset,
+        reverseStartOffset: reverseStartOffset,
+        reverseEndOffset: reverseEndOffset,
+        textAlign: textAlign,
+      );
+    }
+  }
+
+  /// 显示自定义 Widget
+  static void showCustomWidget(
+    Widget widget, {
+    BuildContext? context,
+    Duration? duration,
+    ToastGravity? position,
+    ToastAnimation? animation,
+    ToastAnimation? reverseAnimation,
+    AlignmentGeometry? alignment,
+    Curve? curve,
+    Curve? reverseCurve,
+    Duration? animDuration,
+    bool? dismissOtherOnShow,
+    bool? isIgnoring,
+    Axis? axis,
+    Offset? startOffset,
+    Offset? endOffset,
+    Offset? reverseStartOffset,
+    Offset? reverseEndOffset,
+    VoidCallback? onDismiss,
+  }) {
+    final service = _service;
+    if (service is ToastService) {
+      service.showCustomWidget(
+        widget,
+        context: context,
+        duration: duration,
+        position: position,
+        animation: animation,
+        reverseAnimation: reverseAnimation,
+        alignment: alignment,
+        curve: curve,
+        reverseCurve: reverseCurve,
+        animDuration: animDuration,
+        dismissOtherOnShow: dismissOtherOnShow,
+        isIgnoring: isIgnoring,
+        axis: axis,
+        startOffset: startOffset,
+        endOffset: endOffset,
+        reverseStartOffset: reverseStartOffset,
+        reverseEndOffset: reverseEndOffset,
+        onDismiss: onDismiss,
+      );
+    }
+  }
+
+  /// 显示全局 Toast（app外也能显示，仅移动端）
+  static void showGlobal(
+    String message, {
+    ToastType type = ToastType.normal,
+    Duration? duration,
+    ToastGravity? gravity,
+    Color? backgroundColor,
+    Color? textColor,
+    double? fontSize,
+  }) {
+    final service = _service;
+    if (service is ToastService) {
+      service.showToastGlobal(
         message,
         type: type,
         duration: duration,

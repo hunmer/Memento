@@ -15,7 +15,7 @@ class MobileJSEngine implements JSEngine {
   final Map<String, Function> _registeredFunctions = {};
 
   // UI 回调函数（由外部注入，用于显示 Toast/Alert/Dialog）
-  Function(String message, String duration, String gravity)? _onToast;
+  Function(String message, String duration, String gravity, String type)? _onToast;
   Future<bool> Function(
     String message, {
     String? title,
@@ -42,7 +42,7 @@ class MobileJSEngine implements JSEngine {
   bool get isSupported => true; // Android/iOS/Desktop 都支持
 
   /// 设置 Toast 回调
-  void setToastHandler(Function(String, String, String) handler) {
+  void setToastHandler(Function(String, String, String, String) handler) {
     _onToast = handler;
   }
 
@@ -143,7 +143,8 @@ class MobileJSEngine implements JSEngine {
           var config = {
             message: String(message),
             duration: (options && options.duration) || 'short',
-            gravity: (options && options.gravity) || 'bottom'
+            gravity: (options && options.gravity) || 'bottom',
+            type: (options && options.type) || 'normal'
           };
 
           sendMessage('_flutterToast', JSON.stringify({ callId: callId, config: config }));
@@ -302,13 +303,14 @@ class MobileJSEngine implements JSEngine {
         final duration =
             durationValue is String ? durationValue : durationValue.toString();
         final gravity = config['gravity'] as String;
+        final type = config['type'] as String? ?? 'normal';
 
         print(
-          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity)',
+          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity, type: $type)',
         );
 
         // 调用 Flutter Toast（需要在 UI 线程执行）
-        _showToast(message, duration, gravity);
+        _showToast(message, duration, gravity, type);
       } catch (e) {
         print('[JS Bridge] Toast 错误: $e');
       }
@@ -1023,9 +1025,9 @@ class MobileJSEngine implements JSEngine {
   // ==================== UI 显示方法 ====================
 
   /// 显示 Toast
-  void _showToast(String message, String duration, String gravity) {
+  void _showToast(String message, String duration, String gravity, String type) {
     if (_onToast != null) {
-      _onToast!(message, duration, gravity);
+      _onToast!(message, duration, gravity, type);
     } else {
       print('[JS Bridge] Toast 未设置处理器: $message');
     }

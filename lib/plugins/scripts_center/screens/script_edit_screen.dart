@@ -257,17 +257,6 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       // 异步加载配置
       _loadScriptConfig();
     }
-
-    // 强制构建所有tabs，确保表单wrapper被初始化
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // 遍历所有tabs，触发构建
-      for (int i = 0; i < _tabController.length; i++) {
-        _tabController.animateTo(i);
-      }
-      // 最后跳回第一个tab
-      _tabController.animateTo(0);
-    });
   }
 
   /// 加载脚本配置
@@ -340,8 +329,24 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
     // 保存基本信息表单的值
     _basicInfoValues = values;
 
-    // 继续提交高级设置表单
-    _advancedWrapperState?.submitForm();
+    // 检查高级设置表单是否已初始化
+    if (_advancedWrapperState != null) {
+      // 如果已初始化，提交表单获取值
+      _advancedWrapperState!.submitForm();
+    } else {
+      // 如果未初始化，使用默认值直接保存
+      _handleAdvancedSubmit(_getDefaultAdvancedValues());
+    }
+  }
+
+  /// 获取高级设置的默认值
+  Map<String, dynamic> _getDefaultAdvancedValues() {
+    final script = widget.script;
+    return {
+      'type': script?.type ?? 'module',
+      'enabled': script?.enabled ?? true,
+      'updateUrl': script?.updateUrl ?? '',
+    };
   }
 
   /// 处理高级设置表单提交（最终提交）
@@ -349,7 +354,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
     // 检查widget是否仍然mounted
     if (!mounted) return;
 
-    // 在保存前，获取配置表单的最新值
+    // 在保存前，获取配置表单的最新值（如果已初始化）
     if (_configWrapperState != null) {
       final configValues = _configWrapperState!.currentValues;
       if (configValues.isNotEmpty) {
@@ -358,6 +363,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
         });
       }
     }
+    // 如果配置表单未初始化，_currentConfig 保持原有值（从编辑模式加载的值或 null）
 
     // 获取保存的基本信息表单的值
     final basicValues = _basicInfoValues ?? {};

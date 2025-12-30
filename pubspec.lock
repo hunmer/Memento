@@ -755,6 +755,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0"
+  flutter_styled_toast:
+    dependency: "direct main"
+    description:
+      name: flutter_styled_toast
+      sha256: "94aa40eb706ad0d03483e2255901902d3584aa5abc8659295cc1040d2c153e0a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   flutter_swipe_action_cell:
     dependency: "direct main"
     description:

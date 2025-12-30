@@ -1,5 +1,4 @@
 import 'package:Memento/core/app_initializer.dart' show globalConfigManager;
-import 'package:Memento/core/utils/app.dart';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -48,8 +47,6 @@ class BaseSettingsController extends ChangeNotifier {
       // 使用 GetX 更新当前显示语言
       Get.updateLocale(result);
       notifyListeners();
-      // 重启应用以应用语言设置
-      restartApplication();
     }
 
     return result;

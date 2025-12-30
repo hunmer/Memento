@@ -181,7 +181,7 @@
     const encouragementText = result.response || '继续加油！';
 
     // 显示 Toast
-    Memento.script_executor.showToast(encouragementText, 'success');
+    Memento.plugins.ui.toast(encouragementText, {type: 'success', duration: 5000, gravity: 'top'});
 
     console.log(`AI 鼓励消息已显示: ${encouragementText}`, 'info');
 
