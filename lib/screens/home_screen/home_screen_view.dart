@@ -221,7 +221,7 @@ class HomeScreenView extends StatelessWidget {
   /// 构建单个 Tab 页面
   Widget _buildTabPage(BuildContext context, String layoutId) {
     final items = _getItemsForLayout(layoutId);
-    return _buildHomeContentForItems(context, items: items, key: ValueKey('page_$layoutId'));
+    return _buildHomeContentForItems(context, layoutId: layoutId, items: items, key: ValueKey('page_$layoutId'));
   }
 
   /// 获取指定布局对应的 items
@@ -234,14 +234,26 @@ class HomeScreenView extends StatelessWidget {
   }
 
   /// 为指定 items 构建主页内容
-  Widget _buildHomeContentForItems(BuildContext context, {required List<HomeItem> items, Key? key}) {
+  Widget _buildHomeContentForItems(BuildContext context, {required String layoutId, required List<HomeItem> items, Key? key}) {
     return Opacity(
       key: key,
       opacity: controller.globalWidgetOpacity,
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // 如果是空布局，使用目标布局的结构显示骨架屏
           if (items.isEmpty) {
-            return _buildSkeletonPlaceholder(context);
+            debugPrint('Build skeleton for layout: $layoutId, current: ${controller.currentLayoutName}');
+            return FutureBuilder<({List<HomeWidgetSize> structure, int crossAxisCount})>(
+              future: controller.getLayoutStructureById(layoutId),
+              builder: (context, snapshot) {
+                debugPrint('FutureBuilder snapshot: ${snapshot.connectionState}, data: ${snapshot.data?.structure.length}');
+                final layoutStructure = snapshot.data;
+                if (layoutStructure == null || layoutStructure.structure.isEmpty) {
+                  return _buildEmptyState(context);
+                }
+                return _buildSkeletonFromStructure(context, layoutStructure.structure, layoutStructure.crossAxisCount);
+              },
+            );
           }
 
           final isCenter = controller.layoutManager.gridAlignment == 'center';
@@ -277,11 +289,20 @@ class HomeScreenView extends StatelessWidget {
     );
   }
 
-  /// 构建骨架屏占位
-  Widget _buildSkeletonPlaceholder(BuildContext context) {
-    final crossAxisCount = controller.layoutManager.gridCrossAxisCount;
+  /// 从当前布局结构构建骨架屏
+  Widget _buildSkeletonFromStructure(BuildContext context, List<HomeWidgetSize> structure, int crossAxisCount) {
     final isCenter = controller.layoutManager.gridAlignment == 'center';
-    final placeholderCount = (crossAxisCount * 3).clamp(4, 12);
+    final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+
+    // 转换为骨架 items
+    final skeletonItems = structure.map((size) {
+      return HomeWidgetItem(
+        id: 'skeleton_${UniqueKey().toString()}',
+        widgetId: 'skeleton',
+        size: size == HomeWidgetSize.custom ? HomeWidgetSize.small : size,
+        config: {},
+      );
+    }).toList();
 
     return Padding(
       padding: EdgeInsets.only(
@@ -289,25 +310,59 @@ class HomeScreenView extends StatelessWidget {
             ? kToolbarHeight + 8
             : 0,
       ),
-      child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1,
-        ),
-        itemCount: placeholderCount,
-        itemBuilder: (context, index) => _buildSkeletonCard(),
+      child: HomeGrid(
+        items: skeletonItems,
+        crossAxisCount: crossAxisCount,
+        isEditMode: controller.isEditMode,
+        isBatchMode: controller.isBatchMode,
+        selectedItemIds: controller.selectedItemIds,
+        alignment: alignment,
+        showSkeleton: true,
+        onReorder: null,
+        onAddToFolder: null,
+        onItemTap: null,
+        onItemLongPress: null,
+        onQuickCreateLayout: null,
       ),
     );
   }
 
-  /// 构建骨架卡片
-  Widget _buildSkeletonCard() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(color: Colors.grey.shade300),
+  /// 构建空状态
+  Widget _buildEmptyState(BuildContext context) {
+    final isCenter = controller.layoutManager.gridAlignment == 'center';
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top: !isCenter && controller.currentBackgroundPath != null
+            ? kToolbarHeight + 8
+            : 0,
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.widgets_outlined,
+              size: 64,
+              color: Theme.of(context).disabledColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'screens_noWidgetsYet'.tr,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Theme.of(context).disabledColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'screens_clickPlusToAdd'.tr,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).disabledColor,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

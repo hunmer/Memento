@@ -512,14 +512,8 @@ class HomeLayoutManager extends ChangeNotifier {
           .toList();
       _gridCrossAxisCount = config.gridCrossAxisCount;
 
-      // 更新当前活动的布局ID
+      // 更新当前活动的布局ID（仅在内存中）
       _activeLayoutId = layoutId;
-      await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
-        'activeLayoutId': layoutId,
-      });
-
-      // 同时更新默认布局（保持向后兼容）
-      await saveLayout();
 
       _isDirty = false;
       notifyListeners();
@@ -527,6 +521,37 @@ class HomeLayoutManager extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error loading layout config: $e');
       rethrow;
+    }
+  }
+
+  /// 设置当前活动的布局并保存
+  Future<void> setActiveLayout(String layoutId) async {
+    await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
+      'activeLayoutId': layoutId,
+    });
+    _activeLayoutId = layoutId;
+  }
+
+  /// 读取指定布局的结构（不修改当前状态）
+  /// 用于骨架屏占位
+  Future<LayoutConfig?> readLayoutConfig(String layoutId) async {
+    try {
+      final layouts = await getSavedLayouts();
+      debugPrint('getSavedLayouts returned ${layouts.length} layouts:');
+      for (var i = 0; i < layouts.length; i++) {
+        debugPrint('  [$i] id=${layouts[i].id}, name=${layouts[i].name}');
+      }
+      final config = layouts.firstWhere(
+        (l) => l.id == layoutId,
+        orElse: () => throw Exception('Layout not found: $layoutId'),
+      );
+      debugPrint(
+        'readLayoutConfig: $layoutId, name=${config.name}, items=${config.items.length}',
+      );
+      return config;
+    } catch (e) {
+      debugPrint('Error reading layout config: $e');
+      return null;
     }
   }
 

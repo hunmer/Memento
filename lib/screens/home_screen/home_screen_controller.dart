@@ -57,6 +57,9 @@ class HomeScreenController extends ChangeNotifier {
   // 是否通过参数启动（如小组件、URL scheme等）
   bool _launchedWithParameters = false;
 
+  // 记录已加载过的布局ID，避免重复加载
+  final Set<String> _loadedLayoutIds = {};
+
   // Getters
   HomeLayoutManager get layoutManager => _layoutManager;
   bool get isLoading => _isLoading;
@@ -103,6 +106,61 @@ class HomeScreenController extends ChangeNotifier {
     onStateChanged();
   }
 
+  /// 获取当前布局的结构（用于骨架屏占位）
+  /// 只保留尺寸信息，不保留实际内容
+  List<HomeWidgetSize> getCurrentLayoutStructure() {
+    return _layoutManager.items.map((item) {
+      if (item is HomeWidgetItem) {
+        if (item.size == HomeWidgetSize.custom) {
+          return HomeWidgetSize.custom;
+        }
+        return item.size;
+      } else if (item is HomeFolderItem) {
+        return HomeWidgetSize.small;
+      }
+      return HomeWidgetSize.small;
+    }).toList();
+  }
+
+  /// 获取指定布局的结构（用于骨架屏占位）
+  /// 直接读取配置，不修改当前状态
+  Future<({List<HomeWidgetSize> structure, int crossAxisCount})> getLayoutStructureById(String layoutId) async {
+    try {
+      // 直接读取目标布局配置，不修改当前状态
+      final config = await _layoutManager.readLayoutConfig(layoutId);
+      if (config == null) {
+        debugPrint('getLayoutStructureById: $layoutId, config is null');
+        return (structure: <HomeWidgetSize>[], crossAxisCount: 4);
+      }
+
+      debugPrint('getLayoutStructureById: $layoutId, config.name=${config.name}, itemsCount=${config.items.length}');
+
+      // 解析结构
+      final structure = config.items.map((json) {
+        final type = json['type'] ?? 'unknown';
+        final item = HomeItem.fromJson(json);
+        final HomeWidgetSize size;
+        if (item is HomeWidgetItem) {
+          size = item.size;
+        } else if (item is HomeFolderItem) {
+          size = HomeWidgetSize.small;
+        } else {
+          size = HomeWidgetSize.small;
+        }
+        debugPrint('  item: type=$type, size=$size');
+        return size;
+      }).toList();
+
+      final targetCrossAxisCount = config.gridCrossAxisCount;
+
+      debugPrint('getLayoutStructureById result: $layoutId, structure: ${structure.length}, crossAxisCount: $targetCrossAxisCount');
+      return (structure: structure, crossAxisCount: targetCrossAxisCount);
+    } catch (e) {
+      debugPrint('获取布局结构失败: $e');
+      return (structure: <HomeWidgetSize>[], crossAxisCount: 4);
+    }
+  }
+
   /// 初始化布局
   Future<void> initializeLayout() async {
     try {
@@ -112,7 +170,7 @@ class HomeScreenController extends ChangeNotifier {
         final currentConfig = await _layoutManager.getCurrentLayoutConfig();
         if (currentConfig != null) {
           await _layoutManager.loadLayoutConfig(currentConfig.id);
-          debugPrint('首次加载布局: ${currentConfig.name}');
+          _loadedLayoutIds.add(currentConfig.id);
         }
       }
       if (_layoutManager.items.isEmpty) {
@@ -313,13 +371,23 @@ class HomeScreenController extends ChangeNotifier {
     if (index < 0 || index >= _savedLayouts.length) return;
 
     final layout = _savedLayouts[index];
+    final isFirstLoad = !_loadedLayoutIds.contains(layout.id);
+
     _currentPageIndex = index;
     _currentLayoutName = layout.name;
-    onStateChanged();
 
     try {
+      // 加载布局配置
       await _layoutManager.loadLayoutConfig(layout.id);
-      await loadCurrentBackground();
+
+      // 仅在首次加载时保存活动布局ID和加载背景图
+      if (isFirstLoad) {
+        await _layoutManager.setActiveLayout(layout.id);
+        await loadCurrentBackground();
+        _loadedLayoutIds.add(layout.id);
+      }
+
+      onStateChanged();
     } catch (e) {
       debugPrint('切换布局失败: $e');
     }
