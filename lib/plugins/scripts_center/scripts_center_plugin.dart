@@ -175,11 +175,6 @@ class ScriptsCenterPlugin extends BasePlugin {
       // 初始化服务层
       _scriptLoader = ScriptLoader(storage);
       _scriptManager = ScriptManager(_scriptLoader);
-      _scriptExecutor = ScriptExecutor(
-        scriptManager: _scriptManager,
-        storage: storage,
-        eventManager: EventManager.instance,
-      );
       _scriptStoreManager = ScriptStoreManager(
         storage: storage,
         scriptLoader: _scriptLoader,
@@ -187,6 +182,12 @@ class ScriptsCenterPlugin extends BasePlugin {
       _scriptDownloadManager = ScriptDownloadManager(
         scriptLoader: _scriptLoader,
         scriptStoreManager: _scriptStoreManager,
+        scriptManager: _scriptManager,
+      );
+      _scriptExecutor = ScriptExecutor(
+        scriptManager: _scriptManager,
+        storage: storage,
+        eventManager: EventManager.instance,
       );
 
       // 初始化JS引擎
@@ -602,6 +603,9 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
                     ),
                     ChangeNotifierProvider.value(
                       value: _plugin.scriptDownloadManager,
+                    ),
+                    ChangeNotifierProvider.value(
+                      value: _plugin.scriptManager,
                     ),
                   ],
                   child: const ScriptStoreScreen(),

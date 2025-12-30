@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/plugins/scripts_center/models/script_store_models.dart';
 import 'package:Memento/plugins/scripts_center/services/script_loader.dart';
+import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/services/script_store_manager.dart';
 
 /// 脚本下载管理器
@@ -20,6 +21,7 @@ import 'package:Memento/plugins/scripts_center/services/script_store_manager.dar
 class ScriptDownloadManager extends ChangeNotifier {
   final ScriptLoader _scriptLoader;
   final ScriptStoreManager _scriptStoreManager;
+  final ScriptManager _scriptManager;
   final http.Client _httpClient;
 
   // 当前安装任务（仅支持单任务）
@@ -31,8 +33,10 @@ class ScriptDownloadManager extends ChangeNotifier {
   ScriptDownloadManager({
     required ScriptLoader scriptLoader,
     required ScriptStoreManager scriptStoreManager,
+    required ScriptManager scriptManager,
   })  : _scriptLoader = scriptLoader,
         _scriptStoreManager = scriptStoreManager,
+        _scriptManager = scriptManager,
         _httpClient = http.Client();
 
   /// 开始安装脚本
@@ -98,6 +102,11 @@ class ScriptDownloadManager extends ChangeNotifier {
         script.sourceId,
       );
       debugPrint('✅ [ScriptDownloadManager] 脚本已标记为已安装');
+
+      // 8. 重新加载脚本列表
+      debugPrint('🔄 [ScriptDownloadManager] 步骤8: 重新加载脚本列表');
+      await _scriptManager.loadScripts();
+      debugPrint('✅ [ScriptDownloadManager] 脚本列表已重新加载');
 
       // 延迟清空任务
       Future.delayed(const Duration(seconds: 2), () {
