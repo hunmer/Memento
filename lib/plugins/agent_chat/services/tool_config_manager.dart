@@ -25,6 +25,7 @@ class ToolConfigManager {
     'system', // 系统级工具（时间、设备信息等）
     'activity',
     'bill',
+    'openai',
     'calendar',
     'calendar_album',
     'chat',

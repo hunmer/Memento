@@ -551,10 +551,10 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
           // 完成回调
         },
       ).timeout(
-        const Duration(seconds: 30),
+        const Duration(seconds: 60),
         onTimeout: () {
           hasError = true;
-          errorMessage = 'Request timeout (30s)';
+          errorMessage = 'Request timeout (60s)';
         },
       );
 

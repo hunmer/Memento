@@ -755,7 +755,7 @@ class MobileJSEngine implements JSEngine {
       // 轮询结果（最多等待 5 秒）
       String? resultStr;
       int retryCount = 0;
-      const maxRetries = 100; // 100 * 50ms = 5 秒
+      const maxRetries = 100 * 12; // 100 * 50ms = 5 秒
 
       while (retryCount < maxRetries) {
         // 1. 处理待处理的 Promise 调用（不依赖 setTimeout）
