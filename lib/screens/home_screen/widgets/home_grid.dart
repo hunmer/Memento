@@ -27,6 +27,8 @@ class HomeGrid extends StatefulWidget {
   final Set<String> selectedItemIds;
   final Alignment alignment;
   final void Function(Map<String, String>)? onQuickCreateLayout;
+  /// 是否显示骨架屏（用于占位加载）
+  final bool showSkeleton;
 
   const HomeGrid({
     super.key,
@@ -41,6 +43,7 @@ class HomeGrid extends StatefulWidget {
     this.selectedItemIds = const {},
     this.alignment = Alignment.topCenter,
     this.onQuickCreateLayout,
+    this.showSkeleton = false,
   });
 
   @override
@@ -131,6 +134,15 @@ class _HomeGridState extends State<HomeGrid> {
       // 文件夹固定为 1x1
       crossAxisCellCount = 1;
       mainAxisCellCount = 1;
+    }
+
+    // 骨架屏模式：返回骨架占位卡片
+    if (widget.showSkeleton) {
+      return StaggeredGridTile.count(
+        crossAxisCellCount: crossAxisCellCount,
+        mainAxisCellCount: mainAxisCellCount,
+        child: _buildSkeletonCard(),
+      );
     }
 
     final isBeingDragged = _draggingIndex == index;
@@ -467,6 +479,19 @@ class _HomeGridState extends State<HomeGrid> {
             label: Text('screens_quickCreateLayout'.tr),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 构建骨架卡片
+  Widget _buildSkeletonCard() {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
   }
