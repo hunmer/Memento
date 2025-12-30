@@ -118,9 +118,10 @@ class _PromptEditorFieldState extends State<PromptEditorField> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             border: Border.all(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
             ),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
           ),
           child: PromptEditor(
             prompts: _prompts,

@@ -113,55 +113,57 @@ class PresetEditForm extends StatelessWidget {
           ),
         ],
       ),
-      body: FormBuilderWrapper(
-        formKey: formKey,
-        config: FormConfig(
-          showSubmitButton: false,
-          showResetButton: false,
-          fieldSpacing: 16,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          fields: [
-            // 名称字段
-            FormFieldConfig(
-              name: 'name',
-              type: FormFieldType.text,
-              labelText: 'openai_presetTitle'.tr,
-              hintText: 'openai_pleaseEnterTitle'.tr,
-              initialValue: preset?.name ?? '',
-              required: true,
-              validationMessage: 'openai_pleaseEnterTitle'.tr,
-            ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: FormBuilderWrapper(
+          formKey: formKey,
+          config: FormConfig(
+            showSubmitButton: false,
+            showResetButton: false,
+            fieldSpacing: 16,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            fields: [
+              // 名称字段
+              FormFieldConfig(
+                name: 'name',
+                type: FormFieldType.text,
+                labelText: 'openai_presetTitle'.tr,
+                hintText: 'openai_pleaseEnterTitle'.tr,
+                initialValue: preset?.name ?? '',
+                required: true,
+                validationMessage: 'openai_pleaseEnterTitle'.tr,
+              ),
 
-            // 描述字段
-            FormFieldConfig(
-              name: 'description',
-              type: FormFieldType.textArea,
-              labelText: 'openai_presetDescription'.tr,
-              hintText: 'openai_enterDescription'.tr,
-              initialValue: preset?.description ?? '',
-              extra: {'minLines': 2, 'maxLines': 4},
-            ),
+              // 描述字段
+              FormFieldConfig(
+                name: 'description',
+                type: FormFieldType.textArea,
+                labelText: 'openai_presetDescription'.tr,
+                hintText: 'openai_enterDescription'.tr,
+                initialValue: preset?.description ?? '',
+                extra: {'minLines': 2, 'maxLines': 4},
+              ),
 
-            // Prompt 编辑器
-            FormFieldConfig(
-              name: 'prompts',
-              type: FormFieldType.promptEditor,
-              initialValue: _getInitialPrompts(),
-              extra: {'labelText': 'openai_promptContent'.tr},
-            ),
+              // Prompt 编辑器
+              FormFieldConfig(
+                name: 'prompts',
+                type: FormFieldType.promptEditor,
+                initialValue: _getInitialPrompts(),
+              ),
 
-            // 标签字段
-            FormFieldConfig(
-              name: 'tags',
-              type: FormFieldType.tags,
-              initialValue: preset?.tags ?? [],
-              initialTags: preset?.tags ?? [],
-              extra: {'addButtonText': 'openai_addTag'.tr},
-            ),
-          ],
-          onSubmit: (values) => _handleSubmit(context, values),
+              // 标签字段
+              FormFieldConfig(
+                name: 'tags',
+                type: FormFieldType.tags,
+                initialValue: preset?.tags ?? [],
+                initialTags: preset?.tags ?? [],
+                extra: {'addButtonText': 'openai_addTag'.tr},
+              ),
+            ],
+            onSubmit: (values) => _handleSubmit(context, values),
+          ),
+          buttonBuilder: null,
         ),
-        buttonBuilder: null,
       ),
     );
   }
