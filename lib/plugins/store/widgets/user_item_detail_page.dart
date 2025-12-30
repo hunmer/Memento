@@ -1,11 +1,9 @@
 import 'package:get/get.dart';
-import 'dart:io';
-
-import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class UserItemDetailPage extends StatefulWidget {
   final StoreController controller;
@@ -213,41 +211,11 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
           // 物品图片
           AspectRatio(
             aspectRatio: 16 / 9,
-            child:
-                item.productImage.isEmpty
-                    ? const Icon(Icons.broken_image, size: 48)
-                    : FutureBuilder<String>(
-                      future: ImageUtils.getAbsolutePath(item.productImage),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasData) {
-                            final imagePath = snapshot.data!;
-                            return isNetworkImage(imagePath)
-                                ? Image.network(
-                                  imagePath,
-                                  fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          const Icon(
-                                            Icons.broken_image,
-                                            size: 48,
-                                          ),
-                                )
-                                : Image.file(
-                                  File(imagePath),
-                                  fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) =>
-                                          const Icon(
-                                            Icons.broken_image,
-                                            size: 48,
-                                          ),
-                                );
-                          }
-                        }
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                    ),
+            child: AdaptiveImage(
+              imagePath: item.productImage.isEmpty ? null : item.productImage,
+              fit: BoxFit.cover,
+              borderRadius: 12,
+            ),
           ),
           const SizedBox(height: 20),
           // 物品信息
@@ -329,9 +297,5 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
-  bool isNetworkImage(String path) {
-    return path.startsWith('http://') || path.startsWith('https://');
   }
 }

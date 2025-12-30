@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';
 import 'package:intl/intl.dart';
-import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 import 'package:Memento/plugins/goods/widgets/warehouse_action_sheet.dart';
 
 class WarehouseCard extends StatelessWidget {
@@ -132,42 +131,12 @@ class WarehouseCard extends StatelessWidget {
       return _buildDefaultCover();
     }
 
-    if (warehouse.imageUrl!.startsWith('http://') ||
-        warehouse.imageUrl!.startsWith('https://')) {
-      return SizedBox(
-        height: double.infinity,
-        child: Image.network(
-          warehouse.imageUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            debugPrint('Error loading network image: $error');
-            return _buildDefaultCover();
-          },
-        ),
-      );
-    }
-
-    return FutureBuilder<String>(
-      future: ImageUtils.getAbsolutePath(warehouse.imageUrl),
-      builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final file = File(snapshot.data!);
-          if (file.existsSync()) {
-            return SizedBox(
-              height: double.infinity,
-              child: Image.file(
-                file,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  debugPrint('Error loading local image: $error');
-                  return _buildDefaultCover();
-                },
-              ),
-            );
-          }
-        }
-        return _buildDefaultCover();
-      },
+    return AdaptiveImage(
+      imagePath: warehouse.imageUrl,
+      width: 96,
+      height: 96,
+      fit: BoxFit.cover,
+      borderRadius: 8,
     );
   }
 

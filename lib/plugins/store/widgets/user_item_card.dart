@@ -1,10 +1,8 @@
 import 'package:get/get.dart';
-
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class UserItemCard extends StatelessWidget {
   final UserItem item;
@@ -95,41 +93,13 @@ class UserItemCard extends StatelessWidget {
                 Stack(
                   children: [
                     SizedBox(
-                      height: 100, // 给图片区域固定高度
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Center(  // 添加居中对齐
-                          child: item.productImage.isEmpty
-                              ? _buildErrorImage()
-                              : FutureBuilder<String>(
-                                  future: ImageUtils.getAbsolutePath(item.productImage),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      if (snapshot.hasData) {
-                                        final imagePath = snapshot.data!;
-                                        return isNetworkImage(imagePath)
-                                            ? Image.network(
-                                                imagePath,
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (context, error, stackTrace) =>
-                                                        _buildErrorImage(),
-                                              )
-                                            : Image.file(
-                                                File(imagePath),
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (context, error, stackTrace) =>
-                                                        _buildErrorImage(),
-                                              );
-                                      }
-                                      return _buildErrorImage();
-                                    }
-                                    return _buildLoadingIndicator();
-                                  },
-                                ),
-                        ),
+                      height: 100,
+                      child: AdaptiveImage(
+                        imagePath: item.productImage.isEmpty ? null : item.productImage,
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        borderRadius: 8,
                       ),
                     ),
                     // Badge showing count
@@ -360,27 +330,6 @@ class UserItemCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year.toString().substring(2)}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
-  }
-
-  bool isNetworkImage(String path) {
-    return path.startsWith('http://') || path.startsWith('https://');
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  Widget _buildErrorImage() {
-    return Container(
-      color: Colors.grey[200],
-      width: double.infinity,
-      height: double.infinity,
-      child: const Icon(
-        Icons.broken_image,
-        size: 48,
-        color: Colors.grey,
-      ),
-    );
   }
 
   void _showBottomSheet(BuildContext context) {

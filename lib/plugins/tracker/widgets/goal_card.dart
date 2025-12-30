@@ -1,12 +1,11 @@
 import 'package:get/get.dart';
-import 'dart:io';
-import 'package:Memento/plugins/tracker/widgets/timer_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/models/record.dart';
 import 'package:Memento/plugins/tracker/controllers/tracker_controller.dart';
-import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/plugins/tracker/widgets/timer_dialog.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class GoalCard extends StatelessWidget {
   final Goal goal;
@@ -36,31 +35,14 @@ class GoalCard extends StatelessWidget {
           children: [
             Positioned.fill(
               child: Container(
-                constraints: const BoxConstraints.expand(), // 为背景添加明确约束
-                child:
-                    goal.imagePath != null && goal.imagePath!.isNotEmpty
-                        ? FutureBuilder<String>(
-                          future: ImageUtils.getAbsolutePath(goal.imagePath),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                              return Image.file(
-                                File(snapshot.data!),
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (context, error, stackTrace) =>
-                                        _buildBackgroundContainer(
-                                          context,
-                                          isCompleted,
-                                        ),
-                              );
-                            }
-                            return _buildBackgroundContainer(
-                              context,
-                              isCompleted,
-                            );
-                          },
-                        )
-                        : _buildBackgroundContainer(context, isCompleted),
+                constraints: const BoxConstraints.expand(),
+                child: goal.imagePath != null && goal.imagePath!.isNotEmpty
+                    ? AdaptiveImage(
+                        imagePath: goal.imagePath,
+                        fit: BoxFit.cover,
+                        borderRadius: 12,
+                      )
+                    : _buildBackgroundContainer(context, isCompleted),
               ),
             ),
             InkWell(

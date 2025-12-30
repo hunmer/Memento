@@ -130,6 +130,9 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
   /// 点击按钮可以显示/隐藏过滤栏，切换时会清空已有的过滤条件
   final bool multiFilterToggleable;
 
+  /// 初始多条件过滤值（用于页面跳转时传递初始筛选条件）
+  final Map<String, dynamic>? initialMultiFilters;
+
   const SuperCupertinoNavigationWrapper({
     super.key,
     required this.title,
@@ -171,6 +174,7 @@ class SuperCupertinoNavigationWrapper extends StatefulWidget {
     this.multiFilterBarHeight = 50,
     this.onMultiFilterChanged,
     this.multiFilterToggleable = true,
+    this.initialMultiFilters,
   });
 
   @override
@@ -211,6 +215,11 @@ class _SuperCupertinoNavigationWrapperState
 
     // 初始化多条件过滤状态
     _multiFilterState = MultiFilterState();
+    // 如果有初始过滤值，则初始化
+    if (widget.initialMultiFilters != null &&
+        widget.initialMultiFilters!.isNotEmpty) {
+      _multiFilterState.initializeFromMap(widget.initialMultiFilters!);
+    }
     // 初始化搜索过滤器状态
     _searchFilters.addAll(
       widget.filterLabels.keys

@@ -98,6 +98,11 @@ class CheckinListController {
   // 更新卡片风格
   Future<void> updateCardStyle(CheckinItem item, CheckinCardStyle style) async {
     item.cardStyle = style;
+    // 通过 UseCase 保存变更
+    await CheckinPlugin.instance.checkinUseCase.updateItem({
+      'id': item.id,
+      'cardStyle': style.index,
+    });
     await CheckinPlugin.shared.triggerSave();
     onStateChanged();
   }

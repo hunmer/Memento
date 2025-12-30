@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'dart:io';
 import 'package:Memento/plugins/contact/controllers/contact_controller.dart';
 import 'package:Memento/plugins/contact/models/contact_model.dart';
-import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/contact/screens/contact_records_screen.dart';
 import 'package:Memento/plugins/contact/widgets/contact_form.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
@@ -233,50 +232,12 @@ class ContactCard extends StatelessWidget {
 
   Widget _buildAvatar({required double size}) {
     if (contact.avatar != null && contact.avatar!.isNotEmpty) {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: FutureBuilder<String>(
-          future:
-              contact.avatar!.startsWith('http')
-                  ? Future.value(contact.avatar!)
-                  : ImageUtils.getAbsolutePath(contact.avatar),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ClipOval(
-                child:
-                    contact.avatar!.startsWith('http')
-                        ? Image.network(
-                          snapshot.data!,
-                          width: size,
-                          height: size,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  _buildIconAvatar(size),
-                        )
-                        : Image.file(
-                          File(snapshot.data!),
-                          width: size,
-                          height: size,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  _buildIconAvatar(size),
-                        ),
-              );
-            } else if (snapshot.hasError) {
-              return _buildIconAvatar(size);
-            } else {
-              return SizedBox(
-                width: size,
-                height: size,
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
-            }
-          },
+      return ClipOval(
+        child: AdaptiveImage(
+          imagePath: contact.avatar,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
         ),
       );
     }

@@ -266,7 +266,9 @@ class ChatHomeWidgets {
               // 最后一条消息预览
               if (lastMessage.isNotEmpty)
                 Expanded(
-                  child: Container(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Theme.of(
@@ -284,15 +286,19 @@ class ChatHomeWidgets {
                     ),
                   ),
                 )
+                )
               else
                 Expanded(
-                  child: Center(
-                    child: Text(
-                      'chat_noMessages'.tr,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Center(
+                      child: Text(
+                        'chat_noMessages'.tr,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                        ),
                       ),
                     ),
                   ),

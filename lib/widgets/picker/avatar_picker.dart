@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'image_picker_dialog.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class AvatarPicker extends StatefulWidget {
   final double size;
@@ -158,46 +159,15 @@ class _AvatarPickerState extends State<AvatarPicker> {
           shape: BoxShape.circle,
           color: Theme.of(context).colorScheme.primaryContainer,
         ),
-        child:
-            _avatarPath != null
-                ? FutureBuilder<String>(
-                  key: ValueKey(_avatarPath), // 添加key以确保更新
-                  future: ImageUtils.getAbsolutePath(_avatarPath!),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data != null) {
-                      final file = File(snapshot.data!);
-                      return FutureBuilder<bool>(
-                        key: ValueKey(snapshot.data), // 添加key以确保更新
-                        future: file.exists(),
-                        builder: (context, existsSnapshot) {
-                          if (existsSnapshot.hasData &&
-                              existsSnapshot.data == true) {
-                            return ClipOval(
-                              child: Image.file(
-                                file,
-                                key: ValueKey(
-                                  '${file.path}?ts=${DateTime.now().millisecondsSinceEpoch}',
-                                ), // 添加时间戳确保更新
-                                width: widget.size,
-                                height: widget.size,
-                                fit: BoxFit.cover,
-                                cacheWidth: (widget.size * 2).toInt(),
-                                cacheHeight: (widget.size * 2).toInt(),
-                                gaplessPlayback: true, // 无缝播放，避免闪烁
-                                errorBuilder: (context, error, stackTrace) {
-                                  debugPrint('Error loading avatar: $error');
-                                  return _buildDefaultAvatar();
-                                },
-                              ),
-                            );
-                          }
-                          return _buildDefaultAvatar();
-                        },
-                      );
-                    }
-                    return _buildDefaultAvatar();
-                  },
-                )
+        child: _avatarPath != null
+            ? AdaptiveImage(
+                key: ValueKey(_avatarPath),
+                imagePath: _avatarPath,
+                width: widget.size,
+                height: widget.size,
+                fit: BoxFit.cover,
+                shape: BoxShape.circle,
+              )
                 : _buildDefaultAvatar(),
       ),
     );

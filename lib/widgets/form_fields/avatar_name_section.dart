@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/picker/image_picker_dialog.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 /// 头像名称区域组件
 ///
@@ -78,29 +77,25 @@ class AvatarNameSection extends StatelessWidget {
         SizedBox(
           width: 80,
           height: 80,
-          child: ClipOval(
-            child: avatarUrl != null
-                ? FutureBuilder<String>(
-                    future: ImageUtils.getAbsolutePath(avatarUrl!),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return Image.file(
-                          File(snapshot.data!),
-                          fit: BoxFit.cover,
-                        );
-                      }
-                      return const CircularProgressIndicator();
-                    },
-                  )
-                : Container(
+          child: avatarUrl != null
+              ? AdaptiveImage(
+                  imagePath: avatarUrl,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  shape: BoxShape.circle,
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
                     color: theme.cardColor,
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: theme.hintColor,
-                    ),
                   ),
-          ),
+                  child: Icon(
+                    Icons.person,
+                    size: 50,
+                    color: theme.hintColor,
+                  ),
+                ),
         ),
         Positioned(
           bottom: 0,
