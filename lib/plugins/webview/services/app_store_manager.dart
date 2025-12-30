@@ -81,8 +81,8 @@ class AppStoreManager extends ChangeNotifier {
       id: const Uuid().v4(),
       name: '网络仓库',
       url:
-          'https://gitee.com/neysummer2000/memento/raw/master/online/apps.json',
-      baseUrl: 'https://gitee.com/neysummer2000/memento/raw/master/online',
+          'https://gitee.com/neysummer2000/memento/raw/master/online/apps/apps.json',
+      baseUrl: 'https://gitee.com/neysummer2000/memento/raw/master/online/apps',
       isDefault: true,
       createdAt: DateTime.now(),
     );
