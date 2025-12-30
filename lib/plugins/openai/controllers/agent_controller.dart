@@ -2,11 +2,26 @@ import 'package:flutter/foundation.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class AgentController extends ChangeNotifier {
   static final AgentController _instance = AgentController._internal();
   factory AgentController() => _instance;
   AgentController._internal();
+
+  // ========== 事件通知 ==========
+
+  /// 触发AI助手事件
+  void _notifyAgentEvent(String action, AIAgent agent) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'openai_agent_$action',
+      itemId: agent.id,
+      title: agent.name,
+      action: action,
+    );
+    EventManager.instance.broadcast('openai_agent_$action', eventArgs);
+  }
 
   List<AIAgent> _agents = [];
   List<AIAgent> get agents => List.unmodifiable(_agents);
@@ -61,6 +76,8 @@ class AgentController extends ChangeNotifier {
 
     // Update or add the agent
     final index = _agents.indexWhere((a) => a.id == agent.id);
+    final bool isNewAgent = index < 0;
+
     if (index >= 0) {
       _agents[index] = agent;
     } else {
@@ -77,6 +94,9 @@ class AgentController extends ChangeNotifier {
     // 通知监听器数据已更新
     notifyListeners();
 
+    // 触发AI助手事件
+    _notifyAgentEvent(isNewAgent ? 'added' : 'updated', agent);
+
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncOpenai();
   }
@@ -84,6 +104,12 @@ class AgentController extends ChangeNotifier {
   Future<void> deleteAgent(String agentId) async {
     final plugin = PluginManager.instance.getPlugin('openai');
     if (plugin == null) return;
+
+    // 获取要删除的agent用于事件
+    final agentToDelete = _agents.firstWhere(
+      (agent) => agent.id == agentId,
+      orElse: () => throw Exception('Agent not found: $agentId'),
+    );
 
     _agents.removeWhere((agent) => agent.id == agentId);
     final List<Map<String, dynamic>> agentsJson =
@@ -94,6 +120,9 @@ class AgentController extends ChangeNotifier {
 
     // 通知监听器数据已更新
     notifyListeners();
+
+    // 触发AI助手删除事件
+    _notifyAgentEvent('deleted', agentToDelete);
 
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncOpenai();

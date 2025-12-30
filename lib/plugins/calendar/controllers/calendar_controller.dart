@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/plugins/calendar/models/event.dart';
 import 'package:Memento/plugins/calendar/services/system_calendar_manager.dart';
 import 'package:Memento/plugins/calendar/services/calendar_mapping_manager.dart';
@@ -68,6 +70,9 @@ class CalendarController extends ChangeNotifier {
     await _saveEvents();
     notifyListeners();
 
+    // 触发事件
+    _notifyEvent('added', event);
+
     // 同步到系统日历
     _syncToSystemCalendar(event);
 
@@ -84,6 +89,9 @@ class CalendarController extends ChangeNotifier {
       await _saveEvents();
       notifyListeners();
 
+      // 触发事件
+      _notifyEvent('updated', updatedEvent);
+
       // 同步到系统日历
       await _syncUpdateToSystemCalendar(oldEvent, updatedEvent);
 
@@ -97,6 +105,9 @@ class CalendarController extends ChangeNotifier {
     _events.removeWhere((e) => e.id == event.id);
     await _saveEvents();
     notifyListeners();
+
+    // 触发事件
+    _notifyEvent('deleted', event);
 
     // 从系统日历删除
     await _syncDeleteFromSystemCalendar(event);
@@ -113,11 +124,25 @@ class CalendarController extends ChangeNotifier {
     await _saveEvents();
     notifyListeners();
 
+    // 触发事件
+    _notifyEvent('completed', event);
+
     // 从系统日历删除（已完成的事件不再显示在日历中）
     await _syncDeleteFromSystemCalendar(event);
 
     // 同步小组件数据
     PluginWidgetSyncHelper.instance.syncCalendar();
+  }
+
+  // 触发事件
+  void _notifyEvent(String action, CalendarEvent event) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'calendar_event_$action',
+      itemId: event.id,
+      title: event.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('calendar_event_$action', eventArgs);
   }
 
   // 加载事件
