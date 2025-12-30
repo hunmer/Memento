@@ -219,16 +219,25 @@ class JSBridgeManager {
         try {
           final args = [a, b, c, d, e].where((arg) => arg != null).toList();
 
-          // 如果没有参数，传递一个空的 Map（插件方法通常期望 Map<String, dynamic> params）
-          // 如果有一个参数且是 Map，直接传递
-          // 否则传递空 Map（期望 JavaScript 调用时传递对象参数）
+          // 参数转换规则：
+          // 1. 如果没有参数，传递空 Map
+          // 2. 如果有一个参数且是 Map，直接传递
+          // 3. 如果有一个参数但不是 Map（如字符串），包装成 {_value: arg}
+          // 4. 如果有多个参数，包装成 {_pos0: arg0, _pos1: arg1, ...}
           final Map<String, dynamic> paramsMap;
           if (args.isEmpty) {
             paramsMap = {};
           } else if (args.length == 1 && args[0] is Map<String, dynamic>) {
             paramsMap = args[0] as Map<String, dynamic>;
+          } else if (args.length == 1) {
+            // 单个非 Map 参数，包装成 {_value: arg}
+            paramsMap = {'_value': args[0]};
           } else {
+            // 多个参数，使用位置名称
             paramsMap = {};
+            for (int i = 0; i < args.length; i++) {
+              paramsMap['_pos$i'] = args[i];
+            }
           }
 
           // 提取过滤参数（避免传递给底层方法）
