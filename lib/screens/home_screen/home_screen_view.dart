@@ -226,11 +226,7 @@ class HomeScreenView extends StatelessWidget {
 
   /// 获取指定布局对应的 items
   List<HomeItem> _getItemsForLayout(String layoutId) {
-    if (controller.currentPageIndex < controller.savedLayouts.length &&
-        controller.savedLayouts[controller.currentPageIndex].id == layoutId) {
-      return controller.layoutManager.items;
-    }
-    return [];
+    return controller.getItemsForLayout(layoutId);
   }
 
   /// 为指定 items 构建主页内容

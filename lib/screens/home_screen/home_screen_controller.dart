@@ -60,6 +60,9 @@ class HomeScreenController extends ChangeNotifier {
   // 记录已加载过的布局ID，避免重复加载
   final Set<String> _loadedLayoutIds = {};
 
+  // 缓存每个布局的 items，避免切换 tab 时重复加载
+  final Map<String, List<HomeItem>> _layoutItemsCache = {};
+
   // Getters
   HomeLayoutManager get layoutManager => _layoutManager;
   bool get isLoading => _isLoading;
@@ -77,6 +80,20 @@ class HomeScreenController extends ChangeNotifier {
   double get globalWidgetOpacity => _globalWidgetOpacity;
   bool get launchedWithParameters => _launchedWithParameters;
   bool get triedToOpenPlugin => _triedToOpenPlugin;
+
+  /// 获取指定布局的 items（从缓存或当前 layoutManager）
+  List<HomeItem> getItemsForLayout(String layoutId) {
+    // 优先从缓存获取
+    if (_layoutItemsCache.containsKey(layoutId)) {
+      return _layoutItemsCache[layoutId]!;
+    }
+    // 如果缓存不存在，检查是否是当前布局
+    if (_currentPageIndex < _savedLayouts.length &&
+        _savedLayouts[_currentPageIndex].id == layoutId) {
+      return _layoutManager.items;
+    }
+    return [];
+  }
 
   /// 初始化
   void init(VoidCallback onStateChanged) {
@@ -171,6 +188,8 @@ class HomeScreenController extends ChangeNotifier {
         if (currentConfig != null) {
           await _layoutManager.loadLayoutConfig(currentConfig.id);
           _loadedLayoutIds.add(currentConfig.id);
+          // 缓存当前布局的 items
+          _layoutItemsCache[currentConfig.id] = List<HomeItem>.from(_layoutManager.items);
         }
       }
       if (_layoutManager.items.isEmpty) {
@@ -370,15 +389,34 @@ class HomeScreenController extends ChangeNotifier {
   void onPageChanged(int index, VoidCallback onStateChanged) async {
     if (index < 0 || index >= _savedLayouts.length) return;
 
+    // 保存当前布局到缓存（如果有内容）
+    final currentLayoutId = _currentPageIndex < _savedLayouts.length
+        ? _savedLayouts[_currentPageIndex].id
+        : null;
+    if (currentLayoutId != null && _layoutManager.items.isNotEmpty) {
+      _layoutItemsCache[currentLayoutId] = List<HomeItem>.from(_layoutManager.items);
+    }
+
     final layout = _savedLayouts[index];
     final isFirstLoad = !_loadedLayoutIds.contains(layout.id);
+    final hasCache = _layoutItemsCache.containsKey(layout.id);
 
     _currentPageIndex = index;
     _currentLayoutName = layout.name;
 
     try {
+      // 如果有缓存，直接使用缓存数据
+      if (hasCache) {
+        _layoutManager.setItems(_layoutItemsCache[layout.id]!);
+        onStateChanged();
+        return;
+      }
+
       // 加载布局配置
       await _layoutManager.loadLayoutConfig(layout.id);
+
+      // 缓存加载的数据
+      _layoutItemsCache[layout.id] = List<HomeItem>.from(_layoutManager.items);
 
       // 仅在首次加载时保存活动布局ID和加载背景图
       if (isFirstLoad) {
