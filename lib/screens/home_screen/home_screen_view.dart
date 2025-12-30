@@ -66,7 +66,6 @@ class HomeScreenView extends StatelessWidget {
                     : Positioned.fill(
                         child: Column(
                           children: [
-                            _buildTabBar(context),
                             Expanded(
                               child: NotificationListener<ScrollNotification>(
                                 onNotification: (notification) => _handleScrollNotification(notification, context),
@@ -91,10 +90,7 @@ class HomeScreenView extends StatelessWidget {
   /// 构建 AppBar
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text(
-        controller.currentLayoutName.isEmpty ? 'app_home'.tr : controller.currentLayoutName,
-      ),
-      centerTitle: true,
+      title: Center(child: _buildTabBar(context)),
       backgroundColor: controller.currentBackgroundPath != null ? Colors.transparent : null,
       elevation: controller.currentBackgroundPath != null ? 0 : null,
       leading: Builder(
@@ -205,6 +201,11 @@ class HomeScreenView extends StatelessWidget {
 
   /// 构建 TabBar
   Widget _buildTabBar(BuildContext context) {
+    if (tabController == null || controller.savedLayouts.isEmpty) {
+      return Text(
+        controller.currentLayoutName.isEmpty ? 'app_home'.tr : controller.currentLayoutName,
+      );
+    }
     return ExtendedTabBar(
       controller: tabController,
       isScrollable: true,
