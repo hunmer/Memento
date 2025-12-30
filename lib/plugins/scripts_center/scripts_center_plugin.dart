@@ -296,12 +296,54 @@ class ScriptsCenterPlugin extends BasePlugin {
     // 插件已在 initialize() 中完成初始化
     // 这里可以添加额外的应用级注册逻辑
 
-    // 延迟设置触发器，确保其他插件已初始化
+    // 延迟设置触发器和执行自动运行脚本，确保其他插件已初始化
     Future.delayed(const Duration(milliseconds: 500), () {
       _setupTriggers();
+      _runAutoRunScripts();
     });
 
     print('✅ ScriptsCenterPlugin已注册到应用');
+  }
+
+  /// 执行自动运行脚本
+  void _runAutoRunScripts() async {
+    try {
+      // 加载所有文件夹的脚本
+      final allScripts = await _scriptManager.loadAllScripts();
+
+      // 筛选已启用且开启了自动运行的脚本
+      final autoRunScripts = allScripts
+          .where((script) => script.enabled && script.autoRun)
+          .toList();
+
+      if (autoRunScripts.isEmpty) {
+        print('ℹ️ 没有自动运行脚本');
+        return;
+      }
+
+      print('🚀 执行自动运行脚本...');
+
+      for (var script in autoRunScripts) {
+        try {
+          print('   ⚡ 执行: ${script.name}');
+          final result = await _scriptExecutor.execute(script.id);
+
+          if (!result.success) {
+            print('   ⚠️ 脚本执行失败: ${script.name}');
+            print('      错误: ${result.error}');
+          } else {
+            print('   ✅ 脚本执行成功: ${script.name}');
+            print('      耗时: ${result.duration.inMilliseconds}ms');
+          }
+        } catch (e) {
+          print('   ❌ 脚本执行异常: ${script.name}, 错误: $e');
+        }
+      }
+
+      print('✅ 自动运行脚本执行完成');
+    } catch (e) {
+      print('❌ 执行自动运行脚本失败: $e');
+    }
   }
 
   /// 设置事件触发器

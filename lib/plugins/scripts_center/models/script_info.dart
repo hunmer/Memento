@@ -27,7 +27,10 @@ List<FormFieldConfig> _parseConfigFormFields(List<dynamic>? jsonList) {
       enabled: json['enabled'] as bool? ?? true,
       prefixIcon: _parseIcon(json['prefixIcon'] as String?),
       extra: json['type'] == 'pluginDataSelector'
-          ? {'pluginDataType': json['pluginDataType'] as String?}
+          ? {
+              'pluginDataType': json['pluginDataType'] as String?,
+              if (json['fieldMapping'] != null) 'fieldMapping': json['fieldMapping'] as Map<String, dynamic>,
+            }
           : json['type'] == 'eventMultiSelect'
               ? {'eventMultiSelect': true}
               : null,
@@ -73,6 +76,9 @@ class ScriptInfo {
   /// 是否启用
   bool enabled;
 
+  /// 是否自动运行（在插件初始化后自动执行）
+  bool autoRun;
+
   /// 脚本类型：module（可接受参数）| standalone（独立运行）
   String type;
 
@@ -104,6 +110,7 @@ class ScriptInfo {
     this.author = 'Unknown',
     this.updateUrl,
     this.enabled = true,
+    this.autoRun = false,
     this.type = 'module',
     this.inputs = const [],
     this.triggers = const [],
@@ -129,6 +136,7 @@ class ScriptInfo {
       author: json['author'] as String? ?? 'Unknown',
       updateUrl: json['updateUrl'] as String?,
       enabled: json['enabled'] as bool? ?? true,
+      autoRun: json['autoRun'] as bool? ?? false,
       type: json['type'] as String? ?? 'module',
       inputs: (json['inputs'] as List<dynamic>?)
               ?.map((e) => ScriptInput.fromJson(e as Map<String, dynamic>))
@@ -160,6 +168,7 @@ class ScriptInfo {
       'author': author,
       if (updateUrl != null) 'updateUrl': updateUrl,
       'enabled': enabled,
+      'autoRun': autoRun,
       'type': type,
       'inputs': inputs.map((i) => i.toJson()).toList(),
       'triggers': triggers.map((t) => t.toJson()).toList(),
@@ -193,6 +202,7 @@ class ScriptInfo {
     String? author,
     String? updateUrl,
     bool? enabled,
+    bool? autoRun,
     String? type,
     List<ScriptInput>? inputs,
     List<ScriptTrigger>? triggers,
@@ -210,6 +220,7 @@ class ScriptInfo {
       author: author ?? this.author,
       updateUrl: updateUrl ?? this.updateUrl,
       enabled: enabled ?? this.enabled,
+      autoRun: autoRun ?? this.autoRun,
       type: type ?? this.type,
       inputs: inputs ?? this.inputs,
       triggers: triggers ?? this.triggers,
