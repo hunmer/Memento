@@ -19,6 +19,10 @@
       "type": "pluginDataSelector",
       "labelText": "AI 助手",
       "pluginDataType": "openai.agent",
+      "fieldMapping": {
+        "id": "id",
+        "name": "name"
+      },
       "required": true,
       "validationMessage": "请选择 AI 助手"
     },

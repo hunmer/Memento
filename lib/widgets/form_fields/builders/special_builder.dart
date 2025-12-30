@@ -326,14 +326,14 @@ Widget buildPluginDataSelectorField(FormFieldConfig config, GlobalKey fieldKey) 
   final extra = config.extra ?? {};
   final pluginDataType = extra['pluginDataType'] as String?;
 
-  if (pluginDataType == null) {
+  if (pluginDataType == null || pluginDataType.isEmpty) {
     return const SizedBox.shrink();
   }
 
   return WrappedFormField(
     key: fieldKey,
     name: config.name,
-    initialValue: config.initialValue as String?,
+    initialValue: config.initialValue,
     enabled: config.enabled,
     onChanged: config.onChanged,
     builder: (context, value, setValue) => PluginDataSelectorField(
@@ -344,6 +344,7 @@ Widget buildPluginDataSelectorField(FormFieldConfig config, GlobalKey fieldKey) 
       prefixIcon: config.prefixIcon,
       onChanged: setValue,
       enabled: config.enabled,
+          extra: extra,
     ),
   );
 }

@@ -1,5 +1,3 @@
-import 'package:Memento/core/services/plugin_data_selector/models/selector_config.dart';
-import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
@@ -82,6 +80,9 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
   // 触发条件列表
   List<ScriptTrigger> _triggers = [];
+
+  // 是否自动运行
+  bool _autoRun = false;
 
   // 本地脚本文件路径
   String? _localScriptPath;
@@ -245,6 +246,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       // 编辑模式
       _inputs = List.from(widget.script!.inputs);
       _triggers = List.from(widget.script!.triggers);
+      _autoRun = widget.script!.autoRun;
       _localScriptPath = widget.script!.localScriptPath;
       _configFormFields = widget.script!.configFormFields;
 
@@ -402,6 +404,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       'icon': iconValue,
       'type': advancedValues['type']?.toString() ?? 'module',
       'enabled': advancedValues['enabled'] as bool? ?? true,
+      'autoRun': _autoRun,
       'code': _codeController.text,
       'inputs': _inputs,
       'triggers': _triggers.map((t) => t.toJson()).toList(),
@@ -883,41 +886,86 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   Widget _buildTriggersTab() {
     return Column(
       children: [
-        // 添加触发器按钮
+        // 自动运行开关
         Container(
           padding: const EdgeInsets.all(16),
+          color: Colors.blue[50],
           child: Row(
             children: [
-              const Icon(Icons.bolt, color: Colors.deepPurple),
+              const Icon(Icons.autorenew, color: Colors.blue),
               const SizedBox(width: 8),
-              const Text(
-                '触发条件',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '自动运行',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                    Text(
+                      '开启后将在插件初始化时自动执行此脚本',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue[700],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: _showAddTriggerDialog,
-                icon: const Icon(Icons.add),
-                label: Text('scripts_center_addTrigger'.tr),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                ),
+              Switch(
+                value: _autoRun,
+                onChanged: (value) {
+                  setState(() {
+                    _autoRun = value;
+                  });
+                },
+                activeColor: Colors.blue,
               ),
             ],
           ),
         ),
         const Divider(height: 1),
 
-        // 触发器列表
-        Expanded(
-          child:
-              _triggers.isEmpty
-                  ? Center(
+        // 自动运行开启时隐藏触发条件选项
+        if (!_autoRun) ...[
+          // 添加触发器按钮
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Icon(Icons.bolt, color: Colors.deepPurple),
+                const SizedBox(width: 8),
+                const Text(
+                  '触发条件',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                const Spacer(),
+                ElevatedButton.icon(
+                  onPressed: _showAddTriggerDialog,
+                  icon: const Icon(Icons.add),
+                  label: Text('scripts_center_addTrigger'.tr),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+
+          // 触发器列表
+          Expanded(
+            child: _triggers.isEmpty
+                ? Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -945,19 +993,18 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                       ],
                     ),
                   )
-                  : ListView.builder(
+                : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _triggers.length,
                     itemBuilder: (context, index) {
                       final trigger = _triggers[index];
                       final eventOption = _availableEvents.firstWhere(
                         (e) => e.eventName == trigger.event,
-                        orElse:
-                            () => _EventOption(
-                              trigger.event,
-                              '未知',
-                              trigger.event,
-                            ),
+                        orElse: () => _EventOption(
+                          trigger.event,
+                          '未知',
+                          trigger.event,
+                        ),
                       );
 
                       return Card(
@@ -1005,7 +1052,40 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                       );
                     },
                   ),
-        ),
+          ),
+        ] else
+          // 自动运行开启时的提示信息
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.autorenew,
+                    size: 64,
+                    color: Colors.blue[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '已启用自动运行',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '此脚本将在插件初始化时自动执行',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -1426,6 +1506,26 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       final json = item as Map<String, dynamic>;
       final typeName = json['type'] as String?;
 
+      // 构建 extra 字段，处理 pluginDataSelector 和 eventMultiSelect
+      Map<String, dynamic>? extra;
+      if (typeName == 'pluginDataSelector') {
+        final pluginDataType = json['pluginDataType'] as String?;
+        final fieldMapping = json['fieldMapping'] as Map<String, dynamic>?;
+        if (pluginDataType != null || fieldMapping != null) {
+          extra = <String, dynamic>{};
+          if (pluginDataType != null) {
+            extra['pluginDataType'] = pluginDataType;
+          }
+          if (fieldMapping != null && fieldMapping.isNotEmpty) {
+            extra['fieldMapping'] = fieldMapping;
+          }
+        }
+      } else if (typeName == 'eventMultiSelect') {
+        extra = {'eventMultiSelect': true};
+      } else {
+        extra = json['extra'] as Map<String, dynamic>?;
+      }
+
       // 解析基础字段
       return FormFieldConfig(
         name: json['name'] as String,
@@ -1440,7 +1540,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
         validationMessage: json['validationMessage'] as String?,
         enabled: json['enabled'] as bool? ?? true,
         prefixIcon: _parseIconData(json['prefixIcon'] as String?),
-        extra: json['extra'] as Map<String, dynamic>?,
+        extra: extra,
       );
     }).toList();
   }

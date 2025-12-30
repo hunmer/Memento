@@ -4,6 +4,7 @@ import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_folder.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
 import 'package:Memento/plugins/scripts_center/models/script_trigger.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
 import 'script_loader.dart';
 
 /// 脚本管理器服务
@@ -327,11 +328,32 @@ class ScriptManager extends ChangeNotifier {
     }
   }
 
+  /// 保存脚本配置数据到 configs/scripts_center/{scriptId}_config.json
+  Future<void> _saveScriptConfig(String scriptId, Map<String, dynamic> config) async {
+    try {
+      final configPath = 'configs/scripts_center/${scriptId}_config.json';
+      await loader.storage.write(configPath, config);
+      print('✅ 保存脚本配置成功: $scriptId -> $configPath');
+    } catch (e) {
+      _lastError = '保存脚本配置失败: $e';
+      print('❌ $_lastError');
+      rethrow;
+    }
+  }
+
   /// 删除脚本
   Future<void> deleteScript(String scriptId) async {
     try {
       // 从文件删除
       await loader.deleteScript(scriptId);
+
+      // 删除配置文件（如果存在）
+      try {
+        final configPath = 'configs/scripts_center/${scriptId}_config.json';
+        await loader.storage.delete(configPath);
+      } catch (_) {
+        // 配置文件不存在，忽略错误
+      }
 
       // 从内存移除
       _scripts.removeWhere((script) => script.id == scriptId);
@@ -473,6 +495,12 @@ class ScriptManager extends ChangeNotifier {
         .map((e) => e as ScriptInput)
         .toList();
 
+    // 解析配置表单字段数据
+    final configFormFieldsData = result['configFormFields'] as List<FormFieldConfig>?;
+
+    // 解析配置数据（实际填写的值）
+    final configData = result['config'] as Map<String, dynamic>?;
+
     if (existingScript == null) {
       // 创建新脚本
       await createScript(
@@ -491,11 +519,13 @@ class ScriptManager extends ChangeNotifier {
           newScript.id,
           newScript.copyWith(
             enabled: result['enabled'] as bool,
+            autoRun: result['autoRun'] as bool? ?? false,
             type: result['type'] as String,
             updateUrl: result['updateUrl'] as String?,
             inputs: inputsData,
             triggers: triggers,
             localScriptPath: result['localScriptPath'] as String?,
+            configFormFields: configFormFieldsData ?? newScript.configFormFields,
           ),
         );
 
@@ -503,6 +533,11 @@ class ScriptManager extends ChangeNotifier {
         final code = result['code'] as String? ?? '';
         if (code.isNotEmpty) {
           await saveScriptCode(newScript.id, code);
+        }
+
+        // 保存配置数据
+        if (configData != null && configData.isNotEmpty) {
+          await _saveScriptConfig(newScript.id, configData);
         }
       }
     } else {
@@ -514,12 +549,14 @@ class ScriptManager extends ChangeNotifier {
         icon: result['icon'] as String,
         author: result['author'] as String,
         enabled: result['enabled'] as bool,
+        autoRun: result['autoRun'] as bool? ?? false,
         type: result['type'] as String,
         updateUrl: result['updateUrl'] as String?,
         inputs: inputsData,
         triggers: triggers,
         updatedAt: DateTime.now(),
         localScriptPath: result['localScriptPath'] as String?,
+        configFormFields: configFormFieldsData ?? existingScript.configFormFields,
       );
 
       await saveScriptMetadata(existingScript.id, updatedScript);
@@ -527,6 +564,11 @@ class ScriptManager extends ChangeNotifier {
       // 保存代码
       final code = result['code'] as String? ?? '';
       await saveScriptCode(existingScript.id, code);
+
+      // 保存配置数据
+      if (configData != null && configData.isNotEmpty) {
+        await _saveScriptConfig(existingScript.id, configData);
+      }
     }
   }
 
