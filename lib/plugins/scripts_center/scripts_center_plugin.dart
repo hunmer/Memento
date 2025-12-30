@@ -171,7 +171,6 @@ class ScriptsCenterPlugin extends BasePlugin {
         scriptManager: _scriptManager,
         storage: storage,
         eventManager: EventManager.instance,
-        timeoutMilliseconds: 10000, // 10秒超时
       );
 
       // 初始化JS引擎

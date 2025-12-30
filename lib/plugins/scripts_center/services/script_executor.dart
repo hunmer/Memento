@@ -28,9 +28,6 @@ class ScriptExecutor {
   /// 正在执行的脚本栈（用于检测循环调用）
   final Set<String> _executingScripts = {};
 
-  /// 执行超时时间（毫秒）
-  final int timeoutMilliseconds;
-
   /// 日志回调函数
   final Function(String message, String level)? onLog;
 
@@ -38,7 +35,6 @@ class ScriptExecutor {
     required this.scriptManager,
     required this.storage,
     required this.eventManager,
-    this.timeoutMilliseconds = 5000,
     this.onLog,
   });
 
@@ -404,9 +400,9 @@ class ScriptExecutor {
         // 准备参数
         final argsJson = jsonEncode(args ?? {});
 
-        // 包装代码（注入 args 参数和脚本信息）
+        // 先定义 args 和 scriptInfo 变量，然后执行脚本代码
+        // 避免包装成函数导致返回值问题
         final wrappedCode = '''
-        (async function() {
           const args = $argsJson;
           const scriptInfo = {
             id: '${script.id}',
@@ -414,31 +410,11 @@ class ScriptExecutor {
             version: '${script.version}'
           };
 
-          try {
-            // 执行脚本代码
-            const result = await (async function() {
-               $code
-            })();
-
-            return result;
-          } catch (error) {
-            console.error('[Script Error]', error);
-            return {
-              success: false,
-              error: error.toString(),
-              stack: error.stack
-            };
-          }
-        })();
+          $code
         ''';
 
-        // 使用 JSBridgeManager 执行脚本（带超时控制）
-        dynamic result;
-        try {
-          result = await _executeWithTimeout(wrappedCode);
-        } on TimeoutException {
-          throw Exception('脚本执行超时（${timeoutMilliseconds}ms）');
-        }
+        // 使用 JSBridgeManager 执行脚本
+        final result = await _executeWithTimeout(wrappedCode);
 
         final duration = DateTime.now().difference(startTime);
 
@@ -474,29 +450,17 @@ class ScriptExecutor {
     }
   }
 
-  /// 带超时的执行
+  /// 执行脚本代码（JS 层已自带超时机制）
   Future<dynamic> _executeWithTimeout(String code) async {
-    return Future.any([
-      Future.delayed(
-        Duration(milliseconds: timeoutMilliseconds),
-        () => throw TimeoutException('执行超时'),
-      ),
-      Future(() async {
-        try {
-          // 使用 JSBridgeManager 执行代码
-          final jsResult = await _jsBridge.evaluate(code);
+    // 使用 JSBridgeManager 执行代码
+    final jsResult = await _jsBridge.evaluate(code);
 
-          // 处理返回值
-          if (!jsResult.success) {
-            throw Exception(jsResult.error ?? '未知错误');
-          }
+    // 处理返回值
+    if (!jsResult.success) {
+      throw Exception(jsResult.error ?? '未知错误');
+    }
 
-          return jsResult.result;
-        } catch (e) {
-          throw Exception('JS执行错误: $e');
-        }
-      }),
-    ]);
+    return jsResult.result;
   }
 
   /// 评估表达式（用于调试）
