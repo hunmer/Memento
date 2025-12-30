@@ -235,51 +235,59 @@ class HomeScreenView extends StatelessWidget {
     return Opacity(
       key: key,
       opacity: controller.globalWidgetOpacity,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // 如果是空布局，使用目标布局的结构显示骨架屏
-          if (items.isEmpty) {
-            debugPrint('Build skeleton for layout: $layoutId, current: ${controller.currentLayoutName}');
-            return FutureBuilder<({List<HomeWidgetSize> structure, int crossAxisCount})>(
-              future: controller.getLayoutStructureById(layoutId),
-              builder: (context, snapshot) {
-                debugPrint('FutureBuilder snapshot: ${snapshot.connectionState}, data: ${snapshot.data?.structure.length}');
-                final layoutStructure = snapshot.data;
-                if (layoutStructure == null || layoutStructure.structure.isEmpty) {
-                  return _buildEmptyState(context);
-                }
-                return _buildSkeletonFromStructure(context, layoutStructure.structure, layoutStructure.crossAxisCount);
-              },
-            );
-          }
+      child: ListenableBuilder(
+        listenable: controller.layoutManager,
+        builder: (context, child) {
+          // 动态获取最新的 items（从缓存或 layoutManager）
+          final latestItems = controller.getItemsForLayout(layoutId);
 
-          final isCenter = controller.layoutManager.gridAlignment == 'center';
-          final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // 如果是空布局，使用目标布局的结构显示骨架屏
+              if (latestItems.isEmpty) {
+                debugPrint('Build skeleton for layout: $layoutId, current: ${controller.currentLayoutName}');
+                return FutureBuilder<({List<HomeWidgetSize> structure, int crossAxisCount})>(
+                  future: controller.getLayoutStructureById(layoutId),
+                  builder: (context, snapshot) {
+                    debugPrint('FutureBuilder snapshot: ${snapshot.connectionState}, data: ${snapshot.data?.structure.length}');
+                    final layoutStructure = snapshot.data;
+                    if (layoutStructure == null || layoutStructure.structure.isEmpty) {
+                      return _buildEmptyState(context);
+                    }
+                    return _buildSkeletonFromStructure(context, layoutStructure.structure, layoutStructure.crossAxisCount);
+                  },
+                );
+              }
 
-          return Padding(
-            padding: EdgeInsets.only(
-              top: !isCenter && controller.currentBackgroundPath != null
-                  ? MediaQuery.of(context).padding.top
-                  : 0,
-            ),
-            child: HomeGrid(
-              items: items,
-              crossAxisCount: controller.layoutManager.gridCrossAxisCount,
-              isEditMode: controller.isEditMode,
-              isBatchMode: controller.isBatchMode,
-              selectedItemIds: controller.selectedItemIds,
-              alignment: alignment,
-              onReorder: controller.layoutManager.reorder,
-              onAddToFolder: (itemId, folderId) {
-                controller.layoutManager.moveToFolder(itemId, folderId);
-                Toast.success('已添加到文件夹');
-              },
-              onItemTap: controller.isBatchMode
-                  ? (item) => controller.toggleItemSelection(item.id)
-                  : null,
-              onItemLongPress: (item) => _handleCardLongPress(context, item),
-              onQuickCreateLayout: _createQuickLayout,
-            ),
+              final isCenter = controller.layoutManager.gridAlignment == 'center';
+              final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  top: !isCenter && controller.currentBackgroundPath != null
+                      ? MediaQuery.of(context).padding.top
+                      : 0,
+                ),
+                child: HomeGrid(
+                  items: latestItems,
+                  crossAxisCount: controller.layoutManager.gridCrossAxisCount,
+                  isEditMode: controller.isEditMode,
+                  isBatchMode: controller.isBatchMode,
+                  selectedItemIds: controller.selectedItemIds,
+                  alignment: alignment,
+                  onReorder: controller.layoutManager.reorder,
+                  onAddToFolder: (itemId, folderId) {
+                    controller.layoutManager.moveToFolder(itemId, folderId);
+                    Toast.success('已添加到文件夹');
+                  },
+                  onItemTap: controller.isBatchMode
+                      ? (item) => controller.toggleItemSelection(item.id)
+                      : null,
+                  onItemLongPress: (item) => _handleCardLongPress(context, item),
+                  onQuickCreateLayout: _createQuickLayout,
+                ),
+              );
+            },
           );
         },
       ),

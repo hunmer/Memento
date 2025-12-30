@@ -96,9 +96,15 @@ class HomeScreenController extends ChangeNotifier {
   }
 
   /// 初始化
+  VoidCallback? _layoutChangedListener;
+
   void init(VoidCallback onStateChanged) {
     initializeLayout();
-    _layoutManager.addListener(onStateChanged);
+    // 创建包装器，先同步缓存再通知 UI
+    _layoutChangedListener = () {
+      onLayoutChanged(onStateChanged);
+    };
+    _layoutManager.addListener(_layoutChangedListener!);
     AppStartupState.instance.addListener(onStateChanged);
   }
 
@@ -120,6 +126,11 @@ class HomeScreenController extends ChangeNotifier {
 
   /// 布局管理器变化时的回调
   void onLayoutChanged(VoidCallback onStateChanged) {
+    // 同步更新当前布局的缓存
+    if (_currentPageIndex < _savedLayouts.length) {
+      final currentLayoutId = _savedLayouts[_currentPageIndex].id;
+      _layoutItemsCache[currentLayoutId] = List<HomeItem>.from(_layoutManager.items);
+    }
     onStateChanged();
   }
 
@@ -463,7 +474,9 @@ class HomeScreenController extends ChangeNotifier {
 
   /// 清理资源
   void cleanup(VoidCallback onStateChanged) {
-    _layoutManager.removeListener(onStateChanged);
+    if (_layoutChangedListener != null) {
+      _layoutManager.removeListener(_layoutChangedListener!);
+    }
     AppStartupState.instance.removeListener(onStateChanged);
     _pageController?.dispose();
     _tabController?.dispose();
