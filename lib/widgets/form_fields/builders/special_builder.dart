@@ -12,6 +12,8 @@ import '../form_field_group.dart';
 import '../custom_fields_field.dart';
 import '../list_add_field.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
+import '../plugin_data_selector_field.dart';
+import '../event_multi_select_field.dart';
 
 /// 构建标签字段
 Widget buildTagsField(FormFieldConfig config, GlobalKey fieldKey, BuildContext context) {
@@ -316,5 +318,68 @@ Widget buildListAddField(FormFieldConfig config, GlobalKey fieldKey) {
         getIsCompleted: wrappedGetIsCompleted,
       );
     },
+  );
+}
+
+/// 构建插件数据选择器字段
+Widget buildPluginDataSelectorField(FormFieldConfig config, GlobalKey fieldKey) {
+  final extra = config.extra ?? {};
+  final pluginDataType = extra['pluginDataType'] as String?;
+
+  if (pluginDataType == null) {
+    return const SizedBox.shrink();
+  }
+
+  return WrappedFormField(
+    key: fieldKey,
+    name: config.name,
+    initialValue: config.initialValue as String?,
+    enabled: config.enabled,
+    onChanged: config.onChanged,
+    builder: (context, value, setValue) => PluginDataSelectorField(
+      name: config.name,
+      pluginDataType: pluginDataType,
+      dialogTitle: config.labelText,
+      initialValue: value,
+      prefixIcon: config.prefixIcon,
+      onChanged: setValue,
+      enabled: config.enabled,
+    ),
+  );
+}
+
+/// 构建事件多选字段
+Widget buildEventMultiSelectField(FormFieldConfig config, GlobalKey fieldKey) {
+  final extra = config.extra ?? {};
+  final availableEventsRaw = extra['availableEvents'] as List<dynamic>?;
+
+  // 解析事件选项
+  List<EventOption> availableEvents = [];
+  if (availableEventsRaw != null) {
+    availableEvents = availableEventsRaw.map((e) {
+      final map = e as Map<String, dynamic>;
+      return EventOption(
+        eventName: map['eventName'] as String,
+        category: map['category'] as String,
+        description: map['description'] as String,
+      );
+    }).toList();
+  }
+
+  return WrappedFormField(
+    key: fieldKey,
+    name: config.name,
+    initialValue: config.initialValue as List<String>?,
+    enabled: config.enabled,
+    onChanged: config.onChanged,
+    builder: (context, value, setValue) => EventMultiSelectField(
+      name: config.name,
+      availableEvents: availableEvents,
+      dialogTitle: config.labelText,
+      initialValue: value,
+      prefixIcon: config.prefixIcon,
+      onChanged: (value) => setValue(value),
+      enabled: config.enabled,
+    ),
   );
 }

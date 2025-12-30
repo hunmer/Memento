@@ -8,11 +8,36 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_search': 'Search scripts',
   'scripts_center_newScript': 'New Script',
 
-  // Script editing
+  // Script editing - pages and buttons
+  'scripts_center_editScript': 'Edit Script',
+  'scripts_center_createNewScript': 'Create New Script',
+  'scripts_center_save': 'Save',
+  'scripts_center_create': 'Create',
+  'scripts_center_basicInfo': 'Basic Info',
+  'scripts_center_codeEditor': 'Code Editor',
+  'scripts_center_triggers': 'Triggers',
+  'scripts_center_advancedSettings': 'Advanced Settings',
+  'scripts_center_config': 'Configuration',
   'scripts_center_format': 'Format',
   'scripts_center_addTrigger': 'Add Trigger',
   'scripts_center_addTriggerCondition': 'Add Trigger Condition',
   'scripts_center_add': 'Add',
+
+  // Script fields
+  'scripts_center_scriptName': 'Script Name',
+  'scripts_center_scriptId': 'Script ID',
+  'scripts_center_description': 'Description',
+  'scripts_center_author': 'Author',
+  'scripts_center_version': 'Version',
+  'scripts_center_scriptType': 'Script Type',
+  'scripts_center_updateUrl': 'Update URL (Optional)',
+  'scripts_center_icon': 'Icon',
+  'scripts_center_selectIcon': 'Select Icon',
+
+  // Configuration
+  'scripts_center_selectAgent': 'Select AI Agent',
+  'scripts_center_enabledEvents': 'Monitored Events',
+  'scripts_center_promptTemplate': 'Prompt Template',
 
   // Script types
   'scripts_center_moduleType': 'Module (Accepts Parameters)',
@@ -54,4 +79,10 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_scriptExecuted': 'Script executed successfully',
   'scripts_center_scriptExecuteFailed': 'Script execution failed',
   'scripts_center_scriptExecuteError': 'Script execution error',
+
+  // Delete related
+  'scripts_center_delete_confirm': 'Confirm Delete',
+  'scripts_center_delete_script_confirm': 'Confirm to delete script',
+  'scripts_center_delete_success': 'Script deleted successfully',
+  'scripts_center_operation_failed': 'Operation failed',
 };

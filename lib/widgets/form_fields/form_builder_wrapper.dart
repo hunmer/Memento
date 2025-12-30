@@ -78,7 +78,10 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
     return values;
   }
 
-  void submitForm() => _submitFormInternal();
+  void submitForm() {
+    if (!mounted) return;
+    _submitFormInternal();
+  }
 
   Map<String, dynamic> get currentValues => _currentValues;
 
@@ -170,9 +173,13 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
     }
 
     if (isValid) {
-      widget.config.onSubmit(values);
+      if (mounted) {
+        widget.config.onSubmit(values);
+      }
     } else if (widget.config.onValidationFailed != null) {
-      widget.config.onValidationFailed!(errors);
+      if (mounted) {
+        widget.config.onValidationFailed!(errors);
+      }
     } else {
       // 默认验证失败行为：显示错误消息
       final errorMessages = errors.values.join('\n');
@@ -182,6 +189,7 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
   /// 显示验证错误提示
   void _showValidationError(String message) {
+    if (!mounted) return;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     scaffoldMessenger.showSnackBar(
       SnackBar(
@@ -348,6 +356,12 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
       case FormFieldType.reminderDate:
         return buildReminderDateField(config, fieldKey);
+
+      case FormFieldType.pluginDataSelector:
+        return buildPluginDataSelectorField(config, fieldKey);
+
+      case FormFieldType.eventMultiSelect:
+        return buildEventMultiSelectField(config, fieldKey);
     }
   }
 

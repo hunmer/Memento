@@ -13,7 +13,7 @@ export 'switch_slider_builder.dart' show buildSwitchField, buildSliderField, bui
 // 特殊功能字段构建器
 export 'special_builder.dart' show buildTagsField, buildIconTitleField,
     buildCategorySelectorField, buildOptionSelectorField, buildCustomFieldsField,
-    buildListAddField;
+    buildListAddField, buildPluginDataSelectorField, buildEventMultiSelectField;
 
 // 插件专用字段构建器
 export 'plugin_builder.dart' show buildPromptEditorField, buildIconAvatarRowField,

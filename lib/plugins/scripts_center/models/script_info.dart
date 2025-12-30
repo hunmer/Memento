@@ -1,5 +1,46 @@
+import 'package:flutter/material.dart';
 import 'script_trigger.dart';
 import 'script_input.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
+
+/// 从JSON解析FormFieldConfig列表
+List<FormFieldConfig> _parseConfigFormFields(List<dynamic>? jsonList) {
+  if (jsonList == null) return [];
+
+  return jsonList.map((item) {
+    final json = item as Map<String, dynamic>;
+    final typeName = json['type'] as String?;
+
+    // 解析基础字段
+    return FormFieldConfig(
+      name: json['name'] as String,
+      type: FormFieldType.values.firstWhere(
+        (e) => e.name == typeName,
+        orElse: () => FormFieldType.text,
+      ),
+      labelText: json['labelText'] as String?,
+      hintText: json['hintText'] as String?,
+      initialValue: json['initialValue'],
+      required: json['required'] as bool? ?? false,
+      validationMessage: json['validationMessage'] as String?,
+      enabled: json['enabled'] as bool? ?? true,
+      prefixIcon: _parseIcon(json['prefixIcon'] as String?),
+      extra: json['type'] == 'pluginDataSelector'
+          ? {'pluginDataType': json['pluginDataType'] as String?}
+          : json['type'] == 'eventMultiSelect'
+              ? {'eventMultiSelect': true}
+              : null,
+    );
+  }).toList();
+}
+
+/// 解析图标名称为IconData
+IconData? _parseIcon(String? iconName) {
+  if (iconName == null) return null;
+  // 简化处理，返回null，实际项目中可以使用图标映射
+  return null;
+}
 
 /// 脚本元数据模型
 ///
@@ -41,11 +82,17 @@ class ScriptInfo {
   /// 触发条件列表
   List<ScriptTrigger> triggers;
 
+  /// 配置表单字段（用于动态渲染配置界面）
+  List<FormFieldConfig> configFormFields;
+
   /// 创建时间
   final DateTime? createdAt;
 
   /// 最后修改时间
   DateTime? updatedAt;
+
+  /// 本地脚本文件路径（可选，用于从外部文件同步脚本内容）
+  String? localScriptPath;
 
   ScriptInfo({
     required this.id,
@@ -60,8 +107,10 @@ class ScriptInfo {
     this.type = 'module',
     this.inputs = const [],
     this.triggers = const [],
+    this.configFormFields = const [],
     this.createdAt,
     this.updatedAt,
+    this.localScriptPath,
   });
 
   /// 从JSON创建脚本信息对象
@@ -89,12 +138,15 @@ class ScriptInfo {
               ?.map((e) => ScriptTrigger.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      configFormFields: _parseConfigFormFields(
+          json['configFormFields'] as List<dynamic>?),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : null,
+      localScriptPath: json['localScriptPath'] as String?,
     );
   }
 
@@ -111,8 +163,24 @@ class ScriptInfo {
       'type': type,
       'inputs': inputs.map((i) => i.toJson()).toList(),
       'triggers': triggers.map((t) => t.toJson()).toList(),
+      if (configFormFields.isNotEmpty)
+        'configFormFields': configFormFields.map((field) {
+          final json = <String, dynamic>{
+            'name': field.name,
+            'type': field.type.name,
+            if (field.labelText != null) 'labelText': field.labelText,
+            if (field.hintText != null) 'hintText': field.hintText,
+            if (field.initialValue != null) 'initialValue': field.initialValue,
+            if (field.required) 'required': field.required,
+            if (field.validationMessage != null) 'validationMessage': field.validationMessage,
+            if (!field.enabled) 'enabled': field.enabled,
+            if (field.extra != null) ...field.extra!,
+          };
+          return json;
+        }).toList(),
       if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
       if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      if (localScriptPath != null) 'localScriptPath': localScriptPath,
     };
   }
 
@@ -128,7 +196,9 @@ class ScriptInfo {
     String? type,
     List<ScriptInput>? inputs,
     List<ScriptTrigger>? triggers,
+    List<FormFieldConfig>? configFormFields,
     DateTime? updatedAt,
+    String? localScriptPath,
   }) {
     return ScriptInfo(
       id: id,
@@ -143,8 +213,10 @@ class ScriptInfo {
       type: type ?? this.type,
       inputs: inputs ?? this.inputs,
       triggers: triggers ?? this.triggers,
+      configFormFields: configFormFields ?? this.configFormFields,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      localScriptPath: localScriptPath ?? this.localScriptPath,
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 class ScriptCard extends StatelessWidget {
   final ScriptInfo script;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final ValueChanged<bool>? onToggle;
   final VoidCallback? onRun;
 
@@ -15,6 +16,7 @@ class ScriptCard extends StatelessWidget {
     super.key,
     required this.script,
     this.onTap,
+    this.onLongPress,
     this.onToggle,
     this.onRun,
   });
@@ -28,6 +30,7 @@ class ScriptCard extends StatelessWidget {
       elevation: 2,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
