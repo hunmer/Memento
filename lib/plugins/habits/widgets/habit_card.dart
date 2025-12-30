@@ -1,6 +1,5 @@
-import 'package:Memento/utils/image_utils.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class HabitCard extends StatelessWidget {
   final String? imageUrl;
@@ -55,46 +54,12 @@ class HabitCard extends StatelessWidget {
       return const Center(child: Icon(Icons.auto_awesome, size: 48));
     }
 
-    return FutureBuilder<String>(
-      future:
-          imageUrl!.startsWith('http')
-              ? Future.value(imageUrl!)
-              : ImageUtils.getAbsolutePath(imageUrl!),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Center(
-            child: AspectRatio(
-              aspectRatio: 1.0,
-              child: ClipOval(
-                child:
-                    imageUrl!.startsWith('http')
-                        ? Image.network(
-                          snapshot.data!,
-                          width: 64,
-                          height: 64,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image),
-                        )
-                        : Image.file(
-                          File(snapshot.data!),
-                          width: 64,
-                          height: 64,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image),
-                        ),
-              ),
-            ),
-          );
-        } else if (snapshot.hasError) {
-          return const Icon(Icons.broken_image);
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
+    return AdaptiveImage(
+      imagePath: imageUrl,
+      width: 64,
+      height: 64,
+      fit: BoxFit.cover,
+      shape: BoxShape.circle,
     );
   }
 }

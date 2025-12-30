@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/widgets/swipe_action/swipe_action_wrapper.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
 
 class AgentListItem extends StatelessWidget {
@@ -71,51 +70,28 @@ class AgentListItem extends StatelessWidget {
   Widget _buildAgentIcon() {
     // 如果有头像，优先显示头像
     if (agent.avatarUrl != null && agent.avatarUrl!.isNotEmpty) {
-      return FutureBuilder<String>(
-        future: ImageUtils.getAbsolutePath(agent.avatarUrl),
-        builder: (context, snapshot) {
-          return SizedBox(
-            width: 40,
-            height: 40,
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _getColorForServiceProvider(
-                    agent.serviceProviderId,
-                  ).withValues(alpha: 0.5),
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: 1.0,
-                  child: ClipOval(
-                    child: agent.avatarUrl!.startsWith('http')
-                        ? Image.network(
-                            agent.avatarUrl!,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                _buildDefaultIcon(),
-                          )
-                        : snapshot.hasData
-                            ? Image.file(
-                                File(snapshot.data!),
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildDefaultIcon(),
-                              )
-                            : _buildDefaultIcon(),
-                  ),
-                ),
-              ),
+      return SizedBox(
+        width: 40,
+        height: 40,
+        child: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: _getColorForServiceProvider(
+                agent.serviceProviderId,
+              ).withValues(alpha: 0.5),
+              width: 2,
             ),
-          );
-        },
+          ),
+          child: ClipOval(
+            child: AdaptiveImage(
+              imagePath: agent.avatarUrl,
+              width: 40,
+              height: 40,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
       );
     }
     

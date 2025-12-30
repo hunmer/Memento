@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
-import 'dart:io';
-import 'package:Memento/plugins/goods/widgets/goods_item_form/index.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/product.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -80,48 +79,11 @@ class ProductCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image Section
-                SizedBox(
-                  height: 100, // 给图片区域固定高度
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Center(
-                      // 添加居中对齐
-                      child:
-                          (product.image?.isEmpty ?? true)
-                              ? _buildErrorImage()
-                              : FutureBuilder<String>(
-                                future: ImageUtils.getAbsolutePath(
-                                  product.image,
-                                ),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    if (snapshot.hasData) {
-                                      final imagePath = snapshot.data!;
-                                      return isNetworkImage(imagePath)
-                                          ? Image.network(
-                                            imagePath,
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    _buildErrorImage(),
-                                          )
-                                          : Image.file(
-                                            File(imagePath),
-                                            fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    _buildErrorImage(),
-                                          );
-                                    }
-                                    return _buildErrorImage();
-                                  }
-                                  return _buildLoadingIndicator();
-                                },
-                              ),
-                    ),
-                  ),
+                // Image Section - 高度自适应
+                AdaptiveImage(
+                  imagePath: product.image,
+                  width: double.infinity,
+                  borderRadius: 8,
                 ),
                 const SizedBox(height: 10),
 
@@ -284,26 +246,5 @@ class ProductCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year.toString().substring(2)}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
-  }
-
-  bool isNetworkImage(String path) {
-    return path.startsWith('http://') || path.startsWith('https://');
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Center(child: CircularProgressIndicator());
-  }
-
-  Widget _buildErrorImage() {
-    return Container(
-      color: Colors.grey[200],
-      width: double.infinity,
-      height: double.infinity,
-      child: const Icon(
-        Icons.broken_image,
-        size: 48,
-        color: Colors.grey,
-      ),
-    );
   }
 }

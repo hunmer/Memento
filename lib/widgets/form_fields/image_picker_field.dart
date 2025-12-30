@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../picker/image_picker_dialog.dart';
-import '../common/image_preview.dart';
+import '../adaptive_image.dart';
 
 /// 图片选择器字段组件
 ///
@@ -149,14 +149,10 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
                   // 图片预览区域
                   GestureDetector(
                     onTap: widget.enabled ? () => _showPicker(ctx) : null,
-                    child: ImagePreview(
+                    child: AdaptiveImage(
                       imagePath: imagePath,
                       width: widget.previewWidth,
-                      height: widget.previewHeight,
-                      defaultImage: widget.defaultImage,
-                      defaultImagePath: widget.defaultImagePath,
                       borderRadius: widget.borderRadius,
-                      showShadow: widget.showShadow,
                     ),
                   ),
                   // 选择按钮

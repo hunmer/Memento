@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/widgets/picker/image_picker_dialog.dart';
+import 'package:Memento/widgets/adaptive_image.dart';
 import 'form_field_wrapper.dart';
 
 /// 图标头像行字段
@@ -148,59 +147,14 @@ class _IconAvatarRowFieldState extends State<IconAvatarRowField> {
                     width: 2,
                   ),
                 ),
-                child:
-                    _avatarUrl != null && _avatarUrl!.isNotEmpty
-                        ? FutureBuilder<String>(
-                          future:
-                              _avatarUrl!.startsWith('http')
-                                  ? Future.value(_avatarUrl!)
-                                  : ImageUtils.getAbsolutePath(_avatarUrl),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return Center(
-                                child: AspectRatio(
-                                  aspectRatio: 1.0,
-                                  child: ClipOval(
-                                    child:
-                                        _avatarUrl!.startsWith('http')
-                                            ? Image.network(
-                                              snapshot.data!,
-                                              width: 64,
-                                              height: 64,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (
-                                                    context,
-                                                    error,
-                                                    stackTrace,
-                                                  ) => const Icon(
-                                                    Icons.broken_image,
-                                                  ),
-                                            )
-                                            : Image.file(
-                                              File(snapshot.data!),
-                                              width: 64,
-                                              height: 64,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (
-                                                    context,
-                                                    error,
-                                                    stackTrace,
-                                                  ) => const Icon(
-                                                    Icons.broken_image,
-                                                  ),
-                                            ),
-                                  ),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const Icon(Icons.broken_image);
-                            } else {
-                              return const CircularProgressIndicator();
-                            }
-                          },
-                        )
+                child: _avatarUrl != null && _avatarUrl!.isNotEmpty
+                    ? AdaptiveImage(
+                        imagePath: _avatarUrl,
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                        shape: BoxShape.circle,
+                      )
                         : Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,

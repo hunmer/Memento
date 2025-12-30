@@ -35,6 +35,11 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
     _filterWarehouseId = widget.initialFilterWarehouseId;
     GoodsPlugin.instance.addListener(_onDataChanged);
 
+    // 如果有初始仓库筛选，同步到多条件过滤状态
+    if (_filterWarehouseId != null) {
+      _multiFilters['warehouse'] = _filterWarehouseId;
+    }
+
     // 设置路由上下文
     _updateRouteContext();
   }
@@ -481,6 +486,8 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
       multiFilterItems: _buildFilterItems(),
       multiFilterBarHeight: 50,
       onMultiFilterChanged: _applyMultiFilters,
+      // 传递初始筛选条件（用于页面跳转时）
+      initialMultiFilters: _multiFilters.isNotEmpty ? _multiFilters : null,
       // 将原有的 AppBar actions 移到右上角
       actions: [
         // 视图切换按钮
