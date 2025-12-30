@@ -6,7 +6,7 @@ import 'package:Memento/plugins/openai/models/ai_agent.dart';
 /// 负责从远程服务器获取 Agent 列表
 class AgentMarketplaceService {
   static const String _defaultMarketplaceUrl =
-      'https://gitee.com/neysummer2000/memento/raw/master/mini_apps_store/agents.json';
+      'https://gitee.com/neysummer2000/memento/raw/master/online/agents.json';
 
   /// 获取商场 Agent 列表
   ///

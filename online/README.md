@@ -5,7 +5,7 @@
 ## 仓库结构
 
 ```
-mini_apps_store/
+online/
 ├── apps.json                    # 应用列表配置文件
 ├── generate_files_json.py       # 文件列表生成工具
 ├── README.md                    # 本文档
@@ -55,14 +55,14 @@ mini_apps_store/
 2. 进入 WebView 插件的应用商店
 3. 添加新的应用源，配置如下：
    - **源名称**: 本地仓库（或自定义名称）
-   - **JSON URL**: `file:///path/to/mini_apps_store/apps.json`
-   - **基础URL**: `file:///path/to/mini_apps_store/`
+   - **JSON URL**: `file:///path/to/online/apps.json`
+   - **基础URL**: `file:///path/to/online/`
 
 ### 开发新应用
 
 #### 方式一：使用自动化工具（推荐）
 
-1. 在 `mini_apps_store/` 目录下创建新的应用目录
+1. 在 `online/` 目录下创建新的应用目录
 2. 添加应用文件（至少需要 `index.html`）
 3. 使用自动化工具生成 `files.json`：
    ```bash
@@ -79,7 +79,7 @@ mini_apps_store/
 
 #### 方式二：手动创建
 
-1. 在 `mini_apps_store/` 目录下创建新的应用目录
+1. 在 `online/` 目录下创建新的应用目录
 2. 添加应用文件（至少需要 `index.html`）
 3. 计算文件的 MD5 和大小：
    ```bash
