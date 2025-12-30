@@ -78,10 +78,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
         type: FormFieldType.optionSelector,
         labelText: 'activity_mood'.tr,
         initialValue:
-            widget.activity?.mood ??
-            (widget.recentMoods?.isNotEmpty == true
-                ? widget.recentMoods!.first
-                : '😊'),
+            widget.activity?.mood ?? '',
         options: _buildMoodOptions(),
         useHorizontalScroll: true,
         optionWidth: 80,
@@ -218,6 +215,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
                       // 标签选择 (fields[3])
                       fields[3],
+                      const SizedBox(height: 16),
 
                       // 心情选择 (fields[1])
                       fields[1],

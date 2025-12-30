@@ -38,12 +38,9 @@ class AgentEditScreen extends StatefulWidget {
     bool isFromMarketplace = false,
   }) {
     return NavigationHelper.createRoute(
-      Localizations.override(
-        context: context,
-        child: AgentEditScreen(
-          agent: agent,
-          isFromMarketplace: isFromMarketplace,
-        ),
+      AgentEditScreen(
+        agent: agent,
+        isFromMarketplace: isFromMarketplace,
       ),
     );
   }
@@ -151,12 +148,25 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
     // 从 promptEditor 字段获取提示词
     final prompts = values['promptEditor'] as List<dynamic>? ?? [];
-    final systemPrompt = prompts
-            .where((p) => p is Prompt && p.type == 'system')
-            .map((p) => (p as Prompt).content)
-            .firstOrNull ??
-        '';
-    final messages = prompts.where((p) => p is Prompt && p.type != 'system').toList();
+    // 构建完整的 messages 数组（包含 system 类型）
+    final allMessages = <Prompt>[];
+    String systemPrompt = '';
+
+    for (final p in prompts) {
+      if (p is Map<String, dynamic>) {
+        final prompt = Prompt.fromJson(p);
+        if (prompt.type == 'system') {
+          systemPrompt = prompt.content;
+        }
+        allMessages.add(prompt);
+      }
+    }
+
+    // 如果没有 system 类型的消息但有 systemPrompt，添加它
+    if (systemPrompt.isNotEmpty &&
+        !allMessages.any((m) => m.type == 'system')) {
+      allMessages.insert(0, Prompt(type: 'system', content: systemPrompt));
+    }
 
     final agent = AIAgent(
       id: widget.agent?.id ?? const Uuid().v4(),
@@ -165,7 +175,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       serviceProviderId: _selectedProviderId,
       baseUrl: values['baseUrl'] as String? ?? '',
       headers: _parseHeaders(values['headers'] as String? ?? ''),
-      systemPrompt: systemPrompt,
       model: values['model'] as String? ?? 'gpt-3.5-turbo',
       tags: (values['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: widget.agent?.createdAt ?? DateTime.now(),
@@ -177,7 +186,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       promptPresetId: values['promptPresetId'] as String?,
       enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
       openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
-      messages: messages.isNotEmpty ? messages.cast<Prompt>() : null,
+      messages: allMessages.isNotEmpty ? allMessages : null,
     );
 
     try {
@@ -324,12 +333,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
     // 从 promptEditor 字段获取提示词
     final prompts = values['promptEditor'] as List<dynamic>? ?? [];
-    final systemPrompt = prompts
-            .where((p) => p is Prompt && p.type == 'system')
-            .map((p) => (p as Prompt).content)
-            .firstOrNull ??
-        '';
-    final messages = prompts.where((p) => p is Prompt && p.type != 'system').toList();
+    // 构建完整的 messages 数组（包含 system 类型）
+    final allMessages = <Prompt>[];
+
+    for (final p in prompts) {
+      if (p is Map<String, dynamic>) {
+        allMessages.add(Prompt.fromJson(p));
+      }
+    }
 
     // 创建一个新的智能体，复制当前智能体的所有属性，但生成新ID并更新名称
     final clonedAgent = AIAgent(
@@ -339,7 +350,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       serviceProviderId: _selectedProviderId,
       baseUrl: values['baseUrl'] as String? ?? '',
       headers: _parseHeaders(values['headers'] as String? ?? ''),
-      systemPrompt: systemPrompt,
       model: values['model'] as String? ?? 'gpt-3.5-turbo',
       tags: (values['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: DateTime.now(),
@@ -351,7 +361,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       promptPresetId: values['promptPresetId'] as String?,
       enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
       openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
-      messages: messages.isNotEmpty ? messages.cast<Prompt>() : null,
+      messages: allMessages.isNotEmpty ? allMessages : null,
     );
 
     try {
@@ -671,12 +681,14 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
 
     // 从 promptEditor 字段获取提示词
     final prompts = values['promptEditor'] as List<dynamic>? ?? [];
-    final systemPrompt = prompts
-            .where((p) => p is Prompt && p.type == 'system')
-            .map((p) => (p as Prompt).content)
-            .firstOrNull ??
-        '';
-    final messages = prompts.where((p) => p is Prompt && p.type != 'system').toList();
+    // 构建完整的 messages 数组（包含 system 类型）
+    final allMessages = <Prompt>[];
+
+    for (final p in prompts) {
+      if (p is Map<String, dynamic>) {
+        allMessages.add(Prompt.fromJson(p));
+      }
+    }
 
     // 创建临时agent用于测试，使用表单中的最新配置
     final headers = _parseHeaders(values['headers'] as String? ?? '');
@@ -690,7 +702,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       serviceProviderId: _selectedProviderId,
       baseUrl: values['baseUrl'] as String? ?? '',
       headers: headers,
-      systemPrompt: systemPrompt,
       tags: (values['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -706,7 +717,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       promptPresetId: values['promptPresetId'] as String?,
       enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
       openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
-      messages: messages.isNotEmpty ? messages.cast<Prompt>() : null,
+      messages: allMessages.isNotEmpty ? allMessages : null,
     );
 
     // 获取当前表单的值
@@ -714,7 +725,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       'name': values['name'],
       'baseUrl': values['baseUrl'],
       'model': values['model'],
-      'systemPrompt': systemPrompt,
       'serviceProviderId': _selectedProviderId,
       'apiKey': apiKey,
       'temperature': 0.7,

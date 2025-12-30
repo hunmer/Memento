@@ -110,9 +110,9 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
     });
   }
 
-  /// 显示编辑对话框
-  Future<void> _showEditDialog({PromptPreset? preset}) async {
-    await showPresetEditDialog(
+  /// 显示编辑页面
+  Future<void> _showEditPage({PromptPreset? preset}) async {
+    await showPresetEditPage(
       context: context,
       preset: preset,
       onSave: (newPreset, prompts) async {
@@ -179,7 +179,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
-          onPressed: () => _showEditDialog(),
+          onPressed: () => _showEditPage(),
         ),
       ],
       body: AnimatedBuilder(
@@ -213,7 +213,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () => _showEditDialog(),
+                    onPressed: () => _showEditPage(),
                     icon: const Icon(Icons.add),
                     label: Text('openai_addPreset'.tr),
                   ),
@@ -297,7 +297,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'edit') {
-                        await _showEditDialog(preset: preset);
+                        await _showEditPage(preset: preset);
                       } else if (value == 'delete') {
                         await _deletePreset(preset);
                       }
@@ -333,7 +333,7 @@ class _PromptPresetScreenState extends State<PromptPresetScreen> {
                           ),
                         ],
                   ),
-                  onTap: () => _showEditDialog(preset: preset),
+                  onTap: () => _showEditPage(preset: preset),
                 ),
               );
             },
