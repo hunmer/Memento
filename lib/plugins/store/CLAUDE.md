@@ -193,7 +193,7 @@ Stream<int> get pointsStream;
     'task_completed': 20,      // 完成任务
     'note_added': 10,          // 添加笔记
     'goods_added': 5,          // 添加物品
-    'onMessageSent': 1,        // 发送消息
+    'chat_message_sent': 1,        // 发送消息
     'onRecordAdded': 2,        // 添加记录
     'onDiaryAdded': 5,         // 添加日记
     'bill_added': 10,          // 添加账单
@@ -389,7 +389,7 @@ class PointAwardEvent {
     eventManager.subscribe('task_completed', _handleTaskCompleted);
     eventManager.subscribe('note_added', _handleNoteAdded);
     eventManager.subscribe('goods_item_added', _handleGoodsAdded);
-    eventManager.subscribe('onMessageSent', _handleMessageSent);
+    eventManager.subscribe(chat_message_sent, _handleMessageSent);
     eventManager.subscribe('onRecordAdded', _handleRecordAdded);
     eventManager.subscribe('diary_entry_created', _handleDiaryAdded);
     eventManager.subscribe('bill_added', _handleBillAdded);

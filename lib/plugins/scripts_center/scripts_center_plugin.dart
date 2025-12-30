@@ -619,8 +619,8 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       // 使用统一的保存方法
       await _plugin.scriptManager.saveScriptFromEditResult(result);
 
-      // 刷新列表
-      await _plugin.scriptManager.loadScripts();
+      // 重新设置触发器
+      await _plugin.reloadScripts();
       Toast.success('脚本创建成功！');
     } catch (e) {
       Toast.error('操作失败: $e');
@@ -696,8 +696,8 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
       // 使用统一的保存方法
       await _plugin.scriptManager.saveScriptFromEditResult(result);
 
-      // 刷新列表
-      await _plugin.scriptManager.loadScripts();
+      // 重新设置触发器
+      await _plugin.reloadScripts();
       Toast.success('脚本导入成功！');
     } catch (e) {
       Toast.error('导入失败: $e');

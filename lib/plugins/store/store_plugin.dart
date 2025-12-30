@@ -73,7 +73,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       'task_completed': 20, // 完成任务奖励
       'note_added': 10, // 添加笔记奖励
       'goods_added': 5, // 添加物品奖励
-      'onMessageSent': 1, // 发送消息奖励
+      'chat_message_sent': 1, // 发送消息奖励
       'onRecordAdded': 2, // 添加记录奖励
       'onDiaryAdded': 5, // 添加日记奖励
       'bill_added': 10, // 添加账单奖励
@@ -265,7 +265,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         return '添加笔记';
       case 'goods_added':
         return '添加物品';
-      case 'onMessageSent':
+      case 'chat_message_sent':
         return '发送消息';
       case 'onRecordAdded':
         return '添加记录';
@@ -892,7 +892,8 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
             dataLoader: (_) async {
               return controller.products.map((product) {
                 // 构建副标题：价格 + 库存
-                final subtitle = '${product.price} ${'store_points'.tr} · ${'store_stockLabel'.tr}: ${product.stock}';
+                final subtitle =
+                    '${product.price} ${'store_points'.tr} · ${'store_stockLabel'.tr}: ${product.stock}';
 
                 return SelectableItem(
                   id: product.id,
@@ -912,9 +913,9 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                 );
                 final productData = item.rawData as Map<String, dynamic>;
                 final description = productData['description'] as String? ?? '';
-                final matchesDescription = description
-                    .toLowerCase()
-                    .contains(lowerQuery);
+                final matchesDescription = description.toLowerCase().contains(
+                  lowerQuery,
+                );
                 return matchesTitle || matchesDescription;
               }).toList();
             },
@@ -943,17 +944,20 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
             dataLoader: (_) async {
               return controller.userItems.map((item) {
                 final productSnapshot = item.productSnapshot;
-                final productName = productSnapshot['name'] as String? ?? '未知物品';
+                final productName =
+                    productSnapshot['name'] as String? ?? '未知物品';
                 final remaining = item.remaining;
                 final expireDate = item.expireDate;
-                final remainingDays = expireDate.difference(DateTime.now()).inDays;
+                final remainingDays =
+                    expireDate.difference(DateTime.now()).inDays;
 
                 // 构建副标题：剩余次数 + 过期信息
                 String subtitle;
                 if (remainingDays < 0) {
                   subtitle = '$remaining ${'store_times'.tr} · 已过期';
                 } else if (remainingDays <= 7) {
-                  subtitle = '$remaining ${'store_times'.tr} · 剩余 $remainingDays 天';
+                  subtitle =
+                      '$remaining ${'store_times'.tr} · 剩余 $remainingDays 天';
                 } else {
                   subtitle = '$remaining ${'store_times'.tr}';
                 }
@@ -975,11 +979,13 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                   lowerQuery,
                 );
                 final itemData = item.rawData as Map<String, dynamic>;
-                final productSnapshot = itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
-                final description = productSnapshot['description'] as String? ?? '';
-                final matchesDescription = description
-                    .toLowerCase()
-                    .contains(lowerQuery);
+                final productSnapshot =
+                    itemData['productSnapshot'] as Map<String, dynamic>? ?? {};
+                final description =
+                    productSnapshot['description'] as String? ?? '';
+                final matchesDescription = description.toLowerCase().contains(
+                  lowerQuery,
+                );
                 return matchesTitle || matchesDescription;
               }).toList();
             },

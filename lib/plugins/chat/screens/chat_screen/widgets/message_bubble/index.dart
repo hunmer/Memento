@@ -70,10 +70,8 @@ class _MessageBubbleState extends State<MessageBubble> {
     _currentMessage = widget.message;
     _currentReplyToId = widget.message.replyToId;
     _loadReplyMessage();
-    _messageUpdateSubscriptionId = memento_event.EventManager.instance.subscribe(
-      'onMessageUpdated',
-      _handleMessageUpdated,
-    );
+    _messageUpdateSubscriptionId = memento_event.EventManager.instance
+        .subscribe('chat_message_updated', _handleMessageUpdated);
   }
 
   @override
@@ -91,7 +89,9 @@ class _MessageBubbleState extends State<MessageBubble> {
   @override
   void dispose() {
     // ignore: deprecated_member_use_from_same_package
-    memento_event.EventManager.instance.unsubscribeById(_messageUpdateSubscriptionId);
+    memento_event.EventManager.instance.unsubscribeById(
+      _messageUpdateSubscriptionId,
+    );
     super.dispose();
   }
 
@@ -350,22 +350,25 @@ class _MessageBubbleState extends State<MessageBubble> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: widget.isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outline,
+          color:
+              widget.isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
           width: 2,
         ),
-        color: widget.isSelected
-            ? Theme.of(context).colorScheme.primary
-            : Colors.transparent,
+        color:
+            widget.isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
       ),
-      child: widget.isSelected
-          ? Icon(
-              Icons.check,
-              size: 16,
-              color: Theme.of(context).colorScheme.onPrimary,
-            )
-          : null,
+      child:
+          widget.isSelected
+              ? Icon(
+                Icons.check,
+                size: 16,
+                color: Theme.of(context).colorScheme.onPrimary,
+              )
+              : null,
     );
   }
 }

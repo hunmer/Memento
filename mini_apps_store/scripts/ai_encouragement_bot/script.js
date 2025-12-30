@@ -23,6 +23,10 @@
 
     // 预设的事件解析
     const eventParsers = {
+      'chat_message_sent': () => {
+        const message = eventData.value.content;
+        return `用户发送了新消息：${message}`;
+      },
       'habit_checked': () => {
         const title = eventData.title || '某个习惯';
         return `用户完成了习惯打卡：${title}`;
