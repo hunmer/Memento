@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/day/sample_data.dart';
@@ -176,6 +178,7 @@ class DayController extends ChangeNotifier {
     }
     await _saveMemorialDays();
     notifyListeners();
+    _notifyEvent('added', memorialDay);
   }
 
   // 更新纪念日
@@ -186,14 +189,20 @@ class DayController extends ChangeNotifier {
       _sortMemorialDays();
       await _saveMemorialDays();
       notifyListeners();
+      _notifyEvent('updated', memorialDay);
     }
   }
 
   // 删除纪念日
   Future<void> deleteMemorialDay(String id) async {
-    _memorialDays.removeWhere((day) => day.id == id);
-    await _saveMemorialDays();
-    notifyListeners();
+    final index = _memorialDays.indexWhere((day) => day.id == id);
+    if (index != -1) {
+      final removedDay = _memorialDays[index];
+      _memorialDays.removeWhere((day) => day.id == id);
+      await _saveMemorialDays();
+      notifyListeners();
+      _notifyEvent('deleted', removedDay);
+    }
   }
 
   // 按当前排序模式排序
@@ -267,5 +276,16 @@ class DayController extends ChangeNotifier {
     // 保存排序模式到偏好设置
     await _saveViewPreference();
     notifyListeners();
+  }
+
+  // 触发事件
+  void _notifyEvent(String action, MemorialDay memorialDay) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'memorial_day_$action',
+      itemId: memorialDay.id,
+      title: memorialDay.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('memorial_day_$action', eventArgs);
   }
 }

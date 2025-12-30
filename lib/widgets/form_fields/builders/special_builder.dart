@@ -16,7 +16,11 @@ import '../plugin_data_selector_field.dart';
 import '../event_multi_select_field.dart';
 
 /// 构建标签字段
-Widget buildTagsField(FormFieldConfig config, GlobalKey fieldKey, BuildContext context) {
+Widget buildTagsField(
+  FormFieldConfig config,
+  GlobalKey fieldKey,
+  BuildContext context,
+) {
   final initialTags = config.initialTags ?? [];
   final extra = config.extra ?? {};
   final quickSelectTags = extra['quickSelectTags'] as List<String>?;
@@ -32,7 +36,8 @@ Widget buildTagsField(FormFieldConfig config, GlobalKey fieldKey, BuildContext c
       return TagsField(
         tags: tags,
         addButtonText: config.hintText ?? '添加标签',
-        primaryColor: (extra['primaryColor'] as Color?) ?? const Color(0xFF607AFB),
+        primaryColor:
+            (extra['primaryColor'] as Color?) ?? const Color(0xFF607AFB),
         quickSelectTags: quickSelectTags,
         onQuickSelectTag: (tag) {
           if (!tags.contains(tag)) {
@@ -44,13 +49,14 @@ Widget buildTagsField(FormFieldConfig config, GlobalKey fieldKey, BuildContext c
         onAddTag: () async {
           final result = await showDialog<String>(
             context: context,
-            builder: (context) => AlertDialog(
-              title: Text(config.labelText ?? '添加标签'),
-              content: TextField(
-                decoration: const InputDecoration(hintText: '标签名称'),
-                onSubmitted: (value) => Navigator.pop(context, value),
-              ),
-            ),
+            builder:
+                (context) => AlertDialog(
+                  title: Text(config.labelText ?? '添加标签'),
+                  content: TextField(
+                    decoration: const InputDecoration(hintText: '标签名称'),
+                    onSubmitted: (value) => Navigator.pop(context, value),
+                  ),
+                ),
           );
           if (result != null && result.isNotEmpty) {
             final newTags = [...tags, result];
@@ -148,10 +154,7 @@ class _IconTitleFieldWrapperState extends State<_IconTitleFieldWrapper> {
   }
 
   void _updateValue() {
-    widget.onValueChanged({
-      'title': _controller.text,
-      'icon': _currentIcon,
-    });
+    widget.onValueChanged({'title': _controller.text, 'icon': _currentIcon});
   }
 
   @override
@@ -162,10 +165,7 @@ class _IconTitleFieldWrapperState extends State<_IconTitleFieldWrapper> {
       hintText: widget.hintText,
       onChanged: (text) => _updateValue(),
       onIconTap: () async {
-        final selectedIcon = await showIconPickerDialog(
-          context,
-          _currentIcon,
-        );
+        final selectedIcon = await showIconPickerDialog(context, _currentIcon);
         if (selectedIcon != null) {
           setState(() {
             _currentIcon = selectedIcon;
@@ -185,12 +185,13 @@ Widget buildCategorySelectorField(FormFieldConfig config, GlobalKey fieldKey) {
     initialValue: config.initialValue as String?,
     enabled: config.enabled,
     onChanged: config.onChanged,
-    builder: (context, value, setValue) => CategorySelectorField(
-      categories: config.categories ?? [],
-      selectedCategory: value,
-      categoryIcons: config.categoryIcons ?? {},
-      onCategoryChanged: config.enabled ? setValue : (category) {},
-    ),
+    builder:
+        (context, value, setValue) => CategorySelectorField(
+          categories: config.categories ?? [],
+          selectedCategory: value,
+          categoryIcons: config.categoryIcons ?? {},
+          onCategoryChanged: config.enabled ? setValue : (category) {},
+        ),
   );
 }
 
@@ -231,12 +232,13 @@ Widget buildCustomFieldsField(FormFieldConfig config, GlobalKey fieldKey) {
     initialValue: List<CustomField>.from(config.initialCustomFields ?? []),
     enabled: config.enabled,
     onChanged: config.onChanged,
-    builder: (context, value, setValue) => CustomFieldsField(
-      fields: (value as List<dynamic>?)?.cast<CustomField>() ?? [],
-      labelText: config.labelText ?? '自定义字段',
-      addButtonText: config.hintText ?? '添加字段',
-      onFieldsChanged: (fields) => setValue(fields),
-    ),
+    builder:
+        (context, value, setValue) => CustomFieldsField(
+          fields: (value as List<dynamic>?)?.cast<CustomField>() ?? [],
+          labelText: config.labelText ?? '自定义字段',
+          addButtonText: config.hintText ?? '添加字段',
+          onFieldsChanged: (fields) => setValue(fields),
+        ),
   );
 }
 
@@ -284,7 +286,9 @@ Widget buildListAddField(FormFieldConfig config, GlobalKey fieldKey) {
 
       try {
         controller = TextEditingController(text: '');
-        controller.selection = TextSelection.fromPosition(TextPosition(offset: controller.text.length));
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: controller.text.length),
+        );
       } catch (e) {
         controller = TextEditingController(text: '');
       }
@@ -297,9 +301,10 @@ Widget buildListAddField(FormFieldConfig config, GlobalKey fieldKey) {
           if (controller.text.isNotEmpty) {
             // 如果提供了 onCreate 回调，使用它创建对象；否则直接添加字符串
             final onCreateRaw = extra['onCreate'];
-            final newItem = onCreateRaw != null
-                ? onCreateRaw(controller.text)
-                : controller.text;
+            final newItem =
+                onCreateRaw != null
+                    ? onCreateRaw(controller.text)
+                    : controller.text;
             final newItems = [...items, newItem];
             fieldState.didChange(newItems);
             config.onChanged?.call(newItems);
@@ -322,7 +327,10 @@ Widget buildListAddField(FormFieldConfig config, GlobalKey fieldKey) {
 }
 
 /// 构建插件数据选择器字段
-Widget buildPluginDataSelectorField(FormFieldConfig config, GlobalKey fieldKey) {
+Widget buildPluginDataSelectorField(
+  FormFieldConfig config,
+  GlobalKey fieldKey,
+) {
   final extra = config.extra ?? {};
   final pluginDataType = extra['pluginDataType'] as String?;
 
@@ -336,16 +344,17 @@ Widget buildPluginDataSelectorField(FormFieldConfig config, GlobalKey fieldKey) 
     initialValue: config.initialValue,
     enabled: config.enabled,
     onChanged: config.onChanged,
-    builder: (context, value, setValue) => PluginDataSelectorField(
-      name: config.name,
-      pluginDataType: pluginDataType,
-      dialogTitle: config.labelText,
-      initialValue: value,
-      prefixIcon: config.prefixIcon,
-      onChanged: setValue,
-      enabled: config.enabled,
+    builder:
+        (context, value, setValue) => PluginDataSelectorField(
+          name: config.name,
+          pluginDataType: pluginDataType,
+          dialogTitle: config.labelText,
+          initialValue: value,
+          prefixIcon: config.prefixIcon,
+          onChanged: setValue,
+          enabled: config.enabled,
           extra: extra,
-    ),
+        ),
   );
 }
 
@@ -357,30 +366,32 @@ Widget buildEventMultiSelectField(FormFieldConfig config, GlobalKey fieldKey) {
   // 解析事件选项
   List<EventOption> availableEvents = [];
   if (availableEventsRaw != null) {
-    availableEvents = availableEventsRaw.map((e) {
-      final map = e as Map<String, dynamic>;
-      return EventOption(
-        eventName: map['eventName'] as String,
-        category: map['category'] as String,
-        description: map['description'] as String,
-      );
-    }).toList();
+    availableEvents =
+        availableEventsRaw.map((e) {
+          final map = e as Map<String, dynamic>;
+          return EventOption(
+            eventName: map['eventName'] as String,
+            category: map['category'] as String,
+            description: map['description'] as String,
+          );
+        }).toList();
   }
 
   return WrappedFormField(
     key: fieldKey,
     name: config.name,
-    initialValue: config.initialValue as List<String>?,
+    initialValue: config.initialValue as List<dynamic>?,
     enabled: config.enabled,
     onChanged: config.onChanged,
-    builder: (context, value, setValue) => EventMultiSelectField(
-      name: config.name,
-      availableEvents: availableEvents,
-      dialogTitle: config.labelText,
-      initialValue: value,
-      prefixIcon: config.prefixIcon,
-      onChanged: (value) => setValue(value),
-      enabled: config.enabled,
-    ),
+    builder:
+        (context, value, setValue) => EventMultiSelectField(
+          name: config.name,
+          availableEvents: availableEvents,
+          dialogTitle: config.labelText,
+          initialValue: value,
+          prefixIcon: config.prefixIcon,
+          onChanged: (value) => setValue(value),
+          enabled: config.enabled,
+        ),
   );
 }

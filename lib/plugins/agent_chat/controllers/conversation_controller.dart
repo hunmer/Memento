@@ -1,6 +1,8 @@
 import 'package:Memento/plugins/agent_chat/data/sample_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
@@ -135,6 +137,9 @@ class ConversationController extends ChangeNotifier {
       await messageService.addMessage(message);
     }
 
+    // 触发会话创建事件
+    _notifyConversationEvent('added', conversation);
+
     return conversation;
   }
 
@@ -152,14 +157,24 @@ class ConversationController extends ChangeNotifier {
   /// 更新会话
   Future<void> updateConversation(Conversation conversation) async {
     await conversationService.updateConversation(conversation);
+    // 触发会话更新事件
+    _notifyConversationEvent('updated', conversation);
   }
 
   /// 删除会话
   Future<void> deleteConversation(String conversationId) async {
+    // 获取会话信息用于事件
+    final conversation = conversationService.getConversation(conversationId);
+
     if (_currentConversationId == conversationId) {
       _currentConversationId = null;
     }
     await conversationService.deleteConversation(conversationId);
+
+    // 触发会话删除事件
+    if (conversation != null) {
+      _notifyConversationEvent('deleted', conversation);
+    }
   }
 
   /// 切换置顶状态
@@ -246,6 +261,17 @@ class ConversationController extends ChangeNotifier {
       conversationService.refresh(),
       if (_currentConversationId != null) messageService.refresh(),
     ]);
+  }
+
+  /// 触发会话事件
+  void _notifyConversationEvent(String action, Conversation conversation) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'agent_chat_conversation_$action',
+      itemId: conversation.id,
+      title: conversation.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('agent_chat_conversation_$action', eventArgs);
   }
 
   @override

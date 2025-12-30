@@ -9,6 +9,7 @@ import 'package:Memento/utils/file_picker_helper.dart';
 import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
 import 'package:Memento/widgets/form_fields/config.dart';
 import 'package:Memento/widgets/form_fields/types.dart';
+import 'package:Memento/widgets/form_fields/event_multi_select_field.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:get/get.dart';
 
@@ -1274,7 +1275,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
   /// 显示添加触发器对话框
   Future<void> _showAddTriggerDialog() async {
-    String? selectedEvent;
+    List<String> selectedEvents = [];
     int delay = 0;
     final delayController = TextEditingController(text: '0');
 
@@ -1297,42 +1298,36 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue: selectedEvent,
-                          decoration: const InputDecoration(
-                            hintText: '请选择一个事件',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                          ),
-                          items:
-                              _availableEvents.map((event) {
-                                return DropdownMenuItem(
-                                  value: event.eventName,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(event.eventName),
-                                      Text(
-                                        '${event.category} - ${event.description}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[600],
-                                        ),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            final events = await showDialog<List<String>>(
+                              context: context,
+                              builder: (context) => EventSelectorDialog(
+                                availableEvents: _availableEvents
+                                    .map(
+                                      (e) => EventOption(
+                                        eventName: e.eventName,
+                                        category: e.category,
+                                        description: e.description,
                                       ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                          onChanged: (value) {
-                            setDialogState(() {
-                              selectedEvent = value;
-                            });
+                                    )
+                                    .toList(),
+                                initialSelectedEvents: selectedEvents,
+                                dialogTitle: '选择事件',
+                              ),
+                            );
+                            if (events != null) {
+                              setDialogState(() {
+                                selectedEvents = events;
+                              });
+                            }
                           },
+                          icon: const Icon(Icons.event),
+                          label: Text(
+                            selectedEvents.isEmpty
+                                ? '请选择事件（可多选）'
+                                : '已选择 ${selectedEvents.length} 个事件',
+                          ),
                         ),
                         const SizedBox(height: 16),
 
@@ -1360,7 +1355,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                     ),
                     ElevatedButton(
                       onPressed:
-                          selectedEvent == null
+                          selectedEvents.isEmpty
                               ? null
                               : () => Navigator.of(context).pop(true),
                       style: ElevatedButton.styleFrom(
@@ -1374,11 +1369,13 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
           ),
     );
 
-    if (result == true && selectedEvent != null) {
+    if (result == true && selectedEvents.isNotEmpty) {
       setState(() {
-        _triggers.add(
-          ScriptTrigger(event: selectedEvent!, delay: delay > 0 ? delay : null),
-        );
+        for (final event in selectedEvents) {
+          _triggers.add(
+            ScriptTrigger(event: event, delay: delay > 0 ? delay : null),
+          );
+        }
       });
     }
 

@@ -270,6 +270,9 @@ class NotesController {
         // 只保存单个笔记到文件
         await _saveNoteToFile(note);
 
+        // 触发更新事件
+        _notifyEvent('updated', note);
+
         // 同步小组件数据
         await _syncWidget();
       }

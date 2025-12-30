@@ -5,6 +5,8 @@ import 'package:Memento/plugins/nodes/models/notebook.dart';
 import 'package:Memento/plugins/nodes/sample_data.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class NodesController extends ChangeNotifier {
   final StorageManager _storageManager;
@@ -13,6 +15,30 @@ class NodesController extends ChangeNotifier {
 
   NodesController(this._storageManager) {
     _loadData();
+  }
+
+  // ========== 事件通知 ==========
+
+  /// 触发笔记本事件
+  void _notifyNotebookEvent(String action, Notebook notebook) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'nodes_notebook_$action',
+      itemId: notebook.id,
+      title: notebook.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('nodes_notebook_$action', eventArgs);
+  }
+
+  /// 触发节点事件
+  void _notifyNodeEvent(String action, Node node, String notebookId) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'nodes_node_$action',
+      itemId: node.id,
+      title: node.title,
+      action: action,
+    );
+    EventManager.instance.broadcast('nodes_node_$action', eventArgs);
   }
 
   List<Notebook> get notebooks => _notebooks;
@@ -117,6 +143,9 @@ class NodesController extends ChangeNotifier {
     notifyListeners();
     await _saveData();
 
+    // 触发笔记本添加事件
+    _notifyNotebookEvent('added', newNotebook);
+
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncNodes();
   }
@@ -131,12 +160,21 @@ class NodesController extends ChangeNotifier {
       notifyListeners();
       await _saveData();
 
+      // 触发笔记本更新事件
+      _notifyNotebookEvent('updated', notebook);
+
       // 同步小组件数据
       await PluginWidgetSyncHelper.instance.syncNodes();
     }
   }
 
   Future<void> deleteNotebook(String notebookId) async {
+    // 获取要删除的笔记本用于事件
+    final notebookToDelete = _notebooks.firstWhere(
+      (nb) => nb.id == notebookId,
+      orElse: () => Notebook(id: '', title: '', icon: Icons.book),
+    );
+
     _notebooks.removeWhere((notebook) => notebook.id == notebookId);
 
     if (_selectedNotebook?.id == notebookId) {
@@ -145,6 +183,11 @@ class NodesController extends ChangeNotifier {
 
     notifyListeners();
     await _saveData();
+
+    // 触发笔记本删除事件
+    if (notebookToDelete.id.isNotEmpty) {
+      _notifyNotebookEvent('deleted', notebookToDelete);
+    }
 
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncNodes();
@@ -206,6 +249,9 @@ class NodesController extends ChangeNotifier {
     notifyListeners();
     await _saveData();
     debugPrint('【NodesController】节点添加完成，已通知UI更新');
+
+    // 触发节点添加事件
+    _notifyNodeEvent('added', node, notebookId);
 
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncNodes();
@@ -272,6 +318,9 @@ class NodesController extends ChangeNotifier {
     notifyListeners();
     await _saveData();
 
+    // 触发节点更新事件
+    _notifyNodeEvent('updated', updatedNode, notebookId);
+
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncNodes();
   }
@@ -305,10 +354,18 @@ class NodesController extends ChangeNotifier {
     );
     if (notebookIndex == -1) return;
 
+    // 获取要删除的节点用于事件
+    final nodeToDelete = findNodeById(notebookId, nodeId);
+
     _deleteNodeFromList(_notebooks[notebookIndex].nodes, nodeId);
 
     notifyListeners();
     await _saveData();
+
+    // 触发节点删除事件
+    if (nodeToDelete != null) {
+      _notifyNodeEvent('deleted', nodeToDelete, notebookId);
+    }
 
     // 同步小组件数据
     await PluginWidgetSyncHelper.instance.syncNodes();

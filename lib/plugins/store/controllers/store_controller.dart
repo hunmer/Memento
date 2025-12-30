@@ -10,6 +10,8 @@ import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/store/models/points_log.dart';
 import 'package:Memento/plugins/store/sample_data.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 
 class StoreController with ChangeNotifier {
   List<Product> _products = [];
@@ -50,6 +52,42 @@ class StoreController with ChangeNotifier {
     _userItemsStreamController.close();
     _pointsStreamController.close();
     super.dispose();
+  }
+
+  // ========== 事件通知 ==========
+
+  /// 触发商品事件
+  void _notifyProductEvent(String action, Product product) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'store_product_$action',
+      itemId: product.id,
+      title: product.name,
+      action: action,
+    );
+    EventManager.instance.broadcast('store_product_$action', eventArgs);
+  }
+
+  /// 触发用户物品事件
+  void _notifyUserItemEvent(String action, UserItem userItem) {
+    final productName = userItem.productName;
+    final eventArgs = ItemEventArgs(
+      eventName: 'store_user_item_$action',
+      itemId: userItem.id,
+      title: productName,
+      action: action,
+    );
+    EventManager.instance.broadcast('store_user_item_$action', eventArgs);
+  }
+
+  /// 触发积分变化事件
+  void _notifyPointsEvent(int value, String reason) {
+    final eventArgs = ItemEventArgs(
+      eventName: 'store_points_changed',
+      itemId: '',  // 积分变化没有具体ID
+      title: reason,
+      action: 'changed',
+    );
+    EventManager.instance.broadcast('store_points_changed', eventArgs);
   }
 
   // 更新所有流
@@ -133,13 +171,19 @@ class StoreController with ChangeNotifier {
     _products.add(product);
     _updateStreams();
 
+    // 触发商品添加事件
+    _notifyProductEvent('added', product);
+
     // 同步小组件数据
     await _syncWidget();
   }
 
   // 从JSON添加商品
   Future<void> addProductFromJson(Map<String, dynamic> json) async {
-    _products.add(Product.fromJson(json));
+    final product = Product.fromJson(json);
+    _products.add(product);
+    // 触发商品添加事件
+    _notifyProductEvent('added', product);
   }
 
   // 兑换商品
@@ -196,6 +240,9 @@ class StoreController with ChangeNotifier {
     _updateStreams(); // 更新badge显示
     notifyListeners(); // 通知UI更新
 
+    // 触发用户物品添加事件
+    _notifyUserItemEvent('added', newItem);
+
     // 同步小组件数据
     await _syncWidget();
 
@@ -225,6 +272,10 @@ class StoreController with ChangeNotifier {
     await saveUserItems();
     _updateStreams(); // 更新badge显示
     notifyListeners(); // 通知UI更新
+
+    // 触发用户物品使用事件
+    _notifyUserItemEvent('used', item);
+
     return true;
   }
 
@@ -234,6 +285,9 @@ class StoreController with ChangeNotifier {
     await saveUserItems();
     _updateStreams();
     notifyListeners();
+
+    // 触发用户物品删除事件
+    _notifyUserItemEvent('deleted', item);
   }
 
   // 保存已使用物品
@@ -275,6 +329,9 @@ class StoreController with ChangeNotifier {
     await savePoints();
     _updateStreams();
     notifyListeners();
+
+    // 触发积分变化事件
+    _notifyPointsEvent(value, reason);
 
     // 同步小组件数据
     await _syncWidget();
@@ -330,6 +387,9 @@ class StoreController with ChangeNotifier {
     await saveProducts();
     await saveArchivedProducts();
     notifyListeners();
+
+    // 触发商品归档事件
+    _notifyProductEvent('archived', product);
   }
 
   // 恢复存档产品
@@ -341,6 +401,9 @@ class StoreController with ChangeNotifier {
     await saveProducts();
     await saveArchivedProducts();
     notifyListeners();
+
+    // 触发商品恢复事件
+    _notifyProductEvent('restored', product);
   }
 
   // 从存储加载数据
