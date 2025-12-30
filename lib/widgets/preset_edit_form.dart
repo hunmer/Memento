@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
 
 import '../plugins/openai/models/prompt_preset.dart';
@@ -44,7 +45,14 @@ class PresetEditForm extends StatelessWidget {
   Future<void> _handleSubmit(BuildContext context, Map<String, dynamic> values) async {
     final name = values['name'] as String;
     final description = values['description'] as String?;
-    final prompts = values['prompts'] as List<Prompt>;
+    final promptsRaw = values['prompts'];
+    final prompts =
+        (promptsRaw is List<Prompt>
+                ? promptsRaw
+                : promptsRaw is List<Map<String, dynamic>>
+                ? promptsRaw.map((e) => Prompt.fromJson(e)).toList()
+                : <Prompt>[])
+            as List<Prompt>;
     final tags = values['tags'] as List<String>? ?? [];
 
     // 验证至少有一个 prompt
@@ -78,122 +86,103 @@ class PresetEditForm extends StatelessWidget {
     );
 
     await onSave(newPreset, prompts);
+    if (context.mounted) {
+      Navigator.of(context).pop(newPreset);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isEditing = preset != null;
-    final initialPrompts = _getInitialPrompts();
+    final formKey = GlobalKey<FormBuilderState>();
 
-    return FormBuilderWrapper(
-      config: FormConfig(
-        showSubmitButton: false,
-        showResetButton: false,
-        fieldSpacing: 16,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        fields: [
-          // 名称字段
-          FormFieldConfig(
-            name: 'name',
-            type: FormFieldType.text,
-            labelText: 'openai_presetTitle'.tr,
-            hintText: 'openai_pleaseEnterTitle'.tr,
-            initialValue: preset?.name ?? '',
-            required: true,
-            validationMessage: 'openai_pleaseEnterTitle'.tr,
-          ),
-
-          // 描述字段
-          FormFieldConfig(
-            name: 'description',
-            type: FormFieldType.textArea,
-            labelText: 'openai_presetDescription'.tr,
-            hintText: 'openai_enterDescription'.tr,
-            initialValue: preset?.description ?? '',
-            extra: {
-              'minLines': 2,
-              'maxLines': 4,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          preset != null ? 'openai_editPreset'.tr : 'openai_addPreset'.tr,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              final state = formKey.currentState;
+              if (state != null && state.saveAndValidate()) {
+                _handleSubmit(context, state.value);
+              }
             },
-          ),
-
-          // Prompt 编辑器
-          FormFieldConfig(
-            name: 'prompts',
-            type: FormFieldType.promptEditor,
-            initialValue: initialPrompts,
-            extra: {
-              'labelText': 'openai_promptContent'.tr,
-            },
-          ),
-
-          // 标签字段
-          FormFieldConfig(
-            name: 'tags',
-            type: FormFieldType.tags,
-            initialValue: preset?.tags ?? [],
-            initialTags: preset?.tags ?? [],
-            extra: {
-              'addButtonText': 'openai_addTag'.tr,
-            },
+            child: Text(isEditing ? 'openai_update'.tr : 'openai_save'.tr),
           ),
         ],
-        onSubmit: (values) => _handleSubmit(context, values),
       ),
-      buttonBuilder: (context, onSubmit, onReset) {
-        return Row(
-          children: [
-            if (onCancel != null) ...[
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onCancel,
-                  child: Text('openai_cancel'.tr),
-                ),
-              ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              flex: 2,
-              child: ElevatedButton(
-                onPressed: () => onSubmit(),
-                child: Text(isEditing ? 'openai_update'.tr : 'openai_save'.tr),
-              ),
+      body: FormBuilderWrapper(
+        formKey: formKey,
+        config: FormConfig(
+          showSubmitButton: false,
+          showResetButton: false,
+          fieldSpacing: 16,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          fields: [
+            // 名称字段
+            FormFieldConfig(
+              name: 'name',
+              type: FormFieldType.text,
+              labelText: 'openai_presetTitle'.tr,
+              hintText: 'openai_pleaseEnterTitle'.tr,
+              initialValue: preset?.name ?? '',
+              required: true,
+              validationMessage: 'openai_pleaseEnterTitle'.tr,
+            ),
+
+            // 描述字段
+            FormFieldConfig(
+              name: 'description',
+              type: FormFieldType.textArea,
+              labelText: 'openai_presetDescription'.tr,
+              hintText: 'openai_enterDescription'.tr,
+              initialValue: preset?.description ?? '',
+              extra: {'minLines': 2, 'maxLines': 4},
+            ),
+
+            // Prompt 编辑器
+            FormFieldConfig(
+              name: 'prompts',
+              type: FormFieldType.promptEditor,
+              initialValue: _getInitialPrompts(),
+              extra: {'labelText': 'openai_promptContent'.tr},
+            ),
+
+            // 标签字段
+            FormFieldConfig(
+              name: 'tags',
+              type: FormFieldType.tags,
+              initialValue: preset?.tags ?? [],
+              initialTags: preset?.tags ?? [],
+              extra: {'addButtonText': 'openai_addTag'.tr},
             ),
           ],
-        );
-      },
+          onSubmit: (values) => _handleSubmit(context, values),
+        ),
+        buttonBuilder: null,
+      ),
     );
   }
 }
 
-/// 显示预设编辑对话框
+/// 显示预设编辑页面
 ///
 /// 返回保存后的预设对象
-Future<PromptPreset?> showPresetEditDialog({
+Future<PromptPreset?> showPresetEditPage({
   required BuildContext context,
   PromptPreset? preset,
   required Future<void> Function(PromptPreset preset, List<Prompt> prompts) onSave,
 }) async {
-  return await showDialog<PromptPreset>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(
-        preset != null ? 'openai_editPreset'.tr : 'openai_addPreset'.tr,
-      ),
-      content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: PresetEditForm(
-          preset: preset,
-          onSave: (newPreset, prompts) async {
-            await onSave(newPreset, prompts);
-            if (context.mounted) {
-              Navigator.of(context).pop(newPreset);
-            }
-          },
-          onCancel: () => Navigator.of(context).pop(),
-        ),
-      ),
-      actions: const [],
+  return await Navigator.of(context).push<PromptPreset>(
+    MaterialPageRoute(
+      builder:
+          (context) => PresetEditForm(
+            preset: preset,
+            onSave: onSave,
+            onCancel: () => Navigator.of(context).pop(),
+          ),
     ),
   );
 }

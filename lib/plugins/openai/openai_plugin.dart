@@ -772,8 +772,8 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
     super.dispose();
   }
 
-  void _showPresetEditDialog() async {
-    await showPresetEditDialog(
+  void _showPresetEditPage() async {
+    await showPresetEditPage(
       context: context,
       onSave: (preset, prompts) async {
         final service = PromptPresetService();
@@ -781,6 +781,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
 
         if (mounted) {
           Toast.success('openai_presetSaved'.tr);
+          setState(() {});
         }
       },
     );
@@ -797,7 +798,7 @@ class _OpenAIMainViewState extends State<OpenAIMainView>
             return AgentEditScreen();
           });
         } else {
-          _showPresetEditDialog();
+          _showPresetEditPage();
         }
       },
       backgroundColor: Colors.deepOrange,

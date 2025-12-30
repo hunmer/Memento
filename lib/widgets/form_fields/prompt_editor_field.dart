@@ -41,9 +41,11 @@ class _PromptEditorFieldState extends State<PromptEditorField> {
 
   /// 将 List dynamic 转换为 List Prompt
   List<Prompt> _parsePrompts(List<dynamic>? values) {
-    return (values ?? [])
-        .map((e) => Prompt.fromJson(e as Map<String, dynamic>))
-        .toList();
+    return (values ?? []).map((e) {
+      if (e is Prompt) return e;
+      if (e is Map<String, dynamic>) return Prompt.fromJson(e);
+      return Prompt(type: 'user', content: e.toString());
+    }).toList();
   }
 
   @override

@@ -54,7 +54,7 @@ class AIAgent {
     required this.id,
     required this.name,
     required this.description,
-    required this.systemPrompt,
+    this.systemPrompt = '', // 保留字段用于兼容
     required this.tags,
     required this.serviceProviderId,
     required this.baseUrl,

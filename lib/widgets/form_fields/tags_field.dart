@@ -58,59 +58,72 @@ class TagsField extends StatelessWidget {
               color: theme.colorScheme.outline.withOpacity(0.2),
             ),
           ),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ...tags.map((tag) => _buildTagChip(tag, theme)),
-              InkWell(
-                onTap: onAddTag,
-                borderRadius: BorderRadius.circular(4),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add_circle_outline, color: theme.colorScheme.primary, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        addButtonText,
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
+              // 已选标签区域
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  ...tags.map((tag) => _buildTagChip(tag, theme)),
+                  InkWell(
+                    onTap: onAddTag,
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 4,
                       ),
-                    ],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add_circle_outline,
+                            color: theme.colorScheme.primary,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            addButtonText,
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              // 快捷选择标签区域
+              if (quickSelectTags != null && quickSelectTags!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  '最近使用',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children:
+                      quickSelectTags!
+                          .where((tag) => !tags.contains(tag)) // 过滤已选标签
+                          .map((tag) => _buildQuickSelectChip(tag, theme))
+                          .toList(),
+                ),
+              ],
             ],
           ),
-        ),
-
-        // 快捷选择标签区域
-        if (quickSelectTags != null && quickSelectTags!.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            '最近使用',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: quickSelectTags!
-                .where((tag) => !tags.contains(tag)) // 过滤已选标签
-                .map((tag) => _buildQuickSelectChip(tag, theme))
-                .toList(),
-          ),
-        ],
+        )
       ],
     );
   }
