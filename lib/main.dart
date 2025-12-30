@@ -9,6 +9,7 @@ import 'package:Memento/l10n/unified_translations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
 import 'package:flutter/material.dart';
 import 'core/services/plugin_widget_sync_helper.dart';
@@ -209,7 +210,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   data: MediaQuery.of(
                     context,
                   ).copyWith(textScaler: const TextScaler.linear(1.0)),
-                  child: child!,
+                  child: StyledToast(
+                    child: child!,
+                  ),
                 );
               },
               initialRoute: AppRoutes.initialRoute,

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'platform/mobile_js_engine.dart';
 import 'package:Memento/widgets/picker/location_picker.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// JavaScript Bridge UI 处理器
 /// 提供默认的 Toast/Alert/Dialog 实现
@@ -22,83 +23,17 @@ class JSUIHandlers {
   }
 
   /// Toast 处理器
-  void _handleToast(String message, String duration, String gravity) {
+  void _handleToast(String message, String duration, String gravity, String type) {
+    // 使用新的 toast_service.dart API
     final durationMs = _parseDuration(duration);
-    final alignment = _parseGravity(gravity);
+    final toastGravity = _parseToastGravity(gravity);
+    final toastType = _parseToastType(type);
 
-    // 使用 Overlay 实现真正的 Toast（支持任意位置）
-    final overlay = Overlay.of(context);
-    late OverlayEntry overlayEntry;
-
-    overlayEntry = OverlayEntry(
-      builder: (context) {
-        // 根据位置选择不同的布局策略
-        if (alignment == Alignment.center) {
-          // 中间：使用 Positioned.fill + Center
-          return Positioned.fill(
-            child: Center(
-              child: _buildToastContent(message),
-            ),
-          );
-        } else if (alignment == Alignment.topCenter) {
-          // 顶部：距离顶部 50px
-          return Positioned(
-            top: 50,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: alignment,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _buildToastContent(message),
-              ),
-            ),
-          );
-        } else {
-          // 底部：距离底部 50px
-          return Positioned(
-            bottom: 50,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: alignment,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _buildToastContent(message),
-              ),
-            ),
-          );
-        }
-      },
-    );
-
-    overlay.insert(overlayEntry);
-
-    // 自动移除
-    Future.delayed(Duration(milliseconds: durationMs), () {
-      overlayEntry.remove();
-    });
-  }
-
-  /// 构建 Toast 内容
-  Widget _buildToastContent(String message) {
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.black87,
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
+    Toast.show(
+      message,
+      duration: Duration(milliseconds: durationMs),
+      gravity: toastGravity,
+      type: toastType,
     );
   }
 
@@ -188,16 +123,33 @@ class JSUIHandlers {
     }
   }
 
-  /// 解析 gravity 参数
-  Alignment _parseGravity(String gravity) {
+  /// 解析 gravity 参数，返回 ToastGravity
+  ToastGravity _parseToastGravity(String gravity) {
     switch (gravity.toLowerCase()) {
       case 'top':
-        return Alignment.topCenter;
+        return ToastGravity.TOP;
       case 'center':
-        return Alignment.center;
+        return ToastGravity.CENTER;
       case 'bottom':
       default:
-        return Alignment.bottomCenter;
+        return ToastGravity.BOTTOM;
+    }
+  }
+
+  /// 解析 type 参数，返回 ToastType
+  ToastType _parseToastType(String type) {
+    switch (type.toLowerCase()) {
+      case 'success':
+        return ToastType.success;
+      case 'error':
+        return ToastType.error;
+      case 'warning':
+        return ToastType.warning;
+      case 'info':
+        return ToastType.info;
+      case 'normal':
+      default:
+        return ToastType.normal;
     }
   }
 

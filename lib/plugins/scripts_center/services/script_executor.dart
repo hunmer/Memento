@@ -5,8 +5,6 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/core/plugin_base.dart';
-import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/scripts_center/models/script_execution_result.dart';
 import 'script_manager.dart';
 
@@ -95,7 +93,6 @@ class ScriptExecutor {
       'runScript': _handleRunScript,
       'getConfig': _handleGetConfig,
       'setConfig': _handleSetConfig,
-      'showToast': _handleShowToast,
       'log': _handleLog,
       'emit': _handleEmit,
     };
@@ -210,42 +207,6 @@ class ScriptExecutor {
     } catch (e) {
       return {'error': e.toString()};
     }
-  }
-
-  /// 处理显示 Toast
-  ///
-  /// 支持两种调用方式：
-  /// 1. showToast({message: 'xxx', type: 'success'}) - 对象参数
-  /// 2. showToast('xxx') - 单个位置参数（默认类型）
-  /// 3. showToast('xxx', 'success') - 两个位置参数
-  void _handleShowToast(Map<String, dynamic> params) {
-    final message =
-        (params['message'] as String?) ??
-        (params['_value'] as String?) ??
-        (params['_pos0'] as String?);
-    final type =
-        (params['type'] as String?) ?? (params['_pos1'] as String?) ?? 'normal';
-
-    if (message == null || message.isEmpty) {
-      return;
-    }
-
-    ToastType toastType = ToastType.normal;
-    switch (type) {
-      case 'success':
-        toastType = ToastType.success;
-        break;
-      case 'error':
-        toastType = ToastType.error;
-        break;
-      case 'warning':
-        toastType = ToastType.warning;
-        break;
-      case 'info':
-        toastType = ToastType.info;
-        break;
-    }
-    Toast.show(message, type: toastType);
   }
 
   /// 处理日志输出

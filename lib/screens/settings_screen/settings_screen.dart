@@ -553,6 +553,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.notifications_active),
+            title: const Text('Toast 测试'),
+            subtitle: const Text('测试 Toast 显示、动画和自定义 Widget'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/toast_test');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.account_tree),
             title: const Text('数据选择器测试'),
             subtitle: const Text('测试插件数据选择器系统'),

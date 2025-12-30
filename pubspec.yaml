@@ -66,6 +66,7 @@ dependencies:
   crop_your_image: ^2.0.0
   fl_chart: ^0.66.2
   package_info_plus: ^9.0.0
+  flutter_styled_toast: ^2.3.0
   smooth_sheets: ^0.15.0
   lottie: ^3.3.2
   infinite_carousel: ^1.1.1

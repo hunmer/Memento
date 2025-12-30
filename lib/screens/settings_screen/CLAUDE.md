@@ -324,7 +324,6 @@ Future<void> checkAndRequestPermissions() async {
 - `file_picker`: 文件选择器
 - `archive`: ZIP 压缩/解压
 - `dio`: HTTP 下载
-- `restart_app`: 应用重启
 
 ---
 
