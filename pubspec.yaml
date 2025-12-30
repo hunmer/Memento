@@ -96,6 +96,7 @@ dependencies:
   adaptive_theme: ^3.7.0
   flutter_js: ^0.8.1
   flutter_image_compress: ^2.3.0
+  extended_tabs: ^5.0.0
   json_dynamic_widget: ^12.0.0
   flutter_markdown: ^0.7.4  # For agent_chat plugin Markdown rendering
   flutter_tts: ^3.8.0  # Text-to-Speech for TTS plugin

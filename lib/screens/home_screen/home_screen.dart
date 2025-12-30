@@ -12,8 +12,10 @@ import 'package:Memento/screens/home_screen/models/layout_config.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:extended_tabs/extended_tabs.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
@@ -40,7 +42,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with RouteAware {
+class _HomeScreenState extends State<HomeScreen>
+    with RouteAware, SingleTickerProviderStateMixin {
   final HomeLayoutManager _layoutManager = HomeLayoutManager();
   bool _isLoading = true;
 
@@ -66,8 +69,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
   // 所有保存的布局列表
   List<LayoutConfig> _savedLayouts = [];
 
-  // PageView 控制器
+  // PageView 控制器（保留以备后用）
   PageController? _pageController;
+
+  // TabBarView 控制器
+  TabController? _tabController;
 
   // 当前页索引
   int _currentPageIndex = 0;
@@ -143,6 +149,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
     _layoutManager.removeListener(_onLayoutChanged);
     AppStartupState.instance.removeListener(_onStartupStateChanged);
     _pageController?.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -217,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
       if (mounted) {
         setState(() {
           _savedLayouts = layouts;
-          // 初始化 PageController
+          // 初始化 PageController 和 TabController
           if (layouts.isNotEmpty && currentConfig != null) {
             // 找到当前活动布局的索引
             _currentPageIndex = layouts.indexWhere(
@@ -227,6 +234,18 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               _currentPageIndex = 0;
             }
             _pageController = PageController(initialPage: _currentPageIndex);
+            // 初始化 TabController
+            if (_tabController == null) {
+              _tabController = TabController(
+                length: layouts.length,
+                vsync: this,
+                initialIndex: _currentPageIndex,
+              );
+              // 监听索引变化（捕获滑动切换）
+              _tabController!.addListener(_onTabControllerChanged);
+            } else {
+              _tabController!.animateTo(_currentPageIndex);
+            }
           }
         });
       }
@@ -1409,96 +1428,31 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
               ? const Center(child: CircularProgressIndicator())
               : _savedLayouts.isEmpty
               ? _buildHomeContent()
-              : Stack(
-                children: [
-                  // 使用 ScrollConfiguration 让桌面端支持鼠标拖拽
-                  ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      dragDevices: {
-                        PointerDeviceKind.touch,
-                        PointerDeviceKind.mouse,
-                        PointerDeviceKind.stylus,
-                        PointerDeviceKind.trackpad,
-                      },
-                    ),
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _savedLayouts.length,
-                      onPageChanged: _onPageChanged,
-                      itemBuilder: (context, index) {
-                        // 使用当前布局ID作为key，确保只在布局切换时触发动画
-                        final layoutId =
-                            index < _savedLayouts.length
-                                ? _savedLayouts[index].id
-                                : 'default';
-
-                        // 使用 AnimatedSwitcher 为小组件添加淡入淡出动画
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          switchInCurve: Curves.easeIn,
-                          switchOutCurve: Curves.easeOut,
-                          child: _buildHomeContent(key: ValueKey(layoutId)),
-                        );
-                      },
-                    ),
-                  ),
-                    // 底部圆点指示器
-                    if (_savedLayouts.length > 1)
-                      Positioned(
-                        bottom: 16,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(
-                                _savedLayouts.length,
-                                (index) => GestureDetector(
-                                  onTap: () {
-                                    _pageController?.animateToPage(
-                                      index,
-                                      duration: const Duration(milliseconds: 300),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                                    width: index == _currentPageIndex ? 24 : 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: index == _currentPageIndex
-                                          ? Theme.of(context).colorScheme.primary
-                                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                : Positioned.fill(
+                  child: Column(
+                    children: [
+                      // 顶部 TabBar（可滑动切换页面）
+                      _buildTabBar(),
+                      // 页面内容（ExtendedTabBarView 支持缓存）
+                      Expanded(
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: _handleScrollNotification,
+                          child: ExtendedTabBarView(
+                            controller: _tabController,
+                            cacheExtent: 1, // 缓存左右各1页
+                            children:
+                                _savedLayouts.map((layout) {
+                                  return _buildTabPage(layout.id);
+                                }).toList(),
                           ),
                         ),
                       ),
-                ],
-              ),
-        ],
-      ),
-    ),
+                    ],
+                  ),
+                ),
+          ],
+        ),
+      )
     );
   }
 
@@ -1569,6 +1523,176 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware {
         },
       ),
     );
+  }
+
+  /// 构建 TabBar
+  Widget _buildTabBar() {
+    return ExtendedTabBar(
+      controller: _tabController,
+      isScrollable: true,
+      indicatorSize: TabBarIndicatorSize.tab,
+      onTap: (index) {
+        _onPageChanged(index);
+      },
+      tabs:
+          _savedLayouts.map((layout) {
+            return Tab(text: layout.name.isEmpty ? '默认' : layout.name);
+          }).toList(),
+    );
+  }
+
+  /// 构建单个 Tab 页面（使用布局ID作为key确保独立重建）
+  Widget _buildTabPage(String layoutId) {
+    // 获取当前布局对应的 items
+    final items = _getItemsForLayout(layoutId);
+    return _buildHomeContentForItems(
+      items: items,
+      key: ValueKey('page_$layoutId'),
+    );
+  }
+
+  /// 获取指定布局对应的 items
+  List<HomeItem> _getItemsForLayout(String layoutId) {
+    // 如果是当前激活的布局，返回 layoutManager 的 items
+    if (_currentPageIndex < _savedLayouts.length &&
+        _savedLayouts[_currentPageIndex].id == layoutId) {
+      return _layoutManager.items;
+    }
+
+    // 否则返回空列表（未激活时显示占位）
+    return [];
+  }
+
+  /// 为指定 items 构建主页内容
+  Widget _buildHomeContentForItems({
+    required List<HomeItem> items,
+    Key? key,
+  }) {
+    return Opacity(
+      key: key,
+      opacity: _globalWidgetOpacity,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // 空列表显示骨架屏占位
+          if (items.isEmpty) {
+            return _buildSkeletonPlaceholder();
+          }
+
+          final isCenter = _layoutManager.gridAlignment == 'center';
+          final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+
+          return Padding(
+            padding: EdgeInsets.only(
+              top:
+                  !isCenter && _currentBackgroundPath != null
+                      ? MediaQuery.of(context).padding.top
+                      : 0,
+            ),
+            child: HomeGrid(
+              items: items,
+              crossAxisCount: _layoutManager.gridCrossAxisCount,
+              isEditMode: _isEditMode,
+              isBatchMode: _isBatchMode,
+              selectedItemIds: _selectedItemIds,
+              alignment: alignment,
+              onReorder: (oldIndex, newIndex) {
+                _layoutManager.reorder(oldIndex, newIndex);
+              },
+              onAddToFolder: (itemId, folderId) {
+                _layoutManager.moveToFolder(itemId, folderId);
+                Toast.success('已添加到文件夹');
+              },
+              onItemTap: _isBatchMode
+                  ? (item) => _toggleItemSelection(item.id)
+                  : null,
+              onItemLongPress: _handleCardLongPress,
+              onQuickCreateLayout: _createQuickLayout,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// 构建骨架屏占位
+  Widget _buildSkeletonPlaceholder() {
+    final crossAxisCount = _layoutManager.gridCrossAxisCount;
+    final isCenter = _layoutManager.gridAlignment == 'center';
+    final placeholderCount = (crossAxisCount * 3).clamp(4, 12);
+
+    return Padding(
+      padding: EdgeInsets.only(
+        top:
+            !isCenter && _currentBackgroundPath != null
+                ? kToolbarHeight + 8
+                : 0,
+      ),
+      child: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1,
+        ),
+        itemCount: placeholderCount,
+        itemBuilder: (context, index) {
+          return _buildSkeletonCard();
+        },
+      ),
+    );
+  }
+
+  /// 构建单个骨架卡片
+  Widget _buildSkeletonCard() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        color: Colors.grey.shade300,
+      ),
+    );
+  }
+
+  /// 处理滚动通知（捕获滑动切换页面）
+  bool _handleScrollNotification(ScrollNotification notification) {
+    // 用户滚动结束（手指释放后）
+    if (notification is UserScrollNotification) {
+      if (notification.direction == ScrollDirection.forward ||
+          notification.direction == ScrollDirection.reverse) {
+        // 滚动方向改变时，更新当前页面索引
+        final context = notification.context;
+        if (context != null) {
+          // 获取 ExtendedTabBarView 的 PageController
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox != null) {
+            final page = _tabController?.index ?? 0;
+            if (page != _currentPageIndex) {
+              _onPageChanged(page);
+            }
+          }
+        }
+      }
+    }
+    // 滚动结束且已达到目标页面
+    if (notification is ScrollEndNotification) {
+      if (_tabController != null) {
+        final page = _tabController!.index;
+        if (page != _currentPageIndex) {
+          _onPageChanged(page);
+        }
+      }
+    }
+    return false;
+  }
+
+  /// TabController 索引变化监听（捕获点击 Tab 切换）
+  void _onTabControllerChanged() {
+    // 只处理点击 Tab 的情况（indexIsChanging 变化）
+    if (_tabController != null &&
+        !_tabController!.indexIsChanging &&
+        _tabController!.index != _currentPageIndex) {
+      _onPageChanged(_tabController!.index);
+    }
   }
 
   /// 页面切换回调
