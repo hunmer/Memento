@@ -76,14 +76,15 @@ class MessageInputState {
         if (this.metadata != null) {
           metadata.addAll(this.metadata!);
         }
-        
+
         // 添加智能体信息（如果元数据中没有）
         if (selectedAgents.isNotEmpty && !metadata.containsKey('agents')) {
           metadata['agents'] = selectedAgents.map((agent) => agent).toList();
         }
-        
+
         // 确保上下文数量存在（如果元数据中没有）
-        if (selectedAgents.isNotEmpty && !metadata.containsKey('contextCount')) {
+        if (selectedAgents.isNotEmpty &&
+            !metadata.containsKey('contextCount')) {
           metadata['contextCount'] = 20; // 默认上下文数量
         }
         // 创建用户对象
@@ -115,13 +116,12 @@ class MessageInputState {
         if (onClearFile != null) {
           onClearFile!();
         }
-        
+
         // 广播消息事件
         memento_event.EventManager.instance.broadcast(
-          'onMessageSent',
+          'chat_message_sent',
           memento_event.Value<Message>(message),
         );
-        
       }
     }
   }

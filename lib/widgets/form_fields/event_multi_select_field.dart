@@ -4,11 +4,7 @@ import 'package:Memento/widgets/form_fields/form_field_wrapper.dart';
 /// 所有可用事件的默认列表
 const List<EventOption> kDefaultAvailableEvents = [
   // Todo 插件事件
-  EventOption(
-    eventName: 'task_added',
-    category: 'Todo',
-    description: '任务已创建',
-  ),
+  EventOption(eventName: 'task_added', category: 'Todo', description: '任务已创建'),
   EventOption(
     eventName: 'task_deleted',
     category: 'Todo',
@@ -48,11 +44,7 @@ const List<EventOption> kDefaultAvailableEvents = [
   ),
 
   // Notes 插件事件
-  EventOption(
-    eventName: 'note_added',
-    category: 'Notes',
-    description: '笔记已创建',
-  ),
+  EventOption(eventName: 'note_added', category: 'Notes', description: '笔记已创建'),
   EventOption(
     eventName: 'note_updated',
     category: 'Notes',
@@ -89,11 +81,7 @@ const List<EventOption> kDefaultAvailableEvents = [
   ),
 
   // Bill 插件事件
-  EventOption(
-    eventName: 'bill_added',
-    category: 'Bill',
-    description: '账单已添加',
-  ),
+  EventOption(eventName: 'bill_added', category: 'Bill', description: '账单已添加'),
   EventOption(
     eventName: 'bill_deleted',
     category: 'Bill',
@@ -243,7 +231,7 @@ const List<EventOption> kDefaultAvailableEvents = [
 
   // Chat 插件事件
   EventOption(
-    eventName: 'onMessageUpdated',
+    eventName: 'chat_message_updated',
     category: 'Chat',
     description: '消息已更新',
   ),
@@ -424,9 +412,10 @@ class _EventMultiSelectFieldState
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: Colors.deepPurple)
-            : const Icon(Icons.event, color: Colors.deepPurple),
+        leading:
+            widget.prefixIcon != null
+                ? Icon(widget.prefixIcon, color: Colors.deepPurple)
+                : const Icon(Icons.event, color: Colors.deepPurple),
         title: const Text('监听的事件'),
         subtitle: Text(_selectedEventsText),
         trailing: const Icon(Icons.chevron_right),
@@ -438,11 +427,12 @@ class _EventMultiSelectFieldState
   Future<void> _showEventSelector() async {
     final result = await showDialog<List<String>>(
       context: context,
-      builder: (context) => EventSelectorDialog(
-        availableEvents: widget.availableEvents,
-        initialSelectedEvents: _selectedEvents,
-        dialogTitle: widget.dialogTitle ?? '选择事件',
-      ),
+      builder:
+          (context) => EventSelectorDialog(
+            availableEvents: widget.availableEvents,
+            initialSelectedEvents: _selectedEvents,
+            dialogTitle: widget.dialogTitle ?? '选择事件',
+          ),
     );
 
     if (result != null) {
@@ -514,43 +504,46 @@ class EventSelectorDialogState extends State<EventSelectorDialog> {
         width: 400,
         height: 400,
         child: ListView(
-          children: groupedEvents.entries.map((entry) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 16,
-                  ),
-                  child: Text(
-                    entry.key,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+          children:
+              groupedEvents.entries.map((entry) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 16,
+                      ),
+                      child: Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           color: Colors.deepPurple,
                           fontWeight: FontWeight.bold,
                         ),
-                  ),
-                ),
-                ...entry.value.map((event) {
-                  final isSelected = _selectedEvents.contains(event.eventName);
-                  return CheckboxListTile(
-                    title: Text(event.eventName),
-                    subtitle: Text(event.description),
-                    value: isSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value == true) {
-                          _selectedEvents.add(event.eventName);
-                        } else {
-                          _selectedEvents.remove(event.eventName);
-                        }
-                      });
-                    },
-                  );
-                }),
-              ],
-            );
-          }).toList(),
+                      ),
+                    ),
+                    ...entry.value.map((event) {
+                      final isSelected = _selectedEvents.contains(
+                        event.eventName,
+                      );
+                      return CheckboxListTile(
+                        title: Text(event.eventName),
+                        subtitle: Text(event.description),
+                        value: isSelected,
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == true) {
+                              _selectedEvents.add(event.eventName);
+                            } else {
+                              _selectedEvents.remove(event.eventName);
+                            }
+                          });
+                        },
+                      );
+                    }),
+                  ],
+                );
+              }).toList(),
         ),
       ),
       actions: [
@@ -559,9 +552,7 @@ class EventSelectorDialogState extends State<EventSelectorDialog> {
           onPressed: _toggleSelectAll,
           icon: Icon(_hasSelection ? Icons.deselect : Icons.select_all),
           label: Text(_hasSelection ? '反选' : '全选'),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.deepPurple,
-          ),
+          style: TextButton.styleFrom(foregroundColor: Colors.deepPurple),
         ),
         const Spacer(),
         // 右侧取消/确定按钮

@@ -158,8 +158,8 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
     _EventOption('goods_item_deleted', '物品', '删除物品'),
 
     // 聊天插件事件
-    _EventOption('onMessageSent', '聊天', '发送消息'),
-    _EventOption('onMessageUpdated', '聊天', '更新消息'),
+    _EventOption('chat_message_sent', '聊天', '发送消息'),
+    _EventOption('chat_message_updated', '聊天', '更新消息'),
     _EventOption('UserEventNames.userAvatarUpdated', '聊天', '更新用户头像'),
 
     // 追踪器事件
@@ -241,7 +241,8 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
       // 解析 configFormFields
       if (widget.initialData!['configFormFields'] != null) {
         _configFormFields = _parseConfigFormFieldsFromJson(
-            widget.initialData!['configFormFields']);
+          widget.initialData!['configFormFields'],
+        );
       }
     } else if (widget.script != null) {
       // 编辑模式
@@ -909,10 +910,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                     ),
                     Text(
                       '开启后将在插件初始化时自动执行此脚本',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue[700],
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.blue[700]),
                     ),
                   ],
                 ),
@@ -965,94 +963,96 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
           // 触发器列表
           Expanded(
-            child: _triggers.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.bolt_outlined,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          '暂无触发条件',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
+            child:
+                _triggers.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.bolt_outlined,
+                            size: 64,
+                            color: Colors.grey[400],
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '点击上方按钮添加触发条件',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _triggers.length,
-                    itemBuilder: (context, index) {
-                      final trigger = _triggers[index];
-                      final eventOption = _availableEvents.firstWhere(
-                        (e) => e.eventName == trigger.event,
-                        orElse: () => _EventOption(
-                          trigger.event,
-                          '未知',
-                          trigger.event,
-                        ),
-                      );
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.deepPurple,
-                            child: Text(
-                              '${index + 1}',
-                              style: const TextStyle(color: Colors.white),
+                          const SizedBox(height: 16),
+                          Text(
+                            '暂无触发条件',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
                             ),
                           ),
-                          title: Text(eventOption.eventName),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'scripts_center_categoryLabel'.trParams({
-                                  'category': eventOption.category,
-                                }),
+                          const SizedBox(height: 8),
+                          Text(
+                            '点击上方按钮添加触发条件',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _triggers.length,
+                      itemBuilder: (context, index) {
+                        final trigger = _triggers[index];
+                        final eventOption = _availableEvents.firstWhere(
+                          (e) => e.eventName == trigger.event,
+                          orElse:
+                              () => _EventOption(
+                                trigger.event,
+                                '未知',
+                                trigger.event,
                               ),
-                              Text(
-                                'scripts_center_descriptionLabel'.trParams({
-                                  'description': eventOption.description,
-                                }),
+                        );
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: Colors.deepPurple,
+                              child: Text(
+                                '${index + 1}',
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              if (trigger.delay != null && trigger.delay! > 0)
+                            ),
+                            title: Text(eventOption.eventName),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  'scripts_center_delayLabel'.trParams({
-                                    'delay': trigger.delay!.toString(),
+                                  'scripts_center_categoryLabel'.trParams({
+                                    'category': eventOption.category,
                                   }),
                                 ),
-                            ],
+                                Text(
+                                  'scripts_center_descriptionLabel'.trParams({
+                                    'description': eventOption.description,
+                                  }),
+                                ),
+                                if (trigger.delay != null && trigger.delay! > 0)
+                                  Text(
+                                    'scripts_center_delayLabel'.trParams({
+                                      'delay': trigger.delay!.toString(),
+                                    }),
+                                  ),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _triggers.removeAt(index);
+                                });
+                              },
+                            ),
+                            isThreeLine: true,
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              setState(() {
-                                _triggers.removeAt(index);
-                              });
-                            },
-                          ),
-                          isThreeLine: true,
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
           ),
         ] else
           // 自动运行开启时的提示信息
@@ -1061,11 +1061,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.autorenew,
-                    size: 64,
-                    color: Colors.blue[400],
-                  ),
+                  Icon(Icons.autorenew, size: 64, color: Colors.blue[400]),
                   const SizedBox(height: 16),
                   Text(
                     '已启用自动运行',
@@ -1078,10 +1074,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                   const SizedBox(height: 8),
                   Text(
                     '此脚本将在插件初始化时自动执行',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -1275,9 +1268,14 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
   /// 显示添加触发器对话框
   Future<void> _showAddTriggerDialog() async {
-    List<String> selectedEvents = [];
-    int delay = 0;
-    final delayController = TextEditingController(text: '0');
+    // 初始化：从当前触发器中提取已有的事件
+    List<String> selectedEvents = _triggers.map((t) => t.event).toList();
+
+    // 获取第一个触发器的延迟作为默认值（如果有）
+    int delay = _triggers.isNotEmpty && _triggers.first.delay != null
+        ? _triggers.first.delay!
+        : 0;
+    final delayController = TextEditingController(text: delay.toString());
 
     final result = await showDialog<bool>(
       context: context,
@@ -1302,19 +1300,21 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                           onPressed: () async {
                             final events = await showDialog<List<String>>(
                               context: context,
-                              builder: (context) => EventSelectorDialog(
-                                availableEvents: _availableEvents
-                                    .map(
-                                      (e) => EventOption(
-                                        eventName: e.eventName,
-                                        category: e.category,
-                                        description: e.description,
-                                      ),
-                                    )
-                                    .toList(),
-                                initialSelectedEvents: selectedEvents,
-                                dialogTitle: '选择事件',
-                              ),
+                              builder:
+                                  (context) => EventSelectorDialog(
+                                    availableEvents:
+                                        _availableEvents
+                                            .map(
+                                              (e) => EventOption(
+                                                eventName: e.eventName,
+                                                category: e.category,
+                                                description: e.description,
+                                              ),
+                                            )
+                                            .toList(),
+                                    initialSelectedEvents: selectedEvents,
+                                    dialogTitle: '选择事件',
+                                  ),
                             );
                             if (events != null) {
                               setDialogState(() {
@@ -1371,6 +1371,8 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
 
     if (result == true && selectedEvents.isNotEmpty) {
       setState(() {
+        // 清空原有触发器，替换为新选择的触发器
+        _triggers.clear();
         for (final event in selectedEvents) {
           _triggers.add(
             ScriptTrigger(event: event, delay: delay > 0 ? delay : null),
@@ -1385,9 +1387,10 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   /// 构建配置标签页
   Widget _buildConfigTab() {
     // 优先使用导入的configFormFields，其次使用script的configFormFields
-    final configFormFields = _configFormFields.isNotEmpty
-        ? _configFormFields
-        : widget.script?.configFormFields ?? [];
+    final configFormFields =
+        _configFormFields.isNotEmpty
+            ? _configFormFields
+            : widget.script?.configFormFields ?? [];
 
     final hasConfigFormFields = configFormFields.isNotEmpty;
 
@@ -1437,9 +1440,10 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
   /// 获取配置表单字段
   List<FormFieldConfig> _getConfigFormFields() {
     // 优先使用导入的configFormFields，其次使用script的configFormFields
-    final fields = _configFormFields.isNotEmpty
-        ? _configFormFields
-        : widget.script?.configFormFields ?? [];
+    final fields =
+        _configFormFields.isNotEmpty
+            ? _configFormFields
+            : widget.script?.configFormFields ?? [];
 
     // 为需要可用事件列表的字段添加 extra 数据
     return fields.map((field) {
@@ -1548,7 +1552,6 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
     return _iconMap[iconName];
   }
 }
-
 
 /// 保持Tab存活的Wrapper
 class _KeepAliveTab extends StatefulWidget {

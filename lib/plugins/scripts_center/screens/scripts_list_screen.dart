@@ -10,6 +10,7 @@ import 'package:Memento/plugins/scripts_center/widgets/script_card.dart';
 import 'package:Memento/plugins/scripts_center/widgets/script_run_dialog.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'script_edit_screen.dart';
+import '../scripts_center_plugin.dart';
 
 /// 脚本列表界面
 ///
@@ -103,6 +104,9 @@ class _ScriptsListScreenState extends State<ScriptsListScreen> {
         result,
         existingScript: script,
       );
+
+      // 重新设置触发器
+      await ScriptsCenterPlugin.instance.reloadScripts();
 
       if (mounted) {
         Toast.success(

@@ -17,33 +17,32 @@ class PointAwardEvent {
   /// 初始化事件处理器
   void _initializeEventHandlers() {
     final eventManager = EventManager.instance;
-    
+
     // 监听活动添加事件
     eventManager.subscribe('activity_added', _handleActivityAdded);
-    
+
     // 监听签到完成事件
     eventManager.subscribe('checkin_completed', _handleCheckinCompleted);
-    
+
     // 监听任务完成事件
     eventManager.subscribe('task_completed', _handleTaskCompleted);
-    
+
     // 监听笔记添加事件
     eventManager.subscribe('note_added', _handleNoteAdded);
-    
+
     // 监听物品添加事件
     eventManager.subscribe('goods_item_added', _handleGoodsAdded);
-    
+
     // 监听消息发送事件
-    eventManager.subscribe('onMessageSent', _handleMessageSent);
-    
+    eventManager.subscribe('chat_message_sent', _handleMessageSent);
+
     // 监听记录添加事件
     eventManager.subscribe('onRecordAdded', _handleRecordAdded);
-    
+
     // 监听日记添加事件
     eventManager.subscribe('diary_entry_created', _handleDiaryAdded);
 
     eventManager.subscribe('bill_added', _handleBillAdded);
-
   }
 
   /// 处理活动添加事件
@@ -73,7 +72,7 @@ class PointAwardEvent {
 
   /// 处理消息发送事件
   Future<void> _handleMessageSent(EventArgs args) async {
-    await _awardPoints(_getPointsForEvent('onMessageSent'), '发送消息奖励');
+    await _awardPoints(_getPointsForEvent('chat_message_sent'), '发送消息奖励');
   }
 
   /// 处理记录添加事件
@@ -105,7 +104,7 @@ class PointAwardEvent {
     eventManager.unsubscribe('task_completed', _handleTaskCompleted);
     eventManager.unsubscribe('note_added', _handleNoteAdded);
     eventManager.unsubscribe('goods_item_added', _handleGoodsAdded);
-    eventManager.unsubscribe('onMessageSent', _handleMessageSent);
+    eventManager.unsubscribe('chat_message_sent', _handleMessageSent);
     eventManager.unsubscribe('onRecordAdded', _handleRecordAdded);
     eventManager.unsubscribe('diary_entry_created', _handleDiaryAdded);
     eventManager.unsubscribe('bill_added', _handleBillAdded);

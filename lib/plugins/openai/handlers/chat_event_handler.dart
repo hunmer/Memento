@@ -49,7 +49,7 @@ class ChatEventHandler {
 
   void initialize() {
     // 订阅聊天消息事件
-    eventManager.subscribe('onMessageSent', _handleChatMessage);
+    eventManager.subscribe('chat_message_sent', _handleChatMessage);
   }
 
   Future<void> _handleChatMessage(EventArgs args) async {
@@ -269,7 +269,7 @@ class ChatEventHandler {
 
                 // 通过事件系统广播消息更新事件
                 eventManager.broadcast(
-                  'onMessageUpdated',
+                  'chat_message_updated',
                   ValuesEventArgs(typingMessage, typingMessage.id),
                 );
               }
@@ -296,7 +296,7 @@ class ChatEventHandler {
 
             // 通过事件系统广播消息更新事件
             eventManager.broadcast(
-              'onMessageUpdated',
+              'chat_message_updated',
               ValuesEventArgs(typingMessage, typingMessage.id),
             );
           }
@@ -337,7 +337,7 @@ class ChatEventHandler {
 
             // 通过事件系统广播消息更新事件
             eventManager.broadcast(
-              'onMessageUpdated',
+              'chat_message_updated',
               ValuesEventArgs(typingMessage, typingMessage.id),
             );
 

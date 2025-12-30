@@ -54,9 +54,10 @@ class ChatDataService {
         _plugin.storage.createDirectory('chat/messages'),
       ]);
 
-      final channelIds = (sampleData['channels'] as List)
-          .map((channel) => channel['id'] as String)
-          .toList();
+      final channelIds =
+          (sampleData['channels'] as List)
+              .map((channel) => channel['id'] as String)
+              .toList();
       await _plugin.storage.write('chat/channels', {'channels': channelIds});
 
       for (var channelJson in sampleData['channels'] as List) {
@@ -71,7 +72,9 @@ class ChatDataService {
           await _plugin.storage.write('chat/messages/$channelId', {
             'messages': messages,
           });
-          debugPrint('Chat插件: 已加载频道 "${channelJson['name']}" 的 ${messages.length} 条消息');
+          debugPrint(
+            'Chat插件: 已加载频道 "${channelJson['name']}" 的 ${messages.length} 条消息',
+          );
         } else {
           await _plugin.storage.write('chat/messages/$channelId', {
             'messages': [],
@@ -102,16 +105,16 @@ class ChatDataService {
         'createdAt': DateTime.now().toIso8601String(),
         'lastActivity': DateTime.now().toIso8601String(),
         'messageCount': 0,
-        'unreadCount': 0
+        'unreadCount': 0,
       };
 
-      await _plugin.storage.write('chat/channels', {'channels': ['default']});
+      await _plugin.storage.write('chat/channels', {
+        'channels': ['default'],
+      });
       await _plugin.storage.write('chat/channel/default', {
         'channel': defaultChannel,
       });
-      await _plugin.storage.write('chat/messages/default', {
-        'messages': [],
-      });
+      await _plugin.storage.write('chat/messages/default', {'messages': []});
 
       debugPrint('Chat插件: 已创建默认频道');
     } catch (e) {
@@ -210,7 +213,9 @@ class ChatDataService {
           _plugin.storage.delete('chat/messages/${channel.id}'),
         ]);
       } catch (cleanupError) {
-        debugPrint('Error cleaning up after failed channel creation: $cleanupError');
+        debugPrint(
+          'Error cleaning up after failed channel creation: $cleanupError',
+        );
       }
       rethrow;
     }
@@ -451,8 +456,8 @@ class ChatDataService {
       ]);
 
       memento_event.EventManager.instance.broadcast(
-        'onMessageUpdated',
-        memento_event.Value<Message>(message, 'onMessageUpdated'),
+        'chat_message_updated',
+        memento_event.Value<Message>(message, 'chat_message_updated'),
       );
 
       _plugin.refresh();
@@ -527,8 +532,8 @@ class ChatDataService {
       }
 
       memento_event.EventManager.instance.broadcast(
-        'onMessageUpdated',
-        memento_event.Value<Message>(message, 'onMessageUpdated'),
+        'chat_message_updated',
+        memento_event.Value<Message>(message, 'chat_message_updated'),
       );
       _plugin.refresh();
       ChatWidgetService.updateWidget();

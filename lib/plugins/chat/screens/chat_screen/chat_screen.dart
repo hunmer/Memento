@@ -73,7 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // 添加监听器，当 ChatPlugin 发生变化时重新加载背景
     ChatPlugin.instance.addListener(_handleChatPluginUpdate);
     // 订阅消息更新事件
-    eventManager.subscribe('onMessageUpdated', _handleMessageUpdated);
+    eventManager.subscribe('chat_message_updated', _handleMessageUpdated);
     _loadBackgroundPath();
     _loadChannelDraft();
 
@@ -119,7 +119,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // 移除监听器
     ChatPlugin.instance.removeListener(_handleChatPluginUpdate);
     // 取消订阅消息更新事件
-    eventManager.unsubscribe('onMessageUpdated', _handleMessageUpdated);
+    eventManager.unsubscribe('chat_message_updated', _handleMessageUpdated);
     _controller.dispose();
     _filterState.dispose();
     // MessageOperations不需要dispose
