@@ -28,7 +28,8 @@ class ScriptStoreManager extends ChangeNotifier {
   List<ScriptStoreSource> _sources = [];
   ScriptStoreSource? _currentSource;
   List<ScriptStoreItem> _scripts = [];
-  Map<String, InstalledScript> _installedScripts = {}; // scriptId -> InstalledScript
+  Map<String, InstalledScript> _installedScripts =
+      {}; // scriptId -> InstalledScript
   bool _isLoading = false;
   String? _error;
 
@@ -83,7 +84,8 @@ class ScriptStoreManager extends ChangeNotifier {
       name: '网络仓库',
       url:
           'https://gitee.com/neysummer2000/memento/raw/master/online/scripts/scripts.json',
-      baseUrl: 'https://gitee.com/neysummer2000/memento/raw/master/online/scripts',
+      baseUrl:
+          'https://gitee.com/neysummer2000/memento/raw/master/online/scripts',
       isDefault: true,
       createdAt: DateTime.now(),
     );
@@ -219,8 +221,11 @@ class ScriptStoreManager extends ChangeNotifier {
       result =
           result.where((script) {
             return script.name.toLowerCase().contains(lowerQuery) ||
-                (script.description?.toLowerCase().contains(lowerQuery) ?? false) ||
-                script.tags.any((tag) => tag.toLowerCase().contains(lowerQuery));
+                (script.description?.toLowerCase().contains(lowerQuery) ??
+                    false) ||
+                script.tags.any(
+                  (tag) => tag.toLowerCase().contains(lowerQuery),
+                );
           }).toList();
     }
 
@@ -362,10 +367,14 @@ class ScriptStoreManager extends ChangeNotifier {
       if (data != null && data is List) {
         _installedScripts = {};
         for (var item in data) {
-          final installed = InstalledScript.fromJson(item as Map<String, dynamic>);
+          final installed = InstalledScript.fromJson(
+            item as Map<String, dynamic>,
+          );
           // 验证脚本是否真实存在
           final scriptsPath = await _scriptLoader.getScriptsDirectory();
-          final scriptDir = Directory(path.join(scriptsPath, installed.scriptId));
+          final scriptDir = Directory(
+            path.join(scriptsPath, installed.scriptId),
+          );
           if (await scriptDir.exists()) {
             _installedScripts[installed.scriptId] = installed;
           }

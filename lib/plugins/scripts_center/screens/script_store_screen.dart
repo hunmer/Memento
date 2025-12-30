@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/scripts_center/models/script_store_models.dart';
+import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/services/script_store_manager.dart';
 import 'package:Memento/plugins/scripts_center/services/script_download_manager.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
@@ -579,6 +580,7 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
   void _showScriptDetail(ScriptStoreItem script) {
     final scriptStoreManager = context.read<ScriptStoreManager>();
     final downloadManager = context.read<ScriptDownloadManager>();
+    final scriptManager = context.read<ScriptManager>();
 
     SmoothBottomSheet.show(
       context: context,
@@ -704,6 +706,7 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
                           child: ElevatedButton.icon(
                             onPressed: () async {
                               await scriptStoreManager.uninstallScript(script.id);
+                              await scriptManager.loadScripts();
                               Toast.success('scripts_center_uninstalled'.tr);
                             },
                             icon: const Icon(Icons.delete),
