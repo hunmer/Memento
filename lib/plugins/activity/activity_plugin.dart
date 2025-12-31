@@ -22,7 +22,7 @@ import 'services/activity_notification_service.dart';
 import 'models/activity_record.dart';
 import 'repositories/client_activity_repository.dart';
 import 'package:shared_models/shared_models.dart';
-import 'dart:io';
+import 'package:universal_platform/universal_platform.dart';
 
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   static ActivityPlugin? _instance;
@@ -364,7 +364,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 参数: params - {} (无需参数)
   Future<String> _jsEnableNotification(Map<String, dynamic> params) async {
     try {
-      if (!Platform.isAndroid) {
+      if (!UniversalPlatform.isAndroid) {
         return jsonEncode({'success': false, 'error': '仅支持Android平台'});
       }
 

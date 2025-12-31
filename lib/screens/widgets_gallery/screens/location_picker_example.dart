@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/picker/location_picker.dart';
 
 /// 位置选择器示例
@@ -84,7 +84,7 @@ class _LocationPickerExampleState extends State<LocationPickerExample> {
       context: context,
       builder:
           (context) => LocationPicker(
-            isMobile: Platform.isAndroid || Platform.isIOS,
+            isMobile: UniversalPlatform.isAndroid || UniversalPlatform.isIOS,
             onLocationSelected: (location) {
               setState(() {
                 selectedLocation = location;

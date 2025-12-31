@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       // 添加返回按钮
       leading:
-          (Platform.isAndroid || Platform.isIOS)
+          (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
               ? null
               : IconButton(
                 icon: const Icon(Icons.arrow_back),

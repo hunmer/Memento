@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -67,7 +67,7 @@ class _AccountListScreenState extends State<AccountListScreen> {
           ),
         ),
         leading:
-            (Platform.isAndroid || Platform.isIOS)
+            (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
                 ? null
                 : IconButton(
                   icon: Icon(

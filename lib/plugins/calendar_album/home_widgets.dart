@@ -13,7 +13,7 @@ import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
-import 'dart:io';
+import 'dart:io' show File;
 import 'dart:async';
 import 'calendar_album_plugin.dart';
 import 'package:infinite_carousel/infinite_carousel.dart';

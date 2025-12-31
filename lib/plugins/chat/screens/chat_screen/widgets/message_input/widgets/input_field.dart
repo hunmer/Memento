@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:io' show Platform;
+import 'package:universal_platform/universal_platform.dart';
 
 class InputField extends StatelessWidget {
   final TextEditingController controller;
@@ -27,7 +27,7 @@ class InputField extends StatelessWidget {
     return KeyboardListener(
       focusNode: keyboardListenerFocusNode,
       onKeyEvent:
-          Platform.isMacOS || Platform.isWindows || Platform.isLinux
+          UniversalPlatform.isMacOS || UniversalPlatform.isWindows || UniversalPlatform.isLinux
               ? onKeyEvent
               : null,
       child: ConstrainedBox(

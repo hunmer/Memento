@@ -1,5 +1,7 @@
-import 'dart:io';
+import 'dart:io'
+    show Platform, HttpServer, HttpRequest, File, HttpStatus, ContentType;
 import 'package:flutter/foundation.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:mime/mime.dart';
 
 /// 本地 HTTP 服务器
@@ -184,7 +186,7 @@ class LocalHttpServer {
     String path = fileUrl.substring('file://'.length);
 
     // Windows 路径处理：移除开头的 /
-    if (Platform.isWindows && path.startsWith('/')) {
+    if (UniversalPlatform.isWindows && path.startsWith('/')) {
       path = path.substring(1);
     }
 
@@ -214,7 +216,7 @@ class LocalHttpServer {
     String path = url.substring('file://'.length);
 
     // Windows 路径处理
-    if (Platform.isWindows && path.startsWith('/')) {
+    if (UniversalPlatform.isWindows && path.startsWith('/')) {
       path = path.substring(1);
     }
 

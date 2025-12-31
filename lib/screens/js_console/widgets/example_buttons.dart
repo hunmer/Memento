@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show Platform;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:provider/provider.dart';
 import 'package:Memento/screens/js_console/controllers/js_console_controller.dart';
 
@@ -11,7 +11,7 @@ class ExampleButtons extends StatelessWidget {
   /// 判断是否为桌面平台
   bool get isDesktop {
     if (kIsWeb) return false;
-    return Platform.isWindows || Platform.isMacOS || Platform.isLinux;
+    return UniversalPlatform.isWindows || UniversalPlatform.isMacOS || UniversalPlatform.isLinux;
   }
 
   @override

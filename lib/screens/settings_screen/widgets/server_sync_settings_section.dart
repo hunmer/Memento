@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/sync_client_service.dart';
@@ -66,19 +66,19 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
     String deviceName = 'Unknown Device';
 
     try {
-      if (Platform.isAndroid) {
+      if (UniversalPlatform.isAndroid) {
         final info = await deviceInfo.androidInfo;
         deviceName = '${info.brand} ${info.model}';
-      } else if (Platform.isIOS) {
+      } else if (UniversalPlatform.isIOS) {
         final info = await deviceInfo.iosInfo;
         deviceName = info.name;
-      } else if (Platform.isWindows) {
+      } else if (UniversalPlatform.isWindows) {
         final info = await deviceInfo.windowsInfo;
         deviceName = info.computerName;
-      } else if (Platform.isMacOS) {
+      } else if (UniversalPlatform.isMacOS) {
         final info = await deviceInfo.macOsInfo;
         deviceName = info.computerName;
-      } else if (Platform.isLinux) {
+      } else if (UniversalPlatform.isLinux) {
         final info = await deviceInfo.linuxInfo;
         deviceName = info.name;
       }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:memento_foreground_service/memento_foreground_service.dart';
 import 'package:Memento/core/services/foreground_task_manager.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
@@ -412,7 +413,7 @@ class ChatController extends ChangeNotifier {
       final enableBackgroundService =
           settings['enableBackgroundService'] as bool? ?? true;
 
-      if (!kIsWeb && Platform.isAndroid && enableBackgroundService) {
+      if (!kIsWeb && UniversalPlatform.isAndroid && enableBackgroundService) {
         // 使用第一个 agent 的消息 ID
         final firstMessageId = '${conversation.id}_chain_0';
         await _startAIChatService(conversation.id, firstMessageId);
@@ -509,7 +510,7 @@ class ChatController extends ChangeNotifier {
 
   /// 启动 AI 聊天前台服务（仅 Android）
   Future<void> _startAIChatService(String conversationId, String messageId) async {
-    if (kIsWeb || !Platform.isAndroid) {
+    if (kIsWeb || !UniversalPlatform.isAndroid) {
       debugPrint('ℹ️ [ChatController] 非 Android 平台，跳过前台服务');
       return;
     }
@@ -825,7 +826,7 @@ class ChatController extends ChangeNotifier {
     _foregroundServiceManager.dispose();
 
     // 移除前台服务数据回调
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && UniversalPlatform.isAndroid) {
       _foregroundTaskManager.removeDataCallback(_onReceiveBackgroundData);
       debugPrint('📝 已移除前台服务数据回调');
     }

@@ -1,6 +1,7 @@
-import 'dart:io';
-import 'dart:async'; // 添加 StreamController 和 TimeoutException 的导入
-import 'dart:typed_data'; // 添加 Uint8List 的导入
+import 'dart:async';
+import 'dart:io' show File, Directory, FileSystemException;
+import 'dart:typed_data';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 
 import 'package:flutter/material.dart';
@@ -100,7 +101,7 @@ class FullBackupController {
       final currentContext = _safeContext;
       if (currentContext == null) return;
 
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
         // 在移动平台上使用分享功能来保存文件
         final result = await FilePicker.platform.saveFile(
           dialogTitle: 'app_selectBackupMethod'.tr,

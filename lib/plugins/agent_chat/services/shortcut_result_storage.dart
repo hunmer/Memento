@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// Shortcut 执行结果的共享存储（Flutter 端）
 ///
@@ -21,7 +22,7 @@ class ShortcutResultStorage {
 
     try {
       // iOS 使用 App Groups 共享容器
-      if (Platform.isIOS) {
+      if (UniversalPlatform.isIOS) {
         // 获取 App Groups 容器路径
         // 注意：path_provider 不直接支持 App Groups，需要使用原生方法
         // 这里使用约定的路径结构

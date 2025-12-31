@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:io' show Platform, Process;
+import 'dart:io' show Process;
+import 'package:universal_platform/universal_platform.dart';
 
 class MetadataDisplay extends StatelessWidget {
   final Map<String, dynamic>? selectedFile;
@@ -51,11 +52,11 @@ class MetadataDisplay extends StatelessWidget {
                           selectedFile!['fileInfo'] as Map<String, dynamic>?;
                       if (fileInfo != null && fileInfo['path'] != null) {
                         final filePath = fileInfo['path'] as String;
-                        if (Platform.isWindows) {
+                        if (UniversalPlatform.isWindows) {
                           Process.run('explorer', [filePath]);
-                        } else if (Platform.isMacOS) {
+                        } else if (UniversalPlatform.isMacOS) {
                           Process.run('open', [filePath]);
-                        } else if (Platform.isLinux) {
+                        } else if (UniversalPlatform.isLinux) {
                           Process.run('xdg-open', [filePath]);
                         }
                       }

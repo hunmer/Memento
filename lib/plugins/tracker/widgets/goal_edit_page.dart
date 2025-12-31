@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'dart:io';
+import 'dart:io' show File;
 
 import 'package:Memento/widgets/picker/circle_icon_picker.dart';
 import 'package:Memento/widgets/picker/image_picker_dialog.dart';

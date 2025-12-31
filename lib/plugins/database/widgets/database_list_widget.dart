@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 import 'package:get/get.dart';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';

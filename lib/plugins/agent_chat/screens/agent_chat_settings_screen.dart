@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:universal_platform/universal_platform.dart';
 /// Agent Chat 插件设置界面
 class AgentChatSettingsScreen extends StatefulWidget {
   final PluginBase plugin;
@@ -246,7 +246,7 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
           const SizedBox(height: 8),
 
           // 后台服务设置标题（仅Android）
-          if (!kIsWeb && Platform.isAndroid) ...[
+          if (!kIsWeb && UniversalPlatform.isAndroid) ...[
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(

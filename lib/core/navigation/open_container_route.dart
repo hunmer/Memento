@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// OpenContainer 风格的页面过渡路由
 ///
@@ -86,7 +86,7 @@ class OpenContainerRoute<T> extends PageRoute<T> {
   bool get maintainState => true;
 
   /// iOS 平台检测
-  static bool get _isIOS => Platform.isIOS;
+  static bool get _isIOS => UniversalPlatform.isIOS;
 
   /// 是否启用左滑返回手势（仅 iOS）
   @override

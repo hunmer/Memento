@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_service.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_state.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// 点击录音按钮组件
 ///
@@ -229,7 +229,7 @@ class _PressToRecordButtonState extends State<PressToRecordButton>
   /// 切换录音状态（点击时调用）
   Future<void> _toggleRecording() async {
     // 在移动端触发震动反馈
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
       HapticFeedback.mediumImpact();
     }
 
