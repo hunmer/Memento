@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:dart_date/dart_date.dart';
 import 'platform/js_engine_interface.dart';
 import 'platform/js_engine_factory.dart';
-import 'platform/mobile_js_engine.dart';
+// 条件导入：默认 Web 平台存根，有 IO 库时（移动/桌面）使用真实实现
+import 'platform/mobile_js_engine_stub.dart'
+    if (dart.library.io) 'platform/mobile_js_engine.dart';
 import 'js_ui_handlers.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/data_filter/field_filter_service.dart';
