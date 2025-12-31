@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:get/get.dart';
 import 'package:super_cupertino_navigation_bar/super_cupertino_navigation_bar.dart';
 import 'super_cupertino_navigation_wrapper/filter_models.dart';
@@ -379,7 +379,7 @@ class _SuperCupertinoNavigationWrapperState
   }
 
   /// 检查是否为移动端
-  bool get _isMobile => Platform.isAndroid || Platform.isIOS;
+  bool get _isMobile => UniversalPlatform.isAndroid || UniversalPlatform.isIOS;
 
   @override
   Widget build(BuildContext context) {
@@ -519,7 +519,7 @@ class _SuperCupertinoNavigationWrapperState
     // 当 automaticallyImplyLeading 为 null 时,根据平台自动设置
     // 非移动端(桌面平台)默认不显示返回按钮,移动端默认显示
     final bool effectiveAutomaticallyImplyLeading =
-        widget.automaticallyImplyLeading ?? !(Platform.isAndroid || Platform.isIOS);
+        widget.automaticallyImplyLeading ?? !(UniversalPlatform.isAndroid || UniversalPlatform.isIOS);
 
     return SuperAppBar(
       backgroundColor:
@@ -528,7 +528,7 @@ class _SuperCupertinoNavigationWrapperState
           Theme.of(context).colorScheme.surface,
       automaticallyImplyLeading: effectiveAutomaticallyImplyLeading,
       leading:
-          (Platform.isAndroid || Platform.isIOS)
+          (UniversalPlatform.isAndroid || UniversalPlatform.isIOS)
               ? null
               : (widget.onLeadingPressed != null
                   ? IconButton(

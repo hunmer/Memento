@@ -9,9 +9,14 @@ import 'package:Memento/l10n/unified_translations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_styled_toast/flutter_styled_toast.dart';
+
+// 条件导入：StyledToast 在 Web 平台有问题
+// 默认使用存根，有 IO 库时（移动/桌面）使用真实实现
+import 'utils/styled_toast_stub.dart'
+    if (dart.library.io) 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'core/services/plugin_widget_sync_helper.dart';
 import 'core/services/clipboard_service.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';

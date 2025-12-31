@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:Memento/utils/platform_utils.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -179,7 +179,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
   /// 同步日历月视图小组件数据
   Future<void> syncWidgetData() async {
     // 只在 Android 平台同步
-    if (!Platform.isAndroid) return;
+    if (!PlatformUtils.isAndroid) return;
 
     try {
       final now = DateTime.now();

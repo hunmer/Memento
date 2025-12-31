@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
@@ -224,7 +224,7 @@ class HabitsSyncer extends PluginWidgetSyncer {
   /// 遍历所有已配置的周视图小组件,更新其数据
   Future<void> syncHabitsWeeklyWidget() async {
     // 检测平台是否为移动平台（Android 或 iOS）
-    if (!Platform.isAndroid && !Platform.isIOS) {
+    if (!UniversalPlatform.isAndroid && !UniversalPlatform.isIOS) {
       return;
     }
 
