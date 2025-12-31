@@ -554,7 +554,7 @@ class EventSelectorDialogState extends State<EventSelectorDialog> {
           label: Text(_hasSelection ? '反选' : '全选'),
           style: TextButton.styleFrom(foregroundColor: Colors.deepPurple),
         ),
-        const Spacer(),
+        const SizedBox(width: 8),  // 使用 SizedBox 替代 Spacer
         // 右侧取消/确定按钮
         TextButton(
           onPressed: () => Navigator.pop(context),

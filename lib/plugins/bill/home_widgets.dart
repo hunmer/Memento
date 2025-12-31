@@ -359,7 +359,6 @@ class BillHomeWidgets {
     required String accountId,
     required bool isExpense,
   }) {
-    final symbolIcon = isExpense ? Icons.remove : Icons.add;
     final amountStr = amount > 0 ? '¥${amount.toStringAsFixed(0)}' : '¥0';
 
     // 获取正确的 BuildContext 用于导航

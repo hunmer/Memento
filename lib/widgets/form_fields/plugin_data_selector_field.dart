@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_config.dart';
-import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/widgets/form_fields/form_field_wrapper.dart';
 
 /// 插件数据选择器字段
@@ -22,6 +21,7 @@ class PluginDataSelectorField extends FormFieldWrapper {
   final IconData? prefixIcon;
 
   /// 值变化回调
+  @override
   final ValueChanged<dynamic>? onChanged;
 
   /// 额外配置（包含 fieldMapping 等）

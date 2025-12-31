@@ -51,8 +51,7 @@ class PresetEditForm extends StatelessWidget {
                 ? promptsRaw
                 : promptsRaw is List<Map<String, dynamic>>
                 ? promptsRaw.map((e) => Prompt.fromJson(e)).toList()
-                : <Prompt>[])
-            as List<Prompt>;
+            : <Prompt>[]);
     final tags = values['tags'] as List<String>? ?? [];
 
     // 验证至少有一个 prompt

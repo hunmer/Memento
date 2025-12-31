@@ -810,7 +810,7 @@ class MobileJSEngine implements JSEngine {
             final checkCode = "globalThis.__EVAL_RESULTS__['$executionId']";
             final checkResult = _runtime.evaluate(checkCode);
             resultStr = checkResult.stringResult;
-            print('[JS Debug] 第 ${retryCount + 1} 次轮询，获取到结果: ' + resultStr);
+            print('[JS Debug] 第 ${retryCount + 1} 次轮询，获取到结果: $resultStr');
             break;
           }
 
