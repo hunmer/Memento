@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:logging/logging.dart';
 import 'tts_base_service.dart';
@@ -27,7 +27,7 @@ class SystemTTSService extends TTSBaseService {
 
       // 平台特定配置
       if (!kIsWeb) {
-        if (Platform.isIOS) {
+        if (UniversalPlatform.isIOS) {
           // iOS 特定配置
           await _flutterTts.setSharedInstance(true);
           await _flutterTts.setIosAudioCategory(
@@ -40,7 +40,7 @@ class SystemTTSService extends TTSBaseService {
             ],
             IosTextToSpeechAudioMode.defaultMode,
           );
-        } else if (Platform.isAndroid) {
+        } else if (UniversalPlatform.isAndroid) {
           // Android 特定配置
           try {
             final engines = await _flutterTts.getEngines;
@@ -84,7 +84,7 @@ class SystemTTSService extends TTSBaseService {
           } catch (e) {
             _log.warning('获取 Android TTS 引擎失败: $e');
           }
-        } else if (Platform.isWindows) {
+        } else if (UniversalPlatform.isWindows) {
           // Windows 特定配置
           try {
             // Windows 使用 UWP 语音，确保设置默认语言
@@ -190,7 +190,7 @@ class SystemTTSService extends TTSBaseService {
 
       // 设置语音/语言
       if (config.voice != null && config.voice!.isNotEmpty) {
-        if (!kIsWeb && Platform.isWindows) {
+        if (!kIsWeb && UniversalPlatform.isWindows) {
           // Windows 需要使用 setVoice 方法设置具体的语音
           try {
             await _flutterTts.setVoice({'name': config.voice!, 'locale': config.voice!});
@@ -199,7 +199,7 @@ class SystemTTSService extends TTSBaseService {
             _log.warning('Windows 设置语音失败，尝试使用 setLanguage: $e');
             await _flutterTts.setLanguage(config.voice!);
           }
-        } else if (!kIsWeb && Platform.isAndroid) {
+        } else if (!kIsWeb && UniversalPlatform.isAndroid) {
           // Android 平台：先尝试使用 setVoice，失败则使用 setLanguage
           _log.info('Android 设置语音: ${config.voice}');
 

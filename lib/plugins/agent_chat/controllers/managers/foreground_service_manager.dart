@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:memento_foreground_service/memento_foreground_service.dart';
 import 'package:Memento/core/services/foreground_task_manager.dart';
+import 'package:universal_platform/universal_platform.dart';
 import '../../services/chat_task_handler.dart';
 import '../../services/token_counter_service.dart';
 import 'shared/manager_context.dart';
@@ -31,7 +31,7 @@ class ChatForegroundServiceManager {
 
   /// 初始化 - 注册数据回调
   Future<void> initialize() async {
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && UniversalPlatform.isAndroid) {
       _taskManager.addDataCallback(_onReceiveBackgroundData);
       debugPrint('📝 已注册前台服务数据回调');
     }
@@ -39,7 +39,7 @@ class ChatForegroundServiceManager {
 
   /// 释放资源 - 移除回调
   void dispose() {
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && UniversalPlatform.isAndroid) {
       _taskManager.removeDataCallback(_onReceiveBackgroundData);
       debugPrint('📝 已移除前台服务数据回调');
     }
@@ -49,7 +49,7 @@ class ChatForegroundServiceManager {
 
   /// 启动 AI 聊天前台服务
   Future<void> startService(String conversationId, String messageId) async {
-    if (kIsWeb || !Platform.isAndroid) {
+    if (kIsWeb || !UniversalPlatform.isAndroid) {
       debugPrint('ℹ️ [ForegroundService] 非 Android 平台，跳过前台服务');
       return;
     }
@@ -87,7 +87,7 @@ class ChatForegroundServiceManager {
 
   /// 停止前台服务 (如果空闲)
   Future<void> stopServiceIfIdle() async {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (kIsWeb || !UniversalPlatform.isAndroid) return;
 
     try {
       if (!isSendingGetter() && await _taskManager.isServiceRunning()) {
@@ -107,7 +107,7 @@ class ChatForegroundServiceManager {
     int? tokenCount,
     String? messageId,
   }) {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (kIsWeb || !UniversalPlatform.isAndroid) return;
 
     try {
       final preview =
@@ -136,7 +136,7 @@ class ChatForegroundServiceManager {
 
   /// 通知生成进度
   void notifyGenerationProgress(String progress) {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (kIsWeb || !UniversalPlatform.isAndroid) return;
 
     try {
       FlutterForegroundTask.sendDataToTask({
@@ -150,7 +150,7 @@ class ChatForegroundServiceManager {
 
   /// 通知生成错误
   void notifyGenerationError(String error, {String? messageId}) {
-    if (kIsWeb || !Platform.isAndroid) return;
+    if (kIsWeb || !UniversalPlatform.isAndroid) return;
 
     try {
       FlutterForegroundTask.sendDataToTask({

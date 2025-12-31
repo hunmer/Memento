@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:intelligence/intelligence.dart';
 import 'package:intelligence/model/representable.dart';
 import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// 同步频道列表到 iOS Intelligence 插件
 class ConversationSyncService {
@@ -11,7 +11,7 @@ class ConversationSyncService {
 
   /// 同步所有非临时会话到 iOS
   Future<void> syncConversationsToIOS(ConversationService service) async {
-    if (!kIsWeb && Platform.isIOS) {
+    if (!kIsWeb && UniversalPlatform.isIOS) {
       try {
         final conversations = service.getNonTemporaryConversations();
 

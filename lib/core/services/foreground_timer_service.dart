@@ -1,7 +1,7 @@
-import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:universal_platform/universal_platform.dart';
 import '../../screens/settings_screen/controllers/live_activities_controller.dart';
 
 /// 通用前台计时器服务（增强版）
@@ -28,12 +28,12 @@ class ForegroundTimerService {
 
   /// 判断是否为 iOS 平台
   static bool get _isIOS {
-    return !kIsWeb && Platform.isIOS;
+    return !kIsWeb && UniversalPlatform.isIOS;
   }
 
   /// 判断是否为 Android 平台
   static bool get _isAndroid {
-    return !kIsWeb && Platform.isAndroid;
+    return !kIsWeb && UniversalPlatform.isAndroid;
   }
 
   /// 启动前台通知服务

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io'
-    show Platform, File, Directory, FileSystemEntity, FileSystemEntityType;
+    show File, Directory, FileSystemEntity, FileSystemEntityType;
+import 'package:universal_platform/universal_platform.dart';
 import 'dart:math' show min;
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
@@ -928,7 +929,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 只在 Windows 平台转换 file:// URL
-    if (!Platform.isWindows) {
+    if (!UniversalPlatform.isWindows) {
       return url;
     }
 
@@ -950,7 +951,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     }
 
     // 如果服务器运行且是 Windows 平台，使用 HTTP URL
-    if (localHttpServer.isRunning && Platform.isWindows) {
+    if (localHttpServer.isRunning && UniversalPlatform.isWindows) {
       return localHttpServer.filePathToHttpUrl(filePath);
     }
 
@@ -962,7 +963,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   String _formatFileUrl(String filePath) {
     String normalizedPath = filePath.replaceAll('\\', '/');
 
-    if (Platform.isWindows) {
+    if (UniversalPlatform.isWindows) {
       if (normalizedPath.length >= 2 && normalizedPath[1] == ':') {
         normalizedPath =
             normalizedPath[0].toUpperCase() + normalizedPath.substring(1);

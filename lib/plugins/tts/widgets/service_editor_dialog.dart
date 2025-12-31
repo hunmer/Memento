@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
@@ -706,7 +705,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
             AppBar(
               title: Text(isEditing ? 'tts_editService'.tr : 'tts_addService'.tr),
               automaticallyImplyLeading:
-                  !(Platform.isAndroid || Platform.isIOS),
+                  !(UniversalPlatform.isAndroid || UniversalPlatform.isIOS),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.close),

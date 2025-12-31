@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:io';
+import 'dart:io' show File;
 import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';

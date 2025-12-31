@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/goods/models/warehouse.dart';

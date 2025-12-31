@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'dart:io';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
@@ -235,7 +235,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                               ),
                             ],
                           ),
-                          if (!Platform.isAndroid) ...[
+                          if (!UniversalPlatform.isAndroid) ...[
                             const SizedBox(height: 12),
                             Container(
                               padding: const EdgeInsets.all(12),
@@ -267,7 +267,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                           ],
 
                           // 通知时间设置
-                          if (_isNotificationEnabled && Platform.isAndroid) ...[
+                          if (_isNotificationEnabled && UniversalPlatform.isAndroid) ...[
                             const SizedBox(height: 24),
                             const Divider(),
                             const SizedBox(height: 16),

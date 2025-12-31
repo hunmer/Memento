@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'dart:io';
+import 'package:universal_platform/universal_platform.dart';
 
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:flutter/material.dart';
@@ -292,21 +292,21 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
 
   // 启动前台通知服务
   Future<void> startNotificationService(TimerTask task) async {
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
       await TimerService.startNotificationService(task);
     }
   }
 
   // 更新前台通知
   Future<void> _updateNotification(TimerTask task) async {
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
       await TimerService.updateNotification(task);
     }
   }
 
   // 停止前台通知服务
   Future<void> stopNotificationService([String? id]) async {
-    if (Platform.isAndroid || Platform.isIOS) {
+    if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
       await TimerService.stopNotificationService(id);
     }
   }

@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/agent_chat/models/conversation.dart';
 import 'package:flutter/material.dart';
@@ -104,7 +104,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
     await AgentChatWidgetService.initialize();
 
     // 初始化 iOS Shortcuts 处理服务（仅 iOS）
-    if (!kIsWeb && Platform.isIOS) {
+    if (!kIsWeb && UniversalPlatform.isIOS) {
       ShortcutsHandlerService.instance.initialize();
       debugPrint('[AgentChatPlugin] iOS Shortcuts 处理服务已启动');
 

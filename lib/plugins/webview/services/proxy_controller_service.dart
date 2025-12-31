@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import '../models/proxy_settings.dart' as models;
@@ -17,7 +17,7 @@ class ProxyControllerService {
 
   /// 检查当前设备是否支持 ProxyController
   Future<bool> checkSupport() async {
-    if (kIsWeb || !Platform.isAndroid) {
+    if (kIsWeb || !UniversalPlatform.isAndroid) {
       _isSupported = false;
       return false;
     }

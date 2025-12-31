@@ -227,19 +227,25 @@ class FloatingBallManager {
         return _getDefaultConfig();
       }
 
-      // 确保返回的是正确的类型
-      if (data is! Map<String, dynamic>) {
+      // Web 平台返回 LinkedMap，需要转换为 Map<String, dynamic>
+      Map<String, dynamic> result;
+      if (data is Map<String, dynamic>) {
+        result = data;
+      } else if (data is Map) {
+        // 将 Map<dynamic, dynamic> 或 LinkedMap 转换为 Map<String, dynamic>
+        result = Map<String, dynamic>.from(data);
+      } else {
         debugPrint('Invalid config type detected: ${data.runtimeType}');
         return _getDefaultConfig();
       }
 
       // 验证配置完整性
-      if (!_isConfigValid(data)) {
+      if (!_isConfigValid(result)) {
         debugPrint('Invalid config detected, merging with defaults');
-        return _mergeWithDefaults(data);
+        return _mergeWithDefaults(result);
       }
 
-      return data;
+      return result;
     } catch (e) {
       debugPrint('Error reading floating ball data: $e');
 

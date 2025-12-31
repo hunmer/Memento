@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 
 import 'open_container_route.dart';
@@ -35,7 +35,7 @@ export 'open_container_route.dart';
 /// ```
 class NavigationHelper {
   /// 检查是否为 iOS 平台
-  static bool get _isIOS => Platform.isIOS;
+  static bool get _isIOS => UniversalPlatform.isIOS;
 
   // ==================== 基础 push 导航 ====================
 
@@ -341,7 +341,7 @@ class NavigationHelper {
     bool fullscreenDialog = false,
     bool maintainState = true,
   }) {
-    if (Platform.isIOS) {
+    if (UniversalPlatform.isIOS) {
       return CupertinoPageRoute<T>(
         builder: (context) => page,
         fullscreenDialog: fullscreenDialog,

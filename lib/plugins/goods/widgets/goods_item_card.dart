@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
-import 'dart:io';
+import 'dart:io' show File;
 import 'package:Memento/plugins/goods/models/goods_item.dart';
 import 'package:Memento/plugins/goods/dialogs/add_usage_record_dialog.dart';
 import 'package:Memento/plugins/goods/screens/goods_item_history_page.dart';

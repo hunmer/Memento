@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 // 条件导入：默认 Web 平台存根，有 IO 库时（移动/桌面）使用真实实现
@@ -158,7 +158,7 @@ class JSUIHandlers {
   /// Location 处理器
   Future<Map<String, dynamic>?> _handleLocation(String mode) async {
     // 判断是否为移动端
-    final isMobile = Platform.isAndroid || Platform.isIOS;
+    final isMobile = UniversalPlatform.isAndroid || UniversalPlatform.isIOS;
 
     if (mode == 'auto') {
       // 自动模式：获取当前位置并返回第一个搜索结果

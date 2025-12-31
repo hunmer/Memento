@@ -8,6 +8,7 @@ import 'package:path/path.dart' as path;
 import 'package:Memento/plugins/chat/models/file_message.dart';
 import 'package:Memento/plugins/chat/services/file_service.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/types.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 Future<void> handleVideoSelection({
   required BuildContext context,
@@ -21,7 +22,7 @@ Future<void> handleVideoSelection({
   }
 
   // 检查是否在macOS平台上
-  if (Platform.isMacOS) {
+  if (UniversalPlatform.isMacOS) {
     try {
       // 在macOS上使用图片选择器从相册选择视频
       final ImagePicker picker = ImagePicker();
