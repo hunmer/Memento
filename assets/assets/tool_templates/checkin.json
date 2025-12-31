@@ -1,0 +1,75 @@
+[
+  {
+    "id": "default-checkin-items",
+    "name": "查看签到项目",
+    "description": "获取所有签到项目列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取签到项目",
+        "desc": "查询所有签到项目",
+        "data": "const items = await Memento.plugins.checkin.getCheckinItems();\n\nconst result = {\n  count: items.length,\n  items: items.map(i => ({\n    id: i.id,\n    name: i.name,\n    consecutiveDays: i.consecutiveDays,\n    isCheckedToday: i.isCheckedToday,\n    lastCheckinDate: i.lastCheckinDate\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["checkin", "项目", "列表"],
+    "declaredTools": [
+      {"id": "checkin_getItems", "name": "获取签到项目"}
+    ]
+  },
+  {
+    "id": "default-checkin-do",
+    "name": "执行签到",
+    "description": "对指定项目执行签到",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "执行签到",
+        "desc": "签到\"早起\"项目",
+        "data": "const items = await Memento.plugins.checkin.getCheckinItems();\nconst item = items.find(i => i.name.includes('早起'));\n\nif (!item) {\n  const result = { success: false, message: '未找到\"早起\"签到项目' };\n  setResult(result);\n  return result;\n}\n\nconst response = await Memento.plugins.checkin.checkin({ itemId: item.id });\n\nconst result = {\n  success: response.success,\n  message: response.message,\n  consecutiveDays: response.consecutiveDays,\n  checkinTime: response.checkinTime\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["checkin", "签到", "打卡"],
+    "declaredTools": [
+      {"id": "checkin_getItems", "name": "获取签到项目"},
+      {"id": "checkin_checkin", "name": "执行签到"}
+    ]
+  },
+  {
+    "id": "default-checkin-stats",
+    "name": "签到统计",
+    "description": "获取签到统计数据",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取统计数据",
+        "desc": "查询签到统计",
+        "data": "const stats = await Memento.plugins.checkin.getStats();\n\nconst result = {\n  totalItems: stats.totalItems,\n  todayCheckins: stats.todayCheckins,\n  totalCheckins: stats.totalCheckins,\n  completionRate: stats.completionRate\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["checkin", "统计", "数据"],
+    "declaredTools": [
+      {"id": "checkin_getStats", "name": "获取签到统计"}
+    ]
+  },
+  {
+    "id": "default-checkin-create",
+    "name": "创建签到项目",
+    "description": "创建新的签到项目",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建项目",
+        "desc": "创建\"每日学习\"签到项目",
+        "data": "const response = await Memento.plugins.checkin.createCheckinItem({\n  name: '每日学习',\n  description: '每天学习新知识',\n  group: '学习'\n});\n\nconst result = {\n  success: response.success,\n  message: response.message,\n  item: response.item\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["checkin", "创建", "项目"],
+    "declaredTools": [
+      {"id": "checkin_createItem", "name": "创建签到项目"}
+    ]
+  }
+]

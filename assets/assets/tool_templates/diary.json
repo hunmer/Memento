@@ -1,0 +1,74 @@
+[
+  {
+    "id": "default-diary-today",
+    "name": "加载今日日记",
+    "description": "获取今天的日记内容",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "加载今日日记",
+        "desc": "获取今天的日记",
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst entry = await Memento.plugins.diary.getEntry({ date: todayDate });\n\nif (!entry) {\n  const result = { exists: false, message: '今天还没有写日记' };\n  setResult(result);\n  return result;\n}\n\nconst result = {\n  exists: true,\n  entry: {\n    date: entry.date,\n    content: entry.content,\n    wordCount: entry.content ? entry.content.length : 0\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["diary", "今日", "日记"],
+    "declaredTools": [
+      {"id": "diary_getEntry", "name": "获取日记"}
+    ]
+  },
+  {
+    "id": "default-diary-stats",
+    "name": "日记统计",
+    "description": "获取日记写作统计数据",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取统计数据",
+        "desc": "查询日记统计信息",
+        "data": "const stats = await Memento.plugins.diary.getStats();\n\nconst result = {\n  totalEntries: stats.totalEntries,\n  totalWords: stats.totalWords,\n  currentStreak: stats.currentStreak,\n  longestStreak: stats.longestStreak\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["diary", "统计", "数据"],
+    "declaredTools": [
+      {"id": "diary_getStats", "name": "获取统计"}
+    ]
+  },
+  {
+    "id": "default-diary-month",
+    "name": "本月日记统计",
+    "description": "统计本月的日记字数",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "本月统计",
+        "desc": "统计本月日记字数",
+        "data": "const currentDate = await Memento.system.getCustomDate();\nconst year = currentDate.year;\nconst month = currentDate.month;\n\nconst entries = await Memento.plugins.diary.getMonthEntries({\n  year: year,\n  month: month\n});\n\nconst totalWords = entries.reduce((sum, e) => {\n  return sum + (e.content ? e.content.length : 0);\n}, 0);\n\nconst result = {\n  year: year,\n  month: month,\n  entryCount: entries.length,\n  totalWords: totalWords,\n  avgWords: entries.length > 0 ? Math.round(totalWords / entries.length) : 0\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["diary", "本月", "统计"],
+    "declaredTools": [
+      {"id": "diary_getMonthEntries", "name": "获取月份日记"}
+    ]
+  },
+  {
+    "id": "default-diary-save",
+    "name": "保存日记",
+    "description": "保存今天的日记内容",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "保存日记",
+        "desc": "保存日记内容",
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\n\nawait Memento.plugins.diary.saveEntry({\n  date: todayDate,\n  content: '今天是充实的一天。\\n\\n完成了很多工作，感觉很有成就感。'\n});\n\nconst result = {\n  success: true,\n  date: todayDate,\n  message: '日记已保存'\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["diary", "保存", "日记"],
+    "declaredTools": [
+      {"id": "diary_saveEntry", "name": "保存日记"}
+    ]
+  }
+]

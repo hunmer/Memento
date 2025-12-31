@@ -1,0 +1,110 @@
+{
+  "ui_toast": {
+    "title": "显示Toast提示",
+    "description": "显示轻量级提示消息，支持自定义显示时长和位置。",
+    "parameters": [
+      {
+        "name": "message",
+        "type": "string",
+        "optional": false,
+        "description": "提示内容"
+      },
+      {
+        "name": "options",
+        "type": "object",
+        "optional": true,
+        "description": "可选配置：{ duration: 'short' | 'long' | number(毫秒), gravity: 'top' | 'center' | 'bottom' }"
+      }
+    ],
+    "returns": {
+      "type": "Promise<void>",
+      "description": "返回一个立即 resolve 的 Promise（为了 API 一致性）"
+    },
+    "examples": [
+      {
+        "code": "Memento.plugins.ui.toast('操作成功');",
+        "comment": "显示简单提示"
+      },
+      {
+        "code": "Memento.plugins.ui.toast('已保存', {\n  duration: 'long',\n  gravity: 'top'\n});",
+        "comment": "长时间显示在顶部"
+      },
+      {
+        "code": "Memento.plugins.ui.toast('加载中...', {\n  duration: 3000\n});",
+        "comment": "自定义显示时长（3秒）"
+      }
+    ],
+    "notes": "duration 默认为 'short'(2秒)，可选 'long'(4秒) 或自定义毫秒数。gravity 默认为 'bottom'。",
+    "enabled": true
+  },
+  "ui_alert": {
+    "title": "显示确认对话框",
+    "description": "显示确认对话框，支持标题、确认/取消按钮自定义。",
+    "parameters": [
+      {
+        "name": "message",
+        "type": "string",
+        "optional": false,
+        "description": "对话框内容"
+      },
+      {
+        "name": "options",
+        "type": "object",
+        "optional": true,
+        "description": "可选配置：{ title: string, confirmText: string, cancelText: string, showCancel: boolean }"
+      }
+    ],
+    "returns": {
+      "type": "Promise<object>",
+      "description": "返回 { confirmed: boolean }，true 表示点击确认，false 表示点击取消或关闭"
+    },
+    "examples": [
+      {
+        "code": "const result = await Memento.plugins.ui.alert('操作完成');\nsetResult(result);",
+        "comment": "仅显示确认按钮"
+      },
+      {
+        "code": "const result = await Memento.plugins.ui.alert('确认删除这个项目？', {\n  title: '警告',\n  confirmText: '删除',\n  cancelText: '取消',\n  showCancel: true\n});\nsetResult(result);",
+        "comment": "带取消按钮的确认对话框"
+      },
+      {
+        "code": "const result = await Memento.plugins.ui.alert('检测到新版本，是否更新？', {\n  title: '版本更新',\n  confirmText: '立即更新',\n  cancelText: '稍后再说',\n  showCancel: true\n});\nsetResult(result);",
+        "comment": "自定义按钮文字"
+      }
+    ],
+    "notes": "confirmText 默认为 '确定'，cancelText 默认为 '取消'，showCancel 默认为 false。必须使用 await 或 .then() 等待用户操作。",
+    "enabled": true
+  },
+  "ui_dialog": {
+    "title": "显示自定义对话框",
+    "description": "显示自定义对话框，支持多个按钮选项，可标记危险操作。",
+    "parameters": [
+      {
+        "name": "options",
+        "type": "object",
+        "optional": false,
+        "description": "对话框配置：{ title: string, content: string, actions: [{ text: string, value: any, isDestructive: boolean }] }"
+      }
+    ],
+    "returns": {
+      "type": "Promise<any>",
+      "description": "返回用户点击的按钮的 value 值，如果关闭对话框则为 null"
+    },
+    "examples": [
+      {
+        "code": "const result = await Memento.plugins.ui.dialog({\n  title: '选择操作',\n  content: '请选择要执行的操作',\n  actions: [\n    { text: '取消', value: 'cancel' },\n    { text: '保存', value: 'save' },\n    { text: '删除', value: 'delete', isDestructive: true }\n  ]\n});\nsetResult(result);",
+        "comment": "多按钮选择对话框"
+      },
+      {
+        "code": "const color = await Memento.plugins.ui.dialog({\n  title: '选择颜色',\n  actions: [\n    { text: '红色', value: 'red' },\n    { text: '蓝色', value: 'blue' },\n    { text: '绿色', value: 'green' }\n  ]\n});\nsetResult(color);",
+        "comment": "简单选择对话框"
+      },
+      {
+        "code": "const confirmed = await Memento.plugins.ui.dialog({\n  title: '确认操作',\n  content: '此操作不可撤销，确定继续？',\n  actions: [\n    { text: '取消', value: false },\n    { text: '确定', value: true }\n  ]\n});\nsetResult(confirmed);",
+        "comment": "确认对话框（灵活版本）"
+      }
+    ],
+    "notes": "actions 数组中的每个按钮需要指定 text（显示文字）和 value（返回值）。isDestructive 为 true 时按钮文字显示为红色（危险操作）。必须使用 await 或 .then() 等待用户操作。",
+    "enabled": true
+  }
+}

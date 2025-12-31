@@ -1,0 +1,30 @@
+{
+  "category": "CalendarAlbum 插件示例",
+  "description": "日记相册相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有日记",
+      "code": "// 获取所有日记条目\nvar entries = await Memento.calendar_album.getEntries();\nconsole.log('日记列表:', entries);\nreturn entries;"
+    },
+    {
+      "title": "获取指定日期的日记",
+      "code": "// 获取今天的日记\n// 参数: dateStr (YYYY-MM-DD)\nvar today = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nvar entries = await Memento.calendar_album.getEntriesForDate(today);\nconsole.log('今日日记:', entries);\nreturn entries;"
+    },
+    {
+      "title": "添加新日记",
+      "code": "// 添加一篇日记\n// 参数: title, content, date, tags, location, mood, weather, imageUrls\nvar entry = await Memento.calendar_album.addEntry(\n  '美好的一天',                      // 标题\n  '今天天气很好...',                 // 内容\n  '2025-11-14',                     // 日期(可选)\n  '生活,心情',                      // 标签(可选, 逗号分隔)\n  '家',                             // 位置(可选)\n  '😊',                             // 心情(可选)\n  '晴天',                           // 天气(可选)\n  'images/photo1.jpg,images/photo2.jpg'  // 图片(可选, 逗号分隔)\n);\n\nconsole.log('添加成功:', entry);\nreturn entry;"
+    },
+    {
+      "title": "按标签查询",
+      "code": "// 根据标签查询日记\n// 参数: tag\nvar entries = await Memento.calendar_album.getEntriesByTag('生活');\nconsole.log('生活相关日记:', entries);\nreturn entries;"
+    },
+    {
+      "title": "按日期范围查询照片",
+      "code": "// 获取指定日期范围内的照片\n// 参数: startDate, endDate (YYYY-MM-DD)\nvar photos = await Memento.calendar_album.getPhotosByDateRange(\n  '2025-11-01',\n  '2025-11-14'\n);\n\nconsole.log('照片列表:', photos);\nreturn photos;"
+    },
+    {
+      "title": "获取统计信息",
+      "code": "// 获取日记统计信息\nvar stats = await Memento.calendar_album.getStatistics();\nconsole.log('统计信息:', stats);\n// 包含: todayCount, last7DaysCount, totalCount, tagCount, photoCount\nreturn stats;"
+    }
+  ]
+}

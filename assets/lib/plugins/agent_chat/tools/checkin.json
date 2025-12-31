@@ -1,0 +1,230 @@
+{
+  "getCheckinItems": {
+    "title": "获取签到项目列表",
+    "description": "获取所有签到项目及其状态信息。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回签到项目数组；有分页参数时返回对象 {data: 签到项目数组, total: 总数, offset: 偏移量, count: 返回数量, hasMore: 是否还有更多}"
+    },
+    "examples": [
+      {
+        "title": "获取所有签到项目（无分页）",
+        "code": "const items = await Memento.plugins.checkin.getCheckinItems({});\nsetResult(`共有 ${items.length} 个签到项目,今天已完成 ${items.filter(i => i.isCheckedToday).length} 个`);"
+      },
+      {
+        "title": "分页获取签到项目（第1页，每页20个）",
+        "code": "const result = await Memento.plugins.checkin.getCheckinItems({offset: 0, count: 20});\nsetResult(`第1页: ${result.data.length}个项目, 共${result.total}个, 还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "分页获取签到项目（第2页）",
+        "code": "const result = await Memento.plugins.checkin.getCheckinItems({offset: 20, count: 20});\nconst checkedToday = result.data.filter(i => i.isCheckedToday).length;\nsetResult(`第2页已签到: ${checkedToday}/${result.data.length}`);"
+      }
+    ],
+    "notes": "返回的项目包含完整的状态信息,包括连续天数和今日签到状态。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "checkin": {
+    "title": "执行签到",
+    "description": "为指定的签到项目执行签到操作",
+    "parameters": [
+      {"name": "itemId", "type": "string", "required": true, "description": "签到项目ID"},
+      {"name": "note", "type": "string", "required": false, "description": "签到备注(可选)"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "签到结果对象,包含 success、message、consecutiveDays、checkinTime 或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "简单签到",
+        "code": "const result = await Memento.plugins.checkin.checkin({itemId: 'item-id-123'});\nsetResult(result.success ? result.message : result.error);"
+      },
+      {
+        "title": "带备注签到",
+        "code": "const result = await Memento.plugins.checkin.checkin({\n  itemId: 'item-id-123',\n  note: '今天起床很顺利'\n});\nif (result.success) {\n  setResult(`签到成功!连续签到 ${result.consecutiveDays} 天`);\n} else {\n  setResult(result.message || result.error);\n}"
+      }
+    ],
+    "notes": "如果今天已经签到过,会返回失败信息;签到成功后会更新连续签到天数",
+    "enabled": true
+  },
+  "getCheckinHistory": {
+    "title": "获取签到历史",
+    "description": "获取指定签到项目在指定日期范围内的历史记录。支持分页查询，提供 offset 或 count 参数时，history 字段返回分页对象；不提供时返回完整数组。",
+    "parameters": [
+      {"name": "itemId", "type": "string", "required": true, "description": "签到项目ID"},
+      {"name": "startDate", "type": "string", "required": false, "description": "开始日期(格式:YYYY-MM-DD)"},
+      {"name": "endDate", "type": "string", "required": false, "description": "结束日期(格式:YYYY-MM-DD)"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "包含 itemId、itemName 和 history 字段。无分页参数时 history 为记录数组；有分页参数时 history 为对象 {data, total, offset, count, hasMore}。另外包含 totalCount（总记录数）或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "获取本月签到历史（无分页）",
+        "code": "const startDate = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'yyyy-MM-dd'});\nconst endDate = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'yyyy-MM-dd'});\nconst result = await Memento.plugins.checkin.getCheckinHistory({\n  itemId: 'item-id-123',\n  startDate: startDate,\n  endDate: endDate\n});\nsetResult(`本月共签到 ${result.totalCount} 次`);"
+      },
+      {
+        "title": "分页获取签到历史（第1页，每页30条）",
+        "code": "const result = await Memento.plugins.checkin.getCheckinHistory({\n  itemId: 'item-id-123',\n  offset: 0,\n  count: 30\n});\nsetResult(`第1页: ${result.history.data.length}条记录, 共${result.history.total}条, 还有更多: ${result.history.hasMore}`);"
+      },
+      {
+        "title": "分页获取指定月份签到历史",
+        "code": "const result = await Memento.plugins.checkin.getCheckinHistory({\n  itemId: 'item-id-123',\n  startDate: '2025-01-01',\n  endDate: '2025-01-31',\n  offset: 0,\n  count: 20\n});\nsetResult(`1月签到记录: ${result.history.data.length}/${result.history.total}`);"
+      }
+    ],
+    "notes": "必需参数: itemId;如果不提供日期参数,返回所有历史记录;记录按签到时间倒序排序。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "getStats": {
+    "title": "获取签到统计",
+    "description": "获取签到的统计信息,可以是全局统计或单个项目统计",
+    "parameters": [
+      {"name": "itemId", "type": "string", "required": false, "description": "签到项目ID(可选,不提供则返回全局统计)"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象,全局统计包含 totalItems、todayCheckins、totalCheckins、completionRate;单项统计包含 itemId、itemName、totalCheckins、consecutiveDays、isCheckedToday、lastCheckinDate"
+    },
+    "examples": [
+      {
+        "title": "获取全局统计",
+        "code": "const stats = await Memento.plugins.checkin.getStats({});\nsetResult(`今日签到: ${stats.todayCheckins}/${stats.totalItems},总签到: ${stats.totalCheckins}`);"
+      },
+      {
+        "title": "获取单个项目统计",
+        "code": "const stats = await Memento.plugins.checkin.getStats({itemId: 'item-id-123'});\nsetResult(`${stats.itemName}:总签到 ${stats.totalCheckins} 次,连续 ${stats.consecutiveDays} 天`);"
+      }
+    ],
+    "notes": "不提供 itemId 参数时返回全局统计;提供 itemId 时返回该项目的详细统计",
+    "enabled": true
+  },
+  "createCheckinItem": {
+    "title": "创建签到项目",
+    "description": "创建一个新的签到项目",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "项目名称"},
+      {"name": "id", "type": "string", "required": false, "description": "项目ID(可选,不提供则自动生成)"},
+      {"name": "group", "type": "string", "required": false, "description": "分组名称(可选)"},
+      {"name": "description", "type": "string", "required": false, "description": "项目描述(可选)"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "创建结果对象,包含 success、message、item(新项目信息)或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "创建简单签到项目",
+        "code": "const result = await Memento.plugins.checkin.createCheckinItem({name: '早起'});\nsetResult(result.success ? result.message : result.error);"
+      },
+      {
+        "title": "创建完整签到项目",
+        "code": "const result = await Memento.plugins.checkin.createCheckinItem({\n  name: '晨跑',\n  group: '健康习惯',\n  description: '每天早上6点跑步30分钟'\n});\nsetResult(result.success ? `创建成功,项目ID: ${result.item.id}` : result.message);"
+      },
+      {
+        "title": "使用自定义ID创建签到项目",
+        "code": "const result = await Memento.plugins.checkin.createCheckinItem({\n  id: 'item-id-123',\n  name: '学习编程',\n  group: '技能提升',\n  description: '每天学习1小时编程'\n});\nsetResult(result.success ? `创建成功,自定义ID: ${result.item.id}` : result.message);"
+      }
+    ],
+    "notes": "必需参数: name(项目名称);可选参数: id(自定义ID)、group(分组)、description(描述);项目名称和ID都不能与现有项目重复;如果不提供id会自动生成时间戳ID;创建后会自动保存到存储",
+    "enabled": true
+  },
+  "findCheckinItemBy": {
+    "title": "通用签到项目查找",
+    "description": "根据自定义条件查找签到项目（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、group）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个签到项目对象或 null；findAll=true 时返回签到项目数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找签到项目",
+        "code": "const item = await Memento.plugins.checkin.findCheckinItemBy({field: 'id', value: 'item123'});\nif (item) {\n  setResult(`找到签到项目: ${item.name}，连续签到: ${item.consecutiveDays}天`);\n} else {\n  setResult('未找到该签到项目');\n}"
+      },
+      {
+        "title": "查找所有健康分组的签到项目",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemBy({field: 'group', value: '健康习惯', findAll: true});\nconst checkedToday = items.filter(i => i.isCheckedToday).length;\nsetResult(`健康习惯分组有 ${items.length} 个项目，今天已签到 ${checkedToday} 个`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历签到项目列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findCheckinItemById": {
+    "title": "根据ID查找签到项目",
+    "description": "快速根据签到项目ID查找单个项目（findCheckinItemBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "签到项目ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的签到项目对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的签到项目",
+        "code": "const item = await Memento.plugins.checkin.findCheckinItemById({id: 'item123'});\nif (item) {\n  setResult(`项目名称: ${item.name}, 连续签到: ${item.consecutiveDays}天, 今日已签: ${item.isCheckedToday ? '是' : '否'}`);\n} else {\n  setResult('签到项目不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findCheckinItemBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findCheckinItemByName": {
+    "title": "根据名称查找签到项目",
+    "description": "根据签到项目名称查找项目（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "签到项目名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个签到项目或 null；findAll=true 时返回签到项目数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配签到项目名称",
+        "code": "const item = await Memento.plugins.checkin.findCheckinItemByName({name: '早起'});\nsetResult(item ? `项目ID: ${item.id}，连续: ${item.consecutiveDays}天` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的签到项目",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemByName({name: '跑步', fuzzy: true, findAll: true});\nconst totalDays = items.reduce((sum, i) => sum + (i.consecutiveDays || 0), 0);\nsetResult(`找到 ${items.length} 个跑步相关签到项目，累积连续: ${totalDays}天`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  },
+  "findCheckinItemsByGroup": {
+    "title": "根据分组查找签到项目",
+    "description": "查找指定分组的所有签到项目",
+    "parameters": [
+      {"name": "group", "type": "string", "required": true, "description": "分组名称"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该分组的签到项目列表"
+    },
+    "examples": [
+      {
+        "title": "查找健康习惯分组的所有签到项目",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemsByGroup({group: '健康习惯'});\nconst checkedToday = items.filter(i => i.isCheckedToday);\nsetResult(`健康习惯分组有 ${items.length} 个项目，今天已完成 ${checkedToday.length} 个`);"
+      },
+      {
+        "title": "统计技能提升分组的签到情况",
+        "code": "const items = await Memento.plugins.checkin.findCheckinItemsByGroup({group: '技能提升'});\nconst avgConsecutive = items.reduce((sum, i) => sum + (i.consecutiveDays || 0), 0) / items.length;\nsetResult(`技能提升分组有 ${items.length} 个项目，平均连续: ${avgConsecutive.toFixed(1)}天`);"
+      }
+    ],
+    "notes": "等价于 findCheckinItemBy({field: 'group', value: group, findAll: true})",
+    "enabled": true
+  }
+}

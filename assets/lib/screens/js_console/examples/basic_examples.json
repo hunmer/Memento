@@ -1,0 +1,34 @@
+{
+  "category": "基础示例",
+  "description": "JavaScript 基础语法和最佳实践示例",
+  "examples": [
+    {
+      "title": "Hello World",
+      "code": "// 最简单的示例\nconsole.log('Hello from JS Console!');\nreturn 'Hello World';"
+    },
+    {
+      "title": "变量与运算",
+      "code": "// JavaScript 基础语法\nvar a = 10;\nvar b = 20;\nvar sum = a + b;\n\nconsole.log('a =', a);\nconsole.log('b =', b);\nconsole.log('sum =', sum);\n\nreturn { a, b, sum };"
+    },
+    {
+      "title": "数组操作",
+      "code": "// 数组的基本操作\nvar numbers = [1, 2, 3, 4, 5];\n\n// map: 每个元素乘以 2\nvar doubled = numbers.map(function(n) { return n * 2; });\n\n// filter: 筛选大于 2 的元素\nvar filtered = numbers.filter(function(n) { return n > 2; });\n\n// reduce: 计算总和\nvar sum = numbers.reduce(function(acc, n) { return acc + n; }, 0);\n\nconsole.log('原始数组:', numbers);\nconsole.log('翻倍:', doubled);\nconsole.log('筛选:', filtered);\nconsole.log('总和:', sum);\n\nreturn { numbers, doubled, filtered, sum };"
+    },
+    {
+      "title": "对象操作",
+      "code": "// 对象的创建和操作\nvar person = {\n  name: 'Zhang San',\n  age: 25,\n  city: 'Beijing',\n  greet: function() {\n    return 'Hello, I am ' + this.name;\n  }\n};\n\nconsole.log('姓名:', person.name);\nconsole.log('年龄:', person.age);\nconsole.log('问候:', person.greet());\n\n// 添加新属性\nperson.email = 'zhangsan@example.com';\n\nreturn person;"
+    },
+    {
+      "title": "Promise 示例",
+      "code": "// 模拟异步操作\nfunction delay(ms) {\n  return new Promise(function(resolve) {\n    // 注意：QuickJS 的 setTimeout 可能不稳定\n    // 实际项目中应使用 Memento API\n    resolve('Delayed ' + ms + 'ms');\n  });\n}\n\nconsole.log('开始...');\nvar result = await delay(100);\nconsole.log('结果:', result);\nreturn result;"
+    },
+    {
+      "title": "错误处理",
+      "code": "// try-catch 错误处理\ntry {\n  console.log('尝试执行可能出错的代码...');\n  \n  // 模拟错误\n  // throw new Error('这是一个测试错误');\n  \n  var result = { success: true, message: '执行成功' };\n  console.log('成功:', result);\n  return result;\n  \n} catch (error) {\n  console.error('捕获错误:', error.message);\n  return { success: false, error: error.message };\n}"
+    },
+    {
+      "title": "❌ 常见错误示例",
+      "code": "// ❌ 错误！不要使用未 await 的 async IIFE\n// (async function() {\n//   var result = await Memento.chat.testSync();\n//   setResult(result);  // ❌ setResult 已被删除！\n// })();\n\n// ✅ 正确写法 1：直接顶层 await\nvar result = await Memento.chat.testSync();\nreturn result;\n\n// ✅ 正确写法 2：定义函数并 await 调用\n// async function run() {\n//   var result = await Memento.chat.testSync();\n//   return result;\n// }\n// return await run();\n\n// ✅ 正确写法 3：await IIFE\n// return await (async function() {\n//   var result = await Memento.chat.testSync();\n//   return result;\n// })();"
+    }
+  ]
+}

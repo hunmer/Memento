@@ -1,0 +1,580 @@
+{
+  "notes_getNotes": {
+    "title": "获取笔记列表",
+    "description": "获取笔记列表，可选择指定文件夹ID来筛选特定文件夹中的笔记，支持分页。",
+    "parameters": [
+      {
+        "name": "folderId",
+        "type": "string",
+        "optional": true,
+        "description": "文件夹 ID，不传则返回所有笔记"
+      },
+      {"name": "offset", "type": "number", "optional": true, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回的记录数（默认全部）"}
+    ],
+    "returns": {
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回笔记数组；有分页参数时返回对象{items: [], total, offset, count}"
+    },
+    "examples": [
+      {
+        "code": "const allNotes = await Memento.plugins.notes.getNotes({});\nsetResult(allNotes);",
+        "comment": "获取所有笔记"
+      },
+      {
+        "code": "const folderNotes = await Memento.plugins.notes.getNotes({ folderId: 'folder' });\nsetResult(folderNotes);",
+        "comment": "获取指定文件夹的笔记"
+      },
+      {
+        "code": "const result = await Memento.plugins.notes.getNotes({offset: 0, count: 20});\nsetResult(`共${result.total}条笔记，返回${result.count}条：\\n${JSON.stringify(result.items, null, 2)}`);",
+        "comment": "分页获取笔记（前20条）"
+      }
+    ],
+    "notes": "支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
+    "enabled": true
+  },
+  "notes_getNote": {
+    "title": "获取单个笔记详情",
+    "description": "根据笔记ID获取单个笔记的详细信息。",
+    "parameters": [
+      {
+        "name": "noteId",
+        "type": "string",
+        "optional": false,
+        "description": "笔记 ID"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "笔记对象"
+    },
+    "examples": [
+      {
+        "code": "const note = await Memento.plugins.notes.getNote({ noteId: 'note123' });\nsetResult(note);",
+        "comment": "获取笔记详情"
+      }
+    ],
+    "notes": "如果笔记不存在会抛出异常，建议使用 try-catch。",
+    "enabled": true
+  },
+  "notes_createNote": {
+    "title": "创建新笔记",
+    "description": "创建新的笔记，支持设置标题、内容（Markdown）、文件夹和标签。",
+    "parameters": [
+      {
+        "name": "title",
+        "type": "string",
+        "optional": false,
+        "description": "笔记标题"
+      },
+      {
+        "name": "content",
+        "type": "string",
+        "optional": false,
+        "description": "笔记内容，支持 Markdown 格式"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "optional": true,
+        "description": "笔记ID(可选,不提供则自动生成)"
+      },
+      {
+        "name": "folderId",
+        "type": "string",
+        "optional": true,
+        "description": "文件夹 ID，默认为 'root'"
+      },
+      {
+        "name": "tags",
+        "type": "Array<string>",
+        "optional": true,
+        "description": "标签数组"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "创建的笔记对象"
+    },
+    "examples": [
+      {
+        "code": "const note1 = await Memento.plugins.notes.createNote({\n  title: '每日总结',\n  content: '# 今日完成\\n\\n- 任务1\\n- 任务2'\n});\nsetResult(note1);",
+        "comment": "创建基础笔记"
+      },
+      {
+        "code": "const note2 = await Memento.plugins.notes.createNote({\n  title: '会议记录',\n  content: '# 产品会议\\n\\n讨论内容...',\n  folderId: 'work_folder_id',\n  tags: ['会议', '产品']\n});\nsetResult(note2);",
+        "comment": "创建带标签的笔记"
+      },
+      {
+        "code": "const note3 = await Memento.plugins.notes.createNote({\n  title: '项目计划',\n  content: '# Q1项目计划\\n\\n## 目标\\n- 完成产品开发\\n- 上线测试版本\\n\\n## 时间线\\n- 1月：需求分析\\n- 2月：开发阶段\\n- 3月：测试上线',\n  id: 'note123',\n  folderId: 'project_folder_id',\n  tags: ['工作', '项目', '重要']\n});\nsetResult(`笔记已创建，自定义ID: ${note3.id}`);",
+        "comment": "使用自定义ID创建笔记"
+      }
+    ],
+    "notes": "必需参数: title(笔记标题)、content(笔记内容);可选参数: id(自定义ID)、folderId(文件夹ID)、tags(标签数组);如果不提供id会自动生成UUID;ID不能与现有笔记重复;content 参数支持 Markdown 格式;tags 参数直接传数组，不是 JSON 字符串。",
+    "enabled": true
+  },
+  "notes_updateNote": {
+    "title": "更新笔记",
+    "description": "更新现有笔记的标题、内容和标签。",
+    "parameters": [
+      {
+        "name": "noteId",
+        "type": "string",
+        "optional": false,
+        "description": "笔记 ID"
+      },
+      {
+        "name": "title",
+        "type": "string",
+        "optional": false,
+        "description": "新标题"
+      },
+      {
+        "name": "content",
+        "type": "string",
+        "optional": false,
+        "description": "新内容"
+      },
+      {
+        "name": "tags",
+        "type": "Array<string>",
+        "optional": true,
+        "description": "新标签数组"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "更新后的笔记对象"
+    },
+    "examples": [
+      {
+        "code": "const updatedNote = await Memento.plugins.notes.updateNote({\n  noteId: 'note123',\n  title: '项目计划 (已更新)',\n  content: '# 项目计划\\n\\n本周目标:\\n- 完成设计稿\\n- 开发核心功能',\n  tags: ['工作', '计划', '重要']\n});\nsetResult(updatedNote);",
+        "comment": "更新笔记的所有内容"
+      }
+    ],
+    "notes": "必须同时提供 title 和 content，tags 可选。",
+    "enabled": true
+  },
+  "notes_deleteNote": {
+    "title": "删除笔记",
+    "description": "根据笔记ID删除指定的笔记。",
+    "parameters": [
+      {
+        "name": "noteId",
+        "type": "string",
+        "optional": false,
+        "description": "笔记 ID"
+      }
+    ],
+    "returns": {
+      "type": "Promise<boolean>",
+      "description": "true 表示成功，false 表示失败"
+    },
+    "examples": [
+      {
+        "code": "const success = await Memento.plugins.notes.deleteNote({ noteId: 'note123' });\nsetResult(success);",
+        "comment": "删除笔记"
+      }
+    ],
+    "notes": "删除操作不可恢复，请谨慎使用。",
+    "enabled": true
+  },
+  "notes_searchNotes": {
+    "title": "搜索笔记",
+    "description": "根据关键词、标签和日期范围搜索笔记，支持分页。",
+    "parameters": [
+      {
+        "name": "keyword",
+        "type": "string",
+        "optional": false,
+        "description": "搜索关键词（标题或内容匹配），传空字符串表示不按关键词筛选"
+      },
+      {
+        "name": "tags",
+        "type": "Array<string>",
+        "optional": true,
+        "description": "标签数组（任一标签匹配即可）"
+      },
+      {
+        "name": "startDate",
+        "type": "string",
+        "optional": true,
+        "description": "开始日期，ISO 8601 格式字符串"
+      },
+      {
+        "name": "endDate",
+        "type": "string",
+        "optional": true,
+        "description": "结束日期，ISO 8601 格式字符串"
+      },
+      {"name": "offset", "type": "number", "optional": true, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回的记录数（默认全部）"}
+    ],
+    "returns": {
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回笔记数组；有分页参数时返回对象{items: [], total, offset, count}"
+    },
+    "examples": [
+      {
+        "code": "const results1 = await Memento.plugins.notes.searchNotes({ keyword: '项目' });\nsetResult(results1);",
+        "comment": "搜索标题或内容包含\"项目\"的笔记"
+      },
+      {
+        "code": "const results2 = await Memento.plugins.notes.searchNotes({ keyword: '', tags: ['工作'] });\nsetResult(results2);",
+        "comment": "搜索带\"工作\"标签的笔记"
+      },
+      {
+        "code": "const startTime = await Memento.system.getCustomDate({relativePosition: 'startOfWeek', format: 'iso'});\nconst endTime = await Memento.system.getCustomDate({relativePosition: 'endOfWeek', format: 'iso'});\nconst results3 = await Memento.plugins.notes.searchNotes({ keyword: '', startDate: startTime, endDate: endTime });\nsetResult(results3);",
+        "comment": "搜索本周创建的笔记"
+      },
+      {
+        "code": "const startTime = await Memento.system.getCustomDate({relativePosition: 'startOfMonth', format: 'iso'});\nconst endTime = await Memento.system.getCustomDate({relativePosition: 'endOfMonth', format: 'iso'});\nconst results4 = await Memento.plugins.notes.searchNotes({ keyword: '会议', tags: ['工作', '产品'], startDate: startTime, endDate: endTime });\nsetResult(results4);",
+        "comment": "组合搜索：关键词 + 标签 + 本月日期范围"
+      },
+      {
+        "code": "const result = await Memento.plugins.notes.searchNotes({keyword: '', offset: 0, count: 20});\nsetResult(`搜索结果共${result.total}条，返回${result.count}条：\\n${JSON.stringify(result.items, null, 2)}`);",
+        "comment": "分页搜索（前20条）"
+      }
+    ],
+    "notes": "标签过滤是\"或\"逻辑，任一标签匹配即可。日期范围基于创建时间。支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
+    "enabled": true
+  },
+  "notes_getFolders": {
+    "title": "获取所有文件夹",
+    "description": "获取所有笔记文件夹的列表，支持分页。",
+    "parameters": [
+      {"name": "offset", "type": "number", "optional": true, "description": "分页偏移量（跳过的记录数，默认0）"},
+      {"name": "count", "type": "number", "optional": true, "description": "返回的记录数（默认全部）"}
+    ],
+    "returns": {
+      "type": "Promise<Array|Object>",
+      "description": "无分页参数时返回文件夹数组；有分页参数时返回对象{items: [], total, offset, count}"
+    },
+    "examples": [
+      {
+        "code": "const folders = await Memento.plugins.notes.getFolders();\nsetResult(folders);",
+        "comment": "获取所有文件夹"
+      },
+      {
+        "code": "const result = await Memento.plugins.notes.getFolders({offset: 0, count: 10});\nsetResult(`共${result.total}个文件夹，返回${result.count}个：\\n${JSON.stringify(result.items, null, 2)}`);",
+        "comment": "分页获取文件夹（前10个）"
+      }
+    ],
+    "notes": "返回值包含所有文件夹，包括 root 根文件夹。支持分页参数offset和count，未提供分页参数时返回原格式（数组）",
+    "enabled": true
+  },
+  "notes_getFolder": {
+    "title": "获取单个文件夹详情",
+    "description": "根据文件夹ID获取单个文件夹的详细信息。",
+    "parameters": [
+      {
+        "name": "folderId",
+        "type": "string",
+        "optional": false,
+        "description": "文件夹 ID"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "文件夹对象"
+    },
+    "examples": [
+      {
+        "code": "const folder = await Memento.plugins.notes.getFolder({ folderId: 'folder123' });\nsetResult(folder);",
+        "comment": "获取文件夹详情"
+      }
+    ],
+    "notes": "如果文件夹不存在会抛出异常，建议使用 try-catch。",
+    "enabled": true
+  },
+  "notes_createFolder": {
+    "title": "创建新文件夹",
+    "description": "创建新的笔记文件夹，可选择指定父文件夹来创建子文件夹，支持自定义文件夹ID。",
+    "parameters": [
+      {
+        "name": "name",
+        "type": "string",
+        "optional": false,
+        "description": "文件夹名称"
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "optional": true,
+        "description": "文件夹ID(可选,不提供则自动生成)"
+      },
+      {
+        "name": "parentId",
+        "type": "string",
+        "optional": true,
+        "description": "父文件夹 ID，不传则在根目录下创建"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "创建的文件夹对象"
+    },
+    "examples": [
+      {
+        "code": "const folder1 = await Memento.plugins.notes.createFolder({ name: '个人笔记' });\nsetResult(folder1);",
+        "comment": "在根目录下创建文件夹"
+      },
+      {
+        "code": "const folder2 = await Memento.plugins.notes.createFolder({ name: '项目A', parentId: 'work_folder_id' });\nsetResult(folder2);",
+        "comment": "创建子文件夹"
+      },
+      {
+        "code": "const folder3 = await Memento.plugins.notes.createFolder({ name: '工作文件夹', id: 'folder123' });\nsetResult(`文件夹已创建，自定义ID: ${folder3.id}`);",
+        "comment": "使用自定义ID创建文件夹"
+      }
+    ],
+    "notes": "必需参数: name(文件夹名称);可选参数: id(自定义ID)、parentId(父文件夹ID);如果不提供id会自动生成;ID不能与现有文件夹重复;支持无限层级嵌套。",
+    "enabled": true
+  },
+  "notes_renameFolder": {
+    "title": "重命名文件夹",
+    "description": "修改文件夹的名称。",
+    "parameters": [
+      {
+        "name": "folderId",
+        "type": "string",
+        "optional": false,
+        "description": "文件夹 ID"
+      },
+      {
+        "name": "newName",
+        "type": "string",
+        "optional": false,
+        "description": "新名称"
+      }
+    ],
+    "returns": {
+      "type": "Promise<boolean>",
+      "description": "true 表示成功，false 表示失败"
+    },
+    "examples": [
+      {
+        "code": "const success = await Memento.plugins.notes.renameFolder({ folderId: 'folder123', newName: '工作笔记 2025' });\nsetResult(success);",
+        "comment": "重命名文件夹"
+      }
+    ],
+    "notes": "不能重命名 root 根文件夹。",
+    "enabled": true
+  },
+  "notes_deleteFolder": {
+    "title": "删除文件夹",
+    "description": "删除文件夹，会递归删除所有子文件夹和笔记。",
+    "parameters": [
+      {
+        "name": "folderId",
+        "type": "string",
+        "optional": false,
+        "description": "文件夹 ID"
+      }
+    ],
+    "returns": {
+      "type": "Promise<boolean>",
+      "description": "true 表示成功，false 表示失败"
+    },
+    "examples": [
+      {
+        "code": "const success = await Memento.plugins.notes.deleteFolder({ folderId: 'old_folder_id' });\nsetResult(success);",
+        "comment": "删除文件夹及其所有内容"
+      }
+    ],
+    "notes": "⚠️ 警告：此操作会递归删除文件夹下的所有子文件夹和笔记，无法撤销！",
+    "enabled": true
+  },
+  "notes_getFolderNotes": {
+    "title": "获取文件夹中的笔记",
+    "description": "获取指定文件夹中的笔记列表（不包括子文件夹的笔记）。",
+    "parameters": [
+      {
+        "name": "folderId",
+        "type": "string",
+        "optional": false,
+        "description": "文件夹 ID"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Array>",
+      "description": "笔记对象数组"
+    },
+    "examples": [
+      {
+        "code": "const noteList = await Memento.plugins.notes.getFolderNotes({ folderId: 'work_folder_id' });\nsetResult(noteList);",
+        "comment": "获取文件夹笔记"
+      }
+    ],
+    "notes": "仅返回直接位于该文件夹的笔记，不包括子文件夹。",
+    "enabled": true
+  },
+  "notes_moveNote": {
+    "title": "移动笔记到其他文件夹",
+    "description": "将笔记从当前文件夹移动到目标文件夹。",
+    "parameters": [
+      {
+        "name": "noteId",
+        "type": "string",
+        "optional": false,
+        "description": "笔记 ID"
+      },
+      {
+        "name": "targetFolderId",
+        "type": "string",
+        "optional": false,
+        "description": "目标文件夹 ID"
+      }
+    ],
+    "returns": {
+      "type": "Promise<boolean>",
+      "description": "true 表示成功，false 表示失败"
+    },
+    "examples": [
+      {
+        "code": "const success = await Memento.plugins.notes.moveNote({ noteId: 'note123', targetFolderId: 'new_folder_id' });\nsetResult(success);",
+        "comment": "移动笔记到新文件夹"
+      }
+    ],
+    "notes": "移动操作会更新笔记的 folderId 属性。",
+    "enabled": true
+  },
+  "notes_findNoteBy": {
+    "title": "通用笔记查找",
+    "description": "根据自定义条件查找笔记（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、folderId、content）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个笔记对象或 null；findAll=true 时返回笔记数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找笔记",
+        "code": "const note = await Memento.plugins.notes.findNoteBy({field: 'id', value: 'note123'});\nif (note) {\n  setResult(`找到笔记: ${note.title}`);\n} else {\n  setResult('未找到该笔记');\n}"
+      },
+      {
+        "title": "查找指定文件夹的所有笔记",
+        "code": "const notes = await Memento.plugins.notes.findNoteBy({field: 'folderId', value: 'folder123', findAll: true});\nsetResult(`找到 ${notes.length} 条笔记`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历笔记列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "notes_findNoteById": {
+    "title": "根据ID查找笔记",
+    "description": "快速根据笔记ID查找单个笔记（findNoteBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "笔记ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的笔记对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的笔记",
+        "code": "const note = await Memento.plugins.notes.findNoteById({id: 'note123'});\nif (note) {\n  setResult(`笔记标题: ${note.title}, 内容长度: ${note.content.length}`);\n} else {\n  setResult('笔记不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findNoteBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "notes_findNoteByTitle": {
+    "title": "根据标题查找笔记",
+    "description": "根据笔记标题查找笔记（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "笔记标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个笔记或 null；findAll=true 时返回笔记数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配笔记标题",
+        "code": "const note = await Memento.plugins.notes.findNoteByTitle({title: '项目计划'});\nsetResult(note ? `找到笔记ID: ${note.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的笔记",
+        "code": "const notes = await Memento.plugins.notes.findNoteByTitle({title: '会议', fuzzy: true, findAll: true});\nsetResult(`找到 ${notes.length} 条包含会议的笔记`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 contains",
+    "enabled": true
+  },
+  "notes_findFolderBy": {
+    "title": "通用文件夹查找",
+    "description": "根据自定义条件查找文件夹（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、parentId）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个文件夹对象或 null；findAll=true 时返回文件夹数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找文件夹",
+        "code": "const folder = await Memento.plugins.notes.findFolderBy({field: 'id', value: 'folder123'});\nif (folder) {\n  setResult(`找到文件夹: ${folder.name}`);\n} else {\n  setResult('未找到该文件夹');\n}"
+      },
+      {
+        "title": "查找某个文件夹的所有子文件夹",
+        "code": "const subFolders = await Memento.plugins.notes.findFolderBy({field: 'parentId', value: 'folder123', findAll: true});\nsetResult(`找到 ${subFolders.length} 个子文件夹`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历文件夹列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "notes_findFolderById": {
+    "title": "根据ID查找文件夹",
+    "description": "快速根据文件夹ID查找单个文件夹（findFolderBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "文件夹ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的文件夹对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的文件夹",
+        "code": "const folder = await Memento.plugins.notes.findFolderById({id: 'folder123'});\nif (folder) {\n  setResult(`文件夹名称: ${folder.name}`);\n} else {\n  setResult('文件夹不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findFolderBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "notes_findFolderByName": {
+    "title": "根据名称查找文件夹",
+    "description": "根据文件夹名称查找文件夹（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "文件夹名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个文件夹或 null；findAll=true 时返回文件夹数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配文件夹名",
+        "code": "const folder = await Memento.plugins.notes.findFolderByName({name: '工作笔记'});\nsetResult(folder ? `找到文件夹ID: ${folder.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的文件夹",
+        "code": "const folders = await Memento.plugins.notes.findFolderByName({name: '项目', fuzzy: true, findAll: true});\nsetResult(`找到 ${folders.length} 个包含项目的文件夹`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 contains",
+    "enabled": true
+  }
+}

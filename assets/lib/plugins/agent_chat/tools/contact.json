@@ -1,0 +1,367 @@
+{
+  "getContacts": {
+    "title": "获取所有联系人",
+    "description": "获取所有联系人的列表。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回联系人数组；有分页参数时返回对象 {data: 联系人数组, total: 总数, offset: 偏移量, count: 返回数量, hasMore: 是否还有更多}"
+    },
+    "examples": [
+      {
+        "title": "获取所有联系人（无分页）",
+        "code": "const contacts = await Memento.plugins.contact.getContacts({});\nsetResult(`共有 ${contacts.length} 个联系人`);"
+      },
+      {
+        "title": "分页获取联系人（第1页，每页20个）",
+        "code": "const result = await Memento.plugins.contact.getContacts({offset: 0, count: 20});\nsetResult(`第1页: ${result.data.length}个联系人, 共${result.total}个, 还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "分页获取联系人（第2页）",
+        "code": "const result = await Memento.plugins.contact.getContacts({offset: 20, count: 20});\nsetResult(JSON.stringify(result.data.map(c => c.name), null, 2));"
+      }
+    ],
+    "notes": "返回所有联系人信息，包含 id、name、phone、tags 等字段。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "getContact": {
+    "title": "获取联系人详情",
+    "description": "根据ID获取指定联系人的详细信息",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "联系人对象，如不存在则返回 error 字段"
+    },
+    "examples": [
+      {
+        "title": "获取联系人详情",
+        "code": "const contact = await Memento.plugins.contact.getContact({contactId: 'contact123'});\nif (contact.error) {\n  setResult('联系人不存在');\n} else {\n  setResult(JSON.stringify(contact, null, 2));\n}"
+      }
+    ],
+    "notes": "如联系人不存在，返回对象包含 error 字段",
+    "enabled": true
+  },
+  "createContact": {
+    "title": "创建联系人",
+    "description": "创建一个新的联系人",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "姓名"},
+      {"name": "phone", "type": "string", "required": true, "description": "电话号码"},
+      {"name": "id", "type": "string", "required": false, "description": "联系人ID(可选,不提供则自动生成)"},
+      {"name": "avatar", "type": "string", "required": false, "description": "头像路径"},
+      {"name": "address", "type": "string", "required": false, "description": "地址"},
+      {"name": "notes", "type": "string", "required": false, "description": "备注"},
+      {"name": "tags", "type": "Array", "required": false, "description": "标签数组"},
+      {"name": "customFields", "type": "Object", "required": false, "description": "自定义字段（键值对对象）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的联系人对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单联系人",
+        "code": "const contact = await Memento.plugins.contact.createContact({name: '张三', phone: '13800138000'});\nsetResult(`联系人已创建: ${contact.name}`);"
+      },
+      {
+        "title": "创建完整联系人",
+        "code": "const contact = await Memento.plugins.contact.createContact({\n  name: '李四',\n  phone: '13900139000',\n  address: '北京市海淀区',\n  notes: '重要客户',\n  tags: ['朋友', '客户'],\n  customFields: {公司: '北京科技', 职位: '经理'}\n});\nsetResult(`联系人ID: ${contact.id}`);"
+      },
+      {
+        "title": "使用自定义ID创建联系人",
+        "code": "const contact = await Memento.plugins.contact.createContact({\n  id: 'contact123',\n  name: '王五',\n  phone: '13700137000',\n  address: '上海市浦东新区',\n  notes: '多年好友',\n  tags: ['朋友'],\n  customFields: {公司: '上海科技', 职位: '工程师'}\n});\nsetResult(`联系人已创建，自定义ID: ${contact.id}`);"
+      }
+    ],
+    "notes": "必需参数: name(姓名)、phone(电话号码);可选参数: id(自定义ID)、avatar(头像)、address(地址)、notes(备注)、tags(标签)、customFields(自定义字段);如果不提供id会自动生成UUID;ID不能与现有联系人重复",
+    "enabled": true
+  },
+  "updateContact": {
+    "title": "更新联系人",
+    "description": "更新已有联系人的信息",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新姓名"},
+      {"name": "phone", "type": "string", "required": false, "description": "新电话号码"},
+      {"name": "avatar", "type": "string", "required": false, "description": "新头像路径"},
+      {"name": "address", "type": "string", "required": false, "description": "新地址"},
+      {"name": "notes", "type": "string", "required": false, "description": "新备注"},
+      {"name": "tags", "type": "Array", "required": false, "description": "新标签数组"},
+      {"name": "customFields", "type": "Object", "required": false, "description": "新自定义字段"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的联系人对象，如不存在则返回 error 字段"
+    },
+    "examples": [
+      {
+        "title": "更新联系人电话",
+        "code": "const updated = await Memento.plugins.contact.updateContact({contactId: 'contact123', phone: '13700137000'});\nsetResult(`电话已更新: ${updated.phone}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，其他字段保持不变",
+    "enabled": true
+  },
+  "deleteContact": {
+    "title": "删除联系人",
+    "description": "删除指定的联系人（包括相关的交互记录）",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true，失败返回 false"
+    },
+    "examples": [
+      {
+        "title": "删除联系人",
+        "code": "const result = await Memento.plugins.contact.deleteContact({contactId: 'contact123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该联系人的所有交互记录",
+    "enabled": true
+  },
+  "addInteraction": {
+    "title": "添加交互记录",
+    "description": "为联系人添加一条交互记录（自动更新最后联系时间）",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"},
+      {"name": "notes", "type": "string", "required": true, "description": "交互内容描述"},
+      {"name": "dateStr", "type": "string", "required": false, "description": "交互日期（ISO8601 格式，默认当前时间）"},
+      {"name": "participants", "type": "Array", "required": false, "description": "其他参与者的联系人ID数组"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的交互记录对象"
+    },
+    "examples": [
+      {
+        "title": "添加简单交互记录",
+        "code": "const record = await Memento.plugins.contact.addInteraction({contactId: 'contact123', notes: '电话沟通了项目进度'});\nsetResult(`交互记录已添加: ${record.id}`);"
+      },
+      {
+        "title": "添加多人交互记录",
+        "code": "const today = await Memento.system.getCustomDate({relativePosition: 'startOfDay', format: 'iso'});\nconst timestamp = today.replace(/T.*/, 'T14:00:00.000Z');\nconst record = await Memento.plugins.contact.addInteraction({\n  contactId: 'contact123',\n  notes: '三方会议讨论合作',\n  dateStr: timestamp,\n  participants: ['contact456', 'contact789']\n});\nsetResult('已记录多人会议');"
+      }
+    ],
+    "notes": "添加交互记录会自动更新联系人的 lastContactTime 字段",
+    "enabled": true
+  },
+  "getInteractions": {
+    "title": "获取交互记录",
+    "description": "获取指定联系人的所有交互记录。支持分页查询，提供 offset 或 count 参数时返回分页对象；不提供时返回完整数组。",
+    "parameters": [
+      {"name": "contactId", "type": "string", "required": true, "description": "联系人ID"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（默认 100）"}
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回交互记录数组；有分页参数时返回对象 {data: 交互记录数组, total: 总数, offset: 偏移量, count: 返回数量, hasMore: 是否还有更多}"
+    },
+    "examples": [
+      {
+        "title": "获取交互记录（无分页）",
+        "code": "const records = await Memento.plugins.contact.getInteractions({contactId: 'contact123'});\nsetResult(`共有 ${records.length} 条交互记录`);"
+      },
+      {
+        "title": "分页获取交互记录（第1页，每页10条）",
+        "code": "const result = await Memento.plugins.contact.getInteractions({contactId: 'contact123', offset: 0, count: 10});\nsetResult(`第1页: ${result.data.length}条记录, 共${result.total}条, 还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "分页获取交互记录（第2页）",
+        "code": "const result = await Memento.plugins.contact.getInteractions({contactId: 'contact123', offset: 10, count: 10});\nsetResult(JSON.stringify(result.data.map(r => r.notes), null, 2));"
+      }
+    ],
+    "notes": "按交互日期倒序排列。使用分页参数可以控制返回数据量，推荐每页 10-30 条数据",
+    "enabled": true
+  },
+  "deleteInteraction": {
+    "title": "删除交互记录",
+    "description": "删除指定的交互记录",
+    "parameters": [
+      {"name": "interactionId", "type": "string", "required": true, "description": "交互记录ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true，失败返回 false"
+    },
+    "examples": [
+      {
+        "title": "删除交互记录",
+        "code": "const result = await Memento.plugins.contact.deleteInteraction({interactionId: 'record456'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
+      }
+    ],
+    "notes": "删除操作不可逆",
+    "enabled": true
+  },
+  "getRecentContacts": {
+    "title": "获取最近联系人数",
+    "description": "获取最近一个月内有过联系的人数",
+    "parameters": [],
+    "returns": {
+      "type": "number",
+      "description": "最近联系人数量"
+    },
+    "examples": [
+      {
+        "title": "获取最近联系人数",
+        "code": "const count = await Memento.plugins.contact.getRecentContacts({});\nsetResult(`最近一个月联系了 ${count} 个人`);"
+      }
+    ],
+    "notes": "统计 lastContactTime 在最近 30 天内的联系人数量",
+    "enabled": true
+  },
+  "getAllTags": {
+    "title": "获取所有标签",
+    "description": "获取系统中使用的所有联系人标签",
+    "parameters": [],
+    "returns": {
+      "type": "Array",
+      "description": "标签字符串数组"
+    },
+    "examples": [
+      {
+        "title": "获取所有标签",
+        "code": "const tags = await Memento.plugins.contact.getAllTags({});\nsetResult(tags.join(', '));"
+      }
+    ],
+    "notes": "返回去重后的标签列表",
+    "enabled": true
+  },
+  "findContactBy": {
+    "title": "通用联系人查找",
+    "description": "根据自定义条件查找联系人（支持单条/多条结果）。当 findAll=true 且提供分页参数时，返回分页对象；否则返回原格式。",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、name、phone、address）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（仅 findAll=true 时有效，默认 100）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个联系人对象或 null；findAll=true 无分页时返回联系人数组；findAll=true 有分页时返回对象 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找联系人",
+        "code": "const contact = await Memento.plugins.contact.findContactBy({field: 'id', value: 'contact123'});\nif (contact) {\n  setResult(`找到联系人: ${contact.name}，电话: ${contact.phone}`);\n} else {\n  setResult('未找到该联系人');\n}"
+      },
+      {
+        "title": "查找所有地址在北京的联系人（无分页）",
+        "code": "const contacts = await Memento.plugins.contact.findContactBy({field: 'address', value: '北京', findAll: true});\nsetResult(`找到 ${contacts.length} 个在北京的联系人`);"
+      },
+      {
+        "title": "分页查找所有地址在北京的联系人",
+        "code": "const result = await Memento.plugins.contact.findContactBy({field: 'address', value: '北京', findAll: true, offset: 0, count: 20});\nsetResult(`第1页: ${result.data.length}个联系人, 共${result.total}个`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历联系人列表；支持任意字段匹配；分页仅在 findAll=true 时生效。推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "findContactById": {
+    "title": "根据ID查找联系人",
+    "description": "快速根据联系人ID查找单个联系人（findContactBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "联系人ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的联系人对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的联系人",
+        "code": "const contact = await Memento.plugins.contact.findContactById({id: 'contact123'});\nif (contact) {\n  setResult(`联系人姓名: ${contact.name}, 电话: ${contact.phone}`);\n} else {\n  setResult('联系人不存在');\n}"
+      }
+    ],
+    "notes": "等价于 getContact，但遵循统一命名规范",
+    "enabled": true
+  },
+  "findContactByName": {
+    "title": "根据名称查找联系人",
+    "description": "根据联系人名称查找联系人（支持精确匹配或模糊匹配）。当 findAll=true 且提供分页参数时，返回分页对象；否则返回原格式。",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "联系人名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（仅 findAll=true 时有效，默认 100）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个联系人或 null；findAll=true 无分页时返回联系人数组；findAll=true 有分页时返回对象 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "精确匹配联系人名称",
+        "code": "const contact = await Memento.plugins.contact.findContactByName({name: '张三'});\nsetResult(contact ? `电话: ${contact.phone}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的联系人（无分页）",
+        "code": "const contacts = await Memento.plugins.contact.findContactByName({name: '张', fuzzy: true, findAll: true});\nsetResult(`找到 ${contacts.length} 个姓张的联系人`);"
+      },
+      {
+        "title": "分页模糊匹配查找联系人",
+        "code": "const result = await Memento.plugins.contact.findContactByName({name: '张', fuzzy: true, findAll: true, offset: 0, count: 20});\nsetResult(`第1页: ${result.data.length}个联系人, 共${result.total}个`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes。分页仅在 findAll=true 时生效。推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "findInteractionBy": {
+    "title": "通用交互记录查找",
+    "description": "根据自定义条件查找交互记录（支持单条/多条结果）。当 findAll=true 且提供分页参数时，返回分页对象；否则返回原格式。",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、contactId、notes）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"},
+      {"name": "offset", "type": "number", "required": false, "description": "分页偏移量（仅 findAll=true 时有效，默认 0）"},
+      {"name": "count", "type": "number", "required": false, "description": "分页数量（仅 findAll=true 时有效，默认 100）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个交互记录或 null；findAll=true 无分页时返回交互记录数组；findAll=true 有分页时返回对象 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找交互记录",
+        "code": "const record = await Memento.plugins.contact.findInteractionBy({field: 'id', value: 'record123'});\nif (record) {\n  setResult(`交互记录: ${record.notes}`);\n} else {\n  setResult('未找到该记录');\n}"
+      },
+      {
+        "title": "查找某联系人的所有交互记录（无分页）",
+        "code": "const records = await Memento.plugins.contact.findInteractionBy({field: 'contactId', value: 'contact123', findAll: true});\nsetResult(`共有 ${records.length} 条交互记录`);"
+      },
+      {
+        "title": "分页查找某联系人的交互记录",
+        "code": "const result = await Memento.plugins.contact.findInteractionBy({field: 'contactId', value: 'contact123', findAll: true, offset: 0, count: 10});\nsetResult(`第1页: ${result.data.length}条记录, 共${result.total}条`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历交互记录列表；支持任意字段匹配；分页仅在 findAll=true 时生效。推荐每页 10-30 条数据",
+    "enabled": true
+  },
+  "findInteractionById": {
+    "title": "根据ID查找交互记录",
+    "description": "快速根据交互记录ID查找单个记录（findInteractionBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "交互记录ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的交互记录对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的交互记录",
+        "code": "const record = await Memento.plugins.contact.findInteractionById({id: 'record123'});\nif (record) {\n  setResult(`交互内容: ${record.notes}, 日期: ${record.date}`);\n} else {\n  setResult('记录不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findInteractionBy({field: 'id', value: id})",
+    "enabled": true
+  }
+}

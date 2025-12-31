@@ -1,0 +1,92 @@
+[
+  {
+    "id": "default-notes-create",
+    "name": "创建新笔记",
+    "description": "创建一个新的笔记",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建笔记",
+        "desc": "创建一个标题为\"每日总结\"的笔记",
+        "data": "const note = await Memento.plugins.notes.createNote({\n  title: '每日总结',\n  content: '## 今日完成\\n\\n## 明日计划\\n\\n## 遇到的问题\\n',\n  tags: ['日总结']\n});\n\nconst result = {\n  success: true,\n  note: {\n    id: note.id,\n    title: note.title\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["notes", "创建", "笔记"],
+    "declaredTools": [
+      {"id": "notes_createNote", "name": "创建笔记"}
+    ]
+  },
+  {
+    "id": "default-notes-search",
+    "name": "搜索笔记",
+    "description": "搜索包含指定关键词的笔记",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "搜索笔记",
+        "desc": "搜索包含\"项目\"关键词的笔记",
+        "data": "const notes = await Memento.plugins.notes.searchNotes({\n  query: '项目'\n});\n\nconst result = {\n  count: notes.length,\n  notes: notes.map(n => ({\n    id: n.id,\n    title: n.title,\n    updatedAt: n.updatedAt\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["notes", "搜索", "查询"],
+    "declaredTools": [
+      {"id": "notes_searchNotes", "name": "搜索笔记"}
+    ]
+  },
+  {
+    "id": "default-notes-by-tag",
+    "name": "按标签查找笔记",
+    "description": "获取带有指定标签的所有笔记",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "按标签查找",
+        "desc": "查找带\"工作\"标签的笔记",
+        "data": "const notes = await Memento.plugins.notes.getNotesByTag({\n  tag: '工作'\n});\n\nconst result = {\n  count: notes.length,\n  notes: notes.map(n => ({\n    id: n.id,\n    title: n.title,\n    tags: n.tags\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["notes", "标签", "查询"],
+    "declaredTools": [
+      {"id": "notes_getNotesByTag", "name": "按标签获取笔记"}
+    ]
+  },
+  {
+    "id": "default-notes-folders",
+    "name": "获取笔记文件夹",
+    "description": "列出所有笔记文件夹",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取文件夹列表",
+        "desc": "列出所有笔记文件夹",
+        "data": "const folders = await Memento.plugins.notes.getFolders();\n\nconst result = {\n  count: folders.length,\n  folders: folders.map(f => ({\n    id: f.id,\n    name: f.name,\n    noteCount: f.noteCount || 0\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["notes", "文件夹", "列表"],
+    "declaredTools": [
+      {"id": "notes_getFolders", "name": "获取文件夹列表"}
+    ]
+  },
+  {
+    "id": "default-notes-create-folder",
+    "name": "创建笔记文件夹",
+    "description": "创建一个新的笔记文件夹",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建文件夹",
+        "desc": "创建名为\"学习笔记\"的文件夹",
+        "data": "const folder = await Memento.plugins.notes.createFolder({\n  name: '学习笔记'\n});\n\nconst result = {\n  success: true,\n  folder: {\n    id: folder.id,\n    name: folder.name\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["notes", "文件夹", "创建"],
+    "declaredTools": [
+      {"id": "notes_createFolder", "name": "创建文件夹"}
+    ]
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "category": "Nodes 插件示例",
+  "description": "节点/笔记本树相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有笔记本",
+      "code": "// 获取所有笔记本列表\nvar notebooks = await Memento.nodes.getNotebooks();\nconsole.log('笔记本列表:', notebooks);\nreturn notebooks;"
+    },
+    {
+      "title": "创建笔记本",
+      "code": "// 创建一个新笔记本\n// 参数: title, iconCodePoint(可选), colorValue(可选)\nvar notebook = await Memento.nodes.createNotebook(\n  '工作笔记本',     // 标题\n  0xe873,          // 图标(可选)\n  0xFF2196F3       // 颜色(可选)\n);\n\nconsole.log('创建成功:', notebook);\nreturn notebook;"
+    },
+    {
+      "title": "获取节点列表",
+      "code": "// 获取笔记本中的节点\nvar notebooks = await Memento.nodes.getNotebooks();\n\nif (notebooks.length > 0) {\n  var notebookId = notebooks[0].id;\n  \n  // 参数: notebookId, parentId(可选, 获取子节点)\n  var nodes = await Memento.nodes.getNodes(notebookId);\n  console.log('节点列表:', nodes);\n  return nodes;\n} else {\n  return '请先创建笔记本';\n}"
+    },
+    {
+      "title": "创建节点",
+      "code": "// 在笔记本中创建节点\nvar notebooks = await Memento.nodes.getNotebooks();\n\nif (notebooks.length > 0) {\n  var notebookId = notebooks[0].id;\n  \n  // 参数: notebookId, nodeData(JSON)\n  var nodeData = JSON.stringify({\n    title: '新任务',\n    status: 'todo',\n    tags: ['重要'],\n    notes: '任务详情'\n  });\n  \n  var node = await Memento.nodes.createNode(notebookId, nodeData);\n  console.log('创建成功:', node);\n  return node;\n} else {\n  return '请先创建笔记本';\n}"
+    },
+    {
+      "title": "获取节点树",
+      "code": "// 获取完整的节点树结构\nvar notebooks = await Memento.nodes.getNotebooks();\n\nif (notebooks.length > 0) {\n  var notebookId = notebooks[0].id;\n  \n  var tree = await Memento.nodes.getNodeTree(notebookId);\n  console.log('节点树:', tree);\n  return tree;\n} else {\n  return '请先创建笔记本';\n}"
+    },
+    {
+      "title": "移动节点",
+      "code": "// 将节点移动到新的父节点下\nvar notebooks = await Memento.nodes.getNotebooks();\n\nif (notebooks.length > 0) {\n  var notebookId = notebooks[0].id;\n  var nodes = await Memento.nodes.getNodes(notebookId);\n  \n  if (nodes.length >= 2) {\n    // 参数: notebookId, nodeId, newParentId\n    var result = await Memento.nodes.moveNode(\n      notebookId,\n      nodes[0].id,\n      nodes[1].id\n    );\n    \n    console.log('移动成功:', result);\n    return result;\n  } else {\n    return '需要至少2个节点';\n  }\n} else {\n  return '请先创建笔记本';\n}"
+    }
+  ]
+}

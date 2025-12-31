@@ -1,0 +1,26 @@
+{
+  "category": "Habits 插件示例",
+  "description": "习惯管理相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取所有习惯",
+      "code": "// 获取所有习惯列表\nvar habits = await Memento.habits.getHabits();\nconsole.log('习惯列表:', habits);\nreturn habits;"
+    },
+    {
+      "title": "获取今日习惯",
+      "code": "// 获取今天需要打卡的习惯\nvar todayHabits = await Memento.habits.getTodayHabits();\nconsole.log('今日习惯:', todayHabits);\nreturn todayHabits;"
+    },
+    {
+      "title": "创建新习惯",
+      "code": "// 创建一个新习惯\n// 先获取技能ID\nvar skills = await Memento.habits.getSkills();\nvar skillId = skills.length > 0 ? skills[0].id : null;\n\n// 参数: title, durationMinutes, skillId, ...\nvar habit = await Memento.habits.createHabit(\n  '每日阅读',      // 标题\n  30,              // 时长(分钟)\n  skillId          // 技能ID\n);\n\nconsole.log('创建成功:', habit);\nreturn habit;"
+    },
+    {
+      "title": "打卡记录",
+      "code": "// 为习惯打卡\nvar habits = await Memento.habits.getHabits();\n\nif (habits.length > 0) {\n  var habitId = habits[0].id;\n  \n  // 参数: habitId, durationSeconds(可选), notes(可选)\n  var record = await Memento.habits.checkIn(\n    habitId,\n    1800,           // 时长(秒), 可选\n    '今天读完了一章'  // 备注, 可选\n  );\n  \n  console.log('打卡成功:', record);\n  return record;\n} else {\n  return '请先创建习惯';\n}"
+    },
+    {
+      "title": "获取统计信息",
+      "code": "// 获取习惯的统计信息\nvar habits = await Memento.habits.getHabits();\n\nif (habits.length > 0) {\n  var habitId = habits[0].id;\n  \n  // 获取统计: totalDurationMinutes, completionCount\n  var stats = await Memento.habits.getStats(habitId);\n  console.log('统计信息:', stats);\n  return stats;\n} else {\n  return '没有习惯记录';\n}"
+    }
+  ]
+}

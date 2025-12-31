@@ -1,0 +1,214 @@
+{
+  "getMemorialDays": {
+    "title": "获取所有纪念日",
+    "description": "获取所有纪念日的列表,支持分页查询",
+    "parameters": [
+      {"name": "offset", "type": "number", "required": false, "description": "偏移量(起始索引),用于分页,默认不分页"},
+      {"name": "count", "type": "number", "required": false, "description": "每页数量,默认20条,仅在提供offset时生效"}
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回纪念日数组;有分页参数时返回对象{items: Array, total: number, offset: number, count: number, hasMore: boolean}"
+    },
+    "examples": [
+      {
+        "title": "获取所有纪念日(无分页)",
+        "code": "const days = await Memento.plugins.day.getMemorialDays({});\nsetResult(JSON.stringify(days, null, 2));"
+      },
+      {
+        "title": "分页获取纪念日(第1页,每页10条)",
+        "code": "const result = await Memento.plugins.day.getMemorialDays({offset: 0, count: 10});\nsetResult(`共 ${result.total} 条,当前显示 ${result.items.length} 条,是否有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "分页获取纪念日(第2页)",
+        "code": "const result = await Memento.plugins.day.getMemorialDays({offset: 10, count: 10});\nsetResult(JSON.stringify(result.items, null, 2));"
+      }
+    ],
+    "notes": "不提供offset和count参数时返回所有纪念日数组(向后兼容);提供分页参数时返回包含items、total、offset、count、hasMore的对象",
+    "enabled": true
+  },
+  "createMemorialDay": {
+    "title": "创建纪念日",
+    "description": "创建一个新的纪念日",
+    "parameters": [
+      {"name": "id", "type": "string", "required": false, "description": "纪念日ID(可选,不传则自动生成)"},
+      {"name": "name", "type": "string", "required": true, "description": "纪念日名称"},
+      {"name": "date", "type": "string", "required": true, "description": "日期字符串(格式:YYYY-MM-DD)"},
+      {"name": "notesJson", "type": "string", "required": false, "description": "笔记列表(JSON数组字符串)"},
+      {"name": "backgroundColor", "type": "number", "required": false, "description": "背景颜色值(整数)"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的纪念日对象,包含 success、data 或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "创建纪念日",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst result = await Memento.plugins.day.createMemorialDay({name: '新年', date: newYearDate});\nsetResult(result.success ? `纪念日已创建: ${result.data.title}` : result.error);"
+      },
+      {
+        "title": "创建带自定义ID的纪念日",
+        "code": "const result = await Memento.plugins.day.createMemorialDay({\n  id: 'day123',\n  name: '测试纪念日',\n  date: '2025-12-31'\n});\nsetResult(result.success ? `创建成功，ID: ${result.data.id}` : result.error);"
+      },
+      {
+        "title": "创建带笔记的纪念日",
+        "code": "const result = await Memento.plugins.day.createMemorialDay({\n  name: '生日',\n  date: '2025-06-15',\n  notesJson: JSON.stringify(['准备礼物', '订餐厅'])\n});\nsetResult(result.success ? '创建成功' : result.error);"
+      }
+    ],
+    "notes": "必需参数: name(名称)、date(日期);可选参数: id(自定义ID)、notesJson(笔记数组)、backgroundColor(颜色值)",
+    "enabled": true
+  },
+  "updateMemorialDay": {
+    "title": "更新纪念日",
+    "description": "更新指定纪念日的信息",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "纪念日ID"},
+      {"name": "name", "type": "string", "required": false, "description": "新名称"},
+      {"name": "date", "type": "string", "required": false, "description": "新日期(格式:YYYY-MM-DD)"},
+      {"name": "notesJson", "type": "string", "required": false, "description": "新笔记列表(JSON数组字符串)"},
+      {"name": "backgroundColor", "type": "number", "required": false, "description": "新背景颜色值(整数)"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的纪念日对象,包含 success、data 或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "更新纪念日名称",
+        "code": "const result = await Memento.plugins.day.updateMemorialDay({id: 'day123', name: '春节'});\nsetResult(result.success ? `已更新: ${result.data.title}` : result.error);"
+      }
+    ],
+    "notes": "必需参数: id(纪念日ID);所有其他字段均为可选,仅更新提供的字段",
+    "enabled": true
+  },
+  "deleteMemorialDay": {
+    "title": "删除纪念日",
+    "description": "删除指定的纪念日",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "纪念日ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "删除结果,包含 success、message 或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "删除纪念日",
+        "code": "const result = await Memento.plugins.day.deleteMemorialDay({id: 'day123'});\nsetResult(result.success ? result.message : result.error);"
+      }
+    ],
+    "notes": "删除操作不可逆,需确认纪念日ID正确",
+    "enabled": true
+  },
+  "getDaysUntil": {
+    "title": "计算距离天数",
+    "description": "计算当前日期到指定日期的天数差",
+    "parameters": [
+      {"name": "date", "type": "string", "required": true, "description": "目标日期(格式:YYYY-MM-DD)"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "包含 success、days(天数差)、isExpired(是否过期)、isToday(是否今天)等字段"
+    },
+    "examples": [
+      {
+        "title": "计算距离新年的天数",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst nextYear = timeInfo.year + 1;\nconst newYearDate = `${nextYear}-01-01`;\nconst result = await Memento.plugins.day.getDaysUntil({date: newYearDate});\nif (result.success) {\n  setResult(`距离${nextYear}年新年还有 ${result.days} 天`);\n} else {\n  setResult(result.error);\n}"
+      }
+    ],
+    "notes": "返回值可能为负数(表示已过去的天数)",
+    "enabled": true
+  },
+  "getUpcomingDays": {
+    "title": "获取即将到来的纪念日",
+    "description": "获取指定天数内即将到来的纪念日列表",
+    "parameters": [
+      {"name": "withinDays", "type": "number", "required": false, "description": "天数范围,默认 7 天"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "包含 success、count(数量)、days(纪念日列表)或 error 字段"
+    },
+    "examples": [
+      {
+        "title": "获取未来7天的纪念日",
+        "code": "const result = await Memento.plugins.day.getUpcomingDays({withinDays: 7});\nif (result.success) {\n  setResult(`未来一周有 ${result.count} 个纪念日`);\n} else {\n  setResult(result.error);\n}"
+      },
+      {
+        "title": "获取未来一个月的纪念日",
+        "code": "const result = await Memento.plugins.day.getUpcomingDays({withinDays: 30});\nsetResult(result.success ? JSON.stringify(result.days, null, 2) : result.error);"
+      }
+    ],
+    "notes": "默认查询未来7天内的纪念日,按时间从近到远排序",
+    "enabled": true
+  },
+  "findMemorialDayBy": {
+    "title": "通用纪念日查找",
+    "description": "根据自定义条件查找纪念日(支持单条/多条结果)",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名(如: id、title)"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项(默认 false,只返回第一个)"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个纪念日对象或 null; findAll=true 时返回纪念日数组"
+    },
+    "examples": [
+      {
+        "title": "根据ID查找纪念日",
+        "code": "const day = await Memento.plugins.day.findMemorialDayBy({field: 'id', value: 'day123'});\nif (day) {\n  setResult(`找到纪念日: ${day.title},距离还有 ${day.daysRemaining} 天`);\n} else {\n  setResult('未找到该纪念日');\n}"
+      },
+      {
+        "title": "根据名称查找纪念日",
+        "code": "const day = await Memento.plugins.day.findMemorialDayBy({field: 'title', value: '春节'});\nsetResult(day ? `纪念日ID: ${day.id}` : '未找到');"
+      }
+    ],
+    "notes": "简化查找逻辑,避免手动遍历纪念日列表;支持任意字段匹配",
+    "enabled": true
+  },
+  "findMemorialDayById": {
+    "title": "根据ID查找纪念日",
+    "description": "快速根据纪念日ID查找单个纪念日(findMemorialDayBy 的便捷方法)",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "纪念日ID"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的纪念日对象,未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的纪念日",
+        "code": "const day = await Memento.plugins.day.findMemorialDayById({id: 'day123'});\nif (day) {\n  setResult(`纪念日名称: ${day.title},目标日期: ${day.targetDate},距离还有: ${day.daysRemaining} 天`);\n} else {\n  setResult('纪念日不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findMemorialDayBy({field: 'id', value: id})",
+    "enabled": true
+  },
+  "findMemorialDayByName": {
+    "title": "根据名称查找纪念日",
+    "description": "根据纪念日名称查找纪念日(支持精确匹配或模糊匹配)",
+    "parameters": [
+      {"name": "name", "type": "string", "required": true, "description": "纪念日名称"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配(默认 false,精确匹配)"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项(默认 false)"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个纪念日或 null; findAll=true 时返回纪念日数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配纪念日名称",
+        "code": "const day = await Memento.plugins.day.findMemorialDayByName({name: '春节'});\nsetResult(day ? `找到纪念日ID: ${day.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配纪念日名称",
+        "code": "const days = await Memento.plugins.day.findMemorialDayByName({name: '生日', fuzzy: true, findAll: true});\nsetResult(`找到 ${days.length} 个包含【生日】的纪念日`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===,模糊匹配使用 includes",
+    "enabled": true
+  }
+}

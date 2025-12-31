@@ -1,0 +1,670 @@
+{
+  "getHabits": {
+    "title": "获取所有习惯",
+    "description": "获取所有习惯的列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回习惯数组；有分页参数时返回 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "获取所有习惯",
+        "code": "const habits = await Memento.plugins.habits.getHabits();\nsetResult(JSON.stringify(habits, null, 2));"
+      },
+      {
+        "title": "分页获取习惯（前20个）",
+        "code": "const result = await Memento.plugins.habits.getHabits({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个习惯，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取习惯（第二页）",
+        "code": "const result = await Memento.plugins.habits.getHabits({offset: 20, count: 20});\nsetResult(`还有更多: ${result.hasMore}`);"
+      },
+      {
+        "title": "遍历所有习惯（分页加载）",
+        "code": "let allHabits = [];\nlet offset = 0;\nconst count = 30;\n\nwhile (true) {\n  const result = await Memento.plugins.habits.getHabits({offset, count});\n  allHabits = allHabits.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allHabits.length} 个习惯`);"
+      }
+    ],
+    "notes": "返回所有已创建的习惯，包括关联的技能信息。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "getHabitById": {
+    "title": "获取单个习惯",
+    "description": "根据ID获取指定习惯的详细信息",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "习惯对象（包含完成记录）"
+    },
+    "examples": [
+      {
+        "title": "获取习惯详情",
+        "code": "const habit = await Memento.plugins.habits.getHabitById({habitId: 'habit123'});\nsetResult(JSON.stringify(habit, null, 2));"
+      }
+    ],
+    "notes": "如习惯不存在则返回 null",
+    "enabled": true
+  },
+  "createHabit": {
+    "title": "创建习惯",
+    "description": "创建一个新的习惯",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "习惯名称"},
+      {"name": "durationMinutes", "type": "number", "required": true, "description": "目标时长（分钟）"},
+      {"name": "id", "type": "string", "required": false, "description": "自定义习惯ID，不提供则自动生成"},
+      {"name": "skillId", "type": "string", "required": false, "description": "关联的技能ID，如果不存在会自动创建新技能"},
+      {"name": "notes", "type": "string", "required": false, "description": "备注"},
+      {"name": "group", "type": "string", "required": false, "description": "分组"},
+      {"name": "icon", "type": "string", "required": false, "description": "图标"},
+      {"name": "image", "type": "string", "required": false, "description": "图片"},
+      {"name": "reminderDays", "type": "array", "required": false, "description": "提醒日期（0-6，周日-周六）"},
+      {"name": "intervalDays", "type": "number", "required": false, "description": "间隔天数，0表示每日"},
+      {"name": "tags", "type": "array", "required": false, "description": "标签列表"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的习惯对象"
+    },
+    "examples": [
+      {
+        "title": "创建简单习惯",
+        "code": "const habit = await Memento.plugins.habits.createHabit({title: '阅读', durationMinutes: 30});\nsetResult(`习惯已创建: ${habit.title}`);"
+      },
+      {
+        "title": "创建关联技能的习惯",
+        "code": "const habit = await Memento.plugins.habits.createHabit({title: '编程练习', durationMinutes: 60, skillId: 'skill123', reminderDays: [1,2,3,4,5]});\nsetResult(`习惯ID: ${habit.id}`);"
+      },
+      {
+        "title": "创建带自定义ID的习惯",
+        "code": "const habit = await Memento.plugins.habits.createHabit({id: 'habit123', title: '晨读', durationMinutes: 45});\nsetResult(`习惯已创建: ${habit.id} - ${habit.title}`);"
+      },
+      {
+        "title": "创建习惯并自动创建关联技能",
+        "code": "const habit = await Memento.plugins.habits.createHabit({title: '学习React', durationMinutes: 90, skillId: 'react_development'});\nsetResult(`习惯已创建: ${habit.title}，自动关联技能: ${habit.skillId}`);\n// 技能'react_development'会自动创建，标题也是'react_development'"
+      }
+    ],
+    "notes": "习惯可关联技能，完成记录会自动累积到技能的总时长（一万小时定律）。如果提供的skillId不存在，系统会自动创建一个新技能，使用skillId作为技能的ID和标题",
+    "enabled": true
+  },
+  "updateHabit": {
+    "title": "更新习惯",
+    "description": "更新习惯的信息",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"},
+      {"name": "title", "type": "string", "required": false, "description": "新名称"},
+      {"name": "durationMinutes", "type": "number", "required": false, "description": "新目标时长"},
+      {"name": "skillId", "type": "string", "required": false, "description": "新关联的技能ID"},
+      {"name": "notes", "type": "string", "required": false, "description": "新备注"},
+      {"name": "group", "type": "string", "required": false, "description": "新分组"},
+      {"name": "icon", "type": "string", "required": false, "description": "新图标"},
+      {"name": "image", "type": "string", "required": false, "description": "新图片"},
+      {"name": "reminderDays", "type": "array", "required": false, "description": "新提醒日期"},
+      {"name": "intervalDays", "type": "number", "required": false, "description": "新间隔天数"},
+      {"name": "tags", "type": "array", "required": false, "description": "新标签列表"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的习惯对象"
+    },
+    "examples": [
+      {
+        "title": "更新习惯名称",
+        "code": "const updated = await Memento.plugins.habits.updateHabit({habitId: 'habit123', title: '深度阅读'});\nsetResult(`习惯已更新: ${updated.title}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，未提供的字段保持不变",
+    "enabled": true
+  },
+  "deleteHabit": {
+    "title": "删除习惯",
+    "description": "删除指定的习惯（包括完成记录）",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除习惯",
+        "code": "const result = await Memento.plugins.habits.deleteHabit({habitId: 'habit123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
+      }
+    ],
+    "notes": "删除操作不可逆，会同时删除该习惯的所有完成记录",
+    "enabled": true
+  },
+  "getSkills": {
+    "title": "获取所有技能",
+    "description": "获取所有技能的列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回技能数组；有分页参数时返回 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "获取所有技能",
+        "code": "const skills = await Memento.plugins.habits.getSkills();\nsetResult(JSON.stringify(skills, null, 2));"
+      },
+      {
+        "title": "分页获取技能（前20个）",
+        "code": "const result = await Memento.plugins.habits.getSkills({offset: 0, count: 20});\nsetResult(`共 ${result.total} 个技能，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取技能（第二页）",
+        "code": "const result = await Memento.plugins.habits.getSkills({offset: 20, count: 20});\nconst avgProgress = result.data.reduce((sum, s) => sum + (s.totalMinutes / s.targetMinutes), 0) / result.data.length * 100;\nsetResult(`平均进度: ${avgProgress.toFixed(1)}%`);"
+      },
+      {
+        "title": "遍历所有技能（分页加载）",
+        "code": "let allSkills = [];\nlet offset = 0;\nconst count = 30;\n\nwhile (true) {\n  const result = await Memento.plugins.habits.getSkills({offset, count});\n  allSkills = allSkills.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nconst totalHours = allSkills.reduce((sum, s) => sum + s.totalMinutes, 0) / 60;\nsetResult(`共加载 ${allSkills.length} 个技能，总累积 ${totalHours.toFixed(1)} 小时`);"
+      }
+    ],
+    "notes": "技能用于追踪一万小时定律，totalMinutes 表示已累积的总时长。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "getSkillById": {
+    "title": "获取单个技能",
+    "description": "根据ID获取指定技能的详细信息",
+    "parameters": [
+      {"name": "skillId", "type": "string", "required": true, "description": "技能ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "技能对象（包含关联的习惯列表）"
+    },
+    "examples": [
+      {
+        "title": "获取技能详情",
+        "code": "const skill = await Memento.plugins.habits.getSkillById({skillId: 'skill123'});\nsetResult(`技能: ${skill.title}, 已累积: ${skill.targetMinutes} 分钟`);"
+      }
+    ],
+    "notes": "如技能不存在则返回 null",
+    "enabled": true
+  },
+  "createSkill": {
+    "title": "创建技能",
+    "description": "创建一个新的技能",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "技能名称"},
+      {"name": "id", "type": "string", "required": false, "description": "自定义技能ID，不提供则自动生成"},
+      {"name": "description", "type": "string", "required": false, "description": "技能描述"},
+      {"name": "notes", "type": "string", "required": false, "description": "备注"},
+      {"name": "group", "type": "string", "required": false, "description": "分组"},
+      {"name": "icon", "type": "string", "required": false, "description": "图标"},
+      {"name": "image", "type": "string", "required": false, "description": "图片"},
+      {"name": "targetMinutes", "type": "number", "required": false, "description": "目标分钟数，默认 600000(=10000小时)"},
+      {"name": "maxDurationMinutes", "type": "number", "required": false, "description": "单次最大时长"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的技能对象"
+    },
+    "examples": [
+      {
+        "title": "创建技能",
+        "code": "const skill = await Memento.plugins.habits.createSkill({title: '编程', targetMinutes: 600000});\nsetResult(`技能已创建: ${skill.title}`);"
+      },
+      {
+        "title": "创建默认目标的技能",
+        "code": "const skill = await Memento.plugins.habits.createSkill({title: '绘画'});\nsetResult(`技能ID: ${skill.id}`);"
+      },
+      {
+        "title": "创建带自定义ID的技能",
+        "code": "const skill = await Memento.plugins.habits.createSkill({id: 'skill_programming_001', title: '高级编程', description: '深入学习编程技能', targetMinutes: 10000});\nsetResult(`技能已创建: ${skill.id} - ${skill.title}`);"
+      }
+    ],
+    "notes": "新创建的技能初始 totalMinutes 为 0，需通过完成关联习惯来累积时长",
+    "enabled": true
+  },
+  "updateSkill": {
+    "title": "更新技能",
+    "description": "更新技能的信息",
+    "parameters": [
+      {"name": "skillId", "type": "string", "required": true, "description": "技能ID"},
+      {"name": "title", "type": "string", "required": false, "description": "新名称"},
+      {"name": "description", "type": "string", "required": false, "description": "新描述"},
+      {"name": "notes", "type": "string", "required": false, "description": "新备注"},
+      {"name": "group", "type": "string", "required": false, "description": "新分组"},
+      {"name": "icon", "type": "string", "required": false, "description": "新图标"},
+      {"name": "image", "type": "string", "required": false, "description": "新图片"},
+      {"name": "targetMinutes", "type": "number", "required": false, "description": "新目标分钟数"},
+      {"name": "maxDurationMinutes", "type": "number", "required": false, "description": "新单次最大时长"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "更新后的技能对象"
+    },
+    "examples": [
+      {
+        "title": "更新技能名称",
+        "code": "const updated = await Memento.plugins.habits.updateSkill({skillId: 'skill123', title: '高级编程'});\nsetResult(`技能已更新: ${updated.title}`);"
+      }
+    ],
+    "notes": "仅更新提供的字段，totalMinutes 由系统自动累积，无法手动修改",
+    "enabled": true
+  },
+  "deleteSkill": {
+    "title": "删除技能",
+    "description": "删除指定的技能（不会删除关联的习惯）",
+    "parameters": [
+      {"name": "skillId", "type": "string", "required": true, "description": "技能ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除技能",
+        "code": "const result = await Memento.plugins.habits.deleteSkill({skillId: 'skill123'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
+      }
+    ],
+    "notes": "删除技能后，关联的习惯仍然保留，但 skillId 字段会被清空",
+    "enabled": true
+  },
+  "checkIn": {
+    "title": "打卡完成习惯",
+    "description": "记录一次习惯完成（打卡）",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"},
+      {"name": "durationSeconds", "type": "number", "required": false, "description": "完成时长（秒），默认使用习惯的目标时长"},
+      {"name": "notes", "type": "string", "required": false, "description": "打卡备注"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "新创建的完成记录对象"
+    },
+    "examples": [
+      {
+        "title": "简单打卡",
+        "code": "const record = await Memento.plugins.habits.checkIn({habitId: 'habit123'});\nsetResult(`打卡成功，时长: ${record.duration / 60} 分钟`);"
+      },
+      {
+        "title": "带时长和备注的打卡",
+        "code": "const record = await Memento.plugins.habits.checkIn({habitId: 'habit123', durationSeconds: 2700, notes: '今天读完了一章'});\nsetResult(`打卡成功: ${record.notes}`);"
+      }
+    ],
+    "notes": "打卡时长会自动累积到关联技能的总时长，支持连续打卡天数统计",
+    "enabled": true
+  },
+  "getCompletionRecords": {
+    "title": "获取完成记录",
+    "description": "获取指定习惯的完成记录列表，支持分页",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"},
+      {"name": "limit", "type": "number", "required": false, "description": "限制返回记录数（返回最新的N条，不推荐与分页参数同时使用）"},
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回记录数组；有分页参数时返回 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "获取所有完成记录",
+        "code": "const records = await Memento.plugins.habits.getCompletionRecords({habitId: 'habit123'});\nsetResult(`共有 ${records.length} 条打卡记录`);"
+      },
+      {
+        "title": "获取最近10条记录（使用limit）",
+        "code": "const recent = await Memento.plugins.habits.getCompletionRecords({habitId: 'habit123', limit: 10});\nsetResult(JSON.stringify(recent, null, 2));"
+      },
+      {
+        "title": "分页获取记录（前30条）",
+        "code": "const result = await Memento.plugins.habits.getCompletionRecords({habitId: 'habit123', offset: 0, count: 30});\nsetResult(`共 ${result.total} 条记录，当前返回 ${result.data.length} 条`);"
+      },
+      {
+        "title": "分页获取记录（第二页）",
+        "code": "const result = await Memento.plugins.habits.getCompletionRecords({habitId: 'habit123', offset: 30, count: 30});\nconst totalMinutes = result.data.reduce((sum, r) => sum + r.durationMinutes, 0);\nsetResult(`本页累积时长: ${totalMinutes} 分钟`);"
+      },
+      {
+        "title": "遍历所有记录（分页加载）",
+        "code": "let allRecords = [];\nlet offset = 0;\nconst count = 50;\n\nwhile (true) {\n  const result = await Memento.plugins.habits.getCompletionRecords({habitId: 'habit123', offset, count});\n  allRecords = allRecords.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allRecords.length} 条记录`);"
+      }
+    ],
+    "notes": "记录按完成时间倒序排列（最新的在前）。使用分页参数可以控制返回数据量，提高性能。推荐每页 30-100 条数据",
+    "enabled": true
+  },
+  "deleteCompletionRecord": {
+    "title": "删除完成记录",
+    "description": "删除指定的完成记录",
+    "parameters": [
+      {"name": "recordId", "type": "string", "required": true, "description": "记录ID"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true"
+    },
+    "examples": [
+      {
+        "title": "删除打卡记录",
+        "code": "const result = await Memento.plugins.habits.deleteCompletionRecord({recordId: 'record456'});\nsetResult(result.success ? '删除成功' : (result.error || '删除失败'));"
+      }
+    ],
+    "notes": "删除记录会同时扣除关联技能的累积时长",
+    "enabled": true
+  },
+  "getStats": {
+    "title": "获取统计信息",
+    "description": "获取习惯的统计信息（连续天数、总时长等）",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 habitId、totalDurationMinutes、completionCount 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取习惯统计",
+        "code": "const stats = await Memento.plugins.habits.getStats({habitId: 'habit123'});\nsetResult(`总时长 ${stats.totalDurationMinutes} 分钟，打卡 ${stats.completionCount} 次`);"
+      }
+    ],
+    "notes": "连续天数统计会在中断打卡后重置为 0",
+    "enabled": true
+  },
+  "getTodayHabits": {
+    "title": "获取今日习惯",
+    "description": "获取今天应该完成的习惯列表（根据频率过滤），支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回习惯数组；有分页参数时返回 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "获取今日待办习惯",
+        "code": "const today = await Memento.plugins.habits.getTodayHabits();\nsetResult(`今天有 ${today.length} 个习惯要完成`);"
+      },
+      {
+        "title": "分页获取今日习惯（前10个）",
+        "code": "const result = await Memento.plugins.habits.getTodayHabits({offset: 0, count: 10});\nsetResult(`今日共 ${result.total} 个习惯，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "分页获取今日习惯（第二页）",
+        "code": "const result = await Memento.plugins.habits.getTodayHabits({offset: 10, count: 10});\nconst totalMinutes = result.data.reduce((sum, h) => sum + h.durationMinutes, 0);\nsetResult(`本页预计耗时: ${totalMinutes} 分钟`);"
+      }
+    ],
+    "notes": "根据习惯的 intervalDays 和 reminderDays 字段过滤。使用分页参数可以控制返回数据量，提高性能。推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "startTimer": {
+    "title": "开始计时",
+    "description": "为指定习惯开始计时",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"},
+      {"name": "initialSeconds", "type": "number", "required": false, "description": "初始秒数（倒计时），默认使用习惯的目标时长"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "计时器状态对象"
+    },
+    "examples": [
+      {
+        "title": "开始计时",
+        "code": "const timer = await Memento.plugins.habits.startTimer({habitId: 'habit123'});\nsetResult('计时已开始');"
+      },
+      {
+        "title": "自定义初始时长",
+        "code": "const timer = await Memento.plugins.habits.startTimer({habitId: 'habit123', initialSeconds: 1800});\nsetResult(`计时已开始: ${timer.initialSeconds} 秒`);"
+      }
+    ],
+    "notes": "同一时间只能有一个习惯在计时，启动新计时会自动停止之前的计时",
+    "enabled": true
+  },
+  "stopTimer": {
+    "title": "停止计时",
+    "description": "停止当前计时",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "停止状态对象"
+    },
+    "examples": [
+      {
+        "title": "停止计时",
+        "code": "const result = await Memento.plugins.habits.stopTimer({habitId: 'habit123'});\nsetResult(`已停止: ${result.habitId}`);"
+      }
+    ],
+    "notes": "停止计时不会自动创建完成记录，需要手动调用 checkIn",
+    "enabled": true
+  },
+  "getTimerStatus": {
+    "title": "获取计时器状态",
+    "description": "获取当前计时器的运行状态",
+    "parameters": [
+      {"name": "habitId", "type": "string", "required": true, "description": "习惯ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "计时器状态对象，包含 habitId、isRunning、elapsedSeconds、isCountdown 等字段"
+    },
+    "examples": [
+      {
+        "title": "查询计时器状态",
+        "code": "const status = await Memento.plugins.habits.getTimerStatus({habitId: 'habit123'});\nif (status.isRunning) {\n  setResult(`正在计时: ${status.elapsedSeconds} 秒`);\n} else {\n  setResult('无正在进行的计时');\n}"
+      }
+    ],
+    "notes": "如果没有正在运行的计时器，isRunning 为 false",
+    "enabled": true
+  },
+  "findHabitBy": {
+    "title": "通用习惯查找",
+    "description": "根据自定义条件查找习惯（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、skillId、group）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个习惯对象或 null；findAll=true 时返回习惯数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找习惯",
+        "code": "const habit = await Memento.plugins.habits.findHabitBy({field: 'id', value: 'habit123'});\nif (habit) {\n  setResult(`找到习惯: ${habit.title}，目标时长: ${habit.durationMinutes}分钟`);\n} else {\n  setResult('未找到该习惯');\n}"
+      },
+      {
+        "title": "查找关联特定技能的所有习惯",
+        "code": "const habits = await Memento.plugins.habits.findHabitBy({field: 'skillId', value: 'skill123', findAll: true});\nsetResult(`该技能关联了 ${habits.length} 个习惯`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历习惯列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findHabitByTitle": {
+    "title": "根据标题查找习惯",
+    "description": "根据习惯标题查找习惯（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "习惯标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个习惯或 null；findAll=true 时返回习惯数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配习惯标题",
+        "code": "const habit = await Memento.plugins.habits.findHabitByTitle({title: '阅读'});\nsetResult(habit ? `习惯ID: ${habit.id}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的习惯",
+        "code": "const habits = await Memento.plugins.habits.findHabitByTitle({title: '学习', fuzzy: true, findAll: true});\nconst totalMinutes = habits.reduce((sum, h) => sum + (h.durationMinutes || 0), 0);\nsetResult(`找到 ${habits.length} 个学习相关习惯，总目标时长: ${totalMinutes}分钟`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes；等价于 getHabitById 但支持标题查找",
+    "enabled": true
+  },
+  "findHabitsByGroup": {
+    "title": "根据分组查找习惯",
+    "description": "查找指定分组的所有习惯",
+    "parameters": [
+      {"name": "group", "type": "string", "required": true, "description": "分组名称"}
+    ],
+    "returns": {
+      "type": "Array",
+      "description": "该分组的习惯列表"
+    },
+    "examples": [
+      {
+        "title": "查找健康分组的所有习惯",
+        "code": "const habits = await Memento.plugins.habits.findHabitsByGroup({group: '健康'});\nsetResult(`健康分组有 ${habits.length} 个习惯`);"
+      }
+    ],
+    "notes": "等价于 findHabitBy({field: 'group', value: group, findAll: true})",
+    "enabled": true
+  },
+  "findSkillBy": {
+    "title": "通用技能查找",
+    "description": "根据自定义条件查找技能（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、title、group）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个技能对象或 null；findAll=true 时返回技能数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找技能",
+        "code": "const skill = await Memento.plugins.habits.findSkillBy({field: 'id', value: 'skill123'});\nif (skill) {\n  setResult(`找到技能: ${skill.title}，已累积: ${skill.totalMinutes}分钟`);\n} else {\n  setResult('未找到该技能');\n}"
+      },
+      {
+        "title": "查找所有学习分组的技能",
+        "code": "const skills = await Memento.plugins.habits.findSkillBy({field: 'group', value: '学习', findAll: true});\nconst totalHours = skills.reduce((sum, s) => sum + (s.totalMinutes || 0), 0) / 60;\nsetResult(`学习分组有 ${skills.length} 个技能，总累积: ${totalHours.toFixed(1)}小时`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历技能列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findSkillByTitle": {
+    "title": "根据标题查找技能",
+    "description": "根据技能标题查找技能（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "技能标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个技能或 null；findAll=true 时返回技能数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配技能标题",
+        "code": "const skill = await Memento.plugins.habits.findSkillByTitle({title: '编程'});\nsetResult(skill ? `技能ID: ${skill.id}，进度: ${(skill.totalMinutes/skill.targetMinutes*100).toFixed(1)}%` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的技能",
+        "code": "const skills = await Memento.plugins.habits.findSkillByTitle({title: '设计', fuzzy: true, findAll: true});\nsetResult(`找到 ${skills.length} 个设计相关技能`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes；等价于 getSkillById 但支持标题查找",
+    "enabled": true
+  },
+  "findCompletionRecordBy": {
+    "title": "通用完成记录查找",
+    "description": "根据自定义条件查找完成记录（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：id、habitId、note）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "habitId", "type": "string", "required": false, "description": "限定在特定习惯内查找（可选）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个记录或 null；findAll=true 时返回记录数组"
+    },
+    "examples": [
+      {
+        "title": "根据 ID 查找完成记录",
+        "code": "const record = await Memento.plugins.habits.findCompletionRecordBy({field: 'id', value: 'record123'});\nif (record) {\n  setResult(`记录时长: ${record.durationMinutes}分钟, 备注: ${record.note || '无'}`);\n} else {\n  setResult('未找到该记录');\n}"
+      },
+      {
+        "title": "查找特定习惯的所有完成记录",
+        "code": "const records = await Memento.plugins.habits.findCompletionRecordBy({field: 'habitId', value: 'habit123', findAll: true});\nconst totalMinutes = records.reduce((sum, r) => sum + (r.durationMinutes || 0), 0);\nsetResult(`该习惯共打卡 ${records.length} 次，累积 ${totalMinutes}分钟`);"
+      }
+    ],
+    "notes": "简化查找逻辑；habitId 可选，不传则在所有习惯的记录中查找",
+    "enabled": true
+  },
+  "findCompletionRecordById": {
+    "title": "根据ID查找完成记录",
+    "description": "快速根据记录ID查找单个完成记录（findCompletionRecordBy 的便捷方法）",
+    "parameters": [
+      {"name": "id", "type": "string", "required": true, "description": "记录ID"},
+      {"name": "habitId", "type": "string", "required": false, "description": "限定在特定习惯内查找（可选，提高性能）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的记录对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定ID的完成记录",
+        "code": "const record = await Memento.plugins.habits.findCompletionRecordById({id: 'record123'});\nif (record) {\n  setResult(`完成时间: ${record.completedAt}, 时长: ${record.durationMinutes}分钟`);\n} else {\n  setResult('记录不存在');\n}"
+      }
+    ],
+    "notes": "等价于 findCompletionRecordBy({field: 'id', value: id, habitId})",
+    "enabled": true
+  }
+}

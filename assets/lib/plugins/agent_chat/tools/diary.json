@@ -1,0 +1,358 @@
+{
+  "getDiaries": {
+    "title": "获取日记列表",
+    "description": "获取指定日期范围内的日记列表,支持分页查询",
+    "parameters": [
+      {"name": "startDate", "type": "string", "required": true, "description": "开始日期（格式：YYYY-MM-DD）"},
+      {"name": "endDate", "type": "string", "required": true, "description": "结束日期（格式：YYYY-MM-DD）"},
+      {"name": "offset", "type": "number", "required": false, "description": "偏移量(起始索引),用于分页,默认不分页"},
+      {"name": "count", "type": "number", "required": false, "description": "每页数量,默认20条,仅在提供offset时生效"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "无分页参数时返回{total: number, diaries: Array};有分页参数时返回{total: number, offset: number, count: number, hasMore: boolean, diaries: Array}"
+    },
+    "examples": [
+      {
+        "title": "获取本月所有日记(无分页)",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startDate = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-01`;\nconst endDate = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.getDiaries({startDate, endDate});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  setResult(`共找到 ${result.total} 篇日记`);\n}"
+      },
+      {
+        "title": "获取最近7天的日记",
+        "code": "const endDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst startDate = await Memento.system.getCustomDate({subtract: {days: 7}, format: 'yyyy-MM-dd'});\nconst result = await Memento.plugins.diary.getDiaries({startDate, endDate});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  const summary = result.diaries.map(d => `${d.date}: ${d.title || '无标题'} (${d.wordCount}字)`).join('\\n');\n  setResult(summary || '无日记记录');\n}"
+      },
+      {
+        "title": "分页获取日记(第1页,每页5条)",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst startDate = `${timeInfo.year}-01-01`;\nconst endDate = `${timeInfo.year}-12-31`;\nconst result = await Memento.plugins.diary.getDiaries({startDate, endDate, offset: 0, count: 5});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  setResult(`共 ${result.total} 条,当前显示 ${result.diaries.length} 条,是否有更多: ${result.hasMore}`);\n}"
+      }
+    ],
+    "notes": "不提供offset和count参数时返回所有日记(向后兼容);提供分页参数时返回包含total、offset、count、hasMore的对象;日记按日期升序排列，每条日记包含 date、title、content、mood、wordCount、createdAt、updatedAt 字段",
+    "enabled": true
+  },
+  "getDiary": {
+    "title": "获取单条日记",
+    "description": "获取指定日期的日记内容",
+    "parameters": [
+      {"name": "date", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "日记对象，包含 exists、date、title、content、mood 等字段"
+    },
+    "examples": [
+      {
+        "title": "获取今日日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.getDiary({date: today});\nif (result.exists) {\n  setResult(`标题: ${result.title}\\n内容: ${result.content}\\n心情: ${result.mood || '未设置'}\\n字数: ${result.wordCount}`);\n} else {\n  setResult(result.error || '今天还没有日记');\n}"
+      },
+      {
+        "title": "检查特定日期的日记",
+        "code": "const result = await Memento.plugins.diary.getDiary({date: '2024-01-01'});\nif (result.exists) {\n  setResult(JSON.stringify(result, null, 2));\n} else {\n  setResult('该日期没有日记');\n}"
+      }
+    ],
+    "notes": "如果指定日期没有日记，exists 字段为 false，并返回 error 说明",
+    "enabled": true
+  },
+  "saveDiary": {
+    "title": "保存日记",
+    "description": "保存或更新指定日期的日记",
+    "parameters": [
+      {"name": "date", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"},
+      {"name": "content", "type": "string", "required": true, "description": "日记内容（支持 Markdown 格式）"},
+      {"name": "title", "type": "string", "required": false, "description": "日记标题（可选，默认为空字符串）"},
+      {"name": "mood", "type": "string", "required": false, "description": "心情表情（可选，如：😊）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "保存结果对象，包含 success、message、date 字段"
+    },
+    "examples": [
+      {
+        "title": "保存今日简单日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.saveDiary({\n  date: today,\n  content: '今天天气很好，完成了很多工作。'\n});\nsetResult(result.success ? result.message : `错误: ${result.error}`);"
+      },
+      {
+        "title": "保存完整日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.saveDiary({\n  date: today,\n  content: '# 美好的一天\\n\\n今天完成了项目的重要里程碑，团队协作非常顺利。\\n\\n## 主要成果\\n- 完成了核心功能开发\\n- 通过了所有测试用例\\n- 得到了用户的正面反馈',\n  title: '美好的一天',\n  mood: '😊'\n});\nsetResult(result.success ? `${result.message}，日期: ${result.date}` : `错误: ${result.error}`);"
+      }
+    ],
+    "notes": "如果日期已存在日记则更新，否则创建新日记；content 参数支持 Markdown 格式；title 和 mood 为可选参数",
+    "enabled": true
+  },
+  "deleteDiary": {
+    "title": "删除日记",
+    "description": "删除指定日期的日记",
+    "parameters": [
+      {"name": "date", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "删除结果对象，包含 success、message、date 字段"
+    },
+    "examples": [
+      {
+        "title": "删除今日日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst result = await Memento.plugins.diary.deleteDiary({date: today});\nsetResult(result.success ? result.message : `错误: ${result.error}`);"
+      },
+      {
+        "title": "删除特定日期的日记",
+        "code": "const result = await Memento.plugins.diary.deleteDiary({date: '2024-01-01'});\nif (result.success) {\n  setResult(`${result.message}，日期: ${result.date}`);\n} else {\n  setResult(`错误: ${result.error}`);\n}"
+      }
+    ],
+    "notes": "删除操作不可逆，请谨慎使用；如果指定日期没有日记，success 为 false",
+    "enabled": true
+  },
+  "getTodayStats": {
+    "title": "获取今日统计",
+    "description": "获取今天日记的统计信息（字数）",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 date（日期）、wordCount（字数）字段"
+    },
+    "examples": [
+      {
+        "title": "获取今日字数",
+        "code": "const result = await Memento.plugins.diary.getTodayStats({});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  setResult(`今天（${result.date}）写了 ${result.wordCount} 字`);\n}"
+      }
+    ],
+    "notes": "仅统计今天的日记内容字数；即使不需要参数，也需传入空对象 {}",
+    "enabled": true
+  },
+  "getMonthStats": {
+    "title": "获取本月统计",
+    "description": "获取本月日记的统计信息（总字数、完成天数、进度）",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 year、month、wordCount、completedDays、totalDays、progress 字段"
+    },
+    "examples": [
+      {
+        "title": "获取本月统计",
+        "code": "const result = await Memento.plugins.diary.getMonthStats({});\nif (result.error) {\n  setResult(`错误: ${result.error}`);\n} else {\n  setResult(`${result.year}年${result.month}月统计：\\n` +\n    `总字数: ${result.wordCount}\\n` +\n    `完成天数: ${result.completedDays}/${result.totalDays}\\n` +\n    `完成度: ${result.progress}%`);\n}"
+      }
+    ],
+    "notes": "统计当前月份所有日记的数据；progress 为完成百分比的字符串格式（如 \"75.0\"）；即使不需要参数，也需传入空对象 {}",
+    "enabled": true
+  },
+  "getTodayWordCount": {
+    "title": "获取今日字数",
+    "description": "获取今天日记的字数统计",
+    "parameters": [],
+    "returns": {
+      "type": "number",
+      "description": "今日日记字数"
+    },
+    "examples": [
+      {
+        "title": "获取今日字数",
+        "code": "const count = await Memento.plugins.diary.getTodayWordCount();\nsetResult(`今天写了 ${count} 字`);"
+      }
+    ],
+    "notes": "仅统计今天的日记内容字数；这是非 JS API 方法，直接返回数字",
+    "enabled": true
+  },
+  "getMonthWordCount": {
+    "title": "获取本月字数",
+    "description": "获取本月所有日记的总字数",
+    "parameters": [],
+    "returns": {
+      "type": "number",
+      "description": "本月总字数"
+    },
+    "examples": [
+      {
+        "title": "获取本月字数",
+        "code": "const count = await Memento.plugins.diary.getMonthWordCount();\nsetResult(`本月共写了 ${count} 字`);"
+      }
+    ],
+    "notes": "统计当前月份所有日记的字数总和；这是非 JS API 方法，直接返回数字",
+    "enabled": true
+  },
+  "getMonthProgress": {
+    "title": "获取本月进度",
+    "description": "获取本月日记完成进度",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "进度对象，包含 completedDays（已完成天数）和 totalDays（总天数）"
+    },
+    "examples": [
+      {
+        "title": "获取本月进度",
+        "code": "const progress = await Memento.plugins.diary.getMonthProgress();\nsetResult(`本月进度: ${progress.completedDays}/${progress.totalDays}`);"
+      }
+    ],
+    "notes": "返回格式为元组 (completedDays, totalDays)；这是非 JS API 方法，直接返回对象",
+    "enabled": true
+  },
+  "loadDiaryEntry": {
+    "title": "加载日记条目",
+    "description": "加载指定日期的日记",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "日记对象，包含 title、content、mood 等字段，如不存在则返回 null"
+    },
+    "examples": [
+      {
+        "title": "加载今日日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.diary.loadDiaryEntry({dateStr: today});\nif (entry) {\n  setResult(JSON.stringify(entry, null, 2));\n} else {\n  setResult('今天还没有日记');\n}"
+      }
+    ],
+    "notes": "如果指定日期没有日记则返回 null；这是非 JS API 方法，直接返回对象",
+    "enabled": true
+  },
+  "saveDiaryEntry": {
+    "title": "保存日记条目",
+    "description": "保存或更新指定日期的日记",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"},
+      {"name": "content", "type": "string", "required": true, "description": "日记内容（Markdown 格式）"},
+      {"name": "title", "type": "string", "required": false, "description": "日记标题（默认为空）"},
+      {"name": "mood", "type": "string", "required": false, "description": "心情表情（如：😊）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "保存后的日记对象"
+    },
+    "examples": [
+      {
+        "title": "保存简单日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.diary.saveDiaryEntry({dateStr: today, content: '今天天气很好，完成了很多工作...'});\nsetResult('日记已保存');"
+      },
+      {
+        "title": "保存完整日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst entry = await Memento.plugins.diary.saveDiaryEntry({dateStr: today, content: '# 美好的一天\\n\\n今天完成了项目里程碑...', title: '美好的一天', mood: '😊'});\nsetResult(`已保存日记: ${entry.title}`);"
+      }
+    ],
+    "notes": "如果日期已存在日记则更新，否则创建新日记；内容支持 Markdown 格式；这是非 JS API 方法，直接使用位置参数",
+    "enabled": true
+  },
+  "deleteDiaryEntry": {
+    "title": "删除日记条目",
+    "description": "删除指定日期的日记",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "删除成功返回 true，失败或不存在返回 false"
+    },
+    "examples": [
+      {
+        "title": "删除今日日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst success = await Memento.plugins.diary.deleteDiaryEntry({dateStr: today});\nsetResult(success ? '删除成功' : '删除失败或日记不存在');"
+      }
+    ],
+    "notes": "删除操作不可逆；这是非 JS API 方法，直接返回布尔值",
+    "enabled": true
+  },
+  "hasEntryForDate": {
+    "title": "检查日期是否有日记",
+    "description": "检查指定日期是否存在日记记录",
+    "parameters": [
+      {"name": "dateStr", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "boolean",
+      "description": "存在返回 true，否则返回 false"
+    },
+    "examples": [
+      {
+        "title": "检查今日是否有日记",
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nconst today = `${timeInfo.year}-${String(timeInfo.month).padStart(2, '0')}-${String(timeInfo.day).padStart(2, '0')}`;\nconst exists = await Memento.plugins.diary.hasEntryForDate({dateStr: today});\nsetResult(exists ? '今天有日记' : '今天还没有日记');"
+      }
+    ],
+    "notes": "用于快速判断某天是否写了日记；这是非 JS API 方法，直接返回布尔值",
+    "enabled": true
+  },
+  "getDiaryStats": {
+    "title": "获取日记统计",
+    "description": "获取所有日记的统计信息",
+    "parameters": [],
+    "returns": {
+      "type": "Object",
+      "description": "统计对象，包含 totalCharCount（总字数）、entryCount（日记数）、averageCharCount（平均字数）"
+    },
+    "examples": [
+      {
+        "title": "获取统计信息",
+        "code": "const stats = await Memento.plugins.diary.getDiaryStats();\nsetResult(`总字数: ${stats.totalCharCount}, 日记数: ${stats.entryCount}, 平均字数: ${stats.averageCharCount}`);"
+      }
+    ],
+    "notes": "统计所有历史日记的数据；这是非 JS API 方法，直接返回对象",
+    "enabled": true
+  },
+  "findDiaryBy": {
+    "title": "通用日记查找",
+    "description": "根据自定义条件查找日记（支持单条/多条结果）",
+    "parameters": [
+      {"name": "field", "type": "string", "required": true, "description": "要匹配的字段名（如：date、title、content、mood）"},
+      {"name": "value", "type": "any", "required": true, "description": "要匹配的值"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false，只返回第一个）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个日记对象或 null；findAll=true 时返回日记数组"
+    },
+    "examples": [
+      {
+        "title": "根据日期查找日记",
+        "code": "const diary = await Memento.plugins.diary.findDiaryBy({field: 'date', value: '2025-01-15'});\nif (diary) {\n  setResult(`找到日记: ${diary.title || '无标题'}，字数: ${diary.wordCount}`);\n} else {\n  setResult('未找到该日期的日记');\n}"
+      },
+      {
+        "title": "查找所有带特定心情的日记",
+        "code": "const diaries = await Memento.plugins.diary.findDiaryBy({field: 'mood', value: '😊', findAll: true});\nsetResult(`找到 ${diaries.length} 篇开心的日记`);"
+      }
+    ],
+    "notes": "简化查找逻辑，避免手动遍历日记列表；支持任意字段匹配",
+    "enabled": true
+  },
+  "findDiaryByDate": {
+    "title": "根据日期查找日记",
+    "description": "快速根据日期查找单条日记（findDiaryBy 的便捷方法）",
+    "parameters": [
+      {"name": "date", "type": "string", "required": true, "description": "日期（格式：YYYY-MM-DD）"}
+    ],
+    "returns": {
+      "type": "Object|null",
+      "description": "找到的日记对象，未找到返回 null"
+    },
+    "examples": [
+      {
+        "title": "查找指定日期的日记",
+        "code": "const diary = await Memento.plugins.diary.findDiaryByDate({date: '2025-01-15'});\nif (diary) {\n  setResult(`日记标题: ${diary.title || '无标题'}, 内容: ${diary.content.substring(0, 50)}...`);\n} else {\n  setResult('该日期没有日记');\n}"
+      }
+    ],
+    "notes": "等价于 getDiary 或 findDiaryBy({field: 'date', value: date})",
+    "enabled": true
+  },
+  "findDiaryByTitle": {
+    "title": "根据标题查找日记",
+    "description": "根据日记标题查找日记（支持精确匹配或模糊匹配）",
+    "parameters": [
+      {"name": "title", "type": "string", "required": true, "description": "日记标题"},
+      {"name": "fuzzy", "type": "boolean", "required": false, "description": "是否模糊匹配（默认 false，精确匹配）"},
+      {"name": "findAll", "type": "boolean", "required": false, "description": "是否返回所有匹配项（默认 false）"}
+    ],
+    "returns": {
+      "type": "Object|Array|null",
+      "description": "findAll=false 时返回单个日记或 null；findAll=true 时返回日记数组"
+    },
+    "examples": [
+      {
+        "title": "精确匹配日记标题",
+        "code": "const diary = await Memento.plugins.diary.findDiaryByTitle({title: '美好的一天'});\nsetResult(diary ? `找到日记，日期: ${diary.date}` : '未找到');"
+      },
+      {
+        "title": "模糊匹配查找所有包含关键词的日记",
+        "code": "const diaries = await Memento.plugins.diary.findDiaryByTitle({title: '工作', fuzzy: true, findAll: true});\nconst totalWords = diaries.reduce((sum, d) => sum + (d.wordCount || 0), 0);\nsetResult(`找到 ${diaries.length} 篇包含'工作'的日记，共 ${totalWords} 字`);"
+      }
+    ],
+    "notes": "精确匹配使用 ===，模糊匹配使用 includes",
+    "enabled": true
+  }
+}

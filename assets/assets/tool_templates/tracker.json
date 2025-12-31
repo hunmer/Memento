@@ -1,0 +1,76 @@
+[
+  {
+    "id": "default-tracker-all",
+    "name": "查看所有目标",
+    "description": "获取所有追踪目标及其进度",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取目标列表",
+        "desc": "查询所有追踪目标",
+        "data": "const goals = await Memento.plugins.tracker.getGoals();\n\nconst result = {\n  count: goals.length,\n  goals: goals.map(g => ({\n    id: g.id,\n    name: g.name,\n    target: g.target,\n    current: g.current,\n    unit: g.unit,\n    progress: g.target > 0 ? Math.round((g.current / g.target) * 100) : 0\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["tracker", "目标", "查询"],
+    "declaredTools": [
+      {"id": "tracker_getGoals", "name": "获取目标列表"}
+    ]
+  },
+  {
+    "id": "default-tracker-record",
+    "name": "记录数据",
+    "description": "记录今天的目标数据",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "记录运动数据",
+        "desc": "记录今天的运动数据",
+        "data": "// 先获取目标\nconst goals = await Memento.plugins.tracker.getGoals();\nconst exerciseGoal = goals.find(g => g.name.includes('运动') || g.name.includes('健身'));\n\nif (!exerciseGoal) {\n  const result = { success: false, message: '未找到运动相关目标' };\n  setResult(result);\n  return result;\n}\n\n// 记录数据\nconst record = await Memento.plugins.tracker.addRecord({\n  goalId: exerciseGoal.id,\n  value: 30,\n  note: '今日运动完成'\n});\n\nconst result = {\n  success: true,\n  record: {\n    goalName: exerciseGoal.name,\n    value: record.value,\n    date: record.date\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["tracker", "记录", "数据"],
+    "declaredTools": [
+      {"id": "tracker_getGoals", "name": "获取目标列表"},
+      {"id": "tracker_addRecord", "name": "添加记录"}
+    ]
+  },
+  {
+    "id": "default-tracker-create",
+    "name": "创建新目标",
+    "description": "创建一个新的追踪目标",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建目标",
+        "desc": "创建每天阅读30分钟的目标",
+        "data": "const goal = await Memento.plugins.tracker.createGoal({\n  name: '每天读书30分钟',\n  target: 30,\n  unit: '分钟',\n  frequency: 'daily'\n});\n\nconst result = {\n  success: true,\n  goal: {\n    id: goal.id,\n    name: goal.name,\n    target: goal.target,\n    unit: goal.unit\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["tracker", "创建", "目标"],
+    "declaredTools": [
+      {"id": "tracker_createGoal", "name": "创建目标"}
+    ]
+  },
+  {
+    "id": "default-tracker-stats",
+    "name": "查看目标统计",
+    "description": "查看本周的目标完成统计",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取统计数据",
+        "desc": "统计本周目标完成情况",
+        "data": "const goals = await Memento.plugins.tracker.getGoals();\nconst weekStartDate = await Memento.system.getCustomDate({relativePosition: 'startOfWeek'});\n\nconst stats = [];\nfor (const goal of goals) {\n  const records = await Memento.plugins.tracker.getRecords({\n    goalId: goal.id,\n    startDate: weekStartDate.datetime\n  });\n\n  const total = records.reduce((sum, r) => sum + r.value, 0);\n  stats.push({\n    name: goal.name,\n    weeklyTotal: total,\n    target: goal.target * 7,\n    completion: goal.target > 0 ? Math.round((total / (goal.target * 7)) * 100) : 0\n  });\n}\n\nconst result = { weekStats: stats };\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["tracker", "统计", "本周"],
+    "declaredTools": [
+      {"id": "tracker_getGoals", "name": "获取目标列表"},
+      {"id": "tracker_getRecords", "name": "获取记录"}
+    ]
+  }
+]

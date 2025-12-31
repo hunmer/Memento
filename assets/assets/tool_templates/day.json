@@ -1,0 +1,56 @@
+[
+  {
+    "id": "default-day-all",
+    "name": "查看所有纪念日",
+    "description": "获取所有纪念日列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取纪念日列表",
+        "desc": "查询所有纪念日",
+        "data": "const days = await Memento.plugins.day.getDays();\n\nconst result = {\n  count: days.length,\n  days: days.map(d => ({\n    id: d.id,\n    name: d.name,\n    date: d.date,\n    type: d.type\n  }))\n};\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["day", "纪念日", "列表"],
+    "declaredTools": [
+      {"id": "day_getDays", "name": "获取纪念日列表"}
+    ]
+  },
+  {
+    "id": "default-day-upcoming",
+    "name": "即将到来的纪念日",
+    "description": "查看即将到来的纪念日",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取即将到来",
+        "desc": "查询即将到来的纪念日",
+        "data": "const upcoming = await Memento.plugins.day.getUpcoming({\n  days: 30\n});\n\nconst result = {\n  count: upcoming.length,\n  days: upcoming.map(d => ({\n    name: d.name,\n    date: d.date,\n    daysUntil: d.daysUntil\n  }))\n};\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["day", "即将", "纪念日"],
+    "declaredTools": [
+      {"id": "day_getUpcoming", "name": "获取即将到来"}
+    ]
+  },
+  {
+    "id": "default-day-create",
+    "name": "创建纪念日",
+    "description": "创建一个新的纪念日",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建纪念日",
+        "desc": "创建结婚纪念日",
+        "data": "const day = await Memento.plugins.day.createDay({\n  name: '结婚纪念日',\n  date: '2020-01-01',\n  type: 'anniversary',\n  repeat: 'yearly'\n});\n\nconst result = {\n  success: true,\n  day: {\n    id: day.id,\n    name: day.name,\n    date: day.date\n  }\n};\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["day", "创建", "纪念日"],
+    "declaredTools": [
+      {"id": "day_createDay", "name": "创建纪念日"}
+    ]
+  }
+]

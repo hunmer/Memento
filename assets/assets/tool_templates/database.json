@@ -1,0 +1,57 @@
+[
+  {
+    "id": "default-database-all",
+    "name": "查看所有数据库",
+    "description": "获取所有自定义数据库列表",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取数据库列表",
+        "desc": "查询所有数据库",
+        "data": "const databases = await Memento.plugins.database.getDatabases();\n\nconst result = {\n  count: databases.length,\n  databases: databases.map(db => ({\n    id: db.id,\n    name: db.name,\n    recordCount: db.recordCount\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["database", "数据库", "列表"],
+    "declaredTools": [
+      {"id": "database_getDatabases", "name": "获取数据库列表"}
+    ]
+  },
+  {
+    "id": "default-database-create",
+    "name": "创建数据库",
+    "description": "创建一个新的自定义数据库",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建数据库",
+        "desc": "创建\"书籍清单\"数据库",
+        "data": "const database = await Memento.plugins.database.createDatabase({\n  name: '书籍清单',\n  fields: [\n    { name: '书名', type: 'text', required: true },\n    { name: '作者', type: 'text' },\n    { name: '评分', type: 'number' },\n    { name: '已读', type: 'boolean' }\n  ]\n});\n\nconst result = {\n  success: true,\n  database: {\n    id: database.id,\n    name: database.name\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["database", "创建", "数据库"],
+    "declaredTools": [
+      {"id": "database_createDatabase", "name": "创建数据库"}
+    ]
+  },
+  {
+    "id": "default-database-query",
+    "name": "查询记录",
+    "description": "查询数据库中的记录",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "查询记录",
+        "desc": "查询符合条件的记录",
+        "data": "const databases = await Memento.plugins.database.getDatabases();\nconst db = databases[0];\n\nif (!db) {\n  const errorResult = { success: false, message: '没有数据库' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst records = await Memento.plugins.database.getRecords({\n  databaseId: db.id\n});\n\nconst result = {\n  databaseName: db.name,\n  count: records.length,\n  records: records.slice(0, 10)\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["database", "查询", "记录"],
+    "declaredTools": [
+      {"id": "database_getDatabases", "name": "获取数据库列表"},
+      {"id": "database_getRecords", "name": "获取记录"}
+    ]
+  }
+]

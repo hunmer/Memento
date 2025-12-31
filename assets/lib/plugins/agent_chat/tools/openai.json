@@ -1,0 +1,141 @@
+{
+  "getAgents": {
+    "title": "获取所有AI助手",
+    "description": "获取所有已配置的AI助手列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回助手数组；有分页参数时返回 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "获取所有AI助手",
+        "code": "const agents = await Memento.plugins.openai.getAgents();\nsetResult(JSON.stringify(agents, null, 2));"
+      },
+      {
+        "title": "分页获取助手（前10个）",
+        "code": "const result = await Memento.plugins.openai.getAgents({offset: 0, count: 10});\nsetResult(`共 ${result.total} 个助手，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "获取第二页助手",
+        "code": "const result = await Memento.plugins.openai.getAgents({offset: 10, count: 10});\nsetResult(`还有更多: ${result.hasMore}`);"
+      }
+    ],
+    "notes": "返回所有已配置的AI助手，包括服务商信息。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "getAgent": {
+    "title": "获取指定AI助手",
+    "description": "根据ID获取指定AI助手的详细信息",
+    "parameters": [
+      {"name": "agentId", "type": "string", "required": true, "description": "助手ID"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "AI助手对象"
+    },
+    "examples": [
+      {
+        "title": "获取助手详情",
+        "code": "const agent = await Memento.plugins.openai.getAgent({agentId: 'assistant-1'});\nsetResult(`助手: ${agent.name}, 模型: ${agent.model}`);"
+      }
+    ],
+    "notes": "如助手不存在则返回错误对象",
+    "enabled": true
+  },
+  "sendMessage": {
+    "title": "发送消息给AI",
+    "description": "向指定AI助手发送消息并获取回复",
+    "parameters": [
+      {"name": "agentId", "type": "string", "required": true, "description": "助手ID"},
+      {"name": "message", "type": "string", "required": true, "description": "消息内容"},
+      {"name": "contextJson", "type": "string", "required": false, "description": "上下文消息（JSON数组字符串）"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "响应对象，包含 success、response、agent 等字段"
+    },
+    "examples": [
+      {
+        "title": "发送简单消息",
+        "code": "const result = await Memento.plugins.openai.sendMessage({agentId: 'assistant-1', message: '你好'});\nif (result.success) {\n  setResult(result.response);\n} else {\n  setResult(`错误: ${result.error}`);\n}"
+      },
+      {
+        "title": "带上下文的消息",
+        "code": "const context = JSON.stringify([{role: 'user', content: '我叫张三'}, {role: 'assistant', content: '你好，张三！'}]);\nconst result = await Memento.plugins.openai.sendMessage({agentId: 'assistant-1', message: '我叫什么名字？', contextJson: context});\nsetResult(result.response);"
+      }
+    ],
+    "notes": "发送消息有30秒超时限制，超时会返回部分响应",
+    "enabled": true
+  },
+  "getProviders": {
+    "title": "获取所有服务商",
+    "description": "获取所有已配置的AI服务商列表，支持分页",
+    "parameters": [
+      {
+        "name": "offset",
+        "type": "number",
+        "required": false,
+        "description": "分页起始位置（默认 0）"
+      },
+      {
+        "name": "count",
+        "type": "number",
+        "required": false,
+        "description": "返回数量（默认 100）"
+      }
+    ],
+    "returns": {
+      "type": "Array|Object",
+      "description": "无分页参数时返回服务商数组；有分页参数时返回 {data, total, offset, count, hasMore}"
+    },
+    "examples": [
+      {
+        "title": "获取所有服务商",
+        "code": "const providers = await Memento.plugins.openai.getProviders();\nsetResult(JSON.stringify(providers, null, 2));"
+      },
+      {
+        "title": "分页获取服务商（前5个）",
+        "code": "const result = await Memento.plugins.openai.getProviders({offset: 0, count: 5});\nsetResult(`共 ${result.total} 个服务商，当前返回 ${result.data.length} 个`);"
+      },
+      {
+        "title": "遍历所有服务商（分页加载）",
+        "code": "let allProviders = [];\nlet offset = 0;\nconst count = 10;\n\nwhile (true) {\n  const result = await Memento.plugins.openai.getProviders({offset, count});\n  allProviders = allProviders.concat(result.data);\n  \n  if (!result.hasMore) break;\n  offset += count;\n}\n\nsetResult(`共加载 ${allProviders.length} 个服务商`);"
+      }
+    ],
+    "notes": "返回所有已配置的AI服务商，包括 OpenAI、Ollama、Claude 等。使用分页参数可以控制返回数据量，推荐每页 20-50 条数据",
+    "enabled": true
+  },
+  "testProvider": {
+    "title": "测试服务商连接",
+    "description": "测试指定服务商的连接状态",
+    "parameters": [
+      {"name": "providerId", "type": "string", "required": true, "description": "服务商ID或label"}
+    ],
+    "returns": {
+      "type": "Object",
+      "description": "测试结果对象，包含 success、provider、response/error 等字段"
+    },
+    "examples": [
+      {
+        "title": "测试服务商连接",
+        "code": "const result = await Memento.plugins.openai.testProvider({providerId: 'ollama'});\nif (result.success) {\n  setResult(`${result.provider} 连接成功`);\n} else {\n  setResult(`连接失败: ${result.error}`);\n}"
+      }
+    ],
+    "notes": "测试会发送一个简单的'Hello'消息，有10秒超时限制",
+    "enabled": true
+  }
+}

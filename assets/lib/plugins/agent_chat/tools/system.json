@@ -1,0 +1,152 @@
+{
+  "system_getCurrentTime": {
+    "title": "获取当前时间",
+    "description": "获取系统当前的日期和时间信息，包括年月日、时分秒、星期几等。AI 无法获取实时时间，必须通过此工具获取。",
+    "parameters": [],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "时间信息对象，包含：timestamp(时间戳), datetime(ISO格式字符串), year, month, day, hour, minute, second, weekday, weekdayName"
+    },
+    "examples": [
+      {
+        "code": "const timeInfo = await Memento.system.getCurrentTime();\nsetResult(timeInfo);",
+        "comment": "获取当前时间信息"
+      },
+      {
+        "code": "const time = await Memento.system.getCurrentTime();\nconst msg = `今天是${time.year}年${time.month}月${time.day}日，星期${time.weekdayName}`;\nsetResult(msg);",
+        "comment": "格式化显示当前日期"
+      }
+    ],
+    "notes": "AI 自身无法感知时间流逝，必须使用此工具获取实时时间。返回值中的 weekday 是数字(1-7，1代表周一)，weekdayName 是中文名称(一、二、三...日)。",
+    "enabled": true
+  },
+  "system_getDeviceInfo": {
+    "title": "获取设备信息",
+    "description": "获取当前设备的基本信息，包括平台类型、操作系统版本、设备型号等。",
+    "parameters": [],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "设备信息对象，包含：platform(平台类型), platformVersion(系统版本), deviceModel(设备型号), isPhysicalDevice(是否真机)"
+    },
+    "examples": [
+      {
+        "code": "const deviceInfo = await Memento.system.getDeviceInfo();\nsetResult(deviceInfo);",
+        "comment": "获取完整设备信息"
+      },
+      {
+        "code": "const info = await Memento.system.getDeviceInfo();\nconst msg = `您正在使用 ${info.platform} 设备`;\nsetResult(msg);",
+        "comment": "获取平台类型"
+      }
+    ],
+    "notes": "platform 可能的值：android, ios, web, windows, macos, linux。Web 平台的部分信息可能不可用。",
+    "enabled": true
+  },
+  "system_getAppInfo": {
+    "title": "获取应用信息",
+    "description": "获取 Memento 应用的版本信息和基本配置。",
+    "parameters": [],
+    "returns": {
+      "type": "Promise<Object>",
+      "description": "应用信息对象，包含：appName(应用名称), version(版本号), buildNumber(构建号), packageName(包名)"
+    },
+    "examples": [
+      {
+        "code": "const appInfo = await Memento.system.getAppInfo();\nsetResult(appInfo);",
+        "comment": "获取应用版本信息"
+      },
+      {
+        "code": "const app = await Memento.system.getAppInfo();\nconst msg = `${app.appName} v${app.version}`;\nsetResult(msg);",
+        "comment": "显示应用名称和版本"
+      }
+    ],
+    "notes": "版本号格式通常为 x.y.z，buildNumber 为构建编号。",
+    "enabled": true
+  },
+  "system_formatDate": {
+    "title": "格式化日期时间",
+    "description": "将时间戳或 ISO 日期字符串格式化为指定格式的日期时间字符串。",
+    "parameters": [
+      {
+        "name": "dateInput",
+        "type": "string|number",
+        "optional": false,
+        "description": "时间戳（毫秒）或 ISO 8601 格式字符串"
+      },
+      {
+        "name": "format",
+        "type": "string",
+        "optional": true,
+        "description": "格式化模板，支持 yyyy/MM/dd/HH/mm/ss/E 等占位符，默认 'yyyy-MM-dd HH:mm:ss'"
+      }
+    ],
+    "returns": {
+      "type": "Promise<string>",
+      "description": "格式化后的日期时间字符串"
+    },
+    "examples": [
+      {
+        "code": "const formatted = await Memento.system.formatDate(Date.now());\nsetResult(formatted);",
+        "comment": "使用默认格式"
+      },
+      {
+        "code": "const date = await Memento.system.formatDate(1731473170123, 'yyyy年MM月dd日 E');\nsetResult(date);",
+        "comment": "自定义格式"
+      },
+      {
+        "code": "const time = await Memento.system.formatDate('2025-01-15T09:30:00.000Z', 'HH:mm');\nsetResult(time);",
+        "comment": "仅显示时间"
+      }
+    ],
+    "notes": "格式占位符：yyyy(年), MM(月), dd(日), HH(时24), hh(时12), mm(分), ss(秒), E(星期)。",
+    "enabled": true
+  },
+  "system_getTimestamp": {
+    "title": "获取当前时间戳",
+    "description": "获取当前时间的毫秒级时间戳。",
+    "parameters": [],
+    "returns": {
+      "type": "Promise<number>",
+      "description": "当前时间的毫秒级时间戳"
+    },
+    "examples": [
+      {
+        "code": "const timestamp = await Memento.system.getTimestamp();\nsetResult(timestamp.toString());",
+        "comment": "获取当前时间戳"
+      }
+    ],
+    "notes": "返回的是 Unix 时间戳（毫秒），与 Date.now() 相同。",
+    "enabled": true
+  },
+  "system_getLocation": {
+    "title": "获取位置信息",
+    "description": "获取用户的地理位置信息，支持两种模式：auto（自动获取当前位置的第一个搜索结果）和 manual（显示对话框让用户选择）。",
+    "parameters": [
+      {
+        "name": "mode",
+        "type": "string",
+        "optional": true,
+        "description": "获取位置的模式，可选值：'auto'（自动获取第一个结果）或 'manual'（手动选择），默认为 'manual'"
+      }
+    ],
+    "returns": {
+      "type": "Promise<Object|null>",
+      "description": "位置信息对象，包含：name(地点名称), address(详细地址), location(经纬度字符串), latitude(纬度), longitude(经度)。如果用户取消或发生错误，返回 null 或包含 error 字段的对象。"
+    },
+    "examples": [
+      {
+        "code": "const location = await Memento.system.getLocation('auto');\nif (location && !location.error) {\n  const msg = `当前位置：${location.name}，地址：${location.address}`;\n  setResult(msg);\n} else {\n  setResult('获取位置失败');\n}\nreturn location;",
+        "comment": "自动获取当前位置"
+      },
+      {
+        "code": "const location = await Memento.system.getLocation('manual');\nif (location) {\n  const msg = `选择的位置：${location.name}`;\n  setResult(msg);\n} else {\n  setResult('用户取消了选择');\n}\nreturn location;",
+        "comment": "手动选择位置"
+      },
+      {
+        "code": "const location = await Memento.system.getLocation();\nif (location) {\n  setResult({ lat: location.latitude, lng: location.longitude });\n} else {\n  setResult(null);\n}\nreturn location;",
+        "comment": "使用默认模式（manual）获取位置"
+      }
+    ],
+    "notes": "auto 模式会自动请求位置权限并返回当前位置附近的第一个 POI（兴趣点）；manual 模式会显示位置选择对话框，用户可以搜索或选择位置；需要位置权限（移动端），使用高德地图 API。",
+    "enabled": true
+  }
+}

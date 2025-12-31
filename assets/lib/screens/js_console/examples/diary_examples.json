@@ -1,0 +1,26 @@
+{
+  "category": "Diary 插件示例",
+  "description": "日记相关的 JS API 调用示例",
+  "examples": [
+    {
+      "title": "获取指定日期的日记",
+      "code": "// 获取今天的日记\nvar today = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nvar diary = await Memento.diary.getDiary(today);\nconsole.log('今日日记:', diary);\nreturn diary;"
+    },
+    {
+      "title": "保存日记",
+      "code": "// 保存一篇日记\n// 参数: date, title, content, mood\nvar result = await Memento.diary.saveDiary(\n  '2025-11-14',           // 日期\n  '美好的一天',           // 标题\n  '# 今日总结\\n\\n今天完成了很多工作...', // 内容(Markdown)\n  '😊'                    // 心情(可选)\n);\nconsole.log('保存结果:', result);\nreturn result;"
+    },
+    {
+      "title": "获取今日统计",
+      "code": "// 获取今日字数统计\nvar stats = await Memento.diary.getTodayStats();\nconsole.log('今日统计:', stats);\n// 包含: date, wordCount\nreturn stats;"
+    },
+    {
+      "title": "获取本月统计",
+      "code": "// 获取本月统计信息\nvar stats = await Memento.diary.getMonthStats();\nconsole.log('本月统计:', stats);\n// 包含: year, month, wordCount, completedDays, totalDays, progress\nreturn stats;"
+    },
+    {
+      "title": "获取日期范围的日记",
+      "code": "// 获取指定日期范围的日记\nvar diaries = await Memento.diary.getDiaries(\n  '2025-11-01',  // 开始日期\n  '2025-11-14'   // 结束日期\n);\nconsole.log('日记数量:', diaries.total);\nconsole.log('日记列表:', diaries.diaries);\nreturn diaries;"
+    }
+  ]
+}
