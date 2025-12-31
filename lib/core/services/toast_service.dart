@@ -1,7 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart' as fluttertoast;
-import 'package:flutter_styled_toast/flutter_styled_toast.dart' as styled_toast;
+
+// 条件导入：StyledToast 在 Web 平台有问题
+// 默认使用存根，有 IO 库时（移动/桌面）使用真实实现
+import '../../utils/styled_toast_stub.dart'
+    if (dart.library.io) 'package:flutter_styled_toast/flutter_styled_toast.dart' as styled_toast;
 
 /// Toast 消息类型
 enum ToastType {
@@ -169,6 +173,18 @@ class ToastService implements IToastServiceWithInit {
   }) {
     if (message.isEmpty) return;
 
+    // Web 平台使用 SnackBar
+    if (kIsWeb) {
+      _showSnackBar(
+        message,
+        type: type,
+        duration: duration ?? const Duration(seconds: 2),
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+      );
+      return;
+    }
+
     final context = _navigatorKey.currentContext;
     if (context == null) {
       debugPrint('ToastService: No context available, fallback to FlutterToast');
@@ -237,6 +253,12 @@ class ToastService implements IToastServiceWithInit {
     Offset? reverseEndOffset,
     VoidCallback? onDismiss,
   }) {
+    // Web 平台暂不支持自定义 Widget Toast，使用 SnackBar 显示简单文本
+    if (kIsWeb) {
+      debugPrint('ToastService: Custom widget toast not supported on Web platform');
+      return;
+    }
+
     final ctx = context ?? _navigatorKey.currentContext;
     if (ctx == null) {
       debugPrint('ToastService: No context available for custom widget');
