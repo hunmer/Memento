@@ -40,4 +40,41 @@ class MobileJSEngine implements JSEngine {
   Future<void> dispose() async {
     throw UnsupportedError('MobileJSEngine is only available on mobile/desktop platforms');
   }
+
+  // UI 处理器相关方法（存根，不执行任何操作）
+  void setToastHandler(Function(String, String, String, String) handler) {
+    // Web 平台不使用
+  }
+
+  void setAlertHandler(
+    Future<bool> Function(
+      String, {
+      String? title,
+      String? confirmText,
+      String? cancelText,
+      bool showCancel,
+    })
+    handler,
+  ) {
+    // Web 平台不使用
+  }
+
+  void setDialogHandler(
+    Future<dynamic> Function(String?, String?, List<Map<String, dynamic>>)
+    handler,
+  ) {
+    // Web 平台不使用
+  }
+
+  void setLocationHandler(
+    Future<Map<String, dynamic>?> Function(String) handler,
+  ) {
+    // Web 平台不使用
+  }
+
+  void setPluginAnalysisHandler(
+    Future<String> Function(String, Map<String, dynamic>) handler,
+  ) {
+    // Web 平台不使用
+  }
 }

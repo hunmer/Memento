@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Memento/core/notification_controller.dart';
+import 'package:Memento/utils/platform_utils.dart';
 import 'activity_service.dart';
 
 /// 活动通知服务 - 管理Android常驻通知栏
@@ -30,7 +30,7 @@ class ActivityNotificationService {
 
     try {
       // 仅在Android平台启用
-      if (!Platform.isAndroid) {
+      if (!PlatformUtils.isAndroid) {
         debugPrint('[ActivityNotificationService] 非Android平台，跳过初始化');
         return;
       }
@@ -47,7 +47,7 @@ class ActivityNotificationService {
 
   /// 启用通知服务
   Future<void> enable() async {
-    if (!Platform.isAndroid) return;
+    if (!PlatformUtils.isAndroid) return;
 
     // 请求通知权限
     final hasPermission = await NotificationController.requestPermission();
@@ -144,7 +144,7 @@ class ActivityNotificationService {
 
   /// 更新通知内容
   Future<void> _updateNotification() async {
-    if (!_isEnabled || !Platform.isAndroid) return;
+    if (!_isEnabled || !PlatformUtils.isAndroid) return;
 
     try {
       debugPrint('[ActivityNotificationService] 开始更新活动通知...');
@@ -332,7 +332,7 @@ class ActivityNotificationService {
     return {
       'isInitialized': _isInitialized,
       'isEnabled': _isEnabled,
-      'platform': Platform.operatingSystem,
+      'platform': PlatformUtils.operatingSystem,
       'notificationId': _notificationId,
       'updateInterval': '1分钟',
       'isTimerActive': _updateTimer?.isActive ?? false,

@@ -1,4 +1,6 @@
-import 'dart:io';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 
 import 'package:Memento/core/services/toast_service.dart';
@@ -153,7 +155,7 @@ class _FilePreviewScreenState extends State<FilePreviewScreen> {
     try {
       final file = File(_absoluteFilePath);
       if (await file.exists()) {
-        if (Platform.isAndroid || Platform.isIOS) {
+        if (UniversalPlatform.isAndroid || UniversalPlatform.isIOS) {
           // 移动端显示文件信息
           showDialog(
             context: context,

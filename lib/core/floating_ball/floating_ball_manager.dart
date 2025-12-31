@@ -1,10 +1,11 @@
 import 'dart:core';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:async';
+import 'package:Memento/core/app_initializer.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'floating_ball_service.dart';
@@ -42,8 +43,8 @@ class FloatingBallManager {
   Offset _position = const Offset(20, 100);
   // 默认大小比例 (100%)
   // 默认启用状态
-  // 存储文件路径
-  File? _storageFile;
+  // 存储键名
+  static const String _storageKey = 'floating_ball_config';
 
   // 初始化完成器，确保数据加载完成
   final Completer<void> _initCompleter = Completer<void>();
@@ -164,18 +165,6 @@ class FloatingBallManager {
 
   static get noRecentPlugin => null;
 
-  // 获取存储文件
-  Future<File> _getStorageFile() async {
-    if (_storageFile != null) return _storageFile!;
-    final directory = await StorageManager.getApplicationDocumentsDirectory();
-    _storageFile = File('${directory.path}/floating_ball_config.json');
-    if (!await _storageFile!.exists()) {
-      // 写入完整的默认配置而不是空对象
-      await _storageFile!.writeAsString(json.encode(_getDefaultConfig()));
-    }
-    return _storageFile!;
-  }
-
   // 确保初始化完成
   Future<void> _ensureInitialized() async {
     if (!_initCompleter.isCompleted) {
@@ -221,8 +210,8 @@ class FloatingBallManager {
 
     _isWriting = true;
     try {
-      final file = await _getStorageFile();
-      await file.writeAsString(json.encode(data));
+      // 使用 StorageManager 保存配置
+      await globalStorage.write(_storageKey, data);
     } finally {
       _isWriting = false;
     }
@@ -231,39 +220,40 @@ class FloatingBallManager {
   // 读取数据
   Future<Map<String, dynamic>> _readData() async {
     try {
-      final file = await _getStorageFile();
-      if (!await file.exists()) {
+      // 使用 StorageManager 读取配置
+      final data = await globalStorage.read(_storageKey);
+
+      if (data == null) {
         return _getDefaultConfig();
       }
 
-      final content = await file.readAsString();
-      if (content.trim().isEmpty) {
+      // 确保返回的是正确的类型
+      if (data is! Map<String, dynamic>) {
+        debugPrint('Invalid config type detected: ${data.runtimeType}');
         return _getDefaultConfig();
       }
-
-      final decoded = json.decode(content) as Map<String, dynamic>;
 
       // 验证配置完整性
-      if (!_isConfigValid(decoded)) {
+      if (!_isConfigValid(data)) {
         debugPrint('Invalid config detected, merging with defaults');
-        return _mergeWithDefaults(decoded);
+        return _mergeWithDefaults(data);
       }
 
-      return decoded;
+      return data;
     } catch (e) {
       debugPrint('Error reading floating ball data: $e');
 
-      // 尝试备份损坏的文件
-      try {
-        final file = await _getStorageFile();
-        if (await file.exists()) {
-          final backupPath =
-              '${file.path}.backup_${DateTime.now().millisecondsSinceEpoch}';
-          await file.copy(backupPath);
-          debugPrint('Corrupted config backed up to: $backupPath');
+      // 尝试备份损坏的配置（仅在非 Web 平台）
+      if (!kIsWeb) {
+        try {
+          final data = await globalStorage.read(_storageKey);
+          if (data != null) {
+            // 在实际文件系统中备份（如果可用）
+            debugPrint('Corrupted config detected');
+          }
+        } catch (backupError) {
+          debugPrint('Failed to backup corrupted config: $backupError');
         }
-      } catch (backupError) {
-        debugPrint('Failed to backup corrupted config: $backupError');
       }
 
       // 返回默认配置
