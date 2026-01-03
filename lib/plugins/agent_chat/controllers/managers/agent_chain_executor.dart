@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/conversation.dart';
 import '../../models/agent_chain_node.dart';
 import '../../models/chat_message.dart';
+import '../../models/tool_call_step.dart';
 import '../../models/saved_tool_template.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import '../../services/tool_service.dart';
@@ -627,11 +628,16 @@ class AgentChainExecutor {
     try {
       debugPrint('🤖 [链式调用] 开始生成总结回复');
 
-      // 构建context messages：用户输入 + 工具执行结果
+      // 构建干净的工具结果消息（只包含执行结果，不包含代码）
+      final cleanToolResult = _buildCleanToolResult(
+        toolResultMessage.toolCall?.steps ?? [],
+      );
+
+      // 构建context messages：用户输入 + 干净的工具执行结果
       final summaryContextMessages = <ChatCompletionMessage>[
         ChatCompletionMessage.user(
           content: ChatCompletionUserMessageContent.string(
-            '工具执行结果：\n${toolResultMessage.content}\n\n请基于以上工具执行结果，给出简洁明了的总结和建议。',
+            '$cleanToolResult\n\n请基于以上工具执行结果，给出简洁明了的总结和建议。',
           ),
         ),
       ];
@@ -688,6 +694,35 @@ class AgentChainExecutor {
       debugPrint('❌ [链式调用] 生成总结回复失败: $e');
       rethrow;
     }
+  }
+
+  /// 构建干净的工具执行结果（只包含结果，不包含代码）
+  /// 用于链式调用的最终总结阶段
+  String _buildCleanToolResult(List<ToolCallStep> steps) {
+    if (steps.isEmpty) {
+      return '无工具执行结果';
+    }
+
+    final buffer = StringBuffer();
+    buffer.writeln('工具执行结果：');
+    buffer.writeln();
+
+    for (int i = 0; i < steps.length; i++) {
+      final step = steps[i];
+
+      // 只添加步骤标题和结果，不添加代码（data字段）
+      buffer.writeln('步骤 ${i + 1}: ${step.title}');
+
+      if (step.result != null) {
+        buffer.writeln('结果: ${step.result}');
+      } else if (step.error != null) {
+        buffer.writeln('错误: ${step.error}');
+      }
+
+      buffer.writeln();
+    }
+
+    return buffer.toString().trim();
   }
 
   /// 构建会话历史上下文消息

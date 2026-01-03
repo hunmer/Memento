@@ -179,8 +179,27 @@ class ToolOrchestrator {
         final currentTokenCount = buffer.length; // 使用 buffer 长度作为 token 计数
         final content = buffer.toString();
 
-        // 实时更新 UI，让 markdown 能够渲染
-        if (content.isNotEmpty) {
+        // 检查是否是工具需求的 JSON 格式
+        final isToolRequestJson = RegExp(
+          r'''^\s*\{\s*["']?needed_tools["']?\s*:''',
+        ).hasMatch(content);
+
+        if (isToolRequestJson && content.isNotEmpty) {
+          // 尝试解析已获取到的工具列表
+          final toolRequest = ToolService.parseToolRequest(content);
+          if (toolRequest != null && toolRequest.isNotEmpty) {
+            // 显示"正在查看工具用法..."
+            final toolsText = toolRequest.join('、');
+            onUpdateMessage(
+              '🔍 正在查看 $toolsText 工具的用法...',
+              currentTokenCount,
+            );
+          } else {
+            // 还在生成 JSON，显示通用提示
+            onUpdateMessage('🔍 正在识别需要的工具...', currentTokenCount);
+          }
+        } else if (content.isNotEmpty) {
+          // 不是工具需求 JSON，直接显示（比如 markdown 格式的工具调用）
           onUpdateMessage(content, currentTokenCount);
         }
       },
