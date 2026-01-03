@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
+import 'package:Memento/core/js_bridge/batch_request_executor.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/webview/webview_plugin.dart';
 
@@ -17,10 +19,28 @@ class JSBridgeInjector {
   final bool enabled;
   BuildContext? _context;
 
+  // 批处理执行器
+  BatchRequestExecutor? _batchExecutor;
+  bool _enableBatchProcessing;
+  Timer? _statsTimer;
+
   JSBridgeInjector({
     required this.controller,
     this.enabled = true,
-  });
+    bool enableBatchProcessing = true,
+    Duration batchWindowDuration = const Duration(milliseconds: 50),
+    int maxBatchSize = 20,
+    int maxConcurrentBatches = 3,
+  }) : _enableBatchProcessing = enableBatchProcessing {
+    if (_enableBatchProcessing) {
+      _batchExecutor = BatchRequestExecutor(
+        windowDuration: batchWindowDuration,
+        maxBatchSize: maxBatchSize,
+        maxConcurrent: maxConcurrentBatches,
+      );
+      debugPrint('[JSBridge] 批处理已启用: 窗口=${batchWindowDuration.inMilliseconds}ms, 最大批次=$maxBatchSize, 并发=$maxConcurrentBatches');
+    }
+  }
 
   /// 设置 BuildContext（用于 UI 操作）
   void setContext(BuildContext context) {
@@ -33,6 +53,13 @@ class JSBridgeInjector {
 
     // 注册核心 handler
     _registerCoreHandlers();
+
+    // 启动统计定时器（每30秒打印一次）
+    if (_enableBatchProcessing) {
+      _statsTimer = Timer.periodic(Duration(seconds: 30), (_) {
+        _batchExecutor?.printStats();
+      });
+    }
   }
 
   /// 注册核心 JavaScript Handlers
@@ -87,7 +114,18 @@ class JSBridgeInjector {
             });
           }
 
-          // 构建 JS Bridge 调用代码（必须有 return 语句才能获取返回值）
+          // 优先使用批处理（绕过 JS 引擎，直接调用 Dart 方法）
+          if (_enableBatchProcessing && _batchExecutor != null) {
+            final result = await _batchExecutor!.addRequest(
+              pluginId: pluginId,
+              method: method,
+              params: methodParams,
+            );
+            // 直接返回序列化后的结果，与 JS 引擎方式保持一致
+            return _serializeResult(result);
+          }
+
+          // 降级到原始的 JS 引擎方式
           final paramsJson = jsonEncode(methodParams);
           final code = 'return Memento_${pluginId}_$method($paramsJson)';
 
@@ -395,5 +433,47 @@ class JSBridgeInjector {
         }
       },
     );
+  }
+
+  /// 获取批处理统计信息
+  Map<String, dynamic>? getBatchStats() {
+    return _batchExecutor?.getStats();
+  }
+
+  /// 打印批处理统计信息
+  void printBatchStats() {
+    _batchExecutor?.printStats();
+  }
+
+  /// 序列化结果（与 JSBridgeManager 保持一致）
+  String _serializeResult(dynamic result) {
+    if (result == null) {
+      return 'null';
+    } else if (result is String) {
+      // 如果已经是 JSON 字符串，直接返回
+      try {
+        jsonDecode(result);
+        return result;
+      } catch (e) {
+        // 不是 JSON，包装成字符串
+        return jsonEncode(result);
+      }
+    } else if (result is bool || result is num) {
+      return result.toString();
+    } else {
+      // 对象或列表，序列化为 JSON
+      try {
+        return jsonEncode(result);
+      } catch (e) {
+        return jsonEncode({'error': 'Failed to serialize result: $e'});
+      }
+    }
+  }
+
+  /// 释放资源
+  void dispose() {
+    _statsTimer?.cancel();
+    _batchExecutor?.dispose();
+    debugPrint('[JSBridge] 资源已释放');
   }
 }
