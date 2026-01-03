@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
+import 'package:Memento/plugins/agent_chat/models/ai_message_status.dart';
+import 'package:Memento/plugins/agent_chat/managers/ai_message_status_manager.dart';
 import 'token_counter_service.dart';
 import 'widget_service.dart';
 
@@ -9,6 +11,9 @@ import 'widget_service.dart';
 /// 管理聊天消息的CRUD操作
 class MessageService extends ChangeNotifier {
   final StorageManager storage;
+
+  /// AI 消息状态管理器
+  final AIMessageStatusManager _statusManager = AIMessageStatusManager();
 
   /// 会话ID -> 消息列表的缓存
   final Map<String, List<ChatMessage>> _messageCache = {};
@@ -19,7 +24,13 @@ class MessageService extends ChangeNotifier {
   /// 当前正在查看的会话ID
   String? _currentConversationId;
 
-  MessageService({required this.storage});
+  MessageService({required this.storage}) {
+    // 初始化状态管理器
+    _statusManager.initialize();
+  }
+
+  /// 获取状态管理器实例（供外部使用）
+  AIMessageStatusManager get statusManager => _statusManager;
 
   /// 获取当前会话的消息列表
   List<ChatMessage> get currentMessages {
@@ -97,6 +108,20 @@ class MessageService extends ChangeNotifier {
     _messageCache[conversationId]!.add(message);
     await _saveMessages(conversationId);
     notifyListeners();
+
+    // 同步到状态管理器
+    if (!message.isUser) {
+      await _statusManager.createMessageStatus(
+        conversationId: conversationId,
+        messageId: message.id,
+        status: message.isGenerating
+            ? AIMessageStatus.generating
+            : AIMessageStatus.completed,
+        generatedByAgentId: message.generatedByAgentId,
+        chainExecutionId: message.chainExecutionId,
+        chainStepIndex: message.chainStepIndex,
+      );
+    }
 
     // 更新桌面小组件
     AgentChatWidgetService.updateWidget();
@@ -271,6 +296,13 @@ class MessageService extends ChangeNotifier {
             tokenCount: tokenCount,
           );
           notifyListeners();
+
+          // 同步到状态管理器
+          await _statusManager.updateMessageContent(
+            messageId: messageId,
+            content: content,
+            tokenCount: tokenCount,
+          );
         }
       }
     }
@@ -288,6 +320,12 @@ class MessageService extends ChangeNotifier {
       );
       final updated = message.completeGeneration(finalTokenCount);
       await updateMessage(updated);
+
+      // 同步到状态管理器
+      await _statusManager.changeMessageStatus(
+        messageId: messageId,
+        newStatus: AIMessageStatus.completed,
+      );
     }
   }
 
