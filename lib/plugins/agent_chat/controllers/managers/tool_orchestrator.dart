@@ -326,14 +326,8 @@ class ToolOrchestrator {
       prompt: null,
       contextMessages: toolExecutionMessages,
       additionalPrompts: secondAdditionalPrompts,
-      responseFormat: ResponseFormat.jsonSchema(
-        jsonSchema: JsonSchemaObject(
-          name: 'ToolCall',
-          description: '工具调用步骤',
-          strict: true,
-          schema: ToolService.toolCallSchema,
-        ),
-      ),
+      // 移除 JSON Schema 限制，改为文本格式，让 AI 返回 Markdown 格式的工具调用
+      responseFormat: null,
       shouldCancel: isCancelling,
       onToken: (token) {
         secondBuffer.write(token);
