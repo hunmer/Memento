@@ -681,6 +681,134 @@ class RequestService {
     }
   }
 
+  /// 流式处理AI响应（带重试机制）
+  ///
+  /// 最多重试 10 次，每次失败后等待 1 秒再重试
+  ///
+  /// [agent] - AI助手配置
+  /// [prompt] - 用户输入的提示，如果为null，则从contextMessages中获取
+  /// [onToken] - 每接收到一个完整响应时的回调
+  /// [onError] - 发生错误时的回调（仅在所有重试都失败后调用）
+  /// [onComplete] - 完成时的回调
+  /// [vision] - 是否启用vision模式
+  /// [filePath] - 图片文件路径（vision模式下使用）
+  /// [contextMessages] - 上下文消息列表，包含system消息和历史消息，按时间从旧到新排序
+  /// [responseFormat] - 响应格式（用于 Structured Outputs）
+  /// [shouldCancel] - 检查是否应该取消的函数
+  /// [additionalPrompts] - 额外的 prompt 部分，使用占位符替换（如 {tool_templates}, {tool_brief}）
+  /// [maxRetries] - 最大重试次数，默认为 10
+  /// [retryDelay] - 每次重试之间的延迟（毫秒），默认为 1000ms
+  static Future<void> streamResponseWithRetry({
+    required AIAgent agent,
+    String? prompt,
+    required Function(String) onToken,
+    required Function(String) onError,
+    required Function() onComplete,
+    bool vision = true,
+    String? filePath,
+    List<ChatCompletionMessage>? contextMessages,
+    ResponseFormat? responseFormat,
+    bool Function()? shouldCancel,
+    Map<String, String>? additionalPrompts,
+    int maxRetries = 10,
+    int retryDelay = 1000,
+  }) async {
+    int attempt = 0;
+    String? lastError;
+
+    while (attempt < maxRetries) {
+      attempt++;
+
+      // 如果不是第一次尝试，等待一段时间后再重试
+      if (attempt > 1) {
+        developer.log(
+          '⏳ 等待 $retryDelay ms 后进行第 $attempt 次重试...',
+          name: 'RequestService',
+        );
+        await Future.delayed(Duration(milliseconds: retryDelay));
+      }
+
+      developer.log('🔄 开始第 $attempt 次尝试...', name: 'RequestService');
+
+      try {
+        // 标记是否成功完成或出错
+        bool succeeded = false;
+        String? currentError;
+
+        // 调用 streamResponse
+        await streamResponse(
+          agent: agent,
+          prompt: prompt,
+          onToken: onToken,
+          onError: (error) {
+            currentError = error;
+            developer.log(
+              '❌ 第 $attempt 次尝试失败: ${error.length > 100 ? "${error.substring(0, 100)}..." : error}',
+              name: 'RequestService',
+            );
+          },
+          onComplete: () {
+            succeeded = true;
+            developer.log(
+              '✅ 第 $attempt 次尝试成功',
+              name: 'RequestService',
+            );
+            onComplete();
+          },
+          vision: vision,
+          filePath: filePath,
+          contextMessages: contextMessages,
+          responseFormat: responseFormat,
+          shouldCancel: shouldCancel,
+          additionalPrompts: additionalPrompts,
+        );
+
+        // 如果成功完成，直接返回
+        if (succeeded && currentError == null) {
+          return;
+        }
+
+        // 保存错误信息用于下次重试
+        lastError = currentError;
+
+        // 如果还有重试机会，继续循环
+        if (attempt < maxRetries) {
+          developer.log(
+            '🔄 第 $attempt 次尝试失败，准备进行第 ${attempt + 1} 次重试...',
+            name: 'RequestService',
+          );
+          continue;
+        }
+      } catch (e, stackTrace) {
+        final errorDetails = _extractErrorMessage(e);
+        lastError = '处理AI响应时出错: $errorDetails';
+        developer.log(
+          '❌ 第 $attempt 次尝试异常: ${errorDetails.length > 100 ? "${errorDetails.substring(0, 100)}..." : errorDetails}',
+          name: 'RequestService',
+          error: e,
+          stackTrace: stackTrace,
+        );
+
+        // 如果还有重试机会，继续循环
+        if (attempt < maxRetries) {
+          developer.log(
+            '🔄 第 $attempt 次尝试异常，准备进行第 ${attempt + 1} 次重试...',
+            name: 'RequestService',
+          );
+          continue;
+        }
+      }
+    }
+
+    // 所有重试都失败了，调用错误回调
+    final finalError = lastError ?? '未知错误';
+    developer.log(
+      '❌ 所有 $maxRetries 次重试都失败，最终错误: ${finalError.length > 100 ? "${finalError.substring(0, 100)}..." : finalError}',
+      name: 'RequestService',
+    );
+    onError(finalError);
+  }
+
   /// 生成图片
   static Future<List<String>> generateImages(
     String prompt,

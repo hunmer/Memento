@@ -639,8 +639,8 @@ class AgentChainExecutor {
       final buffer = StringBuffer();
       int tokenCount = 0;
 
-      // 流式请求总结回复
-      await RequestService.streamResponse(
+      // 流式请求总结回复（带重试机制，最多10次重试）
+      await RequestService.streamResponseWithRetry(
         agent: agent,
         prompt: null,
         contextMessages: summaryContextMessages,
@@ -681,6 +681,8 @@ class AgentChainExecutor {
             summaryMessageId,
           );
         },
+        maxRetries: 10,
+        retryDelay: 1000,
       );
     } catch (e) {
       debugPrint('❌ [链式调用] 生成总结回复失败: $e');

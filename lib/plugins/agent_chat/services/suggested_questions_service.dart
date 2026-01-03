@@ -366,11 +366,11 @@ ${agent.systemPrompt}
 
 请生成 $count 条请求式任务:''';
 
-      // 使用流式 API 收集完整响应
+      // 使用流式 API 收集完整响应（带重试机制，最多10次重试）
       final StringBuffer responseBuffer = StringBuffer();
       bool hasError = false;
 
-      await RequestService.streamResponse(
+      await RequestService.streamResponseWithRetry(
         agent: agent,
         prompt: prompt,
         onToken: (token) {
@@ -380,6 +380,8 @@ ${agent.systemPrompt}
           hasError = true;
         },
         onComplete: () {},
+        maxRetries: 10,
+        retryDelay: 1000,
       ).timeout(
         const Duration(seconds: 30),
         onTimeout: () {

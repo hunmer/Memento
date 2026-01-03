@@ -342,9 +342,34 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
             MarkdownContent(content: _extractAIReply(message.content)),
             const SizedBox(height: 12),
           ]
-          // 如果正在生成且没有回复，显示加载占位符
+          // 只有当工具调用还未解析时，才显示正在生成的 markdown
+          else if (message.isGenerating && message.content.isNotEmpty) ...[
+            MarkdownContent(content: message.content),
+            const SizedBox(height: 12),
+          ]
+          // 如果正在生成但没有内容，显示加载指示器
           else if (message.isGenerating) ...[
-            _buildLoadingIndicator(context, 'AI 正在生成回复...'),
+            Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '正在生成...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
           ],
 
@@ -358,12 +383,32 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
                     : null,
           ),
         ]
-        // 如果正在生成普通消息
-        else if (message.isGenerating)
-          _buildLoadingIndicator(context, '正在生成...')
-        // 普通消息内容
+        // 总是显示消息内容（包括正在生成中的内容）
         else if (message.content.isNotEmpty)
           MarkdownContent(content: message.content)
+        // 如果正在生成但没有内容，显示加载指示器
+        else if (message.isGenerating)
+          Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '正在生成...',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          )
         else
           Text(
             '(空消息)',
@@ -372,31 +417,6 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-      ],
-    );
-  }
-
-  /// 构建加载指示器
-  Widget _buildLoadingIndicator(BuildContext context, String text) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 14,
-            fontStyle: FontStyle.italic,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
       ],
     );
   }

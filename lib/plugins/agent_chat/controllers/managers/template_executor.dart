@@ -362,7 +362,7 @@ $toolBriefPrompt
 ''';
 
       final buffer = StringBuffer();
-      await RequestService.streamResponse(
+      await RequestService.streamResponseWithRetry(
         agent: currentAgent,
         prompt: prompt,
         contextMessages: [],
@@ -406,6 +406,8 @@ $toolBriefPrompt
         onToken: (token) => buffer.write(token),
         onComplete: () {},
         onError: (error) => debugPrint('AI 参数分析错误: $error'),
+        maxRetries: 10,
+        retryDelay: 1000,
       );
 
       final response = buffer.toString();
@@ -549,7 +551,7 @@ $toolDetailPrompt
 ''';
 
       final buffer = StringBuffer();
-      await RequestService.streamResponse(
+      await RequestService.streamResponseWithRetry(
         agent: currentAgent,
         prompt: prompt,
         contextMessages: [],
@@ -587,6 +589,8 @@ $toolDetailPrompt
         onToken: (token) => buffer.write(token),
         onComplete: () {},
         onError: (error) => debugPrint('AI 代码生成错误: $error'),
+        maxRetries: 10,
+        retryDelay: 1000,
       );
 
       final response = buffer.toString();

@@ -4,6 +4,184 @@ import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'tool_config_manager.dart';
 import 'package:Memento/plugins/webview/services/js_tool_service.dart';
 
+// ==================== Markdown 工具调用解析器 ====================
+
+/// Markdown 工具调用解析器
+///
+/// 将 AI 返回的 Markdown 格式工具调用解析为 ToolCallResponse 对象
+/// 格式示例：
+/// ```markdown
+/// # 获取今日任务
+/// 查询今天的所有待办任务
+/// ```javascript
+/// const tasks = await Memento.plugins.todo.getTodayTasks();
+/// return tasks;
+/// ```
+/// ```
+class MarkdownToolCallParser {
+  // 正则表达式模式
+  static final _titlePattern = RegExp(r'^#\s+(.+)$');
+  static final _descPattern = RegExp(r'^##\s+(.+)$');
+  static final _codeBlockStart = RegExp(r'^```(\w*)');
+  static final _codeBlockEnd = RegExp(r'^```\s*$');
+
+  /// 解析 Markdown 文本为工具调用响应
+  ///
+  /// 支持不完整的 Markdown（正在生成中的内容）
+  /// 会忽略最后一个未完成闭合的步骤
+  static ToolCallResponse? parse(String markdown) {
+    // 预处理：移除外层的 ```markdown 包裹和前导空代码块
+    String processedMarkdown = markdown;
+
+    // 1. 检测是否被 ```markdown ... ``` 包裹
+    final markdownBlockMatch = RegExp(
+      r'^```\s*markdown\s*\n([\s\S]*?)\n```$',
+      multiLine: true,
+    ).firstMatch(markdown.trim());
+
+    if (markdownBlockMatch != null) {
+      // 提取内部内容
+      processedMarkdown = markdownBlockMatch.group(1) ?? markdown;
+      print('[MarkdownToolCallParser] 检测到外层 markdown 代码块包裹，已移除');
+    }
+
+    // 2. 移除前导的空代码块（如 ``` \n 或 ```\n\n）
+    if (processedMarkdown.startsWith('```')) {
+      final firstCodeBlockEnd = processedMarkdown.indexOf('\n', 3);
+      if (firstCodeBlockEnd != -1) {
+        final afterCodeBlock = processedMarkdown.substring(firstCodeBlockEnd + 1);
+        // 检查下一行是否以 # 开头（工具调用标题）
+        if (afterCodeBlock.trimLeft().startsWith('#')) {
+          processedMarkdown = afterCodeBlock;
+          print('[MarkdownToolCallParser] 检测到前导空代码块，已移除');
+        }
+      }
+    }
+
+    // 3. 移除开头的空白行
+    processedMarkdown = processedMarkdown.replaceFirst(
+      RegExp(r'^\s+\n'),
+      '',
+    );
+
+    final lines = processedMarkdown.split('\n');
+    final steps = <ToolCallStep>[];
+
+    String? currentTitle;
+    String? currentDesc;
+    String? currentCodeLang;
+    StringBuffer? currentCode;
+    bool inCodeBlock = false;
+
+    for (final line in lines) {
+      // 1. 检测代码块结束
+      if (inCodeBlock && _codeBlockEnd.hasMatch(line)) {
+        // 只有当有标题和代码时才添加步骤
+        if (currentTitle != null && currentCode != null) {
+          steps.add(
+            ToolCallStep(
+              method: _parseMethod(currentCodeLang),
+              title: currentTitle,
+              desc: currentDesc ?? '',
+              data: currentCode.toString().trim(),
+            ),
+          );
+        }
+
+        // 重置状态
+        currentTitle = null;
+        currentDesc = null;
+        currentCodeLang = null;
+        currentCode = null;
+        inCodeBlock = false;
+        continue;
+      }
+
+      // 2. 检测代码块开始
+      final codeStartMatch = _codeBlockStart.firstMatch(line);
+      if (codeStartMatch != null) {
+        inCodeBlock = true;
+        currentCodeLang = codeStartMatch.group(1)?.trim();
+        currentCode = StringBuffer();
+        continue;
+      }
+
+      // 3. 在代码块中 - 累积代码
+      if (inCodeBlock) {
+        currentCode?.writeln(line);
+        continue;
+      }
+
+      // 4. 检测一级标题
+      final titleMatch = _titlePattern.firstMatch(line);
+      if (titleMatch != null) {
+        currentTitle = titleMatch.group(1)!.trim();
+        continue;
+      }
+
+      // 5. 检测二级标题
+      final descMatch = _descPattern.firstMatch(line);
+      if (descMatch != null) {
+        currentDesc = descMatch.group(1)!.trim();
+        continue;
+      }
+    }
+
+    // 返回结果（不完整的最后一个步骤会被忽略）
+    return steps.isEmpty ? null : ToolCallResponse(steps: steps);
+  }
+
+  /// 解析方法类型
+  ///
+  /// 从代码块语言标识解析方法类型
+  static String _parseMethod(String? lang) {
+    if (lang == null || lang.isEmpty) return 'run_js';
+
+    switch (lang.toLowerCase()) {
+      case 'javascript':
+      case 'js':
+        return 'run_js';
+      default:
+        return 'run_js'; // 默认方法
+    }
+  }
+
+  /// 检测内容是否包含 Markdown 工具调用格式
+  ///
+  /// 通过检测是否包含标题和代码块来判断
+  /// 支持检测被 ```markdown 包裹的内容和前导空代码块
+  static bool containsMarkdownToolCall(String content) {
+    // 预处理：移除外层的 ```markdown 包裹后再检测
+    String processedContent = content;
+
+    // 检测是否被 ```markdown ... ``` 包裹
+    final markdownBlockMatch = RegExp(
+      r'^```\s*markdown\s*\n([\s\S]*?)\n```$',
+      multiLine: true,
+    ).firstMatch(content.trim());
+
+    if (markdownBlockMatch != null) {
+      // 提取内部内容
+      processedContent = markdownBlockMatch.group(1) ?? content;
+    }
+
+    // 移除前导的空代码块
+    if (processedContent.startsWith('```')) {
+      final firstCodeBlockEnd = processedContent.indexOf('\n', 3);
+      if (firstCodeBlockEnd != -1) {
+        final afterCodeBlock = processedContent.substring(firstCodeBlockEnd + 1);
+        if (afterCodeBlock.trimLeft().startsWith('#')) {
+          processedContent = afterCodeBlock;
+        }
+      }
+    }
+
+    final hasTitle = RegExp(r'^#\s+.+', multiLine: true).hasMatch(processedContent);
+    final hasCodeBlock = RegExp(r'```').hasMatch(processedContent);
+    return hasTitle && hasCodeBlock;
+  }
+}
+
 /// 模板修改策略
 enum TemplateStrategy {
   /// 关键词替换 - 简单的字符串替换
@@ -455,13 +633,14 @@ class ToolService {
     buffer.writeln('- 一个步骤中可以包含多个操作');
     buffer.writeln('\n**正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议');
     buffer.writeln('\n## 📝 工具调用格式\n');
-    buffer.writeln('**🚨 重要：必须使用 Markdown 格式，不要使用 JSON 格式！**\n');
+    buffer.writeln('**🚨 重要：必须使用以下 Markdown 格式，不要使用 JSON 格式！**\n');
     buffer.writeln('**严格遵循**:');
-    buffer.writeln('1. **仅返回** Markdown 格式的工具调用');
+    buffer.writeln('1. **仅返回** 以下格式的工具调用');
     buffer.writeln('2. **不要** 任何额外文本或解释');
     buffer.writeln('3. **不要** 使用 JSON 格式（如 `{"steps": [...]}`）');
-    buffer.writeln('4. **必须** 使用以下 Markdown 格式：\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('4. **不要** 在外层包裹 ` ```markdown ` 代码块');
+    buffer.writeln('5. **必须** 使用以下格式：\n');
+    buffer.writeln('```\n');
     buffer.writeln('# 步骤标题');
     buffer.writeln('## 步骤描述（可选）');
     buffer.writeln('```javascript');
@@ -500,17 +679,17 @@ class ToolService {
     // 使用示例
     buffer.writeln('### 💡 使用示例\n');
     buffer.writeln('**示例 1：查询今天的任务**\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('```\n');
     buffer.writeln('# 获取今日任务');
     buffer.writeln('查询今天的所有待办任务');
     buffer.writeln('```javascript');
     buffer.writeln(
-      'const today = await Memento.system.getCustomDate(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是${today.month}月${today.day}日，有 ${tasks.length} 个任务`; setResult(result); return result;',
+      'const today = await Memento.system.getCustomDate(); const tasks = await Memento.plugins.todo.getTodayTasks(); const result = `今天是\${today.month}月\${today.day}日，有 \${tasks.length} 个任务`; setResult(result); return result;',
     );
     buffer.writeln('```');
     buffer.writeln('```\n');
     buffer.writeln('**示例 2：查询并处理数据**\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('```\n');
     buffer.writeln('# 统计任务情况');
     buffer.writeln('获取并统计今日任务');
     buffer.writeln('```javascript');
@@ -521,7 +700,7 @@ class ToolService {
     buffer.writeln('```\n');
     buffer.writeln('**示例 3：完整的签到流程（查询+执行）**\n');
     buffer.writeln('用户请求"帮我完成签到"时，应该直接执行完整流程：\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('```\n');
     buffer.writeln('# 执行签到操作');
     buffer.writeln('查找第一个未签到的项目并执行签到');
     buffer.writeln('```javascript');
@@ -532,7 +711,7 @@ class ToolService {
     buffer.writeln('```\n');
     buffer.writeln('**示例 4：步骤间数据传递（查询→分析→生成报告）**\n');
     buffer.writeln('使用 setResult/getResult 在步骤之间传递数据（⚠️ 必须使用对象类型）：\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('```\n');
     buffer.writeln('# 查询今日任务');
     buffer.writeln('获取今天的任务列表');
     buffer.writeln('```javascript');
@@ -551,7 +730,7 @@ class ToolService {
     buffer.writeln('```\n');
     buffer.writeln('**示例 5：多步骤操作链（查询条件+创建）**\n');
     buffer.writeln('当用户说"创建明天的任务"时，直接完成创建：\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('```\n');
     buffer.writeln('# 创建明天的任务');
     buffer.writeln('获取明天日期并创建任务');
     buffer.writeln('```javascript');
@@ -1009,13 +1188,14 @@ return result;
     buffer.writeln('1. JavaScript 返回结构化数据(如数组、对象)');
     buffer.writeln('2. AI 基于这些数据进行自然语言分析和建议\n');
     buffer.writeln('## 📝 生成工具调用\n');
-    buffer.writeln('**🚨 重要：必须使用 Markdown 格式，不要使用 JSON 格式！**\n');
+    buffer.writeln('**🚨 重要：必须使用以下 Markdown 格式，不要使用 JSON 格式！**\n');
     buffer.writeln('**严格遵循**:');
-    buffer.writeln('1. **仅返回** Markdown 格式的工具调用');
+    buffer.writeln('1. **仅返回** 以下格式的工具调用');
     buffer.writeln('2. **不要** 任何额外文本或解释');
     buffer.writeln('3. **不要** 使用 JSON 格式（如 `{"steps": [...]}`）');
-    buffer.writeln('4. **必须** 使用以下 Markdown 格式：\n');
-    buffer.writeln('```markdown');
+    buffer.writeln('4. **不要** 在外层包裹 ` ```markdown ` 代码块');
+    buffer.writeln('5. **必须** 使用以下格式：\n');
+    buffer.writeln('```\n');
     buffer.writeln('# 步骤标题');
     buffer.writeln('## 步骤描述（可选）');
     buffer.writeln('```javascript');
@@ -1023,7 +1203,7 @@ return result;
     buffer.writeln('```');
     buffer.writeln('```\n');
     buffer.writeln('**正确示例**：');
-    buffer.writeln('```markdown');
+    buffer.writeln('```\n');
     buffer.writeln('# 获取任务');
     buffer.writeln('查询今日任务');
     buffer.writeln('```javascript');
@@ -1452,122 +1632,6 @@ return result;
         '[ToolService] 响应内容前$errorPreviewLength字符: ${response.substring(0, errorPreviewLength)}',
       );
       return null;
-    }
-  }
-
-  // ==================== Markdown 工具调用解析器 ====================
-
-  /// Markdown 工具调用解析器
-  ///
-  /// 将 AI 返回的 Markdown 格式工具调用解析为 ToolCallResponse 对象
-  /// 格式示例：
-  /// ```markdown
-  /// # 获取今日任务
-  /// 查询今天的所有待办任务
-  /// ```javascript
-  /// const tasks = await Memento.plugins.todo.getTodayTasks();
-  /// return tasks;
-  /// ```
-  /// ```
-  static class MarkdownToolCallParser {
-    // 正则表达式模式
-    static final _titlePattern = RegExp(r'^#\s+(.+)$');
-    static final _descPattern = RegExp(r'^##\s+(.+)$');
-    static final _codeBlockStart = RegExp(r'^```(\w*)');
-    static final _codeBlockEnd = RegExp(r'^```\s*$');
-
-    /// 解析 Markdown 文本为工具调用响应
-    ///
-    /// 支持不完整的 Markdown（正在生成中的内容）
-    /// 会忽略最后一个未完成闭合的步骤
-    static ToolCallResponse? parse(String markdown) {
-      final lines = markdown.split('\n');
-      final steps = <ToolCallStep>[];
-
-      String? currentTitle;
-      String? currentDesc;
-      String? currentCodeLang;
-      StringBuffer? currentCode;
-      bool inCodeBlock = false;
-
-      for (final line in lines) {
-        // 1. 检测代码块结束
-        if (inCodeBlock && _codeBlockEnd.hasMatch(line)) {
-          // 只有当有标题和代码时才添加步骤
-          if (currentTitle != null && currentCode != null) {
-            steps.add(ToolCallStep(
-              method: _parseMethod(currentCodeLang),
-              title: currentTitle,
-              desc: currentDesc ?? '',
-              data: currentCode.toString().trim(),
-            ));
-          }
-
-          // 重置状态
-          currentTitle = null;
-          currentDesc = null;
-          currentCodeLang = null;
-          currentCode = null;
-          inCodeBlock = false;
-          continue;
-        }
-
-        // 2. 检测代码块开始
-        final codeStartMatch = _codeBlockStart.firstMatch(line);
-        if (codeStartMatch != null) {
-          inCodeBlock = true;
-          currentCodeLang = codeStartMatch.group(1)?.trim();
-          currentCode = StringBuffer();
-          continue;
-        }
-
-        // 3. 在代码块中 - 累积代码
-        if (inCodeBlock) {
-          currentCode?.writeln(line);
-          continue;
-        }
-
-        // 4. 检测一级标题
-        final titleMatch = _titlePattern.firstMatch(line);
-        if (titleMatch != null) {
-          currentTitle = titleMatch.group(1)!.trim();
-          continue;
-        }
-
-        // 5. 检测二级标题
-        final descMatch = _descPattern.firstMatch(line);
-        if (descMatch != null) {
-          currentDesc = descMatch.group(1)!.trim();
-          continue;
-        }
-      }
-
-      // 返回结果（不完整的最后一个步骤会被忽略）
-      return steps.isEmpty ? null : ToolCallResponse(steps: steps);
-    }
-
-    /// 解析方法类型
-    ///
-    /// 从代码块语言标识解析方法类型
-    static String _parseMethod(String? lang) {
-      if (lang == null || lang.isEmpty) return 'run_js';
-
-      switch (lang.toLowerCase()) {
-        case 'javascript':
-        case 'js':
-          return 'run_js';
-        default:
-          return 'run_js'; // 默认方法
-      }
-    }
-
-    /// 检测内容是否包含 Markdown 工具调用格式
-    ///
-    /// 通过检测是否包含标题和代码块来判断
-    static bool containsMarkdownToolCall(String content) {
-      final hasTitle = RegExp(r'^#\s+.+', multiLine: true).hasMatch(content);
-      final hasCodeBlock = RegExp(r'```').hasMatch(content);
-      return hasTitle && hasCodeBlock;
     }
   }
 }
