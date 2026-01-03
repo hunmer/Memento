@@ -1,0 +1,47 @@
+[
+  {
+    "path": "index.html",
+    "md5": "29ad4d9caf280107e983a8ae1be23bfe",
+    "size": 764
+  },
+  {
+    "path": "assets/index-B0S3q-sC.css",
+    "md5": "62bd8ad56ce6f3f69f78c186284edb97",
+    "size": 32875
+  },
+  {
+    "path": "assets/index-Cv6s65YB.js",
+    "md5": "26dc0460e4e4fd23895f4a8d22fe630d",
+    "size": 449476
+  },
+  {
+    "path": "assets/roboto-latin-400-normal-068yxgMN.woff",
+    "md5": "c2778ee3b60b1cbd03fe4ee82642401f",
+    "size": 20216
+  },
+  {
+    "path": "assets/roboto-latin-400-normal-CNwBRw8h.woff2",
+    "md5": "b07da7aa3e4f363c5cdbc11312239e8c",
+    "size": 20612
+  },
+  {
+    "path": "assets/roboto-latin-500-normal-CC5nhZkh.woff",
+    "md5": "ae0e53d3770e4ca3e8b1d315316d9177",
+    "size": 20340
+  },
+  {
+    "path": "assets/roboto-latin-500-normal-CkrA1NAy.woff2",
+    "md5": "02e18aa1a344f3345345384d3b3decaa",
+    "size": 20928
+  },
+  {
+    "path": "assets/roboto-latin-700-normal-CXeAXeti.woff2",
+    "md5": "549a12cc5504190e9168c9ef067f10a4",
+    "size": 21004
+  },
+  {
+    "path": "assets/roboto-latin-700-normal-DUekQERp.woff",
+    "md5": "9f025a79cd2d0e1b05ab9d75f3c8fd5d",
+    "size": 20368
+  }
+]

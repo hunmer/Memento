@@ -10,9 +10,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateDiaryIntent(),
             phrases: [
-                "写日记",
-                "记录今天的日记",
-                "用 Memento 写日记"
+                "用\${applicationName}写日记",
+                "在\${applicationName}记录今天的日记",
+                "打开\${applicationName}写日记"
             ],
             shortTitle: "写日记",
             systemImageName: "book.fill"
@@ -21,9 +21,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateTaskIntent(),
             phrases: [
-                "创建待办任务",
-                "添加新任务",
-                "提醒我"
+                "用\${applicationName}创建待办任务",
+                "在\${applicationName}添加新任务",
+                "用\${applicationName}提醒我"
             ],
             shortTitle: "创建任务",
             systemImageName: "checkmark.circle.fill"
@@ -32,9 +32,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateNoteIntent(),
             phrases: [
-                "创建笔记",
-                "记录笔记",
-                "添加新笔记"
+                "用\${applicationName}创建笔记",
+                "在\${applicationName}记录笔记",
+                "打开\${applicationName}添加新笔记"
             ],
             shortTitle: "创建笔记",
             systemImageName: "note.text"
@@ -43,9 +43,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateBillIntent(),
             phrases: [
-                "记录支出",
-                "添加账单",
-                "记花了多少钱"
+                "用\${applicationName}记录支出",
+                "在\${applicationName}添加账单",
+                "用\${applicationName}记花了多少钱"
             ],
             shortTitle: "记录账单",
             systemImageName: "creditcard.fill"
@@ -54,9 +54,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateActivityIntent(),
             phrases: [
-                "记录活动",
-                "开始活动",
-                "添加新活动"
+                "用\${applicationName}记录活动",
+                "在\${applicationName}开始活动",
+                "打开\${applicationName}添加新活动"
             ],
             shortTitle: "记录活动",
             systemImageName: "figure.run"
@@ -65,9 +65,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateHabitIntent(),
             phrases: [
-                "打卡习惯",
-                "完成习惯",
-                "记录习惯"
+                "用\${applicationName}打卡习惯",
+                "在\${applicationName}完成习惯",
+                "用\${applicationName}记录习惯"
             ],
             shortTitle: "习惯打卡",
             systemImageName: "checkmark.seal.fill"
@@ -76,9 +76,9 @@ struct MementoAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: SendToAgentChatIntent(),
             phrases: [
-                "发送消息给AI",
-                "和AI聊天",
-                "问AI"
+                "用\${applicationName}发送消息给AI",
+                "在\${applicationName}和AI聊天",
+                "打开\${applicationName}问AI"
             ],
             shortTitle: "AI对话",
             systemImageName: "bubble.left.and.bubble.right.fill"

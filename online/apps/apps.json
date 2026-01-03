@@ -34,5 +34,17 @@
     "homepage": "",
     "tags": ["阅读", "工具", "效率"],
     "permissions": ["storage"]
+  },
+  {
+    "id": "timeline",
+    "title": "时间线展示",
+    "icon": "⏰",
+    "desc": "从头到尾排列所有记忆的瞬间，像时间线一样展示你的生活。",
+    "files": "timeline/files.json",
+    "version": "1.0.0",
+    "author": "mementoTeam",
+    "homepage": "",
+    "tags": ["时间线", "记忆", "展示"],
+    "permissions": ["storage"]
   }
 ]
