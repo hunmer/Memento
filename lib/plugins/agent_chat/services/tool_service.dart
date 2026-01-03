@@ -1424,6 +1424,7 @@ return result;
   /// 从文本中提取完整的JSON对象（处理嵌套括号）
   static String? _extractCompleteJsonObject(String text) {
     int braceCount = 0;
+    int bracketCount = 0;
     int startIndex = -1;
     bool inString = false;
     bool escaped = false;
@@ -1447,15 +1448,20 @@ return result;
 
       if (!inString) {
         if (char == '{') {
-          if (braceCount == 0) {
+          if (braceCount == 0 && bracketCount == 0) {
             startIndex = i;
           }
           braceCount++;
         } else if (char == '}') {
           braceCount--;
-          if (braceCount == 0 && startIndex != -1) {
+          // 只有当大括号和方括号都平衡时，才算完整
+          if (braceCount == 0 && bracketCount == 0 && startIndex != -1) {
             return text.substring(startIndex, i + 1);
           }
+        } else if (char == '[') {
+          bracketCount++;
+        } else if (char == ']') {
+          bracketCount--;
         }
       }
     }

@@ -327,8 +327,10 @@ class MessageBubble extends StatelessWidget {
                         : null,
               ),
 
-              // 显示思考内容（如果有，通常不会显示）
-              if (parsedContent['thinking']?.isNotEmpty ?? false) ...[
+              // 只有在工具调用未解析时，才显示思考内容（原始markdown）
+              // 工具调用解析成功后，隐藏原始内容以避免重复显示
+              if (!toolCallParsed &&
+                  (parsedContent['thinking']?.isNotEmpty ?? false)) ...[
                 const SizedBox(height: 8),
                 const Divider(),
                 const SizedBox(height: 8),

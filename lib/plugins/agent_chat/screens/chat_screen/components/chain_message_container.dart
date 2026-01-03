@@ -335,45 +335,9 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 如果有工具调用，显示工具调用步骤
+        // 如果有工具调用
         if (hasToolCall) ...[
-          // 解析并显示 AI 回复（如果有）
-          if (_hasAIReply(message.content)) ...[
-            MarkdownContent(content: _extractAIReply(message.content)),
-            const SizedBox(height: 12),
-          ]
-          // 只有当工具调用还未解析时，才显示正在生成的 markdown
-          else if (message.isGenerating && message.content.isNotEmpty) ...[
-            MarkdownContent(content: message.content),
-            const SizedBox(height: 12),
-          ]
-          // 如果正在生成但没有内容，显示加载指示器
-          else if (message.isGenerating) ...[
-            Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '正在生成...',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          // 显示工具调用步骤
+          // ⚠️ 优先显示 ToolCallSteps
           ToolCallSteps(
             steps: message.toolCall!.steps,
             isGenerating: message.isGenerating,
@@ -419,20 +383,5 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           ),
       ],
     );
-  }
-
-  /// 检查是否有 AI 最终回复
-  bool _hasAIReply(String content) {
-    return content.contains('[AI最终回复]');
-  }
-
-  /// 提取 AI 最终回复
-  String _extractAIReply(String content) {
-    final finalReplyIndex = content.indexOf('[AI最终回复]');
-    if (finalReplyIndex != -1) {
-      final replyStart = finalReplyIndex + '[AI最终回复]'.length;
-      return content.substring(replyStart).trim();
-    }
-    return '';
   }
 }

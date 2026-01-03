@@ -75,9 +75,9 @@ class ToolExecutor {
           final step = toolCall.steps[i];
           debugPrint('  步骤 ${i + 1}: ${step.title}');
 
-          // 更新步骤为执行中
-          step.status = ToolCallStatus.running;
-          final updatedSteps = List<ToolCallStep>.from(toolCall.steps);
+          // 创建步骤的深拷贝，并更新状态为执行中
+          final updatedSteps = toolCall.steps.map((s) => s.copyWith()).toList();
+          updatedSteps[i].status = ToolCallStatus.running;
           updatedMessage = updatedMessage.copyWith(
             toolCall: ToolCallResponse(steps: updatedSteps),
           );
@@ -103,10 +103,10 @@ class ToolExecutor {
                 jsBridge.setToolCallResult('step_$i', result);
               }
 
-              // 更新步骤为成功
-              step.result = result;
-              step.status = ToolCallStatus.success;
-              final successSteps = List<ToolCallStep>.from(toolCall.steps);
+              // 更新步骤为成功（使用深拷贝）
+              final successSteps = updatedMessage.toolCall!.steps.map((s) => s.copyWith()).toList();
+              successSteps[i].result = result;
+              successSteps[i].status = ToolCallStatus.success;
               updatedMessage = updatedMessage.copyWith(
                 toolCall: ToolCallResponse(steps: successSteps),
               );
@@ -118,10 +118,10 @@ class ToolExecutor {
               toolResultsBuffer.writeln('结果: $result');
               toolResultsBuffer.writeln();
             } catch (e) {
-              // 更新步骤为失败
-              step.error = e.toString();
-              step.status = ToolCallStatus.failed;
-              final failedSteps = List<ToolCallStep>.from(toolCall.steps);
+              // 更新步骤为失败（使用深拷贝）
+              final failedSteps = updatedMessage.toolCall!.steps.map((s) => s.copyWith()).toList();
+              failedSteps[i].error = e.toString();
+              failedSteps[i].status = ToolCallStatus.failed;
               updatedMessage = updatedMessage.copyWith(
                 toolCall: ToolCallResponse(steps: failedSteps),
               );
@@ -211,9 +211,9 @@ class ToolExecutor {
       for (var i = 0; i < steps.length; i++) {
         final step = steps[i];
 
-        // 更新步骤状态为运行中
-        step.status = ToolCallStatus.running;
-        final runningSteps = List<ToolCallStep>.from(steps);
+        // 更新步骤状态为运行中（使用深拷贝）
+        final runningSteps = steps.map((s) => s.copyWith()).toList();
+        runningSteps[i].status = ToolCallStatus.running;
         await _updateMessageToolSteps(messageId, runningSteps);
         context.notify();
 
@@ -227,17 +227,17 @@ class ToolExecutor {
           // 自动将步骤结果保存到上下文（供后续步骤通过索引获取）
           jsBridge.setToolCallResult('step_$i', result);
 
-          // 更新步骤状态为成功
-          step.status = ToolCallStatus.success;
-          step.result = result;
-          final successSteps = List<ToolCallStep>.from(steps);
+          // 更新步骤状态为成功（使用深拷贝）
+          final successSteps = steps.map((s) => s.copyWith()).toList();
+          successSteps[i].status = ToolCallStatus.success;
+          successSteps[i].result = result;
           await _updateMessageToolSteps(messageId, successSteps);
           context.notify();
         } catch (e) {
-          // 更新步骤状态为失败
-          step.status = ToolCallStatus.failed;
-          step.error = e.toString();
-          final failedSteps = List<ToolCallStep>.from(steps);
+          // 更新步骤状态为失败（使用深拷贝）
+          final failedSteps = steps.map((s) => s.copyWith()).toList();
+          failedSteps[i].status = ToolCallStatus.failed;
+          failedSteps[i].error = e.toString();
           await _updateMessageToolSteps(messageId, failedSteps);
           context.notify();
           break; // 停止执行后续步骤
@@ -337,28 +337,31 @@ class ToolExecutor {
 
       debugPrint('✅ 步骤 $stepIndex 状态已重置, 开始执行');
 
-      // 重新执行该步骤
+      // 重新执行该步骤（使用深拷贝）
       steps[stepIndex].status = ToolCallStatus.running;
-      await _updateMessageToolSteps(messageId, steps);
+      final runningSteps = steps.map((s) => s.copyWith()).toList();
+      await _updateMessageToolSteps(messageId, runningSteps);
       context.notify();
 
       try {
         // 执行步骤
         final result = await ToolService.executeToolStep(steps[stepIndex]);
 
-        // 更新步骤状态为成功
-        steps[stepIndex].status = ToolCallStatus.success;
-        steps[stepIndex].result = result;
-        steps[stepIndex].error = null; // 清除之前的错误
-        await _updateMessageToolSteps(messageId, steps);
+        // 更新步骤状态为成功（使用深拷贝）
+        final successSteps = steps.map((s) => s.copyWith()).toList();
+        successSteps[stepIndex].status = ToolCallStatus.success;
+        successSteps[stepIndex].result = result;
+        successSteps[stepIndex].error = null; // 清除之前的错误
+        await _updateMessageToolSteps(messageId, successSteps);
         context.notify();
 
         debugPrint('✅ 步骤 $stepIndex 重新执行成功');
       } catch (e) {
-        // 更新步骤状态为失败
-        steps[stepIndex].status = ToolCallStatus.failed;
-        steps[stepIndex].error = e.toString();
-        await _updateMessageToolSteps(messageId, steps);
+        // 更新步骤状态为失败（使用深拷贝）
+        final failedSteps = steps.map((s) => s.copyWith()).toList();
+        failedSteps[stepIndex].status = ToolCallStatus.failed;
+        failedSteps[stepIndex].error = e.toString();
+        await _updateMessageToolSteps(messageId, failedSteps);
         context.notify();
 
         debugPrint('❌ 步骤 $stepIndex 重新执行失败: $e');
