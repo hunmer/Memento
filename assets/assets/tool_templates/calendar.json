@@ -36,6 +36,24 @@
     ]
   },
   {
+    "id": "default-calendar-upcoming",
+    "name": "即将到来的事件",
+    "description": "获取未来几天内的事件",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取即将到来",
+        "desc": "查询未来7天的事件",
+        "data": "const response = await Memento.plugins.calendar.getUpcoming({\n  days: 7\n});\n\nif (!response.success) {\n  setResult({\n    error: response.error,\n    timestamp: response.timestamp\n  });\n  return { error: response.error };\n}\n\nconst result = {\n  count: response.data?.data?.length || 0,\n  events: response.data?.data?.map(e => ({\n    id: e.id,\n    title: e.title,\n    startTime: e.startTime,\n    endTime: e.endTime\n  })) || [],\n  timestamp: response.timestamp\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["calendar", "即将", "事件"],
+    "declaredTools": [
+      {"id": "calendar_getUpcoming", "name": "获取即将到来的事件"}
+    ]
+  },
+  {
     "id": "default-calendar-create",
     "name": "创建日历事件",
     "description": "创建一个新的日历事件",

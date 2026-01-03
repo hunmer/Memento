@@ -2,13 +2,13 @@
   {
     "id": "default-habits-all",
     "name": "查看所有习惯",
-    "description": "获取所有习惯列表",
+    "description": "获取所有习惯列表（支持分页）",
     "steps": [
       {
         "method": "run_js",
         "title": "获取习惯列表",
         "desc": "查询所有习惯",
-        "data": "const habits = await Memento.plugins.habits.getHabits();\n\nconst result = {\n  count: habits.length,\n  habits: habits.map(h => ({\n    id: h.id,\n    name: h.name,\n    targetMinutes: h.targetMinutes,\n    totalMinutes: h.totalMinutes\n  }))\n};\nsetResult(result);\nreturn result;"
+        "data": "const result = await Memento.habits.getHabits({ offset: 0, count: 10 });\n\nif (!result.success) {\n  const errorResult = { success: false, error: result.error, timestamp: result.timestamp };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst formatted = {\n  success: result.success,\n  timestamp: result.timestamp,\n  total: result.data.total,\n  count: result.data.count,\n  hasMore: result.data.hasMore,\n  habits: result.data.data.map(h => ({\n    id: h.id,\n    title: h.title,\n    durationMinutes: h.durationMinutes,\n    skillId: h.skillId,\n    tags: h.tags,\n    intervalDays: h.intervalDays\n  }))\n};\n\nsetResult(formatted);\nreturn formatted;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "创建习惯",
         "desc": "创建每日阅读习惯",
-        "data": "const habit = await Memento.plugins.habits.createHabit({\n  name: '每天阅读',\n  targetMinutes: 30\n});\n\nconst result = {\n  success: true,\n  habit: {\n    id: habit.id,\n    name: habit.name,\n    targetMinutes: habit.targetMinutes\n  }\n};\nsetResult(result);\nreturn result;"
+        "data": "const habit = await Memento.habits.createHabit({\n  title: '每天阅读',\n  durationMinutes: 30,\n  intervalDays: 0,\n  reminderDays: [1, 2, 3, 4, 5],\n  tags: ['阅读', '学习']\n});\n\nconst result = {\n  success: true,\n  habit: {\n    id: habit.id,\n    title: habit.title,\n    durationMinutes: habit.durationMinutes\n  }\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -38,56 +38,88 @@
   {
     "id": "default-habits-checkin",
     "name": "打卡习惯",
-    "description": "完成习惯打卡",
+    "description": "完成习惯打卡（记录完成时间和时长）",
     "steps": [
       {
         "method": "run_js",
-        "title": "打卡习惯",
-        "desc": "打卡完成习惯",
-        "data": "const habits = await Memento.plugins.habits.getHabits();\nconst habit = habits[0];\n\nif (!habit) {\n  const errorResult = { success: false, message: '没有习惯' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nawait Memento.plugins.habits.checkin({\n  habitId: habit.id,\n  minutes: 30\n});\n\nconst result = {\n  success: true,\n  habit: {\n    name: habit.name,\n    minutes: 30\n  }\n};\nsetResult(result);\nreturn result;"
+        "title": "获取习惯列表",
+        "desc": "获取第一个可用习惯",
+        "data": "const habitsResult = await Memento.habits.getHabits({ offset: 0, count: 1 });\nconst habits = habitsResult.data || [];\nconst habit = habits[0];\n\nif (!habit) {\n  const errorResult = { success: false, message: '没有可用的习惯，请先创建习惯' };\n  setResult(errorResult);\n  return errorResult;\n}\n\n// 保存习惯信息供下一步使用\nsetContext({ habitId: habit.id, habitTitle: habit.title });\n\nconst result = {\n  success: true,\n  habit: {\n    id: habit.id,\n    title: habit.title\n  }\n};\n\nsetResult(result);\nreturn result;"
+      },
+      {
+        "method": "run_js",
+        "title": "打卡",
+        "desc": "记录完成时长（分钟）",
+        "data": "const context = getContext();\nif (!context.habitId) {\n  const errorResult = { success: false, message: '请先选择习惯' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst record = await Memento.habits.checkIn({\n  habitId: context.habitId,\n  durationMinutes: 30,\n  notes: '完成打卡'\n});\n\nconst result = {\n  success: true,\n  record: {\n    id: record.id,\n    habitTitle: context.habitTitle,\n    durationMinutes: 30,\n    date: record.date\n  }\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
     "tags": ["habits", "打卡", "完成"],
     "declaredTools": [
       {"id": "habits_getHabits", "name": "获取习惯列表"},
-      {"id": "habits_checkin", "name": "打卡"}
+      {"id": "habits_checkIn", "name": "打卡"}
     ]
   },
   {
     "id": "default-habits-stats",
     "name": "习惯统计",
-    "description": "获取习惯统计数据",
+    "description": "获取特定习惯的统计数据（累计时长和完成次数）",
     "steps": [
       {
         "method": "run_js",
+        "title": "选择习惯",
+        "desc": "获取第一个可用习惯",
+        "data": "const habitsResult = await Memento.habits.getHabits({ offset: 0, count: 1 });\nconst habits = habitsResult.data || [];\nconst habit = habits[0];\n\nif (!habit) {\n  const errorResult = { success: false, message: '没有可用的习惯' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nsetContext({ habitId: habit.id, habitTitle: habit.title });\n\nreturn { success: true, habit: { id: habit.id, title: habit.title } };"
+      },
+      {
+        "method": "run_js",
         "title": "获取统计数据",
-        "desc": "查询习惯统计",
-        "data": "const stats = await Memento.plugins.habits.getStats();\n\nconst result = {\n  totalHabits: stats.totalHabits,\n  todayCompleted: stats.todayCompleted,\n  totalMinutes: stats.totalMinutes\n};\nsetResult(result);\nreturn result;"
+        "desc": "查询累计时长和完成次数",
+        "data": "const context = getContext();\nconst stats = await Memento.habits.getStats({ habitId: context.habitId });\n\nconst result = {\n  habitTitle: context.habitTitle,\n  totalDurationMinutes: stats.totalDurationMinutes,\n  completionCount: stats.completionCount,\n  averageMinutes: stats.completionCount > 0 \n    ? Math.round(stats.totalDurationMinutes / stats.completionCount)\n    : 0\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
     "tags": ["habits", "统计", "数据"],
     "declaredTools": [
+      {"id": "habits_getHabits", "name": "获取习惯列表"},
       {"id": "habits_getStats", "name": "获取统计"}
     ]
   },
   {
     "id": "default-habits-today",
     "name": "今日习惯清单",
-    "description": "查看今天的习惯清单",
+    "description": "查看今天需要打卡的习惯清单",
     "steps": [
       {
         "method": "run_js",
         "title": "获取今日习惯",
         "desc": "查询今天的习惯清单",
-        "data": "const todayHabits = await Memento.plugins.habits.getTodayHabits();\n\nconst result = {\n  count: todayHabits.length,\n  habits: todayHabits.map(h => ({\n    name: h.name,\n    completed: h.completed,\n    todayMinutes: h.todayMinutes,\n    targetMinutes: h.targetMinutes\n  }))\n};\nsetResult(result);\nreturn result;"
+        "data": "const result = await Memento.habits.getTodayHabits();\n\nconst formatted = {\n  count: result.length,\n  habits: result.map(h => ({\n    id: h.id,\n    title: h.title,\n    durationMinutes: h.durationMinutes,\n    skillId: h.skillId,\n    intervalDays: h.intervalDays,\n    reminderDays: h.reminderDays\n  }))\n};\n\nsetResult(formatted);\nreturn formatted;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
     "tags": ["habits", "今日", "清单"],
     "declaredTools": [
       {"id": "habits_getTodayHabits", "name": "获取今日习惯"}
+    ]
+  },
+  {
+    "id": "default-habits-detail",
+    "name": "查看习惯详情",
+    "description": "获取特定习惯的详细信息",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "选择习惯",
+        "desc": "获取第一个可用习惯的详情",
+        "data": "const habitsResult = await Memento.habits.getHabits({ offset: 0, count: 1 });\nconst habits = habitsResult.data || [];\nconst habit = habits[0];\n\nif (!habit) {\n  const errorResult = { success: false, message: '没有可用的习惯' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst detail = await Memento.habits.getHabitById({ habitId: habit.id });\n\nconst result = {\n  id: detail.id,\n  title: detail.title,\n  notes: detail.notes,\n  group: detail.group,\n  icon: detail.icon,\n  durationMinutes: detail.durationMinutes,\n  skillId: detail.skillId,\n  tags: detail.tags,\n  reminderDays: detail.reminderDays,\n  intervalDays: detail.intervalDays\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["habits", "详情", "查看"],
+    "declaredTools": [
+      {"id": "habits_getHabits", "name": "获取习惯列表"},
+      {"id": "habits_getHabitById", "name": "获取习惯详情"}
     ]
   }
 ]
