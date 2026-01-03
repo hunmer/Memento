@@ -141,34 +141,6 @@ class ToolService {
     'additionalProperties': false,
   };
 
-  /// 第二阶段 JSON Schema - 工具调用
-  static const Map<String, dynamic> toolCallSchema = {
-    'type': 'object',
-    'properties': {
-      'steps': {
-        'type': 'array',
-        'description': '工具执行步骤列表',
-        'items': {
-          'type': 'object',
-          'properties': {
-            'method': {
-              'type': 'string',
-              'description': '执行方法,固定为 run_js',
-              'enum': ['run_js'],
-            },
-            'title': {'type': 'string', 'description': '步骤标题'},
-            'desc': {'type': 'string', 'description': '步骤描述'},
-            'data': {'type': 'string', 'description': 'JavaScript 代码字符串'},
-          },
-          'required': ['method', 'title', 'desc', 'data'],
-          'additionalProperties': false,
-        },
-      },
-    },
-    'required': ['steps'],
-    'additionalProperties': false,
-  };
-
   /// 初始化工具服务（加载所有工具配置）
   static Future<void> initialize() async {
     if (_initialized) return;
@@ -214,44 +186,18 @@ class ToolService {
     }
   }
 
-  /// 检查内容是否包含工具调用（支持 Markdown 和 JSON 两种格式）
+  /// 检查内容是否包含工具调用（Markdown 格式）
   static bool containsToolCall(String content) {
-    // 1. 优先检测 Markdown 格式
-    if (MarkdownToolCallParser.containsMarkdownToolCall(content)) {
-      return true;
-    }
-
-    // 2. 回退到 JSON 格式检测
-    final json = parseJsonFromResponse(content, requiredField: 'steps');
-    if (json != null && json.containsKey('steps')) {
-      try {
-        final steps = json['steps'];
-        return steps is List;
-      } catch (e) {
-        return false;
-      }
-    }
-    return false;
+    return MarkdownToolCallParser.containsMarkdownToolCall(content);
   }
 
-  /// 从 AI 回复中解析工具调用（支持 Markdown 和 JSON 两种格式）
+  /// 从 AI 回复中解析工具调用（Markdown 格式）
   static ToolCallResponse? parseToolCallFromResponse(String response) {
     try {
-      // 1. 优先尝试 Markdown 解析
-      if (MarkdownToolCallParser.containsMarkdownToolCall(response)) {
-        final markdownResult = MarkdownToolCallParser.parse(response);
-        if (markdownResult != null) {
-          print('[ToolService] Markdown 解析成功，包含 ${markdownResult.steps.length} 个步骤');
-          return markdownResult;
-        }
-      }
-
-      // 2. 回退到 JSON 解析（向后兼容）
-      final json = parseJsonFromResponse(response, requiredField: 'steps');
-      if (json != null) {
-        final toolCall = ToolCallResponse.fromJson(json);
-        print('[ToolService] JSON 解析成功，包含 ${toolCall.steps.length} 个步骤');
-        return toolCall;
+      final result = MarkdownToolCallParser.parse(response);
+      if (result != null) {
+        print('[ToolService] Markdown 解析成功，包含 ${result.steps.length} 个步骤');
+        return result;
       }
 
       print('[ToolService] 未找到工具调用');
