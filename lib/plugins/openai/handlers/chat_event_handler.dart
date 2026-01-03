@@ -228,7 +228,7 @@ class ChatEventHandler {
         ),
       );
 
-      await RequestService.streamResponse(
+      await RequestService.streamResponseWithRetry(
         agent: agent,
         prompt: null, // 不再需要单独的prompt参数，因为已经添加到contextMessages中
         vision: hasImage,
@@ -361,6 +361,8 @@ class ChatEventHandler {
             _cleanupMessageResources(typingMessage.id);
           }
         },
+        maxRetries: 10,
+        retryDelay: 1000,
       );
     } catch (e) {
       return;

@@ -138,8 +138,8 @@ class AIRequestHandler {
           // 使用 Completer 等待 onComplete 完成
           final completer = Completer<bool>();
 
-          // 第零阶段：请求 AI 匹配模板
-          await RequestService.streamResponse(
+          // 第零阶段：请求 AI 匹配模板（带重试机制，最多10次重试）
+          await RequestService.streamResponseWithRetry(
             agent: currentAgent,
             prompt: null,
             contextMessages: contextMessages,
@@ -262,6 +262,8 @@ class AIRequestHandler {
                 completer.complete(false);
               }
             },
+            maxRetries: 10,
+            retryDelay: 1000,
           );
 
           // ⚠️ 关键修复：等待 onComplete 完成并检查结果

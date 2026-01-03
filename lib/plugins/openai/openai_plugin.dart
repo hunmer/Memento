@@ -536,8 +536,8 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
       bool hasError = false;
       String? errorMessage;
 
-      // 使用流式 API，设置 30 秒超时
-      await RequestService.streamResponse(
+      // 使用流式 API（带重试机制，最多10次重试）
+      await RequestService.streamResponseWithRetry(
         agent: agent,
         prompt: message,
         onToken: (token) {
@@ -550,12 +550,8 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
         onComplete: () {
           // 完成回调
         },
-      ).timeout(
-        const Duration(seconds: 60),
-        onTimeout: () {
-          hasError = true;
-          errorMessage = 'Request timeout (60s)';
-        },
+        maxRetries: 10,
+        retryDelay: 1000,
       );
 
       if (hasError) {

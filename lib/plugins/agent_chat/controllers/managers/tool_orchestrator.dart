@@ -153,8 +153,8 @@ class ToolOrchestrator {
     // 使用 Completer 等待第一阶段完成
     final firstPhaseCompleter = Completer<List<String>?>();
 
-    // 流式请求 AI 回复（第一阶段：工具需求识别）
-    await RequestService.streamResponse(
+    // 流式请求 AI 回复（第一阶段：工具需求识别，带重试机制，最多10次重试）
+    await RequestService.streamResponseWithRetry(
       agent: effectiveAgent,
       prompt: null,
       contextMessages: contextMessages,
@@ -179,19 +179,8 @@ class ToolOrchestrator {
         final currentTokenCount = buffer.length; // 使用 buffer 长度作为 token 计数
         final content = buffer.toString();
 
-        // 检测是否为工具需求
-        if (enableToolCalling && agent.enableFunctionCalling) {
-          final toolRequest = ToolService.parseToolRequest(content);
-          final containsToolCall = ToolService.containsToolCall(content);
-
-          if (toolRequest != null || containsToolCall) {
-            final displayContent = '$content\n\n⚙️ 正在准备工具调用...';
-            onUpdateMessage(displayContent, currentTokenCount);
-          } else if (content.isNotEmpty) {
-            onUpdateMessage(content, currentTokenCount);
-          }
-        } else {
-          // 实时更新 UI
+        // 实时更新 UI，让 markdown 能够渲染
+        if (content.isNotEmpty) {
           onUpdateMessage(content, currentTokenCount);
         }
       },
@@ -213,6 +202,8 @@ class ToolOrchestrator {
 
         firstPhaseCompleter.complete(null);
       },
+      maxRetries: 10,
+      retryDelay: 1000,
     );
 
     return firstPhaseCompleter.future;
@@ -315,13 +306,12 @@ class ToolOrchestrator {
     // 用于第二阶段的 buffer
     final secondBuffer = StringBuffer();
     int secondTokenCount = 0;
-    bool secondIsCollecting = false;
 
     // 使用 Completer 等待第二阶段完成
     final secondPhaseCompleter = Completer<String?>();
 
-    // 第二阶段：请求生成工具调用代码
-    await RequestService.streamResponse(
+    // 第二阶段：请求生成工具调用代码（带重试机制，最多10次重试）
+    await RequestService.streamResponseWithRetry(
       agent: executionAgent,
       prompt: null,
       contextMessages: toolExecutionMessages,
@@ -334,11 +324,8 @@ class ToolOrchestrator {
         secondTokenCount++;
 
         final content = secondBuffer.toString();
-        if (ToolService.containsToolCall(content)) {
-          secondIsCollecting = true;
-          final displayContent = '$content\n\n⚙️ 正在准备执行工具...';
-          onUpdateMessage(displayContent, secondTokenCount);
-        } else if (!secondIsCollecting && content.isNotEmpty) {
+        // 实时更新内容，让 markdown 能够渲染
+        if (content.isNotEmpty) {
           onUpdateMessage(content, secondTokenCount);
         }
       },
@@ -353,6 +340,8 @@ class ToolOrchestrator {
         // 返回第二阶段响应
         secondPhaseCompleter.complete(secondBuffer.toString());
       },
+      maxRetries: 10,
+      retryDelay: 1000,
     );
 
     return secondPhaseCompleter.future;

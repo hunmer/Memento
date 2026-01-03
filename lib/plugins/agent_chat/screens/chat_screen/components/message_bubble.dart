@@ -125,56 +125,16 @@ class MessageBubble extends StatelessWidget {
                             message.chainStepIndex != null)
                           _buildAgentLabel(context),
 
-                        // 消息内容 - 优先检查是否有工具调用
+                        // 消息内容 - 总是实时渲染内容（流式输出）
                         if (isToolCallMessage)
-                          // 如果是工具调用消息，显示工具调用步骤（内部处理加载状态）
+                          // 如果是工具调用消息，显示工具调用步骤
                           _buildToolCallContent()
-                        else if (message.isGenerating)
-                          // 普通消息正在生成中
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '正在生成...',
-                                style: TextStyle(
-                                  fontStyle: FontStyle.italic,
-                                  color:
-                                      Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              // 取消按钮
-                              if (onCancel != null) ...[
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: Icon(Icons.cancel, size: 20),
-                                  color: Theme.of(context).colorScheme.error,
-                                  tooltip: '取消生成',
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
-                                  ),
-                                  onPressed: onCancel,
-                                ),
-                              ],
-                            ],
-                          )
                         else if (message.matchedTemplateIds != null &&
                             message.matchedTemplateIds!.isNotEmpty)
                           // 显示模版选择按钮
                           _buildTemplateSelectionUI()
                         else
+                          // 总是显示消息内容（包括正在生成中的内容）
                           _buildMessageContent(),
 
                         // 附件显示
@@ -312,6 +272,9 @@ class MessageBubble extends StatelessWidget {
           // 智能解析content，提取思考内容和AI回复
           final parsedContent = _parseToolCallContent(message.content);
 
+          // 检查工具调用是否已经被解析（有steps）
+          final toolCallParsed = message.toolCall?.steps.isNotEmpty ?? false;
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -320,8 +283,10 @@ class MessageBubble extends StatelessWidget {
                 MarkdownContent(content: parsedContent['finalReply']!),
                 const SizedBox(height: 12),
               ]
-              // 如果正在生成且没有最终回复，显示实时生成的内容（Markdown格式）
-              else if (message.isGenerating && message.content.isNotEmpty) ...[
+              // 只有当工具调用还未解析时，才显示正在生成的 markdown
+              else if (!toolCallParsed &&
+                  message.isGenerating &&
+                  message.content.isNotEmpty) ...[
                 // 实时显示正在生成的 Markdown 内容
                 MarkdownContent(content: message.content),
                 const SizedBox(height: 12),
@@ -340,7 +305,7 @@ class MessageBubble extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'AI 正在生成回复...',
+                      '正在生成...',
                       style: TextStyle(
                         fontSize: 14,
                         fontStyle: FontStyle.italic,
