@@ -96,7 +96,6 @@ export class SessionManager {
     });
 
     console.log(`[会话] 新会话创建: ${sessionId}`);
-    // this.startHeartbeat(session);
   }
 
   /**
@@ -195,26 +194,6 @@ export class SessionManager {
     this.connectionToSession.clear();
   }
 
-  /**
-   * 启动心跳检测
-   */
-  private startHeartbeat(session: Session): void {
-    const checkInterval = setInterval(() => {
-      const now = Date.now();
-      const inactive = now - session.lastActivity;
-
-      // 超过 90 秒无活动，关闭会话
-      if (inactive > 90000) {
-        clearInterval(checkInterval);
-        this.sessions.delete(session.id);
-        this.connectionToSession.delete(session.frontend);
-        this.connectionToSession.delete(session.client);
-        session.frontend.close();
-        session.client.close();
-        console.log(`[会话] ${session.id}: 活动超时，已关闭`);
-      }
-    }, 30000); // 每 30 秒检查一次
-  }
 
   /**
    * 发送认证响应
