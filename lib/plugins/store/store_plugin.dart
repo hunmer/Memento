@@ -15,6 +15,9 @@ import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:shared_models/usecases/store/store_usecase.dart';
 import 'package:Memento/plugins/store/repositories/client_store_repository.dart';
 
+// HTTP 服务器导入
+import 'package:Memento/plugins/webview/services/local_http_server.dart';
+
 /// 物品兑换插件 - UseCase 架构
 class StorePlugin extends BasePlugin with JSBridgePlugin {
   static StorePlugin? _instance;
@@ -323,8 +326,13 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
   /// 获取所有商品列表（UseCase 版本）
   /// 支持分页参数: offset, count
+  /// 支持 get_http_image 参数：是否将图片路径转换为 HTTP URL
   Future<String> _jsGetProducts(Map<String, dynamic> params) async {
     try {
+      // 提取图片转换参数
+      final getHttpImage = params['get_http_image'] == true;
+      params.remove('get_http_image');
+
       final result = await useCase.getProducts(params);
 
       if (result.isFailure) {
@@ -335,12 +343,25 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         });
       }
 
+      var products = result.dataOrNull ?? [];
+
+      // 处理图片路径转换（使用简化方法）
+      if (getHttpImage) {
+        products = await LocalHttpServer.convertImagesWithAutoConfig(
+          items: products,
+          pluginId: id,
+          imageKey: 'image',
+          storageManager: storage,
+        );
+      }
+
       return jsonEncode({
         'success': true,
-        'data': result.dataOrNull ?? [],
+        'data': products,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {
+      debugPrint('[StorePlugin] ✗ 获取商品列表失败: $e');
       return jsonEncode({
         'success': false,
         'error': '获取商品列表失败: $e',
@@ -350,8 +371,13 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   /// 获取商品详情（UseCase 版本）
+  /// 支持 get_http_image 参数：是否将图片路径转换为 HTTP URL
   Future<String> _jsGetProduct(Map<String, dynamic> params) async {
     try {
+      // 提取图片转换参数
+      final getHttpImage = params['get_http_image'] == true;
+      params.remove('get_http_image');
+
       // 支持 productId 或 id 参数
       final productId =
           params['productId'] as String? ?? params['id'] as String?;
@@ -367,9 +393,20 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
         });
       }
 
-      final product = result.dataOrNull;
+      var product = result.dataOrNull;
       if (product == null) {
         return jsonEncode({'error': '商品不存在'});
+      }
+
+      // 处理图片路径转换（使用简化方法）
+      if (getHttpImage) {
+        final convertedList = await LocalHttpServer.convertImagesWithAutoConfig(
+          items: [product],
+          pluginId: id,
+          imageKey: 'image',
+          storageManager: storage,
+        );
+        product = convertedList.isNotEmpty ? convertedList.first : product;
       }
 
       return jsonEncode(product);
