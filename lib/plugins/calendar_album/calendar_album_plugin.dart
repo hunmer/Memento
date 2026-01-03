@@ -398,6 +398,7 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       // 照片相关
       'getPhotos': _jsGetPhotos,
       'getPhotosByDateRange': _jsGetPhotosByDateRange,
+      'createPhoto': _jsCreatePhoto,
 
       // 统计相关
       'getStatistics': _jsGetStatistics,
@@ -711,6 +712,51 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({
         'error': '日期格式错误',
         'message': '请使用 YYYY-MM-DD 格式',
+      });
+    }
+  }
+
+  /// 创建照片日记
+  /// @param params.caption - 照片说明/标题（必需）
+  /// @param params.imageUrl - 图片URL（必需）
+  /// @param params.date - 日期字符串（可选，格式 YYYY-MM-DD，默认今天）
+  /// @param params.tags - 标签数组（可选）
+  /// @param params.content - 额外内容描述（可选）
+  Future<String> _jsCreatePhoto(Map<String, dynamic> params) async {
+    final String? caption = params['caption'];
+    if (caption == null || caption.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: caption'});
+    }
+
+    final String? imageUrl = params['imageUrl'];
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return jsonEncode({'error': '缺少必需参数: imageUrl'});
+    }
+
+    try {
+      // 解析日期或使用今天
+      DateTime createdAt = DateTime.now();
+      if (params['date'] != null) {
+        createdAt = DateTime.parse(params['date'] + 'T00:00:00.000Z');
+      }
+
+      final result = await useCase.createEntry({
+        'title': caption,
+        'content': params['content'] ?? '',
+        'createdAt': createdAt.toIso8601String(),
+        'tags': params['tags'] ?? [],
+        'imageUrls': [imageUrl],
+      });
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull ?? {});
+    } catch (e) {
+      return jsonEncode({
+        'error': '创建照片日记失败',
+        'message': e.toString(),
       });
     }
   }

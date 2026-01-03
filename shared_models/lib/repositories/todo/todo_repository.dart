@@ -191,6 +191,15 @@ abstract class ITodoRepository {
   /// 获取逾期任务
   Future<Result<List<TaskDto>>> getOverdueTasks({PaginationParams? pagination});
 
+  /// 获取即将到期任务
+  ///
+  /// [days] 天数范围（默认7天）
+  /// [pagination] 分页参数
+  Future<Result<List<TaskDto>>> getUpcomingTasks({
+    int days = 7,
+    PaginationParams? pagination,
+  });
+
   /// 获取已完成任务
   Future<Result<List<TaskDto>>> getCompletedTasks(
       {PaginationParams? pagination});

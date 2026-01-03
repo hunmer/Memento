@@ -658,15 +658,21 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       // 物品相关
       'getGoods': _jsGetGoods,
       'getGoodsItem': _jsGetGoodsItem,
+      'getItems': _jsGetGoods, // 别名，与工具模板保持一致
+      'getItemById': _jsGetGoodsItem, // 别名
       'createGoodsItem': _jsCreateGoodsItem,
+      'createItem': _jsCreateGoodsItem, // 别名，与工具模板保持一致
       'updateGoodsItem': _jsUpdateGoodsItem,
+      'updateItem': _jsUpdateGoodsItem, // 别名
       'deleteGoodsItem': _jsDeleteGoodsItem,
+      'deleteItem': _jsDeleteGoodsItem, // 别名
 
       // 使用记录相关
       'addUsageRecord': _jsAddUsageRecord,
 
       // 统计相关
       'getStatistics': _jsGetStatistics,
+      'getStats': _jsGetStatistics, // 别名
     };
   }
 

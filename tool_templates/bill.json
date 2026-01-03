@@ -1,0 +1,75 @@
+[
+  {
+    "id": "default-bill-create",
+    "name": "创建账单",
+    "description": "创建一个新的账单记录（收入或支出）",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建账单",
+        "desc": "记录一笔收入或支出",
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\n\n// 创建支出账单\nconst expenseBill = await Memento.plugins.bill.createBill({\n  amount: -50.00,\n  type: 'expense',\n  category: '餐饮',\n  description: '午餐',\n  date: todayDate,\n  tags: ['日常', '工作日'],\n  metadata: {\n    location: '公司餐厅'\n  }\n});\n\n// 或者创建收入账单\nconst incomeBill = await Memento.plugins.bill.createBill({\n  amount: 5000.00,\n  type: 'income',\n  category: '工资',\n  description: '月度工资',\n  date: todayDate,\n  tags: ['收入', '月度']\n});\n\nconst result = {\n  success: true,\n  bill: {\n    id: expenseBill.id,\n    amount: expenseBill.amount,\n    category: expenseBill.category,\n    date: expenseBill.date,\n    description: expenseBill.description\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["bill", "创建", "账单", "收入", "支出"],
+    "declaredTools": [
+      {"id": "bill_createBill", "name": "创建账单"}
+    ]
+  },
+  {
+    "id": "default-bill-query",
+    "name": "查询账单",
+    "description": "查询指定时间范围的账单记录",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "查询账单",
+        "desc": "按日期范围查询账单",
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\n\n// 查询今天的账单\nconst billsToday = await Memento.plugins.bill.getBills({\n  startDate: todayDate,\n  endDate: todayDate\n});\n\n// 查询本月的账单\nconst startOfMonth = todayDate.substring(0, 8) + '01';\nconst billsMonth = await Memento.plugins.bill.getBills({\n  startDate: startOfMonth,\n  endDate: todayDate\n});\n\nconst result = {\n  success: true,\n  todayBills: {\n    count: billsToday.data.length,\n    total: billsToday.data.reduce((sum, b) => sum + b.amount, 0)\n  },\n  monthBills: {\n    count: billsMonth.data.length,\n    total: billsMonth.data.reduce((sum, b) => sum + b.amount, 0)\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["bill", "查询", "账单", "统计"],
+    "declaredTools": [
+      {"id": "bill_getBills", "name": "获取账单列表"}
+    ]
+  },
+  {
+    "id": "default-bill-stats",
+    "name": "账单统计",
+    "description": "获取指定时间范围的账单统计信息",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "账单统计",
+        "desc": "查看收支统计和分类统计",
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst startOfMonth = todayDate.substring(0, 8) + '01';\n\n// 获取统计信息\nconst stats = await Memento.plugins.bill.getStats({\n  startDate: startOfMonth,\n  endDate: todayDate\n});\n\n// 获取分类统计\nconst categoryStats = await Memento.plugins.bill.getCategoryStats({\n  startDate: startOfMonth,\n  endDate: todayDate\n});\n\nconst result = {\n  success: true,\n  period: '本月',\n  stats: {\n    totalIncome: stats.totalIncome,\n    totalExpense: stats.totalExpense,\n    balance: stats.balance,\n    billCount: stats.billCount\n  },\n  categoryBreakdown: Object.entries(categoryStats)\n    .map(([cat, amount]) => ({ category: cat, amount }))\n    .sort((a, b) => b.amount - a.amount)\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["bill", "统计", "收支", "分类"],
+    "declaredTools": [
+      {"id": "bill_getStats", "name": "获取统计信息"},
+      {"id": "bill_getCategoryStats", "name": "获取分类统计"}
+    ]
+  },
+  {
+    "id": "default-account-create",
+    "name": "创建账户",
+    "description": "创建一个新的财务账户",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建账户",
+        "desc": "添加新的财务账户",
+        "data": "const account = await Memento.plugins.bill.createAccount({\n  title: '现金账户',\n  iconCodePoint: 58837, // Icons.account_balance_wallet.codePoint\n  backgroundColor: 4278238420 // 绿色\n});\n\nconst result = {\n  success: true,\n  account: {\n    id: account.id,\n    title: account.title,\n    totalAmount: account.totalAmount\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["bill", "账户", "创建"],
+    "declaredTools": [
+      {"id": "bill_createAccount", "name": "创建账户"}
+    ]
+  }
+]

@@ -297,6 +297,52 @@ class ClientTodoRepository implements ITodoRepository {
   }
 
   @override
+  Future<Result<List<TaskDto>>> getUpcomingTasks({
+    int days = 7,
+    PaginationParams? pagination,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final futureDate = now.add(Duration(days: days));
+
+      final upcomingTasks =
+          _taskController.tasks.where((task) {
+            // 必须未完成
+            if (task.status == TaskStatus.done) return false;
+
+            // 必须有截止日期
+            if (task.dueDate == null) return false;
+
+            // 截止日期必须在范围内：[now, futureDate]
+            final dueTime = task.dueDate!;
+            return !dueTime.isBefore(now) && !dueTime.isAfter(futureDate);
+          }).toList();
+
+      // 按截止日期升序排序
+      upcomingTasks.sort((a, b) {
+        final aDue = a.dueDate ?? DateTime.now();
+        final bDue = b.dueDate ?? DateTime.now();
+        return aDue.compareTo(bDue);
+      });
+
+      final dtos = upcomingTasks.map(_taskToDto).toList();
+
+      if (pagination != null && pagination.hasPagination) {
+        final paginated = PaginationUtils.paginate(
+          dtos,
+          offset: pagination.offset,
+          count: pagination.count,
+        );
+        return Result.success(paginated.data);
+      }
+
+      return Result.success(dtos);
+    } catch (e) {
+      return Result.failure('获取即将到期任务失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
+  @override
   Future<Result<List<TaskDto>>> getCompletedTasks({
     PaginationParams? pagination,
   }) async {

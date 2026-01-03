@@ -388,6 +388,36 @@ class TodoUseCase {
     }
   }
 
+  /// 获取即将到期任务
+  ///
+  /// [params] 可选参数:
+  /// - `days`: 天数范围（默认7天）
+  /// - `offset`: 分页偏移
+  /// - `count`: 分页数量
+  Future<Result<dynamic>> getUpcomingTasks(Map<String, dynamic> params) async {
+    try {
+      final days = params['days'] as int? ?? 7;
+      final pagination = _extractPagination(params);
+
+      final result = await repository.getUpcomingTasks(
+        days: days,
+        pagination: pagination,
+      );
+
+      return result.map((tasks) {
+        final jsonList = tasks.map((t) => t.toJson()).toList();
+
+        if (pagination != null && pagination.hasPagination) {
+          return PaginationUtils.toMap(jsonList,
+              offset: pagination.offset, count: pagination.count);
+        }
+        return jsonList;
+      });
+    } catch (e) {
+      return Result.failure('获取即将到期任务失败: $e', code: ErrorCodes.serverError);
+    }
+  }
+
   /// 获取已完成任务
   Future<Result<dynamic>> getCompletedTasks(Map<String, dynamic> params) async {
     try {

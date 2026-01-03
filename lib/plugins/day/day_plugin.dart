@@ -229,26 +229,28 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   @override
   Map<String, Function> defineJSAPI() {
     return {
-      // 纪念日管理
-      'getMemorialDays': _jsGetMemorialDays,
-      'createMemorialDay': _jsCreateMemorialDay,
-      'updateMemorialDay': _jsUpdateMemorialDay,
-      'deleteMemorialDay': _jsDeleteMemorialDay,
+      // 纪念日管理（简化命名以符合 JS API 规范）
+      'getDays': _jsGetMemorialDays,
+      'getDayById': _jsFindMemorialDayById,
+      'createDay': _jsCreateMemorialDay,
+      'updateDay': _jsUpdateMemorialDay,
+      'deleteDay': _jsDeleteMemorialDay,
 
       // 工具方法
       'getDaysUntil': _jsGetDaysUntil,
-      'getUpcomingDays': _jsGetUpcomingDays,
+      'getUpcoming': _jsGetUpcomingDays,
 
       // 查找方法
-      'findMemorialDayBy': _jsFindMemorialDayBy,
-      'findMemorialDayById': _jsFindMemorialDayById,
-      'findMemorialDayByName': _jsFindMemorialDayByName,
+      'findDayBy': _jsFindMemorialDayBy,
+      'findDayByName': _jsFindMemorialDayByName,
     };
   }
 
   // ==================== JS API 实现 ====================
 
   /// 获取所有纪念日
+  /// @param params.offset 起始位置（可选，默认 0）
+  /// @param params.count 返回数量（可选，默认 100）
   Future<String> _jsGetMemorialDays(Map<String, dynamic> params) async {
     try {
       final result = await _useCase.getMemorialDays(params);
