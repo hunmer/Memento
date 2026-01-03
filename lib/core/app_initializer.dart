@@ -31,6 +31,8 @@ import 'package:Memento/screens/route.dart';
 import 'global_flags.dart';
 import 'services/toast_service.dart';
 import 'services/file_watch_sync_service.dart';
+import 'api_forwarding/api_forwarding_config.dart';
+import 'api_forwarding/api_forwarding_service.dart';
 
 /// 应用启动状态管理
 class AppStartupState extends ChangeNotifier {
@@ -264,6 +266,9 @@ Future<void> _initializeBackgroundServices() async {
 
     // 初始化文件监听同步服务（用于自动同步文件变更到服务器）
     unawaited(fileWatchSyncService.initialize());
+
+    // 初始化 API 转发服务（如果配置了自动连接）
+    unawaited(_initializeApiForwardingService());
 
     // 延迟执行权限检查和小组件同步
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -541,5 +546,21 @@ Future<void> initializeFlutterFloatingBall() async {
   } catch (e, stack) {
     debugPrint('Flutter悬浮球初始化失败: $e');
     debugPrint('堆栈: $stack');
+  }
+}
+
+/// 初始化 API 转发服务
+/// 检查配置是否启用自动连接，如果是则启动服务
+Future<void> _initializeApiForwardingService() async {
+  try {
+    final config = await ApiForwardingConfig.load();
+    if (config.autoConnect && config.enabled && config.isValid) {
+      debugPrint('[API转发] 检测到自动连接已启用，正在启动服务...');
+      await ApiForwardingService.instance.start(config);
+    } else {
+      debugPrint('[API转发] 自动连接未启用或配置无效，跳过启动');
+    }
+  } catch (e) {
+    debugPrint('[API转发] 自动启动失败: $e');
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/core/theme_controller.dart';
 
@@ -7,6 +8,7 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './widgets/server_sync_settings_section.dart';
+import './widgets/api_forwarding_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
 import 'package:Memento/core/floating_ball/settings_screen.dart';
 import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
@@ -15,6 +17,8 @@ import 'package:Memento/screens/about_screen/about_screen.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
 import 'package:Memento/screens/settings_screen/widgets/permission_request_dialog.dart';
+import 'package:Memento/core/api_forwarding/api_forwarding_config.dart';
+import 'package:Memento/core/api_forwarding/api_forwarding_service.dart';
 import 'package:get/get.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
@@ -33,6 +37,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late WebDAVController _webdavController;
   bool _isWebDAVConnected = false;
   bool _isServerSyncLoggedIn = false;
+  bool _isApiForwardingConnected = false;
+
+  StreamSubscription? _apiForwardingSubscription;
 
   @override
   void initState() {
@@ -50,6 +57,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _checkWebDAVConfig();
     // 检查服务器同步配置
     _checkServerSyncConfig();
+    // 检查 API 转发连接状态
+    _checkApiForwardingStatus();
+    // 监听 API 转发状态变化
+    _listenToApiForwardingEvents();
   }
 
   @override
@@ -69,6 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
+    _apiForwardingSubscription?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -91,6 +103,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _isServerSyncLoggedIn = config.isLoggedIn;
       });
     }
+  }
+
+  // 检查 API 转发连接状态
+  void _checkApiForwardingStatus() {
+    if (mounted) {
+      setState(() {
+        _isApiForwardingConnected = ApiForwardingService.instance.isConnected;
+      });
+    }
+  }
+
+  // 监听 API 转发事件
+  void _listenToApiForwardingEvents() {
+    _apiForwardingSubscription = ApiForwardingService.instance.eventStream.listen((event) {
+      if (mounted) {
+        final type = event['type'] as String?;
+        if (type == 'connected' || type == 'disconnected' || type == 'stopped') {
+          setState(() {
+            _isApiForwardingConnected = type == 'connected';
+          });
+        }
+      }
+    });
   }
 
   late BackupService _backupService;
@@ -550,6 +585,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/js_console');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.cloud_sync),
+            title: const Text('转发数据服务'),
+            subtitle: Text(
+              _isApiForwardingConnected
+                  ? '已连接到转发服务器'
+                  : '配置 API 转发服务，支持前端访问',
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isApiForwardingConnected)
+                  const Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.arrow_forward_ios),
+              ],
+            ),
+            onTap: () async {
+              final config = await ApiForwardingConfig.load();
+              if (!mounted) return;
+
+              final result = await showDialog<bool>(
+                context: context,
+                builder: (context) => ApiForwardingSettingsDialog(
+                  initialConfig: config,
+                ),
+              );
+
+              if (result == true) {
+                // 重新检查连接状态
+                setState(() {});
+              }
             },
           ),
           ListTile(
