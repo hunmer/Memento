@@ -320,7 +320,13 @@ class MessageBubble extends StatelessWidget {
                 MarkdownContent(content: parsedContent['finalReply']!),
                 const SizedBox(height: 12),
               ]
-              // 如果正在生成且没有最终回复，显示加载占位符
+              // 如果正在生成且没有最终回复，显示实时生成的内容（Markdown格式）
+              else if (message.isGenerating && message.content.isNotEmpty) ...[
+                // 实时显示正在生成的 Markdown 内容
+                MarkdownContent(content: message.content),
+                const SizedBox(height: 12),
+              ]
+              // 如果正在生成但没有内容，显示加载占位符
               else if (message.isGenerating) ...[
                 Row(
                   children: [
