@@ -388,7 +388,11 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': result.errorOrNull?.message ?? '获取账单失败'});
     }
 
-    return jsonEncode(result.dataOrNull);
+    return jsonEncode({
+      'success': true,
+      'data': result.dataOrNull ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 创建账单

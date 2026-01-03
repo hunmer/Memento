@@ -389,11 +389,12 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   Future<String> _jsGetHabits(Map<String, dynamic> params) async {
     final result = await _useCase.getHabits(params);
 
-    if (result.isSuccess) {
-      return jsonEncode(result.dataOrNull);
-    } else {
-      return jsonEncode({'error': result.errorOrNull?.message});
-    }
+    return jsonEncode({
+      'success': result.isSuccess,
+      'data': result.dataOrNull ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'error': result.errorOrNull?.message,
+    });
   }
 
   /// 根据ID获取习惯

@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取即将到期任务",
         "desc": "查询未来7天内到期的所有待办任务",
-        "data": "const tasks = await Memento.plugins.todo.getUpcomingTasks({\n  days: 7\n});\n\nconst result = {\n  count: tasks.length,\n  tasks: tasks.map(t => ({\n    id: t.id,\n    title: t.title,\n    priority: t.priority,\n    dueDate: t.dueDate\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.todo.getUpcomingTasks({\n  days: 7\n});\n\nif (response.success) {\n  const tasks = response.data;\n  const result = {\n    count: tasks.length,\n    tasks: tasks.map(t => ({\n      id: t.id,\n      title: t.title,\n      priority: t.priority,\n      dueDate: t.dueDate\n    }))\n  };\n  \n  setResult(result);\n  return result;\n} else {\n  const result = {\n    success: false,\n    error: response.error,\n    count: 0,\n    tasks: []\n  };\n  \n  setResult(result);\n  return result;\n}"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

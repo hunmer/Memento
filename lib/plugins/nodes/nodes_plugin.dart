@@ -380,7 +380,11 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
       nodes = nodes.where((node) => node['parentId'] == parentId).toList();
     }
 
-    return jsonEncode(nodes);
+    return jsonEncode({
+      'success': true,
+      'data': nodes,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 获取节点详情

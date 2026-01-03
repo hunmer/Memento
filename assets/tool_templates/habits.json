@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取习惯列表",
         "desc": "查询所有习惯",
-        "data": "const result = await Memento.habits.getHabits({ offset: 0, count: 10 });\n\nconst formatted = {\n  total: result.total,\n  count: result.count,\n  hasMore: result.hasMore,\n  habits: result.data.map(h => ({\n    id: h.id,\n    title: h.title,\n    durationMinutes: h.durationMinutes,\n    skillId: h.skillId,\n    tags: h.tags,\n    intervalDays: h.intervalDays\n  }))\n};\n\nsetResult(formatted);\nreturn formatted;"
+        "data": "const result = await Memento.habits.getHabits({ offset: 0, count: 10 });\n\nif (!result.success) {\n  const errorResult = { success: false, error: result.error, timestamp: result.timestamp };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst formatted = {\n  success: result.success,\n  timestamp: result.timestamp,\n  total: result.data.total,\n  count: result.data.count,\n  hasMore: result.data.hasMore,\n  habits: result.data.data.map(h => ({\n    id: h.id,\n    title: h.title,\n    durationMinutes: h.durationMinutes,\n    skillId: h.skillId,\n    tags: h.tags,\n    intervalDays: h.intervalDays\n  }))\n};\n\nsetResult(formatted);\nreturn formatted;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

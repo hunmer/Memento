@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "获取即将到来",
         "desc": "查询未来7天的事件",
-        "data": "const events = await Memento.plugins.calendar.getUpcoming({\n  days: 7\n});\n\nconst result = {\n  count: events.data?.length || 0,\n  events: events.data?.map(e => ({\n    id: e.id,\n    title: e.title,\n    startTime: e.startTime,\n    endTime: e.endTime\n  })) || []\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.calendar.getUpcoming({\n  days: 7\n});\n\nif (!response.success) {\n  setResult({\n    error: response.error,\n    timestamp: response.timestamp\n  });\n  return { error: response.error };\n}\n\nconst result = {\n  count: response.data?.data?.length || 0,\n  events: response.data?.data?.map(e => ({\n    id: e.id,\n    title: e.title,\n    startTime: e.startTime,\n    endTime: e.endTime\n  })) || [],\n  timestamp: response.timestamp\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

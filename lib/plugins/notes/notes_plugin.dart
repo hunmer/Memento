@@ -262,7 +262,11 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(result.dataOrNull);
+    return jsonEncode({
+      'success': true,
+      'data': result.dataOrNull ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 获取单个笔记详情
