@@ -3,6 +3,7 @@ import 'dart:io'
 import 'package:flutter/foundation.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:mime/mime.dart';
+import 'package:path/path.dart' as path;
 
 // 导入用于自动配置的类型
 import 'package:Memento/core/plugin_manager.dart';
@@ -121,8 +122,8 @@ class LocalHttpServer {
       }
 
       if (await file.exists()) {
-        // 获取 MIME 类型
-        var mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
+        // 获取 MIME 类型（优先使用自定义映射）
+        var mimeType = _getMimeType(filePath);
 
         // 设置响应头
         request.response.headers.contentType = ContentType.parse(mimeType);
@@ -159,22 +160,83 @@ class LocalHttpServer {
     }
   }
 
-  /// 从 Referer 中提取项目名称
+  /// 从 Referer 中提取项目路径
   ///
+  /// 例如：http://localhost:8080/webview/http_server/dist/index.html -> webview/http_server/dist
   /// 例如：http://localhost:8080/projectName/index.html -> projectName
   String? _extractProjectNameFromReferer(String referer) {
     try {
       final uri = Uri.parse(referer);
       final pathSegments = uri.pathSegments;
 
-      // 如果有路径段，第一个段就是项目名称
-      if (pathSegments.isNotEmpty) {
-        return pathSegments.first;
+      if (pathSegments.isEmpty) {
+        return null;
       }
+
+      // 移除最后一个段（文件名），保留目录路径
+      // 例如：[webview, http_server, dist, index.html] -> webview/http_server/dist
+      final dirPath = pathSegments
+          .sublist(0, pathSegments.length - 1)
+          .join('/');
+
+      return dirPath.isNotEmpty ? dirPath : null;
     } catch (e) {
       debugPrint('[LocalHttpServer] 解析 Referer 失败: $e');
     }
     return null;
+  }
+
+  /// 获取文件的 MIME 类型
+  ///
+  /// 优先使用自定义映射，确保常见文件类型返回正确的 MIME 类型
+  String _getMimeType(String filePath) {
+    final extension = path.extension(filePath).toLowerCase();
+
+    // 自定义 MIME 类型映射（确保常见文件类型正确识别）
+    const mimeMap = {
+      '.html': 'text/html',
+      '.htm': 'text/html',
+      '.css': 'text/css',
+      '.js': 'application/javascript',
+      '.mjs': 'application/javascript',
+      '.json': 'application/json',
+      '.xml': 'application/xml',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.ico': 'image/x-icon',
+      '.webp': 'image/webp',
+      '.woff': 'font/woff',
+      '.woff2': 'font/woff2',
+      '.ttf': 'font/ttf',
+      '.otf': 'font/otf',
+      '.eot': 'application/vnd.ms-fontobject',
+      '.mp4': 'video/mp4',
+      '.webm': 'video/webm',
+      '.mp3': 'audio/mpeg',
+      '.wav': 'audio/wav',
+      '.ogg': 'audio/ogg',
+      '.pdf': 'application/pdf',
+      '.zip': 'application/zip',
+      '.txt': 'text/plain',
+      '.md': 'text/markdown',
+    };
+
+    // 优先使用自定义映射
+    if (mimeMap.containsKey(extension)) {
+      return mimeMap[extension]!;
+    }
+
+    // 回退到 mime 包的 lookupMimeType
+    final mimeType = lookupMimeType(filePath);
+    if (mimeType != null) {
+      return mimeType;
+    }
+
+    // 默认返回二进制流类型
+    return 'application/octet-stream';
   }
 
   /// 将 file:// URL 转换为 HTTP URL

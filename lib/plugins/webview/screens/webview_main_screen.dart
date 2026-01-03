@@ -475,36 +475,70 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                               icon: const Icon(Icons.folder_open),
                               tooltip: 'webview_select_local_file'.tr,
                               onPressed: () async {
-                                // Android 11+ 需要使用 pickFiles 来获取文件访问权限
-                                // 让用户选择目录中的所有文件
-                                final result = await FilePicker.platform
-                                    .pickFiles(
-                                      dialogTitle: '选择项目中的所有文件（包括 index.html）',
-                                      allowMultiple: true,
-                                      type: FileType.any,
-                                      withData: false,
-                                      withReadStream: false,
-                                    );
+                                String? directoryPath;
+                                List<String>? filesToCopy;
 
-                                if (result == null || result.files.isEmpty) {
+                                // macOS 使用目录选择，其他平台使用多文件选择
+                                if (Theme.of(context).platform == TargetPlatform.macOS) {
+                                  // macOS: 使用目录选择
+                                  directoryPath = await FilePicker.platform.getDirectoryPath(
+                                    dialogTitle: '选择项目目录（需包含 index.html）',
+                                  );
+                                } else {
+                                  // Android/其他: 使用多文件选择
+                                  final result = await FilePicker.platform.pickFiles(
+                                    dialogTitle: '选择项目中的所有文件（包括 index.html）',
+                                    allowMultiple: true,
+                                    type: FileType.any,
+                                    withData: false,
+                                    withReadStream: false,
+                                  );
+
+                                  if (result == null || result.files.isEmpty) {
+                                    return;
+                                  }
+
+                                  // 找到包含 index.html 的目录
+                                  String? indexHtmlPath;
+                                  for (final file in result.files) {
+                                    if (file.path != null &&
+                                        file.name == 'index.html') {
+                                      indexHtmlPath = file.path;
+                                      break;
+                                    }
+                                  }
+
+                                  if (indexHtmlPath == null) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('错误：所选文件中未找到 index.html'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  // 获取目录路径和文件列表
+                                  directoryPath = path.dirname(indexHtmlPath);
+                                  filesToCopy = result.files
+                                      .where((f) => f.path != null)
+                                      .map((f) => f.path!)
+                                      .toList();
+                                }
+
+                                if (directoryPath == null) {
                                   return;
                                 }
 
-                                // 找到包含 index.html 的目录
-                                String? indexHtmlPath;
-                                for (final file in result.files) {
-                                  if (file.path != null &&
-                                      file.name == 'index.html') {
-                                    indexHtmlPath = file.path;
-                                    break;
-                                  }
-                                }
-
-                                if (indexHtmlPath == null) {
+                                // 检查目录中是否存在 index.html
+                                final indexHtmlFile = File(path.join(directoryPath, 'index.html'));
+                                if (!await indexHtmlFile.exists()) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('错误：所选文件中未找到 index.html'),
+                                        content: Text('错误：所选目录中未找到 index.html'),
                                         backgroundColor: Colors.red,
                                       ),
                                     );
@@ -512,20 +546,20 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                   return;
                                 }
 
-                                // 获取目录路径和名称
-                                final directoryPath = path.dirname(
-                                  indexHtmlPath,
-                                );
-                                final directoryName = path.basename(
-                                  directoryPath,
-                                );
+                                final directoryName = path.basename(directoryPath);
 
                                 // 将选中的文件列表保存到 WebViewPlugin 中以备后用
-                                WebViewPlugin.instance.pendingFilesToCopy =
-                                    result.files
-                                        .where((f) => f.path != null)
-                                        .map((f) => f.path!)
-                                        .toList();
+                                if (filesToCopy != null) {
+                                  WebViewPlugin.instance.pendingFilesToCopy = filesToCopy;
+                                } else {
+                                  // macOS: 扫描目录下所有文件
+                                  final dir = Directory(directoryPath);
+                                  WebViewPlugin.instance.pendingFilesToCopy = (await dir
+                                      .list(recursive: true)
+                                      .where((entity) => entity is File)
+                                      .map((entity) => entity.path)
+                                      .toList());
+                                }
 
                                 setState(() {
                                   isLocalFileMode = true;

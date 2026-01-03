@@ -630,13 +630,25 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   /// 获取 HTTP 服务器根目录
   ///
-  /// 返回 app_data/webview/http_server 目录
+  /// 返回 app_data 目录，以便访问 app_images 等共享目录
   Future<String> getHttpServerRootDir() async {
     if (kIsWeb) {
       return 'http_server'; // Web 平台使用相对路径
     }
 
-    // 使用 StorageManager 获取应用数据目录（包含 app_data 前缀）
+    // 返回 app_data 根目录，以便访问 app_images 等共享目录
+    final appDataDir = await storageManager.getApplicationDataDirectory();
+    return appDataDir.path;
+  }
+
+  /// 获取 WebView 项目文件存储目录
+  ///
+  /// 返回 app_data/webview/http_server 目录，用于存储项目文件
+  Future<String> _getWebViewHttpServerDir() async {
+    if (kIsWeb) {
+      return 'http_server';
+    }
+
     final appDataDir = await storageManager.getApplicationDataDirectory();
     final pluginPath = storageManager.getPluginStoragePath('webview');
     return path.join(appDataDir.path, pluginPath, 'http_server');
@@ -660,8 +672,12 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       throw ArgumentError('项目名称只能包含字母、数字、下划线和连字符');
     }
 
+    // 使用 WebView 专用的 HTTP 服务器目录
+    final webViewHttpRoot = await _getWebViewHttpServerDir();
+    final projectDir = path.join(webViewHttpRoot, projectName);
+
+    // 获取 HTTP 服务器根目录（用于计算相对路径）
     final httpRoot = await getHttpServerRootDir();
-    final projectDir = path.join(httpRoot, projectName);
 
     try {
       // 创建项目目录
@@ -681,10 +697,11 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         // 查找入口文件
         final entryFile = await _findEntryFile(projectDir);
         if (entryFile != null) {
+          // 计算相对于 app_data 的路径
           final relativePath = path.relative(entryFile, from: httpRoot);
           return './${relativePath.replaceAll(path.separator, '/')}';
         } else {
-          return './$projectName/';
+          return './webview/http_server/$projectName/';
         }
       }
 
@@ -715,8 +732,8 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
           }
         }
 
-        // 返回相对路径
-        return './$projectName/$fileName';
+        // 返回相对路径（相对于 app_data）
+        return './webview/http_server/$projectName/$fileName';
       } else if (source == FileSystemEntityType.directory) {
         // 复制整个目录
         await _copyDirectory(sourcePath, projectDir);
@@ -725,10 +742,11 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         // 查找入口文件（index.html 或第一个 .html 文件）
         final entryFile = await _findEntryFile(projectDir);
         if (entryFile != null) {
+          // 计算相对于 app_data 的路径
           final relativePath = path.relative(entryFile, from: httpRoot);
           return './${relativePath.replaceAll(path.separator, '/')}';
         } else {
-          return './$projectName/';
+          return './webview/http_server/$projectName/';
         }
       } else {
         throw ArgumentError('源路径不是有效的文件或目录: $sourcePath');
