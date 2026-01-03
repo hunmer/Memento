@@ -367,6 +367,7 @@ class ClientGoodsRepository extends IGoodsRepository {
       description: item.notes,
       quantity: 1, // GoodsItem 没有 quantity 字段，默认1
       category: null, // GoodsItem 没有 category 字段
+      imageUrl: item.imageUrl, // 添加图片URL
       tags: item.tags,
       customFields: item.customFields.isNotEmpty
           ? {
@@ -383,7 +384,7 @@ class ClientGoodsRepository extends IGoodsRepository {
     return GoodsItem(
       id: dto.id,
       title: dto.name,
-      imageUrl: dto.description, // 临时使用 description 字段存储 imageUrl
+      imageUrl: dto.imageUrl, // 使用 dto.imageUrl 字段
       icon: null,
       iconColor: null,
       tags: dto.tags,

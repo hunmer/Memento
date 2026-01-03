@@ -629,6 +629,8 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   /// 获取 HTTP 服务器根目录
+  ///
+  /// 返回 app_data/webview/http_server 目录
   Future<String> getHttpServerRootDir() async {
     if (kIsWeb) {
       return 'http_server'; // Web 平台使用相对路径
@@ -636,7 +638,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 使用 StorageManager 获取应用数据目录（包含 app_data 前缀）
     final appDataDir = await storageManager.getApplicationDataDirectory();
-    final pluginPath = storageManager.getPluginStoragePath(id);
+    final pluginPath = storageManager.getPluginStoragePath('webview');
     return path.join(appDataDir.path, pluginPath, 'http_server');
   }
 

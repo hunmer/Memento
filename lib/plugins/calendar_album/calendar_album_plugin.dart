@@ -14,6 +14,9 @@ import 'controllers/tag_controller.dart';
 import 'repositories/client_calendar_album_repository.dart';
 import 'models/calendar_entry.dart';
 
+// HTTP 服务器导入
+import 'package:Memento/plugins/webview/services/local_http_server.dart';
+
 /// 日历相册插件主视图
 class CalendarAlbumMainView extends StatelessWidget {
   const CalendarAlbumMainView({super.key});
@@ -350,32 +353,6 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     );
   }
 
-  // ==================== 分页控制器 ====================
-
-  /// 分页控制器 - 对列表进行分页处理
-  /// @param list 原始数据列表
-  /// @param offset 起始位置（默认 0）
-  /// @param count 返回数量（默认 100）
-  /// @return 分页后的数据，包含 data、total、offset、count、hasMore
-  Map<String, dynamic> _paginate<T>(
-    List<T> list, {
-    int offset = 0,
-    int count = 100,
-  }) {
-    final total = list.length;
-    final start = offset.clamp(0, total);
-    final end = (start + count).clamp(start, total);
-    final data = list.sublist(start, end);
-
-    return {
-      'data': data,
-      'total': total,
-      'offset': start,
-      'count': data.length,
-      'hasMore': end < total,
-    };
-  }
-
   // ==================== JS API 定义 ====================
 
   @override
@@ -639,30 +616,88 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
-  /// 获取所有照片URL
+  /// 获取所有照片（包含完整日记数据）
   /// 支持分页参数: offset, count
+  /// 支持 get_http_image 参数：是否将图片路径转换为 HTTP URL
   Future<String> _jsGetPhotos(Map<String, dynamic> params) async {
     try {
-      final result = await useCase.getAllImages(params);
+      final getHttpImage = params['get_http_image'] == true;
+      params.remove('get_http_image');
+
+      final controller = calendarController;
+      if (controller == null) {
+        return jsonEncode({
+          'success': false,
+          'data': [],
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'error': 'calendarController 未初始化'
+        });
+      }
+
+      // 获取所有包含图片的日记数据
+      final images = controller.getAllImages();
+      var photos = <Map<String, dynamic>>[];
+
+      for (final imageUrl in images) {
+        // 根据图片URL获取对应的日记
+        final entry = controller.getDiaryEntryForImage(imageUrl);
+        if (entry != null) {
+          final photoData = {
+            'id': entry.id,
+            'title': entry.title,
+            'content': entry.content,
+            'imageUrl': imageUrl,
+            'createdAt': entry.createdAt.toIso8601String(),
+            'updatedAt': entry.updatedAt.toIso8601String(),
+            'tags': entry.tags,
+            'location': entry.location,
+            'mood': entry.mood,
+            'weather': entry.weather,
+          };
+          photos.add(photoData);
+        }
+      }
+
+      // 处理图片路径转换
+      if (getHttpImage && photos.isNotEmpty) {
+        photos = await LocalHttpServer.convertImagesWithAutoConfig(
+          items: photos,
+          pluginId: id,
+          imageKey: 'imageUrl',
+          storageManager: storage,
+        );
+      }
+
+      // 应用分页
+      final offset = params['offset'] as int? ?? 0;
+      final count = params['count'] as int?;
+
+      List<Map<String, dynamic>> paginatedPhotos;
+      if (count != null && count > 0) {
+        final end = (offset + count).clamp(0, photos.length);
+        paginatedPhotos = photos.sublist(offset, end);
+      } else {
+        paginatedPhotos = photos.skip(offset).toList();
+      }
 
       return jsonEncode({
-        'success': !result.isFailure,
-        'data': result.dataOrNull ?? [],
+        'success': true,
+        'data': paginatedPhotos,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'error': result.isFailure ? result.errorOrNull?.message : null,
       });
     } catch (e) {
       return jsonEncode({
         'success': false,
         'data': [],
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'error': '获取图片列表失败: $e',
+        'error': '获取照片列表失败: $e',
       });
     }
   }
 
-  /// 根据日期范围获取照片
+  /// 根据日期范围获取照片（包含完整日记数据）
   /// 支持分页参数: offset, count
+  /// 支持 get_http_image 参数：是否将图片路径转换为 HTTP URL
   Future<String> _jsGetPhotosByDateRange(Map<String, dynamic> params) async {
     final String? startDateStr = params['startDate'];
     final String? endDateStr = params['endDate'];
@@ -673,19 +708,24 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': '缺少必需参数: endDate'});
     }
 
-    final int? offset = params['offset'];
-    final int? count = params['count'];
-
     try {
+      final getHttpImage = params['get_http_image'] == true;
+      params.remove('get_http_image');
+
       final startDate = DateTime.parse(startDateStr);
       final endDate = DateTime.parse(endDateStr);
 
-      final List<Map<String, dynamic>> photos = [];
-
       final controller = calendarController;
       if (controller == null) {
-        return jsonEncode({'error': 'calendarController 未初始化', 'items': []});
+        return jsonEncode({
+          'success': false,
+          'data': [],
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'error': 'calendarController 未初始化'
+        });
       }
+
+      var photos = <Map<String, dynamic>>[];
       controller.entries.forEach((date, entries) {
         if ((date.isAfter(startDate) || date.isAtSameMomentAs(startDate)) &&
             (date.isBefore(endDate) || date.isAtSameMomentAs(endDate))) {
@@ -693,31 +733,56 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
             final allImages = <String>[...entry.imageUrls, ...entry.extractImagesFromMarkdown()];
             for (var imageUrl in allImages) {
               photos.add({
-                'date': date.toIso8601String(),
+                'id': entry.id,
+                'title': entry.title,
+                'content': entry.content,
                 'imageUrl': imageUrl,
-                'entryId': entry.id,
-                'entryTitle': entry.title,
+                'date': date.toIso8601String(),
+                'createdAt': entry.createdAt.toIso8601String(),
+                'updatedAt': entry.updatedAt.toIso8601String(),
+                'tags': entry.tags,
+                'location': entry.location,
+                'mood': entry.mood,
+                'weather': entry.weather,
               });
             }
           }
         }
       });
 
-      // 检查是否需要分页
-      if (offset != null || count != null) {
-        final paginated = _paginate(
-          photos,
-          offset: offset ?? 0,
-          count: count ?? 100,
+      // 处理图片路径转换
+      if (getHttpImage && photos.isNotEmpty) {
+        photos = await LocalHttpServer.convertImagesWithAutoConfig(
+          items: photos,
+          pluginId: id,
+          imageKey: 'imageUrl',
+          storageManager: storage,
         );
-        return jsonEncode(paginated);
       }
 
-      return jsonEncode(photos);
+      // 应用分页
+      final offset = params['offset'] as int? ?? 0;
+      final count = params['count'] as int?;
+
+      List<Map<String, dynamic>> paginatedPhotos;
+      if (count != null && count > 0) {
+        final end = (offset + count).clamp(0, photos.length);
+        paginatedPhotos = photos.sublist(offset, end);
+      } else {
+        paginatedPhotos = photos.skip(offset).toList();
+      }
+
+      return jsonEncode({
+        'success': true,
+        'data': paginatedPhotos,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
       return jsonEncode({
-        'error': '日期格式错误',
-        'message': '请使用 YYYY-MM-DD 格式',
+        'success': false,
+        'data': [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'error': '获取照片列表失败: $e',
       });
     }
   }

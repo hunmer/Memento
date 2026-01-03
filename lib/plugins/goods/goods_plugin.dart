@@ -17,6 +17,9 @@ import 'models/find_item_result.dart';
 import 'repositories/client_goods_repository.dart';
 import 'sample_data.dart';
 
+// HTTP 服务器导入
+import 'package:Memento/plugins/webview/services/local_http_server.dart';
+
 /// 物品相关事件的基类
 abstract class GoodsEventArgs extends EventArgs {
   final String warehouseId;
@@ -775,13 +778,30 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 获取物品列表
   /// 支持分页参数: offset, count
+  /// 支持 get_http_image 参数：是否将图片路径转换为 HTTP URL
   Future<String> _jsGetGoods(Map<String, dynamic> params) async {
     try {
+      // 提取图片转换参数
+      final getHttpImage = params['get_http_image'] == true;
+      params.remove('get_http_image');
+
       final result = await _useCase.getItems(params);
+
+      var items = result.dataOrNull ?? [];
+
+      // 处理图片路径转换（使用简化方法）
+      if (getHttpImage) {
+        items = await LocalHttpServer.convertImagesWithAutoConfig(
+          items: items,
+          pluginId: id,
+          imageKey: 'imageUrl',
+          storageManager: storage,
+        );
+      }
 
       return jsonEncode({
         'success': true,
-        'data': result.dataOrNull ?? [],
+        'data': items,
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {

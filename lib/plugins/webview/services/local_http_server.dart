@@ -4,6 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:mime/mime.dart';
 
+// 导入用于自动配置的类型
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/webview/webview_plugin.dart';
+import 'package:Memento/core/storage/storage_manager.dart';
+
 /// 本地 HTTP 服务器
 /// 用于在 Windows 等平台上提供本地文件访问，绕过 file:// 协议的安全限制
 class LocalHttpServer {
@@ -242,5 +247,257 @@ class LocalHttpServer {
     }
 
     return '$serverUrl$normalizedPath';
+  }
+
+  /// 获取 HTTP 服务器的完整 URL 前缀（静态方法）
+  ///
+  /// [port] 服务器端口（默认 8080）
+  /// [appDataRoot] app_data 根目录路径
+  /// [filePath] 要转换的文件路径
+  ///
+  /// 返回 HTTP URL，例如：http://localhost:8080/webview/http_server/project/index.html
+  static String getHttpUrl({
+    required int port,
+    required String appDataRoot,
+    required String filePath,
+  }) {
+    final serverUrl = 'http://localhost:$port';
+    String normalizedPath = filePath.replaceAll(Platform.pathSeparator, '/');
+
+    // 移除 app_data 根目录前缀
+    final normalizedRoot = appDataRoot.replaceAll(Platform.pathSeparator, '/');
+    if (normalizedPath.startsWith(normalizedRoot)) {
+      normalizedPath = normalizedPath.substring(normalizedRoot.length);
+    }
+
+    // 确保路径以 / 开头
+    if (!normalizedPath.startsWith('/')) {
+      normalizedPath = '/$normalizedPath';
+    }
+
+    return '$serverUrl$normalizedPath';
+  }
+
+  // ==================== 静态方法（供其他插件复用） ====================
+
+  /// 获取 HTTP 服务器的完整 URL 前缀（静态方法）
+  ///
+  /// 此方法供其他插件复用，将本地图片路径转换为可通过 HTTP 访问的 URL。
+  ///
+  /// 参数：
+  /// - [imagePath] 图片路径（支持相对路径 ./xxx.png、file:// URL、绝对路径、网络 URL）
+  /// - [httpServerRoot] HTTP 服务器根目录（现在是 app_data 目录）
+  /// - [port] HTTP 服务器端口（默认 8080）
+  /// - [pluginStoragePath] 插件存储路径（可选，用于解析相对路径）
+  ///
+  /// 返回：
+  /// - 网络图片 URL 直接返回
+  /// - 本地图片路径返回 http://localhost:port/xxx 格式的 URL
+  /// - 转换失败返回原始路径
+  ///
+  /// 示例：
+  /// ```dart
+  /// final httpUrl = await LocalHttpServer.convertImageToHttpUrl(
+  ///   imagePath: './app_images/icon.png',
+  ///   httpServerRoot: '/path/to/app_data',
+  ///   port: 8080,
+  ///   pluginStoragePath: '/path/to/app_data/store',
+  /// );
+  /// // 返回: 'http://localhost:8080/app_images/icon.png'
+  /// ```
+  static Future<String> convertImageToHttpUrl({
+    required String? imagePath,
+    required String httpServerRoot,
+    int port = 8080,
+    String? pluginStoragePath,
+  }) async {
+    if (imagePath == null || imagePath.isEmpty) {
+      return '';
+    }
+
+    // 如果已经是网络 URL，直接返回
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+
+    try {
+      String filePathToConvert;
+
+      if (imagePath.startsWith('./')) {
+        // 相对路径：./app_images/xxx.png
+        final relativePath = imagePath.substring(2); // 移除 ./
+        // 直接使用 HTTP 服务器根目录（app_data），不检查文件是否存在
+        filePathToConvert = '$httpServerRoot/${relativePath.replaceAll('/', Platform.pathSeparator)}';
+      } else if (imagePath.startsWith('file://')) {
+        // file:// URL，提取路径部分
+        filePathToConvert = imagePath.substring('file://'.length);
+        if (UniversalPlatform.isWindows && filePathToConvert.startsWith('/')) {
+          filePathToConvert = filePathToConvert.substring(1);
+        }
+      } else {
+        // 其他情况，假设是相对于插件目录的路径
+        if (pluginStoragePath != null && pluginStoragePath.isNotEmpty) {
+          filePathToConvert = '$pluginStoragePath/${imagePath.replaceAll('/', Platform.pathSeparator)}';
+        } else {
+          // 没有插件存储路径，直接使用相对于根目录的路径
+          filePathToConvert = '$httpServerRoot/${imagePath.replaceAll('/', Platform.pathSeparator)}';
+        }
+      }
+
+      // 转换为 HTTP URL
+      return getHttpUrl(port: port, appDataRoot: httpServerRoot, filePath: filePathToConvert);
+    } catch (e) {
+      debugPrint('[LocalHttpServer] 图片路径转换失败: $e');
+      return imagePath;
+    }
+  }
+
+  /// 批量转换图片路径（静态方法）
+  ///
+  /// 参数：
+  /// - [items] 包含图片字段的数据列表
+  /// - [imageKey] 图片字段的键名（默认 'image'）
+  /// - [httpServerRoot] HTTP 服务器根目录
+  /// - [port] HTTP 服务器端口（默认 8080）
+  /// - [pluginStoragePath] 插件存储路径（可选）
+  ///
+  /// 返回：处理后的数据列表（不修改原始数据）
+  static Future<List<Map<String, dynamic>>> convertImagesInItems({
+    required List<dynamic> items,
+    String imageKey = 'image',
+    required String httpServerRoot,
+    int port = 8080,
+    String? pluginStoragePath,
+  }) async {
+    final processedItems = <Map<String, dynamic>>[];
+
+    for (final item in items) {
+      if (item is Map<String, dynamic>) {
+        final updatedItem = Map<String, dynamic>.from(item);
+        final imagePath = updatedItem[imageKey] as String?;
+        if (imagePath != null && imagePath.isNotEmpty) {
+          updatedItem[imageKey] = await convertImageToHttpUrl(
+            imagePath: imagePath,
+            httpServerRoot: httpServerRoot,
+            port: port,
+            pluginStoragePath: pluginStoragePath,
+          );
+        }
+        processedItems.add(updatedItem);
+      }
+    }
+
+    return processedItems;
+  }
+
+  /// 批量转换图片路径（自动配置版本）
+  ///
+  /// 这是一个便捷方法，自动获取 WebView 插件和 HTTP 服务器配置。
+  /// 适用于其他插件在 JS API 中快速转换图片路径。
+  ///
+  /// 参数：
+  /// - [items] 包含图片字段的数据列表
+  /// - [pluginId] 当前插件的 ID
+  /// - [imageKey] 图片字段的键名（默认 'image'）
+  /// - [storageManager] StorageManager 实例（可选）
+  ///
+  /// 返回：处理后的数据列表
+  ///
+  /// 使用示例：
+  /// ```dart
+  /// // 在插件 JS API 中
+  /// var products = await useCase.getProducts(params);
+  /// if (getHttpImage) {
+  ///   products = await LocalHttpServer.convertImagesWithAutoConfig(
+  ///     items: products,
+  ///     pluginId: id,
+  ///     imageKey: 'image',
+  ///     storageManager: storageManager,
+  ///   );
+  /// }
+  /// ```
+  static Future<List<Map<String, dynamic>>> convertImagesWithAutoConfig({
+    required List<dynamic> items,
+    required String pluginId,
+    String imageKey = 'image',
+    StorageManager? storageManager,
+  }) async {
+    if (items.isEmpty) {
+      return [];
+    }
+
+    try {
+      // 获取 WebView 插件
+      final webViewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+
+      if (webViewPlugin == null) {
+        debugPrint('[LocalHttpServer] ⚠️ WebView 插件未初始化，跳过图片转换');
+        return items.cast<Map<String, dynamic>>().toList();
+      }
+
+      if (!webViewPlugin.localHttpServer.isRunning) {
+        debugPrint('[LocalHttpServer] ⚠️ HTTP 服务器未运行，跳过图片转换');
+        return items.cast<Map<String, dynamic>>().toList();
+      }
+
+      // 获取配置
+      final httpServerRoot = await webViewPlugin.getHttpServerRootDir();
+      final port = webViewPlugin.localHttpServer.port;
+      String? pluginStoragePath;
+
+      // 获取插件存储路径（如果提供了 StorageManager）
+      if (storageManager != null) {
+        pluginStoragePath = storageManager.getPluginStoragePath(pluginId);
+      }
+
+      debugPrint('[LocalHttpServer] 开始转换图片 [plugin: $pluginId, count: ${items.length}]');
+
+      // 使用静态方法批量转换图片
+      final result = await convertImagesInItems(
+        items: items,
+        imageKey: imageKey,
+        httpServerRoot: httpServerRoot,
+        port: port,
+        pluginStoragePath: pluginStoragePath,
+      );
+
+      debugPrint('[LocalHttpServer] ✓ 图片转换完成 [plugin: $pluginId]');
+      return result;
+    } catch (e) {
+      debugPrint('[LocalHttpServer] ✗ 图片转换失败 [plugin: $pluginId]: $e');
+      return items.cast<Map<String, dynamic>>().toList();
+    }
+  }
+
+  /// 转换单个数据项中的图片路径（静态方法）
+  ///
+  /// 参数：
+  /// - [item] 包含图片字段的数据
+  /// - [imageKey] 图片字段的键名（默认 'image'）
+  /// - [httpServerRoot] HTTP 服务器根目录
+  /// - [port] HTTP 服务器端口（默认 8080）
+  /// - [pluginStoragePath] 插件存储路径（可选）
+  ///
+  /// 返回：处理后的数据（不修改原始数据），如果输入为 null 则返回 null
+  static Future<Map<String, dynamic>?> convertImageInItem({
+    required Map<String, dynamic>? item,
+    String imageKey = 'image',
+    required String httpServerRoot,
+    int port = 8080,
+    String? pluginStoragePath,
+  }) async {
+    if (item == null) return null;
+
+    final updatedItem = Map<String, dynamic>.from(item);
+    final imagePath = updatedItem[imageKey] as String?;
+    if (imagePath != null && imagePath.isNotEmpty) {
+      updatedItem[imageKey] = await convertImageToHttpUrl(
+        imagePath: imagePath,
+        httpServerRoot: httpServerRoot,
+        port: port,
+        pluginStoragePath: pluginStoragePath,
+      );
+    }
+    return updatedItem;
   }
 }

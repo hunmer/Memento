@@ -22,6 +22,9 @@ import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:shared_models/usecases/contact/contact_usecase.dart';
 import 'repositories/client_contact_repository.dart';
 
+// HTTP 服务器导入
+import 'package:Memento/plugins/webview/services/local_http_server.dart';
+
 class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;
   late ContactUseCase _useCase;
@@ -242,17 +245,44 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取所有联系人
   /// 支持分页参数: offset, count
   Future<String> _jsGetContacts(Map<String, dynamic> params) async {
-    final result = await _useCase.getContacts(params);
+    try {
+      final getHttpImage = params['get_http_image'] == true;
+      params.remove('get_http_image');
 
-    if (result.isFailure) {
-      return jsonEncode({'error': result.errorOrNull?.message});
+      final result = await _useCase.getContacts(params);
+
+      if (result.isFailure) {
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
+      }
+
+      var contacts = result.dataOrNull ?? [];
+
+      // 处理头像路径转换
+      if (getHttpImage && contacts.isNotEmpty) {
+        contacts = await LocalHttpServer.convertImagesWithAutoConfig(
+          items: contacts,
+          pluginId: id,
+          imageKey: 'avatar',
+          storageManager: storage,
+        );
+      }
+
+      return jsonEncode({
+        'success': true,
+        'data': contacts,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
+    } catch (e) {
+      return jsonEncode({
+        'success': false,
+        'error': '获取联系人失败: ${e.toString()}',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
-
-    return jsonEncode({
-      'success': true,
-      'data': result.dataOrNull ?? [],
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    });
   }
 
   /// 获取联系人详情

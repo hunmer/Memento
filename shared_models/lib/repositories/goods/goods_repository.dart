@@ -80,6 +80,7 @@ class GoodsItemDto {
   final String? description;
   final int quantity;
   final String? category;
+  final String? imageUrl;
   final List<String> tags;
   final Map<String, dynamic>? customFields;
   final DateTime createdAt;
@@ -91,6 +92,7 @@ class GoodsItemDto {
     this.description,
     this.quantity = 1,
     this.category,
+    this.imageUrl,
     this.tags = const [],
     this.customFields,
     required this.createdAt,
@@ -104,6 +106,7 @@ class GoodsItemDto {
       description: json['description'] as String?,
       quantity: json['quantity'] as int? ?? 1,
       category: json['category'] as String?,
+      imageUrl: json['imageUrl'] as String?,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       customFields: json['customFields'] as Map<String, dynamic>?,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -118,6 +121,7 @@ class GoodsItemDto {
       'description': description,
       'quantity': quantity,
       'category': category,
+      'imageUrl': imageUrl,
       'tags': tags,
       'customFields': customFields,
       'createdAt': createdAt.toIso8601String(),
@@ -131,6 +135,7 @@ class GoodsItemDto {
     String? description,
     int? quantity,
     String? category,
+    String? imageUrl,
     List<String>? tags,
     Map<String, dynamic>? customFields,
     DateTime? createdAt,
@@ -142,6 +147,7 @@ class GoodsItemDto {
       description: description ?? this.description,
       quantity: quantity ?? this.quantity,
       category: category ?? this.category,
+      imageUrl: imageUrl ?? this.imageUrl,
       tags: tags ?? this.tags,
       customFields: customFields ?? this.customFields,
       createdAt: createdAt ?? this.createdAt,

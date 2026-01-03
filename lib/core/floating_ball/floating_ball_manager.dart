@@ -270,7 +270,11 @@ class FloatingBallManager {
   // 加载保存的动作
   Future<void> _loadActions() async {
     final data = await _readData();
-    final actions = data['actions'] as Map<String, dynamic>? ?? {};
+    final actionsData = data['actions'];
+    final Map<String, dynamic> actions = actionsData is Map<String, dynamic>
+        ? actionsData
+        : (actionsData is Map ? Map<String, dynamic>.from(actionsData) : {});
+
     for (var gesture in FloatingBallGesture.values) {
       final actionTitle = actions[gesture.name];
       if (actionTitle != null) {
@@ -293,7 +297,10 @@ class FloatingBallManager {
   ) async {
     await _ensureInitialized();
     final data = await _readData();
-    var actions = data['actions'] as Map<String, dynamic>? ?? {};
+    final actionsData = data['actions'];
+    final Map<String, dynamic> actions = actionsData is Map<String, dynamic>
+        ? actionsData
+        : (actionsData is Map ? Map<String, dynamic>.from(actionsData) : {});
     if (actionTitle != null) {
       actions[gesture.name] = actionTitle;
     } else {
@@ -348,7 +355,10 @@ class FloatingBallManager {
   Future<Offset> getPosition() async {
     await _ensureInitialized();
     final data = await _readData();
-    final position = data['position'] as Map<String, dynamic>? ?? {};
+    final positionData = data['position'];
+    final Map<String, dynamic> position = positionData is Map<String, dynamic>
+        ? positionData
+        : (positionData is Map ? Map<String, dynamic>.from(positionData) : {});
     final double x = (position['x'] as num?)?.toDouble() ?? 20;
     final double y = (position['y'] as num?)?.toDouble() ?? 100;
     _position = Offset(x, y);
