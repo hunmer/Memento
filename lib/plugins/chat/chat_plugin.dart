@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
@@ -353,6 +355,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       // 消息相关
       'sendMessage': _jsSendMessage,
       'getMessages': _jsGetMessages,
+      'getMessagesByDate': _jsGetMessagesByDate, // 按日期范围获取所有消息
       'deleteMessage': _jsDeleteMessage,
 
       // 用户相关
@@ -486,6 +489,120 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   Future<String> _jsFindMessageByContent(Map<String, dynamic> params) async {
     final result = await chatUseCase.findMessageByContent(params);
     return result.toJsonString();
+  }
+
+  /// 根据日期范围获取所有频道的消息
+  /// @param params.startDate 开始日期，格式 "YYYY-MM-DD" (必需)
+  /// @param params.endDate 结束日期，格式 "YYYY-MM-DD" (必需)
+  /// @param params.offset 分页起始位置 (可选)
+  /// @param params.count 返回数量 (可选，默认 100)
+  /// @return JSON 字符串，包含消息列表
+  Future<String> _jsGetMessagesByDate(Map<String, dynamic> params) async {
+    try {
+      // 验证必需参数
+      if (!params.containsKey('startDate')) {
+        return '{"error": "缺少必需参数: startDate", "messages": []}';
+      }
+      if (!params.containsKey('endDate')) {
+        return '{"error": "缺少必需参数: endDate", "messages": []}';
+      }
+
+      final startDateStr = params['startDate'] as String;
+      final endDateStr = params['endDate'] as String;
+
+      // 解析日期
+      final startDate = DateTime.parse(startDateStr);
+      final endDate = DateTime.parse(endDateStr).add(const Duration(days: 1)); // 包含结束日期当天的消息
+
+      // 获取所有频道
+      final channelsResult = await chatUseCase.getChannels({});
+      if (channelsResult.isFailure) {
+        return '{"error": "获取频道失败", "messages": []}';
+      }
+
+      final channelsData = channelsResult.dataOrNull;
+      if (channelsData is! List) {
+        return '{"error": "频道数据格式错误", "messages": []}';
+      }
+
+      final channelsList = channelsData as List<dynamic>;
+      final allMessages = <Map<String, dynamic>>[];
+
+      // 遍历每个频道获取消息
+      for (final channelData in channelsList) {
+        if (channelData is! Map) continue;
+
+        final channel = channelData as Map<String, dynamic>;
+        final channelId = channel['id'] as String?;
+
+        if (channelId == null || channelId.isEmpty) continue;
+
+        try {
+          // 获取频道的所有消息
+          final messagesResult = await chatUseCase.getMessages({
+            'channelId': channelId,
+          });
+
+          if (messagesResult.isSuccess) {
+            final messagesData = messagesResult.dataOrNull;
+            if (messagesData is List) {
+              final messages = messagesData as List<dynamic>;
+
+              // 过滤日期范围内的消息
+              for (final msgData in messages) {
+                if (msgData is! Map) continue;
+
+                final msg = msgData as Map<String, dynamic>;
+                final timestampStr = msg['date'] as String?;
+
+                if (timestampStr != null) {
+                  try {
+                    final timestamp = DateTime.parse(timestampStr);
+
+                    // 检查是否在日期范围内
+                    if (timestamp.isAfter(startDate) && timestamp.isBefore(endDate)) {
+                      allMessages.add(msg);
+                    }
+                  } catch (e) {
+                    // 忽略日期解析错误的消息
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // 忽略获取单个频道消息的错误，继续处理其他频道
+          debugPrint('Error getting messages for channel $channelId: $e');
+        }
+      }
+
+      // 按时间排序（最新的在前）
+      allMessages.sort((a, b) {
+        final aTime = DateTime.parse(a['date'] as String);
+        final bTime = DateTime.parse(b['date'] as String);
+        return bTime.compareTo(aTime);
+      });
+
+      // 处理分页
+      final offset = params['offset'] as int? ?? 0;
+      final count = params['count'] as int? ?? 100;
+
+      final paginatedMessages = allMessages.skip(offset).take(count).toList();
+
+      // 返回结果
+      final result = {
+        'total': allMessages.length,
+        'offset': offset,
+        'count': count,
+        'hasMore': offset + count < allMessages.length,
+        'messages': paginatedMessages,
+      };
+
+      return const JsonEncoder().convert(result);
+    } catch (e) {
+      debugPrint('Error in getMessagesByDate: $e');
+      return '{"error": "获取消息失败: $e", "messages": []}';
+    }
   }
 
   @override
