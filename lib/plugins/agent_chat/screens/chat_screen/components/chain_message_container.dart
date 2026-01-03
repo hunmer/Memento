@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/models/chat_message.dart';
+import 'package:Memento/plugins/agent_chat/models/ai_message_status.dart';
+import 'package:Memento/plugins/agent_chat/managers/ai_message_status_manager.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event_args.dart';
 import 'markdown_content.dart';
 import 'tool_call_steps.dart';
 
@@ -49,21 +53,83 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
   /// 上一次最终总结的生成状态
   bool? _lastSummaryGeneratingState;
 
+  /// 消息ID到实时状态的映射
+  final Map<String, AIMessageStatusData> _statusMap = {};
+
+  /// 事件管理器
+  final EventManager _eventManager = EventManager.instance;
+
+  /// 订阅处理器引用（用于取消订阅）
+  Function(EventArgs)? _statusHandler;
+  Function(EventArgs)? _progressHandler;
+
   @override
   void initState() {
     super.initState();
     _loadChainMessages();
-    // 监听消息变化
+
+    // 订阅链式消息状态变化
+    _subscribeToChainMessages();
+
+    // 保持原有的监听器以兼容消息服务的变化
     widget.messageService.addListener(_onMessageChanged);
   }
 
   @override
   void dispose() {
+    // 取消事件订阅
+    if (_statusHandler != null) {
+      _eventManager.unsubscribe(
+        AIMessageStatusManager.eventStatusChanged,
+        _statusHandler!,
+      );
+    }
+    if (_progressHandler != null) {
+      _eventManager.unsubscribe(
+        AIMessageStatusManager.eventChainStepCompleted,
+        _progressHandler!,
+      );
+    }
+
+    // 移除监听器
     widget.messageService.removeListener(_onMessageChanged);
     super.dispose();
   }
 
-  /// 监听消息变化
+  /// 订阅链式消息状态变化
+  void _subscribeToChainMessages() {
+    // 订阅链式执行的所有消息状态变化
+    _statusHandler = (EventArgs args) {
+      if (args is AIMessageStatusEventArgs &&
+          args.chainExecutionId == widget.chainExecutionId) {
+        _onChainMessageStatusChanged();
+      }
+    };
+    _eventManager.subscribe(
+      AIMessageStatusManager.eventStatusChanged,
+      _statusHandler!,
+    );
+
+    // 订阅链式执行进度变化
+    _progressHandler = (EventArgs args) {
+      if (args is Values && args.value1 == widget.chainExecutionId) {
+        _loadChainMessages();
+      }
+    };
+    _eventManager.subscribe(
+      AIMessageStatusManager.eventChainStepCompleted,
+      _progressHandler!,
+    );
+  }
+
+  /// 处理链式消息状态变化
+  void _onChainMessageStatusChanged() {
+    if (mounted) {
+      _loadChainMessages();
+    }
+  }
+
+  /// 监听消息变化（保留兼容性）
   void _onMessageChanged() {
     _loadChainMessages();
   }
@@ -74,6 +140,16 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
       widget.conversationId,
       widget.chainExecutionId,
     );
+
+    // 从状态管理器获取实时状态
+    final statusManager = widget.messageService.statusManager;
+    final chainStatuses = statusManager.getChainMessages(widget.chainExecutionId);
+
+    // 更新消息ID到状态的映射（清空后重新填充）
+    _statusMap.clear();
+    for (final status in chainStatuses) {
+      _statusMap[status.messageId] = status;
+    }
 
     // 分离常规消息和最终总结消息
     final regularMessages = <ChatMessage>[];
@@ -90,9 +166,14 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
     setState(() {
       _chainMessages = regularMessages;
 
-      // 检测最终总结状态变化
+      // 检测最终总结状态变化（使用状态管理器的实时状态）
       final wasGenerating = _lastSummaryGeneratingState;
-      final isNowGenerating = summaryMsg?.isGenerating;
+      bool isNowGenerating = false;
+
+      if (summaryMsg != null) {
+        final status = _statusMap[summaryMsg.id];
+        isNowGenerating = status?.isActive ?? false;
+      }
 
       _finalSummaryMessage = summaryMsg;
       _lastSummaryGeneratingState = isNowGenerating;
@@ -100,12 +181,12 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
       // 如果是首次加载且有完成的最终结果，默认选中
       if (wasGenerating == null &&
           summaryMsg != null &&
-          !summaryMsg.isGenerating) {
+          !isNowGenerating) {
         _selectedTabIndex = regularMessages.length; // 选中最终结果tab
       }
       // 如果最终总结刚刚完成生成，自动切换到该tab
       else if (wasGenerating == true &&
-          isNowGenerating == false &&
+          !isNowGenerating &&
           summaryMsg != null) {
         _selectedTabIndex = regularMessages.length; // 选中最终结果tab
       }
@@ -175,6 +256,11 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           'Agent';
       final stepIndex = message.chainStepIndex ?? index;
 
+      // 从状态管理器获取实时生成状态
+      final status = _statusMap[message.id];
+      final isGenerating = status?.isActive ?? false;
+      final tokenCount = status?.tokenCount ?? 0;
+
       tabs.add(
         Padding(
           padding: const EdgeInsets.only(right: 8),
@@ -182,9 +268,9 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
             context: context,
             label: '步骤${stepIndex + 1}: $agentName',
             isSelected: isSelected,
-            isGenerating: message.isGenerating,
+            isGenerating: isGenerating,
             hasError: message.content.contains('❌'),
-            tokenCount: null, // 常规步骤不显示token
+            tokenCount: isGenerating ? tokenCount : null, // 常规步骤不显示token
             onTap: () {
               setState(() {
                 _selectedTabIndex = index;
@@ -200,6 +286,11 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
       final summaryIndex = _chainMessages.length;
       final isSelected = _selectedTabIndex == summaryIndex;
 
+      // 从状态管理器获取实时生成状态
+      final status = _statusMap[_finalSummaryMessage!.id];
+      final isGenerating = status?.isActive ?? false;
+      final tokenCount = status?.tokenCount ?? 0;
+
       tabs.add(
         Padding(
           padding: const EdgeInsets.only(right: 8),
@@ -207,12 +298,9 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
             context: context,
             label: '最终结果',
             isSelected: isSelected,
-            isGenerating: _finalSummaryMessage!.isGenerating,
+            isGenerating: isGenerating,
             hasError: _finalSummaryMessage!.content.contains('❌'),
-            tokenCount:
-                _finalSummaryMessage!.isGenerating
-                    ? _finalSummaryMessage!.tokenCount
-                    : null,
+            tokenCount: isGenerating ? tokenCount : null,
             onTap: () {
               setState(() {
                 _selectedTabIndex = summaryIndex;
@@ -328,6 +416,11 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
 
   /// 构建消息内容
   Widget _buildMessageContent(BuildContext context, ChatMessage message) {
+    // 从状态管理器获取实时生成状态
+    final status = _statusMap[message.id];
+    final isGenerating = status?.isActive ?? false;
+    final currentContent = status?.currentContent ?? message.content;
+
     // 检查是否有工具调用
     final hasToolCall =
         message.toolCall != null && message.toolCall!.steps.isNotEmpty;
@@ -340,7 +433,7 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           // ⚠️ 优先显示 ToolCallSteps
           ToolCallSteps(
             steps: message.toolCall!.steps,
-            isGenerating: message.isGenerating,
+            isGenerating: isGenerating,
             onRerunStep:
                 widget.onRerunStep != null
                     ? (stepIndex) => widget.onRerunStep!(message.id, stepIndex)
@@ -348,10 +441,10 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           ),
         ]
         // 总是显示消息内容（包括正在生成中的内容）
-        else if (message.content.isNotEmpty)
-          MarkdownContent(content: message.content)
+        else if (currentContent.isNotEmpty)
+          MarkdownContent(content: _stripMarkdownCodeBlocks(currentContent))
         // 如果正在生成但没有内容，显示加载指示器
-        else if (message.isGenerating)
+        else if (isGenerating)
           Row(
             children: [
               SizedBox(
@@ -383,5 +476,28 @@ class _ChainMessageContainerState extends State<ChainMessageContainer> {
           ),
       ],
     );
+  }
+
+  /// 移除 Markdown 代码块的开头和结尾标记（如 ```json 或 ```）
+  String _stripMarkdownCodeBlocks(String content) {
+    final trimmed = content.trim();
+
+    // 匹配开头的 ``` 后面可能跟语言标识（如 json、dart 等）
+    final startPattern = RegExp(r'^```\w*\n?');
+    final endPattern = RegExp(r'\n?```$');
+
+    String result = trimmed;
+
+    // 移除开头的标记
+    if (startPattern.hasMatch(result)) {
+      result = result.replaceFirst(startPattern, '');
+    }
+
+    // 移除结尾的标记
+    if (endPattern.hasMatch(result)) {
+      result = result.replaceFirst(endPattern, '');
+    }
+
+    return result.trim();
   }
 }

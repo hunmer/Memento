@@ -537,6 +537,14 @@ class AgentChainExecutor {
         // 使用内部的工具执行器（不会调用续写回调）
         await _toolExecutor.handleToolCall(aiMessageId, secondResponse);
 
+        // 先标记原消息为完成状态（在生成总结之前）
+        // 这样UI可以正确显示步骤已完成
+        context.messageService.completeAIMessage(
+          context.conversationId,
+          aiMessageId,
+        );
+        debugPrint('✅ [链式调用] 工具执行完成');
+
         // 工具执行完成后，创建一个临时的"总结agent"（关闭工具调用）
         // 来基于工具结果生成最终回复
         if (agent.enableFunctionCalling) {
@@ -572,13 +580,6 @@ class AgentChainExecutor {
             );
           }
         }
-
-        // 标记原消息为完成状态
-        context.messageService.completeAIMessage(
-          context.conversationId,
-          aiMessageId,
-        );
-        debugPrint('✅ [链式调用] 工具执行完成');
       } else {
         // 没有生成工具调用，直接完成
         _processNormalResponse(aiMessageId, secondResponse);
