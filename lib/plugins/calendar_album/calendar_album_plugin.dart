@@ -645,13 +645,19 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
     try {
       final result = await useCase.getAllImages(params);
 
-      if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message, 'items': []});
-      }
-
-      return jsonEncode(result.dataOrNull);
+      return jsonEncode({
+        'success': !result.isFailure,
+        'data': result.dataOrNull ?? [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'error': result.isFailure ? result.errorOrNull?.message : null,
+      });
     } catch (e) {
-      return jsonEncode({'error': '获取图片列表失败: $e', 'items': []});
+      return jsonEncode({
+        'success': false,
+        'data': [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'error': '获取图片列表失败: $e',
+      });
     }
   }
 

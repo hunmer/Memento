@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取物品列表",
         "desc": "查询所有物品",
-        "data": "const items = await Memento.plugins.goods.getItems();\n\nconst result = {\n  count: items.length,\n  items: items.map(i => ({\n    id: i.id,\n    name: i.name,\n    warehouse: i.warehouseName,\n    quantity: i.quantity\n  }))\n};\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.goods.getItems();\n\nif (!response.success) {\n  const errorResult = {\n    success: false,\n    message: '获取物品失败'\n  };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst result = {\n  count: response.data.length,\n  items: response.data.map(i => ({\n    id: i.id,\n    name: i.name,\n    warehouse: i.warehouseName,\n    quantity: i.quantity\n  }))\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

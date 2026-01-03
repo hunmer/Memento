@@ -329,13 +329,23 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
 
       if (result.isFailure) {
         return jsonEncode({
+          'success': false,
           'error': result.errorOrNull?.message ?? 'Unknown error',
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
         });
       }
 
-      return jsonEncode(result.dataOrNull ?? []);
+      return jsonEncode({
+        'success': true,
+        'data': result.dataOrNull ?? [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
-      return jsonEncode({'error': '获取商品列表失败: $e'});
+      return jsonEncode({
+        'success': false,
+        'error': '获取商品列表失败: $e',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
   }
 

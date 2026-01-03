@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取笔记本列表",
         "desc": "查询所有笔记本",
-        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\n\nconst result = {\n  count: notebooks.length,\n  notebooks: notebooks.map(n => ({\n    id: n.id,\n    name: n.name,\n    nodeCount: n.nodeCount\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\n\nconst result = {\n  success: true,\n  data: {\n    count: notebooks.length,\n    notebooks: notebooks.map(n => ({\n      id: n.id,\n      name: n.name,\n      nodeCount: n.nodeCount\n    }))\n  },\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "创建笔记本",
         "desc": "创建\"工作笔记\"笔记本",
-        "data": "const notebook = await Memento.plugins.nodes.createNotebook({\n  name: '工作笔记'\n});\n\nconst result = {\n  success: true,\n  notebook: {\n    id: notebook.id,\n    name: notebook.name\n  }\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const notebook = await Memento.plugins.nodes.createNotebook({\n  name: '工作笔记'\n});\n\nconst result = {\n  success: true,\n  data: {\n    id: notebook.id,\n    name: notebook.name\n  },\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,7 +44,7 @@
         "method": "run_js",
         "title": "获取节点树",
         "desc": "查询笔记本节点树",
-        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nconst notebook = notebooks[0];\n\nif (!notebook) {\n  const errorResult = { success: false, message: '没有笔记本' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst tree = await Memento.plugins.nodes.getTree({\n  notebookId: notebook.id\n});\n\nconst result = {\n  notebookName: notebook.name,\n  tree: tree\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nconst notebook = notebooks[0];\n\nif (!notebook) {\n  const errorResult = { success: false, message: '没有笔记本' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst tree = await Memento.plugins.nodes.getTree({\n  notebookId: notebook.id\n});\n\nconst result = {\n  success: true,\n  data: {\n    notebookName: notebook.name,\n    tree: tree\n  },\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -63,7 +63,7 @@
         "method": "run_js",
         "title": "创建节点",
         "desc": "创建新节点",
-        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nconst notebook = notebooks[0];\n\nif (!notebook) {\n  const errorResult = { success: false, message: '没有笔记本' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst node = await Memento.plugins.nodes.createNode({\n  notebookId: notebook.id,\n  nodeData: {\n    title: '新节点',\n    notes: '节点内容'\n  }\n});\n\nconst result = {\n  success: true,\n  node: {\n    id: node.id,\n    title: node.title,\n    status: node.status\n  }\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const notebooks = await Memento.plugins.nodes.getNotebooks();\nconst notebook = notebooks[0];\n\nif (!notebook) {\n  const errorResult = { success: false, message: '没有笔记本' };\n  setResult(errorResult);\n  return errorResult;\n}\n\nconst node = await Memento.plugins.nodes.createNode({\n  notebookId: notebook.id,\n  nodeData: {\n    title: '新节点',\n    notes: '节点内容'\n  }\n});\n\nconst result = {\n  success: true,\n  data: {\n    id: node.id,\n    title: node.title,\n    status: node.status\n  },\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

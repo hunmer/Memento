@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取纪念日列表",
         "desc": "查询所有纪念日",
-        "data": "const days = await Memento.plugins.day.getDays();\n\nconst result = {\n  count: days.data?.length || 0,\n  total: days.total || 0,\n  days: days.data?.map(d => ({\n    id: d.id,\n    title: d.title,\n    targetDate: d.targetDate,\n    daysRemaining: d.daysRemaining,\n    isToday: d.isToday,\n    isExpired: d.isExpired\n  })) || []\n};\nsetResult(result);\nreturn result;"
+        "data": "const days = await Memento.plugins.day.getDays();\n\nconst result = {\n  success: days.success,\n  count: days.data?.length || 0,\n  timestamp: days.timestamp,\n  data: days.data?.map(d => ({\n    id: d.id,\n    title: d.title,\n    targetDate: d.targetDate,\n    daysRemaining: d.daysRemaining,\n    isToday: d.isToday,\n    isExpired: d.isExpired\n  })) || []\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取即将到来",
         "desc": "查询即将到来的纪念日",
-        "data": "const upcoming = await Memento.plugins.day.getUpcoming({\n  withinDays: 30\n});\n\nconst result = {\n  success: upcoming.success,\n  count: upcoming.count || 0,\n  days: upcoming.days?.map(d => ({\n    id: d.id,\n    title: d.title,\n    targetDate: d.targetDate,\n    daysRemaining: d.daysRemaining\n  })) || []\n};\nsetResult(result);\nreturn result;"
+        "data": "const upcoming = await Memento.plugins.day.getUpcoming({\n  withinDays: 30\n});\n\nconst result = {\n  success: upcoming.success,\n  timestamp: upcoming.timestamp,\n  data: upcoming.data?.map(d => ({\n    id: d.id,\n    title: d.title,\n    targetDate: d.targetDate,\n    daysRemaining: d.daysRemaining\n  })) || []\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

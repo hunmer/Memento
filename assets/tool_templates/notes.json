@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "搜索笔记",
         "desc": "搜索包含\"项目\"关键词的笔记",
-        "data": "const notes = await Memento.plugins.notes.searchNotes({\n  query: '项目'\n});\n\nconst result = {\n  count: notes.length,\n  notes: notes.map(n => ({\n    id: n.id,\n    title: n.title,\n    updatedAt: n.updatedAt\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.notes.searchNotes({\n  keyword: '项目'\n});\n\nconst result = {\n  success: true,\n  data: response.data || [],\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,13 +44,13 @@
         "method": "run_js",
         "title": "按标签查找",
         "desc": "查找带\"工作\"标签的笔记",
-        "data": "const notes = await Memento.plugins.notes.getNotesByTag({\n  tag: '工作'\n});\n\nconst result = {\n  count: notes.length,\n  notes: notes.map(n => ({\n    id: n.id,\n    title: n.title,\n    tags: n.tags\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.notes.searchNotes({\n  keyword: '',\n  tags: ['工作']\n});\n\nconst result = {\n  success: true,\n  data: response.data || [],\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
     "tags": ["notes", "标签", "查询"],
     "declaredTools": [
-      {"id": "notes_getNotesByTag", "name": "按标签获取笔记"}
+      {"id": "notes_searchNotes", "name": "搜索笔记"}
     ]
   },
   {
@@ -62,7 +62,7 @@
         "method": "run_js",
         "title": "获取文件夹列表",
         "desc": "列出所有笔记文件夹",
-        "data": "const folders = await Memento.plugins.notes.getFolders();\n\nconst result = {\n  count: folders.length,\n  folders: folders.map(f => ({\n    id: f.id,\n    name: f.name,\n    noteCount: f.noteCount || 0\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.notes.getFolders();\n\nconst result = {\n  success: true,\n  data: response.data || [],\n  timestamp: Date.now()\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

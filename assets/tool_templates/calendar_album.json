@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取今日照片",
         "desc": "查询今天的照片日记",
-        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst photos = await Memento.plugins.calendarAlbum.getPhotos({\n  date: todayDate\n});\n\nconst result = {\n  count: photos.length,\n  photos: photos.map(p => ({\n    id: p.id,\n    caption: p.caption,\n    tags: p.tags\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst response = await Memento.plugins.calendarAlbum.getPhotos({\n  date: todayDate\n});\n\nif (response.success) {\n  const result = {\n    count: response.data.length,\n    photos: response.data.map(p => ({\n      id: p.id,\n      caption: p.caption,\n      tags: p.tags\n    }))\n  };\n  setResult(result);\n  return result;\n} else {\n  throw new Error(response.error || '获取照片失败');\n}"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

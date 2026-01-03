@@ -748,12 +748,24 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       final result = await calendarUseCase.searchEvents(filteredParams);
 
       if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message});
+        return jsonEncode({
+          'success': false,
+          'error': result.errorOrNull?.message,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        });
       }
 
-      return jsonEncode(result.dataOrNull);
+      return jsonEncode({
+        'success': true,
+        'data': result.dataOrNull ?? [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
-      return jsonEncode({'error': '获取即将到来的事件失败: $e'});
+      return jsonEncode({
+        'success': false,
+        'error': '获取即将到来的事件失败: $e',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
   }
 

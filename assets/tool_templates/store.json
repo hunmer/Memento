@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取商品列表",
         "desc": "查询可兑换的商品",
-        "data": "const products = await Memento.plugins.store.getProducts();\n\nconst result = {\n  count: products.length,\n  products: products.map(p => ({\n    id: p.id,\n    name: p.name,\n    price: p.price,\n    stock: p.stock\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.store.getProducts();\n\nconst result = {\n  success: response.success,\n  count: response.data.length,\n  products: response.data.map(p => ({\n    id: p.id,\n    name: p.name,\n    price: p.price,\n    stock: p.stock\n  })),\n  timestamp: response.timestamp\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

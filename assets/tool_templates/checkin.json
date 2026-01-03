@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取签到项目",
         "desc": "查询所有签到项目",
-        "data": "const items = await Memento.plugins.checkin.getCheckinItems();\n\nconst result = {\n  count: items.length,\n  items: items.map(i => ({\n    id: i.id,\n    name: i.name,\n    consecutiveDays: i.consecutiveDays,\n    isCheckedToday: i.isCheckedToday,\n    lastCheckinDate: i.lastCheckinDate\n  }))\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const response = await Memento.plugins.checkin.getCheckinItems();\n\nif (!response.success) {\n  const result = { success: false, message: '获取签到项目失败' };\n  setResult(result);\n  return result;\n}\n\nconst result = {\n  success: true,\n  count: response.data.length,\n  items: response.data.map(i => ({\n    id: i.id,\n    name: i.name,\n    group: i.group,\n    consecutiveDays: i.consecutiveDays,\n    isCheckedToday: i.isCheckedToday,\n    lastCheckinDate: i.lastCheckinDate\n  }))\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "执行签到",
         "desc": "签到\"早起\"项目",
-        "data": "const items = await Memento.plugins.checkin.getCheckinItems();\nconst item = items.find(i => i.name.includes('早起'));\n\nif (!item) {\n  const result = { success: false, message: '未找到\"早起\"签到项目' };\n  setResult(result);\n  return result;\n}\n\nconst response = await Memento.plugins.checkin.checkin({ itemId: item.id });\n\nconst result = {\n  success: response.success,\n  message: response.message,\n  consecutiveDays: response.consecutiveDays,\n  checkinTime: response.checkinTime\n};\n\nsetResult(result);\nreturn result;"
+        "data": "const itemsResponse = await Memento.plugins.checkin.getCheckinItems();\n\nif (!itemsResponse.success) {\n  const result = { success: false, message: '获取签到项目失败' };\n  setResult(result);\n  return result;\n}\n\nconst item = itemsResponse.data.find(i => i.name.includes('早起'));\n\nif (!item) {\n  const result = { success: false, message: '未找到\"早起\"签到项目' };\n  setResult(result);\n  return result;\n}\n\nconst response = await Memento.plugins.checkin.checkin({ itemId: item.id });\n\nconst result = {\n  success: response.success,\n  message: response.data.message,\n  consecutiveDays: response.data.consecutiveDays,\n  checkinTime: response.data.checkinTime\n};\n\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

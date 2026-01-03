@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取联系人列表",
         "desc": "查询所有联系人",
-        "data": "const contacts = await Memento.plugins.contact.getContacts();\n\nconst result = {\n  count: contacts.length,\n  contacts: contacts.map(c => ({\n    id: c.id,\n    name: c.name,\n    phone: c.phone,\n    email: c.email\n  }))\n};\nsetResult(result);\nreturn result;"
+        "data": "const contacts = await Memento.plugins.contact.getContacts();\n\nconst result = {\n  count: contacts.data.length,\n  contacts: contacts.data.map(c => ({\n    id: c.id,\n    name: c.name,\n    phone: c.phone,\n    email: c.email\n  }))\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",

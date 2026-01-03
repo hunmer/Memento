@@ -779,13 +779,17 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
     try {
       final result = await _useCase.getItems(params);
 
-      if (result.isFailure) {
-        return jsonEncode({'error': result.errorOrNull?.message});
-      }
-
-      return jsonEncode(result.dataOrNull);
+      return jsonEncode({
+        'success': true,
+        'data': result.dataOrNull ?? [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
-      return jsonEncode({'error': '获取物品失败: ${e.toString()}'});
+      return jsonEncode({
+        'success': false,
+        'error': '获取物品失败: ${e.toString()}',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
   }
 

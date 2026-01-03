@@ -248,7 +248,11 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(result.dataOrNull ?? []);
+    return jsonEncode({
+      'success': true,
+      'data': result.dataOrNull ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 获取联系人详情
@@ -342,7 +346,11 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       return jsonEncode({'error': result.errorOrNull?.message});
     }
 
-    return jsonEncode(result.dataOrNull ?? []);
+    return jsonEncode({
+      'success': true,
+      'data': result.dataOrNull ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 删除交互记录

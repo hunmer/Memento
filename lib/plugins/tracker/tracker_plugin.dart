@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:flutter/material.dart';
@@ -342,7 +344,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     if (result.isFailure) {
       final failure = result.errorOrNull;
-      return {'error': failure?.message ?? 'Unknown error'};
+      return jsonEncode({
+        'success': false,
+        'error': failure?.message ?? 'Unknown error',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
 
     var goalsJson = result.dataOrNull;
@@ -354,7 +360,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     // 如果有分页参数，UseCase 已经处理了分页
     // 如果没有分页参数，直接返回数据
-    return goalsJson;
+    return jsonEncode({
+      'success': true,
+      'data': goalsJson ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 获取单个目标详情
@@ -545,7 +555,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     // 提取必需参数并验证
     final String? goalId = params['goalId'];
     if (goalId == null || goalId.isEmpty) {
-      return {'error': '缺少必需参数: goalId'};
+      return jsonEncode({
+        'success': false,
+        'error': '缺少必需参数: goalId',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
 
     // 构建参数（limit 参数不直接支持，需要在结果后处理）
@@ -559,7 +573,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
     if (result.isFailure) {
       final failure = result.errorOrNull;
-      return {'error': failure?.message ?? 'Unknown error'};
+      return jsonEncode({
+        'success': false,
+        'error': failure?.message ?? 'Unknown error',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
 
     var recordsJson = result.dataOrNull;
@@ -570,7 +588,11 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
       recordsJson = recordsJson.sublist(0, limit);
     }
 
-    return recordsJson;
+    return jsonEncode({
+      'success': true,
+      'data': recordsJson ?? [],
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   /// 删除记录

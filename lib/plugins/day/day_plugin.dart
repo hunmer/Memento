@@ -257,7 +257,11 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
       if (result.isFailure) {
         return jsonEncode({'error': result.errorOrNull?.message});
       }
-      return jsonEncode(result.dataOrNull);
+      return jsonEncode({
+        'success': true,
+        'data': result.dataOrNull ?? [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
       return jsonEncode({'error': e.toString()});
     }
@@ -343,8 +347,8 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
       return jsonEncode({
         'success': true,
-        'count': upcomingDays.length,
-        'days': upcomingDays.map((d) => d.toJson()).toList(),
+        'data': upcomingDays.map((d) => d.toJson()).toList(),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {
       return jsonEncode({'success': false, 'error': e.toString()});

@@ -676,7 +676,11 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
       }).toList();
 
       // UseCase 已经处理了分页，直接返回
-      return jsonEncode(jsonList);
+      return jsonEncode({
+        'success': true,
+        'data': jsonList,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
       return jsonEncode({'error': '获取签到项目失败: $e'});
     }
@@ -722,11 +726,16 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
         orElse: () => throw Exception('签到项目不存在'),
       );
 
-      return jsonEncode({
-        'success': true,
+      final responseData = {
         'message': '签到成功',
         'consecutiveDays': item.getConsecutiveDays(),
         'checkinTime': now.toIso8601String(),
+      };
+
+      return jsonEncode({
+        'success': true,
+        'data': responseData,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {
       return jsonEncode({'error': '签到失败: $e'});

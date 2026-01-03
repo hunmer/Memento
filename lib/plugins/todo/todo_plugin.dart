@@ -414,13 +414,17 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       // 调用 UseCase
       final result = await _todoUseCase.getUpcomingTasks(useCaseParams);
 
-      if (result.isSuccess) {
-        return jsonEncode(result.dataOrNull);
-      } else {
-        return jsonEncode({'error': result.errorOrNull!.message});
-      }
+      return jsonEncode({
+        'success': true,
+        'data': result.dataOrNull ?? [],
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     } catch (e) {
-      return jsonEncode({'error': '获取即将到期任务失败: $e'});
+      return jsonEncode({
+        'success': false,
+        'error': '获取即将到期任务失败: $e',
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      });
     }
   }
 
