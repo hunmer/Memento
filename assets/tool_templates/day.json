@@ -8,7 +8,7 @@
         "method": "run_js",
         "title": "获取纪念日列表",
         "desc": "查询所有纪念日",
-        "data": "const days = await Memento.plugins.day.getDays();\n\nconst result = {\n  count: days.length,\n  days: days.map(d => ({\n    id: d.id,\n    name: d.name,\n    date: d.date,\n    type: d.type\n  }))\n};\nsetResult(result);\nreturn result;"
+        "data": "const days = await Memento.plugins.day.getDays();\n\nconst result = {\n  count: days.data?.length || 0,\n  total: days.total || 0,\n  days: days.data?.map(d => ({\n    id: d.id,\n    title: d.title,\n    targetDate: d.targetDate,\n    daysRemaining: d.daysRemaining,\n    isToday: d.isToday,\n    isExpired: d.isExpired\n  })) || []\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -26,7 +26,7 @@
         "method": "run_js",
         "title": "获取即将到来",
         "desc": "查询即将到来的纪念日",
-        "data": "const upcoming = await Memento.plugins.day.getUpcoming({\n  days: 30\n});\n\nconst result = {\n  count: upcoming.length,\n  days: upcoming.map(d => ({\n    name: d.name,\n    date: d.date,\n    daysUntil: d.daysUntil\n  }))\n};\nsetResult(result);\nreturn result;"
+        "data": "const upcoming = await Memento.plugins.day.getUpcoming({\n  withinDays: 30\n});\n\nconst result = {\n  success: upcoming.success,\n  count: upcoming.count || 0,\n  days: upcoming.days?.map(d => ({\n    id: d.id,\n    title: d.title,\n    targetDate: d.targetDate,\n    daysRemaining: d.daysRemaining\n  })) || []\n};\nsetResult(result);\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
@@ -44,13 +44,31 @@
         "method": "run_js",
         "title": "创建纪念日",
         "desc": "创建结婚纪念日",
-        "data": "const day = await Memento.plugins.day.createDay({\n  name: '结婚纪念日',\n  date: '2020-01-01',\n  type: 'anniversary',\n  repeat: 'yearly'\n});\n\nconst result = {\n  success: true,\n  day: {\n    id: day.id,\n    name: day.name,\n    date: day.date\n  }\n};\nsetResult(result);\nreturn result;"
+        "data": "const result = await Memento.plugins.day.createDay({\n  title: '结婚纪念日',\n  targetDate: '2020-01-01T00:00:00.000Z'\n});\n\nif (result.success) {\n  setResult({\n    success: true,\n    day: {\n      id: result.data.id,\n      title: result.data.title,\n      targetDate: result.data.targetDate\n    }\n  });\n} else {\n  setResult({\n    success: false,\n    error: result.error\n  });\n}\n\nreturn result;"
       }
     ],
     "createdAt": "2025-01-01T00:00:00.000",
     "tags": ["day", "创建", "纪念日"],
     "declaredTools": [
       {"id": "day_createDay", "name": "创建纪念日"}
+    ]
+  },
+  {
+    "id": "default-day-getById",
+    "name": "根据ID获取纪念日",
+    "description": "根据ID查询单个纪念日详情",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "查询纪念日详情",
+        "desc": "根据ID获取纪念日",
+        "data": "const dayId = params.dayId;\nif (!dayId) {\n  return setResult({\n    error: '缺少必需参数: dayId'\n  });\n}\n\nconst result = await Memento.plugins.day.getDayById({\n  id: dayId\n});\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["day", "查询", "纪念日"],
+    "declaredTools": [
+      {"id": "day_getDayById", "name": "根据ID获取纪念日"}
     ]
   }
 ]

@@ -176,6 +176,7 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'getTask': _jsGetTask,
       'getTodayTasks': _jsGetTodayTasks,
       'getOverdueTasks': _jsGetOverdueTasks,
+      'getUpcomingTasks': _jsGetUpcomingTasks,
 
       // 任务操作
       'createTask': _jsCreateTask,
@@ -381,6 +382,45 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       return jsonEncode(result.dataOrNull);
     } else {
       return jsonEncode({'error': result.errorOrNull!.message});
+    }
+  }
+
+  /// 获取即将到期的任务
+  /// 参数对象: {
+  ///   days: number (可选, 天数范围, 默认7),
+  ///   offset: number (可选, 分页起始位置),
+  ///   count: number (可选, 返回数量)
+  /// }
+  Future<String> _jsGetUpcomingTasks(Map<String, dynamic> params) async {
+    try {
+      // 转换参数格式
+      final useCaseParams = <String, dynamic>{};
+
+      // 天数范围
+      if (params.containsKey('days')) {
+        useCaseParams['days'] = params['days'] as int;
+      } else {
+        useCaseParams['days'] = 7; // 默认7天
+      }
+
+      // 分页参数
+      if (params.containsKey('offset')) {
+        useCaseParams['offset'] = params['offset'] as int;
+      }
+      if (params.containsKey('count')) {
+        useCaseParams['count'] = params['count'] as int;
+      }
+
+      // 调用 UseCase
+      final result = await _todoUseCase.getUpcomingTasks(useCaseParams);
+
+      if (result.isSuccess) {
+        return jsonEncode(result.dataOrNull);
+      } else {
+        return jsonEncode({'error': result.errorOrNull!.message});
+      }
+    } catch (e) {
+      return jsonEncode({'error': '获取即将到期任务失败: $e'});
     }
   }
 

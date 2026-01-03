@@ -1,0 +1,186 @@
+[
+  {
+    "id": "default-store-create-product",
+    "name": "创建商品",
+    "description": "在积分商店中创建一个新的商品",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建商品",
+        "desc": "添加新商品到积分商店",
+        "data": "const product = await Memento.plugins.store.createProduct({\n  name: '免作业卡',\n  description: '可免除一次家庭作业',\n  image: 'assets/no_homework_card.png',\n  stock: 10,\n  price: 50,\n  exchangeStart: '2025-01-01T00:00:00.000Z',\n  exchangeEnd: '2025-12-31T23:59:59.999Z',\n  useDuration: 30\n});\n\nconst result = {\n  success: true,\n  product: {\n    id: product.id,\n    name: product.name,\n    price: product.price,\n    stock: product.stock\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "商品", "创建"],
+    "declaredTools": [
+      {"id": "store_createProduct", "name": "创建商品"}
+    ]
+  },
+  {
+    "id": "default-store-redeem-product",
+    "name": "兑换商品",
+    "description": "使用积分兑换商品",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "兑换商品",
+        "desc": "从积分商店兑换指定商品",
+        "data": "// 首先查找商品\nconst products = await Memento.plugins.store.findProductByName({\n  name: '免作业卡',\n  fuzzy: false\n});\n\nif (!products) {\n  const result = {\n    success: false,\n    error: '商品不存在'\n  };\n  setResult(result);\n  return result;\n}\n\n// 兑换商品\nconst redeemResult = await Memento.plugins.store.redeem({\n  productId: products.id\n});\n\nsetResult(redeemResult);\nreturn redeemResult;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "兑换", "购买"],
+    "declaredTools": [
+      {"id": "store_findProductByName", "name": "查找商品"},
+      {"id": "store_redeem", "name": "兑换商品"}
+    ]
+  },
+  {
+    "id": "default-store-add-points",
+    "name": "添加积分",
+    "description": "为用户添加积分（可用于手动奖励）",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "添加积分",
+        "desc": "手动为用户增加积分",
+        "data": "const result = await Memento.plugins.store.addPoints({\n  points: 50,\n  reason: '手动奖励：完成任务'\n});\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "积分", "奖励"],
+    "declaredTools": [
+      {"id": "store_addPoints", "name": "添加积分"}
+    ]
+  },
+  {
+    "id": "default-store-get-products",
+    "name": "获取商品列表",
+    "description": "获取积分商店中的所有商品",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取商品列表",
+        "desc": "查看所有可兑换商品",
+        "data": "const products = await Memento.plugins.store.getProducts({\n  offset: 0,\n  count: 20\n});\n\nconst result = {\n  success: true,\n  count: products.length,\n  products: products.map(p => ({\n    id: p.id,\n    name: p.name,\n    price: p.price,\n    stock: p.stock,\n    description: p.description\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "商品", "查询"],
+    "declaredTools": [
+      {"id": "store_getProducts", "name": "获取商品列表"}
+    ]
+  },
+  {
+    "id": "default-store-get-user-items",
+    "name": "获取我的物品",
+    "description": "获取用户已兑换的所有物品",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取我的物品",
+        "desc": "查看我已兑换的所有物品",
+        "data": "const items = await Memento.plugins.store.getUserItems({\n  offset: 0,\n  count: 50\n});\n\nconst result = {\n  success: true,\n  count: items.length,\n  items: items.map(item => {\n    const productSnapshot = item.productSnapshot || {};\n    return {\n      id: item.id,\n      productName: productSnapshot.name || '未知物品',\n      remaining: item.remaining,\n      expireDate: item.expireDate,\n      purchaseDate: item.purchaseDate\n    };\n  })\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "物品", "查询"],
+    "declaredTools": [
+      {"id": "store_getUserItems", "name": "获取用户物品"}
+    ]
+  },
+  {
+    "id": "default-store-use-item",
+    "name": "使用物品",
+    "description": "使用已兑换的物品（减少剩余次数）",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "使用物品",
+        "desc": "使用指定的用户物品",
+        "data": "// 首先查找用户的物品\nconst items = await Memento.plugins.store.getUserItems();\nconst targetItem = items.find(item => {\n  const snapshot = item.productSnapshot || {};\n  return snapshot.name === '免作业卡' && item.remaining > 0;\n});\n\nif (!targetItem) {\n  const result = {\n    success: false,\n    error: '未找到可用的物品'\n  };\n  setResult(result);\n  return result;\n}\n\n// 使用物品\nconst useResult = await Memento.plugins.store.useItem({\n  itemId: targetItem.id\n});\n\nsetResult(useResult);\nreturn useResult;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "物品", "使用"],
+    "declaredTools": [
+      {"id": "store_getUserItems", "name": "获取用户物品"},
+      {"id": "store_useItem", "name": "使用物品"}
+    ]
+  },
+  {
+    "id": "default-store-get-points",
+    "name": "获取当前积分",
+    "description": "查询用户当前的积分余额",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取当前积分",
+        "desc": "查看我的积分余额",
+        "data": "const points = await Memento.plugins.store.getPoints();\n\nconst result = {\n  success: true,\n  currentPoints: points\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "积分", "查询"],
+    "declaredTools": [
+      {"id": "store_getPoints", "name": "获取积分"}
+    ]
+  },
+  {
+    "id": "default-store-get-points-history",
+    "name": "获取积分历史",
+    "description": "获取积分获得和消耗的历史记录",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取积分历史",
+        "desc": "查看积分获得和消耗记录",
+        "data": "const history = await Memento.plugins.store.getPointsHistory({\n  offset: 0,\n  count: 50\n});\n\nconst result = {\n  success: true,\n  count: history.length,\n  logs: history.map(log => ({\n    id: log.id,\n    type: log.type,\n    value: log.value,\n    reason: log.reason,\n    timestamp: log.timestamp\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "积分", "历史"],
+    "declaredTools": [
+      {"id": "store_getPointsHistory", "name": "获取积分历史"}
+    ]
+  },
+  {
+    "id": "default-store-update-product",
+    "name": "更新商品",
+    "description": "更新现有商品的信息",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "更新商品",
+        "desc": "修改商品的信息（价格、库存等）",
+        "data": "// 首先查找商品\nconst product = await Memento.plugins.store.findProductByName({\n  name: '免作业卡',\n  fuzzy: false\n});\n\nif (!product) {\n  const result = {\n    success: false,\n    error: '商品不存在'\n  };\n  setResult(result);\n  return result;\n}\n\n// 更新商品\nconst updatedProduct = await Memento.plugins.store.updateProduct({\n  id: product.id,\n  name: product.name,\n  description: '可免除一次家庭作业（特价）',\n  price: 40,\n  stock: 20\n});\n\nconst result = {\n  success: true,\n  product: {\n    id: updatedProduct.id,\n    name: updatedProduct.name,\n    price: updatedProduct.price,\n    stock: updatedProduct.stock\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "商品", "更新"],
+    "declaredTools": [
+      {"id": "store_findProductByName", "name": "查找商品"},
+      {"id": "store_updateProduct", "name": "更新商品"}
+    ]
+  },
+  {
+    "id": "default-store-archive-product",
+    "name": "归档商品",
+    "description": "将商品归档（不再显示在列表中）",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "归档商品",
+        "desc": "将商品移至归档列表",
+        "data": "// 首先查找商品\nconst product = await Memento.plugins.store.findProductByName({\n  name: '免作业卡',\n  fuzzy: false\n});\n\nif (!product) {\n  const result = {\n    success: false,\n    error: '商品不存在'\n  };\n  setResult(result);\n  return result;\n}\n\n// 归档商品\nconst archiveResult = await Memento.plugins.store.archiveProduct({\n  productId: product.id\n});\n\nsetResult(archiveResult);\nreturn archiveResult;"
+      }
+    ],
+    "createdAt": "2025-01-03T00:00:00.000",
+    "tags": ["store", "商品", "归档"],
+    "declaredTools": [
+      {"id": "store_findProductByName", "name": "查找商品"},
+      {"id": "store_archiveProduct", "name": "归档商品"}
+    ]
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "default-album-create",
+    "name": "创建照片日记",
+    "description": "创建一个新的照片日记",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "创建照片日记",
+        "desc": "添加照片到今天",
+        "data": "const todayDate = await Memento.system.getCustomDate({format: 'yyyy-MM-dd'});\nconst photo = await Memento.plugins.calendarAlbum.createPhoto({\n  caption: '美好瞬间',\n  imageUrl: 'file:///path/to/photo.jpg',\n  date: todayDate,\n  tags: ['生活', '记录']\n});\n\nconst result = {\n  success: true,\n  photo: {\n    id: photo.id,\n    caption: photo.title,\n    date: photo.createdAt\n  }\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["album", "创建", "照片"],
+    "declaredTools": [
+      {"id": "calendarAlbum_createPhoto", "name": "创建照片日记"}
+    ]
+  }
+]

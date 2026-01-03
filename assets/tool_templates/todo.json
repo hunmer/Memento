@@ -18,6 +18,24 @@
     ]
   },
   {
+    "id": "default-todo-upcoming",
+    "name": "查看即将到期任务",
+    "description": "获取未来7天内需要完成的待办任务",
+    "steps": [
+      {
+        "method": "run_js",
+        "title": "获取即将到期任务",
+        "desc": "查询未来7天内到期的所有待办任务",
+        "data": "const tasks = await Memento.plugins.todo.getUpcomingTasks({\n  days: 7\n});\n\nconst result = {\n  count: tasks.length,\n  tasks: tasks.map(t => ({\n    id: t.id,\n    title: t.title,\n    priority: t.priority,\n    dueDate: t.dueDate\n  }))\n};\n\nsetResult(result);\nreturn result;"
+      }
+    ],
+    "createdAt": "2025-01-01T00:00:00.000",
+    "tags": ["todo", "待办", "即将到期"],
+    "declaredTools": [
+      {"id": "todo_getUpcomingTasks", "name": "获取即将到期任务"}
+    ]
+  },
+  {
     "id": "default-todo-create-high",
     "name": "创建高优先级任务",
     "description": "创建一个高优先级的待办任务",

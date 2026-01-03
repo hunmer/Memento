@@ -621,6 +621,7 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       'getEvents': _jsGetEvents,
       'getTodayEvents': _jsGetTodayEvents,
       'getEventsByDateRange': _jsGetEventsByDateRange,
+      'getUpcoming': _jsGetUpcoming,
 
       // 事件操作
       'createEvent': _jsCreateEvent,
@@ -728,6 +729,32 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     return jsonEncode(result.dataOrNull);
+  }
+
+  /// 获取即将到来的事件
+  /// @param params.days - 天数范围（可选，默认7天）
+  /// @param params.offset - 分页起始位置（可选）
+  /// @param params.count - 分页返回数量（可选，默认100）
+  Future<String> _jsGetUpcoming(Map<String, dynamic> params) async {
+    try {
+      final int days = params['days'] ?? 7;
+      final now = DateTime.now();
+      final endDate = now.add(Duration(days: days));
+
+      final filteredParams = Map<String, dynamic>.from(params);
+      filteredParams['startDate'] = now;
+      filteredParams['endDate'] = endDate;
+
+      final result = await calendarUseCase.searchEvents(filteredParams);
+
+      if (result.isFailure) {
+        return jsonEncode({'error': result.errorOrNull?.message});
+      }
+
+      return jsonEncode(result.dataOrNull);
+    } catch (e) {
+      return jsonEncode({'error': '获取即将到来的事件失败: $e'});
+    }
   }
 
   /// 创建事件
