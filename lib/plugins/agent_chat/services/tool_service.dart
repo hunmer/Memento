@@ -454,7 +454,13 @@ class ToolService {
     buffer.writeln('- 不要只查询信息后询问用户确认,应该根据用户意图自动完成完整流程');
     buffer.writeln('- 一个步骤中可以包含多个操作');
     buffer.writeln('\n**正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议');
-    buffer.writeln('当需要使用工具时，请返回以下 Markdown 格式：\n');
+    buffer.writeln('\n## 📝 工具调用格式\n');
+    buffer.writeln('**🚨 重要：必须使用 Markdown 格式，不要使用 JSON 格式！**\n');
+    buffer.writeln('**严格遵循**:');
+    buffer.writeln('1. **仅返回** Markdown 格式的工具调用');
+    buffer.writeln('2. **不要** 任何额外文本或解释');
+    buffer.writeln('3. **不要** 使用 JSON 格式（如 `{"steps": [...]}`）');
+    buffer.writeln('4. **必须** 使用以下 Markdown 格式：\n');
     buffer.writeln('```markdown');
     buffer.writeln('# 步骤标题');
     buffer.writeln('## 步骤描述（可选）');
@@ -674,7 +680,15 @@ if (result.tasks && result.tasks.length > 0) { ... } // 正确！
 
 **正确流程**: JavaScript 返回结构化数据 → AI 基于数据进行分析和建议
 
-你可以通过返回 Markdown 格式来调用插件功能：
+## 📝 工具调用格式
+
+**🚨 重要：必须使用 Markdown 格式，不要使用 JSON 格式！**
+
+**严格遵循**:
+1. **仅返回** Markdown 格式的工具调用
+2. **不要** 任何额外文本或解释
+3. **不要** 使用 JSON 格式（如 `{"steps": [...]}`）
+4. **必须** 使用以下 Markdown 格式：
 
 ```markdown
 # 步骤标题
@@ -995,14 +1009,31 @@ return result;
     buffer.writeln('1. JavaScript 返回结构化数据(如数组、对象)');
     buffer.writeln('2. AI 基于这些数据进行自然语言分析和建议\n');
     buffer.writeln('## 📝 生成工具调用\n');
-    buffer.writeln('**严格遵循：仅返回 Markdown 格式的工具调用，不要任何额外文本或解释**');
-    buffer.writeln('\n请根据以上文档生成 JavaScript 代码，格式如下：\n');
+    buffer.writeln('**🚨 重要：必须使用 Markdown 格式，不要使用 JSON 格式！**\n');
+    buffer.writeln('**严格遵循**:');
+    buffer.writeln('1. **仅返回** Markdown 格式的工具调用');
+    buffer.writeln('2. **不要** 任何额外文本或解释');
+    buffer.writeln('3. **不要** 使用 JSON 格式（如 `{"steps": [...]}`）');
+    buffer.writeln('4. **必须** 使用以下 Markdown 格式：\n');
     buffer.writeln('```markdown');
     buffer.writeln('# 步骤标题');
     buffer.writeln('## 步骤描述（可选）');
     buffer.writeln('```javascript');
     buffer.writeln('// JavaScript 代码');
     buffer.writeln('```');
+    buffer.writeln('```\n');
+    buffer.writeln('**正确示例**：');
+    buffer.writeln('```markdown');
+    buffer.writeln('# 获取任务');
+    buffer.writeln('查询今日任务');
+    buffer.writeln('```javascript');
+    buffer.writeln('const tasks = await Memento.plugins.todo.getTodayTasks();');
+    buffer.writeln('return tasks;');
+    buffer.writeln('```');
+    buffer.writeln('```\n');
+    buffer.writeln('**❌ 错误示例（禁止）**：');
+    buffer.writeln('```json');
+    buffer.writeln('{"steps": [{"method": "run_js", ...}]}');
     buffer.writeln('```\n');
     buffer.writeln('### 📋 返回结果的标准模式\n');
     buffer.writeln('```javascript');
