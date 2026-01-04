@@ -3,10 +3,13 @@ import 'package:Memento/plugins/webview/screens/app_store/app_detail_sheet.dart'
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:get/get.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../../models/app_store_models.dart';
 import '../../services/app_store_manager.dart';
 import '../../services/download_manager.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
 
 /// 小应用商场主界面
 class AppStoreScreen extends StatefulWidget {
@@ -18,113 +21,86 @@ class AppStoreScreen extends StatefulWidget {
 
 class _AppStoreScreenState extends State<AppStoreScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _selectedTags = [];
+  String _selectedTag = '';
   bool _showInstalledOnly = false;
+  final Map<String, bool> _searchFilters = {
+    'title': true,
+    'desc': true,
+    'author': true,
+  };
 
   @override
   Widget build(BuildContext context) {
     final appStoreManager = context.watch<AppStoreManager>();
     final downloadManager = context.watch<DownloadManager>();
 
-    final filteredApps = appStoreManager.searchApps(
-      _searchController.text,
-      tags: _selectedTags.isEmpty ? null : _selectedTags,
-      installedOnly: _showInstalledOnly ? true : null,
-    );
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('webview_app_store'.tr),
-        actions: [
-          // 源切换按钮
-          IconButton(
-            icon: const Icon(Icons.source),
-            tooltip:
-                appStoreManager.currentSource?.name ??
-                'webview_select_source'.tr,
-            onPressed: () => _showSourcePicker(context),
-          ),
-          // 源管理按钮
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'webview_manage_sources'.tr,
-            onPressed: () {
-              final appStoreManager = context.read<AppStoreManager>();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (_) => ChangeNotifierProvider.value(
-                        value: appStoreManager,
-                        child: const SourceManagementScreen(),
-                      ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text('webview_app_store'.tr),
+      largeTitle: 'webview_app_store'.tr,
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: 'search'.tr,
+      onSearchChanged: (_) => setState(() {}),
+      enableSearchFilter: true,
+      filterLabels: {
+        'title': 'webview_search_title'.tr,
+        'desc': 'webview_search_desc'.tr,
+        'author': 'webview_search_author'.tr,
+      },
+      onSearchFilterChanged: (filters) {
+        setState(() {
+          _searchFilters.addAll(filters);
+        });
+      },
+      enableMultiFilter: true,
+      multiFilterItems: _buildFilterItems(appStoreManager),
+      onMultiFilterChanged: (filters) {
+        setState(() {
+          if (filters.containsKey('tag')) {
+            _selectedTag = filters['tag'] as String? ?? '';
+          }
+          if (filters.containsKey('installed')) {
+            _showInstalledOnly = filters['installed'] as bool? ?? false;
+          }
+        });
+      },
+      actions: [
+        // 源切换按钮
+        IconButton(
+          icon: const Icon(Icons.source),
+          tooltip:
+              appStoreManager.currentSource?.name ??
+              'webview_select_source'.tr,
+          onPressed: () => _showSourcePicker(context),
+        ),
+        // 源管理按钮
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: 'webview_manage_sources'.tr,
+          onPressed: () {
+            final appStoreManager = context.read<AppStoreManager>();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => ChangeNotifierProvider.value(
+                      value: appStoreManager,
+                      child: const SourceManagementScreen(),
+                    ),
+              ),
+            );
+          },
+        ),
+      ],
       body: Column(
         children: [
-          // 搜索栏
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'search'.tr,
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
-
-          // 标签过滤器
-          _buildTagFilter(appStoreManager),
-
-          // 已安装过滤器
-          SwitchListTile(
-            title: Text('webview_installed_only'.tr),
-            value: _showInstalledOnly,
-            onChanged: (value) {
-              setState(() {
-                _showInstalledOnly = value;
-              });
-            },
-          ),
-
-          const Divider(height: 1),
-
           // 应用列表
           Expanded(
-            child:
-                appStoreManager.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : appStoreManager.error != null
-                    ? _buildErrorView(appStoreManager)
-                    : filteredApps.isEmpty
-                    ? _buildEmptyView()
-                    : GridView.builder(
-                      padding: const EdgeInsets.all(16),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1.1,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                      itemCount: filteredApps.length,
-                      itemBuilder: (context, index) {
-                        return _buildAppCard(filteredApps[index]);
-                      },
-                    ),
+            child: appStoreManager.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : appStoreManager.error != null
+                ? _buildErrorView(appStoreManager)
+                : _buildAppList(appStoreManager),
           ),
 
           // 安装进度条
@@ -135,39 +111,130 @@ class _AppStoreScreenState extends State<AppStoreScreen> {
     );
   }
 
-  /// 标签过滤器
-  Widget _buildTagFilter(AppStoreManager manager) {
+  /// 构建多条件过滤配置
+  List<FilterItem> _buildFilterItems(AppStoreManager manager) {
     final allTags = manager.getAllTags();
-    if (allTags.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 50,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: allTags.length,
-        itemBuilder: (context, index) {
-          final tag = allTags[index];
-          final isSelected = _selectedTags.contains(tag);
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(tag),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedTags.add(tag);
-                  } else {
-                    _selectedTags.remove(tag);
-                  }
-                });
-              },
-            ),
+    return [
+      // 分类过滤
+      FilterItem(
+        id: 'tag',
+        title: 'webview_category'.tr,
+        type: FilterType.tagsSingle,
+        initialValue: _selectedTag,
+        builder: (context, value, onChanged) {
+          return Row(
+            children: [
+              _buildTagChip('全部', '', value, onChanged),
+              ...allTags.map((tag) =>
+                  _buildTagChip(tag, tag, value, onChanged)),
+            ],
           );
         },
+        getBadge: (value) {
+          if (value == null || value == '') return null;
+          return value as String;
+        },
+      ),
+      // 是否已安装过滤
+      FilterItem(
+        id: 'installed',
+        title: 'webview_installed_only'.tr,
+        type: FilterType.checkbox,
+        initialValue: _showInstalledOnly,
+        builder: (context, value, onChanged) {
+          return Row(
+            children: [
+              Checkbox(
+                value: value as bool? ?? false,
+                onChanged: (newValue) => onChanged(newValue ?? false),
+              ),
+              const SizedBox(width: 8),
+              Text('webview_installed_only'.tr),
+            ],
+          );
+        },
+        getBadge: (value) {
+          if (value == true) return 'webview_installed_only'.tr;
+          return null;
+        },
+      ),
+    ];
+  }
+
+  /// 构建标签芯片
+  Widget _buildTagChip(
+    String label,
+    String value,
+    String? selectedValue,
+    ValueChanged<dynamic> onChanged,
+  ) {
+    final isSelected = value == selectedValue;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (_) => onChanged(value),
+        showCheckmark: false,
       ),
     );
+  }
+
+  /// 构建应用列表
+  Widget _buildAppList(AppStoreManager appStoreManager) {
+    final filteredApps = _filterApps(appStoreManager.apps);
+
+    if (filteredApps.isEmpty) {
+      return _buildEmptyView();
+    }
+
+    return MasonryGridView.count(
+      padding: const EdgeInsets.all(8),
+      crossAxisCount: 2,
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      itemCount: filteredApps.length,
+      itemBuilder: (context, index) {
+        return _buildAppCard(filteredApps[index]);
+      },
+    );
+  }
+
+  /// 过滤应用列表
+  List<MiniApp> _filterApps(List<MiniApp> apps) {
+    final query = _searchController.text.toLowerCase();
+
+    return apps.where((app) {
+      // 搜索过滤
+      if (query.isNotEmpty) {
+        bool matches = false;
+
+        if (_searchFilters['title'] == true) {
+          matches = matches || app.title.toLowerCase().contains(query);
+        }
+        if (_searchFilters['desc'] == true && app.desc != null) {
+          matches = matches || app.desc!.toLowerCase().contains(query);
+        }
+        if (_searchFilters['author'] == true && app.author != null) {
+          matches = matches || app.author!.toLowerCase().contains(query);
+        }
+
+        if (!matches) return false;
+      }
+
+      // 分类过滤
+      if (_selectedTag.isNotEmpty && !app.tags.contains(_selectedTag)) {
+        return false;
+      }
+
+      // 已安装过滤
+      if (_showInstalledOnly && !app.isInstalled) {
+        return false;
+      }
+
+      return true;
+    }).toList();
   }
 
   /// 应用卡片

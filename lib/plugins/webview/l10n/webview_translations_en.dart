@@ -140,4 +140,15 @@ const Map<String, String> webviewTranslationsEn = {
   'webview_localFile': 'Local File',
   'webview_cardSelectorName': 'URL Card',
   'webview_cardSelectorDesc': 'Select a URL card to add to home screen',
+
+  // Search and filter related translations
+  'webview_search_url': 'URL',
+  'webview_search_title': 'Title',
+  'webview_search_desc': 'Description',
+  'webview_search_author': 'Author',
+  'webview_card_type': 'Type',
+  'webview_sort': 'Sort',
+  'webview_sort_by_open_time': 'Recently Opened',
+  'webview_sort_by_add_time': 'Recently Added',
+  'webview_category': 'Category',
 };

@@ -18,6 +18,8 @@ import 'proxy_settings_screen.dart';
 import 'app_store/app_store_screen.dart';
 import '../../../core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
 
 /// WebView 主界面 - 网址卡片列表
 class WebViewMainScreen extends StatefulWidget {
@@ -27,10 +29,18 @@ class WebViewMainScreen extends StatefulWidget {
   State<WebViewMainScreen> createState() => _WebViewMainScreenState();
 }
 
+/// 排序类型枚举
+enum SortType { openTime, addTime }
+
 class _WebViewMainScreenState extends State<WebViewMainScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   CardType? _filterType;
+  SortType _sortType = SortType.openTime;
+  final Map<String, bool> _searchFilters = {
+    'url': true,
+    'title': true,
+  };
 
   @override
   void dispose() {
@@ -38,247 +48,332 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
     super.dispose();
   }
 
+  /// 获取多条件过滤配置
+  List<FilterItem> get _multiFilterItems => [
+        // 卡片类型过滤
+        FilterItem(
+          id: 'cardType',
+          title: 'webview_card_type'.tr,
+          type: FilterType.tagsSingle,
+          initialValue: _filterType?.name,
+          builder: (context, value, onChanged) {
+            return Row(
+              children: [
+                _buildTypeChip(
+                  label: 'webview_all_cards'.tr,
+                  value: null,
+                  selectedValue: value,
+                  onChanged: onChanged,
+                ),
+                const SizedBox(width: 8),
+                _buildTypeChip(
+                  label: 'webview_online_urls'.tr,
+                  value: CardType.url.name,
+                  selectedValue: value,
+                  onChanged: onChanged,
+                ),
+                const SizedBox(width: 8),
+                _buildTypeChip(
+                  label: 'webview_local_files'.tr,
+                  value: CardType.localFile.name,
+                  selectedValue: value,
+                  onChanged: onChanged,
+                ),
+              ],
+            );
+          },
+          getBadge: (value) {
+            if (value == null) return null;
+            if (value == CardType.url.name) return 'webview_online_urls'.tr;
+            if (value == CardType.localFile.name) return 'webview_local_files'.tr;
+            return null;
+          },
+        ),
+        // 排序过滤
+        FilterItem(
+          id: 'sortType',
+          title: 'webview_sort'.tr,
+          type: FilterType.tagsSingle,
+          initialValue: _sortType.name,
+          builder: (context, value, onChanged) {
+            return Row(
+              children: [
+                _buildTypeChip(
+                  label: 'webview_sort_by_open_time'.tr,
+                  value: SortType.openTime.name,
+                  selectedValue: value,
+                  onChanged: onChanged,
+                ),
+                const SizedBox(width: 8),
+                _buildTypeChip(
+                  label: 'webview_sort_by_add_time'.tr,
+                  value: SortType.addTime.name,
+                  selectedValue: value,
+                  onChanged: onChanged,
+                ),
+              ],
+            );
+          },
+          getBadge: (value) {
+            if (value == SortType.openTime.name) return 'webview_sort_by_open_time'.tr;
+            if (value == SortType.addTime.name) return 'webview_sort_by_add_time'.tr;
+            return null;
+          },
+        ),
+      ];
+
+  /// 构建类型选择芯片
+  Widget _buildTypeChip({
+    required String label,
+    required String? value,
+    required String? selectedValue,
+    required ValueChanged<dynamic> onChanged,
+  }) {
+    final isSelected = value == selectedValue;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onChanged(value),
+      showCheckmark: false,
+      visualDensity: VisualDensity.compact,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('webview_name'.tr),
-        actions: [
-          // 代理设置按钮
-          IconButton(
-            icon: const Icon(Icons.wifi_tethering),
-            onPressed: () {
-              NavigationHelper.push(
-                context,
-                const ProxySettingsScreen(),
-              );
-            },
-            tooltip: 'webview_proxy_settings'.tr,
-          ),
-          // 筛选按钮
-          PopupMenuButton<CardType?>(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (type) {
-              setState(() {
-                _filterType = type;
-              });
-            },
-            itemBuilder:
-                (context) => [
-                  PopupMenuItem(
-                    value: null,
-                    child: Text('webview_all_cards'.tr),
-                  ),
-                  PopupMenuItem(
-                    value: CardType.url,
-                    child: Text('webview_online_urls'.tr),
-                  ),
-                  PopupMenuItem(
-                    value: CardType.localFile,
-                    child: Text('webview_local_files'.tr),
-                  ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text('webview_name'.tr),
+      largeTitle: 'webview_name'.tr,
+      enableLargeTitle: true,
+      enableSearchBar: true,
+      searchPlaceholder: 'webview_search_placeholder'.tr,
+      enableSearchFilter: true,
+      filterLabels: {'url': 'webview_search_url'.tr, 'title': 'webview_search_title'.tr},
+      onSearchFilterChanged: (filters) {
+        setState(() {
+          _searchFilters.addAll(filters);
+        });
+      },
+      enableMultiFilter: true,
+      multiFilterItems: _multiFilterItems,
+      onSearchChanged: (query) {
+        setState(() {
+          _searchQuery = query;
+        });
+      },
+      onSearchSubmitted: (value) {
+        // 如果输入的是有效 URL，直接打开
+        if (_isValidUrl(value)) {
+          _openUrl(value);
+        }
+      },
+      onMultiFilterChanged: (filters) {
+        setState(() {
+          // 更新卡片类型过滤
+          if (filters.containsKey('cardType')) {
+            final cardTypeStr = filters['cardType'] as String?;
+            _filterType = cardTypeStr != null
+                ? CardType.values.firstWhere((e) => e.name == cardTypeStr)
+                : null;
+          }
+          // 更新排序类型
+          if (filters.containsKey('sortType')) {
+            final sortTypeStr = filters['sortType'] as String?;
+            _sortType = sortTypeStr != null
+                ? SortType.values.firstWhere((e) => e.name == sortTypeStr)
+                : SortType.openTime;
+          }
+        });
+      },
+      actions: [
+        // 代理设置按钮
+        IconButton(
+          icon: const Icon(Icons.wifi_tethering),
+          onPressed: () {
+            NavigationHelper.push(context, const ProxySettingsScreen());
+          },
+          tooltip: 'webview_proxy_settings'.tr,
+        ),
+        // 商场入口按钮
+        IconButton(
+          icon: const Icon(Icons.store),
+          tooltip: 'webview_app_store'.tr,
+          onPressed: () {
+            // 先捕获 Provider 实例，避免闭包中 context 失效
+            final appStoreManager = context.read<AppStoreManager>();
+            final downloadManager = context.read<DownloadManager>();
+            NavigationHelper.push(
+              context,
+              MultiProvider(
+                providers: [
+                  ChangeNotifierProvider.value(value: appStoreManager),
+                  ChangeNotifierProvider.value(value: downloadManager),
                 ],
-          ),
-
-          // 源切换按钮
-          Consumer<AppStoreManager>(
-            builder: (context, appStoreManager, _) {
-              return IconButton(
-                icon: const Icon(Icons.source),
-                tooltip:
-                    appStoreManager.currentSource?.name ??
-                    'webview_select_source'.tr,
-                onPressed: () => _showSourcePicker(context),
-              );
-            },
-          ),
-
-          // 商场入口按钮
-          IconButton(
-            icon: const Icon(Icons.store),
-            tooltip: 'webview_app_store'.tr,
-            onPressed: () {
-              // 先捕获 Provider 实例，避免闭包中 context 失效
-              final appStoreManager = context.read<AppStoreManager>();
-              final downloadManager = context.read<DownloadManager>();
-              NavigationHelper.push(
-                context,
-                MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider.value(value: appStoreManager),
-                    ChangeNotifierProvider.value(value: downloadManager),
-                  ],
-                  child: const AppStoreScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // 搜索栏
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'webview_search_placeholder'.tr,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon:
-                    _searchQuery.isNotEmpty
-                        ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                        : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                filled: true,
+                child: const AppStoreScreen(),
               ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              onSubmitted: (value) {
-                // 如果输入的是有效 URL，直接打开
-                if (_isValidUrl(value)) {
-                  _openUrl(value);
-                }
-              },
-            ),
-          ),
-
-          // 卡片列表
-          Expanded(
-            child: Consumer<CardManager>(
-              builder: (context, cardManager, child) {
-                var cards = cardManager.cards;
-
-                // 应用搜索过滤
-                if (_searchQuery.isNotEmpty) {
-                  cards = cardManager.searchCards(_searchQuery);
-                }
-
-                // 应用类型过滤
-                if (_filterType != null) {
-                  cards = cards.where((c) => c.type == _filterType).toList();
-                }
-
-                if (cards.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.web_asset_off,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'webview_no_cards'.tr,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                // 分组显示：固定的卡片在前
-                final pinnedCards = cards.where((c) => c.isPinned).toList();
-                final unpinnedCards = cards.where((c) => !c.isPinned).toList();
-
-                return ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    // 固定的卡片
-                    if (pinnedCards.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          'webview_pinned'.tr,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                      ),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _getCrossAxisCount(context),
-                          childAspectRatio: 1.2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                        itemCount: pinnedCards.length,
-                        itemBuilder: (context, index) {
-                          return WebViewCardItem(
-                            card: pinnedCards[index],
-                            onTap: () => _openCard(pinnedCards[index]),
-                            onLongPress:
-                                () => _showCardOptions(pinnedCards[index]),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    // 普通卡片
-                    if (unpinnedCards.isNotEmpty) ...[
-                      if (pinnedCards.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            'webview_all_cards'.tr,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(color: Colors.grey[600]),
-                          ),
-                        ),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _getCrossAxisCount(context),
-                          childAspectRatio: 1.2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
-                        itemCount: unpinnedCards.length,
-                        itemBuilder: (context, index) {
-                          return WebViewCardItem(
-                            card: unpinnedCards[index],
-                            onTap: () => _openCard(unpinnedCards[index]),
-                            onLongPress:
-                                () => _showCardOptions(unpinnedCards[index]),
-                          );
-                        },
-                      ),
-                    ],
-
-                    const SizedBox(height: 80), // FAB 留空
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddCardDialog,
-        child: const Icon(Icons.add),
-      ),
+            );
+          },
+        ),
+      ],
+      largeTitleActions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: _showAddCardDialog,
+          tooltip: 'webview_add_card'.tr,
+        ),
+      ],
+      body: _buildCardList(),
     );
+  }
+
+  /// 构建卡片列表
+  Widget _buildCardList() {
+    return Consumer<CardManager>(
+      builder: (context, cardManager, child) {
+        var cards = cardManager.cards;
+
+        // 应用搜索过滤
+        if (_searchQuery.isNotEmpty) {
+          cards = cards.where((c) {
+            final queryLower = _searchQuery.toLowerCase();
+            bool matches = false;
+
+            // 根据搜索过滤器决定搜索范围
+            if (_searchFilters['url'] == true) {
+              matches = matches || c.url.toLowerCase().contains(queryLower);
+            }
+            if (_searchFilters['title'] == true) {
+              matches = matches ||
+                  c.title.toLowerCase().contains(queryLower) ||
+                  (c.description?.toLowerCase().contains(queryLower) ?? false);
+            }
+
+            return matches;
+          }).toList();
+        }
+
+        // 应用类型过滤
+        if (_filterType != null) {
+          cards = cards.where((c) => c.type == _filterType).toList();
+        }
+
+        // 应用排序
+        cards = _sortCards(cards);
+
+        if (cards.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.web_asset_off,
+                  size: 64,
+                  color: Colors.grey[400],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'webview_no_cards'.tr,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // 分组显示：固定的卡片在前
+        final pinnedCards = cards.where((c) => c.isPinned).toList();
+        final unpinnedCards = cards.where((c) => !c.isPinned).toList();
+
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          children: [
+            // 固定的卡片
+            if (pinnedCards.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  'webview_pinned'.tr,
+                  style: Theme.of(context).textTheme.titleSmall
+                      ?.copyWith(color: Colors.grey[600]),
+                ),
+              ),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _getCrossAxisCount(context),
+                  childAspectRatio: 1.2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: pinnedCards.length,
+                itemBuilder: (context, index) {
+                  return WebViewCardItem(
+                    card: pinnedCards[index],
+                    onTap: () => _openCard(pinnedCards[index]),
+                    onLongPress:
+                        () => _showCardOptions(pinnedCards[index]),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // 普通卡片
+            if (unpinnedCards.isNotEmpty) ...[
+              if (pinnedCards.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'webview_all_cards'.tr,
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(color: Colors.grey[600]),
+                  ),
+                ),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _getCrossAxisCount(context),
+                  childAspectRatio: 1.2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                ),
+                itemCount: unpinnedCards.length,
+                itemBuilder: (context, index) {
+                  return WebViewCardItem(
+                    card: unpinnedCards[index],
+                    onTap: () => _openCard(unpinnedCards[index]),
+                    onLongPress:
+                        () => _showCardOptions(unpinnedCards[index]),
+                  );
+                },
+              ),
+            ],
+
+            const SizedBox(height: 80), // FAB 留空
+          ],
+        );
+      },
+    );
+  }
+
+  /// 对卡片进行排序
+  List<WebViewCard> _sortCards(List<WebViewCard> cards) {
+    final sortedCards = List<WebViewCard>.from(cards);
+    if (_sortType == SortType.openTime) {
+      // 按最近打开时间排序（打开次数多的在前）
+      sortedCards.sort((a, b) => b.openCount.compareTo(a.openCount));
+    } else {
+      // 按最近添加时间排序（这里假设 id 是基于时间的 UUID）
+      // 实际项目中，你可能需要在 WebViewCard 模型中添加 createdAt 字段
+      // 目前使用 id 字符串比较作为近似
+      sortedCards.sort((a, b) => b.id.compareTo(a.id));
+    }
+    return sortedCards;
   }
 
   int _getCrossAxisCount(BuildContext context) {
@@ -479,20 +574,24 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                 List<String>? filesToCopy;
 
                                 // macOS 使用目录选择，其他平台使用多文件选择
-                                if (Theme.of(context).platform == TargetPlatform.macOS) {
+                                if (Theme.of(context).platform ==
+                                    TargetPlatform.macOS) {
                                   // macOS: 使用目录选择
-                                  directoryPath = await FilePicker.platform.getDirectoryPath(
-                                    dialogTitle: '选择项目目录（需包含 index.html）',
-                                  );
+                                  directoryPath = await FilePicker.platform
+                                      .getDirectoryPath(
+                                        dialogTitle: '选择项目目录（需包含 index.html）',
+                                      );
                                 } else {
                                   // Android/其他: 使用多文件选择
-                                  final result = await FilePicker.platform.pickFiles(
-                                    dialogTitle: '选择项目中的所有文件（包括 index.html）',
-                                    allowMultiple: true,
-                                    type: FileType.any,
-                                    withData: false,
-                                    withReadStream: false,
-                                  );
+                                  final result = await FilePicker.platform
+                                      .pickFiles(
+                                        dialogTitle:
+                                            '选择项目中的所有文件（包括 index.html）',
+                                        allowMultiple: true,
+                                        type: FileType.any,
+                                        withData: false,
+                                        withReadStream: false,
+                                      );
 
                                   if (result == null || result.files.isEmpty) {
                                     return;
@@ -510,9 +609,13 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
 
                                   if (indexHtmlPath == null) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content: Text('错误：所选文件中未找到 index.html'),
+                                          content: Text(
+                                            '错误：所选文件中未找到 index.html',
+                                          ),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -522,10 +625,11 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
 
                                   // 获取目录路径和文件列表
                                   directoryPath = path.dirname(indexHtmlPath);
-                                  filesToCopy = result.files
-                                      .where((f) => f.path != null)
-                                      .map((f) => f.path!)
-                                      .toList();
+                                  filesToCopy =
+                                      result.files
+                                          .where((f) => f.path != null)
+                                          .map((f) => f.path!)
+                                          .toList();
                                 }
 
                                 if (directoryPath == null) {
@@ -533,7 +637,9 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                 }
 
                                 // 检查目录中是否存在 index.html
-                                final indexHtmlFile = File(path.join(directoryPath, 'index.html'));
+                                final indexHtmlFile = File(
+                                  path.join(directoryPath, 'index.html'),
+                                );
                                 if (!await indexHtmlFile.exists()) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -546,19 +652,23 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
                                   return;
                                 }
 
-                                final directoryName = path.basename(directoryPath);
+                                final directoryName = path.basename(
+                                  directoryPath,
+                                );
 
                                 // 将选中的文件列表保存到 WebViewPlugin 中以备后用
                                 if (filesToCopy != null) {
-                                  WebViewPlugin.instance.pendingFilesToCopy = filesToCopy;
+                                  WebViewPlugin.instance.pendingFilesToCopy =
+                                      filesToCopy;
                                 } else {
                                   // macOS: 扫描目录下所有文件
                                   final dir = Directory(directoryPath);
-                                  WebViewPlugin.instance.pendingFilesToCopy = (await dir
-                                      .list(recursive: true)
-                                      .where((entity) => entity is File)
-                                      .map((entity) => entity.path)
-                                      .toList());
+                                  WebViewPlugin.instance.pendingFilesToCopy =
+                                      (await dir
+                                          .list(recursive: true)
+                                          .where((entity) => entity is File)
+                                          .map((entity) => entity.path)
+                                          .toList());
                                 }
 
                                 setState(() {
@@ -905,50 +1015,6 @@ class _WebViewMainScreenState extends State<WebViewMainScreen> {
         ),
       );
     }
-  }
-
-  void _showSourcePicker(BuildContext context) {
-    final manager = context.read<AppStoreManager>();
-    if (manager.sources.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('webview_no_sources'.tr)));
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('webview_select_source'.tr),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  manager.sources.map((source) {
-                    return RadioListTile<String>(
-                      title: Text(source.name),
-                      subtitle: Text(
-                        source.url,
-                        style: const TextStyle(fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      value: source.id,
-                      groupValue: manager.currentSource?.id,
-                      onChanged: (value) {
-                        if (value != null) {
-                          manager.switchSource(value);
-                          Navigator.pop(context);
-                        }
-                      },
-                    );
-                  }).toList(),
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _confirmDeleteCard(WebViewCard card) {
