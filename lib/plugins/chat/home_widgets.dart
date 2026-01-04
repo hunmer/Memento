@@ -104,7 +104,7 @@ class ChatHomeWidgets {
     result['lastMessageTime'] = itemData['lastMessageTime'] as String?;
     result['messageCount'] = itemData['messageCount'] as int?;
     result['icon'] = itemData['icon'] as int?;
-    result['backgroundColor'] = itemData['backgroundColor'] as int?;
+    // result['backgroundColor'] = itemData['backgroundColor'] as int?;
     return result;
   }
 

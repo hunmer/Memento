@@ -23,6 +23,7 @@ import 'widgets/background_settings_page.dart';
 import 'widgets/create_folder_dialog.dart';
 import 'widgets/home_grid.dart';
 import 'widgets/layout_manager_dialog.dart';
+import 'widgets/selector_widget_types.dart';
 import 'widgets/widget_settings_dialog.dart';
 
 /// 主屏幕视图 - 负责 UI 构建
@@ -629,12 +630,30 @@ class HomeScreenView extends StatelessWidget {
   }
 
   Map<String, dynamic> _processSelectorResult(dynamic widget, SelectorResult result) {
-    final newConfig = <String, dynamic>{'selectorWidgetConfig': result.toMap()};
+    SelectorResult finalResult = result;
+    Map<String, dynamic>? extractedData;
+
     if (widget.dataSelector != null && result.data is List) {
       final dataArray = result.data as List<dynamic>;
-      final extractedData = widget.dataSelector!(dataArray);
+      final transformedData = widget.dataSelector!(dataArray);
+      if (transformedData is Map<String, dynamic>) {
+        extractedData = transformedData;
+      }
+      finalResult = SelectorResult(
+        pluginId: result.pluginId,
+        selectorId: result.selectorId,
+        path: result.path,
+        data: transformedData,
+      );
+    }
+
+    final selectorConfig = SelectorWidgetConfig.fromSelectorResult(finalResult);
+    final newConfig = <String, dynamic>{'selectorWidgetConfig': selectorConfig.toJson()};
+
+    if (extractedData != null) {
       newConfig.addAll(extractedData);
     }
+
     return newConfig;
   }
 

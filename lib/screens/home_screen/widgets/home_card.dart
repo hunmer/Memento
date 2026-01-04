@@ -166,23 +166,11 @@ class _HomeCardState extends State<HomeCard> {
       final globalBackgroundOpacity =
           layoutManager.globalWidgetBackgroundOpacity;
 
-      // 获取背景配置
-      Color backgroundColor;
-      if (widgetItem.config['backgroundColor'] != null) {
-        // 用户设置了自定义背景颜色
-        final originalColor = Color(
-          widgetItem.config['backgroundColor'] as int,
-        );
-        backgroundColor = originalColor.withValues(
-          alpha: originalColor.a * globalBackgroundOpacity,
-        );
-      } else {
-        // 没有设置背景颜色，使用默认的主题卡片颜色
-        final defaultColor = Theme.of(context).cardColor;
-        backgroundColor = defaultColor.withValues(
-          alpha: defaultColor.a * globalBackgroundOpacity,
-        );
-      }
+      // 获取背景配置 - 使用默认的主题卡片颜色
+      final defaultColor = Theme.of(context).cardColor;
+      final backgroundColor = defaultColor.withValues(
+        alpha: defaultColor.a * globalBackgroundOpacity,
+      );
 
       final backgroundImagePath =
           widgetItem.config['backgroundImage'] as String?;
