@@ -53,4 +53,18 @@ final Map<String, String> dayTranslationsZh = {
   // Selector Widget Strings
   'day_memorialSelectorName': '纪念日倒计时',
   'day_memorialSelectorDescription': '选择纪念日并显示倒计时',
+
+  // List Widget Strings
+  'day_listWidgetName': '纪念日列表',
+  'day_listWidgetDescription': '显示指定日期范围内的纪念日列表',
+  'day_dateRangeFilter': '日期范围',
+  'day_upcomingOnly': '即将到来',
+  'day_pastOnly': '已经过去',
+  'day_allDays': '全部',
+  'day_next7Days': '未来7天',
+  'day_next30Days': '未来30天',
+  'day_past7Days': '过去7天',
+  'day_past30Days': '过去30天',
+  'day_noMemorialDaysInRange': '该日期范围内暂无纪念日',
+  'day_andMore': '还有 @count 个',
 };

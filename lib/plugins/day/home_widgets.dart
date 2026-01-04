@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/core/app_initializer.dart' show navigatorKey;
 import 'package:Memento/utils/image_utils.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
@@ -77,6 +78,95 @@ class DayHomeWidgets {
             ),
       ),
     );
+
+    // 纪念日列表小组件 - 显示指定日期范围内的纪念日
+    registry.register(
+      HomeWidget(
+        id: 'day_date_range_list',
+        pluginId: 'day',
+        name: 'day_listWidgetName'.tr,
+        description: 'day_listWidgetDescription'.tr,
+        icon: Icons.calendar_month,
+        color: Colors.black87,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        category: 'home_categoryRecord'.tr,
+        // 使用日期范围选择器
+        selectorId: 'day.dateRange',
+        dataSelector: _extractDateRangeData,
+        dataRenderer: _renderDateRangeList,
+        navigationHandler: _navigateToDayPage,
+        builder:
+            (context, config) => GenericSelectorWidget(
+              widgetDefinition: registry.getWidget('day_date_range_list')!,
+              config: config,
+            ),
+      ),
+    );
+  }
+
+  /// 从选择器数据中提取日期范围值
+  static Map<String, dynamic> _extractDateRangeData(List<dynamic> dataArray) {
+    final selectedItem = dataArray[0];
+
+    // 处理 SelectableItem 或 Map
+    Map<String, dynamic>? rangeData;
+    String? dateRangeLabel;
+
+    if (selectedItem is SelectableItem) {
+      rangeData = selectedItem.rawData as Map<String, dynamic>?;
+      dateRangeLabel = selectedItem.title;
+    } else if (selectedItem is Map<String, dynamic>) {
+      rangeData = selectedItem['rawData'] as Map<String, dynamic>?;
+      dateRangeLabel = selectedItem['title'] as String?;
+    }
+
+    // 默认值：未来7天
+    final startDay = rangeData?['startDay'] as int? ?? 0;
+    final endDay = rangeData?['endDay'] as int? ?? 7;
+
+    return {
+      'startDay': startDay,
+      'endDay': endDay,
+      'dateRangeLabel': dateRangeLabel ?? '未来7天',
+    };
+  }
+
+  /// 渲染日期范围列表数据
+  static Widget _renderDateRangeList(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final savedData = result.data as Map<String, dynamic>;
+    final startDay = savedData['startDay'] as int? ?? 0;
+    final endDay = savedData['endDay'] as int? ?? 7;
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'memorial_day_added',
+            'memorial_day_updated',
+            'memorial_day_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildDateRangeListContent(
+            context,
+            startDay,
+            endDay,
+            savedData['dateRangeLabel'] as String? ?? '未来7天',
+            config,
+          ),
+        );
+      },
+    );
+  }
+
+  /// 导航到纪念日主页面
+  static void _navigateToDayPage(BuildContext context, SelectorResult result) {
+    NavigationHelper.pushNamed(context, '/day');
   }
 
   /// 从选择器数据中提取小组件需要的数据
@@ -110,9 +200,10 @@ class DayHomeWidgets {
     Map<String, dynamic> config,
   ) {
     // 从 result.data 获取已保存的数据
-    final savedData = result.data is Map
-        ? Map<String, dynamic>.from(result.data as Map)
-        : <String, dynamic>{};
+    final savedData =
+        result.data is Map
+            ? Map<String, dynamic>.from(result.data as Map)
+            : <String, dynamic>{};
     final dayId = savedData['id'] as String? ?? '';
 
     if (dayId.isEmpty) {
@@ -151,8 +242,7 @@ class DayHomeWidgets {
     final day = plugin.getMemorialDayById(dayId);
     final title = day?.title ?? savedData['title'] as String? ?? '未知纪念日';
     final targetDateStr =
-        day?.targetDate.toIso8601String() ??
-        savedData['targetDate'] as String?;
+        day?.targetDate.toIso8601String() ?? savedData['targetDate'] as String?;
     final targetDate =
         targetDateStr != null ? DateTime.tryParse(targetDateStr) : null;
     final daysRemaining = day?.daysRemaining ?? 0;
@@ -446,5 +536,232 @@ class DayHomeWidgets {
         ],
       ),
     );
+  }
+
+  // ===== 日期范围列表小组件 =====
+
+  /// 构建日期范围列表内容
+  static Widget _buildDateRangeListContent(
+    BuildContext context,
+    int startDay,
+    int endDay,
+    String dateRangeLabel,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+    final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, '纪念日插件不可用');
+    }
+
+    // 获取所有纪念日并过滤
+    final allDays = plugin.getAllMemorialDays();
+    final filteredDays = _filterMemorialDaysByDaysRange(allDays, startDay, endDay);
+
+    // 获取小组件尺寸
+    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
+    final isMediumSize = widgetSize == HomeWidgetSize.medium;
+
+    // 限制显示数量
+    final displayDays = filteredDays.take(isMediumSize ? 3 : 5).toList();
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          // 点击跳转到纪念日主页面
+          NavigationHelper.pushNamed(context, '/day');
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 顶部标题和筛选器标签
+              Row(
+                children: [
+                  const Icon(Icons.calendar_month, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'day_listWidgetName'.tr,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
+                          ),
+                        ),
+                        Text(
+                          dateRangeLabel,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 纪念日数量徽章
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${filteredDays.length}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // 纪念日列表（使用滚动容器防止溢出）
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (displayDays.isNotEmpty) ...[
+                        ...displayDays.map((day) => _buildMemorialDayListItem(context, day)),
+                        if (filteredDays.length > displayDays.length)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              'day_andMore'.trParams({'count': '${filteredDays.length - displayDays.length}'}),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                      ] else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: Text(
+                              'day_noMemorialDaysInRange'.tr,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建单个纪念日列表项
+  static Widget _buildMemorialDayListItem(BuildContext context, MemorialDay day) {
+    final theme = Theme.of(context);
+
+    // 计算状态文本和颜色
+    String statusText;
+    Color statusColor;
+
+    if (day.isToday) {
+      statusText = 'day_daysRemaining_zero'.tr;
+      statusColor = Colors.red;
+    } else if (day.isExpired) {
+      statusText = 'day_daysPassed'.trParams({'count': '${day.daysPassed}'});
+      statusColor = Colors.grey;
+    } else {
+      statusText = 'day_daysRemaining'.trParams({'count': '${day.daysRemaining}'});
+      statusColor = day.daysRemaining <= 7 ? Colors.orange : theme.colorScheme.primary;
+    }
+
+    // 格式化日期
+    final formattedDate = '${day.targetDate.month}/${day.targetDate.day}';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            Icons.celebration,
+            size: 16,
+            color: day.backgroundColor,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  day.title,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  formattedDate,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            statusText,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: statusColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 根据天数范围过滤纪念日
+  /// startDay: 起始天数（负数=过去，0=今天，正数=未来）
+  /// endDay: 结束天数（负数=过去，0=今天，正数=未来）
+  static List<MemorialDay> _filterMemorialDaysByDaysRange(
+    List<MemorialDay> days,
+    int? startDay,
+    int? endDay,
+  ) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    return days.where((day) {
+      final targetDate = DateTime(
+        day.targetDate.year,
+        day.targetDate.month,
+        day.targetDate.day,
+      );
+      final daysDiff = targetDate.difference(today).inDays;
+
+      // 如果 startDay 和 endDay 都为 null，显示全部
+      if (startDay == null && endDay == null) {
+        return true;
+      }
+
+      // 检查天数差是否在范围内
+      final inRange = (startDay == null || daysDiff >= startDay) &&
+          (endDay == null || daysDiff <= endDay);
+
+      return inRange;
+    }).toList()
+      ..sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
   }
 }

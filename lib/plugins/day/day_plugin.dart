@@ -139,6 +139,12 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
     }
   }
 
+  /// 获取所有纪念日（供小组件使用）
+  List<MemorialDay> getAllMemorialDays() {
+    if (!_isInitialized) return [];
+    return List.from(_controller.memorialDays);
+  }
+
   @override
   Widget? buildCardView(BuildContext context) {
     if (!_isInitialized) return null;
@@ -462,6 +468,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   // ==================== 数据选择器注册 ====================
 
   void _registerDataSelectors() {
+    // 纪念日选择器
     pluginDataSelectorService.registerSelector(SelectorDefinition(
       id: 'day.memorial',
       pluginId: id,
@@ -506,6 +513,85 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
             return items.where((item) =>
               item.title.toLowerCase().contains(lowerQuery)
             ).toList();
+          },
+        ),
+      ],
+    ));
+
+    // 日期范围选择器 - 基于天数的范围选择
+    pluginDataSelectorService.registerSelector(SelectorDefinition(
+      id: 'day.dateRange',
+      pluginId: id,
+      name: 'day_dateRangeFilter'.tr,
+      icon: Icons.date_range,
+      color: color,
+      searchable: false,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'dateRange',
+          title: 'day_dateRangeFilter'.tr,
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            return [
+              // 未来7天 (0到7天)
+              SelectableItem(
+                id: 'next_7',
+                title: '未来7天',
+                subtitle: '今天起往后7天',
+                icon: Icons.arrow_upward,
+                rawData: {'startDay': 0, 'endDay': 7},
+              ),
+              // 未来30天 (0到30天)
+              SelectableItem(
+                id: 'next_30',
+                title: '未来30天',
+                subtitle: '今天起往后30天',
+                icon: Icons.trending_up,
+                rawData: {'startDay': 0, 'endDay': 30},
+              ),
+              // 过去7天 (-7到0天)
+              SelectableItem(
+                id: 'past_7',
+                title: '过去7天',
+                subtitle: '往前7天到今天',
+                icon: Icons.arrow_downward,
+                rawData: {'startDay': -7, 'endDay': 0},
+              ),
+              // 过去30天 (-30到0天)
+              SelectableItem(
+                id: 'past_30',
+                title: '过去30天',
+                subtitle: '往前30天到今天',
+                icon: Icons.trending_down,
+                rawData: {'startDay': -30, 'endDay': 0},
+              ),
+              // 前后7天 (-7到7天)
+              SelectableItem(
+                id: 'around_7',
+                title: '前后7天',
+                subtitle: '往前7天到往后7天',
+                icon: Icons.sync_alt,
+                rawData: {'startDay': -7, 'endDay': 7},
+              ),
+              // 前后30天 (-30到30天)
+              SelectableItem(
+                id: 'around_30',
+                title: '前后30天',
+                subtitle: '往前30天到往后30天',
+                icon: Icons.all_inclusive,
+                rawData: {'startDay': -30, 'endDay': 30},
+              ),
+              // 全部
+              SelectableItem(
+                id: 'all',
+                title: 'day_allDays'.tr,
+                subtitle: '显示所有纪念日',
+                icon: Icons.calendar_today,
+                rawData: {'startDay': null, 'endDay': null},
+              ),
+            ];
           },
         ),
       ],
