@@ -81,13 +81,13 @@ class _TaskListViewState extends State<TaskListView> {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.task_alt, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
+        children: [
+          const Icon(Icons.task_alt, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
           Text(
-            'No tasks yet\nTap + to add a new task',
+            'todo_emptyTaskList'.tr,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.grey),
+            style: const TextStyle(fontSize: 16, color: Colors.grey),
           ),
         ],
       ),
@@ -820,9 +820,9 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
     }
 
     if (diff.inDays > 0) {
-      text = '${diff.inDays} days remaining';
+      text = '${diff.inDays} ${'todo_daysRemaining'.tr}';
     } else {
-      text = '${diff.inHours} hours remaining';
+      text = '${diff.inHours} ${'todo_hoursRemaining'.tr}';
     }
 
     bg =
