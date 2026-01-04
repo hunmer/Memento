@@ -133,4 +133,9 @@ const Map<String, String> todoTranslationsEn = {
   'todo_quickAddDesc': 'Tap to create a new task',
   'todo_listWidgetName': 'Todo List',
   'todo_listWidgetDesc': 'Display todo task list',
+
+  // Empty state messages
+  'todo_emptyTaskList': 'No tasks yet\nTap + to add a new task',
+  'todo_daysRemaining': 'days remaining',
+  'todo_hoursRemaining': 'hours remaining',
 };

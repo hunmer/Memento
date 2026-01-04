@@ -132,4 +132,9 @@ const Map<String, String> todoTranslationsZh = {
   'todo_quickAddDesc': '点击跳转到新建任务页面',
   'todo_listWidgetName': '待办列表',
   'todo_listWidgetDesc': '显示待办任务列表',
+
+  // 空状态提示
+  'todo_emptyTaskList': '暂无任务\n点击 + 添加新任务',
+  'todo_daysRemaining': '天后截止',
+  'todo_hoursRemaining': '小时后截止',
 };
