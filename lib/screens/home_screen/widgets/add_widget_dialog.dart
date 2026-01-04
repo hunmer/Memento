@@ -14,7 +14,18 @@ class AddWidgetDialog extends StatefulWidget {
   /// 可选的文件夹ID，如果提供则将组件添加到该文件夹
   final String? folderId;
 
-  const AddWidgetDialog({super.key, this.folderId});
+  /// 可选的要替换的小组件ID，如果提供则为替换模式
+  final String? replaceWidgetItemId;
+
+  /// 初始搜索关键词（用于替换模式时自动搜索同插件组件）
+  final String? initialSearchQuery;
+
+  const AddWidgetDialog({
+    super.key,
+    this.folderId,
+    this.replaceWidgetItemId,
+    this.initialSearchQuery,
+  });
 
   @override
   State<AddWidgetDialog> createState() => _AddWidgetDialogState();
@@ -37,6 +48,11 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
     // 获取所有小组件并按分类分组
     _widgetsByCategory = HomeWidgetRegistry().getWidgetsByCategory();
     _categories = _widgetsByCategory.keys.toList()..sort();
+
+    // 替换模式：初始化插件过滤器值（通过 initialMultiFilters 参数传递）
+    if (widget.initialSearchQuery != null) {
+      _filterValues['plugin'] = widget.initialSearchQuery;
+    }
   }
 
   /// 获取所有组件的扁平列表
@@ -55,8 +71,17 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
         final matchesName = widget.name.toLowerCase().contains(query);
         final matchesDescription =
             widget.description?.toLowerCase().contains(query) ?? false;
-        return matchesName || matchesDescription;
+        final matchesPlugin = widget.pluginId.toLowerCase().contains(query);
+        return matchesName || matchesDescription || matchesPlugin;
       }).toList();
+    }
+
+    // 应用插件过滤（从 _filterValues 中获取）
+    final selectedPlugin = _filterValues['plugin'] as String?;
+    if (selectedPlugin != null &&
+        selectedPlugin.isNotEmpty &&
+        selectedPlugin != '全部插件') {
+      widgets = widgets.where((w) => w.pluginId == selectedPlugin).toList();
     }
 
     // 应用分类过滤（从 _filterValues 中获取）
@@ -83,7 +108,31 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
 
   /// 构建分类过滤器
   List<FilterItem> _buildFilterItems() {
+    // 获取所有插件ID列表
+    final allPlugins = _allWidgets
+        .map((w) => w.pluginId)
+        .toSet()
+        .toList()
+      ..sort();
+
     return [
+      // 插件过滤器
+      FilterItem(
+        id: 'plugin',
+        title: '插件',
+        type: FilterType.tagsSingle,
+        builder: (context, currentValue, onChanged) {
+          return _buildPluginFilter(
+            allPlugins,
+            currentValue as String?,
+            (value) => onChanged(value),
+          );
+        },
+        getBadge: (value) {
+          if (value == null || value == '全部插件') return null;
+          return value as String;
+        },
+      ),
       // 分类过滤器
       FilterItem(
         id: 'category',
@@ -119,6 +168,41 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
         },
       ),
     ];
+  }
+
+  /// 构建插件过滤器内容
+  Widget _buildPluginFilter(
+    List<String> allPlugins,
+    String? selectedPlugin,
+    ValueChanged<String?> onChanged,
+  ) {
+    final allOptions = ['全部插件', ...allPlugins];
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: allOptions.map((plugin) {
+        final isSelected =
+            (selectedPlugin ?? '全部插件') == plugin ||
+            (plugin == '全部插件' && selectedPlugin == null);
+
+        return ChoiceChip(
+          label: Text(plugin),
+          selected: isSelected,
+          onSelected: (_) {
+            onChanged(plugin == '全部插件' ? null : plugin);
+          },
+          showCheckmark: false,
+          selectedColor: Theme.of(context).colorScheme.primaryContainer,
+          labelStyle: TextStyle(
+            color: isSelected
+                ? Theme.of(context).colorScheme.onPrimaryContainer
+                : Theme.of(context).colorScheme.onSurface,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        );
+      }).toList(),
+    );
   }
 
   /// 构建分类过滤器内容
@@ -195,9 +279,32 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
     );
   }
 
-  /// 添加小组件
+  /// 添加小组件或替换现有小组件
   void _addWidget(HomeWidget widget) async {
     final layoutManager = HomeLayoutManager();
+
+    // 替换模式：替换掉原小组件
+    if (this.widget.replaceWidgetItemId != null) {
+      final oldItem = layoutManager.findItem(this.widget.replaceWidgetItemId!);
+      if (oldItem != null && oldItem is HomeWidgetItem) {
+        // 保留原小组件的尺寸和配置，只更换 widgetId
+        final replacementItem = HomeWidgetItem(
+          id: oldItem.id,
+          widgetId: widget.id,
+          size: oldItem.size,
+          config: oldItem.config,
+        );
+        layoutManager.updateItem(oldItem.id, replacementItem);
+        await layoutManager.saveLayout();
+
+        // 关闭对话框
+        Navigator.of(context).pop();
+
+        // 显示提示
+        Toast.success('已将小组件替换为 ${widget.name}');
+        return;
+      }
+    }
 
     // 创建小组件实例
     final widgetItem = HomeWidgetItem(
@@ -400,8 +507,8 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
         height: dialogHeight,
         child: SuperCupertinoNavigationWrapper(
           // 基本配置
-          title: Text('screens_addWidget'.tr),
-          largeTitle: 'screens_addWidget'.tr,
+          title: Text(widget.replaceWidgetItemId != null ? 'screens_replaceWidget'.tr : 'screens_addWidget'.tr),
+          largeTitle: widget.replaceWidgetItemId != null ? 'screens_replaceWidget'.tr : 'screens_addWidget'.tr,
           enableLargeTitle: true,
 
           // 主体内容 - 使用相同的过滤后的组件列表
@@ -423,6 +530,10 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
           multiFilterItems: _buildFilterItems(),
           multiFilterBarHeight: 50,
           multiFilterToggleable: true,
+          // 设置初始过滤值（替换模式下自动过滤插件）
+          initialMultiFilters: widget.initialSearchQuery != null
+              ? {'plugin': widget.initialSearchQuery}
+              : null,
           onMultiFilterChanged: (filters) {
             // 保存过滤值并刷新UI
             setState(() {

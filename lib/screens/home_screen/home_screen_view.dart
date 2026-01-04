@@ -574,6 +574,14 @@ class HomeScreenView extends StatelessWidget {
                   _reselectWidgetData(context, item);
                 },
               ),
+            ListTile(
+              leading: const Icon(Icons.swap_horiz),
+              title: Text('screens_replaceWidget'.tr),
+              onTap: () {
+                Navigator.pop(context);
+                _replaceWidget(context, item);
+              },
+            ),
             const Divider(),
           ],
           ListTile(
@@ -623,6 +631,25 @@ class HomeScreenView extends StatelessWidget {
     await controller.layoutManager.saveLayout();
 
     Toast.success('数据已更新');
+  }
+
+  void _replaceWidget(BuildContext context, HomeWidgetItem item) {
+    final registry = HomeWidgetRegistry();
+    final widget = registry.getWidget(item.widgetId);
+
+    if (widget == null) {
+      Toast.error('未找到小组件定义');
+      return;
+    }
+
+    // 使用插件名称作为初始搜索关键词，过滤出同插件的其他小组件
+    showDialog(
+      context: context,
+      builder: (context) => AddWidgetDialog(
+        replaceWidgetItemId: item.id,
+        initialSearchQuery: widget.pluginId,
+      ),
+    );
   }
 
   List<String> _getSelectorDataKeys(dynamic widget) {
