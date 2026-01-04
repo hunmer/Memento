@@ -1,4 +1,5 @@
 import 'selectable_item.dart';
+import 'package:flutter/material.dart';
 
 /// 选择器视图类型
 enum SelectorViewType {
@@ -10,6 +11,9 @@ enum SelectorViewType {
 
   /// 日历视图
   calendar,
+
+  /// 自定义表单视图
+  customForm,
 }
 
 /// 选择步骤数据加载器类型
@@ -21,6 +25,13 @@ typedef SelectorDataLoader = Future<List<SelectableItem>> Function(
 typedef SelectorSearchFilter = List<SelectableItem> Function(
   List<SelectableItem> items,
   String query,
+);
+
+/// 自定义表单构建器类型
+typedef CustomFormBuilder = Widget Function(
+  BuildContext context,
+  Map<String, dynamic> previousSelections,
+  Function(dynamic) onComplete,
 );
 
 /// 选择步骤
@@ -54,6 +65,9 @@ class SelectorStep {
   /// 网格视图的子项宽高比（仅 grid 视图有效）
   final double gridChildAspectRatio;
 
+  /// 自定义表单构建器（仅 customForm 视图有效）
+  final CustomFormBuilder? customFormBuilder;
+
   const SelectorStep({
     required this.id,
     required this.title,
@@ -64,6 +78,7 @@ class SelectorStep {
     this.emptyText,
     this.gridCrossAxisCount = 2,
     this.gridChildAspectRatio = 1.0,
+    this.customFormBuilder,
   });
 
   /// 默认搜索过滤器

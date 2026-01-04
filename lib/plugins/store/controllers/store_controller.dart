@@ -167,6 +167,22 @@ class StoreController with ChangeNotifier {
         .length;
   }
 
+  // 获取今日获得的积分
+  int getTodayPoints() {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    return _pointsLogs
+        .where(
+          (log) =>
+              log.timestamp.isAfter(startOfDay) &&
+              log.timestamp.isBefore(endOfDay) &&
+              log.type == '获得',
+        )
+        .fold(0, (sum, log) => sum + log.value);
+  }
+
   // 添加商品
   Future<void> addProduct(Product product) async {
     _products.add(product);

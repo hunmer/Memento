@@ -2,6 +2,32 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/models/points_log.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
+
+/// 独立的积分历史页面（包含 Scaffold）
+class PointsHistoryPage extends StatelessWidget {
+  const PointsHistoryPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
+    if (plugin == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('store_name'.tr)),
+        body: Center(child: Text('store_pluginNotAvailable'.tr)),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('store_pointsHistory'.tr),
+        elevation: 0,
+      ),
+      body: PointsHistoryContent(controller: plugin.controller),
+    );
+  }
+}
 
 /// 积分历史内容组件（不包含 Scaffold，用于 TabBarView）
 class PointsHistoryContent extends StatefulWidget {

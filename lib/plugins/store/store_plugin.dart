@@ -893,6 +893,38 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   void _registerDataSelectors() {
     final selectorService = pluginDataSelectorService;
 
+    // 注册积分目标配置选择器（表单类型）
+    selectorService.registerSelector(
+      SelectorDefinition(
+        id: 'store.pointsGoalForm',
+        pluginId: id,
+        name: '积分目标配置',
+        description: '设置每日积分目标',
+        icon: Icons.flag,
+        color: Colors.orange,
+        searchable: false,
+        selectionMode: SelectionMode.single,
+        steps: [
+          // 直接使用自定义表单视图
+          SelectorStep(
+            id: 'goal_input',
+            title: '设置每日积分目标',
+            viewType: SelectorViewType.customForm,
+            isFinalStep: true,
+            dataLoader: (_) async {
+              // 返回空列表，因为使用自定义UI
+              return [];
+            },
+            customFormBuilder: (context, previousSelections, onComplete) {
+              return _CustomGoalInputForm(
+                onComplete: onComplete,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
     // 注册商品选择器
     selectorService.registerSelector(
       SelectorDefinition(
@@ -1010,6 +1042,158 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
                 return matchesTitle || matchesDescription;
               }).toList();
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 自定义目标输入表单
+class _CustomGoalInputForm extends StatefulWidget {
+  final Function(dynamic) onComplete;
+
+  const _CustomGoalInputForm({
+    required this.onComplete,
+  });
+
+  @override
+  State<_CustomGoalInputForm> createState() => _CustomGoalInputFormState();
+}
+
+class _CustomGoalInputFormState extends State<_CustomGoalInputForm> {
+  final TextEditingController _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isValid = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() ?? false) {
+      final value = int.tryParse(_controller.text);
+      if (value != null && value > 0) {
+        widget.onComplete({'goal': value});
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // 说明文字
+          Icon(
+            Icons.flag,
+            size: 64,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(height: 24),
+          Text(
+            '设置你的每日积分目标',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '输入一个正整数作为你的每日目标',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+
+          // 输入框
+          TextFormField(
+            controller: _controller,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: '目标积分',
+              hintText: '例如：50',
+              prefixIcon: const Icon(Icons.emoji_events),
+              suffixText: '积分',
+              border: const OutlineInputBorder(),
+              filled: true,
+              fillColor: theme.colorScheme.surfaceContainerHighest,
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return '请输入目标值';
+              }
+              final number = int.tryParse(value);
+              if (number == null) {
+                return '请输入有效的数字';
+              }
+              if (number <= 0) {
+                return '目标值必须大于0';
+              }
+              if (number > 10000) {
+                return '目标值不能超过10000';
+              }
+              return null;
+            },
+            onChanged: (value) {
+              // 更新按钮状态
+              final isValid = _formKey.currentState?.validate() ?? false;
+              if (_isValid != isValid) {
+                setState(() {
+                  _isValid = isValid;
+                });
+              }
+            },
+            onFieldSubmitted: (_) => _submit(),
+          ),
+          const SizedBox(height: 16),
+
+          // 推荐目标
+          Text(
+            '推荐目标：',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [20, 50, 100, 200].map((value) {
+              return FilledButton.tonal(
+                onPressed: () {
+                  _controller.text = value.toString();
+                  setState(() {
+                    _isValid = true;
+                  });
+                  _submit();
+                },
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(60, 36),
+                ),
+                child: Text('$value'),
+              );
+            }).toList(),
+          ),
+          const Spacer(),
+
+          // 确定按钮
+          FilledButton(
+            onPressed: _isValid ? _submit : null,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+              backgroundColor: theme.colorScheme.primary,
+            ),
+            child: const Text('确定'),
           ),
         ],
       ),
