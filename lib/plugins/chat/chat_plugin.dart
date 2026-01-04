@@ -525,7 +525,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
         return '{"error": "频道数据格式错误", "messages": []}';
       }
 
-      final channelsList = channelsData as List<dynamic>;
+      final channelsList = channelsData;
       final allMessages = <Map<String, dynamic>>[];
 
       // 遍历每个频道获取消息
@@ -546,7 +546,7 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
           if (messagesResult.isSuccess) {
             final messagesData = messagesResult.dataOrNull;
             if (messagesData is List) {
-              final messages = messagesData as List<dynamic>;
+              final messages = messagesData;
 
               // 过滤日期范围内的消息
               for (final msgData in messages) {

@@ -21,7 +21,7 @@ class JSBridgeInjector {
 
   // 批处理执行器
   BatchRequestExecutor? _batchExecutor;
-  bool _enableBatchProcessing;
+  final bool _enableBatchProcessing;
   Timer? _statsTimer;
 
   JSBridgeInjector({

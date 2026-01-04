@@ -362,14 +362,14 @@ class AIMessageStatusManager {
     String messageId,
     void Function(AIMessageStatusData) callback,
   ) {
-    final handler = (EventArgs args) {
+    void handler(EventArgs args) {
       if (args is AIMessageStatusEventArgs && args.messageId == messageId) {
         final status = _messageStates[messageId];
         if (status != null) {
           callback(status);
         }
       }
-    };
+    }
 
     return EventManager.instance.subscribe(eventStatusChanged, handler);
   }
@@ -379,11 +379,11 @@ class AIMessageStatusManager {
     String conversationId,
     void Function(List<AIMessageStatusData>) callback,
   ) {
-    final handler = (EventArgs args) {
+    void handler(EventArgs args) {
       if (args is AIMessageStatusEventArgs && args.conversationId == conversationId) {
         callback(getConversationMessages(conversationId));
       }
-    };
+    }
 
     return EventManager.instance.subscribe(eventStatusChanged, handler);
   }
@@ -393,11 +393,11 @@ class AIMessageStatusManager {
     String chainExecutionId,
     void Function(List<AIMessageStatusData>) callback,
   ) {
-    final handler = (EventArgs args) {
+    void handler(EventArgs args) {
       if (args is AIMessageStatusEventArgs && args.chainExecutionId == chainExecutionId) {
         callback(getChainMessages(chainExecutionId));
       }
-    };
+    }
 
     return EventManager.instance.subscribe(eventStatusChanged, handler);
   }
@@ -407,11 +407,11 @@ class AIMessageStatusManager {
     String chainExecutionId,
     void Function(Map<String, dynamic>) callback,
   ) {
-    final handler = (EventArgs args) {
+    void handler(EventArgs args) {
       if (args is Values && args.value1 == chainExecutionId) {
         callback(getChainProgress(chainExecutionId));
       }
-    };
+    }
 
     return EventManager.instance.subscribe(eventChainStepCompleted, handler);
   }
