@@ -758,17 +758,6 @@ class StoreHomeWidgets {
         },
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors:
-                  isCompleted
-                      ? [Colors.orange.shade400, Colors.orange.shade600]
-                      : [Colors.orange.shade100, Colors.orange.shade200],
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -777,21 +766,20 @@ class StoreHomeWidgets {
                 children: [
                   Icon(
                     isCompleted ? Icons.emoji_events : Icons.flag,
-                    color: isCompleted ? Colors.white : Colors.orange.shade700,
+                    color: Colors.black,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '今日积分目标',
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color:
-                          isCompleted ? Colors.white : Colors.orange.shade900,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const Spacer(),
                   if (isCompleted)
-                    Icon(Icons.check_circle, color: Colors.white, size: 20),
+                    Icon(Icons.check_circle, color: Colors.black, size: 20),
                 ],
               ),
               const SizedBox(height: 8),
@@ -807,7 +795,7 @@ class StoreHomeWidgets {
                       Container(
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -820,10 +808,7 @@ class StoreHomeWidgets {
                           child: Container(
                             height: 48,
                             decoration: BoxDecoration(
-                              color:
-                                  isCompleted
-                                      ? Colors.white.withOpacity(0.9)
-                                      : Colors.orange.shade700,
+                              color: Colors.grey.shade400,
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
@@ -836,10 +821,7 @@ class StoreHomeWidgets {
                           child: Text(
                             '$todayPoints / $goal',
                             style: theme.textTheme.titleLarge?.copyWith(
-                              color:
-                                  isCompleted
-                                      ? Colors.orange.shade700
-                                      : Colors.white,
+                              color: Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
