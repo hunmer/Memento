@@ -83,7 +83,11 @@ struct MementoAppShortcuts: AppShortcutsProvider {
                 ],
                 shortTitle: "AI对话",
                 systemImageName: "bubble.left.and.bubble.right.fill"
-            )
+            ),
         ]
+    }
+
+    static var appShortcutTileColor: ShortcutTileColor {
+        .blue
     }
 }

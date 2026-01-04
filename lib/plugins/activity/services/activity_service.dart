@@ -287,6 +287,73 @@ class ActivityService {
     }
   }
 
+  /// 获取最近的活动记录（跨所有日期）
+  /// 返回最近结束的活动，如果没有活动则返回null
+  Future<ActivityRecord?> getLastActivity() async {
+    try {
+      final now = DateTime.now();
+      ActivityRecord? latestActivity;
+
+      // 搜索最近7天的活动
+      for (int i = 0; i < 7; i++) {
+        final date = now.subtract(Duration(days: i));
+        final activities = await getActivitiesForDate(date);
+
+        for (final activity in activities) {
+          if (latestActivity == null ||
+              activity.endTime.isAfter(latestActivity.endTime)) {
+            latestActivity = activity;
+          }
+        }
+
+        // 如果找到今天之前有活动的记录，可以提前结束搜索
+        if (latestActivity != null && i > 0) {
+          break;
+        }
+      }
+
+      return latestActivity;
+    } catch (e) {
+      debugPrint('Error getting last activity: $e');
+      return null;
+    }
+  }
+
+  /// 获取指定日期范围的活动统计（按标签分组）
+  /// 返回 Map<String, int>，key是标签名，value是该标签的总时长（分钟）
+  Future<Map<String, int>> getActivityStatsByTag(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final Map<String, int> tagStats = {};
+
+      // 遍历日期范围
+      DateTime current = DateTime(startDate.year, startDate.month, startDate.day);
+      final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+
+      while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+        final activities = await getActivitiesForDate(current);
+
+        for (final activity in activities) {
+          final duration = activity.endTime.difference(activity.startTime).inMinutes;
+
+          // 为每个标签累加时长
+          for (final tag in activity.tags) {
+            tagStats[tag] = (tagStats[tag] ?? 0) + duration;
+          }
+        }
+
+        current = current.add(const Duration(days: 1));
+      }
+
+      return tagStats;
+    } catch (e) {
+      debugPrint('Error getting activity stats by tag: $e');
+      return {};
+    }
+  }
+
   /// 初始化默认数据
   /// 当插件首次使用时（没有任何JSON文件存在），自动插入示例数据
   Future<void> initializeDefaultData() async {
