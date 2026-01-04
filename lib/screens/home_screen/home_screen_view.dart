@@ -525,11 +525,12 @@ class HomeScreenView extends StatelessWidget {
       context: context,
       builder: (context) => LayoutManagerDialog(
         onLayoutChanged: () async {
-          // 布局变化时立即重新加载布局列表
+          // 布局删除时重新加载并切换到第一个
           await controller.reloadLayouts();
         },
       ),
     );
+    // 对话框关闭后重新初始化（处理新建布局的情况）
     await controller.initializeLayout();
   }
 

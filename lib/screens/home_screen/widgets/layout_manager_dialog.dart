@@ -163,8 +163,10 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
     showDialog(
       context: context,
       builder: (context) => _CreateLayoutDialog(
-        onLayoutCreated: () {
+        onLayoutCreated: (newLayoutId) {
           _loadLayouts();
+          // 通知外部切换到新布局
+          widget.onLayoutChanged?.call();
           Navigator.pop(context); // 关闭布局管理对话框
         },
       ),
@@ -305,7 +307,7 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
 
 /// 新建布局对话框
 class _CreateLayoutDialog extends StatefulWidget {
-  final VoidCallback onLayoutCreated;
+  final ValueChanged<String> onLayoutCreated;
 
   const _CreateLayoutDialog({required this.onLayoutCreated});
 
@@ -345,7 +347,7 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       // 空白布局不添加任何内容
 
       // 保存新布局(不修改当前布局状态)
-      await _layoutManager.saveLayoutAs(
+      final newLayoutId = await _layoutManager.saveLayoutAs(
         name,
         newItems,
         _layoutManager.gridCrossAxisCount,
@@ -354,7 +356,7 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
       if (mounted) {
         toastService.showToast('screens_layoutSaved'.trParams({'name': name}));
         Navigator.pop(context);
-        widget.onLayoutCreated();
+        widget.onLayoutCreated(newLayoutId);
       }
     } catch (e) {
       if (mounted) {

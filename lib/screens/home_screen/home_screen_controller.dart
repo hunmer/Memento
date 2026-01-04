@@ -300,6 +300,24 @@ class HomeScreenController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 切换到最后一个布局（用于新建布局后）
+  Future<void> switchToLastLayout() async {
+    if (_savedLayouts.isEmpty) return;
+
+    await _loadSavedLayouts();
+
+    // 切换到最后一个布局
+    _currentPageIndex = _savedLayouts.length - 1;
+    final layout = _savedLayouts[_currentPageIndex];
+    _currentLayoutName = layout.name;
+    await _layoutManager.loadLayoutConfig(layout.id);
+    _layoutItemsCache[layout.id] = List<HomeItem>.from(_layoutManager.items);
+    await loadCurrentBackground();
+
+    // 通知监听器更新 UI
+    notifyListeners();
+  }
+
   /// 更新当前布局名称
   Future<void> _updateCurrentLayoutName() async {
     try {
