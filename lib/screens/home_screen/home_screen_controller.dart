@@ -67,6 +67,9 @@ class HomeScreenController extends ChangeNotifier {
   final Map<String, ({List<HomeWidgetSize> structure, int crossAxisCount})>
   _layoutStructureCache = {};
 
+  // UI 状态变化回调
+  VoidCallback? _stateChangedCallback;
+
   // Getters
   HomeLayoutManager get layoutManager => _layoutManager;
   bool get isLoading => _isLoading;
@@ -103,6 +106,7 @@ class HomeScreenController extends ChangeNotifier {
   VoidCallback? _layoutChangedListener;
 
   void init(VoidCallback onStateChanged) {
+    _stateChangedCallback = onStateChanged;
     initializeLayout();
     // 创建包装器，先同步缓存再通知 UI
     _layoutChangedListener = () {
@@ -452,6 +456,7 @@ class HomeScreenController extends ChangeNotifier {
   /// 切换编辑模式
   void toggleEditMode() {
     _isEditMode = !_isEditMode;
+    _stateChangedCallback?.call();
   }
 
   /// 切换批量编辑模式
@@ -463,12 +468,14 @@ class HomeScreenController extends ChangeNotifier {
     if (_isBatchMode) {
       _isEditMode = false;
     }
+    _stateChangedCallback?.call();
   }
 
   /// 退出批量编辑模式
   void exitBatchMode() {
     _isBatchMode = false;
     _selectedItemIds.clear();
+    _stateChangedCallback?.call();
   }
 
   /// 切换项目选中状态
@@ -478,6 +485,7 @@ class HomeScreenController extends ChangeNotifier {
     } else {
       _selectedItemIds.add(itemId);
     }
+    _stateChangedCallback?.call();
   }
 
   /// 页面切换回调
