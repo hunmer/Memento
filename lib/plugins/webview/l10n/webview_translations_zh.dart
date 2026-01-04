@@ -140,4 +140,15 @@ const Map<String, String> webviewTranslationsZh = {
   'webview_localFile': '本地文件',
   'webview_cardSelectorName': '网址卡片',
   'webview_cardSelectorDesc': '选择一个网址卡片添加到主页',
+
+  // 搜索和过滤相关翻译
+  'webview_search_url': '网址',
+  'webview_search_title': '标题',
+  'webview_search_desc': '描述',
+  'webview_search_author': '作者',
+  'webview_card_type': '类型',
+  'webview_sort': '排序',
+  'webview_sort_by_open_time': '最近打开',
+  'webview_sort_by_add_time': '最近添加',
+  'webview_category': '分类',
 };
