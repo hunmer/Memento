@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/form_fields/event_multi_select_field.dart';
 
 /// Store 插件设置界面
 class StoreSettingsScreen extends StatefulWidget {
@@ -16,6 +17,9 @@ class StoreSettingsScreen extends StatefulWidget {
 
 class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  // 选中的事件列表
+  List<String> _selectedEvents = [];
 
   // 积分奖励设置
   final Map<String, int> _pointAwards = {};
@@ -63,12 +67,16 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
       final pointAwards = settings['point_awards'] as Map<String, dynamic>?;
 
       if (pointAwards != null) {
-        // 加载积分奖励设置
+        // 加载积分奖励设置和选中的事件
         pointAwards.forEach((key, value) {
-          _pointAwards[key] = value as int;
-          final controller = TextEditingController(text: value.toString());
-          controller.addListener(() => _onTextChanged(key));
-          _controllers[key] = controller;
+          // 只加载积分值大于 0 的事件
+          if (value is int && value > 0) {
+            _pointAwards[key] = value;
+            _selectedEvents.add(key);
+            final controller = TextEditingController(text: value.toString());
+            controller.addListener(() => _onTextChanged(key));
+            _controllers[key] = controller;
+          }
         });
       }
 
@@ -89,9 +97,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   /// 保存设置（包含表单验证）
   Future<void> _saveSettings() async {
-    // 验证所有输入
-    for (final entry in _pointAwards.entries) {
-      final controller = _controllers[entry.key];
+    // 验证选中事件的输入
+    for (final eventKey in _selectedEvents) {
+      final controller = _controllers[eventKey];
       if (controller != null) {
         final value = int.tryParse(controller.text);
         if (value == null || value < 0) {
@@ -106,14 +114,17 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     });
 
     try {
+      // 只保存选中事件的积分值
       final newPointAwards = <String, dynamic>{};
-      _pointAwards.forEach((key, _) {
-        final controller = _controllers[key];
-        if (controller != null) {
-          final value = int.tryParse(controller.text) ?? 0;
-          newPointAwards[key] = value;
-        }
-      });
+
+      // 为每个选中事件保存积分值
+      for (final eventKey in _selectedEvents) {
+        final controller = _controllers[eventKey];
+        final value = controller != null
+            ? (int.tryParse(controller.text) ?? getDefaultPointsForEvent(eventKey))
+            : getDefaultPointsForEvent(eventKey);
+        newPointAwards[eventKey] = value;
+      }
 
       debugPrint('🔧 [Store设置页面] 准备保存积分奖励配置');
       await widget.plugin.updateSettings({
@@ -141,6 +152,52 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  /// 获取事件的默认积分值
+  int getDefaultPointsForEvent(String eventKey) {
+    final defaults = StorePlugin.defaultPointSettings['point_awards'] as Map<String, dynamic>?;
+    return defaults?[eventKey] as int? ?? 10;
+  }
+
+  /// 从 kDefaultAvailableEvents 获取事件显示名称
+  String _getEventDisplayName(String eventKey) {
+    final eventOption = kDefaultAvailableEvents.firstWhere(
+      (e) => e.eventName == eventKey,
+      orElse: () => EventOption(
+        eventName: eventKey,
+        category: '未知',
+        description: eventKey,
+      ),
+    );
+    return eventOption.description;
+  }
+
+  /// 处理事件选择变化
+  void _onSelectedEventsChanged(List<String> events) {
+    setState(() {
+      _hasChanges = true;
+
+      // 添加新选择的事件
+      for (final eventKey in events) {
+        if (!_pointAwards.containsKey(eventKey)) {
+          _pointAwards[eventKey] = getDefaultPointsForEvent(eventKey);
+          _controllers[eventKey] = TextEditingController(
+            text: _pointAwards[eventKey].toString(),
+          );
+          _controllers[eventKey]?.addListener(() => _onTextChanged(eventKey));
+        }
+      }
+
+      // 移除未选择的事件（保留控制器以备重新选择）
+      for (final eventKey in _pointAwards.keys.toList()) {
+        if (!events.contains(eventKey)) {
+          _pointAwards.remove(eventKey);
+        }
+      }
+
+      _selectedEvents = events;
+    });
   }
 
   /// 保存开关设置（不需要表单验证）
@@ -292,11 +349,27 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                '配置各项行为的积分奖励，当用户执行对应操作时将自动获得积分。',
+                '选择要启用积分奖励的事件，并配置各项行为的积分奖励值。',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 事件选择器
+            EventMultiSelectField(
+              name: 'selected_events',
+              availableEvents: kDefaultAvailableEvents,
+              dialogTitle: '选择启用积分奖励的事件',
+              initialValue: _selectedEvents,
+              prefixIcon: Icons.event_available,
+              onChanged: (events) {
+                if (events is List<String>) {
+                  _onSelectedEventsChanged(events);
+                }
+              },
             ),
 
             const SizedBox(height: 16),
@@ -309,61 +382,77 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   child: CircularProgressIndicator(),
                 ),
               )
+            else if (_selectedEvents.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Center(
+                  child: Text(
+                    '未选择任何事件\n请点击上方选择需要启用积分奖励的事件',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
             else
               Form(
                 key: _formKey,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
-                    children:
-                        _pointAwards.entries.map((entry) {
-                          final eventKey = entry.key;
-                          final displayName = (widget.plugin as dynamic)
-                              .getEventDisplayName(eventKey);
-                          final controller = _controllers[eventKey];
+                    children: _selectedEvents.map((eventKey) {
+                      final displayName = _getEventDisplayName(eventKey);
+                      final controller = _controllers[eventKey];
 
-                          if (controller == null) {
-                            return const SizedBox.shrink();
-                          }
+                      // 如果没有控制器，创建一个默认的
+                      if (controller == null) {
+                        _controllers[eventKey] = TextEditingController(
+                          text: getDefaultPointsForEvent(eventKey).toString(),
+                        );
+                        _controllers[eventKey]?.addListener(() => _onTextChanged(eventKey));
+                      }
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Text(
-                                    displayName,
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: TextFormField(
-                                    controller: controller,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                      labelText: '积分',
-                                      hintText: '0',
-                                      suffix: Text('store_points'.tr),
-                                      border: const OutlineInputBorder(),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return '请输入积分值';
-                                      }
-                                      final points = int.tryParse(value);
-                                      if (points == null || points < 0) {
-                                        return '必须为非负整数';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
+                      final effectiveController = _controllers[eventKey]!;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                displayName,
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             ),
-                          );
-                        }).toList(),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextFormField(
+                                controller: effectiveController,
+                                keyboardType: TextInputType.number,
+                                decoration: InputDecoration(
+                                  labelText: '积分',
+                                  hintText: '0',
+                                  suffix: Text('store_points'.tr),
+                                  border: const OutlineInputBorder(),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return '请输入积分值';
+                                  }
+                                  final points = int.tryParse(value);
+                                  if (points == null || points < 0) {
+                                    return '必须为非负整数';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
               ),
