@@ -3,6 +3,7 @@ import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 import 'package:Memento/plugins/notes/screens/note_edit_screen.dart';
 import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:Memento/plugins/store/widgets/store_view/store_main.dart';
+import 'package:Memento/plugins/store/widgets/store_view/points_history_page.dart';
 import 'package:Memento/plugins/store/widgets/product_items_page.dart';
 import 'package:Memento/plugins/store/widgets/user_item_detail_page.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
@@ -147,6 +148,7 @@ class AppRoutes extends NavigatorObserver {
   static const String openai = '/openai';
   static const String scriptsCenter = '/scripts_center';
   static const String store = '/store';
+  static const String storePointsHistory = '/store/points_history';
   static const String timer = '/timer';
   static const String todo = '/todo';
   static const String tracker = '/tracker';
@@ -669,6 +671,10 @@ class AppRoutes extends NavigatorObserver {
             autoUse: autoUse,
           ),
         );
+      case '/store/points_history':
+      case 'store/points_history':
+        // 积分历史页面
+        return _createRoute(const PointsHistoryPage());
       case '/timer':
       case 'timer':
         return _createRoute(const TimerMainView());

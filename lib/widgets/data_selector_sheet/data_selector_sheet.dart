@@ -407,6 +407,56 @@ class _DataSelectorSheetState extends State<DataSelectorSheet> {
           emptyText: _currentStep.emptyText,
           emptyWidget: widget.config.emptyStateWidget,
         );
+
+      case SelectorViewType.customForm:
+        // 使用自定义表单构建器
+        if (_currentStep.customFormBuilder != null) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: _currentStep.customFormBuilder!(
+              context,
+              _selections,
+              (data) {
+                // 用户完成输入，需要手动添加到selectionPath
+                _selections[_currentStep.id] = data;
+
+                // 创建一个虚拟的SelectableItem用于SelectionPath
+                final virtualItem = SelectableItem(
+                  id: 'custom_form_result',
+                  title: '自定义表单结果',
+                  rawData: data,
+                );
+
+                _selectionPath.add(SelectionPathItem(
+                  stepId: _currentStep.id,
+                  stepTitle: _currentStep.title,
+                  selectedItem: virtualItem,
+                ));
+
+                // 完成选择
+                _completeSelection(data);
+              },
+            ),
+          );
+        }
+        // 如果没有提供自定义构建器，显示错误
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '表单配置错误：缺少customFormBuilder',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        );
     }
   }
 
