@@ -107,28 +107,25 @@ class DayHomeWidgets {
 
   /// 从选择器数据中提取日期范围值
   static Map<String, dynamic> _extractDateRangeData(List<dynamic> dataArray) {
+    // dataArray 包含 SelectableItem 对象， rawData 是 Map
     final selectedItem = dataArray[0];
 
-    // 处理 SelectableItem 或 Map
     Map<String, dynamic>? rangeData;
-    String? dateRangeLabel;
-
     if (selectedItem is SelectableItem) {
       rangeData = selectedItem.rawData as Map<String, dynamic>?;
-      dateRangeLabel = selectedItem.title;
     } else if (selectedItem is Map<String, dynamic>) {
-      rangeData = selectedItem['rawData'] as Map<String, dynamic>?;
-      dateRangeLabel = selectedItem['title'] as String?;
+      rangeData = selectedItem;
     }
 
     // 默认值：未来7天
     final startDay = rangeData?['startDay'] as int? ?? 0;
     final endDay = rangeData?['endDay'] as int? ?? 7;
+    final title = rangeData?['title'] as String? ?? '未来7天';
 
     return {
       'startDay': startDay,
       'endDay': endDay,
-      'dateRangeLabel': dateRangeLabel ?? '未来7天',
+      'dateRangeLabel': title,
     };
   }
 

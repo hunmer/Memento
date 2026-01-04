@@ -541,7 +541,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: '未来7天',
                 subtitle: '今天起往后7天',
                 icon: Icons.arrow_upward,
-                rawData: {'startDay': 0, 'endDay': 7},
+                rawData: {'startDay': 0, 'endDay': 7, 'title': '未来7天'},
               ),
               // 未来30天 (0到30天)
               SelectableItem(
@@ -549,7 +549,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: '未来30天',
                 subtitle: '今天起往后30天',
                 icon: Icons.trending_up,
-                rawData: {'startDay': 0, 'endDay': 30},
+                rawData: {'startDay': 0, 'endDay': 30, 'title': '未来30天'},
               ),
               // 过去7天 (-7到0天)
               SelectableItem(
@@ -557,7 +557,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: '过去7天',
                 subtitle: '往前7天到今天',
                 icon: Icons.arrow_downward,
-                rawData: {'startDay': -7, 'endDay': 0},
+                rawData: {'startDay': -7, 'endDay': 0, 'title': '过去7天'},
               ),
               // 过去30天 (-30到0天)
               SelectableItem(
@@ -565,7 +565,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: '过去30天',
                 subtitle: '往前30天到今天',
                 icon: Icons.trending_down,
-                rawData: {'startDay': -30, 'endDay': 0},
+                rawData: {'startDay': -30, 'endDay': 0, 'title': '过去30天'},
               ),
               // 前后7天 (-7到7天)
               SelectableItem(
@@ -573,7 +573,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: '前后7天',
                 subtitle: '往前7天到往后7天',
                 icon: Icons.sync_alt,
-                rawData: {'startDay': -7, 'endDay': 7},
+                rawData: {'startDay': -7, 'endDay': 7, 'title': '前后7天'},
               ),
               // 前后30天 (-30到30天)
               SelectableItem(
@@ -581,7 +581,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: '前后30天',
                 subtitle: '往前30天到往后30天',
                 icon: Icons.all_inclusive,
-                rawData: {'startDay': -30, 'endDay': 30},
+                rawData: {'startDay': -30, 'endDay': 30, 'title': '前后30天'},
               ),
               // 全部
               SelectableItem(
@@ -589,7 +589,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
                 title: 'day_allDays'.tr,
                 subtitle: '显示所有纪念日',
                 icon: Icons.calendar_today,
-                rawData: {'startDay': null, 'endDay': null},
+                rawData: {'startDay': null, 'endDay': null, 'title': 'day_allDays'.tr},
               ),
             ];
           },
