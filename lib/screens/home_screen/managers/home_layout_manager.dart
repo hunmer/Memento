@@ -548,7 +548,8 @@ class HomeLayoutManager extends ChangeNotifier {
 
   /// 保存指定的布局配置(不修改当前布局状态)
   /// 用于创建新布局时避免影响当前显示的布局
-  Future<void> saveLayoutAs(String name, List<HomeItem> items, int crossAxisCount) async {
+  /// 返回新创建的布局ID
+  Future<String> saveLayoutAs(String name, List<HomeItem> items, int crossAxisCount) async {
     try {
       final layoutId = 'layout_${DateTime.now().millisecondsSinceEpoch}';
       final now = DateTime.now();
@@ -569,9 +570,14 @@ class HomeLayoutManager extends ChangeNotifier {
         'layouts': layouts.map((l) => l.toJson()).toList(),
       });
 
-      // 不设置为当前活动的布局,因为这是创建新布局
-      // 保留当前正在使用的布局状态
+      // 设置为当前活动的布局
+      _activeLayoutId = layoutId;
+      await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
+        'activeLayoutId': layoutId,
+      });
+
       notifyListeners();
+      return layoutId;
     } catch (e) {
       debugPrint('Error saving layout: $e');
       rethrow;
