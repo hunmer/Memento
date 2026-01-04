@@ -7,6 +7,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'activity_plugin.dart';
 import 'screens/activity_edit_screen.dart';
 
@@ -129,21 +130,42 @@ class ActivityHomeWidgets {
         widgetConfig = PluginWidgetConfig();
       }
 
-      // 获取可用的统计项数据
-      final availableItems = _getAvailableStats(context);
-
-      // 使用通用小组件
-      return GenericPluginWidget(
-        pluginId: 'activity',
-        pluginName: 'activity_name'.tr,
-        pluginIcon: Icons.access_time,
-        pluginDefaultColor: Colors.pink,
-        availableItems: availableItems,
-        config: widgetConfig,
+      // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return EventListenerContainer(
+            events: const [
+              'activity_added',
+              'activity_updated',
+              'activity_deleted',
+            ],
+            onEvent: () => setState(() {}),
+            child: _buildOverviewContent(context, widgetConfig),
+          );
+        },
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
     }
+  }
+
+  /// 构建概览小组件内容（获取最新数据）
+  static Widget _buildOverviewContent(
+    BuildContext context,
+    PluginWidgetConfig widgetConfig,
+  ) {
+    // 获取可用的统计项数据（每次重建时重新获取）
+    final availableItems = _getAvailableStats(context);
+
+    // 使用通用小组件
+    return GenericPluginWidget(
+      pluginId: 'activity',
+      pluginName: 'activity_name'.tr,
+      pluginIcon: Icons.access_time,
+      pluginDefaultColor: Colors.pink,
+      availableItems: availableItems,
+      config: widgetConfig,
+    );
   }
 
   /// 构建错误提示组件

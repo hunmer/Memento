@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'package:Memento/utils/image_utils.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'contact_plugin.dart';
@@ -214,12 +215,35 @@ class ContactHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
+    // 从初始化数据中获取联系人ID
     final savedData =
         result.data is Map
             ? Map<String, dynamic>.from(result.data as Map)
             : <String, dynamic>{};
     final contactId = savedData['id'] as String? ?? '';
 
+    if (contactId.isEmpty) {
+      return _buildContactNotFoundWidget(context, savedData);
+    }
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['contact_created'],
+          onEvent: () => setState(() {}),
+          child: _buildContactCardWidgetByLoad(context, contactId, savedData),
+        );
+      },
+    );
+  }
+
+  /// 构建联系人卡片小组件（从 PluginManager 获取最新数据）
+  static Widget _buildContactCardWidgetByLoad(
+    BuildContext context,
+    String contactId,
+    Map<String, dynamic> savedData,
+  ) {
     return FutureBuilder<Contact?>(
       future: _loadContactById(contactId),
       builder: (context, snapshot) {
@@ -237,7 +261,7 @@ class ContactHomeWidgets {
     );
   }
 
-  /// 从 controller 加载联系人数据
+  /// 从 controller 加载联系人数据（异步方法，保留用于其他可能的用途）
   static Future<Contact?> _loadContactById(String contactId) async {
     try {
       final plugin =

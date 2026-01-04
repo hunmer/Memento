@@ -7,6 +7,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'todo_plugin.dart';
 import 'models/task.dart';
 
@@ -121,6 +122,23 @@ class TodoHomeWidgets {
     BuildContext context,
     Map<String, dynamic> config,
   ) {
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['task_added', 'task_deleted', 'task_completed'],
+          onEvent: () => setState(() {}),
+          child: _buildOverviewWidgetContent(context, config),
+        );
+      },
+    );
+  }
+
+  /// 构建概览小组件内容（获取最新数据）
+  static Widget _buildOverviewWidgetContent(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
     try {
       // 解析插件配置
       PluginWidgetConfig widgetConfig;
@@ -136,7 +154,7 @@ class TodoHomeWidgets {
         widgetConfig = PluginWidgetConfig();
       }
 
-      // 获取可用的统计项数据
+      // 获取可用的统计项数据（从 PluginManager 获取最新数据）
       final availableItems = _getAvailableStats(context);
 
       // 使用通用小组件
@@ -276,6 +294,20 @@ class TodoHomeWidgets {
 
   /// 构建 2x2 待办列表小组件
   static Widget _buildTodoListWidget(BuildContext context) {
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['task_added', 'task_deleted', 'task_completed'],
+          onEvent: () => setState(() {}),
+          child: _buildTodoListWidgetContent(context),
+        );
+      },
+    );
+  }
+
+  /// 构建待办列表小组件内容（获取最新数据）
+  static Widget _buildTodoListWidgetContent(BuildContext context) {
     final theme = Theme.of(context);
     final tasks = _getTodoTasks(5);
 

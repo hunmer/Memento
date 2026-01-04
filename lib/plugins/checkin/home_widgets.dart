@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'checkin_plugin.dart';
 import 'models/checkin_item.dart';
 
@@ -199,48 +200,57 @@ class CheckinHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
-
-    if (result.data == null) {
-      return _buildErrorWidget(context, '数据不存在');
-    }
-
-    // 处理 CheckinItem 对象或 Map
-    Map<String, dynamic> itemData;
-    if (result.data is Map<String, dynamic>) {
-      itemData = result.data as Map<String, dynamic>;
-    } else if (result.data is dynamic && result.data.toJson != null) {
-      itemData = result.data.toJson() as Map<String, dynamic>;
-    } else {
-      return _buildErrorWidget(context, '数据类型错误');
-    }
-
-    final name = itemData['name'] as String? ?? '未知项目';
-    final group = itemData['group'] as String?;
-    final iconCode = itemData['icon'] as int? ?? 57455;
-    final colorValue = itemData['color'] as int? ?? 4280391411;
+    // 从初始化数据中获取项目ID
+    final itemData = result.data as Map<String, dynamic>;
     final itemId = itemData['id'] as String?;
 
-    // 获取今日打卡状态
-    bool isCheckedToday = false;
-    CheckinItem? checkinItem;
-    if (itemId != null) {
-      try {
-        final plugin =
-            PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
-        if (plugin != null) {
-          final items = plugin.checkinItems;
-          checkinItem = items.firstWhere(
-            (i) => i.id == itemId,
-            orElse: () => throw Exception('not found'),
-          );
-          isCheckedToday = checkinItem.isCheckedToday();
-        }
-      } catch (e) {
-        isCheckedToday = false;
-      }
+    if (itemId == null) {
+      return _buildErrorWidget(context, '项目不存在');
     }
 
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['checkin_deleted'],
+          onEvent: () => setState(() {}),
+          child: _buildCheckinItemWidget(context, itemId, config),
+        );
+      },
+    );
+  }
+
+  /// 构建签到项目小组件内容（获取最新数据）
+  static Widget _buildCheckinItemWidget(
+    BuildContext context,
+    String itemId,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    // 从 PluginManager 获取最新的项目数据
+    final plugin =
+        PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, '插件不可用');
+    }
+
+    // 查找对应项目
+    CheckinItem? checkinItem;
+    try {
+      checkinItem = plugin.checkinItems.firstWhere(
+        (i) => i.id == itemId,
+        orElse: () => throw Exception('项目不存在'),
+      );
+    } catch (e) {
+      return _buildErrorWidget(context, '项目不存在');
+    }
+
+    final name = checkinItem.name;
+    final group = checkinItem.group;
+    final iconCode = checkinItem.icon.codePoint;
+    final colorValue = checkinItem.color.value;
+    final isCheckedToday = checkinItem.isCheckedToday();
     final itemColor = Color(colorValue);
 
     // 获取卡片大小
@@ -337,7 +347,7 @@ class CheckinHomeWidgets {
             ],
           ),
           // 热力图（根据卡片大小显示不同范围）
-          if (showHeatmap && checkinItem != null) ...[
+          if (showHeatmap) ...[
             const SizedBox(height: 12),
             _buildHeatmapGrid(context, checkinItem, itemColor, widgetSize!),
           ],

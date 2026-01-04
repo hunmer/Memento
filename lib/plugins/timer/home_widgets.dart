@@ -10,6 +10,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'timer_plugin.dart';
 import 'models/timer_task.dart';
 import 'models/timer_item.dart';
@@ -339,14 +340,33 @@ class TimerHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
     final taskId = _getTaskId(result);
 
     if (taskId == null) {
       return _buildErrorWidget(context, '计时器ID不存在');
     }
 
-    // 从 TimerPlugin 获取最新数据
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'timer_item_changed',
+            'timer_task_changed',
+            'timer_item_progress',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildTimerWidget(context, taskId),
+        );
+      },
+    );
+  }
+
+  /// 构建计时器小组件内容（获取最新数据）
+  static Widget _buildTimerWidget(BuildContext context, String taskId) {
+    final theme = Theme.of(context);
+
+    // 从 PluginManager 获取最新的计时器数据
     final plugin = PluginManager.instance.getPlugin('timer') as TimerPlugin?;
     if (plugin == null) {
       return _buildErrorWidget(context, '计时器插件未加载');

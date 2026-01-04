@@ -10,6 +10,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'tracker_plugin.dart';
 
 /// 目标追踪插件的主页小组件注册
@@ -199,102 +200,135 @@ class TrackerHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
+    // 从初始化数据中获取目标ID
+    final goalData = result.data as Map<String, dynamic>;
+    final goalId = goalData['id'] as String?;
 
-    if (result.data == null) {
-      return _buildErrorWidget(context, '数据不存在');
+    if (goalId == null) {
+      return _buildErrorWidget(context, 'tracker_goalNotFound'.tr);
     }
 
-    final goalData = result.data as Map<String, dynamic>;
-    final name = goalData['name'] as String? ?? '未知目标';
-    final currentValue = (goalData['currentValue'] as num?)?.toDouble() ?? 0.0;
-    final targetValue = (goalData['targetValue'] as num?)?.toDouble() ?? 1.0;
-    final unitType = goalData['unitType'] as String? ?? '次';
-    final iconCode = goalData['icon'] as String? ?? '57455';
-    final iconColorValue = goalData['iconColor'] as int? ?? 4283215696;
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['tracker_record_added'],
+          onEvent: () => setState(() {}),
+          child: _buildGoalWidget(context, goalId),
+        );
+      },
+    );
+  }
+
+  /// 构建目标小组件内容（获取最新数据）
+  static Widget _buildGoalWidget(BuildContext context, String goalId) {
+    final theme = Theme.of(context);
+
+    // 从 PluginManager 获取最新的目标数据
+    final plugin = PluginManager.instance.getPlugin('tracker') as TrackerPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, 'tracker_pluginNotAvailable'.tr);
+    }
+
+    // 查找对应目标
+    final goal = plugin.controller.goals.firstWhere(
+      (g) => g.id == goalId,
+      orElse: () => throw Exception('tracker_goalNotFound'.tr),
+    );
+
+    // 使用最新的目标数据
+    final name = goal.name;
+    final currentValue = goal.currentValue;
+    final targetValue = goal.targetValue;
+    final unitType = goal.unitType;
+    final iconCode = goal.icon;
+    final iconColorValue = goal.iconColor;
 
     final progress = (targetValue > 0 ? (currentValue / targetValue) : 0).clamp(
       0.0,
       1.0,
     );
-    final goalColor = Color(iconColorValue);
+    final goalColor = Color(iconColorValue ?? 4283215696);
 
     return Material(
       color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 目标名称和图标
-            Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: goalColor.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    IconData(
-                      int.tryParse(iconCode) ?? 57455,
-                      fontFamily: 'MaterialIcons',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 目标名称和图标
+              Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: goalColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    color: goalColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    child: Icon(
+                      IconData(
+                        int.tryParse(iconCode) ?? 57455,
+                        fontFamily: 'MaterialIcons',
                       ),
-                      Text(
-                        '$currentValue / $targetValue $unitType',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            // 进度条和百分比
-            Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: progress.toDouble(),
-                      minHeight: 8,
-                      backgroundColor: goalColor.withOpacity(0.2),
-                      valueColor: AlwaysStoppedAnimation<Color>(goalColor),
+                      color: goalColor,
+                      size: 20,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${(progress * 100).toStringAsFixed(0)}%',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: progress >= 1.0 ? Colors.green : goalColor,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          '$currentValue / $targetValue $unitType',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              // 进度条和百分比
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: progress.toDouble(),
+                        minHeight: 8,
+                        backgroundColor: goalColor.withOpacity(0.2),
+                        valueColor: AlwaysStoppedAnimation<Color>(goalColor),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: progress >= 1.0 ? Colors.green : goalColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
-import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
-import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
-import 'package:Memento/core/plugin_manager.dart';
-import 'database_plugin.dart';
 import 'package:get/get.dart';
+import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
+import 'database_plugin.dart';
 
 /// 数据库插件的主页小组件注册
 class DatabaseHomeWidgets {
@@ -75,6 +76,27 @@ class DatabaseHomeWidgets {
 
   /// 构建 2x2 详细卡片组件
   static Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'database_added',
+            'database_updated',
+            'database_deleted',
+            'database_record_added',
+            'database_record_updated',
+            'database_record_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildOverviewContent(context, config),
+        );
+      },
+    );
+  }
+
+  /// 构建概览小组件内容（获取最新数据）
+  static Widget _buildOverviewContent(BuildContext context, Map<String, dynamic> config) {
     try {
       // 解析插件配置
       PluginWidgetConfig widgetConfig;

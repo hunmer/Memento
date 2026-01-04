@@ -8,6 +8,7 @@ import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'calendar_plugin.dart';
 import 'models/event.dart';
 
@@ -206,6 +207,30 @@ class CalendarHomeWidgets {
     Map<String, dynamic> config,
   ) {
     final theme = Theme.of(context);
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'calendar_event_added',
+            'calendar_event_updated',
+            'calendar_event_deleted',
+            'calendar_event_completed',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildEventListContent(context, theme),
+        );
+      },
+    );
+  }
+
+  /// 构建事件列表内容（获取最新数据）
+  static Widget _buildEventListContent(
+    BuildContext context,
+    ThemeData theme,
+  ) {
+    // 从 PluginManager 获取最新的日历数据
     final events = _getUpcomingEvents(5);
     final timeFormat = DateFormat('HH:mm');
 

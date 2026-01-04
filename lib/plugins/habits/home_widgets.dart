@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'habits_plugin.dart';
@@ -223,8 +224,6 @@ class HabitsHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
-
     if (result.data == null) {
       return _buildErrorWidget(context, '数据不存在');
     }
@@ -232,9 +231,39 @@ class HabitsHomeWidgets {
     final savedData =
         result.data is Map<String, dynamic>
             ? result.data as Map<String, dynamic>
-            : {};
+            : <String, dynamic>{};
 
     final habitId = savedData['id'] as String?;
+
+    if (habitId == null) {
+      return _buildErrorWidget(context, '习惯ID不存在');
+    }
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'habit_data_changed',
+            'habit_timer_started',
+            'habit_timer_stopped',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildHabitHeatmapWidget(context, habitId, savedData, config),
+        );
+      },
+    );
+  }
+
+  /// 构建习惯热力图小组件内容（获取最新数据）
+  static Widget _buildHabitHeatmapWidget(
+    BuildContext context,
+    String habitId,
+    Map<String, dynamic> savedData,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
     final title = savedData['title'] as String? ?? '未知习惯';
     final group = savedData['group'] as String?;
     final iconCode = savedData['icon'] as String?;

@@ -10,6 +10,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'bill_plugin.dart';
 import 'screens/bill_edit_screen.dart';
 
@@ -194,8 +195,6 @@ class BillHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
-
     // 从 result.data 获取已转换的数据（由 dataSelector 处理）
     final data =
         result.data is Map<String, dynamic>
@@ -212,6 +211,43 @@ class BillHomeWidgets {
     final periodLabel = data['periodLabel'] as String? ?? '本月';
     final periodStart = data['periodStart'] as String?;
     final periodEnd = data['periodEnd'] as String?;
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'bill_added',
+            'bill_deleted',
+            'account_added',
+            'account_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildBillStatsWidget(
+            context,
+            accountId,
+            accountTitle,
+            accountIcon,
+            periodLabel,
+            periodStart,
+            periodEnd,
+          ),
+        );
+      },
+    );
+  }
+
+  /// 构建账单统计小组件内容（获取最新数据）
+  static Widget _buildBillStatsWidget(
+    BuildContext context,
+    String accountId,
+    String accountTitle,
+    IconData accountIcon,
+    String periodLabel,
+    String? periodStart,
+    String? periodEnd,
+  ) {
+    final theme = Theme.of(context);
 
     // 支出卡片颜色（红色系）
     const expenseGradient = [Color(0xFFEF5350), Color(0xFFE53935)];

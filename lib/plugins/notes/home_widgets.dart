@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'notes_plugin.dart';
 
 const Color _notesColor = Color.fromARGB(255, 61, 204, 185);
@@ -226,12 +227,34 @@ class NotesHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
     final folderData = result.data as Map<String, dynamic>;
+    final folderId = folderData['id'] as String?;
 
-    final folderId = folderData['id'] as String? ?? '';
+    if (folderId == null) {
+      return _buildErrorWidget(context, 'notes_folderNotFound'.tr);
+    }
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['note_added', 'note_updated', 'note_deleted'],
+          onEvent: () => setState(() {}),
+          child: _buildFolderWidget(context, folderId, folderData, config),
+        );
+      },
+    );
+  }
+
+  /// 构建文件夹小组件内容（获取最新数据）
+  static Widget _buildFolderWidget(
+    BuildContext context,
+    String folderId,
+    Map<String, dynamic> folderData,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
     final name = folderData['name'] as String? ?? '未命名文件夹';
-    final notesCount = folderData['notesCount'] as int? ?? 0;
     final folderPath = folderData['folderPath'] as String? ?? '';
     final iconCodePoint = folderData['icon'] as int?;
     final colorValue = folderData['color'] as int?;
@@ -246,13 +269,15 @@ class NotesHomeWidgets {
     final widgetSize = config['widgetSize'] as HomeWidgetSize?;
     final isMediumSize = widgetSize == HomeWidgetSize.medium;
 
-    // 通过插件获取笔记列表
+    // 从 PluginManager 获取最新的笔记数据
     List<Map<String, dynamic>> notes = [];
+    int notesCount = 0;
     try {
       final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
       if (plugin != null) {
         final notesController = plugin.controller;
         final allNotes = notesController.getFolderNotes(folderId);
+        notesCount = allNotes.length;
         // 取最近的 3-5 条笔记
         notes =
             allNotes

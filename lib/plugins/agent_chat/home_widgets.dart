@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'agent_chat_plugin.dart';
 import 'controllers/conversation_controller.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
@@ -116,20 +117,52 @@ class AgentChatHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
+    // 从初始化数据中获取会话ID
     final convData = result.data as Map<String, dynamic>;
-    final title = convData['title'] as String? ?? 'Untitled';
-    final lastMessagePreview = convData['lastMessagePreview'] as String? ?? '';
-    final lastMessageAtStr = convData['lastMessageAt'] as String?;
-    final agentId = convData['agentId'] as String?;
+    final conversationId = convData['id'] as String?;
 
-    final lastMessageAt =
-        lastMessageAtStr != null
-            ? DateTime.parse(lastMessageAtStr)
-            : DateTime.now();
+    if (conversationId == null) {
+      return _buildErrorWidget(context, 'agent_chat_conversationNotFound'.tr);
+    }
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'agent_chat_conversation_added',
+            'agent_chat_conversation_updated',
+            'agent_chat_conversation_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildConversationWidget(context, conversationId),
+        );
+      },
+    );
+  }
+
+  /// 构建会话小组件内容（获取最新数据）
+  static Widget _buildConversationWidget(BuildContext context, String conversationId) {
+    // 从 PluginManager 获取最新的会话数据
+    final plugin = PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, 'agent_chat_pluginNotAvailable'.tr);
+    }
+
+    // 查找对应会话
+    final conversation = plugin.conversationController!.conversations.firstWhere(
+      (c) => c.id == conversationId,
+      orElse: () => throw Exception('会话不存在'),
+    );
 
     // 获取小组件尺寸
-    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
-    final isMediumSize = widgetSize == HomeWidgetSize.medium;
+    final widgetSize = HomeWidgetSize.large; // 默认值，实际应从 context 获取
+
+    // 使用最新的会话数据
+    final title = conversation.title;
+    final lastMessagePreview = conversation.lastMessagePreview ?? '';
+    final lastMessageAt = conversation.lastMessageAt ?? DateTime.now();
+    final agentId = conversation.agentId;
 
     return Material(
       color: Colors.transparent,
@@ -164,8 +197,8 @@ class AgentChatHomeWidgets {
 
               const SizedBox(height: 12),
 
-              // 最后一条消息预览（仅在非 medium 尺寸时显示）
-              if (lastMessagePreview.isNotEmpty && !isMediumSize)
+              // 最后一条消息预览
+              if (lastMessagePreview.isNotEmpty)
                 Expanded(
                   child: Text(
                     lastMessagePreview,
@@ -177,10 +210,19 @@ class AgentChatHomeWidgets {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
+                )
+              else
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      '暂无消息',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
                 ),
-
-              // medium 尺寸下使用提示文字替代消息预览
-              if (isMediumSize) const Spacer(),
 
               // 时间和 Agent 信息
               Row(
