@@ -10,6 +10,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'goods_plugin.dart';
 import 'models/goods_item.dart';
 
@@ -249,8 +250,6 @@ class GoodsHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
-
     // 从 result.data 获取仓库 ID
     final data = result.data as Map<String, dynamic>?;
     if (data == null) {
@@ -259,11 +258,36 @@ class GoodsHomeWidgets {
 
     final warehouseId = data['id'] as String?;
 
-    // 从 GoodsPlugin 获取最新数据
-    final plugin = GoodsPlugin.instance;
-    final warehouse =
-        warehouseId != null ? plugin.getWarehouse(warehouseId) : null;
+    if (warehouseId == null) {
+      return _buildErrorWidget(context, '仓库ID为空');
+    }
 
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['goods_item_added', 'goods_item_deleted'],
+          onEvent: () => setState(() {}),
+          child: _buildWarehouseWidget(context, warehouseId),
+        );
+      },
+    );
+  }
+
+  /// 构建仓库小组件内容（获取最新数据）
+  static Widget _buildWarehouseWidget(
+    BuildContext context,
+    String warehouseId,
+  ) {
+    final theme = Theme.of(context);
+
+    // 从 PluginManager 获取最新的仓库数据
+    final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, '插件不可用');
+    }
+
+    final warehouse = plugin.getWarehouse(warehouseId);
     if (warehouse == null) {
       return _buildErrorWidget(context, '仓库不存在');
     }
@@ -285,7 +309,7 @@ class GoodsHomeWidgets {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () => _navigateToWarehouse(context, result),
+            onTap: () => _navigateToWarehouseById(context, warehouseId, title),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
@@ -388,14 +412,25 @@ class GoodsHomeWidgets {
     );
   }
 
+  /// 导航到仓库详情页面（通过ID）
+  static void _navigateToWarehouseById(
+    BuildContext context,
+    String warehouseId,
+    String warehouseName,
+  ) {
+    NavigationHelper.pushNamed(
+      context,
+      '/goods/warehouse_detail',
+      arguments: {'warehouseId': warehouseId, 'warehouseName': warehouseName},
+    );
+  }
+
   /// 渲染选中的物品数据
   static Widget _renderItemData(
     BuildContext context,
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final theme = Theme.of(context);
-
     // 从 result.data 获取物品 ID
     final data = result.data as Map<String, dynamic>?;
     if (data == null) {
@@ -404,9 +439,37 @@ class GoodsHomeWidgets {
 
     final itemId = data['id'] as String?;
 
-    // 从 GoodsPlugin 获取最新数据
-    final plugin = GoodsPlugin.instance;
-    final findResult = itemId != null ? plugin.findGoodsItemById(itemId) : null;
+    if (itemId == null) {
+      return _buildErrorWidget(context, '物品ID为空');
+    }
+
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['goods_item_added', 'goods_item_deleted'],
+          onEvent: () => setState(() {}),
+          child: _buildItemWidget(context, itemId, config),
+        );
+      },
+    );
+  }
+
+  /// 构建物品小组件内容（获取最新数据）
+  static Widget _buildItemWidget(
+    BuildContext context,
+    String itemId,
+    Map<String, dynamic> config,
+  ) {
+    final theme = Theme.of(context);
+
+    // 从 PluginManager 获取最新的物品数据
+    final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, '插件不可用');
+    }
+
+    final findResult = plugin.findGoodsItemById(itemId);
     final item = findResult?.item;
 
     if (item == null) {
@@ -434,7 +497,7 @@ class GoodsHomeWidgets {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () => _navigateToItem(context, result),
+            onTap: () => _navigateToItemById(context, itemId, findResult?.warehouseId, title),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
@@ -612,6 +675,29 @@ class GoodsHomeWidgets {
         'itemId': itemId,
         'warehouseId': findResult.warehouseId,
         'itemTitle': findResult.item.title,
+      },
+    );
+  }
+
+  /// 导航到物品详情页面（通过ID）
+  static void _navigateToItemById(
+    BuildContext context,
+    String itemId,
+    String? warehouseId,
+    String itemTitle,
+  ) {
+    if (warehouseId == null) {
+      debugPrint('仓库ID为空');
+      return;
+    }
+
+    NavigationHelper.pushNamed(
+      context,
+      '/goods/item_detail',
+      arguments: {
+        'itemId': itemId,
+        'warehouseId': warehouseId,
+        'itemTitle': itemTitle,
       },
     );
   }

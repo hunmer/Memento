@@ -13,6 +13,7 @@ import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_detail_screen.dart';
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'dart:io' show File;
 import 'dart:async';
 import 'calendar_album_plugin.dart';
@@ -168,21 +169,44 @@ class CalendarAlbumHomeWidgets {
         widgetConfig = PluginWidgetConfig();
       }
 
-      // 获取可用的统计项数据
-      final availableItems = _getAvailableStats(context);
-
-      // 使用通用小组件
-      return GenericPluginWidget(
-        pluginId: 'calendar_album',
-        pluginName: 'calendar_album_name'.tr,
-        pluginIcon: Icons.notes_rounded,
-        pluginDefaultColor: _pluginColor,
-        availableItems: availableItems,
-        config: widgetConfig,
+      // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return EventListenerContainer(
+            events: const [
+              'calendar_entry_added',
+              'calendar_entry_updated',
+              'calendar_entry_deleted',
+              'calendar_tag_added',
+              'calendar_tag_deleted',
+            ],
+            onEvent: () => setState(() {}),
+            child: _buildOverviewWidgetContent(context, widgetConfig),
+          );
+        },
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
     }
+  }
+
+  /// 构建概览小组件内容（获取最新数据）
+  static Widget _buildOverviewWidgetContent(
+    BuildContext context,
+    PluginWidgetConfig widgetConfig,
+  ) {
+    // 从 PluginManager 获取最新的统计项数据
+    final availableItems = _getAvailableStats(context);
+
+    // 使用通用小组件
+    return GenericPluginWidget(
+      pluginId: 'calendar_album',
+      pluginName: 'calendar_album_name'.tr,
+      pluginIcon: Icons.notes_rounded,
+      pluginDefaultColor: _pluginColor,
+      availableItems: availableItems,
+      config: widgetConfig,
+    );
   }
 
   /// 构建错误提示组件
@@ -208,54 +232,74 @@ class CalendarAlbumHomeWidgets {
     Map<String, dynamic> config,
   ) {
     try {
-      final plugin =
-          PluginManager.instance.getPlugin('calendar_album')
-              as CalendarAlbumPlugin?;
-      if (plugin == null) return _buildErrorWidget(context, 'Plugin not found');
-
-      final controller = plugin.calendarController;
-      if (controller == null) {
-        return _buildErrorWidget(context, 'Controller not found');
-      }
-
-      final now = DateTime.now();
-      final weekDays = _getCurrentWeekDays(now);
-
-      // 构建每天的日记数据
-      final Map<DateTime, List<CalendarEntry>> weekEntries = {};
-      for (final date in weekDays) {
-        weekEntries[date] = controller.getEntriesForDate(date);
-      }
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 七天卡片
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children:
-                    weekDays.map((date) {
-                      final entries = weekEntries[date] ?? [];
-                      final firstEntry =
-                          entries.isNotEmpty ? entries.first : null;
-                      return _buildDayPhotoCard(
-                        context,
-                        date,
-                        firstEntry,
-                        plugin,
-                      );
-                    }).toList(),
-              ),
-            ),
-          ],
-        ),
+      // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return EventListenerContainer(
+            events: const [
+              'calendar_entry_added',
+              'calendar_entry_updated',
+              'calendar_entry_deleted',
+              'calendar_tag_added',
+              'calendar_tag_deleted',
+            ],
+            onEvent: () => setState(() {}),
+            child: _buildWeeklyAlbumWidgetContent(context),
+          );
+        },
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
     }
+  }
+
+  /// 构建本周相册小组件内容（获取最新数据）
+  static Widget _buildWeeklyAlbumWidgetContent(BuildContext context) {
+    final plugin =
+        PluginManager.instance.getPlugin('calendar_album')
+            as CalendarAlbumPlugin?;
+    if (plugin == null) return _buildErrorWidget(context, 'Plugin not found');
+
+    final controller = plugin.calendarController;
+    if (controller == null) {
+      return _buildErrorWidget(context, 'Controller not found');
+    }
+
+    final now = DateTime.now();
+    final weekDays = _getCurrentWeekDays(now);
+
+    // 构建每天的日记数据
+    final Map<DateTime, List<CalendarEntry>> weekEntries = {};
+    for (final date in weekDays) {
+      weekEntries[date] = controller.getEntriesForDate(date);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 七天卡片
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children:
+                  weekDays.map((date) {
+                    final entries = weekEntries[date] ?? [];
+                    final firstEntry =
+                        entries.isNotEmpty ? entries.first : null;
+                    return _buildDayPhotoCard(
+                      context,
+                      date,
+                      firstEntry,
+                      plugin,
+                    );
+                  }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 获取当前周的周一到周日日期
@@ -482,31 +526,51 @@ class CalendarAlbumHomeWidgets {
     Map<String, dynamic> config,
   ) {
     try {
-      final plugin =
-          PluginManager.instance.getPlugin('calendar_album')
-              as CalendarAlbumPlugin?;
-      if (plugin == null) return _buildErrorWidget(context, 'Plugin not found');
-
-      final controller = plugin.calendarController;
-      if (controller == null) {
-        return _buildErrorWidget(context, 'Controller not found');
-      }
-
-      // 获取最近30天的图片
-      final photos = _getRecentPhotos(controller, days: 30);
-
-      if (photos.isEmpty) {
-        return _buildEmptyPhotoWidget(context);
-      }
-
-      return _PhotoCarouselWidget(
-        photos: photos,
-        plugin: plugin,
-        pluginColor: _pluginColor,
+      // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return EventListenerContainer(
+            events: const [
+              'calendar_entry_added',
+              'calendar_entry_updated',
+              'calendar_entry_deleted',
+              'calendar_tag_added',
+              'calendar_tag_deleted',
+            ],
+            onEvent: () => setState(() {}),
+            child: _buildPhotoCarouselWidgetContent(context),
+          );
+        },
       );
     } catch (e) {
       return _buildErrorWidget(context, e.toString());
     }
+  }
+
+  /// 构建滑动滚动图片小组件内容（获取最新数据）
+  static Widget _buildPhotoCarouselWidgetContent(BuildContext context) {
+    final plugin =
+        PluginManager.instance.getPlugin('calendar_album')
+            as CalendarAlbumPlugin?;
+    if (plugin == null) return _buildErrorWidget(context, 'Plugin not found');
+
+    final controller = plugin.calendarController;
+    if (controller == null) {
+      return _buildErrorWidget(context, 'Controller not found');
+    }
+
+    // 获取最近30天的图片
+    final photos = _getRecentPhotos(controller, days: 30);
+
+    if (photos.isEmpty) {
+      return _buildEmptyPhotoWidget(context);
+    }
+
+    return _PhotoCarouselWidget(
+      photos: photos,
+      plugin: plugin,
+      pluginColor: _pluginColor,
+    );
   }
 
   /// 获取最近指定天数的图片列表

@@ -9,6 +9,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'chat_plugin.dart';
 
 /// 聊天插件的主页小组件注册
@@ -212,6 +213,20 @@ class ChatHomeWidgets {
       return _buildErrorWidget(context, 'chat_channelNotFound'.tr);
     }
 
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const ['chat_message_sent', 'chat_message_updated'],
+          onEvent: () => setState(() {}),
+          child: _buildChannelWidget(context, channelId),
+        );
+      },
+    );
+  }
+
+  /// 构建频道小组件内容（获取最新数据）
+  static Widget _buildChannelWidget(BuildContext context, String channelId) {
     // 从 PluginManager 获取最新的频道数据
     final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
     if (plugin == null) {

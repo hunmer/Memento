@@ -10,6 +10,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'nodes_plugin.dart';
 import 'models/node.dart';
 import 'screens/node_edit_screen/node_edit_screen.dart';
@@ -223,110 +224,131 @@ class NodesHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
-    final savedData =
-        result.data is Map<String, dynamic>
-            ? result.data as Map<String, dynamic>
-            : {};
+    final savedData = result.data is Map<String, dynamic>
+        ? result.data as Map<String, dynamic>
+        : <String, dynamic>{};
     final notebookId = savedData['id'] as String? ?? '';
 
-    return FutureBuilder<List<Node>>(
-      future: _loadNotebookNodes(notebookId),
-      builder: (context, snapshot) {
-        final nodes = snapshot.data ?? [];
-
-        if (nodes.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.note_outlined, size: 32, color: Colors.grey[400]),
-                const SizedBox(height: 8),
-                Text(
-                  'nodes_noNodes'.tr,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          );
-        }
-
-        // 扁平化节点树（显示所有节点包括子节点，带深度信息）
-        final flatNodes = <Map<String, dynamic>>[];
-        void flattenNodes(List<Node> nodeList, int depth) {
-          for (var node in nodeList) {
-            flatNodes.add({'node': node, 'depth': depth});
-            if (node.children.isNotEmpty) {
-              flattenNodes(node.children, depth + 1);
-            }
-          }
-        }
-
-        flattenNodes(nodes, 0);
-
-        final notebookTitle =
-            savedData['title'] as String? ?? 'nodes_notebook'.tr;
-
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => _navigateToNotebook(context, result),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header: 显示笔记本标题
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            notebookTitle,
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w600),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Text(
-                          '${flatNodes.length} ${'nodes_nodes'.tr}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  // 节点列表
-                  Expanded(
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      itemCount: flatNodes.length,
-                      separatorBuilder:
-                          (context, index) => Divider(
-                            height: 1,
-                            color: Theme.of(context).dividerColor.withOpacity(0.3),
-                          ),
-                      itemBuilder: (context, index) {
-                        final item = flatNodes[index];
-                        final node = item['node'] as Node;
-                        final depth = item['depth'] as int;
-                        return _buildNodeListItem(context, notebookId, node, depth);
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'nodes_notebook_added',
+            'nodes_notebook_updated',
+            'nodes_notebook_deleted',
+            'nodes_node_added',
+            'nodes_node_updated',
+            'nodes_node_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildNotebookWidget(context, notebookId, savedData, result),
         );
       },
+    );
+  }
+
+  /// 构建笔记本小组件内容（获取最新数据）
+  static Widget _buildNotebookWidget(
+    BuildContext context,
+    String notebookId,
+    Map<String, dynamic> savedData,
+    SelectorResult result,
+  ) {
+    // 从 PluginManager 获取最新的节点数据
+    final nodes = _loadNotebookNodesSync(notebookId);
+
+    if (nodes.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.note_outlined, size: 32, color: Colors.grey[400]),
+            const SizedBox(height: 8),
+            Text(
+              'nodes_noNodes'.tr,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 扁平化节点树（显示所有节点包括子节点，带深度信息）
+    final flatNodes = <Map<String, dynamic>>[];
+    void flattenNodes(List<Node> nodeList, int depth) {
+      for (var node in nodeList) {
+        flatNodes.add({'node': node, 'depth': depth});
+        if (node.children.isNotEmpty) {
+          flattenNodes(node.children, depth + 1);
+        }
+      }
+    }
+
+    flattenNodes(nodes, 0);
+
+    final notebookTitle =
+        savedData['title'] as String? ?? 'nodes_notebook'.tr;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => _navigateToNotebook(context, result),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: 显示笔记本标题
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        notebookTitle,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Text(
+                      '${flatNodes.length} ${'nodes_nodes'.tr}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              // 节点列表
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  itemCount: flatNodes.length,
+                  separatorBuilder:
+                      (context, index) => Divider(
+                        height: 1,
+                        color: Theme.of(context).dividerColor.withOpacity(0.3),
+                      ),
+                  itemBuilder: (context, index) {
+                    final item = flatNodes[index];
+                    final node = item['node'] as Node;
+                    final depth = item['depth'] as int;
+                    return _buildNodeListItem(context, notebookId, node, depth);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -387,8 +409,8 @@ class NodesHomeWidgets {
     );
   }
 
-  /// 从 controller 加载笔记本的节点
-  static Future<List<Node>> _loadNotebookNodes(String notebookId) async {
+  /// 从 controller 加载笔记本的节点（同步版本，用于事件监听器）
+  static List<Node> _loadNotebookNodesSync(String notebookId) {
     try {
       final plugin = PluginManager.instance.getPlugin('nodes') as NodesPlugin?;
       if (plugin == null || notebookId.isEmpty) return [];

@@ -11,6 +11,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/core/app_initializer.dart' show navigatorKey;
 import 'package:Memento/utils/image_utils.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'day_plugin.dart';
 import 'models/memorial_day.dart';
 
@@ -109,72 +110,83 @@ class DayHomeWidgets {
     Map<String, dynamic> config,
   ) {
     // 从 result.data 获取已保存的数据
-    final savedData =
-        result.data is Map<String, dynamic>
-            ? result.data as Map<String, dynamic>
-            : {};
+    final savedData = result.data is Map
+        ? Map<String, dynamic>.from(result.data as Map)
+        : <String, dynamic>{};
     final dayId = savedData['id'] as String? ?? '';
 
-    return FutureBuilder<MemorialDay?>(
-      future: _loadLatestMemorialDay(dayId),
-      builder: (context, snapshot) {
-        final day = snapshot.data;
-        final title = day?.title ?? savedData['title'] as String? ?? '未知纪念日';
-        final targetDateStr =
-            day?.targetDate.toIso8601String() ??
-            savedData['targetDate'] as String?;
-        final targetDate =
-            targetDateStr != null ? DateTime.tryParse(targetDateStr) : null;
-        final daysRemaining = day?.daysRemaining ?? 0;
-        final isToday = day?.isToday ?? false;
-        final isExpired = day?.isExpired ?? false;
-        // 获取背景图片URL（优先使用最新的）
-        final backgroundImageUrl =
-            day?.backgroundImageUrl ??
-            savedData['backgroundImageUrl'] as String?;
-        // 获取背景色（如果没有图片，使用背景色）
-        final backgroundColor = day?.backgroundColor;
+    if (dayId.isEmpty) {
+      return _buildErrorWidget(context, '未选择纪念日');
+    }
 
-        // 计算倒计时文本和颜色
-        String countdownText;
-        Color countdownColor;
-        if (isToday) {
-          countdownText = '就是今天！';
-          countdownColor = Colors.red;
-        } else if (isExpired) {
-          countdownText = '已过 ${day?.daysPassed ?? 0} 天';
-          countdownColor = Colors.grey;
-        } else {
-          countdownText = '剩余 $daysRemaining 天';
-          countdownColor = Colors.orange;
-        }
-
-        return _buildMemorialDayCard(
-          context: context,
-          title: title,
-          countdownText: countdownText,
-          countdownColor: countdownColor,
-          targetDate: targetDate,
-          backgroundImageUrl: backgroundImageUrl,
-          backgroundColor: backgroundColor,
+    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'memorial_day_added',
+            'memorial_day_updated',
+            'memorial_day_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildMemorialDayWidget(context, dayId, savedData),
         );
       },
     );
   }
 
-  /// 从 controller 加载最新纪念日数据
-  static Future<MemorialDay?> _loadLatestMemorialDay(String dayId) async {
-    try {
-      if (dayId.isEmpty) return null;
-      final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
-      if (plugin == null) return null;
-
-      // 使用公共方法获取纪念日
-      return plugin.getMemorialDayById(dayId);
-    } catch (e) {
-      debugPrint('加载纪念日数据失败: $e');
-      return null;
+  /// 构建纪念日小组件内容（获取最新数据）
+  static Widget _buildMemorialDayWidget(
+    BuildContext context,
+    String dayId,
+    Map<String, dynamic> savedData,
+  ) {
+    // 从 PluginManager 获取最新的纪念日数据
+    final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, '纪念日插件不可用');
     }
+
+    // 获取最新数据
+    final day = plugin.getMemorialDayById(dayId);
+    final title = day?.title ?? savedData['title'] as String? ?? '未知纪念日';
+    final targetDateStr =
+        day?.targetDate.toIso8601String() ??
+        savedData['targetDate'] as String?;
+    final targetDate =
+        targetDateStr != null ? DateTime.tryParse(targetDateStr) : null;
+    final daysRemaining = day?.daysRemaining ?? 0;
+    final isToday = day?.isToday ?? false;
+    final isExpired = day?.isExpired ?? false;
+    // 获取背景图片URL（优先使用最新的）
+    final backgroundImageUrl =
+        day?.backgroundImageUrl ?? savedData['backgroundImageUrl'] as String?;
+    // 获取背景色（如果没有图片，使用背景色）
+    final backgroundColor = day?.backgroundColor;
+
+    // 计算倒计时文本和颜色
+    String countdownText;
+    Color countdownColor;
+    if (isToday) {
+      countdownText = '就是今天！';
+      countdownColor = Colors.red;
+    } else if (isExpired) {
+      countdownText = '已过 ${day?.daysPassed ?? 0} 天';
+      countdownColor = Colors.grey;
+    } else {
+      countdownText = '剩余 $daysRemaining 天';
+      countdownColor = Colors.orange;
+    }
+
+    return _buildMemorialDayCard(
+      context: context,
+      title: title,
+      countdownText: countdownText,
+      countdownColor: countdownColor,
+      targetDate: targetDate,
+      backgroundImageUrl: backgroundImageUrl,
+      backgroundColor: backgroundColor,
+    );
   }
 
   /// 构建纪念日卡片 UI
