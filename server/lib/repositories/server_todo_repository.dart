@@ -403,4 +403,11 @@ class ServerTodoRepository extends ITodoRepository {
       return Result.failure('获取统计失败: $e', code: ErrorCodes.serverError);
     }
   }
+  
+  @override
+  Future<Result<List<TaskDto>>> getUpcomingTasks(
+      {int days = 7, PaginationParams? pagination}) {
+    // TODO: implement getUpcomingTasks
+    throw UnimplementedError();
+  }
 }

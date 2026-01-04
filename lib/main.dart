@@ -16,7 +16,6 @@ import 'utils/styled_toast_stub.dart'
     if (dart.library.io) 'package:flutter_styled_toast/flutter_styled_toast.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'core/services/plugin_widget_sync_helper.dart';
 import 'core/services/clipboard_service.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';

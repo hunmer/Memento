@@ -1,5 +1,4 @@
 import 'dart:io' show File;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 
