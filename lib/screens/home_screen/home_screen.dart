@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/core/global_flags.dart';
 import 'home_screen_controller.dart';
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with RouteAware, TickerProviderStateMixin {
   final HomeScreenController _controller = HomeScreenController();
   TabController? _tabController;
+  int _previousLayoutsLength = 0;
 
   @override
   void initState() {
@@ -31,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware, TickerProvider
       if (!mounted) return;
 
       // 创建 TabController
+      _previousLayoutsLength = _controller.savedLayouts.length;
       if (_controller.savedLayouts.isNotEmpty) {
         _tabController = TabController(
           length: _controller.savedLayouts.length,
@@ -58,9 +62,40 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware, TickerProvider
 
   void _onStateChanged() {
     if (mounted) {
+      // 检测布局数量变化，重新创建 TabController
+      if (_controller.savedLayouts.length != _previousLayoutsLength) {
+        // 使用 scheduleMicrotask 延迟 dispose，避免在 notifyListeners 回调中修改监听器列表
+        scheduleMicrotask(() {
+          if (!mounted) return;
+          _tabController?.removeListener(_onTabChanged);
+          _tabController?.dispose();
+
+          _previousLayoutsLength = _controller.savedLayouts.length;
+          if (_controller.savedLayouts.isNotEmpty) {
+            _tabController = TabController(
+              length: _controller.savedLayouts.length,
+              vsync: this,
+              initialIndex: _controller.currentPageIndex.clamp(
+                0,
+                _controller.savedLayouts.length - 1,
+              ),
+            );
+            _tabController!.addListener(() => _onTabChanged());
+          } else {
+            _tabController = null;
+          }
+          // TabController 创建/销毁后需要刷新 UI
+          setState(() {});
+        });
+      }
+
+      // 触发 UI 重建
       setState(() {});
+
       // TabController 索引同步
-      if (_tabController != null && _tabController!.index != _controller.currentPageIndex) {
+      if (_tabController != null &&
+          _controller.savedLayouts.length == _previousLayoutsLength &&
+          _tabController!.index != _controller.currentPageIndex) {
         _tabController!.animateTo(_controller.currentPageIndex);
       }
     }

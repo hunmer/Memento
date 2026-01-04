@@ -69,13 +69,20 @@ class HomeScreenView extends StatelessWidget {
                             Expanded(
                               child: NotificationListener<ScrollNotification>(
                                 onNotification: (notification) => _handleScrollNotification(notification, context),
-                                child: ExtendedTabBarView(
-                                  controller: tabController,
-                                  cacheExtent: 1,
-                                  children: controller.savedLayouts.map((layout) {
-                                    return _buildTabPage(context, layout.id);
-                                  }).toList(),
-                                ),
+                                child: () {
+                                      final tc = tabController;
+                                      if (tc == null ||
+                                          tc.length != controller.savedLayouts.length) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return ExtendedTabBarView(
+                                        controller: tc,
+                                        cacheExtent: 1,
+                                        children: controller.savedLayouts.map((layout) {
+                                          return _buildTabPage(context, layout.id);
+                                        }).toList(),
+                                      );
+                                    }(),
                               ),
                             ),
                           ],
@@ -449,6 +456,8 @@ class HomeScreenView extends StatelessWidget {
         await _addAllWidgetsOfSize(HomeWidgetSize.large);
       }
       await controller.layoutManager.saveCurrentLayoutAs(name);
+      // 重新加载布局列表，确保包含新创建的布局
+      await controller.reloadLayouts();
       Toast.success('布局"$name"已创建');
     } catch (e) {
       Toast.error('创建失败：$e');
@@ -512,7 +521,15 @@ class HomeScreenView extends StatelessWidget {
   }
 
   Future<void> _showLayoutManagerDialog(BuildContext context) async {
-    await showDialog(context: context, builder: (context) => const LayoutManagerDialog());
+    await showDialog(
+      context: context,
+      builder: (context) => LayoutManagerDialog(
+        onLayoutChanged: () async {
+          // 布局变化时立即重新加载布局列表
+          await controller.reloadLayouts();
+        },
+      ),
+    );
     await controller.initializeLayout();
   }
 
@@ -579,27 +596,30 @@ class HomeScreenView extends StatelessWidget {
       return;
     }
 
+    // 直接弹出选择器,不先清空配置
+    final result = await pluginDataSelectorService.showSelector(context, widget.selectorId!);
+
+    if (result == null || result.cancelled) {
+      return; // 取消时不做任何操作
+    }
+
+    // 清除旧的选择器相关配置
     final updatedConfig = Map<String, dynamic>.from(item.config);
     updatedConfig.remove('selectorWidgetConfig');
     final keysToRemove = widget.dataSelector != null ? _getSelectorDataKeys(widget) : [];
     for (final key in keysToRemove) {
       updatedConfig.remove(key);
     }
-    final clearedItem = item.copyWith(config: updatedConfig);
-    controller.layoutManager.updateItem(item.id, clearedItem);
 
-    final result = await pluginDataSelectorService.showSelector(context, widget.selectorId!);
-
-    if (result == null || result.cancelled) {
-      controller.layoutManager.updateItem(item.id, item);
-      return;
-    }
-
+    // 添加新的选择器配置
     final newConfig = _processSelectorResult(widget, result);
-    final finalConfig = Map<String, dynamic>.from(item.config)..addAll(newConfig);
+    final finalConfig = updatedConfig..addAll(newConfig);
     final finalItem = item.copyWith(config: finalConfig);
+
+    // 一次性更新并强制刷新
     controller.layoutManager.updateItem(item.id, finalItem);
     await controller.layoutManager.saveLayout();
+
     Toast.success('数据已更新');
   }
 
@@ -790,9 +810,10 @@ class HomeScreenView extends StatelessWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
               controller.layoutManager.removeItem(item.id);
+              await controller.layoutManager.saveLayout();
               ToastService.instance.showToast(
                 '"${item is HomeWidgetItem ? HomeWidgetRegistry().getWidget(item.widgetId)?.name ?? '组件' : (item as HomeFolderItem).name}" ${'screens_deleted'.tr}',
               );
@@ -813,11 +834,12 @@ class HomeScreenView extends StatelessWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
               for (final itemId in controller.selectedItemIds) {
                 controller.layoutManager.removeItem(itemId);
               }
+              await controller.layoutManager.saveLayout();
               Toast.success('screens_itemsDeleted'.trParams({'count': controller.selectedItemIds.length.toString()}));
               controller.exitBatchMode();
             },
@@ -867,10 +889,11 @@ class HomeScreenView extends StatelessWidget {
     );
   }
 
-  void _moveSelectedItemsToFolder(BuildContext context, String folderId) {
+  void _moveSelectedItemsToFolder(BuildContext context, String folderId) async {
     for (final itemId in controller.selectedItemIds) {
       controller.layoutManager.moveToFolder(itemId, folderId);
     }
+    await controller.layoutManager.saveLayout();
     Toast.success('screens_itemsMovedToFolder'.trParams({'count': controller.selectedItemIds.length.toString()}));
     controller.exitBatchMode();
   }

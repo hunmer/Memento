@@ -188,9 +188,10 @@ class _FolderDialogState extends State<FolderDialog> {
           ListTile(
             leading: const Icon(Icons.drive_file_move),
             title: Text('screens_moveOutOfFolder'.tr),
-            onTap: () {
+                onTap: () async {
               Navigator.pop(context);
               _layoutManager.removeFromFolder(item.id, widget.folder.id);
+                  await _layoutManager.saveLayout();
               Toast.success('screens_movedToHomePage'.tr);
             },
           ),
@@ -219,7 +220,7 @@ class _FolderDialogState extends State<FolderDialog> {
             child: Text('screens_cancel'.tr),
           ),
           TextButton(
-            onPressed: () {
+                onPressed: () async {
               Navigator.pop(context);
               // 从文件夹的 children 中删除
               final folder = _layoutManager.findItem(widget.folder.id) as HomeFolderItem;
@@ -227,7 +228,8 @@ class _FolderDialogState extends State<FolderDialog> {
                 children: folder.children.where((c) => c.id != item.id).toList(),
               );
               _layoutManager.updateItem(widget.folder.id, updatedFolder);
-                          Toast.success('screens_deleteSuccess'.tr);
+                  await _layoutManager.saveLayout();
+                  Toast.success('screens_deleteSuccess'.tr);
             },
             child: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
           ),
@@ -572,7 +574,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
   }
 
   /// 保存文件夹修改
-  void _saveFolderChanges() {
+  Future<void> _saveFolderChanges() async {
     final newName = _nameController.text.trim();    if (newName.isEmpty) {
           Toast.error('screens_pleaseEnterFolderName'.tr);
       return;
@@ -587,6 +589,7 @@ class _EditFolderDialogState extends State<_EditFolderDialog> {
 
     // 更新文件夹
     widget.layoutManager.updateItem(widget.folder.id, updatedFolder);
+    await widget.layoutManager.saveLayout();
 
     Navigator.pop(context);
     Toast.success('screens_folderUpdated'.tr);

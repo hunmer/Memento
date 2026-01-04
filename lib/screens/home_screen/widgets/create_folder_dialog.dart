@@ -156,7 +156,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
   }
 
   /// 创建文件夹
-  void _createFolder() {
+  void _createFolder() async {
     final name = _nameController.text.trim();
 
     if (name.isEmpty) {
@@ -176,6 +176,7 @@ class _CreateFolderDialogState extends State<CreateFolderDialog> {
 
     // 添加到布局
     layoutManager.addItem(folder);
+    await layoutManager.saveLayout();
 
     // 关闭对话框
     Navigator.of(context).pop();

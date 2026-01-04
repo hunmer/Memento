@@ -63,6 +63,10 @@ class HomeScreenController extends ChangeNotifier {
   // 缓存每个布局的 items，避免切换 tab 时重复加载
   final Map<String, List<HomeItem>> _layoutItemsCache = {};
 
+  // 缓存每个布局的结构（用于骨架屏），避免重复加载
+  final Map<String, ({List<HomeWidgetSize> structure, int crossAxisCount})>
+  _layoutStructureCache = {};
+
   // Getters
   HomeLayoutManager get layoutManager => _layoutManager;
   bool get isLoading => _isLoading;
@@ -153,6 +157,11 @@ class HomeScreenController extends ChangeNotifier {
   /// 获取指定布局的结构（用于骨架屏占位）
   /// 直接读取配置，不修改当前状态
   Future<({List<HomeWidgetSize> structure, int crossAxisCount})> getLayoutStructureById(String layoutId) async {
+    // 检查缓存
+    if (_layoutStructureCache.containsKey(layoutId)) {
+      return _layoutStructureCache[layoutId]!;
+    }
+
     try {
       // 直接读取目标布局配置，不修改当前状态
       final config = await _layoutManager.readLayoutConfig(layoutId);
@@ -181,8 +190,16 @@ class HomeScreenController extends ChangeNotifier {
 
       final targetCrossAxisCount = config.gridCrossAxisCount;
 
+      final result = (
+        structure: structure,
+        crossAxisCount: targetCrossAxisCount,
+      );
+
+      // 缓存结果
+      _layoutStructureCache[layoutId] = result;
+
       debugPrint('getLayoutStructureById result: $layoutId, structure: ${structure.length}, crossAxisCount: $targetCrossAxisCount');
-      return (structure: structure, crossAxisCount: targetCrossAxisCount);
+      return result;
     } catch (e) {
       debugPrint('获取布局结构失败: $e');
       return (structure: <HomeWidgetSize>[], crossAxisCount: 4);
@@ -203,9 +220,9 @@ class HomeScreenController extends ChangeNotifier {
           _layoutItemsCache[currentConfig.id] = List<HomeItem>.from(_layoutManager.items);
         }
       }
-      if (_layoutManager.items.isEmpty) {
-        await _createDefaultWidgets();
-      }
+      // if (_layoutManager.items.isEmpty) {
+      //   await _createDefaultWidgets();
+      // }
       await _updateCurrentLayoutName();
       await loadCurrentBackground();
     } catch (e) {
@@ -221,6 +238,19 @@ class HomeScreenController extends ChangeNotifier {
       final layouts = await _layoutManager.getSavedLayouts();
       final currentConfig = await _layoutManager.getCurrentLayoutConfig();
       _savedLayouts = layouts;
+
+      // 清除已删除布局的缓存
+      final validLayoutIds = layouts.map((l) => l.id).toSet();
+      _layoutItemsCache.removeWhere(
+        (layoutId, _) => !validLayoutIds.contains(layoutId),
+      );
+      _layoutStructureCache.removeWhere(
+        (layoutId, _) => !validLayoutIds.contains(layoutId),
+      );
+      _loadedLayoutIds.removeWhere(
+        (layoutId) => !validLayoutIds.contains(layoutId),
+      );
+
       if (layouts.isNotEmpty && currentConfig != null) {
         _currentPageIndex = layouts.indexWhere(
           (layout) => layout.id == currentConfig.id,
@@ -232,6 +262,42 @@ class HomeScreenController extends ChangeNotifier {
     } catch (e) {
       debugPrint('加载保存的布局失败: $e');
     }
+  }
+
+  /// 重新加载布局列表（供外部调用）
+  Future<void> reloadLayouts() async {
+    // 保存当前布局 ID
+    final oldLayoutId = _currentPageIndex < _savedLayouts.length
+        ? _savedLayouts[_currentPageIndex].id
+        : null;
+
+    await _loadSavedLayouts();
+
+    // 检查当前布局是否还存在
+    final bool currentLayoutExists = oldLayoutId != null &&
+        _savedLayouts.any((layout) => layout.id == oldLayoutId);
+
+    if (_savedLayouts.isEmpty) {
+      // 没有布局了，重置 index
+      _currentPageIndex = 0;
+      _currentLayoutName = '';
+    } else if (!currentLayoutExists || _currentPageIndex >= _savedLayouts.length) {
+      // 当前布局被删除或 index 越界，切换到第一个布局
+      _currentPageIndex = 0;
+      final layout = _savedLayouts[_currentPageIndex];
+      _currentLayoutName = layout.name;
+      await _layoutManager.loadLayoutConfig(layout.id);
+      _layoutItemsCache[layout.id] = List<HomeItem>.from(_layoutManager.items);
+      await loadCurrentBackground();
+    } else {
+      // 当前布局仍存在，重新加载以确保数据同步
+      final layout = _savedLayouts[_currentPageIndex];
+      await _layoutManager.loadLayoutConfig(layout.id);
+      _layoutItemsCache[layout.id] = List<HomeItem>.from(_layoutManager.items);
+    }
+
+    // 通知监听器更新 UI
+    notifyListeners();
   }
 
   /// 更新当前布局名称
@@ -419,6 +485,8 @@ class HomeScreenController extends ChangeNotifier {
       // 如果有缓存，直接使用缓存数据
       if (hasCache) {
         _layoutManager.setItems(_layoutItemsCache[layout.id]!);
+        // 清除结构缓存，确保使用最新的布局数据
+        _layoutStructureCache.remove(layout.id);
         onStateChanged();
         return;
       }
@@ -428,6 +496,9 @@ class HomeScreenController extends ChangeNotifier {
 
       // 缓存加载的数据
       _layoutItemsCache[layout.id] = List<HomeItem>.from(_layoutManager.items);
+
+      // 清除结构缓存，确保使用最新的布局数据
+      _layoutStructureCache.remove(layout.id);
 
       // 仅在首次加载时保存活动布局ID和加载背景图
       if (isFirstLoad) {

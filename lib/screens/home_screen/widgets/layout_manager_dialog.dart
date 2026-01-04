@@ -1,3 +1,4 @@
+import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,9 @@ import 'layout_type_selector.dart';
 ///
 /// 显示所有保存的布局配置，支持切换、重命名和删除
 class LayoutManagerDialog extends StatefulWidget {
-  const LayoutManagerDialog({super.key});
+  final VoidCallback? onLayoutChanged;
+
+  const LayoutManagerDialog({super.key, this.onLayoutChanged});
 
   @override
   State<LayoutManagerDialog> createState() => _LayoutManagerDialogState();
@@ -119,7 +122,8 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
   }
 
   /// 确认删除布局
-  void _confirmDelete(LayoutConfig layout) {    showDialog(
+  void _confirmDelete(LayoutConfig layout) {
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('screens_confirmDelete'.tr),
@@ -136,6 +140,8 @@ class _LayoutManagerDialogState extends State<LayoutManagerDialog> {
               try {
                 await _layoutManager.deleteLayoutConfig(layout.id);
                 await _loadLayouts();
+                    // 通知外部重新加载布局列表
+                    widget.onLayoutChanged?.call();
                 if (mounted) {
                   toastService.showToast('screens_deleteSuccess'.tr);
                 }
@@ -319,26 +325,31 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
   }
 
   /// 创建布局
-  Future<void> _createLayout() async {    final name = _nameController.text.trim();
+  Future<void> _createLayout() async {
+    final name = _nameController.text.trim();
     if (name.isEmpty) {
       toastService.showToast('screens_pleaseEnterLayoutName'.tr);
       return;
     }
 
     try {
-      // 清空当前布局
-      _layoutManager.clear();
+      // 创建临时的 items 列表(不修改当前布局状态)
+      final List<HomeItem> newItems = [];
 
       // 根据选择的类型添加小组件
       if (_selectedLayoutType == '1x1') {
-        await _addAllWidgetsOfSize(HomeWidgetSize.small);
+        newItems.addAll(await _getAllWidgetsOfSize(HomeWidgetSize.small));
       } else if (_selectedLayoutType == '2x2') {
-        await _addAllWidgetsOfSize(HomeWidgetSize.large);
+        newItems.addAll(await _getAllWidgetsOfSize(HomeWidgetSize.large));
       }
       // 空白布局不添加任何内容
 
-      // 保存布局
-      await _layoutManager.saveCurrentLayoutAs(name);
+      // 保存新布局(不修改当前布局状态)
+      await _layoutManager.saveLayoutAs(
+        name,
+        newItems,
+        _layoutManager.gridCrossAxisCount,
+      );
 
       if (mounted) {
         toastService.showToast('screens_layoutSaved'.trParams({'name': name}));
@@ -352,8 +363,8 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
     }
   }
 
-  /// 添加所有指定尺寸的小组件
-  Future<void> _addAllWidgetsOfSize(HomeWidgetSize size) async {
+  /// 获取所有指定尺寸的小组件(返回列表,不添加到 layoutManager)
+  Future<List<HomeItem>> _getAllWidgetsOfSize(HomeWidgetSize size) async {
     final registry = HomeWidgetRegistry();
     final allWidgets = registry.getAllWidgets();
 
@@ -362,7 +373,8 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
         .where((widget) => widget.supportedSizes.contains(size))
         .toList();
 
-    // 添加到布局
+    // 创建小组件项列表
+    final items = <HomeItem>[];
     for (final widget in widgets) {
       final item = HomeWidgetItem(
         id: _layoutManager.generateId(),
@@ -370,8 +382,10 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
         size: size,
         config: {},
       );
-      _layoutManager.addItem(item);
+      items.add(item);
     }
+
+    return items;
   }
 
   @override

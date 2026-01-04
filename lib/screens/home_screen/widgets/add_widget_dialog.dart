@@ -196,7 +196,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
   }
 
   /// 添加小组件
-  void _addWidget(HomeWidget widget) {
+  void _addWidget(HomeWidget widget) async {
     final layoutManager = HomeLayoutManager();
 
     // 创建小组件实例
@@ -214,6 +214,8 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
       // 添加到主页
       layoutManager.addItem(widgetItem);
     }
+
+    await layoutManager.saveLayout();
 
     // 关闭对话框
     Navigator.of(context).pop();

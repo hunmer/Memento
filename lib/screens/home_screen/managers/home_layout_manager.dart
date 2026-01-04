@@ -250,16 +250,56 @@ class HomeLayoutManager extends ChangeNotifier {
       final oldItem = _items[index];
 
       // 只有当项目真的改变时才更新和保存
-      // 通过比较 JSON 序列化结果来判断是否有变化
+      // 使用 runtimeType 和 JSON 对比判断是否有变化
       final oldJson = oldItem.toJson();
       final newJson = newItem.toJson();
 
-      if (oldJson.toString() != newJson.toString()) {
+      // 改进的比较逻辑:使用 JSON 编码后的字符串比较(更稳定)
+      bool hasChanged = false;
+      if (oldItem.runtimeType != newItem.runtimeType) {
+        hasChanged = true;
+      } else {
+        // 比较关键字段
+        if (oldJson['type'] != newJson['type']) {
+          hasChanged = true;
+        } else if (oldItem is HomeWidgetItem && newItem is HomeWidgetItem) {
+          // 对于小组件,比较 widgetId、size 和 config
+          if (oldItem.widgetId != newItem.widgetId ||
+              oldItem.size != newItem.size ||
+              !_mapsAreEqual(oldItem.config, newItem.config)) {
+            hasChanged = true;
+          }
+        } else if (oldItem is HomeFolderItem && newItem is HomeFolderItem) {
+          // 对于文件夹,比较名称、图标、颜色和子项数量
+          if (oldItem.name != newItem.name ||
+              oldItem.icon != newItem.icon ||
+              oldItem.color != newItem.color ||
+              oldItem.children.length != newItem.children.length) {
+            hasChanged = true;
+          }
+        } else {
+          // 其他情况,总是更新
+          hasChanged = true;
+        }
+      }
+
+      if (hasChanged) {
         _items[index] = newItem;
         _markDirty();
         notifyListeners();
       }
     }
+  }
+
+  /// 比较两个 Map 是否相等(浅比较)
+  bool _mapsAreEqual(Map<String, dynamic> map1, Map<String, dynamic> map2) {
+    if (map1.length != map2.length) return false;
+    for (final key in map1.keys) {
+      if (!map2.containsKey(key) || map1[key] != map2[key]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// 根据ID查找项目
@@ -498,6 +538,40 @@ class HomeLayoutManager extends ChangeNotifier {
       await globalConfigManager.savePluginConfig(_activeLayoutIdKey, {
         'activeLayoutId': layoutId,
       });
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error saving layout: $e');
+      rethrow;
+    }
+  }
+
+  /// 保存指定的布局配置(不修改当前布局状态)
+  /// 用于创建新布局时避免影响当前显示的布局
+  Future<void> saveLayoutAs(String name, List<HomeItem> items, int crossAxisCount) async {
+    try {
+      final layoutId = 'layout_${DateTime.now().millisecondsSinceEpoch}';
+      final now = DateTime.now();
+
+      final config = LayoutConfig(
+        id: layoutId,
+        name: name,
+        items: items.map((item) => item.toJson()).toList(),
+        gridCrossAxisCount: crossAxisCount,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      final layouts = await getSavedLayouts();
+      layouts.add(config);
+
+      await globalConfigManager.savePluginConfig(_layoutConfigsKey, {
+        'layouts': layouts.map((l) => l.toJson()).toList(),
+      });
+
+      // 不设置为当前活动的布局,因为这是创建新布局
+      // 保留当前正在使用的布局状态
+      notifyListeners();
     } catch (e) {
       debugPrint('Error saving layout: $e');
       rethrow;
@@ -581,6 +655,7 @@ class HomeLayoutManager extends ChangeNotifier {
         });
       }
 
+      notifyListeners();
     } catch (e) {
       debugPrint('Error deleting layout: $e');
       rethrow;
@@ -608,6 +683,7 @@ class HomeLayoutManager extends ChangeNotifier {
         'layouts': layouts.map((l) => l.toJson()).toList(),
       });
 
+      notifyListeners();
     } catch (e) {
       debugPrint('Error renaming layout: $e');
       rethrow;
