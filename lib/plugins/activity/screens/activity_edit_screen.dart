@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Memento/plugins/activity/services/activity_service.dart';
+import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -8,17 +8,13 @@ import 'package:Memento/core/services/toast_service.dart';
 /// 活动编辑界面
 /// 用于创建和编辑活动记录
 class ActivityEditScreen extends StatefulWidget {
-  final ActivityService activityService;
   final ActivityRecord? activity;
-  final DateTime selectedDate;
-  final Function(List<String>)? onTagsUpdated;
+  final DateTime? selectedDate;
 
   const ActivityEditScreen({
     super.key,
-    required this.activityService,
     this.activity,
-    required this.selectedDate,
-    this.onTagsUpdated,
+    this.selectedDate,
   });
 
   @override
@@ -28,17 +24,65 @@ class ActivityEditScreen extends StatefulWidget {
 class _ActivityEditScreenState extends State<ActivityEditScreen> {
   List<String> recentMoods = [];
   List<String> recentTags = [];
+  DateTime? _defaultStartTime;
+  DateTime? _defaultEndTime;
 
   @override
   void initState() {
     super.initState();
     _loadRecentMoodsAndTags();
+    _initDefaultTimes();
+  }
+
+  /// 初始化默认时间
+  Future<void> _initDefaultTimes() async {
+    // 如果是编辑模式或已提供 selectedDate，则不需要设置默认时间
+    if (widget.activity != null || widget.selectedDate != null) {
+      return;
+    }
+
+    try {
+      // 获取上一个活动
+      final lastActivity =
+          await ActivityPlugin.instance.activityService.getLastActivity();
+
+      DateTime startTime;
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+
+      if (lastActivity != null) {
+        // 使用上一个活动的结束时间作为开始时间
+        startTime = lastActivity.endTime;
+
+        // 如果小于今日00:00，则使用今日00:00
+        if (startTime.isBefore(todayStart)) {
+          startTime = todayStart;
+        }
+      } else {
+        // 没有上一个活动，使用今日00:00
+        startTime = todayStart;
+      }
+
+      // 结束时间就是现在
+      final endTime = now;
+
+      if (mounted) {
+        setState(() {
+          _defaultStartTime = startTime;
+          _defaultEndTime = endTime;
+        });
+      }
+    } catch (e) {
+      debugPrint('初始化默认时间失败: $e');
+    }
   }
 
   Future<void> _loadRecentMoodsAndTags() async {
     try {
-      final loadedMoods = await widget.activityService.getRecentMoods();
-      final loadedTags = await widget.activityService.getRecentTags();
+      final loadedMoods =
+          await ActivityPlugin.instance.activityService.getRecentMoods();
+      final loadedTags =
+          await ActivityPlugin.instance.activityService.getRecentTags();
       if (mounted) {
         setState(() {
           recentMoods = loadedMoods;
@@ -54,29 +98,34 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
     try {
       if (widget.activity != null) {
         // 编辑现有活动
-        await widget.activityService.updateActivity(widget.activity!, activity);
+        await ActivityPlugin.instance.activityService.updateActivity(
+          widget.activity!,
+          activity,
+        );
       } else {
         // 创建新活动
-        await widget.activityService.saveActivity(activity);
+        await ActivityPlugin.instance.activityService.saveActivity(activity);
       }
 
-      if (activity.tags.isNotEmpty && widget.onTagsUpdated != null) {
-        widget.onTagsUpdated!(activity.tags);
+      // 自动保存最近标签
+      if (activity.tags.isNotEmpty) {
         await _updateRecentTags(activity.tags);
       }
 
+      // 自动保存最近心情
       if (activity.mood != null && activity.mood!.isNotEmpty) {
         await _updateRecentMood(activity.mood!);
       }
 
       if (mounted) {
-        Navigator.of(context).pop();
-        // 显示保存成功消息
+        // 先显示保存成功消息
         toastService.showToast(
           widget.activity != null
               ? 'activity_editActivity'.tr
-              : 'activity_addActivity'.tr
+              : 'activity_addActivity'.tr,
         );
+        // 再关闭界面
+        Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
@@ -87,7 +136,7 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
 
   Future<void> _updateRecentTags(List<String> tags) async {
     try {
-      await widget.activityService.saveRecentTags(tags);
+      await ActivityPlugin.instance.activityService.saveRecentTags(tags);
     } catch (e) {
       debugPrint('更新最近标签失败: $e');
     }
@@ -95,7 +144,7 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
 
   Future<void> _updateRecentMood(String mood) async {
     try {
-      await widget.activityService.saveRecentMoods([mood]);
+      await ActivityPlugin.instance.activityService.saveRecentMoods([mood]);
     } catch (e) {
       debugPrint('更新最近心情失败: $e');
     }
@@ -103,6 +152,9 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 如果没有提供 selectedDate，使用今天的日期
+    final selectedDate = widget.selectedDate ?? DateTime.now();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -117,7 +169,9 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
       ),
       body: ActivityForm(
         activity: widget.activity,
-        selectedDate: widget.selectedDate,
+        selectedDate: selectedDate,
+        initialStartTime: _defaultStartTime,
+        initialEndTime: _defaultEndTime,
         recentMoods: recentMoods,
         recentTags: recentTags,
         onSave: _saveActivity,
