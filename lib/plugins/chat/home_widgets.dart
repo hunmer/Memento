@@ -204,28 +204,33 @@ class ChatHomeWidgets {
     SelectorResult result,
     Map<String, dynamic> config,
   ) {
+    // 从初始化数据中获取频道ID
     final channelData = result.data as Map<String, dynamic>;
-    final title = channelData['title'] as String? ?? 'chat_untitled'.tr;
-    final lastMessage = channelData['lastMessage'] as String? ?? '';
-    final lastMessageTimeStr = channelData['lastMessageTime'] as String?;
-    final messageCount = channelData['messageCount'] as int? ?? 0;
-    final iconCodePoint = channelData['icon'] as int?;
-    final backgroundColorValue = channelData['backgroundColor'] as int?;
+    final channelId = channelData['id'] as String?;
 
-    final lastMessageTime =
-        lastMessageTimeStr != null
-            ? DateTime.parse(lastMessageTimeStr)
-            : DateTime.now();
+    if (channelId == null) {
+      return _buildErrorWidget(context, 'chat_channelNotFound'.tr);
+    }
 
-    final channelIcon =
-        iconCodePoint != null
-            ? IconData(iconCodePoint, fontFamily: 'MaterialIcons')
-            : Icons.chat_bubble;
+    // 从 PluginManager 获取最新的频道数据
+    final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
+    if (plugin == null) {
+      return _buildErrorWidget(context, 'chat_pluginNotAvailable'.tr);
+    }
 
-    final channelColor =
-        backgroundColorValue != null
-            ? Color(backgroundColorValue)
-            : Colors.indigoAccent;
+    // 查找对应频道
+    final channel = plugin.channelService.channels.firstWhere(
+      (c) => c.id == channelId,
+      orElse: () => throw Exception('频道不存在'),
+    );
+
+    // 使用最新的频道数据
+    final title = channel.title;
+    final lastMessage = channel.lastMessage?.content ?? '';
+    final lastMessageTime = channel.lastMessage?.date ?? DateTime.now();
+    final messageCount = channel.messages.length;
+    final channelIcon = channel.icon;
+    final channelColor = channel.backgroundColor;
 
     return Material(
       color: Colors.transparent,
