@@ -53,4 +53,18 @@ final Map<String, String> dayTranslationsEn = {
   // Selector Widget Strings
   'day_memorialSelectorName': 'Countdown',
   'day_memorialSelectorDescription': 'Select a memorial day and show countdown',
+
+  // List Widget Strings
+  'day_listWidgetName': 'Memorial Day List',
+  'day_listWidgetDescription': 'Show list of memorial days within date range',
+  'day_dateRangeFilter': 'Date Range',
+  'day_upcomingOnly': 'Upcoming Only',
+  'day_pastOnly': 'Past Only',
+  'day_allDays': 'All Days',
+  'day_next7Days': 'Next 7 Days',
+  'day_next30Days': 'Next 30 Days',
+  'day_past7Days': 'Past 7 Days',
+  'day_past30Days': 'Past 30 Days',
+  'day_noMemorialDaysInRange': 'No memorial days in this range',
+  'day_andMore': 'and @count more',
 };
