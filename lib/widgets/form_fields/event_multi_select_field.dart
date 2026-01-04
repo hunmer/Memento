@@ -75,6 +75,11 @@ const List<EventOption> kDefaultAvailableEvents = [
 
   // Checkin 插件事件
   EventOption(
+    eventName: 'checkin_completed',
+    category: 'Checkin',
+    description: '打卡已完成',
+  ),
+  EventOption(
     eventName: 'checkin_deleted',
     category: 'Checkin',
     description: '打卡记录已删除',

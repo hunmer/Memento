@@ -78,7 +78,7 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       'goods_added': 5, // 添加物品奖励
       'chat_message_sent': 1, // 发送消息奖励
       'onRecordAdded': 2, // 添加记录奖励
-      'onDiaryAdded': 5, // 添加日记奖励
+      'diary_entry_created': 5, // 添加日记奖励
       'bill_added': 10, // 添加账单奖励
     },
   };
@@ -253,32 +253,6 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   @override
   Widget buildSettingsView(BuildContext context) {
     return StoreSettingsScreen(plugin: this);
-  }
-
-  /// 获取事件显示名称
-  String getEventDisplayName(String eventKey) {
-    switch (eventKey) {
-      case 'activity_added':
-        return '添加活动';
-      case 'checkin_completed':
-        return '完成签到';
-      case 'task_completed':
-        return '完成任务';
-      case 'note_added':
-        return '添加笔记';
-      case 'goods_added':
-        return '添加物品';
-      case 'chat_message_sent':
-        return '发送消息';
-      case 'onRecordAdded':
-        return '添加记录';
-      case 'onDiaryAdded':
-        return '添加日记';
-      case 'bill_added':
-        return '添加账单';
-      default:
-        return eventKey;
-    }
   }
 
   // ==================== JS API 定义 ====================

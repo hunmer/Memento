@@ -12,6 +12,7 @@ import 'package:Memento/plugins/store/models/points_log.dart';
 import 'package:Memento/plugins/store/sample_data.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 class StoreController with ChangeNotifier {
   List<Product> _products = [];
@@ -330,8 +331,21 @@ class StoreController with ChangeNotifier {
     _updateStreams();
     notifyListeners();
 
-    // 触发积分变化事件
+    // 触发积分变化事件（始终触发，供其他插件监听）
     _notifyPointsEvent(value, reason);
+
+    // 检查是否启用积分变动通知（toast 提示）
+    final enablePointsNotification =
+        plugin.settings['enablePointsNotification'] as bool? ?? true;
+    if (enablePointsNotification) {
+      // 显示 toast 通知
+      final message = value > 0
+          ? '获得 $value 积分：$reason'
+          : value < 0
+              ? '消耗 ${-value} 积分：$reason'
+              : '积分变动：$reason';
+      toastService.showToast(message);
+    }
 
     // 同步小组件数据
     await _syncWidget();

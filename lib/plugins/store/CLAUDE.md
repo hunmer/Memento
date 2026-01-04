@@ -195,7 +195,7 @@ Stream<int> get pointsStream;
     'goods_added': 5,          // 添加物品
     'chat_message_sent': 1,        // 发送消息
     'onRecordAdded': 2,        // 添加记录
-    'onDiaryAdded': 5,         // 添加日记
+    'diary_entry_created': 5,         // 添加日记
     'bill_added': 10,          // 添加账单
   }
 }

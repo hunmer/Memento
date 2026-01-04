@@ -82,7 +82,7 @@ class PointAwardEvent {
 
   /// 处理日记添加事件
   Future<void> _handleDiaryAdded(EventArgs args) async {
-    await _awardPoints(_getPointsForEvent('onDiaryAdded'), '添加日记奖励');
+    await _awardPoints(_getPointsForEvent('diary_entry_created'), '添加日记奖励');
   }
 
   Future<void> _handleBillAdded(EventArgs args) async {
