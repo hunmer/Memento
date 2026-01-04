@@ -274,19 +274,10 @@ class ActivityCreateShortcutWidget extends StatelessWidget {
         return;
       }
 
-      final activityService = plugin.activityService;
-      final now = DateTime.now();
-
-      Navigator.of(context).push(
+      Navigator.push(
+        context,
         MaterialPageRoute(
-          builder:
-              (context) => ActivityEditScreen(
-                activityService: activityService,
-                selectedDate: now,
-                onTagsUpdated: (tags) async {
-                  await activityService.saveRecentTags(tags);
-                },
-              ),
+          builder: (context) => const ActivityEditScreen(),
         ),
       );
     } catch (e) {
@@ -442,10 +433,6 @@ class _ActivityLastActivityWidgetState extends State<ActivityLastActivityWidget>
         onTap: () => _navigateToCreateActivity(context),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: Colors.pink.withAlpha(25),
-          ),
           child: Row(
             children: [
               Icon(
@@ -519,19 +506,10 @@ class _ActivityLastActivityWidgetState extends State<ActivityLastActivityWidget>
         return;
       }
 
-      final activityService = plugin.activityService;
-      final now = DateTime.now();
-
-      Navigator.of(context).push(
+      Navigator.push(
+        context,
         MaterialPageRoute(
-          builder:
-              (context) => ActivityEditScreen(
-                activityService: activityService,
-                selectedDate: now,
-                onTagsUpdated: (tags) async {
-                  await activityService.saveRecentTags(tags);
-                },
-              ),
+          builder: (context) => const ActivityEditScreen(),
         ),
       );
     } catch (e) {
@@ -598,10 +576,6 @@ class _ActivityTodayPieChartWidgetState
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.pink.withAlpha(25),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -685,10 +659,6 @@ class _ActivityTodayPieChartWidgetState
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.pink.withAlpha(25),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

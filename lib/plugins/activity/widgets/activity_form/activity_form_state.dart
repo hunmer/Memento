@@ -22,6 +22,51 @@ class ActivityFormState extends State<ActivityFormWidget> {
   List<String>? _tagsValue;
 
   @override
+  void didUpdateWidget(ActivityFormWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 检测初始时间的变化
+    final startTimeChanged =
+        oldWidget.initialStartTime != widget.initialStartTime;
+    final endTimeChanged = oldWidget.initialEndTime != widget.initialEndTime;
+
+    if (startTimeChanged || endTimeChanged) {
+      // 重新计算时间
+      final initialStartTime = getInitialTime(
+        activityTime: widget.activity?.startTime,
+        initialTime: widget.initialStartTime,
+        lastActivityEndTime: widget.lastActivityEndTime,
+        selectedDate: widget.selectedDate,
+        isStartTime: true,
+      );
+
+      final initialEndTime = getInitialTime(
+        activityTime: widget.activity?.endTime,
+        initialTime: widget.initialEndTime,
+        selectedDate: widget.selectedDate,
+        isStartTime: false,
+      );
+
+      setState(() {
+        if (startTimeChanged) {
+          _currentStartTime = initialStartTime;
+        }
+        if (endTimeChanged) {
+          _currentEndTime = initialEndTime;
+        }
+        // 重新计算持续时间
+        if (_currentStartTime != null && _currentEndTime != null) {
+          _currentDuration = calculateDuration(
+            widget.selectedDate,
+            _currentStartTime!,
+            _currentEndTime!,
+          );
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
 

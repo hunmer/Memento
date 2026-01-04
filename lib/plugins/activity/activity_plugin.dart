@@ -101,11 +101,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     // 使用全局导航器打开活动编辑界面
     final navigator = navigatorKey.currentState;
     if (navigator != null) {
-      navigator.push(NavigationHelper.createRoute(ActivityEditScreen(
-                activityService: activityService,
-                selectedDate: DateTime.now(),
-              ),
-        ),
+      navigator.push(
+        NavigationHelper.createRoute(const ActivityEditScreen()),
       );
       debugPrint('[ActivityPlugin] 活动编辑界面已打开');
     } else {
