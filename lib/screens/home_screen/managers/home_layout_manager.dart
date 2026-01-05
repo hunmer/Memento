@@ -433,14 +433,22 @@ class HomeLayoutManager extends ChangeNotifier {
   }
 
   void updateStackActiveIndex(String stackId, int newIndex) {
-    final stack = findItem(stackId);
+    final index = _items.indexWhere((item) => item.id == stackId);
+    if (index == -1) {
+      return;
+    }
+    final stack = _items[index];
     if (stack is! HomeStackItem) {
       return;
     }
     if (newIndex < 0 || newIndex >= stack.children.length) {
       return;
     }
-    updateItem(stackId, stack.copyWith(activeIndex: newIndex));
+    if (stack.activeIndex == newIndex) {
+      return;
+    }
+    _items[index] = stack.copyWith(activeIndex: newIndex);
+    _markDirty();
   }
 
   HomeWidgetItem? _resolveStackReference(HomeItem item) {
