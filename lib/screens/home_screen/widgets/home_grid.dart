@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +21,7 @@ import 'layout_type_selector.dart';
 /// 支持长按拖拽排序和批量选择
 class HomeGrid extends StatefulWidget {
   final List<HomeItem> items;
+  final String? layoutId;
   final Function(int oldIndex, int newIndex)? onReorder;
   final Function(String itemId, String folderId)? onAddToFolder;
   final Function(HomeItem item)? onItemTap;
@@ -33,10 +35,15 @@ class HomeGrid extends StatefulWidget {
   /// 是否显示骨架屏（用于占位加载）
   final bool showSkeleton;
   final Future<bool> Function(BuildContext context, HomeItem target, HomeItem dragged)? onMergeIntoStack;
+  final void Function(String layoutId, HomeItem item)? onDragStarted;
+  final VoidCallback? onDragEnded;
+  final Future<bool> Function(String draggedItemId, String targetLayoutId, int targetIndex)?
+      onCrossLayoutDrop;
 
   const HomeGrid({
     super.key,
     required this.items,
+    this.layoutId,
     this.onReorder,
     this.onAddToFolder,
     this.onItemTap,
@@ -49,6 +56,9 @@ class HomeGrid extends StatefulWidget {
     this.onQuickCreateLayout,
     this.showSkeleton = false,
     this.onMergeIntoStack,
+    this.onDragStarted,
+    this.onDragEnded,
+    this.onCrossLayoutDrop,
   });
 
   @override
@@ -62,7 +72,66 @@ class _HomeGridState extends State<HomeGrid> {
   _DropRegion? _hoveredDropZone;
   _DropRegion? _appliedPreviewZone;
   Timer? _previewTimer;
+  final List<String> _displayOrder = [];
+  String? _previewDraggingId;
+  int? _pendingTargetIndex;
   final String _quickLayoutType = 'empty';
+
+  @override
+  void initState() {
+    super.initState();
+    _syncDisplayOrder();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_hasSameItems(oldWidget.items, widget.items)) {
+      _syncDisplayOrder();
+    }
+  }
+
+  void _syncDisplayOrder() {
+    _displayOrder
+      ..clear()
+      ..addAll(widget.items.map((item) => item.id));
+  }
+
+  bool _hasSameItems(List<HomeItem> oldItems, List<HomeItem> newItems) {
+    if (oldItems.length != newItems.length) return false;
+    for (var i = 0; i < oldItems.length; i++) {
+      if (oldItems[i].id != newItems[i].id) return false;
+    }
+    return true;
+  }
+
+  void _resetPreviewOrder() {
+    _previewDraggingId = null;
+    _pendingTargetIndex = null;
+    _appliedPreviewZone = null;
+    _hoveredDropZone = null;
+    _displayOrder
+      ..clear()
+      ..addAll(widget.items.map((item) => item.id));
+  }
+
+  List<HomeItem> _buildOrderedItems() {
+    if (_displayOrder.length != widget.items.length) {
+      _syncDisplayOrder();
+    }
+    final map = {for (final item in widget.items) item.id: item};
+    final ordered = <HomeItem>[];
+    for (final id in _displayOrder) {
+      final item = map[id];
+      if (item != null) {
+        ordered.add(item);
+      }
+    }
+    if (ordered.length != widget.items.length) {
+      return widget.items;
+    }
+    return ordered;
+  }
 
   /// 处理添加到文件夹的操作
   void _handleAddToFolder(String itemId, String folderId) {
@@ -79,7 +148,8 @@ class _HomeGridState extends State<HomeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.items.isEmpty) {
+    final orderedItems = _buildOrderedItems();
+    if (orderedItems.isEmpty) {
       return _buildEmptyState(context);
     }
 
@@ -89,8 +159,8 @@ class _HomeGridState extends State<HomeGrid> {
         crossAxisCount: widget.crossAxisCount,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        children: List.generate(widget.items.length, (index) {
-          return _buildDraggableTile(context, widget.items[index], index);
+        children: List.generate(orderedItems.length, (index) {
+          return _buildDraggableTile(context, orderedItems[index], index);
         }),
       ),
     );
@@ -268,6 +338,9 @@ class _HomeGridState extends State<HomeGrid> {
           _draggingItemId = item.id;
         });
         _previewTimer?.cancel();
+        if (widget.layoutId != null && widget.onDragStarted != null) {
+          widget.onDragStarted!(widget.layoutId!, item);
+        }
         HapticFeedback.mediumImpact();
       },
       onDragEnd: (_) {
@@ -275,9 +348,11 @@ class _HomeGridState extends State<HomeGrid> {
           _draggingIndex = null;
           _draggingItemId = null;
           _hoveredDropZone = null;
+          _resetPreviewOrder();
         });
         _previewTimer?.cancel();
         _appliedPreviewZone = null;
+        widget.onDragEnded?.call();
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -328,78 +403,176 @@ class _HomeGridState extends State<HomeGrid> {
       crossAxisCellCount: crossAxisCellCount,
       mainAxisCellCount: mainAxisCellCount,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           centerTarget,
-          if (widget.isEditMode) ..._buildDropZoneWidgets(index),
+          if (widget.isEditMode) _buildDirectionalOverlay(context, index),
         ],
       ),
     );
   }
-  List<Widget> _buildDropZoneWidgets(int index) {
-    return _DropDirection.values.map((direction) {
-      final zone = _DropRegion(index, direction);
-      final isActive = _hoveredDropZone == zone;
-      return Positioned.fill(
-        child: Align(
-          alignment: _alignmentForDirection(direction),
-          child: FractionallySizedBox(
-            widthFactor: direction == _DropDirection.left || direction == _DropDirection.right ? 0.35 : 1,
-            heightFactor: direction == _DropDirection.top || direction == _DropDirection.bottom ? 0.35 : 1,
-            child: DragTarget<String>(
-              hitTestBehavior: HitTestBehavior.translucent,
-              onWillAcceptWithDetails: (details) => _handleDropZoneHover(zone, details),
-              onLeave: (_) => _handleDropZoneLeave(zone),
-              onAcceptWithDetails: (_) {},
-              builder: (context, candidateData, rejectedData) {
-                return AnimatedOpacity(
-                  opacity: isActive ? 0.45 : 0,
-                  duration: const Duration(milliseconds: 150),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                );
-              },
+  Widget _buildDirectionalOverlay(BuildContext context, int index) {
+    return Positioned.fill(
+      child: DragTarget<String>(
+        hitTestBehavior: HitTestBehavior.translucent,
+        onWillAcceptWithDetails: (details) => _handleDirectionalHover(context, index, details),
+        onMove: (details) => _handleDirectionalHover(context, index, details),
+        onLeave: (_) => _handleDirectionalLeave(index),
+        onAcceptWithDetails: (_) {},
+        builder: (context, candidateData, rejectedData) {
+          final zone = _hoveredDropZone;
+          final bool isActive = zone != null && zone.index == index;
+          return IgnorePointer(
+            ignoring: true,
+            child: AnimatedOpacity(
+              opacity: isActive ? 0.45 : 0,
+              duration: const Duration(milliseconds: 150),
+              child: _buildDropIndicator(context, zone?.direction),
             ),
-          ),
-        ),
-      );
-    }).toList();
+          );
+        },
+      ),
+    );
   }
 
-  bool _handleDropZoneHover(_DropRegion zone, DragTargetDetails<String> details) {
+  Widget _buildDropIndicator(BuildContext context, _DropDirection? direction) {
+    if (direction == null) {
+      return const SizedBox.shrink();
+    }
+    final bool isHorizontal = direction == _DropDirection.top || direction == _DropDirection.bottom;
+    return Align(
+      alignment: _alignmentForDirection(direction),
+      child: FractionallySizedBox(
+        widthFactor: isHorizontal ? 1 : 0.35,
+        heightFactor: isHorizontal ? 0.35 : 1,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool _handleDirectionalHover(
+    BuildContext context,
+    int index,
+    DragTargetDetails<String> details,
+  ) {
     final draggedId = details.data;
-    if (draggedId == null || draggedId == widget.items[zone.index].id) {
+    final displayItems = _buildOrderedItems();
+    if (draggedId == null || index < 0 || index >= displayItems.length) {
       return false;
     }
-    final previousZone = _hoveredDropZone;
-    setState(() {
-      _hoveredDropZone = zone;
-    });
-    if (previousZone != zone) {
-      _appliedPreviewZone = null;
+    if (draggedId == displayItems[index].id) {
+      return false;
     }
-    if (_appliedPreviewZone == zone) {
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) {
+      return false;
+    }
+    final localOffset = renderBox.globalToLocal(details.offset);
+    final direction = _resolveDirectionFromOffset(localOffset, renderBox.size);
+    if (direction == null) {
+      if (_hoveredDropZone?.index == index) {
+        _clearHoveredZone();
+      }
+      return false;
+    }
+
+    final zone = _DropRegion(index, direction);
+    if (_hoveredDropZone == zone) {
       return true;
     }
+
+    _activateDropZone(zone);
+    return true;
+  }
+
+  void _handleDirectionalLeave(int index) {
+    if (_hoveredDropZone?.index != index) {
+      return;
+    }
+    _clearHoveredZone();
+  }
+
+  _DropDirection? _resolveDirectionFromOffset(Offset local, Size size) {
+    final double width = size.width;
+    final double height = size.height;
+    if (!width.isFinite || !height.isFinite || width <= 0 || height <= 0) {
+      return null;
+    }
+    final double clampedX = local.dx.clamp(0, width);
+    final double clampedY = local.dy.clamp(0, height);
+    final distances = <_DropDirection, double>{
+      _DropDirection.top: clampedY,
+      _DropDirection.bottom: height - clampedY,
+      _DropDirection.left: clampedX,
+      _DropDirection.right: width - clampedX,
+    };
+    final minEntry = distances.entries.reduce((prev, next) {
+      if (prev.value == next.value) {
+        // 保持水平方向优先，避免在对角线位置震荡
+        if (_isHorizontalDirection(prev.key)) {
+          return prev;
+        }
+        if (_isHorizontalDirection(next.key)) {
+          return next;
+        }
+      }
+      return prev.value <= next.value ? prev : next;
+    });
+    final double threshold = math.min(width, height) * 0.28;
+    if (minEntry.value > threshold) {
+      return null;
+    }
+    return minEntry.key;
+  }
+
+  bool _isHorizontalDirection(_DropDirection direction) {
+    return direction == _DropDirection.top || direction == _DropDirection.bottom;
+  }
+
+  void _activateDropZone(_DropRegion zone) {
+    final bool hadPreview = _previewDraggingId != null;
+    setState(() {
+      if (hadPreview) {
+        _resetPreviewOrder();
+      }
+      _hoveredDropZone = zone;
+    });
+    _appliedPreviewZone = null;
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(seconds: 1), () {
       _applyPreview(zone);
     });
-    return true;
   }
 
-  void _handleDropZoneLeave(_DropRegion zone) {
-    if (_hoveredDropZone == zone) {
-      setState(() {
+  void _clearHoveredZone() {
+    final bool hadPreview = _previewDraggingId != null;
+    setState(() {
+      if (hadPreview) {
+        _resetPreviewOrder();
+      } else {
         _hoveredDropZone = null;
-      });
-    }
+        _appliedPreviewZone = null;
+      }
+    });
     _previewTimer?.cancel();
     _previewTimer = null;
-    _appliedPreviewZone = null;
+  }
+
+  int _mapDisplayIndexToActual(int displayIndex, List<String> displayOrder) {
+    if (displayIndex >= displayOrder.length) {
+      return widget.items.length;
+    }
+    final referenceId = displayOrder[displayIndex];
+    final actualIndex = widget.items.indexWhere((element) => element.id == referenceId);
+    if (actualIndex == -1) {
+      return widget.items.length;
+    }
+    return actualIndex;
   }
 
   void _applyPreview(_DropRegion zone) {
@@ -407,23 +580,40 @@ class _HomeGridState extends State<HomeGrid> {
       return;
     }
     final draggedId = _draggingItemId;
-    if (draggedId == null || widget.onReorder == null) {
+    if (draggedId == null) {
       return;
     }
-    final items = widget.items;
-    final currentIndex = items.indexWhere((element) => element.id == draggedId);
-    if (currentIndex == -1) {
+
+    final currentOrder = _displayOrder.isEmpty
+        ? widget.items.map((item) => item.id).toList()
+        : List<String>.from(_displayOrder);
+    final fromIndex = currentOrder.indexOf(draggedId);
+    if (fromIndex == -1) {
       return;
     }
-    int targetIndex = zone.index;
+
+    int displayTargetIndex = zone.index;
     if (zone.direction == _DropDirection.bottom || zone.direction == _DropDirection.right) {
-      targetIndex += 1;
+      displayTargetIndex += 1;
     }
-    if (currentIndex == targetIndex) {
-      return;
+    displayTargetIndex = displayTargetIndex.clamp(0, currentOrder.length);
+    final actualTargetIndex = _mapDisplayIndexToActual(displayTargetIndex, currentOrder);
+
+    final newOrder = List<String>.from(currentOrder);
+    final removed = newOrder.removeAt(fromIndex);
+    if (fromIndex < displayTargetIndex) {
+      displayTargetIndex -= 1;
     }
-    _appliedPreviewZone = zone;
-    widget.onReorder!(currentIndex, targetIndex);
+    newOrder.insert(displayTargetIndex, removed);
+
+    setState(() {
+      _displayOrder
+        ..clear()
+        ..addAll(newOrder);
+      _previewDraggingId = draggedId;
+      _pendingTargetIndex = actualTargetIndex;
+      _appliedPreviewZone = zone;
+    });
     _previewTimer = null;
   }
 
@@ -432,32 +622,31 @@ class _HomeGridState extends State<HomeGrid> {
     int targetIndex,
     DragTargetDetails<String> details,
   ) async {
-    setState(() {
-      _hoveringIndex = null;
-      _draggingIndex = null;
-      _draggingItemId = null;
-      _hoveredDropZone = null;
-    });
-    _previewTimer?.cancel();
-    _previewTimer = null;
-    _appliedPreviewZone = null;
-
     final draggedId = details.data;
     if (draggedId == null) {
+      _resetPreviewStateAfterDrop();
       return;
     }
 
-    final targetItem = widget.items[targetIndex];
+    final orderedItems = _buildOrderedItems();
+    if (targetIndex < 0 || targetIndex >= orderedItems.length) {
+      _resetPreviewStateAfterDrop();
+      return;
+    }
+
+    final targetItem = orderedItems[targetIndex];
     if (draggedId == targetItem.id) {
+      _resetPreviewStateAfterDrop();
       return;
     }
 
     final draggedItem = _findItemById(draggedId);
-    if (draggedItem == null) {
-      return;
-    }
 
     if (targetItem is HomeFolderItem && widget.onReorder != null) {
+      if (draggedItem == null) {
+        _resetPreviewStateAfterDrop();
+        return;
+      }
       final result = await _showDragToFolderDialog(context, draggedItem, targetItem);
       if (result == _DragToFolderAction.replace) {
         final sourceIndex = widget.items.indexWhere((element) => element.id == draggedId);
@@ -467,15 +656,56 @@ class _HomeGridState extends State<HomeGrid> {
       } else if (result == _DragToFolderAction.addToFolder) {
         _handleAddToFolder(draggedItem.id, targetItem.id);
       }
+      _resetPreviewStateAfterDrop();
       return;
     }
 
-    if (widget.onMergeIntoStack != null) {
+    if (draggedItem != null && widget.onMergeIntoStack != null) {
       final handled = await widget.onMergeIntoStack!(context, targetItem, draggedItem);
       if (handled) {
+        _resetPreviewStateAfterDrop();
         return;
       }
     }
+
+    bool handled = false;
+    if (draggedItem != null && widget.onReorder != null) {
+      final sourceIndex = widget.items.indexWhere((element) => element.id == draggedId);
+      if (sourceIndex != -1) {
+        final newIndex = _pendingTargetIndex ??
+            _mapDisplayIndexToActual(targetIndex, _displayOrder.isEmpty
+                ? widget.items.map((item) => item.id).toList()
+                : _displayOrder);
+        widget.onReorder!(sourceIndex, newIndex);
+        handled = true;
+      }
+    } else if (draggedItem == null &&
+        widget.onCrossLayoutDrop != null &&
+        widget.layoutId != null) {
+      final actualIndex = _pendingTargetIndex ??
+          _mapDisplayIndexToActual(targetIndex, _displayOrder.isEmpty
+              ? widget.items.map((item) => item.id).toList()
+              : _displayOrder);
+      handled = await widget.onCrossLayoutDrop!(draggedId, widget.layoutId!, actualIndex);
+    }
+
+    _resetPreviewStateAfterDrop();
+    if (handled) {
+      widget.onDragEnded?.call();
+    }
+  }
+
+  void _resetPreviewStateAfterDrop() {
+    setState(() {
+      _hoveringIndex = null;
+      _draggingIndex = null;
+      _draggingItemId = null;
+      _hoveredDropZone = null;
+      _resetPreviewOrder();
+    });
+    _previewTimer?.cancel();
+    _previewTimer = null;
+    _appliedPreviewZone = null;
   }
 
   HomeItem? _findItemById(String id) {

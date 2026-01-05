@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -19,6 +20,7 @@ import 'models/home_widget_item.dart';
 import 'models/home_stack_item.dart';
 import 'models/home_widget_size.dart';
 import 'models/plugin_widget_config.dart';
+import 'models/layout_config.dart';
 import 'widgets/add_widget_dialog.dart';
 import 'widgets/background_settings_page.dart';
 import 'widgets/create_folder_dialog.dart';
@@ -217,17 +219,28 @@ class HomeScreenView extends StatelessWidget {
         controller.currentLayoutName.isEmpty ? 'app_home'.tr : controller.currentLayoutName,
       );
     }
-    return ExtendedTabBar(
-      controller: tabController,
-      isScrollable: true,
-      indicatorSize: TabBarIndicatorSize.tab,
-      onTap: (index) {
-        controller.onPageChanged(index, () {});
-      },
-      tabs: controller.savedLayouts.map((layout) {
-        return Tab(text: layout.name.isEmpty ? '默认' : layout.name);
-      }).toList(),
+    return _DragAwareTabBar(
+      tabController: tabController!,
+      layouts: controller.savedLayouts,
+      onTap: (index) => controller.onPageChanged(index, () {}),
+      onHoverSwitch: _handleTabSwitchByDrag,
+      isDragActive: () => controller.isDraggingItem,
     );
+  }
+
+  Future<void> _handleTabSwitchByDrag(int index) async {
+    final tc = tabController;
+    if (tc == null) {
+      return;
+    }
+    if (index < 0 || index >= tc.length) {
+      return;
+    }
+    if (tc.index == index) {
+      return;
+    }
+    tc.animateTo(index);
+    controller.onPageChanged(index, () {});
   }
 
   /// 构建单个 Tab 页面
@@ -281,6 +294,7 @@ class HomeScreenView extends StatelessWidget {
                 ),
                 child: HomeGrid(
                   items: latestItems,
+                  layoutId: layoutId,
                   crossAxisCount: controller.layoutManager.gridCrossAxisCount,
                   isEditMode: controller.isEditMode,
                   isBatchMode: controller.isBatchMode,
@@ -297,6 +311,15 @@ class HomeScreenView extends StatelessWidget {
                   onItemLongPress: (item) => _handleCardLongPress(context, item),
                   onQuickCreateLayout: _createQuickLayout,
                   onMergeIntoStack: _handleStackMerge,
+                  onDragStarted: controller.handleDragStart,
+                  onDragEnded: controller.handleDragEnded,
+                  onCrossLayoutDrop:
+                      (draggedId, targetLayoutId, targetIndex) =>
+                          controller.moveDraggedItemToLayout(
+                            draggedId,
+                            targetLayoutId,
+                            targetIndex,
+                          ),
                 ),
               );
             },
@@ -1145,5 +1168,106 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
       ),
       actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_complete'.tr))],
     );
+  }
+}
+
+class _DragAwareTabBar extends StatefulWidget {
+  final TabController tabController;
+  final List<LayoutConfig> layouts;
+  final ValueChanged<int> onTap;
+  final Future<void> Function(int index) onHoverSwitch;
+  final bool Function() isDragActive;
+
+  const _DragAwareTabBar({
+    required this.tabController,
+    required this.layouts,
+    required this.onTap,
+    required this.onHoverSwitch,
+    required this.isDragActive,
+  });
+
+  @override
+  State<_DragAwareTabBar> createState() => _DragAwareTabBarState();
+}
+
+class _DragAwareTabBarState extends State<_DragAwareTabBar> {
+  int? _hoveredIndex;
+  Timer? _switchTimer;
+
+  @override
+  void dispose() {
+    _switchTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExtendedTabBar(
+      controller: widget.tabController,
+      isScrollable: true,
+      indicatorSize: TabBarIndicatorSize.tab,
+      onTap: widget.onTap,
+      tabs: List.generate(widget.layouts.length, (index) {
+        final layout = widget.layouts[index];
+        final label = layout.name.isEmpty ? '默认' : layout.name;
+        return DragTarget<String>(
+          hitTestBehavior: HitTestBehavior.translucent,
+          onWillAcceptWithDetails: (_) {
+            if (!widget.isDragActive()) {
+              return false;
+            }
+            _scheduleSwitch(index);
+            return false;
+          },
+          onLeave: (_) => _cancelHover(index),
+          onAcceptWithDetails: (_) => _cancelHover(index),
+          builder: (context, candidateData, rejectedData) {
+            final isHovering = _hoveredIndex == index && widget.isDragActive();
+            return Tab(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration:
+                    isHovering
+                        ? BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(999),
+                        )
+                        : null,
+                child: Text(label),
+              ),
+            );
+          },
+        );
+      }),
+    );
+  }
+
+  void _scheduleSwitch(int index) {
+    if (_hoveredIndex == index) {
+      return;
+    }
+    setState(() {
+      _hoveredIndex = index;
+    });
+    _switchTimer?.cancel();
+    _switchTimer = Timer(const Duration(milliseconds: 800), () {
+      widget.onHoverSwitch(index);
+    });
+  }
+
+  void _cancelHover(int index) {
+    if (_hoveredIndex == index) {
+      setState(() {
+        _hoveredIndex = null;
+      });
+    }
+    _switchTimer?.cancel();
+    _switchTimer = null;
   }
 }
