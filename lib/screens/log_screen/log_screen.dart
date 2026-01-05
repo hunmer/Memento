@@ -195,24 +195,13 @@ class _LogScreenState extends State<LogScreen> {
           ),
           const Divider(height: 1),
 
-          // 内容区域
+          // 文件列表（横向滚动）
+          _buildFileList(),
+          const Divider(height: 1),
+
+          // 日志内容区域
           Expanded(
-            child: Row(
-              children: [
-                // 左侧：日志文件列表
-                SizedBox(
-                  width: 200,
-                  child: _buildFileList(),
-                ),
-
-                const VerticalDivider(width: 1),
-
-                // 右侧：日志内容
-                Expanded(
-                  child: _buildLogContent(),
-                ),
-              ],
-            ),
+            child: _buildLogContent(),
           ),
         ],
       ),
@@ -220,54 +209,94 @@ class _LogScreenState extends State<LogScreen> {
   }
 
   Widget _buildFileList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 当前会话日志
-        ListTile(
-          leading: const Icon(Icons.live_help, size: 20),
-          title: const Text('当前会话', style: TextStyle(fontSize: 13)),
-          selected: _selectedFileContent.isEmpty,
-          selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-          onTap: _clearSelection,
-          dense: true,
-        ),
-        const Divider(height: 1),
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          // 当前会话日志
+          const SizedBox(width: 8),
+          _buildFileChip(
+            icon: Icons.live_help,
+            label: '当前会话',
+            isSelected: _selectedFileContent.isEmpty,
+            onTap: _clearSelection,
+          ),
+          const SizedBox(width: 8),
 
-        // 历史日志文件列表
-        Expanded(
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _logFiles.isEmpty
-                  ? const Center(child: Text('暂无历史日志'))
-                  : ListView.builder(
-                      itemCount: _logFiles.length,
-                      itemBuilder: (context, index) {
-                        final file = _logFiles[index];
-                        final fileName = file.path.split(Platform.pathSeparator).last;
-                        final isSelected = _selectedFileContent.isNotEmpty &&
-                            file.path == _logFiles.firstWhere(
-                              (f) => _selectedFileContent.contains(fileName),
-                              orElse: () => File(''),
-                            ).path;
+          // 历史日志文件列表（横向滚动）
+          Expanded(
+            child: _isLoading
+                ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)))
+                : _logFiles.isEmpty
+                    ? const Center(child: Text('暂无历史日志', style: TextStyle(fontSize: 12, color: Colors.grey)))
+                    : ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        itemCount: _logFiles.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final file = _logFiles[index];
+                          final fileName = file.path.split(Platform.pathSeparator).last;
+                          final isSelected = _selectedFileContent.isNotEmpty &&
+                              file.path == _logFiles.firstWhere(
+                                (f) => _selectedFileContent.contains(fileName),
+                                orElse: () => File(''),
+                              ).path;
 
-                        return ListTile(
-                          leading: const Icon(Icons.insert_drive_file, size: 18),
-                          title: Text(
-                            fileName,
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          selected: isSelected,
-                          selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
-                          onTap: () => _loadLogFile(file),
-                          dense: true,
-                        );
-                      },
-                    ),
+                          return _buildFileChip(
+                            icon: Icons.insert_drive_file,
+                            label: fileName,
+                            isSelected: isSelected,
+                            onTap: () => _loadLogFile(file),
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFileChip({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5)
+              : Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
+                : Colors.transparent,
+            width: 1,
+          ),
         ),
-      ],
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: isSelected ? Theme.of(context).colorScheme.primary : null),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                color: isSelected ? Theme.of(context).colorScheme.primary : null,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
