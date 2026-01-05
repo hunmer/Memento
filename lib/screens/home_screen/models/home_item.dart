@@ -2,6 +2,7 @@
 // 为了避免循环依赖，这些类在单独的文件中定义
 import 'home_widget_item.dart';
 import 'home_folder_item.dart';
+import 'home_stack_item.dart';
 
 /// 主页项目类型
 enum HomeItemType {
@@ -10,6 +11,9 @@ enum HomeItemType {
 
   /// 文件夹
   folder,
+
+  /// 折叠组件
+  stack,
 }
 
 /// 主页项目基类（可以是小组件或文件夹）
@@ -38,6 +42,8 @@ abstract class HomeItem {
         return HomeWidgetItem.fromJson(json);
       case HomeItemType.folder:
         return HomeFolderItem.fromJson(json);
+      case HomeItemType.stack:
+        return HomeStackItem.fromJson(json);
     }
   }
 }

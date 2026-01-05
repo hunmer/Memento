@@ -16,6 +16,7 @@ import 'managers/home_widget_registry.dart';
 import 'models/home_folder_item.dart';
 import 'models/home_item.dart';
 import 'models/home_widget_item.dart';
+import 'models/home_stack_item.dart';
 import 'models/home_widget_size.dart';
 import 'models/plugin_widget_config.dart';
 import 'widgets/add_widget_dialog.dart';
@@ -25,6 +26,7 @@ import 'widgets/home_grid.dart';
 import 'widgets/layout_manager_dialog.dart';
 import 'widgets/selector_widget_types.dart';
 import 'widgets/widget_settings_dialog.dart';
+import 'widgets/stack_direction_dialog.dart';
 
 /// 主屏幕视图 - 负责 UI 构建
 class HomeScreenView extends StatelessWidget {
@@ -200,6 +202,7 @@ class HomeScreenView extends StatelessWidget {
                   : null,
               onItemLongPress: (item) => _handleCardLongPress(context, item),
               onQuickCreateLayout: _createQuickLayout,
+              onMergeIntoStack: _handleStackMerge,
             ),
           );
         },
@@ -293,6 +296,7 @@ class HomeScreenView extends StatelessWidget {
                       : null,
                   onItemLongPress: (item) => _handleCardLongPress(context, item),
                   onQuickCreateLayout: _createQuickLayout,
+                  onMergeIntoStack: _handleStackMerge,
                 ),
               );
             },
@@ -650,6 +654,41 @@ class HomeScreenView extends StatelessWidget {
         initialSearchQuery: widget.pluginId,
       ),
     );
+  }
+
+  Future<bool> _handleStackMerge(
+    BuildContext context,
+    HomeItem targetItem,
+    HomeItem draggedItem,
+  ) async {
+    final layoutManager = controller.layoutManager;
+    if (!layoutManager.canMergeIntoStack(targetItem, draggedItem)) {
+      Toast.warning('????????????');
+      return false;
+    }
+
+    HomeStackDirection? direction;
+    if (targetItem is! HomeStackItem) {
+      direction = await showStackDirectionDialog(context);
+      if (direction == null) {
+        return false;
+      }
+    }
+
+    final result = layoutManager.mergeIntoStack(
+      targetItemId: targetItem.id,
+      draggedItemId: draggedItem.id,
+      direction: direction,
+    );
+
+    if (result == null) {
+      Toast.error('??????????');
+      return false;
+    }
+
+    await layoutManager.saveLayout();
+    Toast.success('???????');
+    return true;
   }
 
   List<String> _getSelectorDataKeys(dynamic widget) {

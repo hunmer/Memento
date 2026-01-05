@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
@@ -15,6 +17,7 @@ import 'package:Memento/plugins/diary/utils/diary_utils.dart';
 import 'package:Memento/plugins/diary/screens/diary_editor_screen.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'folder_dialog.dart';
+import 'package:infinite_carousel/infinite_carousel.dart';
 
 /// 主页卡片组件
 ///
@@ -57,33 +60,59 @@ class _HomeCardState extends State<HomeCard> {
 
   @override
   Widget build(BuildContext context) {
-    final isWidgetItem = item is HomeWidgetItem;
+    final HomeItem currentItem = item;
 
-    // 编辑模式下不使用交互，直接返回卡片内容
+    // ???????????????????
     if (isEditMode) {
-      return _buildCardContent(context, isWidgetItem);
+      return _buildCardContent(context, currentItem);
     }
 
-    // 小组件卡片使用 OpenContainer 动画
-    if (isWidgetItem) {
+    if (currentItem is HomeStackItem) {
+      return GestureDetector(
+        key: _cardKey,
+        onTap: onTap ?? () => _openStackItem(context, currentItem),
+        onLongPress: onLongPress,
+        child: _buildCardContent(context, currentItem),
+      );
+    }
+
+    if (currentItem is HomeWidgetItem) {
       return GestureDetector(
         key: _cardKey,
         onTap: onTap ?? () => _openWidgetPlugin(context),
         onLongPress: onLongPress,
-        child: _buildCardContent(context, true),
+        child: _buildCardContent(context, currentItem),
       );
     }
 
-    // 文件夹卡片使用 GestureDetector
     return GestureDetector(
       onTap: onTap ?? () => _handleTap(context),
       onLongPress: onLongPress,
-      child: _buildCardContent(context, isWidgetItem),
+      child: _buildCardContent(context, currentItem),
+    );
+  }
+  Widget _buildStackCard(BuildContext context, HomeStackItem stackItem) {
+    return _HomeStackCarousel(
+      stack: stackItem,
+      isEditMode: isEditMode,
+      itemBuilder: (child) => _buildWidgetCard(context, child),
+      onActiveIndexChanged: (index) {
+        if (!isEditMode) {
+          HomeLayoutManager().updateStackActiveIndex(stackItem.id, index);
+        }
+      },
     );
   }
 
-  /// 构建卡片内容（用于复用）
-  Widget _buildCardContent(BuildContext context, bool isWidgetItem) {
+  /// ????????????
+  Widget _buildCardContent(BuildContext context, HomeItem currentItem) {
+    final isWidgetLike = currentItem is HomeWidgetItem || currentItem is HomeStackItem;
+    final Widget content =
+        currentItem is HomeWidgetItem
+            ? _buildWidgetCard(context, currentItem)
+            : currentItem is HomeStackItem
+                ? _buildStackCard(context, currentItem)
+                : _buildFolderCard(context, currentItem as HomeFolderItem);
     return Stack(
       children: [
         Card(
@@ -103,18 +132,15 @@ class _HomeCardState extends State<HomeCard> {
                       width: 1,
                     ),
           ),
-          // 对小组件卡片使用透明的 Card 背景色，这样内部背景颜色的透明度
-          // 能够作用到整体（否则会被 Card 自身的背景色遮挡）
-          color: isWidgetItem ? Colors.transparent : null,
-          child:
-              isWidgetItem
-                  ? _buildWidgetCard(context, item as HomeWidgetItem)
-                  : _buildFolderCard(context, item as HomeFolderItem),
+          // ???????????Card????????????????
+          // ???????????? Card ?????????
+          color: isWidgetLike ? Colors.transparent : null,
+          child: content,
         ),
-        // 编辑模式下显示拖拽手柄
+        // ???????????
         if (isEditMode && dragHandle != null)
           Positioned(top: 4, right: 4, child: dragHandle!),
-        // 批量选择模式下显示选中标记
+        // ?????????????
         if (isBatchMode)
           Positioned(
             top: 8,
@@ -149,8 +175,6 @@ class _HomeCardState extends State<HomeCard> {
       ],
     );
   }
-
-  /// 构建小组件卡片
   Widget _buildWidgetCard(BuildContext context, HomeWidgetItem widgetItem) {
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
 
@@ -331,8 +355,8 @@ class _HomeCardState extends State<HomeCard> {
   }
 
   /// 打开小组件对应的插件（使用 OpenContainer 风格动画，iOS 支持左滑返回）
-  void _openWidgetPlugin(BuildContext context) async {
-    final widgetItem = item as HomeWidgetItem;
+  void _openWidgetPlugin(BuildContext context, [HomeWidgetItem? target]) async {
+    final widgetItem = target ?? (item as HomeWidgetItem);
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
 
     if (widgetDef == null) return;
@@ -369,6 +393,16 @@ class _HomeCardState extends State<HomeCard> {
   }
 
   /// 打开今日日记编辑界面
+  void _openStackItem(BuildContext context, HomeStackItem stackItem) {
+    if (stackItem.children.isEmpty) {
+      Toast.warning('????????');
+      return;
+    }
+    final activeIndex = stackItem.activeIndex.clamp(0, stackItem.children.length - 1);
+    final target = stackItem.children[activeIndex];
+    _openWidgetPlugin(context, target);
+  }
+
   Future<void> _openTodayDiaryEditor(BuildContext context) async {
     try {
       // 获取 DiaryPlugin 实例
@@ -538,5 +572,331 @@ class _HomeCardState extends State<HomeCard> {
       context: context,
       builder: (context) => FolderDialog(folder: folder),
     );
+  }
+}
+
+class _HomeStackCarousel extends StatefulWidget {
+  final HomeStackItem stack;
+  final bool isEditMode;
+  final Widget Function(HomeWidgetItem item) itemBuilder;
+  final ValueChanged<int> onActiveIndexChanged;
+
+  const _HomeStackCarousel({
+    required this.stack,
+    required this.isEditMode,
+    required this.itemBuilder,
+    required this.onActiveIndexChanged,
+  });
+
+  @override
+  State<_HomeStackCarousel> createState() => _HomeStackCarouselState();
+}
+
+class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTickerProviderStateMixin {
+  late InfiniteScrollController _controller;
+  late int _currentIndex;
+  late AnimationController _countdownController;
+  static const Duration _autoScrollInterval = Duration(seconds: 6);
+  static const double _dragTriggerDistance = 24;
+  static const double _dragTriggerVelocity = 380;
+  double _manualDragOffset = 0;
+  bool _manualScrollInProgress = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = _sanitizeIndex(widget.stack.activeIndex);
+    _controller = InfiniteScrollController(initialItem: _currentIndex);
+    _countdownController = AnimationController(
+      vsync: this,
+      duration: _autoScrollInterval,
+    )..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _handleAutoAdvance();
+        }
+      });
+    _startCountdownIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeStackCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final nextIndex = _sanitizeIndex(widget.stack.activeIndex);
+    if (nextIndex != _currentIndex ||
+        oldWidget.stack.children.length != widget.stack.children.length) {
+      _currentIndex = nextIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _controller.jumpToItem(_currentIndex);
+        }
+      });
+    }
+
+    if (_autoScrollEnabled) {
+      _restartCountdown();
+    } else {
+      _stopCountdown();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _countdownController.dispose();
+    super.dispose();
+  }
+
+  int _sanitizeIndex(int index) {
+    if (widget.stack.children.isEmpty) {
+      return 0;
+    }
+    return index.clamp(0, widget.stack.children.length - 1);
+  }
+
+  double _resolveExtent(BoxConstraints constraints) {
+    final candidate = widget.stack.direction == HomeStackDirection.horizontal
+        ? constraints.maxWidth
+        : constraints.maxHeight;
+    if (candidate.isFinite && candidate > 0) {
+      return candidate;
+    }
+    return 200;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.stack.children.isEmpty) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(child: Icon(Icons.widgets_outlined)),
+      );
+    }
+
+    if (widget.stack.children.length == 1) {
+      return widget.itemBuilder(widget.stack.children.first);
+    }
+
+    final carousel = Stack(
+      fit: StackFit.expand,
+      children: [
+        Positioned.fill(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final extent = _resolveExtent(constraints);
+          return InfiniteCarousel.builder(
+            controller: _controller,
+            itemCount: widget.stack.children.length,
+            itemExtent: extent,
+            physics: const NeverScrollableScrollPhysics(),
+            axisDirection: widget.stack.direction == HomeStackDirection.horizontal
+                ? Axis.horizontal
+                : Axis.vertical,
+                loop: true,
+                onIndexChanged: (index) {
+                  if (!mounted) return;
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                  if (!widget.isEditMode) {
+                    widget.onActiveIndexChanged(index);
+                    _restartCountdown();
+                  } else {
+                    _stopCountdown();
+                  }
+                },
+                itemBuilder: (context, itemIndex, realIndex) {
+                  final child = widget.stack.children[itemIndex];
+                  return Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: widget.itemBuilder(child),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        _buildDotsIndicator(),
+      ],
+    );
+
+    final bool enableManualDrag = !widget.isEditMode;
+
+    final gestureChild = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragStart: enableManualDrag && widget.stack.direction == HomeStackDirection.horizontal
+          ? (_) => _onManualDragStart()
+          : null,
+      onHorizontalDragUpdate: enableManualDrag && widget.stack.direction == HomeStackDirection.horizontal
+          ? (details) => _onManualDragUpdate(details.primaryDelta ?? 0)
+          : null,
+      onHorizontalDragEnd: enableManualDrag && widget.stack.direction == HomeStackDirection.horizontal
+          ? (details) => _onManualDragEnd(details.primaryVelocity ?? 0)
+          : null,
+      onVerticalDragStart: enableManualDrag && widget.stack.direction == HomeStackDirection.vertical
+          ? (_) => _onManualDragStart()
+          : null,
+      onVerticalDragUpdate: enableManualDrag && widget.stack.direction == HomeStackDirection.vertical
+          ? (details) => _onManualDragUpdate(details.primaryDelta ?? 0)
+          : null,
+      onVerticalDragEnd: enableManualDrag && widget.stack.direction == HomeStackDirection.vertical
+          ? (details) => _onManualDragEnd(details.primaryVelocity ?? 0)
+          : null,
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerSignal: _handlePointerSignal,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _handleScrollNotification,
+          child: carousel,
+        ),
+      ),
+    );
+
+    return IgnorePointer(
+      ignoring: widget.isEditMode,
+      child: gestureChild,
+    );
+  }
+
+  Widget _buildDotsIndicator() {
+    final total = widget.stack.children.length;
+    if (total <= 1) {
+      return const SizedBox.shrink();
+    }
+    final axis =
+        widget.stack.direction == HomeStackDirection.horizontal ? Axis.horizontal : Axis.vertical;
+    final children = List.generate(total, (index) {
+      final isActive = (_currentIndex % total) == index;
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.all(2),
+        width: axis == Axis.horizontal ? 8 : 6,
+        height: axis == Axis.horizontal ? 6 : 8,
+        decoration: BoxDecoration(
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(999),
+        ),
+      );
+    });
+
+    if (axis == Axis.horizontal) {
+      return Positioned(
+        bottom: 6,
+        left: 0,
+        right: 0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: children,
+        ),
+      );
+    }
+
+    return Positioned(
+      right: 6,
+      top: 0,
+      bottom: 0,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollStartNotification) {
+      _stopCountdown();
+    } else if (notification is ScrollEndNotification) {
+      _restartCountdown();
+    }
+    return true;
+  }
+
+  void _handlePointerSignal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent) return;
+    if (widget.stack.children.length <= 1) return;
+
+    double delta;
+    if (widget.stack.direction == HomeStackDirection.horizontal) {
+      delta = event.scrollDelta.dx != 0 ? event.scrollDelta.dx : event.scrollDelta.dy;
+    } else {
+      delta = event.scrollDelta.dy != 0 ? event.scrollDelta.dy : event.scrollDelta.dx;
+    }
+    if (delta == 0) return;
+
+    if (delta > 0) {
+      _controller.nextItem();
+    } else {
+      _controller.previousItem();
+    }
+    _restartCountdown();
+  }
+
+  bool get _autoScrollEnabled => !widget.isEditMode && widget.stack.children.length > 1;
+
+  void _onManualDragStart() {
+    _manualScrollInProgress = true;
+    _manualDragOffset = 0;
+    _stopCountdown();
+  }
+
+  void _onManualDragUpdate(double delta) {
+    if (!_manualScrollInProgress) {
+      return;
+    }
+    _manualDragOffset += delta;
+  }
+
+  void _onManualDragEnd(double velocity) {
+    if (!_manualScrollInProgress) {
+      return;
+    }
+    double signal = _manualDragOffset;
+    if (signal.abs() < _dragTriggerDistance && velocity.abs() >= _dragTriggerVelocity) {
+      signal = velocity;
+    }
+    if (signal.abs() >= _dragTriggerDistance || signal.abs() >= _dragTriggerVelocity) {
+      if (signal > 0) {
+        _controller.previousItem();
+      } else if (signal < 0) {
+        _controller.nextItem();
+      }
+    }
+    _manualDragOffset = 0;
+    _manualScrollInProgress = false;
+    _restartCountdown();
+  }
+
+  void _startCountdownIfNeeded() {
+    if (_autoScrollEnabled) {
+      _countdownController
+        ..reset()
+        ..forward();
+    }
+  }
+
+  void _restartCountdown() {
+    _stopCountdown();
+    _startCountdownIfNeeded();
+  }
+
+  void _stopCountdown() {
+    if (_countdownController.isAnimating) {
+      _countdownController.stop();
+    }
+    _countdownController.reset();
+  }
+
+  void _handleAutoAdvance() {
+    if (!_autoScrollEnabled) {
+      return;
+    }
+    _controller.nextItem();
+    _restartCountdown();
   }
 }
