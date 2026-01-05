@@ -6,10 +6,10 @@ part of 'day_plugin.dart';
     // 纪念日选择器
     pluginDataSelectorService.registerSelector(SelectorDefinition(
       id: 'day.memorial',
-      pluginId: id,
+      pluginId: DayPlugin.instance.id,
       name: '选择纪念日',
-      icon: icon,
-      color: color,
+      icon: DayPlugin.instance.icon,
+      color: DayPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -19,7 +19,7 @@ part of 'day_plugin.dart';
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (_) async {
-            return _controller.memorialDays.map((day) {
+            return DayPlugin.instance._controller.memorialDays.map((day) {
               // 计算倒计时文本
               String subtitle;
               if (day.isToday) {
@@ -56,10 +56,10 @@ part of 'day_plugin.dart';
     // 日期范围选择器 - 基于天数的范围选择
     pluginDataSelectorService.registerSelector(SelectorDefinition(
       id: 'day.dateRange',
-      pluginId: id,
+      pluginId: DayPlugin.instance.id,
       name: 'day_dateRangeFilter'.tr,
       icon: Icons.date_range,
-      color: color,
+      color: DayPlugin.instance.color,
       searchable: false,
       selectionMode: SelectionMode.single,
       steps: [

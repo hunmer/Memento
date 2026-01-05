@@ -1,46 +1,12 @@
 part of 'goods_plugin.dart';
 
-// ==================== JS API 定义 ====================
-
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 仓库相关
-    'getWarehouses': _jsGetWarehouses,
-    'getWarehouse': _jsGetWarehouse,
-    'createWarehouse': _jsCreateWarehouse,
-    'updateWarehouse': _jsUpdateWarehouse,
-    'deleteWarehouse': _jsDeleteWarehouse,
-    'clearWarehouse': _jsClearWarehouse,
-
-    // 物品相关
-    'getGoods': _jsGetGoods,
-    'getGoodsItem': _jsGetGoodsItem,
-    'getItems': _jsGetGoods, // 别名，与工具模板保持一致
-    'getItemById': _jsGetGoodsItem, // 别名
-    'createGoodsItem': _jsCreateGoodsItem,
-    'createItem': _jsCreateGoodsItem, // 别名，与工具模板保持一致
-    'updateGoodsItem': _jsUpdateGoodsItem,
-    'updateItem': _jsUpdateGoodsItem, // 别名
-    'deleteGoodsItem': _jsDeleteGoodsItem,
-    'deleteItem': _jsDeleteGoodsItem, // 别名
-
-    // 使用记录相关
-    'addUsageRecord': _jsAddUsageRecord,
-
-    // 统计相关
-    'getStatistics': _jsGetStatistics,
-    'getStats': _jsGetStatistics, // 别名
-  };
-}
-
 // ==================== JS API 实现 ====================
 /// 获取所有仓库列表
 /// 支持分页参数: offset, count
 /// 返回: JSON数组，包含所有仓库信息（不含物品）
 Future<String> _jsGetWarehouses(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.getWarehouses(params);
+    final result = await GoodsPlugin.instance.useCase.getWarehouses(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -55,7 +21,7 @@ Future<String> _jsGetWarehouses(Map<String, dynamic> params) async {
 /// 获取指定仓库的详细信息（包含物品）
 Future<String> _jsGetWarehouse(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.getWarehouseById(params);
+    final result = await GoodsPlugin.instance.useCase.getWarehouseById(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -74,7 +40,7 @@ Future<String> _jsGetWarehouse(Map<String, dynamic> params) async {
 /// 创建新仓库
 Future<String> _jsCreateWarehouse(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.createWarehouse(params);
+    final result = await GoodsPlugin.instance.useCase.createWarehouse(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -89,7 +55,7 @@ Future<String> _jsCreateWarehouse(Map<String, dynamic> params) async {
 /// 更新仓库信息
 Future<String> _jsUpdateWarehouse(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.updateWarehouse(params);
+    final result = await GoodsPlugin.instance.useCase.updateWarehouse(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -104,7 +70,7 @@ Future<String> _jsUpdateWarehouse(Map<String, dynamic> params) async {
 /// 删除仓库
 Future<String> _jsDeleteWarehouse(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.deleteWarehouse(params);
+    final result = await GoodsPlugin.instance.useCase.deleteWarehouse(params);
 
     if (result.isFailure) {
       return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
@@ -124,7 +90,7 @@ Future<String> _jsClearWarehouse(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: warehouseId'});
     }
 
-    await clearWarehouse(warehouseId);
+    await GoodsPlugin.instance.clearWarehouse(warehouseId);
     return jsonEncode({'success': true, 'warehouseId': warehouseId});
   } catch (e) {
     return jsonEncode({'success': false, 'error': e.toString()});
@@ -140,7 +106,7 @@ Future<String> _jsGetGoods(Map<String, dynamic> params) async {
     final getHttpImage = params['get_http_image'] == true;
     params.remove('get_http_image');
 
-    final result = await _useCase.getItems(params);
+    final result = await GoodsPlugin.instance.useCase.getItems(params);
 
     var items = result.dataOrNull ?? [];
 
@@ -148,9 +114,9 @@ Future<String> _jsGetGoods(Map<String, dynamic> params) async {
     if (getHttpImage) {
       items = await LocalHttpServer.convertImagesWithAutoConfig(
         items: items,
-        pluginId: id,
+        pluginId: GoodsPlugin.instance.id,
         imageKey: 'imageUrl',
-        storageManager: storage,
+        storageManager: GoodsPlugin.instance.storage,
       );
     }
 
@@ -171,7 +137,7 @@ Future<String> _jsGetGoods(Map<String, dynamic> params) async {
 /// 获取指定物品的详细信息
 Future<String> _jsGetGoodsItem(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.getItemById(params);
+    final result = await GoodsPlugin.instance.useCase.getItemById(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -218,7 +184,7 @@ Future<String> _jsCreateGoodsItem(Map<String, dynamic> params) async {
       'warehouseId': params['warehouseId'],
     };
 
-    final result = await _useCase.createItem(useCaseParams);
+    final result = await GoodsPlugin.instance.useCase.createItem(useCaseParams);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -245,7 +211,7 @@ Future<String> _jsUpdateGoodsItem(Map<String, dynamic> params) async {
     }
 
     // 查找物品所在的仓库
-    final existingItem = findGoodsItemById(itemId);
+    final existingItem = GoodsPlugin.instance.findGoodsItemById(itemId);
     if (existingItem == null) {
       return jsonEncode({'error': '物品不存在', 'itemId': itemId});
     }
@@ -265,7 +231,7 @@ Future<String> _jsUpdateGoodsItem(Map<String, dynamic> params) async {
       'warehouseId': existingItem.warehouseId,
     };
 
-    final result = await _useCase.updateItem(useCaseParams);
+    final result = await GoodsPlugin.instance.useCase.updateItem(useCaseParams);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -286,7 +252,7 @@ Future<String> _jsDeleteGoodsItem(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: itemId'});
     }
 
-    final existingItem = findGoodsItemById(itemId);
+    final existingItem = GoodsPlugin.instance.findGoodsItemById(itemId);
     if (existingItem == null) {
       return jsonEncode({'error': '物品不存在', 'itemId': itemId});
     }
@@ -297,7 +263,7 @@ Future<String> _jsDeleteGoodsItem(Map<String, dynamic> params) async {
       'warehouseId': existingItem.warehouseId,
     };
 
-    final result = await _useCase.deleteItem(useCaseParams);
+    final result = await GoodsPlugin.instance.useCase.deleteItem(useCaseParams);
 
     if (result.isFailure) {
       return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
@@ -327,7 +293,7 @@ Future<String> _jsAddUsageRecord(Map<String, dynamic> params) async {
     final String? note = params['note'];
 
     // 查找物品
-    final result = findGoodsItemById(itemId);
+    final result = GoodsPlugin.instance.findGoodsItemById(itemId);
     if (result == null) {
       return jsonEncode({'error': '物品不存在', 'itemId': itemId});
     }
@@ -337,7 +303,7 @@ Future<String> _jsAddUsageRecord(Map<String, dynamic> params) async {
 
     // 添加使用记录
     final updatedItem = result.item.addUsageRecord(date, note: note);
-    await saveGoodsItem(result.warehouseId, updatedItem);
+    await GoodsPlugin.instance.saveGoodsItem(result.warehouseId, updatedItem);
 
     return jsonEncode(updatedItem.toJson());
   } catch (e) {
@@ -349,7 +315,7 @@ Future<String> _jsAddUsageRecord(Map<String, dynamic> params) async {
 /// 返回: 包含总数量、总价值、未使用物品数的统计数据
 Future<String> _jsGetStatistics(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.getStats(params);
+    final result = await GoodsPlugin.instance.useCase.getStats(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});

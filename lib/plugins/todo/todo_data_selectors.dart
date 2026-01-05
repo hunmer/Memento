@@ -3,12 +3,12 @@ part of 'todo_plugin.dart';
 // ==================== 数据选择器注册 ====================
 
 void _registerDataSelectors() {
-  pluginDataSelectorService.registerSelector(SelectorDefinition(
+  PluginDataSelectorService.instance.registerSelector(SelectorDefinition(
     id: 'todo.task',
-    pluginId: id,
+    pluginId: TodoPlugin.instance.id,
     name: '选择任务',
-    icon: icon,
-    color: color,
+    icon: TodoPlugin.instance.icon,
+    color: TodoPlugin.instance.color,
     searchable: true,
     selectionMode: SelectionMode.single,
     steps: [
@@ -18,7 +18,7 @@ void _registerDataSelectors() {
         viewType: SelectorViewType.list,
         isFinalStep: true,
         dataLoader: (_) async {
-          return taskController.tasks.map((task) {
+          return TodoPlugin.instance.taskController.tasks.map((task) {
             // 构建副标题：状态 + 优先级 + 日期
             final statusText = task.status == TaskStatus.todo
                 ? '待办'

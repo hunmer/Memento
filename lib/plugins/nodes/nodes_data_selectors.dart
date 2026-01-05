@@ -7,10 +7,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'nodes.node',
-      pluginId: id,
+      pluginId: NodesPlugin.instance.id,
       name: '选择节点',
-      icon: icon,
-      color: color,
+      icon: NodesPlugin.instance.icon,
+      color: NodesPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -23,7 +23,7 @@ void _registerDataSelectors() {
             // 获取所有笔记本的所有节点(扁平列表)
             final List<SelectableItem> items = [];
 
-            for (var notebook in _controller.notebooks) {
+            for (var notebook in NodesPlugin.instance.controller.notebooks) {
               // 递归获取所有节点
               void addNodesRecursively(
                 List<Node> nodes,
@@ -89,10 +89,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'nodes.notebook',
-      pluginId: id,
+      pluginId: NodesPlugin.instance.id,
       name: 'nodes_selectNotebook'.tr,
       icon: Icons.book,
-      color: color,
+      color: NodesPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -102,7 +102,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (_) async {
-            return _controller.notebooks.map((notebook) {
+            return NodesPlugin.instance.controller.notebooks.map((notebook) {
               // 计算节点数量
               final nodeCount = _countAllNodes(notebook.nodes);
 

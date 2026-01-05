@@ -5,10 +5,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'activity.record',
-      pluginId: id,
+      pluginId: ActivityPlugin.instance.id,
       name: '选择活动记录',
-      icon: icon,
-      color: color,
+      icon: ActivityPlugin.instance.icon,
+      color: ActivityPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -20,7 +20,7 @@ void _registerDataSelectors() {
           dataLoader: (_) async {
             // 获取今天的活动记录
             final now = DateTime.now();
-            final activities = await _activityService.getActivitiesForDate(now);
+            final activities = await ActivityPlugin.instance.activityService.getActivitiesForDate(now);
 
             return activities.map((activity) {
               // 格式化时间显示

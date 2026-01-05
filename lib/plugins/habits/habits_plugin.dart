@@ -60,6 +60,39 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
   }
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 习惯相关
+      'getHabits': _jsGetHabits,
+      'getHabitById': _jsGetHabitById,
+      'createHabit': _jsCreateHabit,
+      'updateHabit': _jsUpdateHabit,
+      'deleteHabit': _jsDeleteHabit,
+
+      // 技能相关
+      'getSkills': _jsGetSkills,
+      'getSkillById': _jsGetSkillById,
+      'createSkill': _jsCreateSkill,
+      'updateSkill': _jsUpdateSkill,
+      'deleteSkill': _jsDeleteSkill,
+
+      // 打卡和记录
+      'checkIn': _jsCheckIn,
+      'getCompletionRecords': _jsGetCompletionRecords,
+      'deleteCompletionRecord': _jsDeleteCompletionRecord,
+
+      // 统计
+      'getStats': _jsGetStats,
+      'getTodayHabits': _jsGetTodayHabits,
+
+      // 计时器
+      'startTimer': _jsStartTimer,
+      'stopTimer': _jsStopTimer,
+      'getTimerStatus': _jsGetTimerStatus,
+    };
+  }
+
+  @override
   String get id => 'habits';
 
   @override

@@ -6,10 +6,10 @@ part of 'contact_plugin.dart';
     pluginDataSelectorService.registerSelector(
       SelectorDefinition(
         id: 'contact.person',
-        pluginId: id,
+        pluginId: ContactPlugin.instance.id,
         name: '选择联系人',
-        icon: icon,
-        color: color,
+        icon: ContactPlugin.instance.icon,
+        color: ContactPlugin.instance.color,
         searchable: true,
         selectionMode: SelectionMode.single,
         steps: [
@@ -19,7 +19,7 @@ part of 'contact_plugin.dart';
             viewType: SelectorViewType.list,
             isFinalStep: true,
             dataLoader: (_) async {
-              final contacts = await _controller.getAllContacts();
+              final contacts = await ContactPlugin.instance._controller.getAllContacts();
               return contacts.map((contact) {
                 return SelectableItem(
                   id: contact.id,

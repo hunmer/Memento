@@ -296,6 +296,38 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 日记查询接口
+      'getDiaries': _jsGetDiaries,
+      'getDiary': _jsGetDiary,
+
+      // 日记操作接口
+      'saveDiary': _jsSaveDiary,
+      'deleteDiary': _jsDeleteDiary,
+
+      // 统计接口
+      'getTodayStats': _jsGetTodayStats,
+      'getMonthStats': _jsGetMonthStats,
+      'getTodayWordCount': _jsGetTodayWordCount,
+      'getMonthWordCount': _jsGetMonthWordCount,
+      'getMonthProgress': _jsGetMonthProgress,
+
+      // 日记条目操作接口（直接操作方法）
+      'loadDiaryEntry': _jsLoadDiaryEntry,
+      'saveDiaryEntry': _jsSaveDiaryEntry,
+      'deleteDiaryEntry': _jsDeleteDiaryEntry,
+      'hasEntryForDate': _jsHasEntryForDate,
+      'getDiaryStats': _jsGetDiaryStats,
+
+      // 日记查找接口
+      'findDiaryBy': _jsFindDiaryBy,
+      'findDiaryByDate': _jsFindDiaryByDate,
+      'findDiaryByTitle': _jsFindDiaryByTitle,
+    };
+  }
+
+  @override
   Future<void> initialize() async {
     // 确保日记数据目录存在
     await storage.createDirectory('diary');

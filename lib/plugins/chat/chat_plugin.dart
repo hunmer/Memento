@@ -109,6 +109,10 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   @override
   String get id => 'chat';
 
+  // JSBridgePlugin 实现
+  @override
+  Map<String, Function> defineJSAPI() => throw UnimplementedError();
+
   @override
   Color get color => Colors.indigoAccent;
 

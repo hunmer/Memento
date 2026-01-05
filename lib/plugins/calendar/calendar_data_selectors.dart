@@ -6,10 +6,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'calendar.event',
-      pluginId: id,
+      pluginId: CalendarPlugin.instance.id,
       name: '选择日历事件',
-      icon: icon,
-      color: color,
+      icon: CalendarPlugin.instance.icon,
+      color: CalendarPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -19,7 +19,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.calendar,
           isFinalStep: true,
           dataLoader: (_) async {
-            final events = controller.getAllEvents();
+            final events = CalendarPlugin.instance.controller.getAllEvents();
             return events.map((event) {
               return SelectableItem(
                 id: event.id,

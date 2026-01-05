@@ -65,6 +65,9 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     _registerDataSelectors();
   }
 
+  @override
+  Map<String, Function> defineJSAPI() => _defineJSAPI();
+
   // 获取总笔记数
   int getTotalNotesCount() {
     if (!_isInitialized) return 0;

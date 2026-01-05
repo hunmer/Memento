@@ -1,27 +1,5 @@
 part of 'checkin_plugin.dart';
 
-// ==================== JS API 定义 ====================
-
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 获取签到项目列表
-    'getCheckinItems': _jsGetCheckinItems,
-
-    // 执行签到
-    'checkin': _jsCheckin,
-
-    // 获取签到历史
-    'getCheckinHistory': _jsGetCheckinHistory,
-
-    // 获取统计信息
-    'getStats': _jsGetStats,
-
-    // 创建签到项目
-    'createCheckinItem': _jsCreateCheckinItem,
-  };
-}
-
 // ==================== 分页控制器 ====================
 
 /// 分页控制器 - 对列表进行分页处理
@@ -55,7 +33,7 @@ Map<String, dynamic> _paginate<T>(
 Future<String> _jsGetCheckinItems(Map<String, dynamic> params) async {
   try {
     // 使用 UseCase 获取数据
-    final result = await _checkinUseCase.getItems(params);
+    final result = await CheckinPlugin.instance._checkinUseCase.getItems(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -68,7 +46,7 @@ Future<String> _jsGetCheckinItems(Map<String, dynamic> params) async {
 
     // 转换为前端需要的格式
     final jsonList = items.map((dto) {
-      final item = _dtoToCheckinItem(dto);
+      final item = CheckinPlugin.instance._dtoToCheckinItem(dto);
       return {
         'id': item.id,
         'name': item.name,
@@ -116,7 +94,7 @@ Future<String> _jsCheckin(Map<String, dynamic> params) async {
     };
 
     // 使用 UseCase 添加打卡记录
-    final result = await _checkinUseCase.addCheckinRecord({
+    final result = await CheckinPlugin.instance._checkinUseCase.addCheckinRecord({
       'itemId': itemId,
       ...record,
     });
@@ -126,10 +104,10 @@ Future<String> _jsCheckin(Map<String, dynamic> params) async {
     }
 
     // 更新本地列表
-    await _saveCheckinItems();
+    await CheckinPlugin.instance._saveCheckinItems();
 
     // 查找对应的项目以获取连续天数
-    final item = _checkinItems.firstWhere(
+    final item = CheckinPlugin.instance._checkinItems.firstWhere(
       (item) => item.id == itemId,
       orElse: () => throw Exception('签到项目不存在'),
     );
@@ -160,14 +138,14 @@ Future<String> _jsGetCheckinHistory(Map<String, dynamic> params) async {
     }
 
     // 获取项目信息
-    final itemResult = await _checkinUseCase.getItemById({'id': itemId});
+    final itemResult = await CheckinPlugin.instance._checkinUseCase.getItemById({'id': itemId});
     if (itemResult.isFailure || itemResult.dataOrNull == null) {
       return jsonEncode({'error': '签到项目不存在: $itemId'});
     }
 
     final json = itemResult.dataOrNull as Map<String, dynamic>;
     final itemDto = CheckinItemDto.fromJson(json);
-    final item = _dtoToCheckinItem(itemDto);
+    final item = CheckinPlugin.instance._dtoToCheckinItem(itemDto);
 
     // 可选参数
     final String? startDate = params['startDate'];
@@ -247,14 +225,14 @@ Future<String> _jsGetStats(Map<String, dynamic> params) async {
 
     if (itemId != null) {
       // 获取单个项目的统计信息
-      final itemResult = await _checkinUseCase.getItemById({'id': itemId});
+      final itemResult = await CheckinPlugin.instance._checkinUseCase.getItemById({'id': itemId});
       if (itemResult.isFailure || itemResult.dataOrNull == null) {
         return jsonEncode({'error': '签到项目不存在: $itemId'});
       }
 
       final json = itemResult.dataOrNull as Map<String, dynamic>;
       final itemDto = CheckinItemDto.fromJson(json);
-      final item = _dtoToCheckinItem(itemDto);
+      final item = CheckinPlugin.instance._dtoToCheckinItem(itemDto);
 
       return jsonEncode({
         'itemId': itemId,
@@ -269,7 +247,7 @@ Future<String> _jsGetStats(Map<String, dynamic> params) async {
       });
     } else {
       // 使用 UseCase 获取全局统计信息
-      final statsResult = await _checkinUseCase.getStats({});
+      final statsResult = await CheckinPlugin.instance._checkinUseCase.getStats({});
       if (statsResult.isFailure) {
         return jsonEncode({'error': statsResult.errorOrNull?.message ?? '未知错误'});
       }
@@ -305,7 +283,7 @@ Future<String> _jsCreateCheckinItem(Map<String, dynamic> params) async {
     final int? color = params['color'] ?? Colors.blue.value;
 
     // 使用 UseCase 创建项目
-    final result = await _checkinUseCase.createItem({
+    final result = await CheckinPlugin.instance._checkinUseCase.createItem({
       'id': id,
       'name': name,
       'icon': icon,
@@ -319,11 +297,11 @@ Future<String> _jsCreateCheckinItem(Map<String, dynamic> params) async {
     }
 
     // 更新本地列表
-    await _saveCheckinItems();
+    await CheckinPlugin.instance._saveCheckinItems();
 
     final json = result.dataOrNull as Map<String, dynamic>;
     final itemDto = CheckinItemDto.fromJson(json);
-    final item = _dtoToCheckinItem(itemDto);
+    final item = CheckinPlugin.instance._dtoToCheckinItem(itemDto);
 
     return jsonEncode({
       'success': true,

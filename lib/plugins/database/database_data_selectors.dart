@@ -5,11 +5,11 @@ void _registerDataSelectors() {
   // 1. 数据库表选择器（单级）
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'database.table',
-    pluginId: id,
+    pluginId: DatabasePlugin.instance.id,
     name: '选择数据库表',
     description: '选择一个数据库表',
-    icon: icon,
-    color: color,
+    icon: DatabasePlugin.instance.icon,
+    color: DatabasePlugin.instance.color,
     steps: [
       SelectorStep(
         id: 'table',
@@ -18,13 +18,13 @@ void _registerDataSelectors() {
         isFinalStep: true,
         emptyText: '暂无数据库表，请先创建',
         dataLoader: (_) async {
-          final databases = await service.getAllDatabases();
+          final databases = await DatabasePlugin.instance.service.getAllDatabases();
           return databases.map((database) => SelectableItem(
             id: database.id,
             title: database.name,
             subtitle: database.description,
             icon: Icons.storage,
-            color: color,
+            color: DatabasePlugin.instance.color,
             rawData: database,
           )).toList();
         },
@@ -42,11 +42,11 @@ void _registerDataSelectors() {
   // 2. 记录选择器（两级：数据库 → 记录）
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'database.record',
-    pluginId: id,
+    pluginId: DatabasePlugin.instance.id,
     name: '选择记录',
     description: '选择一条数据库记录',
     icon: Icons.description,
-    color: color,
+    color: DatabasePlugin.instance.color,
     steps: [
       // 第一级：选择数据库
       SelectorStep(
@@ -56,13 +56,13 @@ void _registerDataSelectors() {
         isFinalStep: false,
         emptyText: '暂无数据库',
         dataLoader: (_) async {
-          final databases = await service.getAllDatabases();
+          final databases = await DatabasePlugin.instance.service.getAllDatabases();
           return databases.map((database) => SelectableItem(
             id: database.id,
             title: database.name,
             subtitle: database.description,
             icon: Icons.storage,
-            color: color,
+            color: DatabasePlugin.instance.color,
             rawData: database,
           )).toList();
         },
@@ -83,7 +83,7 @@ void _registerDataSelectors() {
         dataLoader: (previousSelections) async {
           final database = previousSelections['database'] as DatabaseModel;
           // 加载数据库记录
-          final records = await controller.getRecords(database.id);
+          final records = await DatabasePlugin.instance.controller.getRecords(database.id);
           if (records.isEmpty) return [];
 
           return records.map((record) {

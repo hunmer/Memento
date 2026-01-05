@@ -2,8 +2,7 @@ part of 'nodes_plugin.dart';
 
 // ==================== JS API 定义 ====================
 
-@override
-Map<String, Function> defineJSAPI() {
+Map<String, Function> _defineJSAPIImpl() {
   return {
     // 笔记本相关
     'getNotebooks': _jsGetNotebooks,
@@ -38,7 +37,7 @@ Map<String, Function> defineJSAPI() {
 
 /// 获取所有笔记本列表
 Future<String> _jsGetNotebooks(Map<String, dynamic> params) async {
-  final result = await _useCase.getNotebooks(params);
+  final result = await NodesPlugin.instance.useCase.getNotebooks(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -82,7 +81,7 @@ Future<String> _jsGetNotebook(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: notebookId'});
   }
 
-  final result = await _useCase.getNotebookById({'id': notebookId});
+  final result = await NodesPlugin.instance.useCase.getNotebookById({'id': notebookId});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -116,7 +115,7 @@ Future<String> _jsCreateNotebook(Map<String, dynamic> params) async {
   final int? iconCodePoint = params['iconCodePoint'];
   final int? colorValue = params['colorValue'];
 
-  final result = await _useCase.createNotebook({
+  final result = await NodesPlugin.instance.useCase.createNotebook({
     'title': title,
     'id': id,
     'icon': iconCodePoint,
@@ -150,7 +149,7 @@ Future<String> _jsUpdateNotebook(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: updates'});
   }
 
-  final result = await _useCase.updateNotebook({
+  final result = await NodesPlugin.instance.useCase.updateNotebook({
     'id': notebookId,
     ...updates,
   });
@@ -170,7 +169,7 @@ Future<String> _jsDeleteNotebook(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: notebookId'});
   }
 
-  final result = await _useCase.deleteNotebook({'id': notebookId});
+  final result = await NodesPlugin.instance.useCase.deleteNotebook({'id': notebookId});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -190,7 +189,7 @@ Future<String> _jsGetNodes(Map<String, dynamic> params) async {
   // 可选参数
   final String? parentId = params['parentId'];
 
-  final result = await _useCase.getNodes({'notebookId': notebookId});
+  final result = await NodesPlugin.instance.useCase.getNodes({'notebookId': notebookId});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -234,7 +233,7 @@ Future<String> _jsGetNode(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: nodeId'});
   }
 
-  final result = await _useCase.getNodeById({'id': nodeId});
+  final result = await NodesPlugin.instance.useCase.getNodeById({'id': nodeId});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -266,7 +265,7 @@ Future<String> _jsCreateNode(Map<String, dynamic> params) async {
   final useCaseParams = Map<String, dynamic>.from(nodeData);
   useCaseParams['notebookId'] = notebookId;
 
-  final result = await _useCase.createNode(useCaseParams);
+  final result = await NodesPlugin.instance.useCase.createNode(useCaseParams);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -295,7 +294,7 @@ Future<String> _jsUpdateNode(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: updates'});
   }
 
-  final result = await _useCase.updateNode({'id': nodeId, ...updates});
+  final result = await NodesPlugin.instance.useCase.updateNode({'id': nodeId, ...updates});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -313,7 +312,7 @@ Future<String> _jsDeleteNode(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: nodeId'});
   }
 
-  final result = await _useCase.deleteNode({'id': nodeId});
+  final result = await NodesPlugin.instance.useCase.deleteNode({'id': nodeId});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -336,7 +335,7 @@ Future<String> _jsMoveNode(Map<String, dynamic> params) async {
   }
 
   // 获取节点详情
-  final getResult = await _useCase.getNodeById({'id': nodeId});
+  final getResult = await NodesPlugin.instance.useCase.getNodeById({'id': nodeId});
   if (getResult.isFailure) {
     return jsonEncode({'error': getResult.errorOrNull?.message ?? '未知错误'});
   }
@@ -347,7 +346,7 @@ Future<String> _jsMoveNode(Map<String, dynamic> params) async {
   }
 
   // 更新节点的 parentId
-  final updateResult = await _useCase.updateNode({
+  final updateResult = await NodesPlugin.instance.useCase.updateNode({
     'id': nodeId,
     'parentId': newParentId,
   });
@@ -367,7 +366,7 @@ Future<String> _jsGetNodeTree(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: notebookId'});
   }
 
-  final notebookResult = await _useCase.getNotebookById({'id': notebookId});
+  final notebookResult = await NodesPlugin.instance.useCase.getNotebookById({'id': notebookId});
   if (notebookResult.isFailure) {
     return jsonEncode({
       'error': notebookResult.errorOrNull?.message ?? '未知错误',
@@ -399,7 +398,7 @@ Future<String> _jsGetNodePath(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: nodeId'});
   }
 
-  final result = await _useCase.getNodePath({
+  final result = await NodesPlugin.instance.useCase.getNodePath({
     'notebookId': notebookId,
     'nodeId': nodeId,
   });
@@ -436,7 +435,7 @@ Future<String> _jsFindNotebookBy(Map<String, dynamic> params) async {
 
   // 使用搜索功能
   if (field.toLowerCase() == 'title') {
-    final result = await _useCase.searchNotebooks({
+    final result = await NodesPlugin.instance.useCase.searchNotebooks({
       'titleKeyword': value.toString(),
     });
 
@@ -474,7 +473,7 @@ Future<String> _jsFindNotebookBy(Map<String, dynamic> params) async {
 
   // 对于 ID 查找,直接获取笔记本
   if (field.toLowerCase() == 'id') {
-    final result = await _useCase.getNotebookById({'id': value.toString()});
+    final result = await NodesPlugin.instance.useCase.getNotebookById({'id': value.toString()});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -504,7 +503,7 @@ Future<String> _jsFindNotebookById(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: id'});
   }
 
-  final result = await _useCase.getNotebookById({'id': id});
+  final result = await NodesPlugin.instance.useCase.getNotebookById({'id': id});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -533,7 +532,7 @@ Future<String> _jsFindNotebookByTitle(Map<String, dynamic> params) async {
 
   final bool findAll = params['findAll'] ?? false;
 
-  final result = await _useCase.searchNotebooks({'titleKeyword': title});
+  final result = await NodesPlugin.instance.useCase.searchNotebooks({'titleKeyword': title});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -598,7 +597,7 @@ Future<String> _jsFindNodeBy(Map<String, dynamic> params) async {
       searchParams['status'] = statusMap[value.toString().toLowerCase()] ?? 0;
     }
 
-    final result = await _useCase.searchNodes(searchParams);
+    final result = await NodesPlugin.instance.useCase.searchNodes(searchParams);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -615,7 +614,7 @@ Future<String> _jsFindNodeBy(Map<String, dynamic> params) async {
 
   // 对于 ID 查找,直接获取节点
   if (field.toLowerCase() == 'id') {
-    final result = await _useCase.getNodeById({'id': value.toString()});
+    final result = await NodesPlugin.instance.useCase.getNodeById({'id': value.toString()});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -639,7 +638,7 @@ Future<String> _jsFindNodeById(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: nodeId'});
   }
 
-  final result = await _useCase.getNodeById({'id': nodeId});
+  final result = await NodesPlugin.instance.useCase.getNodeById({'id': nodeId});
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message ?? '未知错误'});
@@ -667,7 +666,7 @@ Future<String> _jsFindNodeByTitle(Map<String, dynamic> params) async {
 
   final bool findAll = params['findAll'] ?? false;
 
-  final result = await _useCase.searchNodes({
+  final result = await NodesPlugin.instance.useCase.searchNodes({
     'notebookId': notebookId,
     'titleKeyword': title,
   });

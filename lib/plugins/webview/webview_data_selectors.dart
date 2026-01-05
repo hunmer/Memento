@@ -4,14 +4,14 @@ part of 'webview_plugin.dart';
 
 /// 注册数据选择器
 void _registerDataSelectors() {
-  pluginDataSelectorService.registerSelector(
+  PluginDataSelectorService.instance.registerSelector(
     SelectorDefinition(
       id: 'webview.card',
       pluginId: 'webview',
       name: 'webview_cardSelectorName'.tr,
       description: 'webview_cardSelectorDesc'.tr,
       icon: Icons.link,
-      color: color,
+      color: WebviewPlugin.instance.color,
       selectionMode: SelectionMode.single,
       steps: [
         SelectorStep(
@@ -20,7 +20,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           dataLoader: (previousSelections) async {
             // 加载所有卡片
-            final cards = cardManager.getAllCards();
+            final cards = WebviewPlugin.instance.cardManager.getAllCards();
             return cards.map((card) => SelectableItem(
               id: card.id,
               title: card.title,

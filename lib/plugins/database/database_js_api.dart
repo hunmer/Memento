@@ -2,8 +2,7 @@ part of 'database_plugin.dart';
 
 // ==================== JS API 定义 ====================
 
-@override
-Map<String, Function> defineJSAPI() {
+Map<String, Function> _defineJSAPI() {
   return {
     // 数据库管理
     'getDatabases': _jsGetDatabases,
@@ -39,7 +38,7 @@ Map<String, Function> defineJSAPI() {
 /// 获取所有数据库
 /// 支持分页参数: offset, count
 Future<String> _jsGetDatabases(Map<String, dynamic> params) async {
-  final result = await useCase.getDatabases(params);
+  final result = await DatabasePlugin.instance.useCase.getDatabases(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -50,7 +49,7 @@ Future<String> _jsGetDatabases(Map<String, dynamic> params) async {
 
 /// 创建数据库
 Future<String> _jsCreateDatabase(Map<String, dynamic> params) async {
-  final result = await useCase.createDatabase(params);
+  final result = await DatabasePlugin.instance.useCase.createDatabase(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -61,7 +60,7 @@ Future<String> _jsCreateDatabase(Map<String, dynamic> params) async {
 
 /// 更新数据库
 Future<String> _jsUpdateDatabase(Map<String, dynamic> params) async {
-  final result = await useCase.updateDatabase(params);
+  final result = await DatabasePlugin.instance.useCase.updateDatabase(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -72,7 +71,7 @@ Future<String> _jsUpdateDatabase(Map<String, dynamic> params) async {
 
 /// 删除数据库
 Future<String> _jsDeleteDatabase(Map<String, dynamic> params) async {
-  final result = await useCase.deleteDatabase(params);
+  final result = await DatabasePlugin.instance.useCase.deleteDatabase(params);
 
   if (result.isFailure) {
     return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
@@ -84,7 +83,7 @@ Future<String> _jsDeleteDatabase(Map<String, dynamic> params) async {
 /// 获取数据库的所有记录
 /// 支持分页参数: offset, count
 Future<String> _jsGetRecords(Map<String, dynamic> params) async {
-  final result = await useCase.getRecords(params);
+  final result = await DatabasePlugin.instance.useCase.getRecords(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -95,7 +94,7 @@ Future<String> _jsGetRecords(Map<String, dynamic> params) async {
 
 /// 创建记录
 Future<String> _jsCreateRecord(Map<String, dynamic> params) async {
-  final result = await useCase.createRecord(params);
+  final result = await DatabasePlugin.instance.useCase.createRecord(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -106,7 +105,7 @@ Future<String> _jsCreateRecord(Map<String, dynamic> params) async {
 
 /// 更新记录
 Future<String> _jsUpdateRecord(Map<String, dynamic> params) async {
-  final result = await useCase.updateRecord(params);
+  final result = await DatabasePlugin.instance.useCase.updateRecord(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -117,7 +116,7 @@ Future<String> _jsUpdateRecord(Map<String, dynamic> params) async {
 
 /// 删除记录
 Future<String> _jsDeleteRecord(Map<String, dynamic> params) async {
-  final result = await useCase.deleteRecord(params);
+  final result = await DatabasePlugin.instance.useCase.deleteRecord(params);
 
   if (result.isFailure) {
     return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
@@ -129,7 +128,7 @@ Future<String> _jsDeleteRecord(Map<String, dynamic> params) async {
 /// 查询记录
 /// 支持分页参数: offset, count
 Future<String> _jsQuery(Map<String, dynamic> params) async {
-  final result = await useCase.searchRecords(params);
+  final result = await DatabasePlugin.instance.useCase.searchRecords(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -150,9 +149,9 @@ Future<int> _jsGetCount(Map<String, dynamic> params) async {
   final String? databaseId = params['databaseId'];
 
   if (type == 'databases') {
-    return await service.getDatabaseCount();
+    return await DatabasePlugin.instance.service.getDatabaseCount();
   } else if (type == 'records' && databaseId != null) {
-    final records = await controller.getRecords(databaseId);
+    final records = await DatabasePlugin.instance.controller.getRecords(databaseId);
     return records.length;
   }
   return 0;
@@ -182,7 +181,7 @@ Future<String> _jsFindDatabaseBy(Map<String, dynamic> params) async {
       searchParams['nameKeyword'] = value.toString();
     }
 
-    final result = await useCase.searchDatabases(searchParams);
+    final result = await DatabasePlugin.instance.useCase.searchDatabases(searchParams);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -209,7 +208,7 @@ Future<String> _jsFindDatabaseBy(Map<String, dynamic> params) async {
 
 /// 根据 ID 查找数据库
 Future<String> _jsFindDatabaseById(Map<String, dynamic> params) async {
-  final result = await useCase.getDatabaseById(params);
+  final result = await DatabasePlugin.instance.useCase.getDatabaseById(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -233,7 +232,7 @@ Future<String> _jsFindDatabaseByName(Map<String, dynamic> params) async {
     // 使用 UseCase 搜索数据库
     final searchParams = <String, dynamic>{'nameKeyword': name};
 
-    final result = await useCase.searchDatabases(searchParams);
+    final result = await DatabasePlugin.instance.useCase.searchDatabases(searchParams);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -289,7 +288,7 @@ Future<String> _jsFindRecordBy(Map<String, dynamic> params) async {
       'fieldKeyword': value.toString(),
     };
 
-    final result = await useCase.searchRecords(searchParams);
+    final result = await DatabasePlugin.instance.useCase.searchRecords(searchParams);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -322,7 +321,7 @@ Future<String> _jsFindRecordBy(Map<String, dynamic> params) async {
 
 /// 根据 ID 查找记录
 Future<String> _jsFindRecordById(Map<String, dynamic> params) async {
-  final result = await useCase.getRecordById(params);
+  final result = await DatabasePlugin.instance.useCase.getRecordById(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});

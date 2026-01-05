@@ -1,26 +1,13 @@
 part of 'openai_plugin.dart';
 
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 助手管理
-    'getAgents': _jsGetAgents,
-    'getAgent': _jsGetAgent,
-
-    // 消息发送（带超时处理）
-    'sendMessage': _jsSendMessage,
-
-    // 服务商管理
-    'getProviders': _jsGetProviders,
-    'testProvider': _jsTestProvider,
-  };
-}
+// JS API 实现 - 私有方法
+// defineJSAPI() 方法在主插件类中实现
 
 /// 获取所有 AI 助手列表
 /// 支持分页参数: offset, count
 Future<String> _jsGetAgents(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.getAgents(params);
+    final result = await OpenAIPlugin.instance._useCase.getAgents(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -46,7 +33,7 @@ Future<String> _jsGetAgent(Map<String, dynamic> params) async {
   }
 
   try {
-    final result = await _useCase.getAgentById({'id': agentId});
+    final result = await OpenAIPlugin.instance._useCase.getAgentById({'id': agentId});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -80,7 +67,7 @@ Future<String> _jsSendMessage(Map<String, dynamic> params) async {
 
   try {
     // 验证 agent 是否存在（使用 UseCase）
-    final agentResult = await _useCase.getAgentById({'id': agentId});
+    final agentResult = await OpenAIPlugin.instance._useCase.getAgentById({'id': agentId});
     if (agentResult.isFailure) {
       return jsonEncode({'error': 'Agent not found: $agentId'});
     }
@@ -140,7 +127,7 @@ Future<String> _jsSendMessage(Map<String, dynamic> params) async {
 /// 支持分页参数: offset, count
 Future<String> _jsGetProviders(Map<String, dynamic> params) async {
   try {
-    final result = await _useCase.getServiceProviders(params);
+    final result = await OpenAIPlugin.instance._useCase.getServiceProviders(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -167,7 +154,7 @@ Future<String> _jsTestProvider(Map<String, dynamic> params) async {
 
   try {
     // 使用 UseCase 获取服务商列表
-    final result = await _useCase.getServiceProviders({});
+    final result = await OpenAIPlugin.instance._useCase.getServiceProviders({});
 
     if (result.isFailure) {
       return jsonEncode({

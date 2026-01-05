@@ -84,6 +84,36 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 计时器列表
+      'getTimers': _jsGetTimers,
+
+      // 计时器管理
+      'createTimer': _jsCreateTimer,
+      'deleteTimer': _jsDeleteTimer,
+
+      // 计时器控制
+      'startTimer': _jsStartTimer,
+      'pauseTimer': _jsPauseTimer,
+      'stopTimer': _jsStopTimer,
+      'resetTimer': _jsResetTimer,
+
+      // 计时器状态
+      'getTimerStatus': _jsGetTimerStatus,
+
+      // 历史记录
+      'getHistory': _jsGetHistory,
+
+      // 查找方法
+      'findTimerBy': _jsFindTimerBy,
+      'findTimerById': _jsFindTimerById,
+      'findTimerByName': _jsFindTimerByName,
+      'findTimersByGroup': _jsFindTimersByGroup,
+    };
+  }
+
+  @override
   String? getPluginName(context) {
     return 'timer_name'.tr;
   }

@@ -19,9 +19,6 @@ import 'controllers/tracker_controller.dart';
 import 'screens/home_screen.dart';
 import 'repositories/client_tracker_repository.dart';
 
-part 'tracker_js_api.dart';
-part 'tracker_data_selectors.dart';
-
 export 'models/goal.dart';
 export 'models/record.dart';
 export 'controllers/tracker_controller.dart';
@@ -31,6 +28,10 @@ export 'widgets/goal_edit_page.dart';
 export 'widgets/record_dialog.dart';
 export 'utils/date_utils.dart';
 export 'utils/tracker_notification_utils.dart';
+
+part 'tracker_js_api.dart';
+part 'tracker_data_selectors.dart';
+
 
 class TrackerMainView extends StatefulWidget {
   final String? initialGoalId;

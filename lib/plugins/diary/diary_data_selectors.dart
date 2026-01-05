@@ -5,10 +5,10 @@ part of 'diary_plugin.dart';
     // 日记条目选择器 - 使用日历视图
     pluginDataSelectorService.registerSelector(SelectorDefinition(
       id: 'diary.entry',
-      pluginId: id,
+      pluginId: DiaryPlugin.instance.id,
       name: '选择日记',
-      icon: icon,
-      color: color,
+      icon: DiaryPlugin.instance.icon,
+      color: DiaryPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -30,7 +30,7 @@ part of 'diary_plugin.dart';
                     ? '${entry.content.substring(0, 50)}...'
                     : entry.content,
                 icon: Icons.article,
-                color: color,
+                color: DiaryPlugin.instance.color,
                 rawData: entry,
                 metadata: {
                   'date': e.key,

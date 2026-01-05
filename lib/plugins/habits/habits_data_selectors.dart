@@ -2,12 +2,12 @@ part of 'habits_plugin.dart';
 
 /// 注册数据选择器
 void _registerDataSelectors() {
-  pluginDataSelectorService.registerSelector(SelectorDefinition(
+  PluginDataSelectorService.instance.registerSelector(SelectorDefinition(
     id: 'habits.habit',
-    pluginId: id,
+    pluginId: HabitsPlugin.instance.id,
     name: '选择习惯',
-    icon: icon,
-    color: color,
+    icon: HabitsPlugin.instance.icon,
+    color: HabitsPlugin.instance.color,
     searchable: true,
     selectionMode: SelectionMode.single,
     steps: [
@@ -17,13 +17,13 @@ void _registerDataSelectors() {
         viewType: SelectorViewType.list,
         isFinalStep: true,
         dataLoader: (_) async {
-          final habits = _habitController.getHabits();
+          final habits = HabitsPlugin.instance._habitController.getHabits();
           final List<SelectableItem> items = [];
 
           for (final habit in habits) {
             // 获取累计时长和完成次数作为副标题
-            final duration = await _recordController.getTotalDuration(habit.id);
-            final count = await _recordController.getCompletionCount(habit.id);
+            final duration = await HabitsPlugin.instance._recordController.getTotalDuration(habit.id);
+            final count = await HabitsPlugin.instance._recordController.getCompletionCount(habit.id);
 
             items.add(SelectableItem(
               id: habit.id,

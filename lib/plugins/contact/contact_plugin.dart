@@ -32,9 +32,51 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
   late ContactController _controller;
   late ContactUseCase _useCase;
 
+  // 静态实例，供 part 文件访问
+  static ContactPlugin? _instance;
+  static ContactPlugin get instance {
+    if (_instance == null) {
+      _instance = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
+      if (_instance == null) {
+        throw StateError('ContactPlugin has not been initialized');
+      }
+    }
+    return _instance!;
+  }
+
   // 暴露控制器和 UseCase 供外部访问
   ContactController get controller => _controller;
   ContactUseCase get useCase => _useCase;
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 联系人相关
+      'getContacts': _jsGetContacts,
+      'getContact': _jsGetContact,
+      'createContact': _jsCreateContact,
+      'updateContact': _jsUpdateContact,
+      'deleteContact': _jsDeleteContact,
+
+      // 记录相关
+      'addInteraction': _jsAddInteraction,
+      'getInteractions': _jsGetInteractions,
+      'deleteInteraction': _jsDeleteInteraction,
+
+      // 筛选与统计
+      'getRecentContacts': _jsGetRecentContacts,
+      'getAllTags': _jsGetAllTags,
+
+      // 联系人查找方法
+      'findContactBy': _jsFindContactBy,
+      'findContactById': _jsFindContactById,
+      'findContactByName': _jsFindContactByName,
+
+      // 交互记录查找方法
+      'findInteractionBy': _jsFindInteractionBy,
+      'findInteractionById': _jsFindInteractionById,
+    };
+  }
 
   @override
   String get id => 'contact';

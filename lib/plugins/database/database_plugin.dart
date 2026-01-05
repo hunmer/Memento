@@ -77,6 +77,9 @@ class DatabasePlugin extends BasePlugin with JSBridgePlugin {
   }
 
   @override
+  Map<String, Function> defineJSAPI() => _defineJSAPI();
+
+  @override
   Widget buildMainView(BuildContext context) {
     return DatabaseMainView();
   }
