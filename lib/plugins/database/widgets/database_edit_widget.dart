@@ -1,10 +1,15 @@
 import 'package:get/get.dart';
-import 'package:Memento/plugins/database/controllers/field_controller.dart';
-import 'package:Memento/widgets/picker/image_picker_dialog.dart';
+import 'package:Memento/widgets/form_fields/field_type_selector_field.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 import 'package:Memento/plugins/database/controllers/database_controller.dart';
+import 'package:Memento/plugins/database/controllers/field_controller.dart';
 import 'package:Memento/plugins/database/models/database_model.dart';
 import 'package:Memento/plugins/database/models/field_model.dart';
 import 'package:Memento/plugins/database/models/database_field.dart';
@@ -26,10 +31,10 @@ class DatabaseEditWidget extends StatefulWidget {
 class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     with SingleTickerProviderStateMixin {
   late DatabaseModel _editedDatabase;
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+  FormBuilderWrapperState? _wrapperState; // 用于外部提交按钮
   late TabController _tabController;
   List<FieldModel> _fields = [];
-  String? _selectedFieldType;
 
   @override
   void initState() {
@@ -43,10 +48,8 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 id: field.id,
                 name: field.name,
                 type: field.type,
-                description:
-                    field is FieldModel
-                        ? (field as FieldModel).description
-                        : null,
+                // 将 metadata 对象转为 JSON 字符串存储在 description 中
+                description: field.metadata != null ? jsonEncode(field.metadata) : null,
               ),
             )
             .toList();
@@ -83,36 +86,53 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
   Widget _buildInfoTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: ListView(
-          children: [
-            TextFormField(
+      child: FormBuilderWrapper(
+        formKey: _formKey,
+        onStateReady: (state) => _wrapperState = state,
+        config: FormConfig(
+          showSubmitButton: false,
+          showResetButton: false,
+          fieldSpacing: 16,
+          fields: [
+            // 封面图片
+            FormFieldConfig(
+              name: 'coverImage',
+              type: FormFieldType.imagePicker,
+              labelText: 'database_cover_image_label'.tr,
+              hintText: 'database_upload_cover_image'.tr,
+              initialValue: _editedDatabase.coverImage,
+              extra: {
+                'enableCrop': true,
+                'cropAspectRatio': 1.0,
+                'saveDirectory': 'database_covers',
+                'previewWidth': double.infinity,
+                'previewHeight': 150.0,
+                'showLabel': false,
+                'showShadow': true,
+              },
+            ),
+            // 数据库名称
+            FormFieldConfig(
+              name: 'name',
+              type: FormFieldType.text,
+              labelText: 'database_database_name_label'.tr,
               initialValue: _editedDatabase.name,
-              decoration: InputDecoration(
-                labelText: 'database_database_name_label'.tr,
-              ),
-              onChanged: (value) {
-                _editedDatabase = _editedDatabase.copyWith(name: value);
-              },
+              required: true,
+              validationMessage: '${'database_database_name_label'.tr}不能为空',
+              prefixIcon: Icons.storage,
             ),
-            const SizedBox(height: 16),
-            OutlinedButton(
-              onPressed: _pickImage,
-              child: Text('database_upload_cover_image'.tr),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
+            
+            // 描述
+            FormFieldConfig(
+              name: 'description',
+              type: FormFieldType.textArea,
+              labelText: 'database_description_label'.tr,
+              hintText: 'database_description_hint'.tr,
               initialValue: _editedDatabase.description,
-              decoration: InputDecoration(
-                labelText: 'database_description_label'.tr,
-              ),
-              maxLines: 3,
-              onChanged: (value) {
-                _editedDatabase = _editedDatabase.copyWith(description: value);
-              },
+              prefixIcon: Icons.description,
             ),
           ],
+          onSubmit: _handleFormSubmit,
         ),
       ),
     );
@@ -136,8 +156,27 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                       key: ValueKey(field.id),
                       title: Text(field.name),
                       subtitle: Text(field.type),
-                      trailing: const Icon(Icons.drag_handle),
-                      onTap: () => _editField(field),
+                      leading: Icon(
+                        FieldController.fieldTypes[field.type] ?? Icons.help,
+                        color: Colors.deepPurple,
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            onPressed: () => _editField(field),
+                            tooltip: '编辑'.tr,
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, size: 20),
+                            onPressed: () => _deleteField(field),
+                            tooltip: '删除'.tr,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          const Icon(Icons.drag_handle),
+                        ],
+                      ),
                     ),
                   )
                   .toList(),
@@ -154,130 +193,105 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     );
   }
 
-  Future<void> _pickImage() async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder:
-          (context) =>
-              ImagePickerDialog(enableCrop: true, cropAspectRatio: 1.0),
-    );
+  /// 处理表单提交（来自 FormBuilderWrapper）
+  void _handleFormSubmit(Map<String, dynamic> values) {
+    final name = values['name'] as String? ?? '';
 
-    if (result != null && result['url'] != null && mounted) {
-      setState(() {
-        _editedDatabase = _editedDatabase.copyWith(coverImage: result['url']);
-      });
+    // coverImage 可能是 String（初始值）或 Map（ImagePickerDialog 返回值）
+    String? coverImage;
+    final coverImageValue = values['coverImage'];
+    if (coverImageValue is Map) {
+      coverImage = coverImageValue['url'] as String?;
+    } else if (coverImageValue is String) {
+      coverImage = coverImageValue;
     }
+
+    final description = values['description'] as String?;
+
+    setState(() {
+      _editedDatabase = _editedDatabase.copyWith(
+        name: name,
+        coverImage: coverImage,
+        description: description,
+      );
+    });
   }
 
   Future<void> _editField(FieldModel field) async {
     final result = await showDialog<FieldModel>(
       context: context,
-      builder:
-          (context) => SimpleDialog(
-            title: Text(
-              'Edit ${field.type} ${'database_fields_tab_title'.tr}',
-            ),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    TextFormField(
-                      initialValue: field.name,
-                      decoration: InputDecoration(
-                        labelText: 'database_field_name_label'.tr,
-                      ),
-                      onChanged: (value) => field = field.copyWith(name: value),
-                    ),
-                    if (field.type == 'Text' ||
-                        field.type == 'Long Text' ||
-                        field.type == 'Password')
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'database_default_value_label'.tr,
-                          hintText:
-                              'Enter default ${field.type.toLowerCase()} value',
-                        ),
-                        maxLines: field.type == 'Long Text' ? 3 : 1,
-                        onChanged:
-                            (value) =>
-                                field = field.copyWith(description: value),
-                      ),
-                  ],
-                ),
-              ),
-              OverflowBar(
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('app_cancel'.tr),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, field),
-                    child: Text('app_save'.tr),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      builder: (context) => FieldTypeSelectorDialog(
+        initialSelectedTypes: [field.type],
+        dialogTitle: '编辑字段',
+        multiSelect: false,
+        showConfigTab: true,
+        initialField: field,
+      ),
     );
 
-    if (result != null) {
-      if (mounted) {
-        setState(() {
-          final index = _fields.indexWhere((f) => f.id == result.id);
-          if (index >= 0) {
-            _fields[index] = result;
-          } else {
-            _fields.add(result);
-          }
-        });
-      }
+    if (result != null && mounted) {
+      setState(() {
+        final index = _fields.indexWhere((f) => f.id == result.id);
+        if (index >= 0) {
+          _fields[index] = result;
+        } else {
+          _fields.add(result);
+        }
+      });
+    }
+  }
+
+  /// 删除字段
+  Future<void> _deleteField(FieldModel field) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('database_delete_field_title'.tr),
+        content: Text('database_delete_field_confirm'.trParams({'name': field.name})),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('app_cancel'.tr),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text('app_delete'.tr),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _fields.removeWhere((f) => f.id == field.id);
+      });
     }
   }
 
   Future<void> _showAddFieldDialog() async {
-    final fieldType = await showDialog<String>(
+    final result = await showDialog<FieldModel>(
       context: context,
-      builder:
-          (context) => SimpleDialog(
-            title: Text('database_select_field_type_title'.tr),
-            children: [
-              for (final type in FieldController.getFieldTypes())
-                FieldController.buildFieldTypeTile(
-                  type: type,
-                  onTap: () {
-                    setState(() {
-                      _selectedFieldType = type;
-                    });
-                    Navigator.pop(context, type);
-                  },
-                ),
-              OverflowBar(
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('app_cancel'.tr),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, _selectedFieldType),
-                    child: Text('app_ok'.tr),
-                  ),
-                ],
-              ),
-            ],
-          ),
+      builder: (context) => FieldTypeSelectorDialog(
+        initialSelectedTypes: [],
+        dialogTitle: 'database_select_field_type_title'.tr,
+        multiSelect: false,
+        showConfigTab: true,
+      ),
     );
 
-    if (fieldType != null) {
-      final newField = FieldModel(
-        id: const Uuid().v4(),
-        name: 'database_new_field_title'.trParams({
-          'type': fieldType,
-        }),
-        type: fieldType,
-      );
-      await _editField(newField);
+    if (result != null && mounted) {
+      setState(() {
+        final newField = FieldModel(
+          id: const Uuid().v4(),
+          name: result.name,
+          type: result.type,
+          description: result.description,
+        );
+        _fields.add(newField);
+      });
     }
   }
 
@@ -285,17 +299,33 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
     try {
       if (!mounted) return;
 
+      // 先保存表单数据（通过 wrapperState）
+      _wrapperState?.submitForm();
+
       // 转换字段模型并更新数据库
       _editedDatabase = _editedDatabase.copyWith(
         fields:
             _fields
                 .map(
-                  (field) => DatabaseField(
-                    id: field.id,
-                    name: field.name,
-                    type: field.type,
-                    isRequired: false,
-                  ),
+                  (field) {
+                    // 将 FieldModel 的 description（JSON 字符串）解析为 metadata 对象
+                    Map<String, dynamic>? metadata;
+                    if (field.description != null && field.description!.isNotEmpty) {
+                      try {
+                        metadata = jsonDecode(field.description!) as Map<String, dynamic>;
+                      } catch (e) {
+                        // 解析失败，忽略
+                      }
+                    }
+
+                    return DatabaseField(
+                      id: field.id,
+                      name: field.name,
+                      type: field.type,
+                      isRequired: false,
+                      metadata: metadata,
+                    );
+                  },
                 )
                 .toList(),
       );
