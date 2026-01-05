@@ -4,7 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
+import 'package:super_cupertino_navigation_bar/utils/transitionable_navigation_bar.dart'
+    as HomeWidgetSize;
 
 /// 主页布局管理器
 ///
@@ -270,12 +273,30 @@ class HomeLayoutManager extends ChangeNotifier {
             hasChanged = true;
           }
         } else if (oldItem is HomeFolderItem && newItem is HomeFolderItem) {
-          // 对于文件夹,比较名称、图标、颜色和子项数量
+          // ?????,???????????????
           if (oldItem.name != newItem.name ||
               oldItem.icon != newItem.icon ||
               oldItem.color != newItem.color ||
               oldItem.children.length != newItem.children.length) {
             hasChanged = true;
+          }
+        } else if (oldItem is HomeStackItem && newItem is HomeStackItem) {
+          if (oldItem.direction != newItem.direction ||
+              oldItem.size != newItem.size ||
+              oldItem.activeIndex != newItem.activeIndex ||
+              oldItem.children.length != newItem.children.length) {
+            hasChanged = true;
+          } else {
+            for (var i = 0; i < oldItem.children.length; i++) {
+              final oldChild = oldItem.children[i];
+              final newChild = newItem.children[i];
+              if (oldChild.widgetId != newChild.widgetId ||
+                  oldChild.size != newChild.size ||
+                  !_mapsAreEqual(oldChild.config, newChild.config)) {
+                hasChanged = true;
+                break;
+              }
+            }
           }
         } else {
           // 其他情况,总是更新
@@ -320,6 +341,140 @@ class HomeLayoutManager extends ChangeNotifier {
     _items.insert(newIndex, item);
     _markDirty();
     notifyListeners();
+  }
+
+  // ==================== 折叠组件管理 ====================
+
+  bool canMergeIntoStack(HomeItem target, HomeItem dragged) {
+    final reference = _resolveStackReference(target);
+    if (reference == null) {
+      return false;
+    }
+    final draggedWidgets = _flattenWidgets(dragged);
+    if (draggedWidgets.isEmpty) {
+      return false;
+    }
+    return draggedWidgets.every(
+      (widget) => _hasSameDimensions(reference, widget),
+    );
+  }
+
+  HomeStackItem? mergeIntoStack({
+    required String targetItemId,
+    required String draggedItemId,
+    HomeStackDirection? direction,
+  }) {
+    final targetIndex = _items.indexWhere((item) => item.id == targetItemId);
+    final draggedIndex = _items.indexWhere((item) => item.id == draggedItemId);
+    if (targetIndex == -1 || draggedIndex == -1) {
+      return null;
+    }
+
+    final targetItem = _items[targetIndex];
+    if (targetItem is HomeFolderItem) {
+      return null;
+    }
+
+    final draggedItem = _items[draggedIndex];
+    final draggedWidgets = _flattenWidgets(draggedItem);
+    if (draggedWidgets.isEmpty) {
+      return null;
+    }
+
+    final reference = _resolveStackReference(targetItem);
+    if (reference == null) {
+      return null;
+    }
+
+    if (!draggedWidgets.every(
+      (widget) => _hasSameDimensions(reference, widget),
+    )) {
+      return null;
+    }
+
+    // 先移除被拖拽项，避免索引错位
+    _items.removeAt(draggedIndex);
+    var effectiveTargetIndex = targetIndex;
+    if (draggedIndex < targetIndex) {
+      effectiveTargetIndex -= 1;
+    }
+
+    HomeStackItem updatedStack;
+    if (targetItem is HomeStackItem) {
+      updatedStack = targetItem.copyWith(
+        children: [...targetItem.children, ...draggedWidgets],
+      );
+      _items[effectiveTargetIndex] = updatedStack;
+    } else if (targetItem is HomeWidgetItem) {
+      if (direction == null) {
+        // 新建折叠需要方向
+        _items.insert(draggedIndex, draggedItem);
+        return null;
+      }
+      updatedStack = HomeStackItem(
+        id: targetItem.id,
+        children: [targetItem, ...draggedWidgets],
+        size: targetItem.size,
+        direction: direction,
+      );
+      _items[effectiveTargetIndex] = updatedStack;
+    } else {
+      // 目标不是可折叠项，撤回移除操作
+      _items.insert(
+        draggedIndex > _items.length ? _items.length : draggedIndex,
+        draggedItem,
+      );
+      return null;
+    }
+
+    _markDirty();
+    notifyListeners();
+    return updatedStack;
+  }
+
+  void updateStackActiveIndex(String stackId, int newIndex) {
+    final stack = findItem(stackId);
+    if (stack is! HomeStackItem) {
+      return;
+    }
+    if (newIndex < 0 || newIndex >= stack.children.length) {
+      return;
+    }
+    updateItem(stackId, stack.copyWith(activeIndex: newIndex));
+  }
+
+  HomeWidgetItem? _resolveStackReference(HomeItem item) {
+    if (item is HomeWidgetItem) {
+      return item;
+    }
+    if (item is HomeStackItem && item.children.isNotEmpty) {
+      return item.children.first;
+    }
+    return null;
+  }
+
+  List<HomeWidgetItem> _flattenWidgets(HomeItem item) {
+    if (item is HomeWidgetItem) {
+      return [item];
+    }
+    if (item is HomeStackItem) {
+      return List<HomeWidgetItem>.from(item.children);
+    }
+    return [];
+  }
+
+  bool _hasSameDimensions(HomeWidgetItem a, HomeWidgetItem b) {
+    if (a.size != b.size) {
+      return false;
+    }
+    if (a.size != HomeWidgetSize.custom) {
+      return true;
+    }
+    final aw = (a.config['customWidth'] as int?) ?? 2;
+    final ah = (a.config['customHeight'] as int?) ?? 2;
+    final bw = (b.config['customWidth'] as int?) ?? 2;
+    final bh = (b.config['customHeight'] as int?) ?? 2;
+    return aw == bw && ah == bh;
   }
 
   // ==================== 文件夹管理 ====================
@@ -468,6 +623,8 @@ class HomeLayoutManager extends ChangeNotifier {
           widgets.add(item);
         } else if (item is HomeFolderItem) {
           collectWidgets(item.children);
+        } else if (item is HomeStackItem) {
+          widgets.addAll(item.children);
         }
       }
     }
@@ -482,6 +639,8 @@ class HomeLayoutManager extends ChangeNotifier {
     for (var item in _items) {
       if (item is HomeFolderItem) {
         count += item.itemCount;
+      } else if (item is HomeStackItem) {
+        count += item.children.length;
       }
     }
     return count;

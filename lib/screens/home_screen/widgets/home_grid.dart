@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +10,7 @@ import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
+import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'home_card.dart';
 import 'layout_type_selector.dart';
@@ -29,6 +32,7 @@ class HomeGrid extends StatefulWidget {
   final void Function(Map<String, String>)? onQuickCreateLayout;
   /// 是否显示骨架屏（用于占位加载）
   final bool showSkeleton;
+  final Future<bool> Function(BuildContext context, HomeItem target, HomeItem dragged)? onMergeIntoStack;
 
   const HomeGrid({
     super.key,
@@ -44,6 +48,7 @@ class HomeGrid extends StatefulWidget {
     this.alignment = Alignment.topCenter,
     this.onQuickCreateLayout,
     this.showSkeleton = false,
+    this.onMergeIntoStack,
   });
 
   @override
@@ -53,6 +58,10 @@ class HomeGrid extends StatefulWidget {
 class _HomeGridState extends State<HomeGrid> {
   int? _draggingIndex;
   int? _hoveringIndex;
+  String? _draggingItemId;
+  _DropRegion? _hoveredDropZone;
+  _DropRegion? _appliedPreviewZone;
+  Timer? _previewTimer;
   final String _quickLayoutType = 'empty';
 
   /// 处理添加到文件夹的操作
@@ -60,6 +69,12 @@ class _HomeGridState extends State<HomeGrid> {
     if (widget.onAddToFolder != null) {
       widget.onAddToFolder!(itemId, folderId);
     }
+  }
+
+  @override
+  void dispose() {
+    _previewTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -116,27 +131,35 @@ class _HomeGridState extends State<HomeGrid> {
 
   /// 构建可拖拽的网格瓦片
   Widget _buildDraggableTile(BuildContext context, HomeItem item, int index) {
-    // 获取卡片尺寸
     int crossAxisCellCount = 1;
     int mainAxisCellCount = 1;
 
     if (item is HomeWidgetItem) {
-      // 处理自定义尺寸
       if (item.size == HomeWidgetSize.custom) {
-        // 从 config 中读取自定义宽高
         crossAxisCellCount = item.config['customWidth'] as int? ?? 2;
         mainAxisCellCount = item.config['customHeight'] as int? ?? 2;
       } else {
         crossAxisCellCount = item.size.width;
         mainAxisCellCount = item.size.height;
       }
+    } else if (item is HomeStackItem) {
+      if (item.size == HomeWidgetSize.custom) {
+        if (item.children.isNotEmpty) {
+          crossAxisCellCount = item.children.first.config['customWidth'] as int? ?? 2;
+          mainAxisCellCount = item.children.first.config['customHeight'] as int? ?? 2;
+        } else {
+          crossAxisCellCount = 2;
+          mainAxisCellCount = 2;
+        }
+      } else {
+        crossAxisCellCount = item.size.width;
+        mainAxisCellCount = item.size.height;
+      }
     } else if (item is HomeFolderItem) {
-      // 文件夹固定为 1x1
       crossAxisCellCount = 1;
       mainAxisCellCount = 1;
     }
 
-    // 骨架屏模式：返回骨架占位卡片
     if (widget.showSkeleton) {
       return StaggeredGridTile.count(
         crossAxisCellCount: crossAxisCellCount,
@@ -146,11 +169,9 @@ class _HomeGridState extends State<HomeGrid> {
     }
 
     final isBeingDragged = _draggingIndex == index;
-    final isHovering = _hoveringIndex == index;
-
+    final isHoveringCenter = _hoveringIndex == index;
     final pluginState = _resolvePluginState(context, item);
 
-    // 如果不是编辑模式，返回普通卡片（包括批量选择模式）
     if (!widget.isEditMode) {
       final isSelected = widget.isBatchMode && widget.selectedItemIds.contains(item.id);
       final bool shouldInterceptTap = pluginState.isPluginItem && pluginState.isDisabled;
@@ -160,10 +181,11 @@ class _HomeGridState extends State<HomeGrid> {
         item: item,
         isSelected: isSelected,
         isBatchMode: widget.isBatchMode,
-        onTap:
-            shouldInterceptTap
-                ? () => _showPluginDisabledToast(context, pluginState)
-                : widget.onItemTap != null ? () => widget.onItemTap!(item) : null,
+        onTap: shouldInterceptTap
+            ? () => _showPluginDisabledToast(context, pluginState)
+            : widget.onItemTap != null
+                ? () => widget.onItemTap!(item)
+                : null,
         onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
       );
 
@@ -176,169 +198,315 @@ class _HomeGridState extends State<HomeGrid> {
       );
     }
 
-    // 编辑模式下启用拖拽
+    final dragHandleWidget = Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.drag_indicator,
+        size: 20,
+        color: Theme.of(context).colorScheme.onPrimary,
+      ),
+    );
+
+    final draggableCard = Draggable<String>(
+      data: item.id,
+      feedback: Material(
+        elevation: 8,
+        borderRadius: BorderRadius.circular(12),
+        child: Opacity(
+          opacity: 0.8,
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).cardColor,
+            ),
+            child: Center(
+              child: Icon(
+                Icons.drag_indicator,
+                size: 48,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+      childWhenDragging: Opacity(
+        opacity: 0.3,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: _wrapWithDisabledOverlay(
+            context,
+            HomeCard(
+              key: ValueKey('${item.id}_dragging'),
+              item: item,
+              isEditMode: true,
+              dragHandle: dragHandleWidget,
+            ),
+            pluginState,
+            isInEditMode: true,
+          ),
+        ),
+      ),
+      onDragStarted: () {
+        setState(() {
+          _draggingIndex = index;
+          _draggingItemId = item.id;
+        });
+        _previewTimer?.cancel();
+        HapticFeedback.mediumImpact();
+      },
+      onDragEnd: (_) {
+        setState(() {
+          _draggingIndex = null;
+          _draggingItemId = null;
+          _hoveredDropZone = null;
+        });
+        _previewTimer?.cancel();
+        _appliedPreviewZone = null;
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: isHoveringCenter
+              ? Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                )
+              : null,
+        ),
+        child: _wrapWithDisabledOverlay(
+          context,
+          HomeCard(
+            key: ValueKey(item.id),
+            item: item,
+            isSelected: isBeingDragged || isHoveringCenter,
+            isEditMode: true,
+            dragHandle: dragHandleWidget,
+          ),
+          pluginState,
+          isInEditMode: true,
+        ),
+      ),
+    );
+
+    final centerTarget = DragTarget<String>(
+      hitTestBehavior: HitTestBehavior.translucent,
+      onWillAcceptWithDetails: (details) {
+        setState(() {
+          _hoveringIndex = index;
+        });
+        return details.data != item.id;
+      },
+      onLeave: (_) {
+        setState(() {
+          _hoveringIndex = null;
+        });
+      },
+      onAcceptWithDetails: (details) async {
+        await _handleCenterDrop(context, index, details);
+      },
+      builder: (context, candidateData, rejectedData) => draggableCard,
+    );
+
     return StaggeredGridTile.count(
       crossAxisCellCount: crossAxisCellCount,
       mainAxisCellCount: mainAxisCellCount,
-      child: DragTarget<int>(
-        onWillAcceptWithDetails: (details) {
-          setState(() {
-            _hoveringIndex = index;
-          });
-          return details.data != index;
-        },
-        onLeave: (_) {
-          setState(() {
-            _hoveringIndex = null;
-          });
-        },
-        onAcceptWithDetails: (details) async {
-          final oldIndex = details.data;
-          final newIndex = index;
-          final targetItem = widget.items[newIndex];
-
-          setState(() {
-            _hoveringIndex = null;
-            _draggingIndex = null;
-          });
-
-          if (oldIndex == newIndex) return;
-
-          // 如果目标是文件夹，显示对话框
-          if (targetItem is HomeFolderItem && widget.onReorder != null) {
-            final draggedItem = widget.items[oldIndex];
-            final result = await _showDragToFolderDialog(
-              context,
-              draggedItem,
-              targetItem,
-            );
-
-            if (result == _DragToFolderAction.replace) {
-              // 替换位置：执行正常的重排序
-              widget.onReorder!(oldIndex, newIndex);
-            } else if (result == _DragToFolderAction.addToFolder) {
-              // 添加到文件夹：需要通过回调通知父组件
-              // 这里我们通过特殊的索引值来标记这个操作
-              // 父组件需要处理这种情况
-              _handleAddToFolder(draggedItem.id, targetItem.id);
-            }
-          } else if (widget.onReorder != null) {
-            // 普通重排序
-            widget.onReorder!(oldIndex, newIndex);
-          }
-        },
-        builder: (context, candidateData, rejectedData) {
-          // 创建拖拽手柄（不包裹在 Draggable 中，只是视觉提示）
-          final dragHandleWidget = Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.drag_indicator,
-              size: 20,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-          );
-
-          // 整个卡片可拖拽
-          return Draggable<int>(
-            data: index,
-            feedback: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(12),
-              child: Opacity(
-                opacity: 0.8,
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Theme.of(context).cardColor,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.drag_indicator,
-                      size: 48,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            childWhenDragging: Opacity(
-              opacity: 0.3,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: _wrapWithDisabledOverlay(
-                  context,
-                  HomeCard(
-                    key: ValueKey('${item.id}_dragging'),
-                    item: item,
-                    isEditMode: true,
-                    dragHandle: dragHandleWidget,
-                  ),
-                  pluginState,
-                  isInEditMode: true,
-                ),
-              ),
-            ),
-            onDragStarted: () {
-              setState(() {
-                _draggingIndex = index;
-              });
-              HapticFeedback.mediumImpact();
-            },
-            onDragEnd: (_) {
-              setState(() {
-                _draggingIndex = null;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: isHovering
-                    ? Border.all(
-                        color: Theme.of(context).primaryColor,
-                        width: 2,
-                      )
-                    : null,
-              ),
-              child: _wrapWithDisabledOverlay(
-                context,
-                HomeCard(
-                  key: ValueKey(item.id),
-                  item: item,
-                  isSelected: isBeingDragged || isHovering,
-                  isEditMode: true,
-                  onTap: null,
-                  onLongPress: null,
-                  dragHandle: dragHandleWidget,
-                ),
-                pluginState,
-                isInEditMode: true,
-              ),
-            ),
-          );
-        },
+      child: Stack(
+        children: [
+          centerTarget,
+          if (widget.isEditMode) ..._buildDropZoneWidgets(index),
+        ],
       ),
     );
   }
+  List<Widget> _buildDropZoneWidgets(int index) {
+    return _DropDirection.values.map((direction) {
+      final zone = _DropRegion(index, direction);
+      final isActive = _hoveredDropZone == zone;
+      return Positioned.fill(
+        child: Align(
+          alignment: _alignmentForDirection(direction),
+          child: FractionallySizedBox(
+            widthFactor: direction == _DropDirection.left || direction == _DropDirection.right ? 0.35 : 1,
+            heightFactor: direction == _DropDirection.top || direction == _DropDirection.bottom ? 0.35 : 1,
+            child: DragTarget<String>(
+              hitTestBehavior: HitTestBehavior.translucent,
+              onWillAcceptWithDetails: (details) => _handleDropZoneHover(zone, details),
+              onLeave: (_) => _handleDropZoneLeave(zone),
+              onAcceptWithDetails: (_) {},
+              builder: (context, candidateData, rejectedData) {
+                return AnimatedOpacity(
+                  opacity: isActive ? 0.45 : 0,
+                  duration: const Duration(milliseconds: 150),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  bool _handleDropZoneHover(_DropRegion zone, DragTargetDetails<String> details) {
+    final draggedId = details.data;
+    if (draggedId == null || draggedId == widget.items[zone.index].id) {
+      return false;
+    }
+    final previousZone = _hoveredDropZone;
+    setState(() {
+      _hoveredDropZone = zone;
+    });
+    if (previousZone != zone) {
+      _appliedPreviewZone = null;
+    }
+    if (_appliedPreviewZone == zone) {
+      return true;
+    }
+    _previewTimer?.cancel();
+    _previewTimer = Timer(const Duration(seconds: 1), () {
+      _applyPreview(zone);
+    });
+    return true;
+  }
+
+  void _handleDropZoneLeave(_DropRegion zone) {
+    if (_hoveredDropZone == zone) {
+      setState(() {
+        _hoveredDropZone = null;
+      });
+    }
+    _previewTimer?.cancel();
+    _previewTimer = null;
+    _appliedPreviewZone = null;
+  }
+
+  void _applyPreview(_DropRegion zone) {
+    if (_hoveredDropZone != zone) {
+      return;
+    }
+    final draggedId = _draggingItemId;
+    if (draggedId == null || widget.onReorder == null) {
+      return;
+    }
+    final items = widget.items;
+    final currentIndex = items.indexWhere((element) => element.id == draggedId);
+    if (currentIndex == -1) {
+      return;
+    }
+    int targetIndex = zone.index;
+    if (zone.direction == _DropDirection.bottom || zone.direction == _DropDirection.right) {
+      targetIndex += 1;
+    }
+    if (currentIndex == targetIndex) {
+      return;
+    }
+    _appliedPreviewZone = zone;
+    widget.onReorder!(currentIndex, targetIndex);
+    _previewTimer = null;
+  }
+
+  Future<void> _handleCenterDrop(
+    BuildContext context,
+    int targetIndex,
+    DragTargetDetails<String> details,
+  ) async {
+    setState(() {
+      _hoveringIndex = null;
+      _draggingIndex = null;
+      _draggingItemId = null;
+      _hoveredDropZone = null;
+    });
+    _previewTimer?.cancel();
+    _previewTimer = null;
+    _appliedPreviewZone = null;
+
+    final draggedId = details.data;
+    if (draggedId == null) {
+      return;
+    }
+
+    final targetItem = widget.items[targetIndex];
+    if (draggedId == targetItem.id) {
+      return;
+    }
+
+    final draggedItem = _findItemById(draggedId);
+    if (draggedItem == null) {
+      return;
+    }
+
+    if (targetItem is HomeFolderItem && widget.onReorder != null) {
+      final result = await _showDragToFolderDialog(context, draggedItem, targetItem);
+      if (result == _DragToFolderAction.replace) {
+        final sourceIndex = widget.items.indexWhere((element) => element.id == draggedId);
+        if (sourceIndex != -1) {
+          widget.onReorder!(sourceIndex, targetIndex);
+        }
+      } else if (result == _DragToFolderAction.addToFolder) {
+        _handleAddToFolder(draggedItem.id, targetItem.id);
+      }
+      return;
+    }
+
+    if (widget.onMergeIntoStack != null) {
+      final handled = await widget.onMergeIntoStack!(context, targetItem, draggedItem);
+      if (handled) {
+        return;
+      }
+    }
+  }
+
+  HomeItem? _findItemById(String id) {
+    try {
+      return widget.items.firstWhere((element) => element.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Alignment _alignmentForDirection(_DropDirection direction) {
+    switch (direction) {
+      case _DropDirection.top:
+        return Alignment.topCenter;
+      case _DropDirection.bottom:
+        return Alignment.bottomCenter;
+      case _DropDirection.left:
+        return Alignment.centerLeft;
+      case _DropDirection.right:
+        return Alignment.centerRight;
+    }
+  }
 
   _PluginCardState _resolvePluginState(BuildContext context, HomeItem item) {
-    if (item is! HomeWidgetItem) {
+    HomeWidgetItem? widgetItem;
+    if (item is HomeWidgetItem) {
+      widgetItem = item;
+    } else if (item is HomeStackItem && item.children.isNotEmpty) {
+      final index = item.activeIndex.clamp(0, item.children.length - 1);
+      widgetItem = item.children[index];
+    } else {
       return const _PluginCardState(
         isPluginItem: false,
         isDisabled: false,
@@ -347,7 +515,7 @@ class _HomeGridState extends State<HomeGrid> {
     }
 
     final registry = HomeWidgetRegistry();
-    final widgetDef = registry.getWidget(item.widgetId);
+    final widgetDef = registry.getWidget(widgetItem.widgetId);
 
     if (widgetDef == null) {
       return const _PluginCardState(
@@ -362,8 +530,7 @@ class _HomeGridState extends State<HomeGrid> {
     final enabledInConfig = globalConfigManager.isPluginEnabled(pluginId);
     final isDisabled = !enabledInConfig;
 
-    final displayName =
-        plugin?.getPluginName(context) ?? widgetDef.name;
+    final displayName = plugin?.getPluginName(context) ?? widgetDef.name;
 
     return _PluginCardState(
       isPluginItem: true,
@@ -577,6 +744,23 @@ class _PluginCardState {
 }
 
 /// 拖拽到文件夹的操作枚举
+enum _DropDirection { top, bottom, left, right }
+
+class _DropRegion {
+  final int index;
+  final _DropDirection direction;
+
+  const _DropRegion(this.index, this.direction);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _DropRegion && other.index == index && other.direction == direction;
+  }
+
+  @override
+  int get hashCode => Object.hash(index, direction);
+}
+
 enum _DragToFolderAction {
   replace,      // 替换位置
   addToFolder,  // 添加到文件夹

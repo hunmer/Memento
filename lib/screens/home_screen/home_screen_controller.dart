@@ -7,6 +7,7 @@ import 'managers/home_widget_registry.dart';
 import 'models/home_folder_item.dart';
 import 'models/home_item.dart';
 import 'models/home_widget_item.dart';
+import 'models/home_stack_item.dart';
 import 'models/home_widget_size.dart';
 import 'models/layout_config.dart';
 
@@ -151,6 +152,8 @@ class HomeScreenController extends ChangeNotifier {
           return HomeWidgetSize.custom;
         }
         return item.size;
+      } else if (item is HomeStackItem) {
+        return item.size;
       } else if (item is HomeFolderItem) {
         return HomeWidgetSize.small;
       }
@@ -182,6 +185,8 @@ class HomeScreenController extends ChangeNotifier {
         final item = HomeItem.fromJson(json);
         final HomeWidgetSize size;
         if (item is HomeWidgetItem) {
+          size = item.size;
+        } else if (item is HomeStackItem) {
           size = item.size;
         } else if (item is HomeFolderItem) {
           size = HomeWidgetSize.small;
