@@ -238,13 +238,20 @@ class CheckinListController {
     NavigationHelper.push<CheckinItem>(
       context,
       CheckinFormScreen(initialItem: item),
-    ).then((updatedItem) {
+    ).then((updatedItem) async {
       if (updatedItem != null) {
-        final index = checkinItems.indexWhere((i) => i.id == updatedItem.id);
-        if (index != -1) {
-          checkinItems[index] = updatedItem;
-          CheckinPlugin.shared.triggerSave();
+        // 通过 UseCase 更新数据到存储
+        final result = await CheckinPlugin.instance.checkinUseCase.updateItem(updatedItem.toJson());
+        if (result.isSuccess) {
+          // 保存成功后，重新加载数据
+          await CheckinPlugin.shared.triggerSave();
           onStateChanged();
+        } else {
+          // 显示错误信息
+          final error = result.errorOrNull;
+          ToastService.instance.showToast(
+            error?.message ?? '保存失败',
+          );
         }
       }
     });
@@ -377,12 +384,18 @@ class CheckinListController {
       CheckinFormScreen(initialItem: item),
     ).then((editedItem) async {
       if (editedItem != null) {
-        final index = checkinItems.indexOf(item);
-        if (index != -1) {
-          checkinItems[index] = editedItem;
-          // 如果分组改变了，无需再处理 expandedGroups
+        // 通过 UseCase 更新数据到存储
+        final result = await CheckinPlugin.instance.checkinUseCase.updateItem(editedItem.toJson());
+        if (result.isSuccess) {
+          // 保存成功后，重新加载数据
           await CheckinPlugin.shared.triggerSave();
           onStateChanged();
+        } else {
+          // 显示错误信息
+          final error = result.errorOrNull;
+          ToastService.instance.showToast(
+            error?.message ?? '保存失败',
+          );
         }
       }
     });

@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/models/points_log.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
 import 'package:Memento/core/services/toast_service.dart';
+
+/// 排序顺序枚举
+enum SortOrder {
+  newestFirst,
+  oldestFirst,
+}
 
 class PointsHistory extends StatefulWidget {
   final StoreController controller;
@@ -20,6 +27,12 @@ class _PointsHistoryState extends State<PointsHistory> {
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
   List<PointsLog> _displayedLogs = [];
+
+  // 搜索和过滤状态
+  String _searchQuery = '';
+  Map<String, dynamic> _filters = {};
+  SortOrder _sortOrder = SortOrder.newestFirst;
+  List<PointsLog> _filteredLogs = []; // 完整的过滤后数据
 
   @override
   void initState() {
@@ -54,13 +67,56 @@ class _PointsHistoryState extends State<PointsHistory> {
   void _loadInitialData() {
     setState(() {
       _currentPage = 0;
-      _loadMoreData();
+      _displayedLogs.clear();
+      // 更新完整的过滤后数据
+      _filteredLogs = _applyFilters(widget.controller.pointsLogs);
     });
+    _loadMoreData();
+  }
+
+  /// 应用搜索和过滤条件到原始数据
+  List<PointsLog> _applyFilters(List<PointsLog> originalLogs) {
+    var filtered = List<PointsLog>.from(originalLogs);
+
+    // 搜索过滤（按理由）
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered
+          .where((log) => log.reason.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
+    }
+
+    // 类型过滤（获得/消耗）
+    final types = _filters['type'] as List<String>?;
+    if (types != null && types.isNotEmpty) {
+      filtered = filtered.where((log) => types.contains(log.type)).toList();
+    }
+
+    // 日期范围过滤
+    final dateRange = _filters['dateRange'] as DateTimeRange?;
+    if (dateRange != null) {
+      filtered = filtered
+          .where((log) =>
+              !log.timestamp.isBefore(dateRange.start) &&
+              !log.timestamp.isAfter(dateRange.end))
+          .toList();
+    }
+
+    // 排序
+    switch (_sortOrder) {
+      case SortOrder.newestFirst:
+        filtered.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        break;
+      case SortOrder.oldestFirst:
+        filtered.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+        break;
+    }
+
+    return filtered;
   }
 
   void _loadMoreData() {
     if (_isLoading) return;
-    if (_currentPage * _pageSize >= widget.controller.pointsLogs.length) return;
+    if (_currentPage * _pageSize >= _filteredLogs.length) return;
 
     setState(() {
       _isLoading = true;
@@ -71,16 +127,15 @@ class _PointsHistoryState extends State<PointsHistory> {
       if (mounted) {
         setState(() {
           final start = _currentPage * _pageSize;
-          final end =
-              (start + _pageSize <= widget.controller.pointsLogs.length)
-                  ? start + _pageSize
-                  : widget.controller.pointsLogs.length;
+          final end = (start + _pageSize <= _filteredLogs.length)
+              ? start + _pageSize
+              : _filteredLogs.length;
 
           if (_currentPage == 0) {
-            _displayedLogs = widget.controller.pointsLogs.sublist(start, end);
+            _displayedLogs = _filteredLogs.sublist(start, end);
           } else {
             _displayedLogs.addAll(
-              widget.controller.pointsLogs.sublist(start, end),
+              _filteredLogs.sublist(start, end),
             );
           }
 
@@ -89,6 +144,138 @@ class _PointsHistoryState extends State<PointsHistory> {
         });
       }
     });
+  }
+
+  /// 搜索回调
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+      _currentPage = 0;
+      _displayedLogs.clear();
+      // 更新完整的过滤后数据
+      _filteredLogs = _applyFilters(widget.controller.pointsLogs);
+    });
+    _loadMoreData();
+  }
+
+  /// 多条件过滤回调
+  void _onMultiFilterChanged(Map<String, dynamic> filters) {
+    setState(() {
+      _filters = filters;
+      // 从过滤器中获取排序设置
+      final sortOrder = filters['sortOrder'] as String?;
+      if (sortOrder == 'oldestFirst') {
+        _sortOrder = SortOrder.oldestFirst;
+      } else {
+        _sortOrder = SortOrder.newestFirst;
+      }
+      _currentPage = 0;
+      _displayedLogs.clear();
+      // 更新完整的过滤后数据
+      _filteredLogs = _applyFilters(widget.controller.pointsLogs);
+    });
+    _loadMoreData();
+  }
+
+  /// 构建多条件过滤项
+  List<FilterItem> _buildMultiFilterItems() {
+    return [
+      // 类型过滤（获得/消耗）
+      FilterItem(
+        id: 'type',
+        title: 'store_type'.tr,
+        type: FilterType.tagsMultiple,
+        initialValue: const ['获得', '消耗'],
+        builder: (context, value, onChanged) {
+          final selected = value as List<String>? ?? ['获得', '消耗'];
+          return Wrap(
+            spacing: 8,
+            children: ['获得', '消耗'].map((type) {
+              final isSelected = selected.contains(type);
+              return FilterChip(
+                label: Text(type),
+                selected: isSelected,
+                onSelected: (bool isCurrentlySelected) {
+                  final newSelected = List<String>.from(selected);
+                  if (isCurrentlySelected) {
+                    if (!newSelected.contains(type)) newSelected.add(type);
+                  } else {
+                    newSelected.remove(type);
+                  }
+                  onChanged(newSelected);
+                },
+                selectedColor: Colors.green.withValues(alpha: 0.3),
+                checkmarkColor: Colors.green,
+              );
+            }).toList(),
+          );
+        },
+        getBadge: (value) {
+          final selected = value as List<String>? ?? [];
+          if (selected.length == 2 || selected.isEmpty) return null;
+          return selected.length.toString();
+        },
+      ),
+      // 日期范围过滤
+      FilterItem(
+        id: 'dateRange',
+        title: 'store_dateRange'.tr,
+        type: FilterType.dateRange,
+        initialValue: null,
+        builder: (context, value, onChanged) {
+          final range = value as DateTimeRange?;
+          return TextButton.icon(
+            onPressed: () async {
+              final picked = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(2020),
+                lastDate: DateTime.now().add(const Duration(days: 30)),
+                initialDateRange: range,
+                locale: const Locale('zh', 'CN'),
+              );
+              if (picked != null) {
+                onChanged(picked);
+              }
+            },
+            icon: const Icon(Icons.calendar_today),
+            label: Text(
+              range == null
+                  ? 'store_selectDateRange'.tr
+                  : '${range.start.month}/${range.start.day} - ${range.end.month}/${range.end.day}',
+            ),
+          );
+        },
+        getBadge: (value) => value != null ? '1' : null,
+      ),
+      // 排序选项
+      FilterItem(
+        id: 'sortOrder',
+        title: 'store_sort'.tr,
+        type: FilterType.tagsSingle,
+        initialValue: 'newestFirst',
+        builder: (context, value, onChanged) {
+          final selected = value as String? ?? 'newestFirst';
+          return Wrap(
+            spacing: 8,
+            children: [
+              FilterChip(
+                label: Text('store_newestFirst'.tr),
+                selected: selected == 'newestFirst',
+                onSelected: (_) => onChanged('newestFirst'),
+                selectedColor: Colors.blue.withValues(alpha: 0.3),
+              ),
+              FilterChip(
+                label: Text('store_oldestFirst'.tr),
+                selected: selected == 'oldestFirst',
+                onSelected: (_) => onChanged('oldestFirst'),
+                selectedColor: Colors.blue.withValues(alpha: 0.3),
+              ),
+            ],
+          );
+        },
+        getBadge: (value) => null,
+      ),
+    ];
   }
 
   @override
@@ -200,7 +387,7 @@ class _PointsHistoryState extends State<PointsHistory> {
               controller: _scrollController,
               padding: const EdgeInsets.all(8),
               itemCount: _displayedLogs.length +
-                  (_currentPage * _pageSize < widget.controller.pointsLogs.length ? 1 : 0),
+                  (_currentPage * _pageSize < _filteredLogs.length ? 1 : 0),
               itemBuilder: (context, index) {
                 // 如果是最后一个项目且还有更多数据可加载，显示加载指示器
                 if (index == _displayedLogs.length) {
@@ -260,7 +447,12 @@ class _PointsHistoryState extends State<PointsHistory> {
         ],
       ),
       enableLargeTitle: true,
-      enableSearchBar: false,
+      enableSearchBar: true,
+      enableMultiFilter: true,
+      multiFilterItems: _buildMultiFilterItems(),
+      searchPlaceholder: 'store_searchReason'.tr,
+      onSearchChanged: _onSearchChanged,
+      onMultiFilterChanged: _onMultiFilterChanged,
       actions: [
         TextButton(
           onPressed: () {
