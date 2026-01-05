@@ -177,4 +177,12 @@ const Map<String, String> storeTranslationsZh = {
   'store_times': '次',
   'store_expireIn': '剩余',
   'store_days': '天',
+
+  // 积分历史搜索和过滤
+  'store_searchReason': '搜索理由',
+  'store_type': '类型',
+  'store_selectDateRange': '选择日期范围',
+  'store_sort': '排序',
+  'store_newestFirst': '从新到旧',
+  'store_oldestFirst': '从旧到新',
 };

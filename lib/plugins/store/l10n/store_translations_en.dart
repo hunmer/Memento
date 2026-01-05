@@ -187,4 +187,12 @@ const Map<String, String> storeTranslationsEn = {
   'store_times': 'times',
   'store_expireIn': 'Expires in',
   'store_days': 'days',
+
+  // Points history search and filter
+  'store_searchReason': 'Search reason',
+  'store_type': 'Type',
+  'store_selectDateRange': 'Select date range',
+  'store_sort': 'Sort',
+  'store_newestFirst': 'Newest first',
+  'store_oldestFirst': 'Oldest first',
 };
