@@ -81,6 +81,31 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   IconData get icon => Icons.timeline;
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 活动查询
+      'getActivities': _jsGetActivities,
+
+      // 活动管理
+      'createActivity': _jsCreateActivity,
+      'updateActivity': _jsUpdateActivity,
+      'deleteActivity': _jsDeleteActivity,
+
+      // 统计信息
+      'getTodayStats': _jsGetTodayStats,
+
+      // 标签管理
+      'getTagGroups': _jsGetTagGroups,
+      'getRecentTags': _jsGetRecentTags,
+
+      // 通知管理
+      'enableNotification': _jsEnableNotification,
+      'disableNotification': _jsDisableNotification,
+      'getNotificationStatus': _jsGetNotificationStatus,
+    };
+  }
+
+  @override
   Future<void> registerToApp(
     
     PluginManager pluginManager,

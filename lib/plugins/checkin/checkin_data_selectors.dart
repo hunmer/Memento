@@ -6,10 +6,10 @@ part of 'checkin_plugin.dart';
 void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'checkin.item',
-    pluginId: id,
+    pluginId: CheckinPlugin.instance.id,
     name: '选择签到项',
-    icon: icon,
-    color: color,
+    icon: CheckinPlugin.instance.icon,
+    color: CheckinPlugin.instance.color,
     searchable: true,
     selectionMode: SelectionMode.single,
     steps: [
@@ -19,7 +19,7 @@ void _registerDataSelectors() {
         viewType: SelectorViewType.grid,
         isFinalStep: true,
         dataLoader: (_) async {
-          return _checkinItems.map((item) => SelectableItem(
+          return CheckinPlugin.instance._checkinItems.map((item) => SelectableItem(
             id: item.id,
             title: item.name,
             subtitle: item.group,

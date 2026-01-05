@@ -2,13 +2,13 @@ part of 'tracker_plugin.dart';
 
 /// 注册数据选择器
 void _registerDataSelectors() {
-  pluginDataSelectorService.registerSelector(
+  PluginDataSelectorService.instance.registerSelector(
     SelectorDefinition(
       id: 'tracker.goal',
-      pluginId: id,
+      pluginId: TrackerPlugin.instance.id,
       name: '选择追踪目标',
-      icon: icon,
-      color: color,
+      icon: TrackerPlugin.instance.icon,
+      color: TrackerPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -18,10 +18,11 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (_) async {
-            final goals = await _controller.getAllGoals();
+            final controller = TrackerPlugin.instance._controller;
+            final goals = await controller.getAllGoals();
             return goals.map((goal) {
               // 构建副标题：显示进度和分组信息
-              final progress = _controller.calculateProgress(goal);
+              final progress = controller.calculateProgress(goal);
               final progressText =
                   '${(progress * 100).toStringAsFixed(1)}% (${goal.currentValue}/${goal.targetValue} ${goal.unitType})';
               final subtitle = '${goal.group} • $progressText';

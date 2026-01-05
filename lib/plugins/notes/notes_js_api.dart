@@ -1,7 +1,8 @@
-part of 'package:Memento/plugins/notes/notes_plugin.dart';
+part of 'notes_plugin.dart';
 
-  @override
-  Map<String, Function> defineJSAPI() {
+// ==================== JS API 定义 ====================
+
+Map<String, Function> _defineJSAPI() {
     return {
 
       // 笔记相关
@@ -37,14 +38,14 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 获取笔记列表
   Future<String> _jsGetNotes(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
     // 提取可选参数
     final String? folderId = params['folderId'];
 
-    final result = await _useCase.getNotes({
+    final result = await NotesPlugin.instance._useCase.getNotes({
       'folderId': folderId,
       'offset': params['offset'],
       'count': params['count'],
@@ -63,7 +64,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 获取单个笔记详情
   Future<String> _jsGetNote(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -73,7 +74,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'error': '缺少必需参数: noteId'});
     }
 
-    final result = await _useCase.getNoteById({'id': noteId});
+    final result = await NotesPlugin.instance._useCase.getNoteById({'id': noteId});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -88,7 +89,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 创建新笔记
   Future<String> _jsCreateNote(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -113,7 +114,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
     // 如果没有指定文件夹，使用根文件夹
     final targetFolderId = folderId ?? 'root';
 
-    final result = await _useCase.createNote({
+    final result = await NotesPlugin.instance._useCase.createNote({
       'id': customId,
       'title': title,
       'content': content,
@@ -130,7 +131,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 更新笔记
   Future<String> _jsUpdateNote(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -155,7 +156,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
         ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
         : null;
 
-    final result = await _useCase.updateNote({
+    final result = await NotesPlugin.instance._useCase.updateNote({
       'id': noteId,
       'title': title,
       'content': content,
@@ -171,7 +172,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 删除笔记
   Future<String> _jsDeleteNote(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
@@ -181,7 +182,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'success': false, 'error': '缺少必需参数: noteId'});
     }
 
-    final result = await _useCase.deleteNote({'id': noteId});
+    final result = await NotesPlugin.instance._useCase.deleteNote({'id': noteId});
 
     if (result.isFailure) {
       return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
@@ -192,7 +193,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 搜索笔记
   Future<String> _jsSearchNotes(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -207,7 +208,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
         ? (params['tags'] as List<dynamic>).map((e) => e.toString()).toList()
         : null;
 
-    final result = await _useCase.searchNotes({
+    final result = await NotesPlugin.instance._useCase.searchNotes({
       'keyword': keyword,
       'tags': tags?.join(','),
       'offset': params['offset'],
@@ -223,11 +224,11 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 获取所有文件夹
   Future<String> _jsGetFolders(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
-    final result = await _useCase.getFolders({
+    final result = await NotesPlugin.instance._useCase.getFolders({
       'parentId': params['parentId'],
       'offset': params['offset'],
       'count': params['count'],
@@ -242,7 +243,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 获取单个文件夹详情
   Future<String> _jsGetFolder(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -252,7 +253,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'error': '缺少必需参数: folderId'});
     }
 
-    final result = await _useCase.getFolderById({'id': folderId});
+    final result = await NotesPlugin.instance._useCase.getFolderById({'id': folderId});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -267,7 +268,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 创建文件夹
   Future<String> _jsCreateFolder(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -281,7 +282,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
     final String? customId = params['id'];
     final String? parentId = params['parentId'];
 
-    final result = await _useCase.createFolder({
+    final result = await NotesPlugin.instance._useCase.createFolder({
       'id': customId,
       'name': name,
       'parentId': parentId,
@@ -296,7 +297,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 重命名文件夹
   Future<String> _jsRenameFolder(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
@@ -311,7 +312,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'success': false, 'error': '缺少必需参数: newName'});
     }
 
-    final result = await _useCase.updateFolder({
+    final result = await NotesPlugin.instance._useCase.updateFolder({
       'id': folderId,
       'name': newName,
     });
@@ -325,7 +326,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 删除文件夹（递归删除子文件夹和笔记）
   Future<String> _jsDeleteFolder(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
@@ -335,7 +336,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'success': false, 'error': '缺少必需参数: folderId'});
     }
 
-    final result = await _useCase.deleteFolder({'id': folderId});
+    final result = await NotesPlugin.instance._useCase.deleteFolder({'id': folderId});
 
     if (result.isFailure) {
       return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
@@ -346,7 +347,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 获取文件夹中的笔记
   Future<String> _jsGetFolderNotes(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -356,7 +357,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'error': '缺少必需参数: folderId'});
     }
 
-    final result = await _useCase.getFolderNotes({
+    final result = await NotesPlugin.instance._useCase.getFolderNotes({
       'id': folderId,
       'offset': params['offset'],
       'count': params['count'],
@@ -371,7 +372,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
 
   /// 移动笔记到其他文件夹
   Future<String> _jsMoveNote(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'success': false, 'error': '插件未初始化'});
     }
 
@@ -386,7 +387,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'success': false, 'error': '缺少必需参数: targetFolderId'});
     }
 
-    final result = await _useCase.moveNote({
+    final result = await NotesPlugin.instance._useCase.moveNote({
       'id': noteId,
       'targetFolderId': targetFolderId,
     });
@@ -405,7 +406,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
   Future<String> _jsFindNoteBy(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -422,7 +423,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
     final bool findAll = params['findAll'] ?? false;
 
     // 获取所有笔记
-    final result = await _useCase.getNotes({});
+    final result = await NotesPlugin.instance._useCase.getNotes({});
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
     }
@@ -453,7 +454,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
   /// 根据ID查找笔记
   /// @param params.id 笔记ID (必需)
   Future<String> _jsFindNoteById(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -462,7 +463,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final result = await _useCase.getNoteById({'id': id});
+    final result = await NotesPlugin.instance._useCase.getNoteById({'id': id});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -476,7 +477,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
   Future<String> _jsFindNoteByTitle(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -489,7 +490,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
     final bool findAll = params['findAll'] ?? false;
 
     // 获取所有笔记
-    final result = await _useCase.getNotes({});
+    final result = await NotesPlugin.instance._useCase.getNotes({});
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
     }
@@ -531,7 +532,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
   /// @param params.value 要匹配的值 (必需)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
   Future<String> _jsFindFolderBy(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -548,7 +549,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
     final bool findAll = params['findAll'] ?? false;
 
     // 获取所有文件夹
-    final result = await _useCase.getFolders({});
+    final result = await NotesPlugin.instance._useCase.getFolders({});
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
     }
@@ -579,7 +580,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
   /// 根据ID查找文件夹
   /// @param params.id 文件夹ID (必需)
   Future<String> _jsFindFolderById(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -588,7 +589,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final result = await _useCase.getFolderById({'id': id});
+    final result = await NotesPlugin.instance._useCase.getFolderById({'id': id});
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -602,7 +603,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
   /// @param params.fuzzy 是否模糊匹配 (可选，默认 false)
   /// @param params.findAll 是否返回所有匹配项 (可选，默认 false)
   Future<String> _jsFindFolderByName(Map<String, dynamic> params) async {
-    if (!_isInitialized) {
+    if (!NotesPlugin.instance._isInitialized) {
       return jsonEncode({'error': '插件未初始化'});
     }
 
@@ -615,7 +616,7 @@ part of 'package:Memento/plugins/notes/notes_plugin.dart';
     final bool findAll = params['findAll'] ?? false;
 
     // 获取所有文件夹
-    final result = await _useCase.getFolders({});
+    final result = await NotesPlugin.instance._useCase.getFolders({});
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
     }

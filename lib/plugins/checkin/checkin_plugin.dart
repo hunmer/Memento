@@ -469,8 +469,28 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 获取签到项目列表
+      'getCheckinItems': _jsGetCheckinItems,
+
+      // 执行签到
+      'checkin': _jsCheckin,
+
+      // 获取签到历史
+      'getCheckinHistory': _jsGetCheckinHistory,
+
+      // 获取统计信息
+      'getStats': _jsGetStats,
+
+      // 创建签到项目
+      'createCheckinItem': _jsCreateCheckinItem,
+    };
+  }
+
+  @override
   Future<void> registerToApp(
-    
+
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {

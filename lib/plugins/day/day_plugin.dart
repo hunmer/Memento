@@ -132,6 +132,29 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
         .length;
   }
 
+  // ==================== JS API 定义 ====================
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 纪念日管理（简化命名以符合 JS API 规范）
+      'getDays': _jsGetMemorialDays,
+      'getDayById': _jsFindMemorialDayById,
+      'createDay': _jsCreateMemorialDay,
+      'updateDay': _jsUpdateMemorialDay,
+      'deleteDay': _jsDeleteMemorialDay,
+
+      // 工具方法
+      'getDaysUntil': _jsGetDaysUntil,
+      'getUpcoming': _jsGetUpcomingDays,
+
+      // 查找方法
+      'findDayBy': _jsFindMemorialDayBy,
+      'findDayByName': _jsFindMemorialDayByName,
+    };
+  }
+
+
   /// 根据 ID 获取纪念日（供小组件使用）
   MemorialDay? getMemorialDayById(String id) {
     if (!_isInitialized) return null;

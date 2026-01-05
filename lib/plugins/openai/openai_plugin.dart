@@ -52,6 +52,20 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   OpenAIUseCase get useCase => _useCase;
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // AI 助手管理
+      'getAgents': _jsGetAgents,
+      'getAgent': _jsGetAgent,
+      'sendMessage': _jsSendMessage,
+
+      // 服务商管理
+      'getProviders': _jsGetProviders,
+      'testProvider': _jsTestProvider,
+    };
+  }
+
+  @override
   String get id => 'openai';
 
   @override

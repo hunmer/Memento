@@ -1,37 +1,5 @@
 part of 'diary_plugin.dart';
 
-  @override
-  Map<String, Function> defineJSAPI() {
-    return {
-      // 日记查询接口
-      'getDiaries': _jsGetDiaries,
-      'getDiary': _jsGetDiary,
-
-      // 日记操作接口
-      'saveDiary': _jsSaveDiary,
-      'deleteDiary': _jsDeleteDiary,
-
-      // 统计接口
-      'getTodayStats': _jsGetTodayStats,
-      'getMonthStats': _jsGetMonthStats,
-      'getTodayWordCount': _jsGetTodayWordCount,
-      'getMonthWordCount': _jsGetMonthWordCount,
-      'getMonthProgress': _jsGetMonthProgress,
-
-      // 日记条目操作接口（直接操作方法）
-      'loadDiaryEntry': _jsLoadDiaryEntry,
-      'saveDiaryEntry': _jsSaveDiaryEntry,
-      'deleteDiaryEntry': _jsDeleteDiaryEntry,
-      'hasEntryForDate': _jsHasEntryForDate,
-      'getDiaryStats': _jsGetDiaryStats,
-
-      // 日记查找接口
-      'findDiaryBy': _jsFindDiaryBy,
-      'findDiaryByDate': _jsFindDiaryByDate,
-      'findDiaryByTitle': _jsFindDiaryByTitle,
-    };
-  }
-
   // ==================== JS API 实现 ====================
 
   /// 获取指定日期范围的日记
@@ -50,7 +18,7 @@ part of 'diary_plugin.dart';
       }
 
       // 使用 UseCase 获取日记列表
-      final result = await _diaryUseCase.getEntries(params);
+      final result = await DiaryPlugin.instance._diaryUseCase.getEntries(params);
 
       if (result.isFailure) {
         return {'error': result.errorOrNull?.message ?? '未知错误', 'total': 0, 'diaries': []};
@@ -94,7 +62,7 @@ part of 'diary_plugin.dart';
       }
 
       // 使用 UseCase 获取日记
-      final result = await _diaryUseCase.getEntryByDate(params);
+      final result = await DiaryPlugin.instance._diaryUseCase.getEntryByDate(params);
 
       if (result.isFailure) {
         return {'exists': false, 'error': result.errorOrNull?.message ?? '未知错误'};
@@ -135,13 +103,13 @@ part of 'diary_plugin.dart';
       }
 
       // 先检查是否已存在
-      final checkResult = await _diaryUseCase.getEntryByDate({'date': params['date']});
+      final checkResult = await DiaryPlugin.instance._diaryUseCase.getEntryByDate({'date': params['date']});
       final exists = checkResult.dataOrNull != null;
 
       // 使用 UseCase 保存日记
       final result = exists
-          ? await _diaryUseCase.updateEntry(params)
-          : await _diaryUseCase.createEntry(params);
+          ? await DiaryPlugin.instance._diaryUseCase.updateEntry(params)
+          : await DiaryPlugin.instance._diaryUseCase.createEntry(params);
 
       if (result.isFailure) {
         return {'success': false, 'error': result.errorOrNull?.message ?? '未知错误'};
@@ -166,7 +134,7 @@ part of 'diary_plugin.dart';
       }
 
       // 使用 UseCase 删除日记
-      final result = await _diaryUseCase.deleteEntry(params);
+      final result = await DiaryPlugin.instance._diaryUseCase.deleteEntry(params);
 
       if (result.isFailure) {
         return {'success': false, 'error': result.errorOrNull?.message ?? '未知错误'};
@@ -193,7 +161,7 @@ part of 'diary_plugin.dart';
   ) async {
     try {
       // 使用 UseCase 获取今日字数
-      final result = await _diaryUseCase.getTodayWordCount(params);
+      final result = await DiaryPlugin.instance._diaryUseCase.getTodayWordCount(params);
 
       if (result.isFailure) {
         return {'error': result.errorOrNull?.message ?? '未知错误', 'wordCount': 0};
@@ -219,8 +187,8 @@ part of 'diary_plugin.dart';
   ) async {
     try {
       // 使用 UseCase 获取本月字数和进度
-      final wordCountResult = await _diaryUseCase.getMonthWordCount(params);
-      final progressResult = await _diaryUseCase.getMonthProgress(params);
+      final wordCountResult = await DiaryPlugin.instance._diaryUseCase.getMonthWordCount(params);
+      final progressResult = await DiaryPlugin.instance._diaryUseCase.getMonthProgress(params);
 
       if (wordCountResult.isFailure || progressResult.isFailure) {
         return {
@@ -265,7 +233,7 @@ part of 'diary_plugin.dart';
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: 数字，今日字数
   Future<int> _jsGetTodayWordCount(Map<String, dynamic> params) async {
-    final result = await _diaryUseCase.getTodayWordCount(params);
+    final result = await DiaryPlugin.instance._diaryUseCase.getTodayWordCount(params);
     return result.dataOrNull ?? 0;
   }
 
@@ -273,7 +241,7 @@ part of 'diary_plugin.dart';
   /// 参数: {} (空对象，保持接口一致性)
   /// 返回: 数字，本月总字数
   Future<int> _jsGetMonthWordCount(Map<String, dynamic> params) async {
-    final result = await _diaryUseCase.getMonthWordCount(params);
+    final result = await DiaryPlugin.instance._diaryUseCase.getMonthWordCount(params);
     return result.dataOrNull ?? 0;
   }
 
@@ -283,7 +251,7 @@ part of 'diary_plugin.dart';
   Future<Map<String, int>> _jsGetMonthProgress(
     Map<String, dynamic> params,
   ) async {
-    final result = await _diaryUseCase.getMonthProgress(params);
+    final result = await DiaryPlugin.instance._diaryUseCase.getMonthProgress(params);
     final progress = result.dataOrNull ?? {};
     return {
       'completedDays': progress['completedDays'] ?? 0,
@@ -303,7 +271,7 @@ part of 'diary_plugin.dart';
       }
 
       // 使用 UseCase 获取日记
-      final result = await _diaryUseCase.getEntryByDate({'date': params['dateStr']});
+      final result = await DiaryPlugin.instance._diaryUseCase.getEntryByDate({'date': params['dateStr']});
 
       if (result.isFailure) {
         return {'error': result.errorOrNull?.message ?? '未知错误'};
@@ -335,13 +303,13 @@ part of 'diary_plugin.dart';
       };
 
       // 先检查是否已存在
-      final checkResult = await _diaryUseCase.getEntryByDate({'date': params['dateStr']});
+      final checkResult = await DiaryPlugin.instance._diaryUseCase.getEntryByDate({'date': params['dateStr']});
       final exists = checkResult.dataOrNull != null;
 
       // 使用 UseCase 保存
       final result = exists
-          ? await _diaryUseCase.updateEntry(saveParams)
-          : await _diaryUseCase.createEntry(saveParams);
+          ? await DiaryPlugin.instance._diaryUseCase.updateEntry(saveParams)
+          : await DiaryPlugin.instance._diaryUseCase.createEntry(saveParams);
 
       if (result.isFailure) {
         return {'error': result.errorOrNull?.message ?? '未知错误'};
@@ -363,7 +331,7 @@ part of 'diary_plugin.dart';
       }
 
       // 使用 UseCase 删除
-      final result = await _diaryUseCase.deleteEntry({'date': params['dateStr']});
+      final result = await DiaryPlugin.instance._diaryUseCase.deleteEntry({'date': params['dateStr']});
 
       if (result.isFailure) {
         debugPrint('Delete diary entry error: ${result.errorOrNull?.message ?? '未知错误'}');
@@ -388,7 +356,7 @@ part of 'diary_plugin.dart';
       }
 
       // 使用 UseCase 获取日记
-      final result = await _diaryUseCase.getEntryByDate({'date': params['dateStr']});
+      final result = await DiaryPlugin.instance._diaryUseCase.getEntryByDate({'date': params['dateStr']});
       return result.dataOrNull != null;
     } catch (e) {
       debugPrint('Check diary entry error: $e');
@@ -402,7 +370,7 @@ part of 'diary_plugin.dart';
   Future<Map<String, dynamic>> _jsGetDiaryStats(
     Map<String, dynamic> params,
   ) async {
-    final result = await _diaryUseCase.getStats(params);
+    final result = await DiaryPlugin.instance._diaryUseCase.getStats(params);
     return result.dataOrNull ?? {};
   }
 
@@ -430,7 +398,7 @@ part of 'diary_plugin.dart';
       final startDate = DateTime(2000, 1, 1); // 足够早的日期
       final endDate = DateTime(now.year + 1, 12, 31); // 足够晚的日期
 
-      final result = await _diaryUseCase.getEntries({
+      final result = await DiaryPlugin.instance._diaryUseCase.getEntries({
         'startDate': DateFormat('yyyy-MM-dd').format(startDate),
         'endDate': DateFormat('yyyy-MM-dd').format(endDate),
       });
@@ -509,7 +477,7 @@ part of 'diary_plugin.dart';
       final startDate = DateTime(2000, 1, 1);
       final endDate = DateTime(now.year + 1, 12, 31);
 
-      final result = await _diaryUseCase.getEntries({
+      final result = await DiaryPlugin.instance._diaryUseCase.getEntries({
         'startDate': DateFormat('yyyy-MM-dd').format(startDate),
         'endDate': DateFormat('yyyy-MM-dd').format(endDate),
       });

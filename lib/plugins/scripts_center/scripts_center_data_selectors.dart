@@ -10,10 +10,10 @@ void registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'scripts_center.script',
-      pluginId: id,
+      pluginId: ScriptsCenterPlugin.instance.id,
       name: 'scripts_center_selectScript'.tr,
-      icon: icon,
-      color: color,
+      icon: ScriptsCenterPlugin.instance.icon,
+      color: ScriptsCenterPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -24,7 +24,7 @@ void registerDataSelectors() {
           isFinalStep: true,
           dataLoader: (_) async {
             // 获取所有启用的脚本
-            final scripts = await _scriptManager.loadAllScripts();
+            final scripts = await ScriptsCenterPlugin.instance.scriptManager.loadAllScripts();
             final enabledScripts = scripts.where((s) => s.enabled).toList();
 
             return enabledScripts.map((script) {

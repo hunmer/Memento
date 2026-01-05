@@ -4,13 +4,13 @@ part of 'store_plugin.dart';
 
 /// 注册数据选择器
 void _registerDataSelectors() {
-  final selectorService = pluginDataSelectorService;
+  final selectorService = PluginDataSelectorService.instance;
 
   // 注册积分目标配置选择器（表单类型）
   selectorService.registerSelector(
     SelectorDefinition(
       id: 'store.pointsGoalForm',
-      pluginId: id,
+      pluginId: StorePlugin.instance.id,
       name: '积分目标配置',
       description: '设置每日积分目标',
       icon: Icons.flag,
@@ -42,11 +42,11 @@ void _registerDataSelectors() {
   selectorService.registerSelector(
     SelectorDefinition(
       id: 'store.product',
-      pluginId: id,
+      pluginId: StorePlugin.instance.id,
       name: 'store_productSelectorName'.tr,
       description: 'store_productSelectorDesc'.tr,
-      icon: icon,
-      color: color,
+      icon: StorePlugin.instance.icon,
+      color: StorePlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -56,7 +56,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.grid,
           isFinalStep: true,
           dataLoader: (_) async {
-            return controller.products.map((product) {
+            return StorePlugin.instance.controller.products.map((product) {
               // 构建副标题：价格 + 库存
               final subtitle =
                   '${product.price} ${'store_points'.tr} · ${'store_stockLabel'.tr}: ${product.stock}';
@@ -94,11 +94,11 @@ void _registerDataSelectors() {
   selectorService.registerSelector(
     SelectorDefinition(
       id: 'store.userItem',
-      pluginId: id,
+      pluginId: StorePlugin.instance.id,
       name: 'store_userItemSelectorName'.tr,
       description: 'store_userItemSelectorDesc'.tr,
       icon: Icons.inventory_2,
-      color: color,
+      color: StorePlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -108,7 +108,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (_) async {
-            return controller.userItems.map((item) {
+            return StorePlugin.instance.controller.userItems.map((item) {
               final productSnapshot = item.productSnapshot;
               final productName =
                   productSnapshot['name'] as String? ?? '未知物品';

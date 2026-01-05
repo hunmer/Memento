@@ -61,6 +61,31 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   bool get isInitialized => _isInitialized;
 
   @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 卡片管理
+      'getCards': _jsGetCards,
+      'addCard': _jsAddCard,
+      'deleteCard': _jsDeleteCard,
+      'updateCard': _jsUpdateCard,
+      'findCardById': _jsFindCardById,
+      'findCardByUrl': _jsFindCardByUrl,
+
+      // 标签页管理
+      'getTabs': _jsGetTabs,
+      'createTab': _jsCreateTab,
+      'closeTab': _jsCloseTab,
+      'switchTab': _jsSwitchTab,
+
+      // 导航
+      'navigate': _jsNavigate,
+      'goBack': _jsGoBack,
+      'goForward': _jsGoForward,
+      'reload': _jsReload,
+    };
+  }
+
+  @override
   String get id => 'webview';
 
   @override

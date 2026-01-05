@@ -115,7 +115,7 @@ Future<String> _jsGetTasks(Map<String, dynamic> params) async {
   }
 
   // 调用 UseCase
-  final result = await _todoUseCase.getTasks(useCaseParams);
+  final result = await TodoPlugin.instance._todoUseCase.getTasks(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -134,7 +134,7 @@ Future<String> _jsGetTask(Map<String, dynamic> params) async {
   }
 
   // 调用 UseCase
-  final result = await _todoUseCase.getTaskById({'id': taskId});
+  final result = await TodoPlugin.instance._todoUseCase.getTaskById({'id': taskId});
 
   if (result.isSuccess) {
     final taskData = result.dataOrNull;
@@ -160,7 +160,7 @@ Future<String> _jsGetTodayTasks(Map<String, dynamic> params) async {
   }
 
   // 调用 UseCase
-  final result = await _todoUseCase.getTodayTasks(useCaseParams);
+  final result = await TodoPlugin.instance._todoUseCase.getTodayTasks(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -182,7 +182,7 @@ Future<String> _jsGetOverdueTasks(Map<String, dynamic> params) async {
   }
 
   // 调用 UseCase
-  final result = await _todoUseCase.getOverdueTasks(useCaseParams);
+  final result = await TodoPlugin.instance._todoUseCase.getOverdueTasks(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -218,7 +218,7 @@ Future<String> _jsGetUpcomingTasks(Map<String, dynamic> params) async {
     }
 
     // 调用 UseCase
-    final result = await _todoUseCase.getUpcomingTasks(useCaseParams);
+    final result = await TodoPlugin.instance._todoUseCase.getUpcomingTasks(useCaseParams);
 
     return jsonEncode({
       'success': true,
@@ -299,7 +299,7 @@ Future<String> _jsCreateTask(Map<String, dynamic> params) async {
     }
 
     // 调用 UseCase
-    final result = await _todoUseCase.createTask(useCaseParams);
+    final result = await TodoPlugin.instance._todoUseCase.createTask(useCaseParams);
 
     if (result.isSuccess) {
       return jsonEncode(result.dataOrNull);
@@ -391,7 +391,7 @@ Future<String> _jsUpdateTask(Map<String, dynamic> params) async {
     }
 
     // 调用 UseCase
-    final result = await _todoUseCase.updateTask(useCaseParams);
+    final result = await TodoPlugin.instance._todoUseCase.updateTask(useCaseParams);
 
     if (result.isSuccess) {
       return jsonEncode(result.dataOrNull);
@@ -415,7 +415,7 @@ Future<String> _jsDeleteTask(Map<String, dynamic> params) async {
     }
 
     // 调用 UseCase
-    final result = await _todoUseCase.deleteTask({'id': taskId});
+    final result = await TodoPlugin.instance._todoUseCase.deleteTask({'id': taskId});
 
     if (result.isSuccess) {
       return jsonEncode({'success': true, 'taskId': taskId});
@@ -439,7 +439,7 @@ Future<String> _jsCompleteTask(Map<String, dynamic> params) async {
     }
 
     // 调用 UseCase
-    final result = await _todoUseCase.completeTask({'id': taskId});
+    final result = await TodoPlugin.instance._todoUseCase.completeTask({'id': taskId});
 
     if (result.isSuccess) {
       return jsonEncode(result.dataOrNull);
@@ -518,7 +518,7 @@ Future<String> _jsFindTaskById(Map<String, dynamic> params) async {
   }
 
   try {
-    final task = taskController.tasks.firstWhere((t) => t.id == id);
+    final task = TodoPlugin.instance.taskController.tasks.firstWhere((t) => t.id == id);
     return jsonEncode(task.toJson());
   } catch (e) {
     return jsonEncode(null);
@@ -542,7 +542,7 @@ Future<String> _jsFindTaskByTitle(Map<String, dynamic> params) async {
   final int? offset = params['offset'];
   final int? count = params['count'];
 
-  final tasks = taskController.tasks;
+  final tasks = TodoPlugin.instance.taskController.tasks;
   final List<Task> matchedTasks = [];
 
   for (final task in tasks) {
@@ -596,7 +596,7 @@ Future<String> _jsFindTasksByTag(Map<String, dynamic> params) async {
   final String? statusStr = params['status'];
   final String? priorityStr = params['priority'];
 
-  List<Task> tasks = taskController.tasks.where((t) => t.tags.contains(tag)).toList();
+  List<Task> tasks = TodoPlugin.instance.taskController.tasks.where((t) => t.tags.contains(tag)).toList();
 
   // 状态过滤
   final status = _normalizeStatus(statusStr);
@@ -659,7 +659,7 @@ Future<String> _jsFindTasksByStatus(Map<String, dynamic> params) async {
     return jsonEncode({'error': '无效的状态值: $statusStr'});
   }
 
-  List<Task> tasks = taskController.tasks.where((t) => t.status == status).toList();
+  List<Task> tasks = TodoPlugin.instance.taskController.tasks.where((t) => t.status == status).toList();
 
   // 日期过滤
   final String? startDateStr = params['startDate'];
@@ -734,7 +734,7 @@ Future<String> _jsFindTasksByPriority(Map<String, dynamic> params) async {
     return jsonEncode({'error': '无效的优先级值: $priorityStr'});
   }
 
-  List<Task> tasks = taskController.tasks.where((t) => t.priority == priority).toList();
+  List<Task> tasks = TodoPlugin.instance.taskController.tasks.where((t) => t.priority == priority).toList();
 
   // 可选的状态过滤
   final String? statusStr = params['status'];

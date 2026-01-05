@@ -1,6 +1,7 @@
 part of 'chat_plugin.dart';
 
-/// JS API 定义
+// ==================== JS API 定义 ====================
+
 @override
 Map<String, Function> defineJSAPI() {
   return {
@@ -37,50 +38,50 @@ Map<String, Function> defineJSAPI() {
 /// 获取所有频道
 /// 支持分页参数: offset, count
 Future<String> _jsGetChannels(Map<String, dynamic> params) async {
-  final result = await chatUseCase.getChannels(params);
+  final result = await ChatPlugin.instance.chatUseCase.getChannels(params);
   return result.toJsonString();
 }
 
 /// 创建频道
 Future<String> _jsCreateChannel(Map<String, dynamic> params) async {
-  final result = await chatUseCase.createChannel(params);
+  final result = await ChatPlugin.instance.chatUseCase.createChannel(params);
   return result.toJsonString();
 }
 
 /// 删除频道
 Future<String> _jsDeleteChannel(Map<String, dynamic> params) async {
-  final result = await chatUseCase.deleteChannel(params);
+  final result = await ChatPlugin.instance.chatUseCase.deleteChannel(params);
   return result.toJsonString();
 }
 
 /// 发送消息
 Future<String> _jsSendMessage(Map<String, dynamic> params) async {
-  final result = await chatUseCase.sendMessage(params);
+  final result = await ChatPlugin.instance.chatUseCase.sendMessage(params);
   return result.toJsonString();
 }
 
 /// 获取频道消息
 /// 支持分页参数: offset, count (或旧版 limit)
 Future<String> _jsGetMessages(Map<String, dynamic> params) async {
-  final result = await chatUseCase.getMessages(params);
+  final result = await ChatPlugin.instance.chatUseCase.getMessages(params);
   return result.toJsonString();
 }
 
 /// 删除消息
 Future<String> _jsDeleteMessage(Map<String, dynamic> params) async {
-  final result = await chatUseCase.deleteMessage(params);
+  final result = await ChatPlugin.instance.chatUseCase.deleteMessage(params);
   return result.toJsonString();
 }
 
 /// 获取当前用户
 Future<String> _jsGetCurrentUser(Map<String, dynamic> params) async {
-  final result = await chatUseCase.getCurrentUser(params);
+  final result = await ChatPlugin.instance.chatUseCase.getCurrentUser(params);
   return result.toJsonString();
 }
 
 /// 获取 AI 用户
 Future<String> _jsGetAIUser(Map<String, dynamic> params) async {
-  final result = await chatUseCase.getAIUser();
+  final result = await ChatPlugin.instance.chatUseCase.getAIUser();
   return result.toJsonString();
 }
 
@@ -93,14 +94,14 @@ Future<String> _jsGetAIUser(Map<String, dynamic> params) async {
 /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
 /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
 Future<String> _jsFindChannelBy(Map<String, dynamic> params) async {
-  final result = await chatUseCase.findChannelBy(params);
+  final result = await ChatPlugin.instance.chatUseCase.findChannelBy(params);
   return result.toJsonString();
 }
 
 /// 根据ID查找频道
 /// @param params.id 频道ID (必需)
 Future<String> _jsFindChannelById(Map<String, dynamic> params) async {
-  final result = await chatUseCase.findChannelById(params);
+  final result = await ChatPlugin.instance.chatUseCase.findChannelById(params);
   return result.toJsonString();
 }
 
@@ -111,7 +112,7 @@ Future<String> _jsFindChannelById(Map<String, dynamic> params) async {
 /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
 /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
 Future<String> _jsFindChannelByTitle(Map<String, dynamic> params) async {
-  final result = await chatUseCase.findChannelByTitle(params);
+  final result = await ChatPlugin.instance.chatUseCase.findChannelByTitle(params);
   return result.toJsonString();
 }
 
@@ -125,7 +126,7 @@ Future<String> _jsFindChannelByTitle(Map<String, dynamic> params) async {
 /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
 /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
 Future<String> _jsFindMessageBy(Map<String, dynamic> params) async {
-  final result = await chatUseCase.findMessageBy(params);
+  final result = await ChatPlugin.instance.chatUseCase.findMessageBy(params);
   return result.toJsonString();
 }
 
@@ -133,7 +134,7 @@ Future<String> _jsFindMessageBy(Map<String, dynamic> params) async {
 /// @param params.id 消息ID (必需)
 /// @param params.channelId 限定在特定频道内查找 (可选)
 Future<String> _jsFindMessageById(Map<String, dynamic> params) async {
-  final result = await chatUseCase.findMessageById(params);
+  final result = await ChatPlugin.instance.chatUseCase.findMessageById(params);
   return result.toJsonString();
 }
 
@@ -145,7 +146,7 @@ Future<String> _jsFindMessageById(Map<String, dynamic> params) async {
 /// @param params.offset 分页起始位置 (可选，仅 findAll=true 时有效)
 /// @param params.count 分页返回数量 (可选，仅 findAll=true 时有效，默认 100)
 Future<String> _jsFindMessageByContent(Map<String, dynamic> params) async {
-  final result = await chatUseCase.findMessageByContent(params);
+  final result = await ChatPlugin.instance.chatUseCase.findMessageByContent(params);
   return result.toJsonString();
 }
 
@@ -173,7 +174,7 @@ Future<String> _jsGetMessagesByDate(Map<String, dynamic> params) async {
     final endDate = DateTime.parse(endDateStr).add(const Duration(days: 1)); // 包含结束日期当天的消息
 
     // 获取所有频道
-    final channelsResult = await chatUseCase.getChannels({});
+    final channelsResult = await ChatPlugin.instance.chatUseCase.getChannels({});
     if (channelsResult.isFailure) {
       return '{"error": "获取频道失败", "messages": []}';
     }
@@ -197,7 +198,7 @@ Future<String> _jsGetMessagesByDate(Map<String, dynamic> params) async {
 
       try {
         // 获取频道的所有消息
-        final messagesResult = await chatUseCase.getMessages({
+        final messagesResult = await ChatPlugin.instance.chatUseCase.getMessages({
           'channelId': channelId,
         });
 

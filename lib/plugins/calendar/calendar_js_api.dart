@@ -1,33 +1,8 @@
 part of 'calendar_plugin.dart';
 
-// ==================== JS API 定义 ====================
+// ==================== JS API 实现 ====================
 
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 事件查询
-    'getEvents': _jsGetEvents,
-    'getTodayEvents': _jsGetTodayEvents,
-    'getEventsByDateRange': _jsGetEventsByDateRange,
-    'getUpcoming': _jsGetUpcoming,
-
-    // 事件操作
-    'createEvent': _jsCreateEvent,
-    'updateEvent': _jsUpdateEvent,
-    'deleteEvent': _jsDeleteEvent,
-    'completeEvent': _jsCompleteEvent,
-
-    // 已完成事件
-    'getCompletedEvents': _jsGetCompletedEvents,
-
-    // 事件查找方法
-    'findEventBy': _jsFindEventBy,
-    'findEventById': _jsFindEventById,
-    'findEventByTitle': _jsFindEventByTitle,
-  };
-}
-
-// ==================== 分页控制器 ====================
+// 以下函数供 CalendarPlugin.defineJSAPI() 使用
 
 /// 分页控制器 - 对列表进行分页处理
 /// @param list 原始数据列表
@@ -58,7 +33,7 @@ Map<String, dynamic> _paginate<T>(
 /// 获取所有事件（包括 Todo 任务事件）
 /// 支持分页参数: offset, count
 Future<String> _jsGetEvents(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.getEvents(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.getEvents(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -79,7 +54,7 @@ Future<String> _jsGetTodayEvents(Map<String, dynamic> params) async {
   filteredParams['startDate'] = today.subtract(const Duration(seconds: 1));
   filteredParams['endDate'] = tomorrow;
 
-  final result = await calendarUseCase.searchEvents(filteredParams);
+  final result = await CalendarPlugin.instance.calendarUseCase.searchEvents(filteredParams);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -110,7 +85,7 @@ Future<String> _jsGetEventsByDateRange(Map<String, dynamic> params) async {
   filteredParams['startDate'] = startDate;
   filteredParams['endDate'] = endDate;
 
-  final result = await calendarUseCase.searchEvents(filteredParams);
+  final result = await CalendarPlugin.instance.calendarUseCase.searchEvents(filteredParams);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -133,7 +108,7 @@ Future<String> _jsGetUpcoming(Map<String, dynamic> params) async {
     filteredParams['startDate'] = now;
     filteredParams['endDate'] = endDate;
 
-    final result = await calendarUseCase.searchEvents(filteredParams);
+    final result = await CalendarPlugin.instance.calendarUseCase.searchEvents(filteredParams);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -159,7 +134,7 @@ Future<String> _jsGetUpcoming(Map<String, dynamic> params) async {
 
 /// 创建事件
 Future<String> _jsCreateEvent(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.createEvent(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.createEvent(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -170,7 +145,7 @@ Future<String> _jsCreateEvent(Map<String, dynamic> params) async {
 
 /// 更新事件
 Future<String> _jsUpdateEvent(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.updateEvent(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.updateEvent(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -181,7 +156,7 @@ Future<String> _jsUpdateEvent(Map<String, dynamic> params) async {
 
 /// 删除事件
 Future<String> _jsDeleteEvent(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.deleteEvent(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.deleteEvent(params);
 
   if (result.isFailure) {
     return jsonEncode({
@@ -195,7 +170,7 @@ Future<String> _jsDeleteEvent(Map<String, dynamic> params) async {
 
 /// 完成事件
 Future<String> _jsCompleteEvent(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.completeEvent(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.completeEvent(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -207,7 +182,7 @@ Future<String> _jsCompleteEvent(Map<String, dynamic> params) async {
 /// 获取已完成事件
 /// 支持分页参数: offset, count
 Future<String> _jsGetCompletedEvents(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.getCompletedEvents(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.getCompletedEvents(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -241,7 +216,7 @@ Future<String> _jsFindEventBy(Map<String, dynamic> params) async {
   final int? offset = params['offset'];
   final int? count = params['count'];
 
-  final events = controller.getAllEvents();
+  final events = CalendarPlugin.instance.controller.getAllEvents();
   final List<CalendarEvent> matchedEvents = [];
 
   for (final event in events) {
@@ -279,7 +254,7 @@ Future<String> _jsFindEventBy(Map<String, dynamic> params) async {
 /// 根据ID查找事件
 /// @param params.id 事件ID (必需)
 Future<String> _jsFindEventById(Map<String, dynamic> params) async {
-  final result = await calendarUseCase.getEventById(params);
+  final result = await CalendarPlugin.instance.calendarUseCase.getEventById(params);
 
   if (result.isFailure) {
     return jsonEncode({'error': result.errorOrNull?.message});
@@ -307,7 +282,7 @@ Future<String> _jsFindEventByTitle(Map<String, dynamic> params) async {
   final int? offset = params['offset'];
   final int? count = params['count'];
 
-  final events = controller.getAllEvents();
+  final events = CalendarPlugin.instance.controller.getAllEvents();
   final List<CalendarEvent> matchedEvents = [];
 
   for (final event in events) {

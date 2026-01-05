@@ -1,33 +1,14 @@
 part of 'day_plugin.dart';
 
-  @override
-  Map<String, Function> defineJSAPI() {
-    return {
-      // 纪念日管理（简化命名以符合 JS API 规范）
-      'getDays': _jsGetMemorialDays,
-      'getDayById': _jsFindMemorialDayById,
-      'createDay': _jsCreateMemorialDay,
-      'updateDay': _jsUpdateMemorialDay,
-      'deleteDay': _jsDeleteMemorialDay,
+// ==================== JS API 实现 ====================
+// 以下函数供 DayPlugin.defineJSAPI() 使用
 
-      // 工具方法
-      'getDaysUntil': _jsGetDaysUntil,
-      'getUpcoming': _jsGetUpcomingDays,
-
-      // 查找方法
-      'findDayBy': _jsFindMemorialDayBy,
-      'findDayByName': _jsFindMemorialDayByName,
-    };
-  }
-
-  // ==================== JS API 实现 ====================
-
-  /// 获取所有纪念日
-  /// @param params.offset 起始位置（可选，默认 0）
-  /// @param params.count 返回数量（可选，默认 100）
-  Future<String> _jsGetMemorialDays(Map<String, dynamic> params) async {
+/// 获取所有纪念日
+/// @param params.offset 起始位置（可选，默认 0）
+/// @param params.count 返回数量（可选，默认 100）
+Future<String> _jsGetMemorialDays(Map<String, dynamic> params) async {
     try {
-      final result = await _useCase.getMemorialDays(params);
+      final result = await DayPlugin.instance._useCase.getMemorialDays(params);
       if (result.isFailure) {
         return jsonEncode({'error': result.errorOrNull?.message});
       }
@@ -44,7 +25,7 @@ part of 'day_plugin.dart';
   /// 创建纪念日
   Future<String> _jsCreateMemorialDay(Map<String, dynamic> params) async {
     try {
-      final result = await _useCase.createMemorialDay(params);
+      final result = await DayPlugin.instance._useCase.createMemorialDay(params);
       if (result.isFailure) {
         return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
       }
@@ -57,7 +38,7 @@ part of 'day_plugin.dart';
   /// 更新纪念日
   Future<String> _jsUpdateMemorialDay(Map<String, dynamic> params) async {
     try {
-      final result = await _useCase.updateMemorialDay(params);
+      final result = await DayPlugin.instance._useCase.updateMemorialDay(params);
       if (result.isFailure) {
         return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
       }
@@ -70,7 +51,7 @@ part of 'day_plugin.dart';
   /// 删除纪念日
   Future<String> _jsDeleteMemorialDay(Map<String, dynamic> params) async {
     try {
-      final result = await _useCase.deleteMemorialDay(params);
+      final result = await DayPlugin.instance._useCase.deleteMemorialDay(params);
       if (result.isFailure) {
         return jsonEncode({'success': false, 'error': result.errorOrNull?.message});
       }
@@ -114,7 +95,7 @@ part of 'day_plugin.dart';
     try {
       final int withinDays = params['withinDays'] ?? 7;
 
-      final upcomingDays = _controller.memorialDays.where((day) {
+      final upcomingDays = DayPlugin.instance._controller.memorialDays.where((day) {
         final daysRemaining = day.daysRemaining;
         return daysRemaining >= 0 && daysRemaining <= withinDays;
       }).toList();
@@ -149,7 +130,7 @@ part of 'day_plugin.dart';
 
       final bool findAll = params['findAll'] ?? false;
 
-      final days = _controller.memorialDays;
+      final days = DayPlugin.instance._controller.memorialDays;
       final List<MemorialDay> matchedDays = [];
 
       for (final day in days) {
@@ -179,7 +160,7 @@ part of 'day_plugin.dart';
   /// @param params.id 纪念日ID (必需)
   Future<String> _jsFindMemorialDayById(Map<String, dynamic> params) async {
     try {
-      final result = await _useCase.getMemorialDayById(params);
+      final result = await DayPlugin.instance._useCase.getMemorialDayById(params);
       if (result.isFailure) {
         return jsonEncode({'error': result.errorOrNull?.message});
       }
@@ -203,7 +184,7 @@ part of 'day_plugin.dart';
       final bool fuzzy = params['fuzzy'] ?? false;
       final bool findAll = params['findAll'] ?? false;
 
-      final days = _controller.memorialDays;
+      final days = DayPlugin.instance._controller.memorialDays;
       final List<MemorialDay> matchedDays = [];
 
       for (final day in days) {

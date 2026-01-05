@@ -1,31 +1,6 @@
 part of 'activity_plugin.dart';
 
-// ==================== JS API 定义 ====================
-
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 活动查询
-    'getActivities': _jsGetActivities,
-
-    // 活动管理
-    'createActivity': _jsCreateActivity,
-    'updateActivity': _jsUpdateActivity,
-    'deleteActivity': _jsDeleteActivity,
-
-    // 统计信息
-    'getTodayStats': _jsGetTodayStats,
-
-    // 标签管理
-    'getTagGroups': _jsGetTagGroups,
-    'getRecentTags': _jsGetRecentTags,
-
-    // 通知管理
-    'enableNotification': _jsEnableNotification,
-    'disableNotification': _jsDisableNotification,
-    'getNotificationStatus': _jsGetNotificationStatus,
-  };
-}
+// 以下函数供 ActivityPlugin.defineJSAPI() 使用
 
 // ==================== JS API 实现 ====================
 
@@ -34,7 +9,7 @@ Map<String, Function> defineJSAPI() {
 /// 支持分页参数: offset, count
 Future<String> _jsGetActivities(Map<String, dynamic> params) async {
   try {
-    final result = await _activityUseCase.getActivities(params);
+    final result = await ActivityPlugin.instance._activityUseCase.getActivities(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -58,7 +33,7 @@ Future<String> _jsGetActivities(Map<String, dynamic> params) async {
 /// }
 Future<String> _jsCreateActivity(Map<String, dynamic> params) async {
   try {
-    final result = await _activityUseCase.createActivity(params);
+    final result = await ActivityPlugin.instance._activityUseCase.createActivity(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -103,7 +78,7 @@ Future<String> _jsUpdateActivity(Map<String, dynamic> params) async {
           '${startTime.year}-${startTime.month.toString().padLeft(2, '0')}-${startTime.day.toString().padLeft(2, '0')}';
     }
 
-    final result = await _activityUseCase.updateActivity(updatedParams);
+    final result = await ActivityPlugin.instance._activityUseCase.updateActivity(updatedParams);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -134,7 +109,7 @@ Future<String> _jsDeleteActivity(Map<String, dynamic> params) async {
       updatedParams['id'] = updatedParams.remove('activityId');
     }
 
-    final result = await _activityUseCase.deleteActivity(updatedParams);
+    final result = await ActivityPlugin.instance._activityUseCase.deleteActivity(updatedParams);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -154,7 +129,7 @@ Future<String> _jsDeleteActivity(Map<String, dynamic> params) async {
 /// 返回: { activityCount, durationMinutes, durationHours, remainingMinutes, remainingHours }
 Future<String> _jsGetTodayStats(Map<String, dynamic> params) async {
   try {
-    final result = await _activityUseCase.getTodayStats(params);
+    final result = await ActivityPlugin.instance._activityUseCase.getTodayStats(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -177,7 +152,7 @@ Future<String> _jsGetTodayStats(Map<String, dynamic> params) async {
 /// 参数: params - {} (无需参数)
 Future<String> _jsGetTagGroups(Map<String, dynamic> params) async {
   try {
-    final result = await _activityUseCase.getTagGroups(params);
+    final result = await ActivityPlugin.instance._activityUseCase.getTagGroups(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -196,7 +171,7 @@ Future<String> _jsGetTagGroups(Map<String, dynamic> params) async {
 /// 参数: params - {} (无需参数)
 Future<String> _jsGetRecentTags(Map<String, dynamic> params) async {
   try {
-    final result = await _activityUseCase.getRecentTags(params);
+    final result = await ActivityPlugin.instance._activityUseCase.getRecentTags(params);
 
     if (result.isFailure) {
       return jsonEncode({'error': result.errorOrNull?.message});
@@ -218,7 +193,7 @@ Future<String> _jsEnableNotification(Map<String, dynamic> params) async {
       return jsonEncode({'success': false, 'error': '仅支持Android平台'});
     }
 
-    await _notificationService.enable();
+    await ActivityPlugin.instance._notificationService.enable();
     return jsonEncode({'success': true, 'message': '活动通知已启用'});
   } catch (e) {
     return jsonEncode({'success': false, 'error': '启用通知失败: $e'});
@@ -229,7 +204,7 @@ Future<String> _jsEnableNotification(Map<String, dynamic> params) async {
 /// 参数: params - {} (无需参数)
 Future<String> _jsDisableNotification(Map<String, dynamic> params) async {
   try {
-    await _notificationService.disable();
+    await ActivityPlugin.instance._notificationService.disable();
     return jsonEncode({'success': true, 'message': '活动通知已禁用'});
   } catch (e) {
     return jsonEncode({'success': false, 'error': '禁用通知失败: $e'});
@@ -240,7 +215,7 @@ Future<String> _jsDisableNotification(Map<String, dynamic> params) async {
 /// 参数: params - {} (无需参数)
 Future<String> _jsGetNotificationStatus(Map<String, dynamic> params) async {
   try {
-    final stats = _notificationService.getStats();
+    final stats = ActivityPlugin.instance._notificationService.getStats();
     return jsonEncode({'success': true, 'status': stats});
   } catch (e) {
     return jsonEncode({'success': false, 'error': '获取通知状态失败: $e'});

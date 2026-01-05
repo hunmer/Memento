@@ -12,7 +12,7 @@ void _registerDataSelectors() {
       name: 'agent_chat_conversationSelectorName'.tr,
       description: 'agent_chat_conversationSelectorDesc'.tr,
       icon: Icons.chat_bubble_outline,
-      color: color,
+      color: AgentChatPlugin.instance.color,
       selectionMode: SelectionMode.single,
       steps: [
         SelectorStep(
@@ -21,7 +21,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           dataLoader: (previousSelections) async {
             // 加载所有会话
-            final conversations = _conversationController?.conversations ?? [];
+            final conversations = AgentChatPlugin.instance.conversationController?.conversations ?? [];
             return conversations.map((conv) => SelectableItem(
               id: conv.id,
               title: conv.title,

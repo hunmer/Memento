@@ -1,46 +1,12 @@
 part of 'habits_plugin.dart';
 
-// ==================== JS API 定义 ====================
-
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 习惯相关
-    'getHabits': _jsGetHabits,
-    'getHabitById': _jsGetHabitById,
-    'createHabit': _jsCreateHabit,
-    'updateHabit': _jsUpdateHabit,
-    'deleteHabit': _jsDeleteHabit,
-
-    // 技能相关
-    'getSkills': _jsGetSkills,
-    'getSkillById': _jsGetSkillById,
-    'createSkill': _jsCreateSkill,
-    'updateSkill': _jsUpdateSkill,
-    'deleteSkill': _jsDeleteSkill,
-
-    // 打卡相关
-    'checkIn': _jsCheckIn,
-    'getCompletionRecords': _jsGetCompletionRecords,
-    'deleteCompletionRecord': _jsDeleteCompletionRecord,
-
-    // 统计相关
-    'getStats': _jsGetStats,
-    'getTodayHabits': _jsGetTodayHabits,
-
-    // 计时器相关
-    'startTimer': _jsStartTimer,
-    'stopTimer': _jsStopTimer,
-    'getTimerStatus': _jsGetTimerStatus,
-  };
-}
-
-// ==================== JS API 实现 ====================
+// JS API 实现 - 私有方法
+// defineJSAPI() 方法在主插件类中实现
 
 /// 获取所有习惯
 /// 支持分页参数: offset, count
 Future<String> _jsGetHabits(Map<String, dynamic> params) async {
-  final result = await _useCase.getHabits(params);
+  final result = await HabitsPlugin.instance._useCase.getHabits(params);
 
   return jsonEncode({
     'success': result.isSuccess,
@@ -58,7 +24,7 @@ Future<String> _jsGetHabitById(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['habitId'];
   }
 
-  final result = await _useCase.getHabitById(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.getHabitById(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull ?? {'error': 'Habit not found'});
@@ -69,7 +35,7 @@ Future<String> _jsGetHabitById(Map<String, dynamic> params) async {
 
 /// 创建习惯
 Future<String> _jsCreateHabit(Map<String, dynamic> params) async {
-  final result = await _useCase.createHabit(params);
+  final result = await HabitsPlugin.instance._useCase.createHabit(params);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -86,7 +52,7 @@ Future<String> _jsUpdateHabit(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['habitId'];
   }
 
-  final result = await _useCase.updateHabit(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.updateHabit(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -103,7 +69,7 @@ Future<String> _jsDeleteHabit(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['habitId'];
   }
 
-  final result = await _useCase.deleteHabit(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.deleteHabit(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode({'success': true});
@@ -115,7 +81,7 @@ Future<String> _jsDeleteHabit(Map<String, dynamic> params) async {
 /// 获取所有技能
 /// 支持分页参数: offset, count
 Future<String> _jsGetSkills(Map<String, dynamic> params) async {
-  final result = await _useCase.getSkills(params);
+  final result = await HabitsPlugin.instance._useCase.getSkills(params);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -132,7 +98,7 @@ Future<String> _jsGetSkillById(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['skillId'];
   }
 
-  final result = await _useCase.getSkillById(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.getSkillById(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull ?? {'error': 'Skill not found'});
@@ -143,7 +109,7 @@ Future<String> _jsGetSkillById(Map<String, dynamic> params) async {
 
 /// 创建技能
 Future<String> _jsCreateSkill(Map<String, dynamic> params) async {
-  final result = await _useCase.createSkill(params);
+  final result = await HabitsPlugin.instance._useCase.createSkill(params);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -160,7 +126,7 @@ Future<String> _jsUpdateSkill(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['skillId'];
   }
 
-  final result = await _useCase.updateSkill(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.updateSkill(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -177,7 +143,7 @@ Future<String> _jsDeleteSkill(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['skillId'];
   }
 
-  final result = await _useCase.deleteSkill(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.deleteSkill(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode({'success': true});
@@ -203,7 +169,7 @@ Future<String> _jsCheckIn(Map<String, dynamic> params) async {
     useCaseParams['date'] = DateTime.now().toIso8601String();
   }
 
-  final result = await _useCase.createCompletionRecord(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.createCompletionRecord(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -221,7 +187,7 @@ Future<String> _jsGetCompletionRecords(Map<String, dynamic> params) async {
     useCaseParams['parentId'] = params['habitId'];
   }
 
-  final result = await _useCase.getCompletionRecords(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.getCompletionRecords(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode(result.dataOrNull);
@@ -238,7 +204,7 @@ Future<String> _jsDeleteCompletionRecord(Map<String, dynamic> params) async {
     useCaseParams['id'] = params['recordId'];
   }
 
-  final result = await _useCase.deleteCompletionRecord(useCaseParams);
+  final result = await HabitsPlugin.instance._useCase.deleteCompletionRecord(useCaseParams);
 
   if (result.isSuccess) {
     return jsonEncode({'success': true});
@@ -257,11 +223,11 @@ Future<String> _jsGetStats(Map<String, dynamic> params) async {
 
   // 获取总时长
   final durationParams = {'habitId': habitId};
-  final durationResult = await _useCase.getHabitTotalDuration(durationParams);
+  final durationResult = await HabitsPlugin.instance._useCase.getHabitTotalDuration(durationParams);
 
   // 获取完成次数
   final countParams = {'habitId': habitId};
-  final countResult = await _useCase.getHabitCompletionCount(countParams);
+  final countResult = await HabitsPlugin.instance._useCase.getHabitCompletionCount(countParams);
 
   if (durationResult.isSuccess && countResult.isSuccess) {
     return jsonEncode({
@@ -280,7 +246,7 @@ Future<String> _jsGetStats(Map<String, dynamic> params) async {
 /// 支持分页参数: offset, count
 Future<String> _jsGetTodayHabits(Map<String, dynamic> params) async {
   // 首先获取所有习惯
-  final allHabitsResult = await _useCase.getHabits({});
+  final allHabitsResult = await HabitsPlugin.instance._useCase.getHabits({});
 
   if (allHabitsResult.isFailure) {
     return jsonEncode({'error': allHabitsResult.errorOrNull?.message});
@@ -348,12 +314,12 @@ Future<String> _jsStartTimer(Map<String, dynamic> params) async {
   }
 
   // 确保习惯数据已加载完成
-  final habits = await _habitController.loadHabits();
+  final habits = await HabitsPlugin.instance._habitController.loadHabits();
   try {
     final habit = habits.firstWhere((h) => h.id == habitId);
 
     // 启动计时器（使用空回调，因为 JS API 不需要实时更新）
-    _timerController.startTimer(
+    HabitsPlugin.instance._timerController.startTimer(
       habit,
       (elapsedSeconds) {}, // 空回调
     );
@@ -376,7 +342,7 @@ Future<String> _jsStopTimer(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: habitId'});
   }
 
-  _timerController.stopTimer(habitId);
+  HabitsPlugin.instance._timerController.stopTimer(habitId);
 
   return jsonEncode({'habitId': habitId, 'status': 'stopped'});
 }
@@ -389,8 +355,8 @@ Future<String> _jsGetTimerStatus(Map<String, dynamic> params) async {
     return jsonEncode({'error': '缺少必需参数: habitId'});
   }
 
-  final timerData = _timerController.getTimerData(habitId);
-  final isRunning = _timerController.isHabitTiming(habitId);
+  final timerData = HabitsPlugin.instance._timerController.getTimerData(habitId);
+  final isRunning = HabitsPlugin.instance._timerController.isHabitTiming(habitId);
 
   if (timerData == null) {
     return jsonEncode({'habitId': habitId, 'isRunning': false});

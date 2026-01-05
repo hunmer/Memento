@@ -90,11 +90,33 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       sfController.view = syncfusion.CalendarView.month;
     }
 
-    // 注册 JS API（最后一步）
-    await registerJSAPI();
-
     // 注册数据选择器
     _registerDataSelectors();
+  }
+
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 事件查询
+      'getEvents': _jsGetEvents,
+      'getTodayEvents': _jsGetTodayEvents,
+      'getEventsByDateRange': _jsGetEventsByDateRange,
+      'getUpcoming': _jsGetUpcoming,
+
+      // 事件操作
+      'createEvent': _jsCreateEvent,
+      'updateEvent': _jsUpdateEvent,
+      'deleteEvent': _jsDeleteEvent,
+      'completeEvent': _jsCompleteEvent,
+
+      // 已完成事件
+      'getCompletedEvents': _jsGetCompletedEvents,
+
+      // 事件查找方法
+      'findEventBy': _jsFindEventBy,
+      'findEventById': _jsFindEventById,
+      'findEventByTitle': _jsFindEventByTitle,
+    };
   }
 
   syncfusion.CalendarView _getCalendarViewFromString(String viewString) {

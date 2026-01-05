@@ -166,6 +166,9 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   IconData get icon => Icons.account_tree;
 
   @override
+  Map<String, Function> defineJSAPI() => _defineJSAPIImpl();
+
+  @override
   Widget buildCardView(BuildContext context) {
     final theme = Theme.of(context);
 

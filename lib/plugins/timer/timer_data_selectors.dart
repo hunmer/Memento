@@ -8,10 +8,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'timer.task',
-      pluginId: id,
+      pluginId: TimerPlugin.instance.id,
       name: '选择计时任务',
-      icon: icon,
-      color: color,
+      icon: TimerPlugin.instance.icon,
+      color: TimerPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -21,7 +21,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (_) async {
-            return _tasks.map((task) {
+            return TimerPlugin.instance._tasks.map((task) {
               // 计算任务总时长
               final totalDuration = task.timerItems.fold<Duration>(
                 Duration.zero,

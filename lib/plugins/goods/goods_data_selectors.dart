@@ -7,10 +7,10 @@ void _registerDataSelectors() {
   // 注册仓库选择器（单级）
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'goods.warehouse',
-    pluginId: id,
+    pluginId: GoodsPlugin.instance.id,
     name: '选择仓库',
-    icon: icon,
-    color: color,
+    icon: GoodsPlugin.instance.icon,
+    color: GoodsPlugin.instance.color,
     steps: [
       SelectorStep(
         id: 'warehouse',
@@ -18,7 +18,7 @@ void _registerDataSelectors() {
         viewType: SelectorViewType.list,
         isFinalStep: true,
         dataLoader: (_) async {
-          return _warehouses.map((warehouse) => SelectableItem(
+          return GoodsPlugin.instance.warehouses.map((warehouse) => SelectableItem(
             id: warehouse.id,
             title: warehouse.title,
             subtitle: '${warehouse.items.length} 件物品',
@@ -34,10 +34,10 @@ void _registerDataSelectors() {
   // 注册物品选择器（两级：仓库 → 物品）
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'goods.item',
-    pluginId: id,
+    pluginId: GoodsPlugin.instance.id,
     name: '选择物品',
-    icon: icon,
-    color: color,
+    icon: GoodsPlugin.instance.icon,
+    color: GoodsPlugin.instance.color,
     steps: [
       // 第一级：选择仓库
       SelectorStep(
@@ -46,7 +46,7 @@ void _registerDataSelectors() {
         viewType: SelectorViewType.list,
         isFinalStep: false,
         dataLoader: (_) async {
-          return _warehouses.map((warehouse) => SelectableItem(
+          return GoodsPlugin.instance.warehouses.map((warehouse) => SelectableItem(
             id: warehouse.id,
             title: warehouse.title,
             subtitle: '${warehouse.items.length} 件物品',

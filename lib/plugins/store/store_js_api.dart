@@ -1,46 +1,5 @@
 part of 'store_plugin.dart';
 
-// ==================== JS API 定义 ====================
-
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 商品相关
-    'getProducts': _jsGetProducts,
-    'getProduct': _jsGetProduct,
-    'createProduct': _jsCreateProduct,
-    'updateProduct': _jsUpdateProduct,
-    'deleteProduct': _jsDeleteProduct,
-
-    // 兑换相关
-    'redeem': _jsRedeem,
-
-    // 积分相关
-    'getPoints': _jsGetPoints,
-    'addPoints': _jsAddPoints,
-
-    // 历史记录
-    'getRedeemHistory': _jsGetRedeemHistory,
-    'getPointsHistory': _jsGetPointsHistory,
-
-    // 用户物品
-    'getUserItems': _jsGetUserItems,
-    'useItem': _jsUseItem,
-
-    // 归档管理
-    'archiveProduct': _jsArchiveProduct,
-    'restoreProduct': _jsRestoreProduct,
-    'getArchivedProducts': _jsGetArchivedProducts,
-
-    // 查找方法
-    'findProductBy': _jsFindProductBy,
-    'findProductById': _jsFindProductById,
-    'findProductByName': _jsFindProductByName,
-    'findUserItemBy': _jsFindUserItemBy,
-    'findUserItemById': _jsFindUserItemById,
-  };
-}
-
 // ==================== JS API 实现 ====================
 
 /// 获取所有商品列表（UseCase 版本）
@@ -52,7 +11,7 @@ Future<String> _jsGetProducts(Map<String, dynamic> params) async {
     final getHttpImage = params['get_http_image'] == true;
     params.remove('get_http_image');
 
-    final result = await useCase.getProducts(params);
+    final result = await StorePlugin.instance.useCase.getProducts(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -68,9 +27,9 @@ Future<String> _jsGetProducts(Map<String, dynamic> params) async {
     if (getHttpImage) {
       products = await LocalHttpServer.convertImagesWithAutoConfig(
         items: products,
-        pluginId: id,
+        pluginId: StorePlugin.instance.id,
         imageKey: 'image',
-        storageManager: storage,
+        storageManager: StorePlugin.instance.storage,
       );
     }
 
@@ -104,7 +63,7 @@ Future<String> _jsGetProduct(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: productId 或 id'});
     }
 
-    final result = await useCase.getProductById({'id': productId});
+    final result = await StorePlugin.instance.useCase.getProductById({'id': productId});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -121,9 +80,9 @@ Future<String> _jsGetProduct(Map<String, dynamic> params) async {
     if (getHttpImage) {
       final convertedList = await LocalHttpServer.convertImagesWithAutoConfig(
         items: [product],
-        pluginId: id,
+        pluginId: StorePlugin.instance.id,
         imageKey: 'image',
-        storageManager: storage,
+        storageManager: StorePlugin.instance.storage,
       );
       product = convertedList.isNotEmpty ? convertedList.first : product;
     }
@@ -137,7 +96,7 @@ Future<String> _jsGetProduct(Map<String, dynamic> params) async {
 /// 创建商品（UseCase 版本）
 Future<String> _jsCreateProduct(Map<String, dynamic> params) async {
   try {
-    final result = await useCase.createProduct(params);
+    final result = await StorePlugin.instance.useCase.createProduct(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -154,7 +113,7 @@ Future<String> _jsCreateProduct(Map<String, dynamic> params) async {
 /// 更新商品（UseCase 版本）
 Future<String> _jsUpdateProduct(Map<String, dynamic> params) async {
   try {
-    final result = await useCase.updateProduct(params);
+    final result = await StorePlugin.instance.useCase.updateProduct(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -179,7 +138,7 @@ Future<String> _jsDeleteProduct(Map<String, dynamic> params) async {
       });
     }
 
-    final result = await useCase.deleteProduct({'id': productId});
+    final result = await StorePlugin.instance.useCase.deleteProduct({'id': productId});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -202,7 +161,7 @@ Future<String> _jsRedeem(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: productId 或 id'});
     }
 
-    final result = await useCase.exchangeProduct({'productId': productId});
+    final result = await StorePlugin.instance.useCase.exchangeProduct({'productId': productId});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -214,7 +173,7 @@ Future<String> _jsRedeem(Map<String, dynamic> params) async {
     return jsonEncode({
       'success': true,
       'message': '兑换成功',
-      'currentPoints': controller.currentPoints,
+      'currentPoints': StorePlugin.instance.controller.currentPoints,
     });
   } catch (e) {
     return jsonEncode({'success': false, 'error': '兑换失败: $e'});
@@ -225,7 +184,7 @@ Future<String> _jsRedeem(Map<String, dynamic> params) async {
 Future<String> _jsGetPoints(Map<String, dynamic> params) async {
   try {
     // UseCase 中没有单独的获取积分方法，使用 getPointsInfo
-    final result = await useCase.getPointsInfo(params);
+    final result = await StorePlugin.instance.useCase.getPointsInfo(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -237,10 +196,10 @@ Future<String> _jsGetPoints(Map<String, dynamic> params) async {
     return jsonEncode(
       pointsInfo != null
           ? pointsInfo['currentPoints']
-          : controller.currentPoints,
+          : StorePlugin.instance.controller.currentPoints,
     );
   } catch (e) {
-    return jsonEncode(controller.currentPoints);
+    return jsonEncode(StorePlugin.instance.controller.currentPoints);
   }
 }
 
@@ -257,7 +216,7 @@ Future<String> _jsAddPoints(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: reason'});
     }
 
-    final result = await useCase.addPoints({
+    final result = await StorePlugin.instance.useCase.addPoints({
       'value': points,
       'reason': reason,
     });
@@ -274,7 +233,7 @@ Future<String> _jsAddPoints(Map<String, dynamic> params) async {
       'currentPoints':
           pointsInfo != null
               ? pointsInfo['currentPoints']
-              : controller.currentPoints,
+              : StorePlugin.instance.controller.currentPoints,
       'message': '积分已${points > 0 ? "增加" : "减少"}: $points',
     });
   } catch (e) {
@@ -286,7 +245,7 @@ Future<String> _jsAddPoints(Map<String, dynamic> params) async {
 /// 支持分页参数: offset, count
 Future<String> _jsGetRedeemHistory(Map<String, dynamic> params) async {
   try {
-    final result = await useCase.getUserItems(params);
+    final result = await StorePlugin.instance.useCase.getUserItems(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -304,7 +263,7 @@ Future<String> _jsGetRedeemHistory(Map<String, dynamic> params) async {
 /// 支持分页参数: offset, count
 Future<String> _jsGetPointsHistory(Map<String, dynamic> params) async {
   try {
-    final result = await useCase.searchPointsLogs(params);
+    final result = await StorePlugin.instance.useCase.searchPointsLogs(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -322,7 +281,7 @@ Future<String> _jsGetPointsHistory(Map<String, dynamic> params) async {
 /// 支持分页参数: offset, count
 Future<String> _jsGetUserItems(Map<String, dynamic> params) async {
   try {
-    final result = await useCase.getUserItems(params);
+    final result = await StorePlugin.instance.useCase.getUserItems(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -344,7 +303,7 @@ Future<String> _jsUseItem(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: itemId 或 id'});
     }
 
-    final result = await useCase.useItem({'itemId': itemId});
+    final result = await StorePlugin.instance.useCase.useItem({'itemId': itemId});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -370,7 +329,7 @@ Future<String> _jsArchiveProduct(Map<String, dynamic> params) async {
       });
     }
 
-    final result = await useCase.archiveProduct({'id': productId});
+    final result = await StorePlugin.instance.useCase.archiveProduct({'id': productId});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -396,7 +355,7 @@ Future<String> _jsRestoreProduct(Map<String, dynamic> params) async {
       });
     }
 
-    final result = await useCase.restoreProduct({'id': productId});
+    final result = await StorePlugin.instance.useCase.restoreProduct({'id': productId});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -415,7 +374,7 @@ Future<String> _jsRestoreProduct(Map<String, dynamic> params) async {
 /// 支持分页参数: offset, count
 Future<String> _jsGetArchivedProducts(Map<String, dynamic> params) async {
   try {
-    final result = await useCase.getArchivedProducts(params);
+    final result = await StorePlugin.instance.useCase.getArchivedProducts(params);
 
     if (result.isFailure) {
       return jsonEncode({
@@ -448,7 +407,7 @@ Future<String> _jsFindProductBy(Map<String, dynamic> params) async {
 
     // 根据字段类型选择搜索方法
     if (field.toLowerCase() == 'name') {
-      final result = await useCase.searchProducts({
+      final result = await StorePlugin.instance.useCase.searchProducts({
         'nameKeyword': value.toString(),
         'includeArchived': false,
         if (!findAll) 'offset': 0,
@@ -469,7 +428,7 @@ Future<String> _jsFindProductBy(Map<String, dynamic> params) async {
       return jsonEncode(findAll ? products : products.first);
     } else if (field.toLowerCase() == 'id') {
       // ID 精确查找
-      final result = await useCase.getProductById({'id': value.toString()});
+      final result = await StorePlugin.instance.useCase.getProductById({'id': value.toString()});
 
       if (result.isFailure) {
         return jsonEncode({
@@ -497,7 +456,7 @@ Future<String> _jsFindProductById(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final result = await useCase.getProductById({'id': id});
+    final result = await StorePlugin.instance.useCase.getProductById({'id': id});
 
     if (result.isFailure) {
       return jsonEncode({
@@ -523,7 +482,7 @@ Future<String> _jsFindProductByName(Map<String, dynamic> params) async {
     final bool findAll = params['findAll'] ?? false;
 
     // 模糊搜索和精确搜索都使用 nameKeyword，UseCase 内部处理模糊匹配
-    final result = await useCase.searchProducts({
+    final result = await StorePlugin.instance.useCase.searchProducts({
       'nameKeyword': name,
       'includeArchived': false,
       if (!findAll) 'offset': 0,
@@ -571,7 +530,7 @@ Future<String> _jsFindUserItemBy(Map<String, dynamic> params) async {
     final bool findAll = params['findAll'] ?? false;
 
     if (field.toLowerCase() == 'productid') {
-      final result = await useCase.searchUserItems({
+      final result = await StorePlugin.instance.useCase.searchUserItems({
         'productId': value.toString(),
         'includeExpired': true,
         if (!findAll) 'offset': 0,
@@ -592,7 +551,7 @@ Future<String> _jsFindUserItemBy(Map<String, dynamic> params) async {
       return jsonEncode(findAll ? items : items.first);
     } else if (field.toLowerCase() == 'id') {
       // ID 精确查找
-      final result = await useCase.getUserItemById({'id': value.toString()});
+      final result = await StorePlugin.instance.useCase.getUserItemById({'id': value.toString()});
 
       if (result.isFailure) {
         return jsonEncode({
@@ -618,7 +577,7 @@ Future<String> _jsFindUserItemById(Map<String, dynamic> params) async {
       return jsonEncode({'error': '缺少必需参数: id'});
     }
 
-    final result = await useCase.getUserItemById({'id': id});
+    final result = await StorePlugin.instance.useCase.getUserItemById({'id': id});
 
     if (result.isFailure) {
       return jsonEncode({

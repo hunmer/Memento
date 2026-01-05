@@ -71,6 +71,41 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
   /// 获取 UseCase 实例
   StoreUseCase get useCase => _useCase;
 
+  @override
+  Map<String, Function> defineJSAPI() {
+    return {
+      // 商品管理
+      'getProducts': _jsGetProducts,
+      'getProduct': _jsGetProduct,
+      'createProduct': _jsCreateProduct,
+      'updateProduct': _jsUpdateProduct,
+      'deleteProduct': _jsDeleteProduct,
+      'archiveProduct': _jsArchiveProduct,
+      'restoreProduct': _jsRestoreProduct,
+      'getArchivedProducts': _jsGetArchivedProducts,
+
+      // 商品查找
+      'findProductBy': _jsFindProductBy,
+      'findProductById': _jsFindProductById,
+      'findProductByName': _jsFindProductByName,
+
+      // 用户物品管理
+      'getUserItems': _jsGetUserItems,
+      'useItem': _jsUseItem,
+      'findUserItemBy': _jsFindUserItemBy,
+      'findUserItemById': _jsFindUserItemById,
+
+      // 积分管理
+      'getPoints': _jsGetPoints,
+      'addPoints': _jsAddPoints,
+      'getPointsHistory': _jsGetPointsHistory,
+
+      // 兑换
+      'redeem': _jsRedeem,
+      'getRedeemHistory': _jsGetRedeemHistory,
+    };
+  }
+
   /// 默认积分配置
   static const Map<String, dynamic> defaultPointSettings = {
     'point_awards': {

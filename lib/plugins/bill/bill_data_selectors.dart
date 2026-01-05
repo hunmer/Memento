@@ -8,10 +8,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'bill.account',
-      pluginId: id,
+      pluginId: BillPlugin.instance.id,
       name: '选择账户',
-      icon: icon,
-      color: color,
+      icon: BillPlugin.instance.icon,
+      color: BillPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -21,7 +21,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: true,
           dataLoader: (_) async {
-            return _billController.accounts
+            return BillPlugin.instance.controller.accounts
                 .map(
                   (account) => SelectableItem(
                     id: account.id,
@@ -51,10 +51,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'bill.record',
-      pluginId: id,
+      pluginId: BillPlugin.instance.id,
       name: '选择账单记录',
       icon: Icons.receipt_long,
-      color: color,
+      color: BillPlugin.instance.color,
       searchable: true,
       selectionMode: SelectionMode.single,
       steps: [
@@ -65,7 +65,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: false,
           dataLoader: (_) async {
-            return _billController.accounts
+            return BillPlugin.instance.controller.accounts
                 .map(
                   (account) => SelectableItem(
                     id: account.id,
@@ -133,10 +133,10 @@ void _registerDataSelectors() {
   pluginDataSelectorService.registerSelector(
     SelectorDefinition(
       id: 'bill.account_with_period',
-      pluginId: id,
+      pluginId: BillPlugin.instance.id,
       name: '选择账户和时间',
       icon: Icons.calendar_today,
-      color: color,
+      color: BillPlugin.instance.color,
       searchable: false,
       selectionMode: SelectionMode.single,
       steps: [
@@ -147,7 +147,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           isFinalStep: false,
           dataLoader: (_) async {
-            return _billController.accounts
+            return BillPlugin.instance.controller.accounts
                 .map(
                   (account) => SelectableItem(
                     id: account.id,

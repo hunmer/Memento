@@ -5,11 +5,11 @@ void _registerDataSelectors() {
   // 1. 频道选择器（单级）
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'chat.channel',
-    pluginId: id,
+    pluginId: ChatPlugin.instance.id,
     name: 'chat_channelSelectorName'.tr,
     description: 'chat_channelSelectorDesc'.tr,
     icon: Icons.chat_bubble_outline,
-    color: color,
+    color: ChatPlugin.instance.color,
     steps: [
       SelectorStep(
         id: 'channel',
@@ -18,7 +18,7 @@ void _registerDataSelectors() {
         isFinalStep: true,
         emptyText: 'chat_noChannels'.tr,
         dataLoader: (_) async {
-          return dataService.channels.map((channel) {
+          return ChatPlugin.instance.dataService.channels.map((channel) {
             // 准备 rawData - 包含完整的频道信息
             final lastMessage = channel.messages.isNotEmpty
                 ? channel.messages.last.content
@@ -58,11 +58,11 @@ void _registerDataSelectors() {
   // 2. 消息选择器（两级：频道 -> 消息）
   pluginDataSelectorService.registerSelector(SelectorDefinition(
     id: 'chat.message',
-    pluginId: id,
+    pluginId: ChatPlugin.instance.id,
     name: '选择消息',
     description: '选择一条聊天消息',
     icon: Icons.message,
-    color: color,
+    color: ChatPlugin.instance.color,
     steps: [
       // 第一级：选择频道
       SelectorStep(
@@ -72,7 +72,7 @@ void _registerDataSelectors() {
         isFinalStep: false,
         emptyText: '暂无频道',
         dataLoader: (_) async {
-          return dataService.channels.map((channel) => SelectableItem(
+          return ChatPlugin.instance.dataService.channels.map((channel) => SelectableItem(
             id: channel.id,
             title: channel.title,
             icon: channel.icon,
@@ -92,7 +92,7 @@ void _registerDataSelectors() {
         dataLoader: (previousSelections) async {
           final channel = previousSelections['channel'] as Channel;
           // 加载频道消息
-          final messages = await dataService.getChannelMessages(channel.id);
+          final messages = await ChatPlugin.instance.dataService.getChannelMessages(channel.id);
           if (messages == null) return [];
 
           return messages.map((message) => SelectableItem(

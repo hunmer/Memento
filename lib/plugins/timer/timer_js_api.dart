@@ -1,43 +1,13 @@
 part of 'timer_plugin.dart';
 
-// ==================== JS API 定义 ====================
-
-@override
-Map<String, Function> defineJSAPI() {
-  return {
-    // 计时器列表
-    'getTimers': _jsGetTimers,
-
-    // 计时器管理
-    'createTimer': _jsCreateTimer,
-    'deleteTimer': _jsDeleteTimer,
-
-    // 计时器控制
-    'startTimer': _jsStartTimer,
-    'pauseTimer': _jsPauseTimer,
-    'stopTimer': _jsStopTimer,
-    'resetTimer': _jsResetTimer,
-
-    // 计时器状态
-    'getTimerStatus': _jsGetTimerStatus,
-
-    // 历史记录
-    'getHistory': _jsGetHistory,
-
-    // 查找方法
-    'findTimerBy': _jsFindTimerBy,
-    'findTimerById': _jsFindTimerById,
-    'findTimerByName': _jsFindTimerByName,
-    'findTimersByGroup': _jsFindTimersByGroup,
-  };
-}
-
 // ==================== JS API 实现 ====================
+// 以下函数供 TimerPlugin.defineJSAPI() 使用
+
 
 /// 获取计时器列表
 /// 支持分页参数: offset, count
 Future<dynamic> _jsGetTimers(Map<String, dynamic> params) async {
-  final result = await timerUseCase.getTimerTasks(params);
+  final result = await TimerPlugin.instance.timerUseCase.getTimerTasks(params);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -67,7 +37,7 @@ Future<dynamic> _jsGetTimers(Map<String, dynamic> params) async {
 
 /// 创建计时器
 Future<dynamic> _jsCreateTimer(Map<String, dynamic> params) async {
-  final result = await timerUseCase.createTimerTask(params);
+  final result = await TimerPlugin.instance.timerUseCase.createTimerTask(params);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -85,7 +55,7 @@ Future<dynamic> _jsCreateTimer(Map<String, dynamic> params) async {
 Future<dynamic> _jsDeleteTimer(Map<String, dynamic> params) async {
   // 转换参数名:timerId -> id
   final useCaseParams = {'id': params['timerId']};
-  final result = await timerUseCase.deleteTimerTask(useCaseParams);
+  final result = await TimerPlugin.instance.timerUseCase.deleteTimerTask(useCaseParams);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -102,14 +72,14 @@ Future<dynamic> _jsStartTimer(Map<String, dynamic> params) async {
   }
 
   // 查找任务并调用原始逻辑(这些操作涉及 UI 更新,不能简单通过 UseCase 处理)
-  await timerController.loadTasks();
-  final task = _tasks.firstWhere(
+  await TimerPlugin.instance.timerController.loadTasks();
+  final task = TimerPlugin.instance._tasks.firstWhere(
     (t) => t.id == timerId,
     orElse: () => throw Exception('计时器不存在'),
   );
 
   task.start();
-  await updateTask(task);
+  await TimerPlugin.instance.updateTask(task);
 
   return {
     'success': true,
@@ -126,14 +96,14 @@ Future<dynamic> _jsPauseTimer(Map<String, dynamic> params) async {
     return {'error': '缺少必需参数: timerId'};
   }
 
-  await timerController.loadTasks();
-  final task = _tasks.firstWhere(
+  await TimerPlugin.instance.timerController.loadTasks();
+  final task = TimerPlugin.instance._tasks.firstWhere(
     (t) => t.id == timerId,
     orElse: () => throw Exception('计时器不存在'),
   );
 
   task.pause();
-  await updateTask(task);
+  await TimerPlugin.instance.updateTask(task);
 
   return {
     'success': true,
@@ -150,15 +120,15 @@ Future<dynamic> _jsStopTimer(Map<String, dynamic> params) async {
     return {'error': '缺少必需参数: timerId'};
   }
 
-  await timerController.loadTasks();
-  final task = _tasks.firstWhere(
+  await TimerPlugin.instance.timerController.loadTasks();
+  final task = TimerPlugin.instance._tasks.firstWhere(
     (t) => t.id == timerId,
     orElse: () => throw Exception('计时器不存在'),
   );
 
   task.pause();
-  await stopNotificationService(task.id);
-  await updateTask(task);
+  await TimerPlugin.instance.stopNotificationService(task.id);
+  await TimerPlugin.instance.updateTask(task);
 
   return {
     'success': true,
@@ -175,14 +145,14 @@ Future<dynamic> _jsResetTimer(Map<String, dynamic> params) async {
     return {'error': '缺少必需参数: timerId'};
   }
 
-  await timerController.loadTasks();
-  final task = _tasks.firstWhere(
+  await TimerPlugin.instance.timerController.loadTasks();
+  final task = TimerPlugin.instance._tasks.firstWhere(
     (t) => t.id == timerId,
     orElse: () => throw Exception('计时器不存在'),
   );
 
   task.reset();
-  await updateTask(task);
+  await TimerPlugin.instance.updateTask(task);
 
   return {'success': true, 'message': '计时器已重置', 'id': task.id};
 }
@@ -196,7 +166,7 @@ Future<dynamic> _jsGetTimerStatus(Map<String, dynamic> params) async {
 
   // 转换参数名:timerId -> id
   final useCaseParams = {'id': timerId};
-  final result = await timerUseCase.getTimerTaskById(useCaseParams);
+  final result = await TimerPlugin.instance.timerUseCase.getTimerTaskById(useCaseParams);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -239,7 +209,7 @@ Future<dynamic> _jsGetHistory(Map<String, dynamic> params) async {
     'isRunning': false, // 查找非运行状态的任务
   };
 
-  final result = await timerUseCase.searchTimerTasks(searchParams);
+  final result = await TimerPlugin.instance.timerUseCase.searchTimerTasks(searchParams);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -388,7 +358,7 @@ Future<dynamic> _jsFindTimerBy(Map<String, dynamic> params) async {
     searchParams['isRunning'] = value;
   }
 
-  final result = await timerUseCase.searchTimerTasks(searchParams);
+  final result = await TimerPlugin.instance.timerUseCase.searchTimerTasks(searchParams);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -435,7 +405,7 @@ Future<dynamic> _jsFindTimerBy(Map<String, dynamic> params) async {
     final int? offset = params['offset'];
     final int? count = params['count'];
     if (offset != null || count != null) {
-      final paginated = _paginate(
+      final paginated = TimerPlugin.instance._paginate(
         matches,
         offset: offset ?? 0,
         count: count ?? 100,
@@ -457,7 +427,7 @@ Future<dynamic> _jsFindTimerById(Map<String, dynamic> params) async {
   }
 
   final useCaseParams = {'id': id};
-  final result = await timerUseCase.getTimerTaskById(useCaseParams);
+  final result = await TimerPlugin.instance.timerUseCase.getTimerTaskById(useCaseParams);
 
   if (result.isFailure) {
     return null;
@@ -498,7 +468,7 @@ Future<dynamic> _jsFindTimerByName(Map<String, dynamic> params) async {
   final bool findAll = params['findAll'] ?? false;
 
   // UseCase 没有按名称搜索的方法,我们先获取所有任务,然后在前端过滤
-  final result = await timerUseCase.getTimerTasks({});
+  final result = await TimerPlugin.instance.timerUseCase.getTimerTasks({});
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -547,7 +517,7 @@ Future<dynamic> _jsFindTimerByName(Map<String, dynamic> params) async {
     final int? offset = params['offset'];
     final int? count = params['count'];
     if (offset != null || count != null) {
-      final paginated = _paginate(
+      final paginated = TimerPlugin.instance._paginate(
         matches,
         offset: offset ?? 0,
         count: count ?? 100,
@@ -573,7 +543,7 @@ Future<dynamic> _jsFindTimersByGroup(Map<String, dynamic> params) async {
 
   // 使用 UseCase 的搜索功能
   final searchParams = {'group': group};
-  final result = await timerUseCase.searchTimerTasks(searchParams);
+  final result = await TimerPlugin.instance.timerUseCase.searchTimerTasks(searchParams);
 
   if (result.isFailure) {
     return {'error': result.errorOrNull?.message};
@@ -608,7 +578,7 @@ Future<dynamic> _jsFindTimersByGroup(Map<String, dynamic> params) async {
   final int? offset = params['offset'];
   final int? count = params['count'];
   if (offset != null || count != null) {
-    final paginated = _paginate(
+    final paginated = TimerPlugin.instance._paginate(
       matches,
       offset: offset ?? 0,
       count: count ?? 100,

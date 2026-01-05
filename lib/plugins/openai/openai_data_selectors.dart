@@ -6,14 +6,14 @@ void _registerDataSelectors() {
   final presetService = PromptPresetService();
 
   // 1. AI 助手选择器
-  pluginDataSelectorService.registerSelector(
+  PluginDataSelectorService.instance.registerSelector(
     SelectorDefinition(
       id: 'openai.agent',
-      pluginId: id,
+      pluginId: OpenAIPlugin.instance.id,
       name: '选择 AI 助手',
       description: '选择一个 AI 助手',
       icon: Icons.smart_toy,
-      color: color,
+      color: OpenAIPlugin.instance.color,
       steps: [
         SelectorStep(
           id: 'agent',
@@ -60,14 +60,14 @@ void _registerDataSelectors() {
   );
 
   // 2. Prompt 预设选择器
-  pluginDataSelectorService.registerSelector(
+  PluginDataSelectorService.instance.registerSelector(
     SelectorDefinition(
       id: 'openai.prompt',
-      pluginId: id,
+      pluginId: OpenAIPlugin.instance.id,
       name: '选择 Prompt 预设',
       description: '选择一个提示词预设',
       icon: Icons.description,
-      color: color,
+      color: OpenAIPlugin.instance.color,
       steps: [
         SelectorStep(
           id: 'prompt',
