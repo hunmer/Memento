@@ -24,6 +24,8 @@ import 'models/agent_chain_node.dart';
 import 'repositories/client_agent_chat_repository.dart';
 import 'package:shared_models/shared_models.dart';
 
+part 'agent_chat_data_selectors.dart';
+
 /// Agent Chat 插件
 ///
 /// 专注于一对一AI对话的极简聊天插件
@@ -116,48 +118,6 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
 
     // 注册数据选择器
     _registerDataSelectors();
-  }
-
-  /// 注册数据选择器
-  void _registerDataSelectors() {
-    pluginDataSelectorService.registerSelector(
-      SelectorDefinition(
-        id: 'agent_chat.conversation',
-        pluginId: 'agent_chat',
-        name: 'agent_chat_conversationSelectorName'.tr,
-        description: 'agent_chat_conversationSelectorDesc'.tr,
-        icon: Icons.chat_bubble_outline,
-        color: color,
-        selectionMode: SelectionMode.single,
-        steps: [
-          SelectorStep(
-            id: 'select_conversation',
-            title: 'agent_chat_selectConversation'.tr,
-            viewType: SelectorViewType.list,
-            dataLoader: (previousSelections) async {
-              // 加载所有会话
-              final conversations = _conversationController?.conversations ?? [];
-              return conversations.map((conv) => SelectableItem(
-                id: conv.id,
-                title: conv.title,
-                subtitle: conv.lastMessagePreview ?? '',
-                icon: Icons.chat,
-                color: conv.isPinned ? Colors.amber : null,
-                rawData: {
-                  'id': conv.id,
-                  'title': conv.title,
-                  'agentId': conv.agentId,
-                  'isPinned': conv.isPinned,
-                  'lastMessagePreview': conv.lastMessagePreview,
-                  'lastMessageAt': conv.lastMessageAt.toIso8601String(),
-                },
-              )).toList();
-            },
-            isFinalStep: true,
-          ),
-        ],
-      ),
-    );
   }
 
   @override

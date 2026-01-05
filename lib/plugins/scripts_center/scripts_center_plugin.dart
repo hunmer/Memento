@@ -1,3 +1,5 @@
+library;
+
 import 'dart:io';
 import 'dart:convert';
 
@@ -28,6 +30,8 @@ import 'screens/script_edit_screen.dart';
 import 'screens/script_store_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:get/get.dart';
+
+part 'scripts_center_data_selectors.dart';
 
 /// 深度序列化对象为 JSON 兼容的 Map/List/基本类型（异步版本）
 Future<dynamic> _deepSerializeAsync(dynamic value) async {
@@ -207,76 +211,11 @@ class ScriptsCenterPlugin extends BasePlugin {
       print('   - 已启用 ${_scriptManager.enabledScriptCount} 个脚本');
 
       // 注册数据选择器
-      _registerDataSelectors();
+      registerDataSelectors();
     } catch (e) {
       print('❌ ScriptsCenterPlugin初始化失败: $e');
       rethrow;
     }
-  }
-
-  /// 注册数据选择器
-  void _registerDataSelectors() {
-    final pluginDataSelectorService = PluginDataSelectorService.instance;
-
-    // 注册脚本选择器
-    pluginDataSelectorService.registerSelector(
-      SelectorDefinition(
-        id: 'scripts_center.script',
-        pluginId: id,
-        name: 'scripts_center_selectScript'.tr,
-        icon: icon,
-        color: color,
-        searchable: true,
-        selectionMode: SelectionMode.single,
-        steps: [
-          SelectorStep(
-            id: 'select_script',
-            title: 'scripts_center_selectScript'.tr,
-            viewType: SelectorViewType.list,
-            isFinalStep: true,
-            dataLoader: (_) async {
-              // 获取所有启用的脚本
-              final scripts = await _scriptManager.loadAllScripts();
-              final enabledScripts = scripts.where((s) => s.enabled).toList();
-
-              return enabledScripts.map((script) {
-                // 解析图标
-                IconData scriptIcon;
-                try {
-                  scriptIcon = IconData(
-                    int.parse(script.icon, radix: 16),
-                    fontFamily: 'MaterialIcons',
-                  );
-                } catch (e) {
-                  scriptIcon = Icons.code;
-                }
-
-                return SelectableItem(
-                  id: script.id,
-                  title: script.name,
-                  subtitle:
-                      script.description.isNotEmpty
-                          ? script.description
-                          : 'v${script.version}',
-                  icon: scriptIcon,
-                  rawData: {
-                    'id': script.id,
-                    'name': script.name,
-                    'description': script.description,
-                    'icon': script.icon,
-                    'version': script.version,
-                    'type': script.type,
-                    'hasInputs': script.hasInputs,
-                  },
-                );
-              }).toList();
-            },
-          ),
-        ],
-      ),
-    );
-
-    print('✅ 脚本选择器注册成功');
   }
 
   /// 初始化默认文件夹
