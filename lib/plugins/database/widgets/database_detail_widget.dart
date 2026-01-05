@@ -7,7 +7,6 @@ import 'package:Memento/plugins/database/controllers/database_controller.dart';
 import 'package:Memento/plugins/database/models/database_model.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
 import '../models/record.dart' as record_model;
-import 'record_detail_widget.dart';
 
 class DatabaseDetailWidget extends StatefulWidget {
   final DatabaseController controller;
@@ -127,10 +126,12 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
                 ),
                 subtitle: Text(record.updatedAt.toString()),
                 onTap: () {
-                  NavigationHelper.push(context, RecordDetailWidget(
+                  NavigationHelper.push(context, RecordEditWidget(
+                            controller: widget.controller,
+                            database: database,
                             record: record,
-                            controller: widget.controller,),
-                  );
+                          )
+                  ).then((_) => setState(() {}));
                 },
                 onLongPress: () {
                   _showRecordMenu(context, record);
@@ -165,10 +166,12 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
             return Card(
               child: InkWell(
                 onTap: () {
-                  NavigationHelper.push(context, RecordDetailWidget(
+                  NavigationHelper.push(context, RecordEditWidget(
+                            controller: widget.controller,
+                            database: database,
                             record: record,
-                            controller: widget.controller,),
-                  );
+                          )
+                  ).then((_) => setState(() {}));
                 },
                 onLongPress: () {
                   _showRecordMenu(context, record);
