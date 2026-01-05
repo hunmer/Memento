@@ -718,6 +718,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/widgets_gallery');
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.description),
+            title: const Text('日志系统'),
+            subtitle: const Text('查看和管理应用日志'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/log');
+            },
+          ),
           const Divider(),
 
           // 关于

@@ -31,6 +31,7 @@ import 'package:Memento/screens/route.dart';
 import 'global_flags.dart';
 import 'services/toast_service.dart';
 import 'services/file_watch_sync_service.dart';
+import 'services/log_service.dart';
 import 'api_forwarding/api_forwarding_config.dart';
 import 'api_forwarding/api_forwarding_service.dart';
 
@@ -114,6 +115,31 @@ Future<void> initializeApp() async {
     if (record.stackTrace != null) {
       debugPrint('StackTrace: ${record.stackTrace}');
     }
+
+    // 同时输出到日志服务
+    final logService = LogService.instance;
+    if (logService.isEnabled) {
+      final message = '[${record.loggerName}] ${record.message}';
+      switch (record.level.name) {
+        case 'WARNING':
+          logService.warning(message);
+          break;
+        case 'SEVERE':
+        case 'SHOUT':
+          logService.error(
+            message,
+            error: record.error,
+            stackTrace: record.stackTrace,
+          );
+          break;
+        case 'INFO':
+        case 'CONFIG':
+          logService.info(message);
+          break;
+        default:
+          logService.debug(message);
+      }
+    }
   });
 
   // 设置首选方向为竖屏（快速操作）
@@ -140,6 +166,9 @@ Future<void> initializeApp() async {
     // 初始化配置管理器
     globalConfigManager = ConfigManager(globalStorage);
     await globalConfigManager.initialize();
+
+    // 初始化日志服务（根据配置决定是否启用）
+    unawaited(LogService.instance.initialize(globalStorage));
 
     // 初始化插件管理器（不注册插件）
     globalPluginManager = PluginManager();

@@ -46,18 +46,12 @@ class _EventListenerContainerState extends State<EventListenerContainer> {
   void _registerEventListeners() {
     for (final event in widget.events) {
       void handler(EventArgs args) {
-        if (kDebugMode) {
-          print('[EventListenerContainer] received event: "$event"');
-        }
         if (mounted) {
           widget.onEvent();
         }
       }
       EventManager.instance.subscribe(event, handler);
       _subscriptions.add((event, handler));
-      if (kDebugMode) {
-        print('[EventListenerContainer] subscribed to: "$event"');
-      }
     }
   }
 

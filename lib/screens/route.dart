@@ -46,6 +46,7 @@ import 'package:Memento/screens/widgets_gallery/screens/app_drawer_example.dart'
 import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/super_cupertino_navigation_example.dart';
+import 'package:Memento/screens/log_screen/log_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:get/get.dart';
@@ -130,6 +131,7 @@ class AppRoutes extends NavigatorObserver {
   static const String overlayTest = '/overlay_test';
   static const String formFieldsTest = '/form_fields_test';
   static const String widgetsGallery = '/widgets_gallery';
+  static const String log = '/log';
 
   // 插件路由路径
   static const String agentChat = '/agent_chat';
@@ -780,6 +782,9 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const PresetEditFormExample());
       case '/widgets_gallery/super_cupertino_navigation':
         return _createRoute(const SuperCupertinoNavigationExample());
+      case '/log':
+      case 'log':
+        return _createRoute(const LogScreen());
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
