@@ -10,6 +10,9 @@ import 'services/tts_manager_service.dart';
 import 'services/tts_base_service.dart';
 import 'screens/tts_services_screen.dart';
 
+part 'tts_js_api.dart';
+part 'tts_data_selectors.dart';
+
 /// TTS语音朗读插件
 class TTSPlugin extends BasePlugin {
   static TTSPlugin? _instance;

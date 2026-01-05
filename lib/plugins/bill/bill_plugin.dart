@@ -25,6 +25,9 @@ import 'models/bill.dart';
 import 'models/bill_statistics.dart';
 import 'models/statistic_range.dart';
 
+part 'bill_js_api.dart';
+part 'bill_data_selectors.dart';
+
 class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   static BillPlugin? _instance;
   static BillPlugin get instance {
