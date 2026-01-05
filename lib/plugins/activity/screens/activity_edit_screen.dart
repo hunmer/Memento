@@ -7,14 +7,17 @@ import 'package:Memento/core/services/toast_service.dart';
 
 /// 活动编辑界面
 /// 用于创建和编辑活动记录
+/// 可作为独立页面或 bottom sheet 内容使用
 class ActivityEditScreen extends StatefulWidget {
   final ActivityRecord? activity;
   final DateTime? selectedDate;
+  final bool showAsBottomSheet;
 
   const ActivityEditScreen({
     super.key,
     this.activity,
     this.selectedDate,
+    this.showAsBottomSheet = false,
   });
 
   @override
@@ -154,28 +157,64 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
   Widget build(BuildContext context) {
     // 如果没有提供 selectedDate，使用今天的日期
     final selectedDate = widget.selectedDate ?? DateTime.now();
+    final title = widget.activity != null
+        ? 'activity_editActivity'.tr
+        : 'activity_addActivity'.tr;
 
+    final formContent = ActivityForm(
+      activity: widget.activity,
+      selectedDate: selectedDate,
+      initialStartTime: _defaultStartTime,
+      initialEndTime: _defaultEndTime,
+      recentMoods: recentMoods,
+      recentTags: recentTags,
+      onSave: _saveActivity,
+    );
+
+    // bottom sheet 模式：只返回带标题栏的内容
+    if (widget.showAsBottomSheet) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 标题栏
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // 表单内容
+          Expanded(child: formContent),
+        ],
+      );
+    }
+
+    // 完整页面模式：使用 Scaffold
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.activity != null
-              ? 'activity_editActivity'.tr
-              : 'activity_addActivity'.tr,
-        ),
+        title: Text(title),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: ActivityForm(
-        activity: widget.activity,
-        selectedDate: selectedDate,
-        initialStartTime: _defaultStartTime,
-        initialEndTime: _defaultEndTime,
-        recentMoods: recentMoods,
-        recentTags: recentTags,
-        onSave: _saveActivity,
-      ),
+      body: formContent,
     );
   }
 }

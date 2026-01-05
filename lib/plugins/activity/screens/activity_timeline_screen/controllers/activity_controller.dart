@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
-import 'package:Memento/plugins/activity/widgets/activity_form.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
+import 'package:Memento/plugins/activity/screens/activity_edit_screen.dart';
 
 class ActivityController {
   final ActivityService activityService;
@@ -58,38 +58,6 @@ class ActivityController {
     recentTags = await activityService.getRecentTags();
   }
 
-  Future<void> _updateRecentMood(String mood) async {
-    if (mood.isEmpty) return;
-
-    // 将新心情添加到列表开头
-    recentMoods.remove(mood); // 如果已存在，先移除
-    recentMoods.insert(0, mood);
-
-    // 保持列表最大长度为10
-    if (recentMoods.length > maxRecentItems) {
-      recentMoods = recentMoods.sublist(0, maxRecentItems);
-    }
-
-    await activityService.saveRecentMoods(recentMoods);
-  }
-
-  Future<void> _updateRecentTags(List<String> tags) async {
-    if (tags.isEmpty) return;
-
-    // 将新标签添加到列表开头
-    for (final tag in tags.reversed) {
-      recentTags.remove(tag); // 如果已存在，先移除
-      recentTags.insert(0, tag);
-    }
-
-    // 保持列表最大长度为10
-    if (recentTags.length > maxRecentItems) {
-      recentTags = recentTags.sublist(0, maxRecentItems);
-    }
-
-    await activityService.saveRecentTags(recentTags);
-  }
-
   // 发送事件通知
   void _notifyEvent(String action, ActivityRecord activity) {
     final eventArgs = ItemEventArgs(
@@ -110,193 +78,43 @@ class ActivityController {
     onActivitiesChanged();
   }
 
-  Future<void> addActivity(
-    BuildContext context,
-    DateTime selectedDate,
-    TimeOfDay? startTime,
-    TimeOfDay? endTime,
-    Function(List<String>) onTagsUpdated,
-  ) async {
-    DateTime? initialStartTime;
-    DateTime? initialEndTime;
-    DateTime? lastActivityEndTime;
-
-    if (startTime != null && endTime != null) {
-      initialStartTime = DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day,
-        startTime.hour,
-        startTime.minute,
-      );
-      initialEndTime = DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day,
-        endTime.hour,
-        endTime.minute,
-      );
-
-      // 智能调整开始时间，避免与已有活动重叠
-      // 确保已加载当天活动数据
-      if (activities.isEmpty) {
-        await loadActivities(selectedDate);
-      }
-
-      // 按开始时间排序活动
-      final sortedActivities = List<ActivityRecord>.from(activities)
-        ..sort((a, b) => a.startTime.compareTo(b.startTime));
-
-      // 查找与初始时间段重叠的最后一个活动
-      ActivityRecord? lastOverlappingActivity;
-      for (final activity in sortedActivities) {
-        // 如果活动结束时间 > 初始开始时间，说明可能重叠
-        if (activity.endTime.isAfter(initialStartTime)) {
-          // 检查是否真的重叠（活动开始时间 < 初始结束时间）
-          if (activity.startTime.isBefore(initialEndTime)) {
-            lastOverlappingActivity = activity;
-          }
-        }
-      }
-
-      // 如果找到重叠的活动，调整开始时间为该活动的结束时间
-      if (lastOverlappingActivity != null) {
-        initialStartTime = lastOverlappingActivity.endTime;
-        lastActivityEndTime = lastOverlappingActivity.endTime;
-      }
-    } else {
-      // 设置默认时间：开始时间为最后一个活动的结束时间，结束时间为当前时间
-      final now = DateTime.now();
-
-      // 确保已加载当天活动数据
-      if (activities.isEmpty) {
-        await loadActivities(selectedDate);
-      }
-
-      // 找到当天最后一个活动的结束时间
-      if (activities.isNotEmpty) {
-        // 按开始时间排序，找到最后一个活动
-        final sortedActivities = List.from(activities)
-          ..sort((a, b) => a.startTime.compareTo(b.startTime));
-        lastActivityEndTime = sortedActivities.last.endTime;
-      }
-
-      // 设置开始时间为最后一个活动的结束时间，如果没有活动则为当前时间前1小时
-      // 但不能早于当天的00:00
-      if (lastActivityEndTime != null) {
-        initialStartTime = lastActivityEndTime;
-      } else {
-        final oneHourBefore = now.subtract(const Duration(hours: 1));
-        final dayStart = DateTime(
-          selectedDate.year,
-          selectedDate.month,
-          selectedDate.day,
-          0,
-          0,
-        );
-        initialStartTime = oneHourBefore.isAfter(dayStart)
-            ? oneHourBefore
-            : dayStart;
-      }
-
-      // 设置结束时间为当前时间
-      initialEndTime = now;
-    }
-
-    // 加载最近使用的心情和标签
-    await loadRecentMoodsAndTags();
-
+  /// 显示活动编辑界面（用于创建新活动）
+  /// 使用 SmoothBottomSheet 显示 ActivityEditScreen
+  static Future<void> showAddActivityScreen(BuildContext context) {
     return SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
       builder: (context) {
         final mediaQuery = MediaQuery.of(context);
-        final keyboardHeight = mediaQuery.viewInsets.bottom;
         final screenHeight = mediaQuery.size.height;
-
-        // 计算内容高度：考虑键盘占用的空间
-        // 当键盘弹出时,使用剩余空间的85%,但不超过原始高度
-        final maxHeight = screenHeight * 0.85;
-        final availableHeight = screenHeight - keyboardHeight;
-        final contentHeight = availableHeight < maxHeight
-            ? availableHeight * 0.9  // 键盘弹出时使用剩余空间的90%
-            : maxHeight;             // 无键盘时使用屏幕的85%
+        final contentHeight = screenHeight * 0.85;
 
         return SizedBox(
           height: contentHeight,
-          child: ActivityForm(
-            selectedDate: selectedDate,
-            initialStartTime: initialStartTime,
-            initialEndTime: initialEndTime,
-            lastActivityEndTime: lastActivityEndTime,
-            recentMoods: recentMoods,
-            recentTags: recentTags,
-            onSave: (ActivityRecord activity) async {
-              await activityService.saveActivity(activity);
-              if (activity.tags.isNotEmpty) {
-                onTagsUpdated(activity.tags);
-                await _updateRecentTags(activity.tags);
-              }
-              if (activity.mood != null && activity.mood!.isNotEmpty) {
-                await _updateRecentMood(activity.mood!);
-              }
-              // 发送活动添加事件
-              _notifyEvent('added', activity);
-              await loadActivities(selectedDate);
-            },
-          ),
+          child: const ActivityEditScreen(showAsBottomSheet: true),
         );
       },
     );
   }
 
+  /// 显示活动编辑界面（用于编辑现有活动）
   void editActivity(BuildContext context, ActivityRecord activity) {
-    // 加载最近使用的心情和标签
-    loadRecentMoodsAndTags().then((_) {
-      if (!context.mounted) return;
-      SmoothBottomSheet.show(
-        context: context,
-        isScrollControlled: true,
-        builder: (context) {
-          final mediaQuery = MediaQuery.of(context);
-          final keyboardHeight = mediaQuery.viewInsets.bottom;
-          final screenHeight = mediaQuery.size.height;
+    SmoothBottomSheet.show(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        final mediaQuery = MediaQuery.of(context);
+        final screenHeight = mediaQuery.size.height;
+        final contentHeight = screenHeight * 0.85;
 
-          // 计算内容高度：考虑键盘占用的空间
-          // 当键盘弹出时,使用剩余空间的85%,但不超过原始高度
-          final maxHeight = screenHeight * 0.85;
-          final availableHeight = screenHeight - keyboardHeight;
-          final contentHeight = availableHeight < maxHeight
-              ? availableHeight * 0.9  // 键盘弹出时使用剩余空间的90%
-              : maxHeight;             // 无键盘时使用屏幕的85%
-
-          return SizedBox(
-            height: contentHeight,
-            child: ActivityForm(
-              activity: activity,
-              recentMoods: recentMoods,
-              recentTags: recentTags,
-              onSave: (ActivityRecord updatedActivity) async {
-                await activityService.updateActivity(
-                  activity,
-                  updatedActivity,
-                );
-                if (updatedActivity.tags.isNotEmpty) {
-                  await _updateRecentTags(updatedActivity.tags);
-                }
-                if (updatedActivity.mood != null &&
-                    updatedActivity.mood!.isNotEmpty) {
-                  await _updateRecentMood(updatedActivity.mood!);
-                }
-                // 发送活动更新事件
-                _notifyEvent('updated', updatedActivity);
-                await loadActivities(activity.startTime);
-              },
-              selectedDate: activity.startTime,
-            ),
-          );
-        },
-      );
-    });
+        return SizedBox(
+          height: contentHeight,
+          child: ActivityEditScreen(
+            activity: activity,
+            showAsBottomSheet: true,
+          ),
+        );
+      },
+    );
   }
 }

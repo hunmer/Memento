@@ -193,20 +193,8 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
   void _showQuickActivityForm() async {
     if (!mounted) return;
 
-    final now = DateTime.now();
-
-    // 尝试检测最优的活动时间
     try {
-      // 这里可以添加智能时间检测逻辑，但现在直接使用当前时间
-      final optimalTime = now;
-
-      await _activityController.addActivity(
-        context,
-        optimalTime,
-        null, // 不预设开始时间，让用户在表单中选择
-        null, // 不预设结束时间
-        _tagController.updateRecentTags,
-      );
+      ActivityController.showAddActivityScreen(context);
     } catch (e) {
       debugPrint('[ActivityTimelineScreen] 打开活动表单失败: $e');
 
@@ -477,20 +465,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                                   activity,
                                 ),
                             onUnrecordedTimeTap: (start, end) {
-                              _activityController
-                                  .addActivity(
-                                    context,
-                                    _selectedDate,
-                                    TimeOfDay(
-                                      hour: start.hour,
-                                      minute: start.minute,
-                                    ),
-                                    TimeOfDay(
-                                      hour: end.hour,
-                                      minute: end.minute,
-                                    ),
-                                    _tagController.updateRecentTags,
-                                  )
+                              ActivityController.showAddActivityScreen(context)
                                   .then((_) {
                                     _viewModeController.clearSelectedMinutes();
                                   });
@@ -519,16 +494,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                                   activity,
                                 ),
                             onUnrecordedTimeTap: (start, end) {
-                              _activityController.addActivity(
-                                context,
-                                _selectedDate,
-                                TimeOfDay(
-                                  hour: start.hour,
-                                  minute: start.minute,
-                                ),
-                                TimeOfDay(hour: end.hour, minute: end.minute),
-                                _tagController.updateRecentTags,
-                              );
+                              ActivityController.showAddActivityScreen(context);
                             },
                           ),
                 ),
@@ -606,14 +572,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           padding: const EdgeInsets.only(right: 8.0),
           child: IconButton(
             icon: const Icon(Icons.add_circle_outline, size: 28),
-            onPressed:
-                () => _activityController.addActivity(
-                  context,
-                  _selectedDate,
-                  null,
-                  null,
-                  _tagController.updateRecentTags,
-                ),
+            onPressed: () => ActivityController.showAddActivityScreen(context),
             tooltip: '添加活动',
           ),
         ),
