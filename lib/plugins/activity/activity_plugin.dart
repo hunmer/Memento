@@ -903,27 +903,9 @@ class _ActivityMainViewState extends State<ActivityMainView>
       backgroundColor: ActivityPlugin.instance.color,
       elevation: 4,
       shape: const CircleBorder(),
-      onPressed: () async {
-        final activityService = ActivityPlugin.instance.activityService;
-        final today = DateTime.now();
-
+      onPressed: () {
         if (!context.mounted) return;
-
-        // 创建控制器实例并调用 addActivity 方法
-        final controller = ActivityController(
-          activityService: activityService,
-          onActivitiesChanged: () {},
-        );
-
-        await controller.addActivity(
-          context,
-          today,
-          null,
-          null,
-          (tags) async {
-            await activityService.saveRecentTags(tags);
-          },
-        );
+        ActivityController.showAddActivityScreen(context);
       },
       child: Icon(
         Icons.add,

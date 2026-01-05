@@ -178,6 +178,8 @@ class ActivityFormState extends State<ActivityFormWidget> {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 16),
+
                       // 标题输入 (fields[0])
                       fields[0],
                       const SizedBox(height: 16),
@@ -621,9 +623,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
     );
 
     await widget.onSave(activity);
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
   }
 
   @override
