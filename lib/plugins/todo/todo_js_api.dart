@@ -474,7 +474,7 @@ Future<String> _jsFindTaskBy(Map<String, dynamic> params) async {
   final int? offset = params['offset'];
   final int? count = params['count'];
 
-  final tasks = taskController.tasks;
+  final tasks = TodoPlugin.instance.taskController.tasks;
   final List<Task> matchedTasks = [];
 
   for (final task in tasks) {

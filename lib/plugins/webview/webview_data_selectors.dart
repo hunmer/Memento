@@ -11,7 +11,7 @@ void _registerDataSelectors() {
       name: 'webview_cardSelectorName'.tr,
       description: 'webview_cardSelectorDesc'.tr,
       icon: Icons.link,
-      color: WebviewPlugin.instance.color,
+      color: WebViewPlugin.instance.color,
       selectionMode: SelectionMode.single,
       steps: [
         SelectorStep(
@@ -20,7 +20,7 @@ void _registerDataSelectors() {
           viewType: SelectorViewType.list,
           dataLoader: (previousSelections) async {
             // 加载所有卡片
-            final cards = WebviewPlugin.instance.cardManager.getAllCards();
+            final cards = WebViewPlugin.instance.cardManager.getAllCards();
             return cards.map((card) => SelectableItem(
               id: card.id,
               title: card.title,
