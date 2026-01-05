@@ -24,6 +24,9 @@ class HomeScreenController extends ChangeNotifier {
 
   // 批量选中的项目ID列表
   final Set<String> _selectedItemIds = {};
+  String? _draggingLayoutId;
+  String? _draggingItemId;
+  HomeItem? _draggingItemSnapshot;
 
   // 是否是首次加载，使用静态变量确保在热重载时保持状态
   static bool _hasInitialized = false;
@@ -77,6 +80,7 @@ class HomeScreenController extends ChangeNotifier {
   bool get isEditMode => _isEditMode;
   bool get isBatchMode => _isBatchMode;
   Set<String> get selectedItemIds => _selectedItemIds;
+  bool get isDraggingItem => _draggingItemId != null;
   String get currentLayoutName => _currentLayoutName;
   List<LayoutConfig> get savedLayouts => _savedLayouts;
   PageController? get pageController => _pageController;
@@ -91,14 +95,11 @@ class HomeScreenController extends ChangeNotifier {
 
   /// 获取指定布局的 items（从缓存或当前 layoutManager）
   List<HomeItem> getItemsForLayout(String layoutId) {
-    // 优先从缓存获取
+    if (_currentLayoutId == layoutId) {
+      return _layoutManager.items;
+    }
     if (_layoutItemsCache.containsKey(layoutId)) {
       return _layoutItemsCache[layoutId]!;
-    }
-    // 如果缓存不存在，检查是否是当前布局
-    if (_currentPageIndex < _savedLayouts.length &&
-        _savedLayouts[_currentPageIndex].id == layoutId) {
-      return _layoutManager.items;
     }
     return [];
   }
@@ -493,6 +494,22 @@ class HomeScreenController extends ChangeNotifier {
     _stateChangedCallback?.call();
   }
 
+  void handleDragStart(String layoutId, HomeItem item) {
+    _draggingLayoutId = layoutId;
+    _draggingItemId = item.id;
+    _draggingItemSnapshot = item;
+    debugPrint('HomeScreenController.handleDragStart -> layout=$layoutId, item=${item.id}');
+  }
+
+  void handleDragEnded() {
+    if (_draggingItemId != null) {
+      debugPrint('HomeScreenController.handleDragEnded -> cleared drag state');
+    }
+    _draggingLayoutId = null;
+    _draggingItemId = null;
+    _draggingItemSnapshot = null;
+  }
+
   /// 页面切换回调
   void onPageChanged(int index, VoidCallback onStateChanged) async {
     if (index < 0 || index >= _savedLayouts.length) return;
@@ -582,5 +599,157 @@ class HomeScreenController extends ChangeNotifier {
     AppStartupState.instance.removeListener(onStateChanged);
     _pageController?.dispose();
     _tabController?.dispose();
+  }
+
+  // ==================== 拖拽跨布局 ====================
+
+  Future<bool> moveDraggedItemToLayout(String draggedItemId, String targetLayoutId, int targetIndex) async {
+    final sourceLayoutId = _draggingLayoutId;
+    final activeDraggedId = _draggingItemId;
+    if (sourceLayoutId == null || activeDraggedId == null) {
+      debugPrint('moveDraggedItemToLayout -> skip, no active drag');
+      return false;
+    }
+    if (sourceLayoutId == targetLayoutId) {
+      debugPrint('moveDraggedItemToLayout -> skip, same layout');
+      return false;
+    }
+    if (activeDraggedId != draggedItemId) {
+      debugPrint('moveDraggedItemToLayout -> mismatch drag id');
+      return false;
+    }
+
+    final removedItem = await _removeItemFromLayout(sourceLayoutId, activeDraggedId) ?? _draggingItemSnapshot;
+    if (removedItem == null) {
+      debugPrint('moveDraggedItemToLayout -> failed, cannot locate source item');
+      return false;
+    }
+
+    final inserted = await _insertItemIntoLayout(targetLayoutId, removedItem, targetIndex);
+    if (!inserted) {
+      await _insertItemIntoLayout(sourceLayoutId, removedItem, 0);
+      return false;
+    }
+
+    await _persistLayouts({sourceLayoutId, targetLayoutId});
+    return true;
+  }
+
+  Future<HomeItem?> _removeItemFromLayout(String layoutId, String itemId) async {
+    if (_isActiveLayout(layoutId)) {
+      final index = _layoutManager.items.indexWhere((element) => element.id == itemId);
+      if (index == -1) {
+        return null;
+      }
+      final item = _layoutManager.items[index];
+      _layoutManager.removeItemAt(index);
+      return item;
+    }
+
+    final items = await _getOrLoadLayoutItems(layoutId);
+    final index = items.indexWhere((element) => element.id == itemId);
+    if (index == -1) {
+      return null;
+    }
+    final item = items.removeAt(index);
+    _layoutItemsCache[layoutId] = items;
+    return item;
+  }
+
+  Future<bool> _insertItemIntoLayout(String layoutId, HomeItem item, int targetIndex) async {
+    if (_isActiveLayout(layoutId)) {
+      final maxIndex = _layoutManager.items.length;
+      final clampedIndex = targetIndex < 0
+          ? 0
+          : targetIndex > maxIndex
+              ? maxIndex
+              : targetIndex;
+      _layoutManager.insertItem(clampedIndex, item);
+      return true;
+    }
+
+    final items = await _getOrLoadLayoutItems(layoutId);
+    final maxIndex = items.length;
+    final clampedIndex = targetIndex < 0
+        ? 0
+        : targetIndex > maxIndex
+            ? maxIndex
+            : targetIndex;
+    items.insert(clampedIndex, item);
+    _layoutItemsCache[layoutId] = items;
+    return true;
+  }
+
+  Future<List<HomeItem>> _getOrLoadLayoutItems(String layoutId) async {
+    final cached = _layoutItemsCache[layoutId];
+    if (cached != null) {
+      return cached;
+    }
+
+    LayoutConfig? config;
+    try {
+      config = _savedLayouts.firstWhere((layout) => layout.id == layoutId);
+    } catch (_) {
+      config = await _layoutManager.readLayoutConfig(layoutId);
+    }
+
+    if (config == null) {
+      _layoutItemsCache[layoutId] = <HomeItem>[];
+      return _layoutItemsCache[layoutId]!;
+    }
+
+    final items = config.items.map((json) => HomeItem.fromJson(json)).toList();
+    _layoutItemsCache[layoutId] = items;
+    return items;
+  }
+
+  Future<void> _persistLayouts(Set<String> layoutIds) async {
+    if (layoutIds.isEmpty) {
+      return;
+    }
+    bool changed = false;
+    final updatedLayouts = List<LayoutConfig>.from(_savedLayouts);
+    for (var i = 0; i < updatedLayouts.length; i++) {
+      final layout = updatedLayouts[i];
+      if (!layoutIds.contains(layout.id)) {
+        continue;
+      }
+      final snapshot = await _getItemsSnapshot(layout.id);
+      if (snapshot == null) {
+        continue;
+      }
+      updatedLayouts[i] = layout.copyWith(
+        items: snapshot.map((item) => item.toJson()).toList(),
+        updatedAt: DateTime.now(),
+      );
+      changed = true;
+    }
+    if (changed) {
+      _savedLayouts = updatedLayouts;
+      await _layoutManager.saveLayoutConfigs(_savedLayouts);
+    }
+  }
+
+  Future<List<HomeItem>?> _getItemsSnapshot(String layoutId) async {
+    if (_isActiveLayout(layoutId)) {
+      return List<HomeItem>.from(_layoutManager.items);
+    }
+    if (_layoutItemsCache.containsKey(layoutId)) {
+      return List<HomeItem>.from(_layoutItemsCache[layoutId]!);
+    }
+    final loaded = await _getOrLoadLayoutItems(layoutId);
+    return List<HomeItem>.from(loaded);
+  }
+
+  bool _isActiveLayout(String layoutId) {
+    final current = _currentLayoutId;
+    return current != null && current == layoutId;
+  }
+
+  String? get _currentLayoutId {
+    if (_savedLayouts.isEmpty || _currentPageIndex >= _savedLayouts.length) {
+      return null;
+    }
+    return _savedLayouts[_currentPageIndex].id;
   }
 }
