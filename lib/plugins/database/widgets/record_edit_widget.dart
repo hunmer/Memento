@@ -31,7 +31,8 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
   @override
   void initState() {
     super.initState();
-    _fields = widget.initialFields ?? {};
+    // 优先使用 record.fields，其次使用 initialFields
+    _fields = widget.record?.fields ?? widget.initialFields ?? {};
     for (final field in widget.database.fields) {
       _fields.putIfAbsent(field.name, () {
         switch (field.type) {
@@ -181,18 +182,21 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
           IconButton(icon: const Icon(Icons.save), onPressed: _saveRecord),
         ],
       ),
-      body: FormBuilderWrapper(
-        onStateReady: (state) {
-          _formState = state;
-        },
-        config: FormConfig(
-          fields: formConfigs,
-          showSubmitButton: false,
-          showResetButton: false,
-          fieldSpacing: 16,
-          onSubmit: (values) {
-            // 表单提交在 _saveRecord 中处理
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: FormBuilderWrapper(
+          onStateReady: (state) {
+            _formState = state;
           },
+          config: FormConfig(
+            fields: formConfigs,
+            showSubmitButton: false,
+            showResetButton: false,
+            fieldSpacing: 16,
+            onSubmit: (values) {
+              // 表单提交在 _saveRecord 中处理
+            },
+          ),
         ),
       ),
     );
