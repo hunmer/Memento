@@ -80,7 +80,12 @@ class ActivityController {
 
   /// 显示活动编辑界面（用于创建新活动）
   /// 使用 SmoothBottomSheet 显示 ActivityEditScreen
-  static Future<void> showAddActivityScreen(BuildContext context) {
+  /// [start] 和 [end] 可选，用于预填充时间
+  static Future<void> showAddActivityScreen(
+    BuildContext context, {
+    DateTime? start,
+    DateTime? end,
+  }) {
     return SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
@@ -91,7 +96,11 @@ class ActivityController {
 
         return SizedBox(
           height: contentHeight,
-          child: const ActivityEditScreen(showAsBottomSheet: true),
+          child: ActivityEditScreen(
+            showAsBottomSheet: true,
+            startTime: start,
+            endTime: end,
+          ),
         );
       },
     );

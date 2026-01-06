@@ -29,13 +29,7 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                 icon: const Icon(Icons.arrow_back),
                 onPressed: () => PluginManager.toHomeScreen(context),
               ),
-      title: Text(
-        viewModeController.isGridMode && viewModeController.selectedMinutes > 0
-            ? 'activity_minutesSelected'.trParams({
-              'minutes': viewModeController.selectedMinutes.toString(),
-            })
-            : 'activity_activityTimeline'.tr,
-      ),
+      title: Text('activity_activityTimeline'.tr),
       actions: [
         // 视图切换按钮
         IconButton(
