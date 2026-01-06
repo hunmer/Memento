@@ -67,9 +67,10 @@ class _HomeCardState extends State<HomeCard> {
     }
 
     if (currentItem is HomeStackItem) {
+      // HomeStackItem 的点击事件由内部的 carousel 处理
+      // 这里只处理长按事件，不处理点击事件
       return GestureDetector(
         key: _cardKey,
-        onTap: onTap ?? () => _openStackItem(context, currentItem),
         onLongPress: onLongPress,
         child: _buildCardContent(context, currentItem),
       );
@@ -100,6 +101,12 @@ class _HomeCardState extends State<HomeCard> {
         if (!isEditMode) {
           HomeLayoutManager().updateStackActiveIndex(stackItem.id, index);
         }
+      },
+      // 传递点击回调，使用轮播组件内部的索引
+      onItemTap: (index) {
+        final sanitizedIndex = index.clamp(0, stackItem.children.length - 1);
+        final target = stackItem.children[sanitizedIndex];
+        _openWidgetPlugin(context, target);
       },
     );
   }
@@ -132,6 +139,7 @@ class _HomeCardState extends State<HomeCard> {
                       width: 1,
                     ),
           ),
+          color: isWidgetLike ? Colors.transparent : null,
           child: content,
         ),
         if (isEditMode && dragHandle != null)
@@ -581,12 +589,14 @@ class _HomeStackCarousel extends StatefulWidget {
   final bool isEditMode;
   final Widget Function(HomeWidgetItem item) itemBuilder;
   final ValueChanged<int> onActiveIndexChanged;
+  final ValueChanged<int>? onItemTap;
 
   const _HomeStackCarousel({
     required this.stack,
     required this.isEditMode,
     required this.itemBuilder,
     required this.onActiveIndexChanged,
+    this.onItemTap,
   });
 
   @override
@@ -720,6 +730,14 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel>
           ),
         ),
         _buildDotsIndicator(),
+        // 添加点击检测层，使用实际的 _currentIndex
+        if (widget.onItemTap != null && !widget.isEditMode)
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => widget.onItemTap!(_currentIndex),
+            ),
+          ),
       ],
     );
 
