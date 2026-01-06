@@ -18,12 +18,15 @@ class LogEntry {
   final LogLevel level;
   final String message;
   final String? stackTrace;
+  /// 重复次数（>=1），1 表示首次出现，>1 表示重复次数
+  final int count;
 
   LogEntry({
     required this.timestamp,
     required this.level,
     required this.message,
     this.stackTrace,
+    this.count = 1,
   });
 
   Map<String, dynamic> toJson() {
@@ -32,6 +35,7 @@ class LogEntry {
       'level': level.name,
       'message': message,
       'stackTrace': stackTrace,
+      'count': count,
     };
   }
 
@@ -44,6 +48,7 @@ class LogEntry {
       ),
       message: json['message'] as String,
       stackTrace: json['stackTrace'] as String?,
+      count: json['count'] as int? ?? 1,
     );
   }
 
@@ -52,6 +57,9 @@ class LogEntry {
     final buffer = StringBuffer();
     buffer.write('[${timestamp.toIso8601String()}] ');
     buffer.write('[${level.name.toUpperCase()}] ');
+    if (count > 1) {
+      buffer.write('[$count] ');
+    }
     buffer.write(message);
     if (stackTrace != null) {
       buffer.write('\n$stackTrace');
@@ -180,15 +188,37 @@ class LogService {
   void _log(LogLevel level, String message, {String? stackTrace}) {
     if (!_isEnabled || !_isInitialized) return;
 
-    final entry = LogEntry(
-      timestamp: DateTime.now(),
-      level: level,
-      message: message,
-      stackTrace: stackTrace,
-    );
+    // 检查最后一条日志是否与当前相同（忽略时间戳和堆栈信息）
+    final lastEntry = _currentSessionLogs.isNotEmpty ? _currentSessionLogs.last : null;
+    final isDuplicate = lastEntry != null &&
+        lastEntry.level == level &&
+        lastEntry.message == message &&
+        lastEntry.stackTrace == stackTrace;
 
-    // 添加到内存
-    _currentSessionLogs.add(entry);
+    LogEntry entry;
+
+    if (isDuplicate) {
+      // 创建一个新的 LogEntry，计数 +1
+      entry = LogEntry(
+        timestamp: lastEntry.timestamp, // 保持首次出现的时间
+        level: level,
+        message: message,
+        stackTrace: stackTrace,
+        count: lastEntry.count + 1,
+      );
+      // 替换最后一条日志
+      _currentSessionLogs[_currentSessionLogs.length - 1] = entry;
+    } else {
+      // 创建新日志
+      entry = LogEntry(
+        timestamp: DateTime.now(),
+        level: level,
+        message: message,
+        stackTrace: stackTrace,
+      );
+      // 添加到内存
+      _currentSessionLogs.add(entry);
+    }
 
     // 发布到流
     _logController.add(entry);
