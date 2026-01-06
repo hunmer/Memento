@@ -354,7 +354,7 @@ class WebviewHomeWidgets {
     NavigationHelper.pushNamed(
       context,
       '/webview/browser',
-      arguments: {'url': url, 'cardId': cardId},
+      arguments: {'url': url, 'cardId': cardId, 'hideUI': true},
     );
   }
 }

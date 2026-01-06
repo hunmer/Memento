@@ -18,12 +18,14 @@ class WebViewBrowserScreen extends StatefulWidget {
   final String? initialUrl;
   final String? initialTitle;
   final String? cardId;
+  final bool hideUI;
 
   const WebViewBrowserScreen({
     super.key,
     this.initialUrl,
     this.initialTitle,
     this.cardId,
+    this.hideUI = false,
   });
 
   @override
@@ -98,8 +100,8 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              // 顶部地址栏和导航
-              _buildAddressBar(context),
+              // 顶部地址栏和导航（根据 hideUI 参数决定是否显示）
+              if (!widget.hideUI) _buildAddressBar(context),
 
               // WebView 内容区域
               Expanded(
@@ -157,8 +159,8 @@ class _WebViewBrowserScreenState extends State<WebViewBrowserScreen> {
                 ),
               ),
 
-              // 底部工具栏
-              _buildBottomBar(context),
+              // 底部工具栏（根据 hideUI 参数决定是否显示）
+              if (!widget.hideUI) _buildBottomBar(context),
             ],
           ),
         ),

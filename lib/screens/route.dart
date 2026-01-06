@@ -1270,6 +1270,7 @@ class AppRoutes extends NavigatorObserver {
         String? url;
         String? title;
         String? cardId;
+        bool hideUI = false;
 
         // 从 arguments 中解析参数
         if (settings.arguments is Map<String, dynamic>) {
@@ -1277,15 +1278,17 @@ class AppRoutes extends NavigatorObserver {
           url = args['url'] as String?;
           title = args['title'] as String?;
           cardId = args['cardId'] as String?;
+          hideUI = args['hideUI'] as bool? ?? false;
         }
 
-        debugPrint('打开 WebView 浏览器: url=$url, cardId=$cardId');
+        debugPrint('打开 WebView 浏览器: url=$url, cardId=$cardId, hideUI=$hideUI');
 
         return _createRoute(
           WebViewBrowserScreen(
             initialUrl: url,
             initialTitle: title,
             cardId: cardId,
+            hideUI: hideUI,
           ),
         );
       default:
