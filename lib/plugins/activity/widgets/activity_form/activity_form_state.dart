@@ -21,6 +21,9 @@ class ActivityFormState extends State<ActivityFormWidget> {
   String? _moodValue;
   List<String>? _tagsValue;
 
+  // 从历史记录加载的最近标签
+  List<String> _recentTags = [];
+
   @override
   void didUpdateWidget(ActivityFormWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -102,7 +105,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
         (widget.recentMoods?.isNotEmpty == true
             ? widget.recentMoods!.first
             : '😊');
-    _tagsValue ??= widget.activity?.tags ?? widget.recentTags;
+    _tagsValue ??= widget.activity?.tags ?? _recentTags;
 
     // 构建字段配置
     final fieldConfigs = [
@@ -153,7 +156,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
         extra: {
           'primaryColor': primaryColor,
           'labelText': 'activity_tags'.tr,
-          'quickSelectTags': widget.recentTags ?? [],
+          'quickSelectTags': _recentTags,
         },
         onChanged: (value) => _tagsValue = value as List<String>?,
       ),
@@ -628,7 +631,21 @@ class ActivityFormState extends State<ActivityFormWidget> {
   @override
   void initState() {
     super.initState();
+    _loadRecentTags();
     // 时间和字段值在 build 方法中初始化
+  }
+
+  /// 从历史记录加载最近标签
+  Future<void> _loadRecentTags() async {
+    final storage = StorageManager();
+    await storage.initialize();
+    final activityService = ActivityService(storage, 'activity');
+    final recentTags = await activityService.getRecentTags();
+    if (mounted) {
+      setState(() {
+        _recentTags = recentTags;
+      });
+    }
   }
 
   @override

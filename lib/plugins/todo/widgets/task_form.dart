@@ -138,47 +138,45 @@ class _TaskFormState extends State<TaskForm> {
     final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(isDark),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
-                child: FormBuilderWrapper(
-                  formKey: _formKey,
-                  onStateReady: (state) => _wrapperState = state,
-                  config: FormConfig(
-                    fieldSpacing: 0,
-                    showSubmitButton: false,
-                    showResetButton: false,
-                    fields: _buildFormFieldConfigs(locale),
-                    onSubmit: _handleSubmit,
-                  ),
-                  contentBuilder: (context, fields) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 16),
-                        // 基本信息组
-                        _buildBasicInfoGroup(fields),
-                        const SizedBox(height: 16),
-                        // 属性组
-                        _buildPropertiesGroup(fields),
-                        const SizedBox(height: 16),
-                        // 时间组
-                        _buildDateGroup(fields),
-                        const SizedBox(height: 16),
-                        // 设置组
-                        _buildSettingsGroup(fields),
-                        const SizedBox(height: 32),
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
+      appBar: AppBar(
+        title: Text(widget.task == null ? 'todo_newTask'.tr : 'todo_editTask'.tr),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
+        child: FormBuilderWrapper(
+          formKey: _formKey,
+          onStateReady: (state) => _wrapperState = state,
+          config: FormConfig(
+            fieldSpacing: 0,
+            showSubmitButton: false,
+            showResetButton: false,
+            fields: _buildFormFieldConfigs(locale),
+            onSubmit: _handleSubmit,
+          ),
+          contentBuilder: (context, fields) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 16),
+                // 基本信息组
+                _buildBasicInfoGroup(fields),
+                const SizedBox(height: 16),
+                // 属性组
+                _buildPropertiesGroup(fields),
+                const SizedBox(height: 16),
+                // 时间组
+                _buildDateGroup(fields),
+                const SizedBox(height: 16),
+                // 设置组
+                _buildSettingsGroup(fields),
+                const SizedBox(height: 32),
+              ],
+            );
+          },
         ),
       ),
       bottomNavigationBar: _buildBottomButton(isDark),
@@ -292,51 +290,6 @@ class _TaskFormState extends State<TaskForm> {
         extra: {'primaryColor': _primaryColor},
       ),
     ];
-  }
-
-  /// 构建头部
-  Widget _buildHeader(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: const Icon(Icons.close, size: 28),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              onPressed: () => Navigator.pop(context),
-              color: isDark ? Colors.white : Colors.grey[800],
-            ),
-          ),
-          Expanded(
-            child: Text(
-              widget.task == null ? 'todo_newTask'.tr : 'todo_editTask'.tr,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.grey[900],
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 48,
-            height: 48,
-            child: IconButton(
-              icon: const Icon(Icons.more_horiz, size: 28),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              onPressed: () {},
-              color: isDark ? Colors.white : Colors.grey[800],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   /// 构建底部按钮
