@@ -27,6 +27,11 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware, TickerProvider
     super.initState();
     _controller.init(_onStateChanged);
 
+    // 首次加载时打开最后使用的插件
+    if (!_controller.launchedWithParameters) {
+      _controller.tryOpenLastUsedPlugin();
+    }
+
     // 等待布局加载完成后创建 TabController
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
@@ -42,14 +47,6 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware, TickerProvider
           initialIndex: _controller.currentPageIndex,
         );
         _tabController!.addListener(() => _onTabChanged());
-      }
-
-      // 显示悬浮球
-      // FloatingBallService().show(context);
-
-      // 首次加载时打开最后使用的插件
-      if (!_controller.triedToOpenPlugin && !_controller.launchedWithParameters) {
-        _controller.tryOpenLastUsedPlugin();
       }
     });
   }

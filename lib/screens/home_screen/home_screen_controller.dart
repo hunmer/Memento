@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/global_flags.dart';
 import 'package:flutter/material.dart';
 import 'managers/home_layout_manager.dart';
@@ -424,8 +425,27 @@ class HomeScreenController extends ChangeNotifier {
   /// 尝试打开最后使用的插件
   void tryOpenLastUsedPlugin() {
     _triedToOpenPlugin = true;
-    if (AppStartupState.instance.pluginsReady) {
+
+    // 获取最后打开的插件ID
+    final lastOpenedPluginId = globalPluginManager.getLastOpenedPluginId;
+    if (lastOpenedPluginId == null) {
+      // 没有最后打开的插件记录
+      return;
+    }
+
+    // 检查插件是否已加载
+    final lastPlugin = globalPluginManager.getPlugin(lastOpenedPluginId);
+    if (lastPlugin != null) {
+      // 插件已加载，直接打开
       openLastUsedPlugin();
+    } else {
+      // 插件还未加载，使用 once 监听 plugin_loaded 事件
+      eventManager.once('plugin_loaded', (args) {
+        if (args is Value<String> && args.value == lastOpenedPluginId) {
+          // 是等待的插件，打开它
+          openLastUsedPlugin();
+        }
+      });
     }
   }
 

@@ -51,12 +51,12 @@ void main() async {
   runZonedGuarded(() async {
     // 3. 重写 debugPrint，让所有日志输出路由到 LogService
     // 这样无需修改现有的 debugPrint 调用
-    final _originalDebugPrint = debugPrint;
+      final originalDebugPrint = debugPrint;
     debugPrint = (String? message, {int? wrapWidth}) {
       if (message == null || message.isEmpty) return;
 
       // 在控制台仍然输出（开发环境方便调试）
-      _originalDebugPrint(message, wrapWidth: wrapWidth);
+        originalDebugPrint(message, wrapWidth: wrapWidth);
 
       // 同时记录到日志服务（如果启用）
       final logService = LogService.instance;
