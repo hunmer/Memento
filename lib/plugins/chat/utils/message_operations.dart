@@ -81,7 +81,7 @@ class MessageOperations {
     controller.dispose();
   }
 
-  /// 删除消息
+  /// 删除消息（带确认对话框）
   Future<void> deleteMessage(Message message) async {
     // 显示确认对话框
     final confirmed = await showDialog<bool>(
@@ -106,11 +106,60 @@ class MessageOperations {
     );
 
     if (confirmed == true) {
-      // 获取频道ID
+      await deleteMessageWithoutConfirmation(message);
+    }
+  }
+
+  /// 删除消息（不带确认对话框）
+  Future<void> deleteMessageWithoutConfirmation(Message message) async {
+    // 获取频道ID
+    final channelId = message.channelId;
+    if (channelId == null) {
+      return;
+    }
+
+    // 获取频道
+    final channel = _chatPlugin.channelService.channels.firstWhere(
+      (c) => c.id == channelId,
+    );
+
+    // 从频道的消息列表中删除消息
+    final updatedMessages = List<Message>.from(channel.messages)
+      ..removeWhere((m) => m.id == message.id);
+
+    // 更新频道的消息列表
+    channel.messages.clear();
+    channel.messages.addAll(updatedMessages);
+
+    // 保存更新后的消息列表
+    await _chatPlugin.channelService.saveMessages(channelId, updatedMessages);
+
+    // 触发 UI 更新
+    _chatPlugin.refresh();
+  }
+
+  /// 批量删除消息（不带确认对话框，只在最后触发一次 UI 更新）
+  Future<void> deleteMessagesWithoutConfirmation(
+    List<Message> messages,
+  ) async {
+    if (messages.isEmpty) return;
+
+    // 按频道分组消息
+    final messagesByChannel = <String, List<Message>>{};
+    for (var message in messages) {
       final channelId = message.channelId;
-      if (channelId == null) {
-        return;
+      if (channelId == null) continue;
+
+      if (!messagesByChannel.containsKey(channelId)) {
+        messagesByChannel[channelId] = [];
       }
+      messagesByChannel[channelId]!.add(message);
+    }
+
+    // 对每个频道的消息进行批量删除
+    for (var entry in messagesByChannel.entries) {
+      final channelId = entry.key;
+      final messagesToDelete = entry.value;
 
       // 获取频道
       final channel = _chatPlugin.channelService.channels.firstWhere(
@@ -118,19 +167,24 @@ class MessageOperations {
       );
 
       // 从频道的消息列表中删除消息
-      final updatedMessages = List<Message>.from(channel.messages)
-        ..removeWhere((m) => m.id == message.id);
+      final updatedMessages = List<Message>.from(channel.messages);
+      for (var message in messagesToDelete) {
+        updatedMessages.removeWhere((m) => m.id == message.id);
+      }
 
       // 更新频道的消息列表
       channel.messages.clear();
       channel.messages.addAll(updatedMessages);
 
       // 保存更新后的消息列表
-      await _chatPlugin.channelService.saveMessages(channelId, updatedMessages);
-
-      // 触发 UI 更新
-      _chatPlugin.refresh();
+      await _chatPlugin.channelService.saveMessages(
+        channelId,
+        updatedMessages,
+      );
     }
+
+    // 触发一次 UI 更新
+    _chatPlugin.refresh();
   }
 
   /// 复制消息内容

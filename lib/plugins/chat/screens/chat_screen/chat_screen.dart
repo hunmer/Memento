@@ -270,11 +270,39 @@ class _ChatScreenState extends State<ChatScreen> {
             )
             .toList();
 
-    for (var message in selectedMessages) {
-      await _deleteMessage(message);
-    }
+    if (selectedMessages.isEmpty) return;
+
+    // 显示一次确认对话框
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('chat_deleteMessages'.tr),
+            content: Text(
+              '确定要删除选中的 ${selectedMessages.length} 条消息吗？此操作不可撤销。',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('app_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('chat_delete'.tr),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed != true) return;
+
+    // 使用批量删除方法，只触发一次 UI 更新
+    await _messageOperations.deleteMessagesWithoutConfirmation(
+      selectedMessages,
+    );
 
     if (mounted) {
+      _updateMessages(); // 重新加载消息列表
       _controller.toggleMultiSelectMode();
     }
   }
@@ -754,20 +782,36 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     return [
-      IconButton(
-        icon: const Icon(Icons.select_all),
-        onPressed: _controller.toggleMultiSelectMode,
-        tooltip: '多选模式',
-      ),
       PopupMenuButton<String>(
         onSelected: (value) {
-          if (value == 'clear') {
+          if (value == 'multi_select') {
+            _controller.toggleMultiSelectMode();
+          } else if (value == 'clear') {
             _showClearConfirmationDialog();
           }
         },
         itemBuilder:
             (context) => [
-              const PopupMenuItem(value: 'clear', child: Text('清空消息')),
+              const PopupMenuItem(
+                value: 'multi_select',
+                child: Row(
+                  children: [
+                    Icon(Icons.select_all),
+                    SizedBox(width: 12),
+                    Text('多选模式'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'clear',
+                child: Row(
+                  children: [
+                    Icon(Icons.clear_all),
+                    SizedBox(width: 12),
+                    Text('清空消息'),
+                  ],
+                ),
+              ),
             ],
       ),
     ];
