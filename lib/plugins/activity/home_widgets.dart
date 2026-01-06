@@ -435,12 +435,6 @@ class _ActivityLastActivityWidgetState extends State<ActivityLastActivityWidget>
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(
-                Icons.history,
-                color: Colors.pink,
-                size: 32,
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,10 +568,12 @@ class _ActivityTodayPieChartWidgetState
   Widget _buildNoActivityWidget(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // 标题
           Text(
@@ -593,6 +589,7 @@ class _ActivityTodayPieChartWidgetState
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
                   Icons.pie_chart,
@@ -627,6 +624,7 @@ class _ActivityTodayPieChartWidgetState
             ),
           ),
         ],
+      ),
       ),
     );
   }
