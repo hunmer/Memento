@@ -62,7 +62,6 @@ class _HomeCardState extends State<HomeCard> {
   Widget build(BuildContext context) {
     final HomeItem currentItem = item;
 
-    // ???????????????????
     if (isEditMode) {
       return _buildCardContent(context, currentItem);
     }
@@ -91,6 +90,7 @@ class _HomeCardState extends State<HomeCard> {
       child: _buildCardContent(context, currentItem),
     );
   }
+
   Widget _buildStackCard(BuildContext context, HomeStackItem stackItem) {
     return _HomeStackCarousel(
       stack: stackItem,
@@ -104,15 +104,15 @@ class _HomeCardState extends State<HomeCard> {
     );
   }
 
-  /// ????????????
   Widget _buildCardContent(BuildContext context, HomeItem currentItem) {
-    final isWidgetLike = currentItem is HomeWidgetItem || currentItem is HomeStackItem;
+    final isWidgetLike =
+        currentItem is HomeWidgetItem || currentItem is HomeStackItem;
     final Widget content =
         currentItem is HomeWidgetItem
             ? _buildWidgetCard(context, currentItem)
             : currentItem is HomeStackItem
-                ? _buildStackCard(context, currentItem)
-                : _buildFolderCard(context, currentItem as HomeFolderItem);
+            ? _buildStackCard(context, currentItem)
+            : _buildFolderCard(context, currentItem as HomeFolderItem);
     return Stack(
       children: [
         Card(
@@ -132,15 +132,10 @@ class _HomeCardState extends State<HomeCard> {
                       width: 1,
                     ),
           ),
-          // ???????????Card????????????????
-          // ???????????? Card ?????????
-          color: isWidgetLike ? Colors.transparent : null,
           child: content,
         ),
-        // ???????????
         if (isEditMode && dragHandle != null)
           Positioned(top: 4, right: 4, child: dragHandle!),
-        // ?????????????
         if (isBatchMode)
           Positioned(
             top: 8,
@@ -175,6 +170,7 @@ class _HomeCardState extends State<HomeCard> {
       ],
     );
   }
+
   Widget _buildWidgetCard(BuildContext context, HomeWidgetItem widgetItem) {
     final widgetDef = HomeWidgetRegistry().getWidget(widgetItem.widgetId);
 
@@ -398,7 +394,10 @@ class _HomeCardState extends State<HomeCard> {
       Toast.warning('????????');
       return;
     }
-    final activeIndex = stackItem.activeIndex.clamp(0, stackItem.children.length - 1);
+    final activeIndex = stackItem.activeIndex.clamp(
+      0,
+      stackItem.children.length - 1,
+    );
     final target = stackItem.children[activeIndex];
     _openWidgetPlugin(context, target);
   }
@@ -537,7 +536,9 @@ class _HomeCardState extends State<HomeCard> {
       }
 
       // 保存选择结果到配置
-      final selectorConfig = SelectorWidgetConfig.fromSelectorResult(finalResult);
+      final selectorConfig = SelectorWidgetConfig.fromSelectorResult(
+        finalResult,
+      );
       final updatedConfig = Map<String, dynamic>.from(widgetItem.config);
       updatedConfig['selectorWidgetConfig'] = selectorConfig.toJson();
 
@@ -592,7 +593,8 @@ class _HomeStackCarousel extends StatefulWidget {
   State<_HomeStackCarousel> createState() => _HomeStackCarouselState();
 }
 
-class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTickerProviderStateMixin {
+class _HomeStackCarouselState extends State<_HomeStackCarousel>
+    with SingleTickerProviderStateMixin {
   late InfiniteScrollController _controller;
   late int _currentIndex;
   late AnimationController _countdownController;
@@ -611,10 +613,10 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
       vsync: this,
       duration: _autoScrollInterval,
     )..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _handleAutoAdvance();
-        }
-      });
+      if (status == AnimationStatus.completed) {
+        _handleAutoAdvance();
+      }
+    });
     _startCountdownIfNeeded();
   }
 
@@ -654,9 +656,10 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
   }
 
   double _resolveExtent(BoxConstraints constraints) {
-    final candidate = widget.stack.direction == HomeStackDirection.horizontal
-        ? constraints.maxWidth
-        : constraints.maxHeight;
+    final candidate =
+        widget.stack.direction == HomeStackDirection.horizontal
+            ? constraints.maxWidth
+            : constraints.maxHeight;
     if (candidate.isFinite && candidate > 0) {
       return candidate;
     }
@@ -686,14 +689,15 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
           child: LayoutBuilder(
             builder: (context, constraints) {
               final extent = _resolveExtent(constraints);
-          return InfiniteCarousel.builder(
-            controller: _controller,
-            itemCount: widget.stack.children.length,
-            itemExtent: extent,
-            physics: const NeverScrollableScrollPhysics(),
-            axisDirection: widget.stack.direction == HomeStackDirection.horizontal
-                ? Axis.horizontal
-                : Axis.vertical,
+              return InfiniteCarousel.builder(
+                controller: _controller,
+                itemCount: widget.stack.children.length,
+                itemExtent: extent,
+                physics: const NeverScrollableScrollPhysics(),
+                axisDirection:
+                    widget.stack.direction == HomeStackDirection.horizontal
+                        ? Axis.horizontal
+                        : Axis.vertical,
                 loop: true,
                 onIndexChanged: (index) {
                   if (!mounted) return;
@@ -709,10 +713,7 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
                 },
                 itemBuilder: (context, itemIndex, realIndex) {
                   final child = widget.stack.children[itemIndex];
-                  return Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: widget.itemBuilder(child),
-                  );
+                  return widget.itemBuilder(child);
                 },
               );
             },
@@ -726,24 +727,36 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
 
     final gestureChild = GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onHorizontalDragStart: enableManualDrag && widget.stack.direction == HomeStackDirection.horizontal
-          ? (_) => _onManualDragStart()
-          : null,
-      onHorizontalDragUpdate: enableManualDrag && widget.stack.direction == HomeStackDirection.horizontal
-          ? (details) => _onManualDragUpdate(details.primaryDelta ?? 0)
-          : null,
-      onHorizontalDragEnd: enableManualDrag && widget.stack.direction == HomeStackDirection.horizontal
-          ? (details) => _onManualDragEnd(details.primaryVelocity ?? 0)
-          : null,
-      onVerticalDragStart: enableManualDrag && widget.stack.direction == HomeStackDirection.vertical
-          ? (_) => _onManualDragStart()
-          : null,
-      onVerticalDragUpdate: enableManualDrag && widget.stack.direction == HomeStackDirection.vertical
-          ? (details) => _onManualDragUpdate(details.primaryDelta ?? 0)
-          : null,
-      onVerticalDragEnd: enableManualDrag && widget.stack.direction == HomeStackDirection.vertical
-          ? (details) => _onManualDragEnd(details.primaryVelocity ?? 0)
-          : null,
+      onHorizontalDragStart:
+          enableManualDrag &&
+                  widget.stack.direction == HomeStackDirection.horizontal
+              ? (_) => _onManualDragStart()
+              : null,
+      onHorizontalDragUpdate:
+          enableManualDrag &&
+                  widget.stack.direction == HomeStackDirection.horizontal
+              ? (details) => _onManualDragUpdate(details.primaryDelta ?? 0)
+              : null,
+      onHorizontalDragEnd:
+          enableManualDrag &&
+                  widget.stack.direction == HomeStackDirection.horizontal
+              ? (details) => _onManualDragEnd(details.primaryVelocity ?? 0)
+              : null,
+      onVerticalDragStart:
+          enableManualDrag &&
+                  widget.stack.direction == HomeStackDirection.vertical
+              ? (_) => _onManualDragStart()
+              : null,
+      onVerticalDragUpdate:
+          enableManualDrag &&
+                  widget.stack.direction == HomeStackDirection.vertical
+              ? (details) => _onManualDragUpdate(details.primaryDelta ?? 0)
+              : null,
+      onVerticalDragEnd:
+          enableManualDrag &&
+                  widget.stack.direction == HomeStackDirection.vertical
+              ? (details) => _onManualDragEnd(details.primaryVelocity ?? 0)
+              : null,
       child: Listener(
         behavior: HitTestBehavior.opaque,
         onPointerSignal: _handlePointerSignal,
@@ -754,10 +767,7 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
       ),
     );
 
-    return IgnorePointer(
-      ignoring: widget.isEditMode,
-      child: gestureChild,
-    );
+    return IgnorePointer(ignoring: widget.isEditMode, child: gestureChild);
   }
 
   Widget _buildDotsIndicator() {
@@ -766,7 +776,9 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
       return const SizedBox.shrink();
     }
     final axis =
-        widget.stack.direction == HomeStackDirection.horizontal ? Axis.horizontal : Axis.vertical;
+        widget.stack.direction == HomeStackDirection.horizontal
+            ? Axis.horizontal
+            : Axis.vertical;
     final children = List.generate(total, (index) {
       final isActive = (_currentIndex % total) == index;
       return AnimatedContainer(
@@ -775,9 +787,10 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
         width: axis == Axis.horizontal ? 8 : 6,
         height: axis == Axis.horizontal ? 6 : 8,
         decoration: BoxDecoration(
-          color: isActive
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          color:
+              isActive
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.primary.withOpacity(0.3),
           borderRadius: BorderRadius.circular(999),
         ),
       );
@@ -823,9 +836,15 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
 
     double delta;
     if (widget.stack.direction == HomeStackDirection.horizontal) {
-      delta = event.scrollDelta.dx != 0 ? event.scrollDelta.dx : event.scrollDelta.dy;
+      delta =
+          event.scrollDelta.dx != 0
+              ? event.scrollDelta.dx
+              : event.scrollDelta.dy;
     } else {
-      delta = event.scrollDelta.dy != 0 ? event.scrollDelta.dy : event.scrollDelta.dx;
+      delta =
+          event.scrollDelta.dy != 0
+              ? event.scrollDelta.dy
+              : event.scrollDelta.dx;
     }
     if (delta == 0) return;
 
@@ -837,7 +856,8 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
     _restartCountdown();
   }
 
-  bool get _autoScrollEnabled => !widget.isEditMode && widget.stack.children.length > 1;
+  bool get _autoScrollEnabled =>
+      !widget.isEditMode && widget.stack.children.length > 1;
 
   void _onManualDragStart() {
     _manualScrollInProgress = true;
@@ -857,10 +877,12 @@ class _HomeStackCarouselState extends State<_HomeStackCarousel> with SingleTicke
       return;
     }
     double signal = _manualDragOffset;
-    if (signal.abs() < _dragTriggerDistance && velocity.abs() >= _dragTriggerVelocity) {
+    if (signal.abs() < _dragTriggerDistance &&
+        velocity.abs() >= _dragTriggerVelocity) {
       signal = velocity;
     }
-    if (signal.abs() >= _dragTriggerDistance || signal.abs() >= _dragTriggerVelocity) {
+    if (signal.abs() >= _dragTriggerDistance ||
+        signal.abs() >= _dragTriggerVelocity) {
       if (signal > 0) {
         _controller.previousItem();
       } else if (signal < 0) {
