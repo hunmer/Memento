@@ -38,12 +38,8 @@ class StoreHomeWidgets {
         dataRenderer: _renderPointsGoalProgress,
         navigationHandler: _navigateToPointsHistory,
         dataSelector: (data) {
-          // GenericSelectorWidget 已经将 List 转换为 Map
-          if (data is Map<String, dynamic>) {
-            final dataMap = data as Map<String, dynamic>;
-            return {'goal': dataMap['goal'] as int};
-          }
-          return {};
+          final dataMap = data[0] as Map<String, dynamic>;
+          return {'goal': dataMap['goal'] as int};
         },
         builder: (context, config) {
           return GenericSelectorWidget(

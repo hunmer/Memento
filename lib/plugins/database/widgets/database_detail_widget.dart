@@ -55,6 +55,9 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
   /// 数据是否需要重新加载
   bool _needsReload = true;
 
+  /// 上一次的过滤状态（用于避免重复触发）
+  Map<String, dynamic>? _lastFilterState;
+
 
   @override
   void initState() {
@@ -155,7 +158,49 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
 
   /// 处理多条件过滤变更
   void _onMultiFilterChanged(Map<String, dynamic> filters) {
-    _applyFilters(filters, _searchKeyword);
+    // 检查过滤状态是否真的改变了（避免重复触发）
+    if (_mapsEqual(_lastFilterState, filters)) {
+      return; // 状态未改变，直接返回
+    }
+
+    // 保存当前状态
+    _lastFilterState = Map<String, dynamic>.unmodifiable(filters);
+
+    // 使用 addPostFrameCallback 避免 build 阶段调用 setState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _applyFilters(filters, _searchKeyword);
+      }
+    });
+  }
+
+  /// 比较两个 Map 是否相等
+  bool _mapsEqual(Map<String, dynamic>? a, Map<String, dynamic>? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+
+    for (var key in a.keys) {
+      if (!b.containsKey(key)) return false;
+      final aValue = a[key];
+      final bValue = b[key];
+
+      // 处理 List 类型的比较
+      if (aValue is List && bValue is List) {
+        if (!_listsEqual(aValue, bValue)) return false;
+      } else if (aValue != bValue) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// 比较两个 List 是否相等（忽略顺序）
+  bool _listsEqual(List<dynamic> a, List<dynamic> b) {
+    if (a.length != b.length) return false;
+    final aSet = a.toSet();
+    final bSet = b.toSet();
+    return aSet.union(bSet).length == aSet.length && aSet.intersection(bSet).length == aSet.length;
   }
 
   /// 处理搜索
@@ -217,8 +262,17 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
 
   /// 应用过滤条件（调用setState）
   void _applyFilters(Map<String, dynamic> filters, String keyword) {
-    _filteredRecords = _computeFilteredRecords(_allRecords, filters, keyword);
-    setState(() {});
+    final newFilteredRecords = _computeFilteredRecords(_allRecords, filters, keyword);
+
+    // 检查结果是否真的改变了（通过比较 ID 列表）
+    final oldIds = _filteredRecords.map((r) => r.id).toSet();
+    final newIds = newFilteredRecords.map((r) => r.id).toSet();
+
+    if (oldIds.length != newIds.length || !oldIds.every((id) => newIds.contains(id))) {
+      // 结果改变了，才调用 setState
+      _filteredRecords = newFilteredRecords;
+      setState(() {});
+    }
   }
 
   @override

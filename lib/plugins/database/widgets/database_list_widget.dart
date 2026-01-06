@@ -25,11 +25,21 @@ class DatabaseListWidget extends StatefulWidget {
 
 class _DatabaseListWidgetState extends State<DatabaseListWidget> {
   late Future<List<DatabaseModel>> _databasesFuture;
+  String _searchQuery = '';
+  List<DatabaseModel> _allDatabases = [];
 
   @override
   void initState() {
     super.initState();
+    _loadDatabases();
+  }
+
+  Future<void> _loadDatabases() async {
     _databasesFuture = widget.service.getAllDatabases();
+    _allDatabases = await _databasesFuture;
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -40,6 +50,24 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
       title: Text('database_database_list_title'.tr),
       largeTitle: 'database_database_list_title'.tr,
       enableLargeTitle: true,
+
+      // 启用搜索栏
+      enableSearchBar: true,
+      searchPlaceholder: 'database_search_databases'.tr,
+      onSearchChanged: (query) {
+        setState(() {
+          _searchQuery = query;
+        });
+      },
+
+      // 添加新建按钮
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          tooltip: 'database_add_database'.tr,
+          onPressed: () => _showAddDatabaseDialog(context),
+        ),
+      ],
 
       body: FutureBuilder<List<DatabaseModel>>(
         future: _databasesFuture,
@@ -70,9 +98,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        _databasesFuture = widget.service.getAllDatabases();
-                      });
+                      _loadDatabases();
                     },
                     child: Text('app_retry'.tr),
                   ),
@@ -81,7 +107,13 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
             );
           }
 
-          final databases = snapshot.data ?? [];
+          // 保存到本地变量并应用搜索过滤
+          _allDatabases = snapshot.data ?? [];
+          final databases = _searchQuery.isEmpty
+              ? _allDatabases
+              : _allDatabases.where((db) {
+                  return db.name.toLowerCase().contains(_searchQuery.toLowerCase());
+                }).toList();
 
           if (databases.isEmpty) {
             return Center(
@@ -110,12 +142,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              setState(() {
-                _databasesFuture = widget.service.getAllDatabases();
-              });
-              if (mounted) {
-                await _databasesFuture;
-              }
+              await _loadDatabases();
             },
             child: GridView.builder(
               padding: const EdgeInsets.all(16),
@@ -142,9 +169,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                           databaseId: database.id,
                         ),
                       ).then(
-                        (_) => setState(() {
-                          _databasesFuture = widget.service.getAllDatabases();
-                        }),
+                        (_) => _loadDatabases(),
                       );
                     },
                     onLongPress: () {
@@ -223,9 +248,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                     ),
                   );
                   if (result == true && mounted) {
-                    setState(() {
-                      _databasesFuture = widget.service.getAllDatabases();
-                    });
+                    _loadDatabases();
                   }
                 },
               ),
@@ -238,9 +261,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                   await widget.service.createDatabase(newDatabase);
                   if (mounted) {
                     Toast.success('database_copy_success'.tr);
-                    setState(() {
-                      _databasesFuture = widget.service.getAllDatabases();
-                    });
+                    _loadDatabases();
                   }
                 },
               ),
@@ -282,9 +303,7 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
                       await widget.service.deleteDatabase(database.id);
                       if (mounted) {
                         Toast.success('database_delete_success_message'.tr);
-                        setState(() {
-                          _databasesFuture = widget.service.getAllDatabases();
-                        });
+                        _loadDatabases();
                       }
                     } catch (e) {
                       if (mounted) {
@@ -350,5 +369,30 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
       color: Colors.grey[200],
       child: const Icon(Icons.broken_image, size: 48),
     );
+  }
+
+  /// 显示新建数据库对话框
+  Future<void> _showAddDatabaseDialog(BuildContext context) async {
+    // 创建一个空的新数据库模型
+    final now = DateTime.now();
+    final newDatabase = DatabaseModel(
+      id: Uuid().v4(),
+      name: '',
+      fields: [],
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final result = await NavigationHelper.push<bool>(
+      context,
+      DatabaseEditWidget(
+        controller: DatabaseController(widget.service),
+        database: newDatabase,
+      ),
+    );
+
+    if (result == true && mounted) {
+      _loadDatabases();
+    }
   }
 }
