@@ -152,7 +152,6 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     await registerJSAPI();
 
     // 等待 JSBridgeManager 完全初始化
-    print('[WebViewPlugin] 等待 JSBridgeManager 初始化...');
     final jsBridge = JSBridgeManager.instance;
 
     // 等待引擎初始化完成
@@ -160,18 +159,14 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     while (!jsBridge.isSupported && retryCount < 50) {
       await Future.delayed(Duration(milliseconds: 100));
       retryCount++;
-      print('[WebViewPlugin] 等待初始化... ($retryCount/50)');
     }
 
     if (jsBridge.isSupported) {
-      print('[WebViewPlugin] ✓ JSBridgeManager 初始化完成');
-    } else {
-      print('[WebViewPlugin] ✗ JSBridgeManager 初始化超时');
-      throw Exception('JSBridgeManager 初始化失败');
+      // 加载所有卡片的 preload.js 并注册工具
+      await _loadPreloadScripts();
     }
 
-    // 加载所有卡片的 preload.js 并注册工具
-    await _loadPreloadScripts();
+   
 
     // 注册数据选择器
     _registerDataSelectors();
@@ -179,74 +174,36 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
   /// 加载所有卡片的 preload.js 文件
   Future<void> _loadPreloadScripts() async {
-    try {
-      print('[WebViewPlugin] ========== 开始加载 preload.js 脚本 ==========');
-
-      final jsBridge = JSBridgeManager.instance;
-      print('[WebViewPlugin] JSBridgeManager 实例获取成功');
-
-      final cards = cardManager.getAllCards();
-      print('[WebViewPlugin] 总共有 ${cards.length} 个卡片');
-
-      if (cards.isEmpty) {
-        print('[WebViewPlugin] 没有卡片，跳过 preload.js 加载');
+    final jsBridge = JSBridgeManager.instance;
+    final cards = cardManager.getAllCards();
+    if (cards.isEmpty) {
         return;
       }
 
-      for (final card in cards) {
-        print('[WebViewPlugin] ----------------------------------------');
-        print('[WebViewPlugin] 检查卡片: ${card.title}, 类型: ${card.type}');
-
+    for (final card in cards) {
         if (card.type == CardType.localFile) {
           // 获取卡片对应的 HTTP 服务器路径
-          final cardPath = await cardManager.getCardPath(card);
-          print('[WebViewPlugin] 卡片 "${card.title}" 的路径: $cardPath');
-
-          final preloadFile = File('$cardPath/preload.js');
-          print('[WebViewPlugin] preload.js 文件路径: ${preloadFile.path}');
-
-          if (await preloadFile.exists()) {
-            print('[WebViewPlugin] ✓ preload.js 文件存在，开始加载...');
+        final cardPath = await cardManager.getCardPath(card);
+        final preloadFile = File('$cardPath/preload.js');
+        if (await preloadFile.exists()) {
             // 读取 preload.js 内容
-            final scriptContent = await preloadFile.readAsString();
-            print(
-              '[WebViewPlugin] preload.js 内容长度: ${scriptContent.length} 字符',
-            );
-            print(
-              '[WebViewPlugin] preload.js 内容预览: ${scriptContent.substring(0, min(100, scriptContent.length))}...',
-            );
-
+          final scriptContent = await preloadFile.readAsString();
             // 在 QuickJS 引擎中执行脚本（如果 JS Bridge 未初始化，会自动加入延迟队列）
-            try {
-              print('[WebViewPlugin] >>> 开始在 QuickJS 中执行 preload.js...');
+          try {
               final result = await jsBridge.evaluateWhenReady(
                 scriptContent,
                 description: 'preload.js: ${card.title}',
-              );
-              print(
-                '[WebViewPlugin] <<< QuickJS 执行完成，结果: ${result.success ? '成功' : '失败'}',
-              );
+            );
               if (!result.success) {
                 print('[WebViewPlugin] 执行错误: ${result.error}');
-              }
-              print('[WebViewPlugin] ✓ 已成功加载 preload.js: ${card.title}');
+            }
             } catch (e) {
               print('[WebViewPlugin] ✗ 加载 preload.js 失败: ${card.title}');
               print('[WebViewPlugin] 错误详情: $e');
               print('[WebViewPlugin] 错误类型: ${e.runtimeType}');
-            }
-          } else {
-            print('[WebViewPlugin] ✗ preload.js 文件不存在');
           }
-        } else {
-          print('[WebViewPlugin] 跳过非本地文件类型的卡片');
         }
-      }
-      print('[WebViewPlugin] ========== preload.js 加载流程完成 ==========');
-    } catch (e) {
-      print('[WebViewPlugin] ✗ 加载 preload.js 脚本时发生错误: $e');
-      print('[WebViewPlugin] 错误类型: ${e.runtimeType}');
-      print('[WebViewPlugin] 错误堆栈: ${StackTrace.current}');
+      } 
     }
   }
 

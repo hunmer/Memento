@@ -59,6 +59,28 @@ class EventManager {
     return id;
   }
 
+  /// 注册一个一次性事件处理器，触发后自动取消订阅
+  /// [eventName] 事件名称
+  /// [handler] 事件处理函数
+  /// 返回订阅句柄的唯一ID
+  String once(String eventName, Function(EventArgs) handler) {
+    final id = 'sub_${_subscriptionIdCounter++}';
+
+    // 包装处理器，在触发后自动取消订阅
+    Function(EventArgs) wrappedHandler = (args) {
+      if (_eventSubscriptions[eventName] != null) {
+        // 执行原始处理器
+        handler(args);
+        // 取消订阅
+        unsubscribeById(id);
+      }
+    };
+
+    final subscription = EventSubscription(id, eventName, wrappedHandler);
+    _eventSubscriptions.putIfAbsent(eventName, () => []).add(subscription);
+    return id;
+  }
+
   /// 通过事件名称和处理函数取消订阅
   /// [eventName] 事件名称
   /// [handler] 事件处理函数（可选）

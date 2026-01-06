@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/material.dart';
 import 'plugin_base.dart';
@@ -53,6 +54,9 @@ class PluginManager {
       await plugin.initialize();
       // 注册到应用程序（设置监听器等）
       await plugin.registerToApp(this, ConfigManager(_storageManager!));
+
+      // 广播插件加载完成事件
+      eventManager.broadcast('plugin_loaded', Value(plugin.id));
     }
   }
 
@@ -178,6 +182,9 @@ class PluginManager {
     _autoOpenLastPlugin = value;
     _saveSettings();
   }
+
+  /// 获取最后打开的插件ID
+  String? get getLastOpenedPluginId => _lastOpenedPluginId;
 
   /// 加载设置
   Future<void> _loadSettings() async {
