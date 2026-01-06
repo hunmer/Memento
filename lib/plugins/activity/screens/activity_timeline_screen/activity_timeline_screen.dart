@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/event/event.dart';
@@ -414,12 +415,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
     }
 
     return SuperCupertinoNavigationWrapper(
-      title: Text(
-        _viewModeController.isGridMode &&
-                _viewModeController.selectedMinutes > 0
-            ? '${_viewModeController.selectedMinutes}分钟已选择'
-            : 'activity_myActivities'.tr,
-      ),
+      title: Text('activity_myActivities'.tr),
       largeTitle: 'activity_myActivities'.tr,
       enableSearchBar: true,
       searchPlaceholder: 'activity_searchPlaceholder'.tr,
@@ -465,19 +461,24 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                                   activity,
                                 ),
                             onUnrecordedTimeTap: (start, end) {
-                              ActivityController.showAddActivityScreen(context)
-                                  .then((_) {
-                                    _viewModeController.clearSelectedMinutes();
-                                  });
+                              ActivityController.showAddActivityScreen(
+                                context,
+                                start: start,
+                                end: end,
+                              );
                             },
                             onSelectionChanged: (start, end) {
                               if (start != null && end != null) {
                                 final minutes = end.difference(start).inMinutes;
-                                _viewModeController.updateSelectedMinutes(
-                                  minutes,
+                                final hours = minutes ~/ 60;
+                                final mins = minutes % 60;
+                                final durationText = hours > 0
+                                    ? '${hours}小时${mins}分钟'
+                                    : '${mins}分钟';
+                                Toast.show(
+                                  '${DateFormat('H:mm').format(start)} - ${DateFormat('H:mm').format(end)} ($durationText)',
+                                  gravity: ToastGravity.BOTTOM,
                                 );
-                              } else {
-                                _viewModeController.clearSelectedMinutes();
                               }
                             },
                           )

@@ -27,9 +27,12 @@ class _HomeScreenState extends State<HomeScreen> with RouteAware, TickerProvider
     super.initState();
     _controller.init(_onStateChanged);
 
-    // 首次加载时打开最后使用的插件
+    // 首次加载时打开最后使用的插件（延迟到下一帧，确保 widget 已挂载）
     if (!_controller.launchedWithParameters) {
-      _controller.tryOpenLastUsedPlugin();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _controller.tryOpenLastUsedPlugin(context);
+      });
     }
 
     // 等待布局加载完成后创建 TabController

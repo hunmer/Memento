@@ -1,3 +1,4 @@
+import 'package:Memento/core/event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
@@ -12,12 +13,16 @@ class ActivityEditScreen extends StatefulWidget {
   final ActivityRecord? activity;
   final DateTime? selectedDate;
   final bool showAsBottomSheet;
+  final DateTime? startTime; // 传入预填充的开始时间
+  final DateTime? endTime; // 传入预填充的结束时间
 
   const ActivityEditScreen({
     super.key,
     this.activity,
     this.selectedDate,
     this.showAsBottomSheet = false,
+    this.startTime,
+    this.endTime,
   });
 
   @override
@@ -39,6 +44,17 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
 
   /// 初始化默认时间
   Future<void> _initDefaultTimes() async {
+    // 如果有传入时间，直接使用传入的时间
+    if (widget.startTime != null && widget.endTime != null) {
+      if (mounted) {
+        setState(() {
+          _defaultStartTime = widget.startTime;
+          _defaultEndTime = widget.endTime;
+        });
+      }
+      return;
+    }
+
     // 如果是编辑模式或已提供 selectedDate，则不需要设置默认时间
     if (widget.activity != null || widget.selectedDate != null) {
       return;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
@@ -29,7 +30,7 @@ class ActivityService {
   }
 
   // 保存活动记录
-  Future<void> saveActivity(ActivityRecord activity) async {
+  Future<void> saveActivity(ActivityRecord activity, {bool notify = true}) async {
     try {
       final date = activity.startTime;
       final filePath = _getActivityFilePath(date);
@@ -61,6 +62,11 @@ class ActivityService {
 
       // 同步到小组件
       await _syncWidget();
+
+      // 广播事件（初始化时不通知）
+      if (notify) {
+        eventManager.broadcast('activity_added', EventArgs());
+      }
     } catch (e) {
       debugPrint('Error saving activity: $e');
       rethrow;
@@ -98,8 +104,8 @@ class ActivityService {
       if (oldActivity.startTime.year != newActivity.startTime.year ||
           oldActivity.startTime.month != newActivity.startTime.month ||
           oldActivity.startTime.day != newActivity.startTime.day) {
-        // 从旧日期文件删除
-        await deleteActivity(oldActivity);
+        // 从旧日期文件删除（不广播，由下面的 saveActivity 广播）
+        await deleteActivity(oldActivity, notify: false);
 
         // 添加到新日期文件
         await saveActivity(newActivity);
@@ -126,6 +132,9 @@ class ActivityService {
 
           // 同步到小组件
           await _syncWidget();
+
+          // 广播更新事件
+          eventManager.broadcast('activity_updated', EventArgs());
         }
       }
     } catch (e) {
@@ -135,7 +144,7 @@ class ActivityService {
   }
 
   // 删除活动记录
-  Future<void> deleteActivity(ActivityRecord activity) async {
+  Future<void> deleteActivity(ActivityRecord activity, {bool notify = true}) async {
     try {
       final date = activity.startTime;
       final filePath = _getActivityFilePath(date);
@@ -157,6 +166,11 @@ class ActivityService {
 
       // 同步到小组件
       await _syncWidget();
+
+      // 广播删除事件
+      if (notify) {
+        eventManager.broadcast('activity_deleted', EventArgs());
+      }
     } catch (e) {
       debugPrint('Error deleting activity: $e');
       rethrow;
@@ -387,14 +401,14 @@ class ActivityService {
         // 4. 插入今日示例活动
         final todaySampleActivities = ActivitySampleData.getSampleActivities();
         for (final activity in todaySampleActivities) {
-          await saveActivity(activity);
+          await saveActivity(activity, notify: false);
         }
         debugPrint('[ActivityService] 已插入 ${todaySampleActivities.length} 个今日示例活动');
 
         // 5. 插入昨日示例活动
         final yesterdaySampleActivities = ActivitySampleData.getYesterdaySampleActivities();
         for (final activity in yesterdaySampleActivities) {
-          await saveActivity(activity);
+          await saveActivity(activity, notify: false);
         }
         debugPrint('[ActivityService] 已插入 ${yesterdaySampleActivities.length} 个昨日示例活动');
 

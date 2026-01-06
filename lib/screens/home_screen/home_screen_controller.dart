@@ -124,17 +124,6 @@ class HomeScreenController extends ChangeNotifier {
     _hasInitialized = true;
   }
 
-  /// 启动状态变化回调
-  void onStartupStateChanged(VoidCallback onStateChanged) {
-    onStateChanged();
-    if (AppStartupState.instance.pluginsReady &&
-        !_hasInitialized &&
-        !_launchedWithParameters &&
-        _triedToOpenPlugin) {
-      openLastUsedPlugin();
-    }
-  }
-
   /// 布局管理器变化时的回调
   void onLayoutChanged(VoidCallback onStateChanged) {
     // 同步更新当前布局的缓存
@@ -423,7 +412,7 @@ class HomeScreenController extends ChangeNotifier {
   }
 
   /// 尝试打开最后使用的插件
-  void tryOpenLastUsedPlugin() {
+  void tryOpenLastUsedPlugin(BuildContext context) {
     _triedToOpenPlugin = true;
 
     // 获取最后打开的插件ID
@@ -437,20 +426,22 @@ class HomeScreenController extends ChangeNotifier {
     final lastPlugin = globalPluginManager.getPlugin(lastOpenedPluginId);
     if (lastPlugin != null) {
       // 插件已加载，直接打开
-      openLastUsedPlugin();
+      openLastUsedPlugin(context);
     } else {
       // 插件还未加载，使用 once 监听 plugin_loaded 事件
       eventManager.once('plugin_loaded', (args) {
         if (args is Value<String> && args.value == lastOpenedPluginId) {
           // 是等待的插件，打开它
-          openLastUsedPlugin();
+          if (context.mounted) {
+            openLastUsedPlugin(context);
+          }
         }
       });
     }
   }
 
   /// 打开最后使用的插件
-  void openLastUsedPlugin() {
+  void openLastUsedPlugin(BuildContext context) {
     if (_isOpeningPlugin) return;
     _isOpeningPlugin = true;
 
@@ -468,7 +459,7 @@ class HomeScreenController extends ChangeNotifier {
 
     final lastPlugin = globalPluginManager.getLastOpenedPlugin();
     if (lastPlugin != null) {
-      // 延迟执行，由 UI 层调用 context
+      globalPluginManager.openPlugin(context, lastPlugin);
     }
 
     _markInitialized();

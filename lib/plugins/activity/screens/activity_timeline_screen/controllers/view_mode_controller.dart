@@ -9,14 +9,12 @@ enum ViewMode {
 class ViewModeController extends ChangeNotifier {
   final plugin = ActivityPlugin.instance;
   ViewMode _currentMode;
-  int _selectedMinutes = 0;
 
   ViewModeController() : _currentMode = ViewMode.timeline {
     _loadViewMode();
   }
 
   bool get isGridMode => _currentMode == ViewMode.grid;
-  int get selectedMinutes => _selectedMinutes;
 
   Future<void> _loadViewMode() async {
     try {
@@ -44,16 +42,6 @@ class ViewModeController extends ChangeNotifier {
   void toggleViewMode() {
     _currentMode = isGridMode ? ViewMode.timeline : ViewMode.grid;
     _saveViewMode();
-    notifyListeners();
-  }
-
-  void updateSelectedMinutes(int minutes) {
-    _selectedMinutes = minutes;
-    notifyListeners();
-  }
-
-  void clearSelectedMinutes() {
-    _selectedMinutes = 0;
     notifyListeners();
   }
 }
