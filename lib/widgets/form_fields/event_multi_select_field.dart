@@ -236,6 +236,11 @@ const List<EventOption> kDefaultAvailableEvents = [
 
   // Chat 插件事件
   EventOption(
+    eventName: 'chat_message_sent',
+    category: 'Chat',
+    description: '消息已发送',
+  ),
+  EventOption(
     eventName: 'chat_message_updated',
     category: 'Chat',
     description: '消息已更新',

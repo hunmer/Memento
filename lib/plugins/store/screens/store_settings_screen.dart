@@ -30,7 +30,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
   bool _enableExpiringReminder = true; // 到期提醒
 
   bool _isLoading = false;
-  bool _hasChanges = false;
 
   @override
   void initState() {
@@ -47,13 +46,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     super.dispose();
   }
 
-  /// 文本改变回调
+  /// 文本改变回调 - 实时保存
   void _onTextChanged(String eventKey) {
-    if (!_hasChanges) {
-      setState(() {
-        _hasChanges = true;
-      });
-    }
+    _savePointAwards();
   }
 
   /// 加载设置
@@ -90,29 +85,12 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     } finally {
       setState(() {
         _isLoading = false;
-        _hasChanges = false;
       });
     }
   }
 
-  /// 保存设置（包含表单验证）
-  Future<void> _saveSettings() async {
-    // 验证选中事件的输入
-    for (final eventKey in _selectedEvents) {
-      final controller = _controllers[eventKey];
-      if (controller != null) {
-        final value = int.tryParse(controller.text);
-        if (value == null || value < 0) {
-          _showError('${widget.plugin.getPluginName(context)} 的积分值必须为非负整数');
-          return;
-        }
-      }
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
+  /// 保存积分奖励设置（实时保存）
+  Future<void> _savePointAwards() async {
     try {
       // 只保存选中事件的积分值
       final newPointAwards = <String, dynamic>{};
@@ -126,31 +104,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
         newPointAwards[eventKey] = value;
       }
 
-      debugPrint('🔧 [Store设置页面] 准备保存积分奖励配置');
+      debugPrint('🔧 [Store设置页面] 实时保存积分奖励配置');
       await widget.plugin.updateSettings({
         'point_awards': newPointAwards,
         'enablePointsNotification': _enablePointsNotification,
         'enableExpiringReminder': _enableExpiringReminder,
       });
-
-      // 验证保存后立即读取
-      final savedSettings = widget.plugin.settings;
-      debugPrint('🔧 [Store设置页面] 保存后验证: ${savedSettings['point_awards']}');
-
-      setState(() {
-        _hasChanges = false;
-      });
-
-      if (mounted) {
-        toastService.showToast('设置保存成功');
-      }
     } catch (e) {
       debugPrint('❌ [Store设置页面] 保存失败: $e');
-      _showError('保存设置失败: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
   }
 
@@ -173,11 +134,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     return eventOption.description;
   }
 
-  /// 处理事件选择变化
+  /// 处理事件选择变化 - 实时保存
   void _onSelectedEventsChanged(List<String> events) {
     setState(() {
-      _hasChanges = true;
-
       // 添加新选择的事件
       for (final eventKey in events) {
         if (!_pointAwards.containsKey(eventKey)) {
@@ -198,6 +157,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
       _selectedEvents = events;
     });
+
+    // 实时保存
+    _savePointAwards();
   }
 
   /// 保存开关设置（不需要表单验证）
@@ -268,13 +230,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             onPressed: _resetToDefault,
             tooltip: '重置为默认设置',
           ),
-          // 保存按钮
-          if (_hasChanges)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _isLoading ? null : _saveSettings,
-              tooltip: '保存设置',
-            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -454,31 +409,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       );
                     }).toList(),
                   ),
-                ),
-              ),
-
-            const SizedBox(height: 24),
-
-            // 底部操作按钮
-            if (!_isLoading)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _resetToDefault,
-                        child: Text('store_resetToDefault'.tr),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: _hasChanges ? _saveSettings : null,
-                        child: Text('store_saveSettings'.tr),
-                      ),
-                    ),
-                  ],
                 ),
               ),
 
