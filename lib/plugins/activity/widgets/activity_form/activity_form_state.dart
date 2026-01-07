@@ -632,7 +632,6 @@ class ActivityFormState extends State<ActivityFormWidget> {
   void initState() {
     super.initState();
     _loadRecentTags();
-    // 时间和字段值在 build 方法中初始化
   }
 
   /// 从历史记录加载最近标签

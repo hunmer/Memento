@@ -46,20 +46,9 @@ Widget buildTagsField(
             config.onChanged?.call(newTags);
           }
         },
-        onAddTag: () async {
-          final result = await showDialog<String>(
-            context: context,
-            builder:
-                (context) => AlertDialog(
-                  title: Text(config.labelText ?? '添加标签'),
-                  content: TextField(
-                    decoration: const InputDecoration(hintText: '标签名称'),
-                    onSubmitted: (value) => Navigator.pop(context, value),
-                  ),
-                ),
-          );
-          if (result != null && result.isNotEmpty) {
-            final newTags = [...tags, result];
+        onAddTag: (tag) {
+          if (tag.isNotEmpty && !tags.contains(tag)) {
+            final newTags = [...tags, tag];
             fieldState.didChange(newTags);
             config.onChanged?.call(newTags);
           }
