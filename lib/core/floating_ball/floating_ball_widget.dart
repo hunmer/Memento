@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:get/get.dart';
 import 'floating_ball_service.dart';
 import 'floating_ball_manager.dart';
 import 'widgets/shared_floating_ball_widget.dart';
@@ -53,12 +54,10 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     // 在下一帧更新上下文
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        // 不覆盖 FloatingBallService 的 context，使用 service 中保存的有效 context
-        // FloatingBallService().updateContext(context);
-        // 设置动作上下文（使用 service 中保存的 context）
-        final serviceContext = FloatingBallService().lastContext;
-        if (serviceContext != null && serviceContext.mounted) {
-          _manager.setActionContext(serviceContext);
+        // 使用 Get.context 获取当前有效的 Navigator context
+        final navigatorContext = Get.context;
+        if (navigatorContext != null && navigatorContext.mounted) {
+          _manager.setActionContext(navigatorContext);
         }
       }
     });
@@ -81,18 +80,18 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
       return;
     }
 
-    // 使用 FloatingBallService 中保存的有效 context（有 Navigator）
-    final serviceContext = FloatingBallService().lastContext;
-    if (serviceContext != null && serviceContext.mounted) {
+    // 使用 Get.context 获取当前有效的 Navigator context
+    final navigatorContext = Get.context;
+    if (navigatorContext != null && navigatorContext.mounted) {
       print('[悬浮球Widget] 开始执行动作: ${gesture.name}');
       final actionManager = ActionManager();
-      final result = await actionManager.executeGestureAction(gesture, serviceContext);
+      final result = await actionManager.executeGestureAction(gesture, navigatorContext);
 
       print(
         '[悬浮球Widget] 动作执行结果: success=${result.success}, error=${result.error}',
       );
     } else {
-      print('[悬浮球Widget] context 已卸载，无法执行动作');
+      print('[悬浮球Widget] 无法获取有效的 Navigator context');
     }
   }
 
