@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/models/tag_group.dart';
 import 'package:Memento/widgets/tags_dialog/tags_dialog.dart';
+import 'package:Memento/widgets/tags_dialog/models/tag_item.dart';
 
 class TagController {
   final ActivityService activityService;
   final VoidCallback onTagsChanged;
 
   List<TagGroup> tagGroups = [];
+  // 保留完整的标签数据（包含图标）
+  List<TagGroupWithTags> tagGroupsWithTags = [];
   List<String> selectedTags = [];
   List<String> recentTags = [];
 
@@ -22,6 +25,12 @@ class TagController {
       TagGroup(name: '健康', tags: ['锻炼', '冥想', '饮食', '睡眠']),
     ];
 
+    // 初始化带图标的标签组
+    tagGroupsWithTags = tagGroups.map((g) => TagGroupWithTags.fromStringList(
+      name: g.name,
+      tags: g.tags,
+    )).toList();
+
     await _loadTagGroups();
   }
 
@@ -31,9 +40,15 @@ class TagController {
       final savedGroups = await activityService.getTagGroups();
       if (savedGroups.isNotEmpty) {
         tagGroups = savedGroups;
+        // 同步更新 tagGroupsWithTags
+        tagGroupsWithTags = tagGroups.map((g) => TagGroupWithTags.fromStringList(
+          name: g.name,
+          tags: g.tags,
+        )).toList();
         // 确保最近使用标签组总是存在
         if (!tagGroups.any((group) => group.name == '最近使用')) {
           tagGroups.insert(0, TagGroup(name: '最近使用', tags: []));
+          tagGroupsWithTags.insert(0, TagGroupWithTags(name: '最近使用'));
         }
       }
 
@@ -62,6 +77,14 @@ class TagController {
     final recentIndex = tagGroups.indexWhere((g) => g.name == '最近使用');
     if (recentIndex != -1) {
       tagGroups[recentIndex] = TagGroup(name: '最近使用', tags: List.from(recentTags));
+    }
+    // 同步更新 tagGroupsWithTags
+    final recentIndexWithTags = tagGroupsWithTags.indexWhere((g) => g.name == '最近使用');
+    if (recentIndexWithTags != -1) {
+      tagGroupsWithTags[recentIndexWithTags] = TagGroupWithTags.fromStringList(
+        name: '最近使用',
+        tags: recentTags,
+      );
     }
   }
 
@@ -144,7 +167,9 @@ class TagController {
         enableBatchEdit: true,
       ),
       onGroupsChanged: (newGroups) {
-        // 新格式转回旧格式
+        // 保存完整的 TagGroupWithTags 数据（包含图标）
+        tagGroupsWithTags = newGroups;
+        // 新格式转回旧格式（兼容性）
         tagGroups = newGroups.map((g) => TagGroup(
           name: g.name,
           tags: g.tags.map((t) => t.name).toList(),
@@ -160,5 +185,41 @@ class TagController {
       await updateRecentTags(result);
       onTagsChanged();
     }
+  }
+
+  /// 根据标签名称获取 TagItem（包含图标）
+  TagItem? getTagItemByName(String tagName) {
+    for (final group in tagGroupsWithTags) {
+      for (final tag in group.tags) {
+        if (tag.name == tagName) {
+          return tag;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// 获取活动的标签图标列表
+  List<IconData> getTagIcons(List<String> tagNames) {
+    final icons = <IconData>[];
+    for (final tagName in tagNames) {
+      final tag = getTagItemByName(tagName);
+      if (tag != null) {
+        icons.add(tag.icon);
+      }
+    }
+    return icons;
+  }
+
+  /// 获取活动的标签颜色列表
+  List<Color?> getTagColors(List<String> tagNames) {
+    final colors = <Color?>[];
+    for (final tagName in tagNames) {
+      final tag = getTagItemByName(tagName);
+      if (tag != null) {
+        colors.add(tag.color);
+      }
+    }
+    return colors;
   }
 }

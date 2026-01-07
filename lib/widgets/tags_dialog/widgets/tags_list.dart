@@ -209,10 +209,6 @@ class _TagPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _getBorderColor(context),
-          width: inherited.isSelected ? 2 : 1,
-        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -255,21 +251,6 @@ class _TagPill extends StatelessWidget {
             ),
           ),
 
-          // 选择指示器（非批量编辑模式）
-          if (!inherited.isBatchEditMode &&
-              inherited.selectionMode != TagsSelectionMode.none &&
-              inherited.isSelected)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Icon(
-                inherited.selectionMode == TagsSelectionMode.single
-                    ? Icons.radio_button_checked
-                    : Icons.check_circle,
-                size: 14,
-                color: config.selectedTagColor ??
-                    Theme.of(context).colorScheme.primary,
-              ),
-            ),
         ],
       ),
     );
@@ -278,21 +259,17 @@ class _TagPill extends StatelessWidget {
   /// 获取背景颜色
   Color _getBackgroundColor(BuildContext context) {
     if (isSelected) {
-      return (config.selectedTagColor ??
-              Theme.of(context).colorScheme.primary)
-          .withOpacity(0.15);
+      // 选中时使用图标的颜色，带透明度
+      return (tag.color ?? Theme.of(context).colorScheme.primary).withOpacity(0.2);
     }
-    return tag.color?.withOpacity(0.15) ??
-        Theme.of(context).colorScheme.surfaceContainerHighest;
+    // 未选中时透明背景
+    return Colors.transparent;
   }
 
   /// 获取边框颜色
   Color _getBorderColor(BuildContext context) {
-    if (isSelected) {
-      return config.selectedTagColor ??
-          Theme.of(context).colorScheme.primary;
-    }
-    return tag.color ?? Theme.of(context).colorScheme.outline;
+    // 无论选中与否，边框都设为透明
+    return Colors.transparent;
   }
 
   /// 获取文本颜色

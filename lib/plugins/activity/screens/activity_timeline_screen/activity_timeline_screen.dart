@@ -497,6 +497,8 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                             onUnrecordedTimeTap: (start, end) {
                               ActivityController.showAddActivityScreen(context);
                             },
+                            getTagIcons: _tagController.getTagIcons,
+                            getTagColors: _tagController.getTagColors,
                           ),
                 ),
               ),
