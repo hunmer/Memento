@@ -1,3 +1,6 @@
+import 'dart:collection';
+import 'dart:core';
+
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/widgets/tags_dialog/models/models.dart';
@@ -70,9 +73,30 @@ class TagController {
   void _updateRecentTagGroup() {
     final recentIndex = tagGroups.indexWhere((g) => g.name == '最近使用');
     if (recentIndex != -1) {
-      tagGroups[recentIndex] = TagGroupWithTags.fromStringList(
+      // 从现有标签组中查找完整的 TagItem 数据（保留 icon、color、createdAt 等）
+      final recentTagItems = <TagItem>[];
+      for (final tagName in recentTags) {
+        TagItem? foundTag;
+        for (final group in tagGroups) {
+          if (group.name == '最近使用') continue;
+          try {
+            final tag = group.tags.firstWhere((t) => t.name == tagName);
+            foundTag = tag;
+            break;
+          } catch (e) {
+            // 继续查找下一个分组
+          }
+        }
+
+        // 如果找不到，创建新的
+        final tagToAdd = foundTag ??
+            TagItem(name: tagName, group: '最近使用', createdAt: DateTime.now());
+        recentTagItems.add(tagToAdd);
+      }
+
+      tagGroups[recentIndex] = TagGroupWithTags(
         name: '最近使用',
-        tags: recentTags,
+        tags: recentTagItems,
       );
     }
   }
@@ -168,9 +192,9 @@ class TagController {
         enableEditing: true,
         enableBatchEdit: true,
       ),
-      onGroupsChanged: (newGroups) {
+      onGroupsChanged: (newGroups) async {
         tagGroups = newGroups;
-        _saveTagGroups();
+        await _saveTagGroups();
         onTagsChanged();
       },
     );

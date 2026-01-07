@@ -222,7 +222,13 @@ class _TagsDialogState extends State<TagsDialog> {
   List<TagItem> _sortTags(List<TagItem> tags, TagsSortType sortType) {
     switch (sortType) {
       case TagsSortType.createdAt:
-        return tags..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        // 先按创建时间降序，时间相同时按名称升序（保证稳定排序）
+        tags.sort((a, b) {
+          final timeCompare = b.createdAt.compareTo(a.createdAt);
+          if (timeCompare != 0) return timeCompare;
+          return a.name.compareTo(b.name);
+        });
+        return tags;
       case TagsSortType.lastUsedAt:
         return tags..sort((a, b) {
           final aTime = a.lastUsedAt ?? a.createdAt;
@@ -310,20 +316,31 @@ class _TagsDialogState extends State<TagsDialog> {
 
   /// 编辑标签
   Future<void> _editTag(TagItem oldTag) async {
-    final newTag =
-        widget.onEditTag != null
-            ? await widget.onEditTag!(oldTag, oldTag)
-            : await _showEditTagDialog(oldTag);
+    // 先调用内置编辑对话框获取编辑后的数据
+    TagItem? newTag = await _showEditTagDialog(oldTag);
+
+    // 如果外部提供了 onEditTag 回调，让它处理编辑后的数据
+    if (newTag != null && widget.onEditTag != null) {
+      newTag = await widget.onEditTag!(oldTag, newTag);
+    }
 
     if (newTag != null) {
       setState(() {
+        // 先从原分组中移除旧标签
         for (var group in _groups) {
-          // 使用名称匹配（标签名是唯一的）
           final index = group.tags.indexWhere((t) => t.name == oldTag.name);
           if (index != -1) {
-            group.tags[index] = newTag;
+            group.tags.removeAt(index);
             break;
           }
+        }
+
+        // 再将新标签添加到新分组（支持跨分组移动）
+        final newGroupIndex = _groups.indexWhere(
+          (g) => g.name == newTag?.group,
+        );
+        if (newGroupIndex != -1) {
+          _groups[newGroupIndex].tags.add(newTag!);
         }
       });
       await _saveData();

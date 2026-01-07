@@ -65,7 +65,7 @@ class TagsList extends StatelessWidget {
           final tag = tags[index];
           final isSelected = selectedTags.contains(tag.name);
           return _TagPill(
-            key: ValueKey('${tag.name}_$index'),
+            key: ValueKey('tag_${tag.createdAt.millisecondsSinceEpoch}'),
             tag: tag,
             isSelected: isSelected,
             isBatchEditMode: isBatchEditMode,
@@ -266,11 +266,6 @@ class _TagPill extends StatelessWidget {
     return Colors.transparent;
   }
 
-  /// 获取边框颜色
-  Color _getBorderColor(BuildContext context) {
-    // 无论选中与否，边框都设为透明
-    return Colors.transparent;
-  }
 
   /// 获取文本颜色
   Color _getTextColor(BuildContext context) {
