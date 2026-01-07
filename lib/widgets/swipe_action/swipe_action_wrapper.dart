@@ -66,6 +66,9 @@ class SwipeActionWrapper extends StatelessWidget {
   /// 编辑模式 - 禁用滑动操作
   final bool isEditMode;
 
+  /// 单元格背景颜色
+  final Color? backgroundColor;
+
   const SwipeActionWrapper({
     super.key,
     required this.child,
@@ -75,6 +78,7 @@ class SwipeActionWrapper extends StatelessWidget {
     this.deleteConfirmTitle = '确认删除',
     this.deleteConfirmContent = '确定要删除此项吗？',
     this.isEditMode = false,
+    this.backgroundColor,
   });
 
   /// 构建滑动操作按钮
@@ -178,6 +182,7 @@ class SwipeActionWrapper extends StatelessWidget {
 
     return SwipeActionCell(
       key: key ?? ObjectKey(this),
+      backgroundColor: backgroundColor ?? Colors.transparent,
 
       // 左滑操作（trailing actions - 从右侧滑出）
       trailingActions: trailingActions?.asMap().entries.map((entry) {

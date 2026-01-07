@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
-import 'package:Memento/widgets/tag_manager_dialog/widgets/tag_manager_dialog.dart';
+import 'package:Memento/widgets/tags_dialog/tags_dialog.dart';
 
 /// 标签管理器示例
 class TagManagerExample extends StatefulWidget {
@@ -12,10 +11,21 @@ class TagManagerExample extends StatefulWidget {
 
 class _TagManagerExampleState extends State<TagManagerExample> {
   List<String> selectedTags = [];
-  List<TagGroup> groups = const [
-    TagGroup(name: '工作', tags: ['重要', '紧急', '待办']),
-    TagGroup(name: '生活', tags: ['购物', '娱乐', '健康']),
-    TagGroup(name: '学习', tags: ['阅读', '笔记', '复习']),
+
+  // 使用兼容的旧格式数据（简单的字符串列表）
+  final List<Map<String, dynamic>> legacyGroups = [
+    {
+      'name': '工作',
+      'tags': ['重要', '紧急', '待办'],
+    },
+    {
+      'name': '生活',
+      'tags': ['购物', '娱乐', '健康'],
+    },
+    {
+      'name': '学习',
+      'tags': ['阅读', '笔记', '复习'],
+    },
   ];
 
   @override
@@ -30,11 +40,12 @@ class _TagManagerExampleState extends State<TagManagerExample> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'TagManagerDialog',
+              'TagsDialog',
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
-            const Text('这是一个标签管理器组件，支持标签的增删改查。'),
+            const Text(
+                '全新的标签管理器组件，支持搜索、过滤、批量编辑等功能。'),
             const SizedBox(height: 24),
             Text(
               '功能特性',
@@ -44,7 +55,10 @@ class _TagManagerExampleState extends State<TagManagerExample> {
             const Text('• 分组管理'),
             const Text('• 标签增删改'),
             const Text('• 多选支持'),
-            const Text('• 搜索功能'),
+            const Text('• 搜索功能（标题、注释）'),
+            const Text('• 多条件过滤（分组、排序）'),
+            const Text('• 批量编辑模式'),
+            const Text('• 长按菜单（编辑、删除）'),
             const SizedBox(height: 24),
             if (selectedTags.isNotEmpty)
               Card(
@@ -98,22 +112,23 @@ class _TagManagerExampleState extends State<TagManagerExample> {
   }
 
   void _showTagManager() async {
-    final result = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => TagManagerDialog(
-        groups: groups,
-        selectedTags: selectedTags,
-        onGroupsChanged: (newGroups) {
-          setState(() {
-            groups = newGroups;
-          });
-        },
-        onTagsSelected: (tags) {
-          // 实时更新选中的标签（可选）
-          print('实时选择: $tags');
-        },
+    // 使用新的 TagsDialog，自动兼容旧格式数据
+    final result = await TagsDialog.show(
+      context,
+      groups: legacyGroups, // 传入旧格式数据，会自动转换
+      selectedTags: selectedTags,
+      config: const TagsDialogConfig(
+        title: '标签选择',
+        selectionMode: TagsSelectionMode.multiple,
+        enableEditing: true,
+        enableBatchEdit: true,
       ),
+      onGroupsChanged: (newGroups) {
+        // 新格式数据变更回调
+        print('分组已更新: ${newGroups.length} 个分组');
+      },
     );
+
     if (result != null) {
       setState(() {
         selectedTags = result;

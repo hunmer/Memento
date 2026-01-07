@@ -9,8 +9,6 @@ import 'package:shared_models/utils/pagination.dart';
 import 'package:Memento/plugins/calendar_album/controllers/calendar_controller.dart';
 import 'package:Memento/plugins/calendar_album/controllers/tag_controller.dart';
 import 'package:Memento/plugins/calendar_album/models/calendar_entry.dart';
-import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart'
-    as dialog;
 
 /// 客户端 Calendar Album Repository 实现
 class ClientCalendarAlbumRepository implements ICalendarAlbumRepository {
@@ -291,13 +289,13 @@ class ClientCalendarAlbumRepository implements ICalendarAlbumRepository {
       for (int i = 0; i < tagGroups.length; i++) {
         final dto = tagGroups[i];
         if (i < tagController.tagGroups.length) {
-          tagController.tagGroups[i] = dialog.TagGroup(
+          tagController.tagGroups[i] = TagGroup(
             name: dto.name,
             tags: List<String>.from(dto.tags),
           );
         } else {
           tagController.tagGroups.add(
-            dialog.TagGroup(name: dto.name, tags: List<String>.from(dto.tags)),
+            TagGroup(name: dto.name, tags: List<String>.from(dto.tags)),
           );
         }
       }
