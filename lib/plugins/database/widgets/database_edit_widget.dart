@@ -35,6 +35,7 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
   FormBuilderWrapperState? _wrapperState; // 用于外部提交按钮
   late TabController _tabController;
   List<FieldModel> _fields = [];
+  bool _isSaving = false; // 标记是否正在保存
 
   @override
   void initState() {
@@ -261,6 +262,13 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
         description: description,
       );
     });
+
+    // 如果是保存操作，在 setState 完成后执行保存
+    if (_isSaving) {
+      _isSaving = false;
+      // 使用 Future.microtask 确保 setState 已完成
+      Future.microtask(() => _performSave());
+    }
   }
 
   Future<void> _editField(FieldModel field) async {
@@ -342,14 +350,17 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
   }
 
   Future<void> _saveChanges() async {
+    _isSaving = true;
+    _wrapperState?.submitForm();
+  }
+
+  /// 执行实际的保存操作
+  Future<void> _performSave() async {
     try {
       if (!mounted) return;
 
-      // 先保存表单数据（通过 wrapperState）
-      _wrapperState?.submitForm();
-
       // 转换字段模型并更新数据库
-      _editedDatabase = _editedDatabase.copyWith(
+      final updatedDatabase = _editedDatabase.copyWith(
         fields:
             _fields
                 .map(
@@ -376,13 +387,13 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
                 .toList(),
       );
 
-      if (_editedDatabase.id.isEmpty) {
-        _editedDatabase = _editedDatabase.copyWith(
+      if (updatedDatabase.id.isEmpty) {
+        final newDatabase = updatedDatabase.copyWith(
           id: const Uuid().v4(),
         );
-        await widget.controller.createDatabase(_editedDatabase);
+        await widget.controller.createDatabase(newDatabase);
       } else {
-        await widget.controller.updateDatabase(_editedDatabase);
+        await widget.controller.updateDatabase(updatedDatabase);
       }
 
       if (mounted) {

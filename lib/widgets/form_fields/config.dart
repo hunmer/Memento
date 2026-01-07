@@ -169,6 +169,9 @@ class FormConfig {
   /// 跨度方向
   final CrossAxisAlignment crossAxisAlignment;
 
+  /// 空状态提示文案（当字段列表为空时显示）
+  final String? emptyStateMessage;
+
   const FormConfig({
     required this.fields,
     required this.onSubmit,
@@ -183,5 +186,6 @@ class FormConfig {
     this.fieldSpacing = 16,
     this.autovalidateMode = false,
     this.crossAxisAlignment = CrossAxisAlignment.start,
+    this.emptyStateMessage,
   });
 }

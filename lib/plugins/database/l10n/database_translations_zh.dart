@@ -24,6 +24,8 @@ class DatabaseTranslationsZh {
     'database_database_name_label': '数据库名称',
     'database_upload_cover_image': '上传封面图片',
     'database_description_label': '描述',
+    'database_description_hint': '请输入数据库描述',
+    'database_cover_image_label': '封面图片',
 
     // 字段相关
     'database_field_name_label': '字段名称',
@@ -31,6 +33,9 @@ class DatabaseTranslationsZh {
     'database_select_field_type_title': '选择字段类型',
     'database_new_field_title': '新建@type字段',
     'database_save_failed_message': '保存失败: @error',
+    'database_delete_field_title': '删除字段',
+    'database_delete_field_confirm': '确定要删除字段"@name"吗?',
+    'database_no_fields_hint': '暂无字段，请先在数据库设置中添加字段',
 
     // 数据库列表
     'database_database_list_title': '数据库列表',
@@ -39,6 +44,8 @@ class DatabaseTranslationsZh {
     'database_no_databases_message': '暂无数据库',
     'database_add_database_hint': '点击右下角按钮添加',
     'database_copy_success_message': '复制成功',
+    'database_search_databases': '搜索数据库',
+    'database_add_database': '添加数据库',
 
     // 删除确认
     'database_confirm_delete_title': '确认删除',

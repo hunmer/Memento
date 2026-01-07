@@ -214,15 +214,20 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    // 构建字段列表
+    final fieldWidgets = widget.config.fields.map((config) => _buildFieldWrapper(config)).toList();
+
     return FormBuilder(
       key: _actualFormKey,
       child: Column(
         crossAxisAlignment: widget.config.crossAxisAlignment,
         children: [
           if (widget.contentBuilder != null)
-            widget.contentBuilder!(context, widget.config.fields.map((config) => _buildFieldWrapper(config)).toList())
+            widget.contentBuilder!(context, fieldWidgets)
+          else if (fieldWidgets.isEmpty)
+            _buildEmptyState()
           else
-            ...widget.config.fields.map((config) => _buildFieldWrapper(config)).expand((field) => [
+            ...fieldWidgets.expand((field) => [
               field,
               SizedBox(height: widget.config.fieldSpacing),
             ]).toList()
@@ -230,6 +235,32 @@ class FormBuilderWrapperState extends State<FormBuilderWrapper> {
           if (widget.config.showSubmitButton || widget.config.showResetButton)
             _buildButtons(),
         ],
+      ),
+    );
+  }
+
+  /// 构建空状态提示
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              widget.config.emptyStateMessage ?? '暂无字段',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }

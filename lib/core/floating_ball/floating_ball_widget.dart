@@ -53,9 +53,13 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
     // 在下一帧更新上下文
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        FloatingBallService().updateContext(context);
-        // 设置动作上下文
-        _manager.setActionContext(context);
+        // 不覆盖 FloatingBallService 的 context，使用 service 中保存的有效 context
+        // FloatingBallService().updateContext(context);
+        // 设置动作上下文（使用 service 中保存的 context）
+        final serviceContext = FloatingBallService().lastContext;
+        if (serviceContext != null && serviceContext.mounted) {
+          _manager.setActionContext(serviceContext);
+        }
       }
     });
   }
@@ -77,11 +81,12 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
       return;
     }
 
-    // 使用 ActionManager 执行手势动作
-    if (context.mounted) {
+    // 使用 FloatingBallService 中保存的有效 context（有 Navigator）
+    final serviceContext = FloatingBallService().lastContext;
+    if (serviceContext != null && serviceContext.mounted) {
       print('[悬浮球Widget] 开始执行动作: ${gesture.name}');
       final actionManager = ActionManager();
-      final result = await actionManager.executeGestureAction(gesture, context);
+      final result = await actionManager.executeGestureAction(gesture, serviceContext);
 
       print(
         '[悬浮球Widget] 动作执行结果: success=${result.success}, error=${result.error}',
@@ -93,8 +98,8 @@ class _FloatingBallWidgetState extends State<FloatingBallWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 确保动作上下文是最新的
-    _manager.setActionContext(context);
+    // 不在这里覆盖 context，因为这是 Overlay 的 context（没有 Navigator）
+    // _manager.setActionContext(context);
 
     return SharedFloatingBallWidget(
       baseSize: widget.baseSize,

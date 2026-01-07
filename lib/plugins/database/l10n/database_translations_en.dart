@@ -24,6 +24,8 @@ class DatabaseTranslationsEn {
     'database_database_name_label': 'Database Name',
     'database_upload_cover_image': 'Upload Cover Image',
     'database_description_label': 'Description',
+    'database_description_hint': 'Enter database description',
+    'database_cover_image_label': 'Cover Image',
 
     // Field related
     'database_field_name_label': 'Field Name',
@@ -31,6 +33,9 @@ class DatabaseTranslationsEn {
     'database_select_field_type_title': 'Select Field Type',
     'database_new_field_title': 'New @type Field',
     'database_save_failed_message': 'Save failed: @error',
+    'database_delete_field_title': 'Delete Field',
+    'database_delete_field_confirm': 'Are you sure you want to delete field "@name"?',
+    'database_no_fields_hint': 'No fields yet, please add fields in database settings first',
 
     // Database list
     'database_database_list_title': 'Database List',
@@ -39,6 +44,8 @@ class DatabaseTranslationsEn {
     'database_no_databases_message': 'No databases',
     'database_add_database_hint': 'Click the button below to add',
     'database_copy_success_message': 'Copy successful',
+    'database_search_databases': 'Search databases',
+    'database_add_database': 'Add Database',
 
     // Delete confirmation
     'database_confirm_delete_title': 'Confirm Delete',
