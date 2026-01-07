@@ -128,7 +128,9 @@ class _TagCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 8),
-        height: config.tagCardHeight,
+        constraints: BoxConstraints(
+          minHeight: config.tagCardHeight,
+        ),
         decoration: BoxDecoration(
           color: _getBackgroundColor(context),
           borderRadius: BorderRadius.circular(config.tagCardRadius),

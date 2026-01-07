@@ -252,7 +252,9 @@ class _TagsDialogState extends State<TagsDialog> {
 
   /// 过滤变更
   void _onFilterChanged(Map<String, dynamic> filters) {
-    setState(() {});
+    setState(() {
+      _filterState.initializeFromMap(filters);
+    });
   }
 
   /// 切换批量编辑模式

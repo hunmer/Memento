@@ -8,26 +8,12 @@ import 'package:Memento/plugins/activity/models/tag_group.dart';
 class ActivitySampleData {
   /// 获取默认标签分组
   static List<TagGroup> get defaultTagGroups => [
-    TagGroup(name: '工作', tags: ['会议', '编码', '文档', '评审', '规划', '沟通', '培训']),
-    TagGroup(name: '学习', tags: ['阅读', '编程', '课程', '练习', '笔记', '研究']),
-    TagGroup(name: '生活', tags: ['锻炼', '吃饭', '睡觉', '娱乐', '购物', '家务', '出行']),
-    TagGroup(name: '健康', tags: ['运动', '冥想', '体检', '喝水', '休息']),
-    TagGroup(name: '社交', tags: ['朋友', '家人', '同事', '聚会', '通话']),
-    TagGroup(name: '创作', tags: ['写作', '设计', '拍照', '视频', '音乐']),
+    // TagGroup(name: '工作', tags: ['会议', '编码', '文档', '评审', '规划', '沟通', '培训']),
   ];
 
   /// 获取默认最近使用的标签
   static List<String> get defaultRecentTags => [
-    '编码',
-    '会议',
-    '阅读',
-    '锻炼',
-    '规划',
-    '写作',
-    '娱乐',
-    '休息',
-    '学习',
-    '沟通',
+    
   ];
 
   /// 获取默认最近使用的心情
