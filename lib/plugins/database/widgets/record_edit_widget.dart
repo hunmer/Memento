@@ -193,6 +193,7 @@ class _RecordEditWidgetState extends State<RecordEditWidget> {
             showSubmitButton: false,
             showResetButton: false,
             fieldSpacing: 16,
+            emptyStateMessage: 'database_no_fields_hint'.tr,
             onSubmit: (values) {
               // 表单提交在 _saveRecord 中处理
             },

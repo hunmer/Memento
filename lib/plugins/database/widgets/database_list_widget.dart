@@ -373,10 +373,10 @@ class _DatabaseListWidgetState extends State<DatabaseListWidget> {
 
   /// 显示新建数据库对话框
   Future<void> _showAddDatabaseDialog(BuildContext context) async {
-    // 创建一个空的新数据库模型
+    // 创建一个空的新数据库模型（ID 为空，保存时才会生成）
     final now = DateTime.now();
     final newDatabase = DatabaseModel(
-      id: Uuid().v4(),
+      id: '',  // 新建时 ID 为空，在 DatabaseEditWidget 保存时生成
       name: '',
       fields: [],
       createdAt: now,
