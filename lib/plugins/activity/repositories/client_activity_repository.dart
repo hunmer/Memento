@@ -6,8 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart'
     as activity_models;
-import 'package:Memento/plugins/activity/models/tag_group.dart'
-    as activity_models;
+import 'package:Memento/widgets/tags_dialog/models/models.dart' as tags_models;
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -280,8 +279,11 @@ class ClientActivityRepository implements IActivityRepository {
     );
   }
 
-  TagGroupDto _tagGroupToDto(activity_models.TagGroup tagGroup) {
-    return TagGroupDto(name: tagGroup.name, tags: tagGroup.tags);
+  TagGroupDto _tagGroupToDto(tags_models.TagGroupWithTags tagGroup) {
+    return TagGroupDto(
+      name: tagGroup.name,
+      tags: tagGroup.tags.map((tag) => tag.name).toList(),
+    );
   }
 
   /// 计算今日剩余时间（分钟）

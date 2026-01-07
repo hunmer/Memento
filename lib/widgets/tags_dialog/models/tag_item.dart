@@ -139,12 +139,23 @@ class TagGroupWithTags {
 
   /// 从 Map 创建
   factory TagGroupWithTags.fromMap(Map<String, dynamic> map) {
+    final name = map['name'] as String;
+    final tagsList = map['tags'] as List<dynamic>? ?? [];
+
     return TagGroupWithTags(
-      name: map['name'] as String,
-      tags: (map['tags'] as List<dynamic>?)
-              ?.map((e) => TagItem.fromMap(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+      name: name,
+      tags: tagsList.map((tag) {
+        // 兼容旧格式：如果是字符串，转换为 TagItem
+        if (tag is String) {
+          return TagItem(
+            name: tag,
+            group: name,
+            createdAt: DateTime.now(),
+          );
+        }
+        // 新格式：从 Map 创建
+        return TagItem.fromMap(tag as Map<String, dynamic>);
+      }).toList(),
     );
   }
 
