@@ -155,7 +155,25 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
 
   Future<void> _updateRecentTags(List<String> tags) async {
     try {
-      await ActivityPlugin.instance.activityService.saveRecentTags(tags);
+      if (tags.isEmpty) return;
+
+      // 获取当前的最近标签
+      final recentTags =
+          await ActivityPlugin.instance.activityService.getRecentTags();
+
+      // 使用 set 去重并移除新标签中已存在的标签
+      final inputTagSet = tags.toSet();
+      recentTags.removeWhere(inputTagSet.contains);
+
+      // 将新标签按选择顺序添加到开头
+      recentTags.insertAll(0, tags);
+
+      // 限制最多30个
+      if (recentTags.length > 30) {
+        recentTags.removeRange(30, recentTags.length);
+      }
+
+      await ActivityPlugin.instance.activityService.saveRecentTags(recentTags);
     } catch (e) {
       debugPrint('更新最近标签失败: $e');
     }

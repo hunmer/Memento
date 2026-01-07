@@ -1000,6 +1000,7 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
                   durationMinutes: data.durationMinutes,
                   label: '',
                   showLabel: false,
+                  tagDurations: data.tagDurations,
                 ),
               );
             }),
@@ -1026,6 +1027,7 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
                   durationMinutes: data.durationMinutes,
                   label: '${data.hour}',
                   showLabel: true,
+                  tagDurations: data.tagDurations,
                 ),
               );
             }),
@@ -1039,14 +1041,26 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
   List<TimeSlotData> _calculateHourlyData(List<ActivityRecord> activities) {
     return List.generate(24, (hour) {
       int totalMinutes = 0;
+      final Map<String, int> tagDurations = {};
 
       for (final activity in activities) {
         if (_activityCoversHour(activity, hour)) {
-          totalMinutes += _calculateMinutesInHour(activity, hour);
+          final minutes = _calculateMinutesInHour(activity, hour);
+          totalMinutes += minutes;
+
+          // 收集每个标签的时长
+          for (final tag in activity.tags) {
+            tagDurations[tag] = (tagDurations[tag] ?? 0) + minutes;
+          }
         }
       }
 
-      return TimeSlotData(hour: hour, minute: 0, durationMinutes: totalMinutes);
+      return TimeSlotData(
+        hour: hour,
+        minute: 0,
+        durationMinutes: totalMinutes,
+        tagDurations: tagDurations,
+      );
     });
   }
 
@@ -1069,6 +1083,7 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
       final slotEnd = slotStart.add(Duration(minutes: granularityMinutes));
 
       int totalMinutes = 0;
+      final Map<String, int> tagDurations = {};
 
       for (final activity in activities) {
         if (activity.startTime.isBefore(slotEnd) && activity.endTime.isAfter(slotStart)) {
@@ -1080,12 +1095,23 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
               : activity.endTime;
 
           if (effectiveEnd.isAfter(effectiveStart)) {
-            totalMinutes += effectiveEnd.difference(effectiveStart).inMinutes;
+            final minutes = effectiveEnd.difference(effectiveStart).inMinutes;
+            totalMinutes += minutes;
+
+            // 收集每个标签的时长
+            for (final tag in activity.tags) {
+              tagDurations[tag] = (tagDurations[tag] ?? 0) + minutes;
+            }
           }
         }
       }
 
-      slots.add(TimeSlotData(hour: hour, minute: minute, durationMinutes: totalMinutes));
+      slots.add(TimeSlotData(
+        hour: hour,
+        minute: minute,
+        durationMinutes: totalMinutes,
+        tagDurations: tagDurations,
+      ));
     }
 
     return slots;
@@ -1096,8 +1122,9 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
     required int durationMinutes,
     required String label,
     bool showLabel = true,
+    Map<String, int> tagDurations = const {},
   }) {
-    final color = _getSlotColor(durationMinutes, _timeGranularity);
+    final color = _getSlotColor(durationMinutes, _timeGranularity, tagDurations);
     final isActive = durationMinutes > 0;
 
     return Container(
@@ -1139,22 +1166,42 @@ class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
     );
   }
 
-  Color _getSlotColor(int minutes, int granularity) {
+  Color _getSlotColor(int minutes, int granularity, Map<String, int> tagDurations) {
     if (minutes == 0) {
       return Colors.grey.withValues(alpha: 0.1);
     }
 
-    // 根据占时间槽的比例来决定颜色
-    final ratio = minutes / granularity;
+    // 如果有标签，使用主要标签的颜色
+    if (tagDurations.isNotEmpty) {
+      final primaryTag = tagDurations.entries
+          .reduce((a, b) => a.value > b.value ? a : b)
+          .key;
+      final tagColor = _getColorFromTag(primaryTag);
 
+      // 根据占时间槽的比例来调整颜色的透明度
+      final ratio = minutes / granularity;
+      final alpha = _getAlphaFromRatio(ratio);
+
+      // 使用标签颜色，根据填充比例调整透明度
+      return tagColor.withValues(alpha: alpha);
+    }
+
+    // 没有标签时，使用默认粉色
+    final ratio = minutes / granularity;
+    final alpha = _getAlphaFromRatio(ratio);
+    return Colors.pink.withValues(alpha: alpha);
+  }
+
+  /// 根据填充比例获取透明度
+  double _getAlphaFromRatio(double ratio) {
     if (ratio < 0.25) {
-      return Colors.pink.withValues(alpha: 0.3);
+      return 0.3;
     } else if (ratio < 0.5) {
-      return Colors.pink.withValues(alpha: 0.5);
+      return 0.5;
     } else if (ratio < 0.75) {
-      return Colors.pink.withValues(alpha: 0.7);
+      return 0.7;
     } else {
-      return Colors.pink;
+      return 1.0;
     }
   }
 
@@ -1339,10 +1386,21 @@ class TimeSlotData {
   final int hour;
   final int minute;
   final int durationMinutes;
+  /// 标签到时长的映射（用于确定主要标签颜色）
+  final Map<String, int> tagDurations;
 
   TimeSlotData({
     required this.hour,
     required this.minute,
     required this.durationMinutes,
+    this.tagDurations = const {},
   });
+
+  /// 获取持续时间最长的标签
+  String? get primaryTag {
+    if (tagDurations.isEmpty) return null;
+    return tagDurations.entries
+        .reduce((a, b) => a.value > b.value ? a : b)
+        .key;
+  }
 }
