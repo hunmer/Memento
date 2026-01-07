@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../models/models.dart';
 
 /// 标签列表组件
@@ -53,36 +54,29 @@ class TagsList extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    return PrimaryScrollController.none(
-      child: CustomScrollView(
-        primary: false,
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverToBoxAdapter(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: List.generate(tags.length, (index) {
-                  final tag = tags[index];
-                  final isSelected = selectedTags.contains(tag.name);
-                  return _TagPill(
-                    key: ValueKey('${tag.name}_$index'),
-                    tag: tag,
-                    isSelected: isSelected,
-                    isBatchEditMode: isBatchEditMode,
-                    config: config,
-                    selectionMode: selectionMode,
-                    onTap: () => onSelectTag(tag.name),
-                    onLongPress: onLongPress != null ? () => onLongPress!(tag) : null,
-                    onDelete: onDeleteTap != null ? () => onDeleteTap!(tag) : null,
-                    onEdit: onEditTap != null ? () => onEditTap!(tag) : null,
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: MasonryGridView.count(
+        crossAxisCount: 5,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        itemCount: tags.length,
+        itemBuilder: (context, index) {
+          final tag = tags[index];
+          final isSelected = selectedTags.contains(tag.name);
+          return _TagPill(
+            key: ValueKey('${tag.name}_$index'),
+            tag: tag,
+            isSelected: isSelected,
+            isBatchEditMode: isBatchEditMode,
+            config: config,
+            selectionMode: selectionMode,
+            onTap: () => onSelectTag(tag.name),
+            onLongPress: onLongPress != null ? () => onLongPress!(tag) : null,
+            onDelete: onDeleteTap != null ? () => onDeleteTap!(tag) : null,
+            onEdit: onEditTap != null ? () => onEditTap!(tag) : null,
+          );
+        },
       ),
     );
   }
@@ -154,53 +148,55 @@ class _TagPill extends StatelessWidget {
         builder: (context) {
           final inherited = _TagPillInherited.of(context);
 
-          return Row(
+          return Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // 标签内容（可点击）
               InkWell(
                 onTap: inherited.isBatchEditMode ? null : inherited.onTap,
                 onLongPress: inherited.isBatchEditMode ? null : inherited.onLongPress,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 child: _buildPillContent(context, inherited),
               ),
 
-              // 编辑按钮（始终存在，用 opacity 控制可见性）
-              Opacity(
-                opacity: inherited.isBatchEditMode && inherited.onEdit != null ? 1.0 : 0.0,
-                child: InkWell(
-                  onTap: inherited.onEdit,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    margin: EdgeInsets.only(left: 4),
-                    padding: EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.edit, color: Colors.blue, size: 16),
+              // 编辑和删除按钮行（批量编辑模式时显示）
+              if (inherited.isBatchEditMode)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (inherited.onEdit != null)
+                        InkWell(
+                          onTap: inherited.onEdit,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.edit, color: Colors.blue, size: 14),
+                          ),
+                        ),
+                      if (inherited.onEdit != null && inherited.onDelete != null)
+                        SizedBox(width: 4),
+                      if (inherited.onDelete != null)
+                        InkWell(
+                          onTap: inherited.onDelete,
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.close, color: Colors.red, size: 14),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
-              ),
-
-              // 删除按钮（始终存在，用 opacity 控制可见性）
-              Opacity(
-                opacity: inherited.isBatchEditMode && inherited.onDelete != null ? 1.0 : 0.0,
-                child: InkWell(
-                  onTap: inherited.onDelete,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    margin: EdgeInsets.only(left: 4),
-                    padding: EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(Icons.close, color: Colors.red, size: 16),
-                  ),
-                ),
-              ),
             ],
           );
         },
@@ -210,43 +206,52 @@ class _TagPill extends StatelessWidget {
 
   Widget _buildPillContent(BuildContext context, _TagPillInherited inherited) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: _getBorderColor(context),
           width: inherited.isSelected ? 2 : 1,
         ),
       ),
-      child: Row(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 标签图标
+          // 标签图标 - 紧贴顶部，圆角融合
           if (tag.icon != null)
             Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: tag.color ?? Theme.of(context).colorScheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                tag.icon,
-                size: 12,
-                color: _getIconColor(context),
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 4),
+              child: Center(
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: tag.color ?? Theme.of(context).colorScheme.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    tag.icon,
+                    size: 22,
+                    color: _getIconColor(context),
+                  ),
+                ),
               ),
             ),
 
-          if (tag.icon != null) SizedBox(width: 6),
-
           // 标签名称
-          Text(
-            tag.name,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: _getTextColor(context),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+            child: Text(
+              tag.name,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: _getTextColor(context),
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
 
@@ -255,12 +260,12 @@ class _TagPill extends StatelessWidget {
               inherited.selectionMode != TagsSelectionMode.none &&
               inherited.isSelected)
             Padding(
-              padding: EdgeInsets.only(left: 6),
+              padding: const EdgeInsets.only(bottom: 4),
               child: Icon(
                 inherited.selectionMode == TagsSelectionMode.single
                     ? Icons.radio_button_checked
                     : Icons.check_circle,
-                size: 16,
+                size: 14,
                 color: config.selectedTagColor ??
                     Theme.of(context).colorScheme.primary,
               ),
