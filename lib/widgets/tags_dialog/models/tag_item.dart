@@ -8,6 +8,9 @@ class TagItem {
   /// 标签图标
   final IconData icon;
 
+  /// 标签颜色（可选）
+  final Color? color;
+
   /// 标签分组
   final String group;
 
@@ -23,6 +26,7 @@ class TagItem {
   const TagItem({
     required this.name,
     this.icon = Icons.label,
+    this.color,
     required this.group,
     this.comment,
     required this.createdAt,
@@ -34,6 +38,7 @@ class TagItem {
     return TagItem(
       name: map['name'] as String,
       icon: _getIconFromString(map['icon'] as String?),
+      color: _getColorFromValue(map['color'] as int?),
       group: map['group'] as String? ?? 'default',
       comment: map['comment'] as String?,
       createdAt: DateTime.parse(map['createdAt'] as String),
@@ -48,6 +53,7 @@ class TagItem {
     return {
       'name': name,
       'icon': _getStringFromIcon(icon),
+      'color': color?.value,
       'group': group,
       'comment': comment,
       'createdAt': createdAt.toIso8601String(),
@@ -59,6 +65,7 @@ class TagItem {
   TagItem copyWith({
     String? name,
     IconData? icon,
+    Color? color,
     String? group,
     String? comment,
     DateTime? createdAt,
@@ -67,6 +74,7 @@ class TagItem {
     return TagItem(
       name: name ?? this.name,
       icon: icon ?? this.icon,
+      color: color ?? this.color,
       group: group ?? this.group,
       comment: comment ?? this.comment,
       createdAt: createdAt ?? this.createdAt,
@@ -79,6 +87,7 @@ class TagItem {
     return TagItem(
       name: name,
       icon: icon,
+      color: color,
       group: group,
       comment: comment,
       createdAt: createdAt,
@@ -106,6 +115,12 @@ class TagItem {
   /// 从图标获取字符串
   static String _getStringFromIcon(IconData icon) {
     return icon.codePoint.toString();
+  }
+
+  /// 从整数值获取颜色
+  static Color? _getColorFromValue(int? value) {
+    if (value == null) return null;
+    return Color(value);
   }
 }
 

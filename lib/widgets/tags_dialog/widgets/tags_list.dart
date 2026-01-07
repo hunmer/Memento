@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/models.dart';
 
 /// 标签列表组件
@@ -26,7 +25,10 @@ class TagsList extends StatelessWidget {
   final Function(TagItem tag)? onLongPress;
 
   /// 删除点击回调
-  final VoidCallback? onDeleteTap;
+  final Function(TagItem tag)? onDeleteTap;
+
+  /// 编辑点击回调
+  final Function(TagItem tag)? onEditTap;
 
   /// 添加标签回调
   final Function(String group)? onAddTag;
@@ -41,6 +43,7 @@ class TagsList extends StatelessWidget {
     required this.onSelectTag,
     this.onLongPress,
     this.onDeleteTap,
+    this.onEditTap,
     this.onAddTag,
   });
 
@@ -50,25 +53,37 @@ class TagsList extends StatelessWidget {
       return _buildEmptyState();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: tags.length,
-      itemBuilder: (context, index) {
-        final tag = tags[index];
-        final isSelected = selectedTags.contains(tag.name);
-
-        return _TagCard(
-          key: ValueKey(tag.name),
-          tag: tag,
-          isSelected: isSelected,
-          isBatchEditMode: isBatchEditMode,
-          config: config,
-          selectionMode: selectionMode,
-          onTap: () => onSelectTag(tag.name),
-          onLongPress: onLongPress != null ? () => onLongPress!(tag) : null,
-          onDelete: isSelected && isBatchEditMode ? onDeleteTap : null,
-        );
-      },
+    return PrimaryScrollController.none(
+      child: CustomScrollView(
+        primary: false,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverToBoxAdapter(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: List.generate(tags.length, (index) {
+                  final tag = tags[index];
+                  final isSelected = selectedTags.contains(tag.name);
+                  return _TagPill(
+                    key: ValueKey('${tag.name}_$index'),
+                    tag: tag,
+                    isSelected: isSelected,
+                    isBatchEditMode: isBatchEditMode,
+                    config: config,
+                    selectionMode: selectionMode,
+                    onTap: () => onSelectTag(tag.name),
+                    onLongPress: onLongPress != null ? () => onLongPress!(tag) : null,
+                    onDelete: onDeleteTap != null ? () => onDeleteTap!(tag) : null,
+                    onEdit: onEditTap != null ? () => onEditTap!(tag) : null,
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -97,8 +112,8 @@ class TagsList extends StatelessWidget {
   }
 }
 
-/// 标签卡片组件
-class _TagCard extends StatelessWidget {
+/// 标签胶囊按钮组件
+class _TagPill extends StatelessWidget {
   final TagItem tag;
   final bool isSelected;
   final bool isBatchEditMode;
@@ -107,8 +122,9 @@ class _TagCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
-  const _TagCard({
+  const _TagPill({
     super.key,
     required this.tag,
     required this.isSelected,
@@ -118,177 +134,138 @@ class _TagCard extends StatelessWidget {
     required this.onTap,
     this.onLongPress,
     this.onDelete,
+    this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    // 使用稳定的 key，避免因状态变化导致 widget 重建问题
+    return _TagPillInherited(
+      tag: tag,
+      isSelected: isSelected,
+      isBatchEditMode: isBatchEditMode,
+      config: config,
+      selectionMode: selectionMode,
       onTap: onTap,
       onLongPress: onLongPress,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(bottom: 8),
-        constraints: BoxConstraints(
-          minHeight: config.tagCardHeight,
-        ),
-        decoration: BoxDecoration(
-          color: _getBackgroundColor(context),
-          borderRadius: BorderRadius.circular(config.tagCardRadius),
-          border: Border.all(
-            color: _getBorderColor(context),
-            width: isSelected ? 2 : 0.5,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
+      onDelete: onDelete,
+      onEdit: onEdit,
+      child: Builder(
+        builder: (context) {
+          final inherited = _TagPillInherited.of(context);
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // 选择图标或标签图标
-              _buildLeading(context),
-
-              SizedBox(width: 12),
-
-              // 标签信息
-              Expanded(
-                child: _buildTagInfo(context),
+              // 标签内容（可点击）
+              InkWell(
+                onTap: inherited.isBatchEditMode ? null : inherited.onTap,
+                onLongPress: inherited.isBatchEditMode ? null : inherited.onLongPress,
+                borderRadius: BorderRadius.circular(20),
+                child: _buildPillContent(context, inherited),
               ),
 
-              // 删除按钮（批量编辑模式）
-              if (isBatchEditMode && isSelected)
-                IconButton(
-                  icon: Icon(Icons.close, color: Colors.red),
-                  onPressed: onDelete,
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(minWidth: 40, minHeight: 40),
+              // 编辑按钮（始终存在，用 opacity 控制可见性）
+              Opacity(
+                opacity: inherited.isBatchEditMode && inherited.onEdit != null ? 1.0 : 0.0,
+                child: InkWell(
+                  onTap: inherited.onEdit,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    margin: EdgeInsets.only(left: 4),
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.edit, color: Colors.blue, size: 16),
+                  ),
                 ),
+              ),
 
-              // 选择指示器
-              if (selectionMode != TagsSelectionMode.none && isSelected)
-                Icon(
-                  selectionMode == TagsSelectionMode.single
-                      ? Icons.radio_button_checked
-                      : Icons.check_circle,
-                  color: config.selectedTagColor ??
-                      Theme.of(context).colorScheme.primary,
+              // 删除按钮（始终存在，用 opacity 控制可见性）
+              Opacity(
+                opacity: inherited.isBatchEditMode && inherited.onDelete != null ? 1.0 : 0.0,
+                child: InkWell(
+                  onTap: inherited.onDelete,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    margin: EdgeInsets.only(left: 4),
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.close, color: Colors.red, size: 16),
+                  ),
                 ),
+              ),
             ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }
 
-  /// 构建前导图标
-  Widget _buildLeading(BuildContext context) {
-    if (selectionMode != TagsSelectionMode.none || isBatchEditMode) {
-      return Icon(
-        isSelected
-            ? (selectionMode == TagsSelectionMode.single
-                ? Icons.radio_button_checked
-                : Icons.check_circle)
-            : (selectionMode == TagsSelectionMode.single
-                ? Icons.radio_button_unchecked
-                : Icons.circle_outlined),
-        color: isSelected
-            ? (config.selectedTagColor ??
-                Theme.of(context).colorScheme.primary)
-            : Colors.grey,
-        size: 24,
-      );
-    }
-
+  Widget _buildPillContent(BuildContext context, _TagPillInherited inherited) {
     return Container(
-      width: 40,
-      height: 40,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: tag.icon == Icons.label
-            ? Theme.of(context).colorScheme.primaryContainer
-            : null,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(
-        tag.icon,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
-
-  /// 构建标签信息
-  Widget _buildTagInfo(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // 标签名称和分组
-        Row(
-          children: [
-            Text(
-              tag.name,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(width: 8),
-            _buildGroupChip(context),
-          ],
+        color: _getBackgroundColor(context),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _getBorderColor(context),
+          width: inherited.isSelected ? 2 : 1,
         ),
-
-        // 注释
-        if (tag.comment != null && tag.comment!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              tag.comment!,
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 标签图标
+          if (tag.icon != null)
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                color: tag.color ?? Theme.of(context).colorScheme.primaryContainer,
+                shape: BoxShape.circle,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-
-        // 时间信息
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Row(
-            children: [
-              Icon(
-                Icons.access_time,
+              child: Icon(
+                tag.icon,
                 size: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: _getIconColor(context),
               ),
-              SizedBox(width: 4),
-              Text(
-                _formatTime(tag.lastUsedAt ?? tag.createdAt),
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+            ),
 
-  /// 构建分组标签
-  Widget _buildGroupChip(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        tag.group,
-        style: TextStyle(
-          fontSize: 10,
-          color: Theme.of(context).colorScheme.onSecondaryContainer,
-        ),
+          if (tag.icon != null) SizedBox(width: 6),
+
+          // 标签名称
+          Text(
+            tag.name,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: _getTextColor(context),
+            ),
+          ),
+
+          // 选择指示器（非批量编辑模式）
+          if (!inherited.isBatchEditMode &&
+              inherited.selectionMode != TagsSelectionMode.none &&
+              inherited.isSelected)
+            Padding(
+              padding: EdgeInsets.only(left: 6),
+              child: Icon(
+                inherited.selectionMode == TagsSelectionMode.single
+                    ? Icons.radio_button_checked
+                    : Icons.check_circle,
+                size: 16,
+                color: config.selectedTagColor ??
+                    Theme.of(context).colorScheme.primary,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -298,9 +275,10 @@ class _TagCard extends StatelessWidget {
     if (isSelected) {
       return (config.selectedTagColor ??
               Theme.of(context).colorScheme.primary)
-          .withOpacity(0.1);
+          .withOpacity(0.15);
     }
-    return Theme.of(context).colorScheme.surface;
+    return tag.color?.withOpacity(0.15) ??
+        Theme.of(context).colorScheme.surfaceContainerHighest;
   }
 
   /// 获取边框颜色
@@ -309,22 +287,63 @@ class _TagCard extends StatelessWidget {
       return config.selectedTagColor ??
           Theme.of(context).colorScheme.primary;
     }
-    return Theme.of(context).dividerColor;
+    return tag.color ?? Theme.of(context).colorScheme.outline;
   }
 
-  /// 格式化时间
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays == 0) {
-      return '今天 ${DateFormat('HH:mm').format(dateTime)}';
-    } else if (difference.inDays == 1) {
-      return '昨天 ${DateFormat('HH:mm').format(dateTime)}';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}天前';
-    } else {
-      return DateFormat('yyyy/MM/dd').format(dateTime);
+  /// 获取文本颜色
+  Color _getTextColor(BuildContext context) {
+    if (isSelected) {
+      return config.selectedTagColor ??
+          Theme.of(context).colorScheme.primary;
     }
+    return tag.color ?? Theme.of(context).colorScheme.onSurface;
+  }
+
+  /// 获取图标颜色
+  Color _getIconColor(BuildContext context) {
+    if (tag.color != null) {
+      final brightness = ThemeData.estimateBrightnessForColor(tag.color!);
+      return brightness == Brightness.dark ? Colors.white : Colors.black;
+    }
+    return Theme.of(context).colorScheme.primary;
+  }
+}
+
+/// InheritedWidget 用于在 _TagPill 内部传递数据
+class _TagPillInherited extends InheritedWidget {
+  final TagItem tag;
+  final bool isSelected;
+  final bool isBatchEditMode;
+  final TagsDialogConfig config;
+  final TagsSelectionMode selectionMode;
+  final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
+
+  const _TagPillInherited({
+    super.key,
+    required this.tag,
+    required this.isSelected,
+    required this.isBatchEditMode,
+    required this.config,
+    required this.selectionMode,
+    required this.onTap,
+    this.onLongPress,
+    this.onDelete,
+    this.onEdit,
+    required Widget child,
+  }) : super(child: child);
+
+  static _TagPillInherited of(BuildContext context) {
+    final result = context.dependOnInheritedWidgetOfExactType<_TagPillInherited>();
+    assert(result != null, 'No _TagPillInherited found in context');
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(_TagPillInherited oldWidget) {
+    return oldWidget.isSelected != isSelected ||
+        oldWidget.isBatchEditMode != isBatchEditMode;
   }
 }
