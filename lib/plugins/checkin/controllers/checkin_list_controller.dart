@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:get/get.dart';
-import 'package:Memento/widgets/tag_manager_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +13,23 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+
+/// 本地 TagGroup 类（用于分组管理对话框）
+class TagGroup {
+  final String name;
+  final List<String> tags;
+  final List<String>? tagIds;
+
+  TagGroup({required this.name, required this.tags, this.tagIds});
+
+  TagGroup copyWith({String? name, List<String>? tags, List<String>? tagIds}) {
+    return TagGroup(
+      name: name ?? this.name,
+      tags: tags ?? List.from(this.tags),
+      tagIds: tagIds ?? (this.tagIds != null ? List.from(this.tagIds!) : null),
+    );
+  }
+}
 
 class CheckinListController {
   final BuildContext context;
@@ -760,5 +776,193 @@ class CheckinListController {
   // 释放资源
   void dispose() {
     // 清理资源
+  }
+}
+
+/// 本地 TagManagerDialog 配置类
+class TagManagerConfig {
+  final String title;
+  final String addGroupHint;
+  final String addTagHint;
+  final String editGroupHint;
+  final String allTagsLabel;
+  final String newGroupLabel;
+
+  const TagManagerConfig({
+    this.title = '标签管理',
+    this.addGroupHint = '添加分组',
+    this.addTagHint = '添加标签',
+    this.editGroupHint = '编辑分组',
+    this.allTagsLabel = '全部',
+    this.newGroupLabel = '新建分组',
+  });
+}
+
+/// 本地 TagManagerDialog 组件
+class TagManagerDialog extends StatefulWidget {
+  final List<TagGroup> groups;
+  final List<String> selectedTags;
+  final Function(List<TagGroup>)? onGroupsChanged;
+  final Function(List<String>)? onTagsSelected;
+  final Future<String?> Function(String group, {String? tag})? onAddTag;
+  final Future<List<TagGroup>> Function()? onRefreshData;
+  final TagManagerConfig? config;
+
+  const TagManagerDialog({
+    super.key,
+    required this.groups,
+    required this.selectedTags,
+    this.onGroupsChanged,
+    this.onTagsSelected,
+    this.onAddTag,
+    this.onRefreshData,
+    this.config,
+  });
+
+  @override
+  State<TagManagerDialog> createState() => _TagManagerDialogState();
+}
+
+class _TagManagerDialogState extends State<TagManagerDialog> {
+  late List<TagGroup> _groups;
+  late List<String> _selectedTags;
+  late String _selectedGroup;
+
+  @override
+  void initState() {
+    super.initState();
+    _groups = List.from(widget.groups);
+    _selectedTags = List.from(widget.selectedTags);
+    _selectedGroup = _groups.isNotEmpty ? _groups[0].name : '';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        width: 600,
+        height: 500,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // 标题栏
+            Row(
+              children: [
+                Text(
+                  widget.config?.title ?? '标签管理',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+            const Divider(),
+
+            // 分组选择
+            if (_groups.isNotEmpty)
+              Container(
+                height: 50,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _groups.length,
+                  itemBuilder: (context, index) {
+                    final group = _groups[index];
+                    final isSelected = _selectedGroup == group.name;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(group.name),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedGroup = group.name;
+                            });
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+            const Divider(),
+
+            // 标签列表
+            Expanded(
+              child: _buildTagsList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTagsList() {
+    if (_groups.isEmpty) {
+      return const Center(child: Text('暂无分组'));
+    }
+
+    final currentGroup = _groups.firstWhere(
+      (g) => g.name == _selectedGroup,
+      orElse: () => _groups[0],
+    );
+
+    if (currentGroup.tags.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('分组「${currentGroup.name}」暂无标签'),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('添加标签'),
+              onPressed: () => _handleAddTag(currentGroup.name),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: currentGroup.tags.length,
+      itemBuilder: (context, index) {
+        final tag = currentGroup.tags[index];
+        final isSelected = _selectedTags.contains(tag);
+        return CheckboxListTile(
+          title: Text(tag),
+          value: isSelected,
+          onChanged: (value) {
+            setState(() {
+              if (value == true) {
+                _selectedTags.add(tag);
+              } else {
+                _selectedTags.remove(tag);
+              }
+              widget.onTagsSelected?.call(_selectedTags);
+            });
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _handleAddTag(String group) async {
+    final result = await widget.onAddTag?.call(group);
+    if (result != null) {
+      // 刷新数据
+      final updated = await widget.onRefreshData?.call();
+      if (updated != null) {
+        setState(() {
+          _groups = updated;
+        });
+        widget.onGroupsChanged?.call(_groups);
+      }
+    }
   }
 }

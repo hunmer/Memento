@@ -5,7 +5,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/plugins/activity/sample_data.dart';
-import 'package:Memento/widgets/tag_manager_dialog.dart';
+import 'package:Memento/plugins/activity/models/tag_group.dart';
 
 class ActivityService {
   final StorageManager _storage;
@@ -334,7 +334,7 @@ class ActivityService {
   }
 
   /// 获取指定日期范围的活动统计（按标签分组）
-  /// 返回 Map<String, int>，key是标签名，value是该标签的总时长（分钟）
+  /// 返回 `Map<String, int>`，key是标签名，value是该标签的总时长（分钟）
   Future<Map<String, int>> getActivityStatsByTag(
     DateTime startDate,
     DateTime endDate,

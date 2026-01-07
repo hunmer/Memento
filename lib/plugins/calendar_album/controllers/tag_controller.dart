@@ -1,11 +1,36 @@
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/widgets/tag_manager_dialog/widgets/tag_manager_dialog.dart';
+import 'package:Memento/widgets/tags_dialog/tags_dialog.dart';
 import 'package:flutter/material.dart';
-import '../../../../widgets/tag_manager_dialog/models/tag_group.dart' as dialog;
 import 'dart:convert';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
+
+/// 简单的标签组数据结构（本地定义，保持向后兼容）
+class TagGroup {
+  final String name;
+  final List<String> tags;
+
+  TagGroup({required this.name, required this.tags});
+
+  TagGroup copyWith({String? name, List<String>? tags}) {
+    return TagGroup(
+      name: name ?? this.name,
+      tags: tags ?? List.from(this.tags),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'tags': tags};
+  }
+
+  factory TagGroup.fromJson(Map<String, dynamic> json) {
+    return TagGroup(
+      name: json['name'] as String,
+      tags: List<String>.from(json['tags'] as List),
+    );
+  }
+}
 
 class TagController extends ChangeNotifier {
   // 发送事件通知
@@ -20,7 +45,7 @@ class TagController extends ChangeNotifier {
   }
   final VoidCallback? onTagsChanged;
 
-  List<dialog.TagGroup> tagGroups = [];
+  List<TagGroup> tagGroups = [];
   List<String> selectedTags = [];
   List<String> recentTags = [];
 
@@ -42,31 +67,21 @@ class TagController extends ChangeNotifier {
   Future<void> initialize() async {
     // 初始化默认标签组
     tagGroups = [
-      dialog.TagGroup(name: '最近使用', tags: []),
-      dialog.TagGroup(name: '地点', tags: ['家', '工作', '旅行']),
-      dialog.TagGroup(name: '活动', tags: ['生日', '聚会', '会议']),
-      dialog.TagGroup(name: '心情', tags: ['开心', '平静', '兴奋', '思考']),
+      TagGroup(name: '最近使用', tags: []),
+      TagGroup(name: '地点', tags: ['家', '工作', '旅行']),
+      TagGroup(name: '活动', tags: ['生日', '聚会', '会议']),
+      TagGroup(name: '心情', tags: ['开心', '平静', '兴奋', '思考']),
     ];
 
-    await _loadTagGroups();
-  }
-
-  Future<void> _loadTagGroups() async {
     try {
       // 尝试加载标签组
-      final groupsJson = await storageManager.readFile(_tagGroupsFile, '[]');
-      final List<dynamic> jsonData = json.decode(groupsJson);
-
-      // 只有在文件有内容时才覆盖默认值
-      if (jsonData.isNotEmpty) {
-        tagGroups =
-            jsonData
-                .map((e) => dialog.TagGroup.fromMap(e as Map<String, dynamic>))
-                .toList();
-
-        // 确保最近使用标签组存在
-        if (!tagGroups.any((group) => group.name == '最近使用')) {
-          tagGroups.insert(0, dialog.TagGroup(name: '最近使用', tags: []));
+      if (await storageManager.fileExists(_tagGroupsFile)) {
+        final jsonStr = await storageManager.readFile(_tagGroupsFile, '');
+        if (jsonStr.isNotEmpty) {
+          final List<dynamic> data = json.decode(jsonStr);
+          if (data.isNotEmpty) {
+            tagGroups = data.map((e) => TagGroup.fromJson(e as Map<String, dynamic>)).toList();
+          }
         }
       } else {
         // 如果文件为空，保存默认标签组
@@ -113,7 +128,7 @@ class TagController extends ChangeNotifier {
   void _updateRecentTagGroup() {
     final recentGroupIndex = tagGroups.indexWhere((g) => g.name == '最近使用');
     if (recentGroupIndex != -1) {
-      tagGroups[recentGroupIndex] = dialog.TagGroup(
+      tagGroups[recentGroupIndex] = TagGroup(
         name: '最近使用',
         tags: List.from(recentTags),
       );
@@ -140,21 +155,29 @@ class TagController extends ChangeNotifier {
   }
 
   Future<List<String>?> showTagManagerDialog(BuildContext context) async {
-    final result = await showDialog<List<String>>(
-      context: context,
-      builder:
-          (context) => TagManagerDialog(
-            groups: List.from(tagGroups),
-            selectedTags: List.from(selectedTags),
-            onGroupsChanged: (updatedGroups) {
-              setState(() {
-                tagGroups = List.from(updatedGroups);
-                _saveTagGroups();
-                notifyListeners();
-                onTagsChanged?.call();
-              });
-            },
-          ),
+    // 转换为新组件可接受的格式
+    final legacyGroups = tagGroups.map((g) => g.toJson()).toList();
+
+    final result = await TagsDialog.show(
+      context,
+      groups: legacyGroups,
+      selectedTags: List.from(selectedTags),
+      config: const TagsDialogConfig(
+        title: '标签管理',
+        selectionMode: TagsSelectionMode.multiple,
+        enableEditing: true,
+        enableBatchEdit: true,
+      ),
+      onGroupsChanged: (newGroups) {
+        // 新格式转回旧格式
+        tagGroups = newGroups.map((g) => TagGroup(
+          name: g.name,
+          tags: g.tags.map((t) => t.name).toList(),
+        )).toList();
+        _saveTagGroups();
+        notifyListeners();
+        onTagsChanged?.call();
+      },
     );
 
     if (result != null) {
@@ -181,7 +204,7 @@ class TagController extends ChangeNotifier {
         groupName != null
             ? tagGroups.firstWhere(
               (g) => g.name == groupName,
-              orElse: () => dialog.TagGroup(name: groupName, tags: []),
+              orElse: () => TagGroup(name: groupName, tags: []),
             )
             : tagGroups.firstWhere((g) => g.name == '最近使用');
 

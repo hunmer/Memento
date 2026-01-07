@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
-import 'package:Memento/widgets/tag_manager_dialog.dart';
+import 'package:Memento/plugins/activity/models/tag_group.dart';
+import 'package:Memento/widgets/tags_dialog/tags_dialog.dart';
 
 class TagController {
   final ActivityService activityService;
@@ -40,14 +41,9 @@ class TagController {
       final loadedRecentTags = await activityService.getRecentTags();
       if (loadedRecentTags.isNotEmpty) {
         recentTags = loadedRecentTags;
-
-        // 更新最近使用标签组
         _updateRecentTagGroup();
       }
-
-      onTagsChanged();
     } catch (e) {
-      // 处理错误
       debugPrint('加载标签组失败: $e');
     }
   }
@@ -61,57 +57,101 @@ class TagController {
     }
   }
 
+  // 更新"最近使用"标签组
   void _updateRecentTagGroup() {
-    final recentGroupIndex = tagGroups.indexWhere((g) => g.name == '最近使用');
-    if (recentGroupIndex != -1) {
-      tagGroups[recentGroupIndex] = TagGroup(
-        name: '最近使用',
-        tags: List.from(recentTags),
-      );
+    final recentIndex = tagGroups.indexWhere((g) => g.name == '最近使用');
+    if (recentIndex != -1) {
+      tagGroups[recentIndex] = TagGroup(name: '最近使用', tags: List.from(recentTags));
     }
   }
 
-  // 更新最近使用的标签
-  Future<void> updateRecentTags(List<String> tags) async {
-    if (tags.isEmpty) return;
+  // 添加标签
+  Future<void> addTag(String tag, {String? groupName}) async {
+    final group = groupName != null
+        ? tagGroups.firstWhere(
+            (g) => g.name == groupName,
+            orElse: () => TagGroup(name: groupName, tags: []),
+          )
+        : tagGroups.firstWhere((g) => g.name == '最近使用');
 
-    // 更新最近使用标签列表
-    for (final tag in tags) {
-      recentTags.remove(tag); // 如果已存在，先移除
-      recentTags.insert(0, tag); // 添加到最前面
+    if (!group.tags.contains(tag)) {
+      group.tags.add(tag);
+      await _saveTagGroups();
+      onTagsChanged();
+    }
+  }
+
+  // 删除标签
+  Future<void> deleteTag(String tag) async {
+    for (var group in tagGroups) {
+      group.tags.remove(tag);
+    }
+    recentTags.remove(tag);
+    await _saveTagGroups();
+    onTagsChanged();
+  }
+
+  // 更新最近使用的标签
+  Future<void> updateRecentTags(List<String> newTags) async {
+    if (newTags.isEmpty) return;
+
+    // 移除已存在的标签，然后将新标签添加到前面
+    for (var tag in newTags) {
+      recentTags.remove(tag);
+      recentTags.insert(0, tag);
     }
 
-    // 限制最近使用标签数量
+    // 限制最多10个
     if (recentTags.length > 10) {
       recentTags.removeRange(10, recentTags.length);
     }
 
-    // 更新最近使用标签组
     _updateRecentTagGroup();
-
-    // 保存最近使用的标签
     await activityService.saveRecentTags(recentTags);
-
-    // 保存标签组
     await _saveTagGroups();
-
     onTagsChanged();
   }
 
+  // 切换标签选择状态
+  void toggleTagSelection(String tag) {
+    if (selectedTags.contains(tag)) {
+      selectedTags.remove(tag);
+    } else {
+      selectedTags.add(tag);
+    }
+    onTagsChanged();
+  }
+
+  // 清除所有选择
+  void clearSelection() {
+    selectedTags.clear();
+    onTagsChanged();
+  }
+
+  // 显示标签管理对话框
   Future<void> showTagManagerDialog(BuildContext context) async {
-    final result = await showDialog<List<String>>(
-      context: context,
-      builder:
-          (context) => TagManagerDialog(
-            groups: tagGroups,
-            selectedTags: selectedTags,
-            onGroupsChanged: (updatedGroups) {
-              // 保存更新后的标签组
-              tagGroups = updatedGroups;
-              _saveTagGroups();
-              onTagsChanged();
-            },
-          ),
+    // 转换为新组件可接受的格式
+    final legacyGroups = tagGroups.map((g) => g.toJson()).toList();
+
+    final result = await TagsDialog.show(
+      context,
+      groups: legacyGroups,
+      selectedTags: List.from(selectedTags),
+      config: const TagsDialogConfig(
+        title: '标签管理',
+        selectionMode: TagsSelectionMode.multiple,
+        enableEditing: true,
+        enableBatchEdit: true,
+      ),
+      onGroupsChanged: (newGroups) {
+        // 新格式转回旧格式
+        tagGroups = newGroups.map((g) => TagGroup(
+          name: g.name,
+          tags: g.tags.map((t) => t.name).toList(),
+        )).toList();
+        _saveTagGroups();
+        onTagsChanged();
+      },
     );
 
     if (result != null) {

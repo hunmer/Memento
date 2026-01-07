@@ -5,7 +5,6 @@ import 'package:Memento/plugins/calendar_album/screens/calendar_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/tag_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/album_screen.dart';
 import 'package:Memento/plugins/calendar_album/screens/entry_editor_screen.dart';
-import 'package:Memento/plugins/calendar_album/widgets/tag_manager_dialog.dart';
 import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/gestures.dart';
@@ -94,14 +93,17 @@ class _CalendarAlbumBottomBarState extends State<CalendarAlbumBottomBar>
                 } else if (_currentPage == 1) {
                   // Tab1: 标签管理
                   return Scaffold(
-                    body: TagManagerDialog(
-                      groups: _tagController.tagGroups,
-                      selectedTags: _tagController.selectedTags,
-                      onGroupsChanged: (newGroups) {
-                        _tagController.tagGroups = newGroups;
-                        // ignore: invalid_use_of_visible_for_testing_member
-                        _tagController.notifyListeners();
-                      },
+                    appBar: AppBar(
+                      title: Text('calendar_album_tag_management'.tr),
+                    ),
+                    body: Center(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.label),
+                        label: Text('calendar_album_manage_tags'.tr),
+                        onPressed: () async {
+                          await _tagController.showTagManagerDialog(context);
+                        },
+                      ),
                     ),
                   );
                 } else {

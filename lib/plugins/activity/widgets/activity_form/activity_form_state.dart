@@ -5,7 +5,7 @@ import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
-import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
+import 'package:Memento/plugins/activity/models/tag_group.dart';
 import 'activity_form_utils.dart';
 import '../../../../../../core/services/toast_service.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:Memento/plugins/activity/models/activity_record.dart';
-import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart';
+import 'package:Memento/plugins/activity/models/tag_group.dart';
 
 /// 活动插件示例数据
 /// 当插件的JSON文件不存在时，会自动加载这些默认数据

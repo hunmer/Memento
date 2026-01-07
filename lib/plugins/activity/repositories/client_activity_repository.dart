@@ -6,8 +6,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart'
     as activity_models;
-import 'package:Memento/widgets/tag_manager_dialog/models/tag_group.dart'
-    as widgets_models;
+import 'package:Memento/plugins/activity/models/tag_group.dart'
+    as activity_models;
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:shared_models/shared_models.dart';
 
@@ -280,7 +280,7 @@ class ClientActivityRepository implements IActivityRepository {
     );
   }
 
-  TagGroupDto _tagGroupToDto(widgets_models.TagGroup tagGroup) {
+  TagGroupDto _tagGroupToDto(activity_models.TagGroup tagGroup) {
     return TagGroupDto(name: tagGroup.name, tags: tagGroup.tags);
   }
 

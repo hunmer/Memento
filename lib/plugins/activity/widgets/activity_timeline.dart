@@ -120,6 +120,8 @@ class ActivityTimeline extends StatelessWidget {
         child: InkWell(
             onTap: () => onActivityTap?.call(activity),
             borderRadius: BorderRadius.circular(12),
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
             child: Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
