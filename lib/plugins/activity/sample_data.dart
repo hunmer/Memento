@@ -1,14 +1,14 @@
 import 'dart:ui';
 
 import 'package:Memento/plugins/activity/models/activity_record.dart';
-import 'package:Memento/plugins/activity/models/tag_group.dart';
+import 'package:Memento/widgets/tags_dialog/models/models.dart';
 
 /// 活动插件示例数据
 /// 当插件的JSON文件不存在时，会自动加载这些默认数据
 class ActivitySampleData {
   /// 获取默认标签分组
-  static List<TagGroup> get defaultTagGroups => [
-    // TagGroup(name: '工作', tags: ['会议', '编码', '文档', '评审', '规划', '沟通', '培训']),
+  static List<TagGroupWithTags> get defaultTagGroups => [
+    // TagGroupWithTags.fromStringList(name: '工作', tags: ['会议', '编码', '文档', '评审', '规划', '沟通', '培训']),
   ];
 
   /// 获取默认最近使用的标签

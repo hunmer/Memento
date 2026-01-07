@@ -318,6 +318,7 @@ class _TagsDialogState extends State<TagsDialog> {
     if (newTag != null) {
       setState(() {
         for (var group in _groups) {
+          // 使用名称匹配（标签名是唯一的）
           final index = group.tags.indexWhere((t) => t.name == oldTag.name);
           if (index != -1) {
             group.tags[index] = newTag;
@@ -839,8 +840,12 @@ class _TagEditDialogState extends State<_TagEditDialog> {
                             setState(() {
                               _selectedIcon = value['icon'] as IconData;
                               _selectedColor = value['color'] as Color;
+                              // 更新后立即同步完整的 iconColor 数据到表单
+                              fieldState.didChange({
+                                'icon': _selectedIcon,
+                                'color': _selectedColor,
+                              });
                             });
-                            fieldState.didChange(value);
                           },
                         ),
                       ],

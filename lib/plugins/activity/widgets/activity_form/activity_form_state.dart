@@ -5,7 +5,7 @@ import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
-import 'package:Memento/plugins/activity/models/tag_group.dart';
+import 'package:Memento/widgets/tags_dialog/models/models.dart';
 import 'activity_form_utils.dart';
 import '../../../../../../core/services/toast_service.dart';
 
@@ -578,7 +578,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
     var unGroupedTags = tagGroups.firstWhere(
       (group) => group.name == 'activity_ungrouped'.tr,
       orElse: () {
-        final newGroup = TagGroup(name: 'activity_ungrouped'.tr, tags: []);
+        final newGroup = TagGroupWithTags(name: 'activity_ungrouped'.tr);
         if (tagGroups.isEmpty) {
           tagGroups.add(newGroup);
         } else {
@@ -599,13 +599,30 @@ class ActivityFormState extends State<ActivityFormWidget> {
     for (final tag in inputTags) {
       bool isNewTag = true;
       for (final group in tagGroups) {
-        if (group.tags.contains(tag)) {
+        final tagNames = group.tags.map((t) => t.name).toList();
+        if (tagNames.contains(tag)) {
           isNewTag = false;
           break;
         }
       }
-      if (isNewTag && !unGroupedTags.tags.contains(tag)) {
-        unGroupedTags.tags.add(tag);
+      if (isNewTag) {
+        final tagNames = unGroupedTags.tags.map((t) => t.name).toList();
+        if (!tagNames.contains(tag)) {
+          final newTag = TagItem(
+            name: tag,
+            group: unGroupedTags.name,
+            createdAt: DateTime.now(),
+          );
+          unGroupedTags = TagGroupWithTags(
+            name: unGroupedTags.name,
+            tags: [...unGroupedTags.tags, newTag],
+          );
+          // 更新 tagGroups 中的对应项
+          final index = tagGroups.indexWhere((g) => g.name == unGroupedTags.name);
+          if (index != -1) {
+            tagGroups[index] = unGroupedTags;
+          }
+        }
       }
     }
 

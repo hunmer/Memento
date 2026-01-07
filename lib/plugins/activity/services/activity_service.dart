@@ -5,7 +5,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/plugins/activity/sample_data.dart';
-import 'package:Memento/plugins/activity/models/tag_group.dart';
+import 'package:Memento/widgets/tags_dialog/models/models.dart';
 
 class ActivityService {
   final StorageManager _storage;
@@ -202,12 +202,9 @@ class ActivityService {
   }
 
   // 保存标签组
-  Future<void> saveTagGroups(List<TagGroup> groups) async {
+  Future<void> saveTagGroups(List<TagGroupWithTags> groups) async {
     try {
-      final jsonList =
-          groups
-              .map((group) => {'name': group.name, 'tags': group.tags})
-              .toList();
+      final jsonList = groups.map((group) => group.toMap()).toList();
       await _storage.writeJson(_tagGroupsFilePath, jsonList);
     } catch (e) {
       debugPrint('Error saving tag groups: $e');
@@ -216,7 +213,7 @@ class ActivityService {
   }
 
   // 获取标签组
-  Future<List<TagGroup>> getTagGroups() async {
+  Future<List<TagGroupWithTags>> getTagGroups() async {
     try {
       if (!await _storage.fileExists(_tagGroupsFilePath)) {
         return [];
@@ -224,12 +221,7 @@ class ActivityService {
       final jsonString = await _storage.readString(_tagGroupsFilePath);
       final List<dynamic> jsonList = jsonDecode(jsonString);
       return jsonList
-          .map(
-            (json) => TagGroup(
-              name: json['name'],
-              tags: List<String>.from(json['tags']),
-            ),
-          )
+          .map((json) => TagGroupWithTags.fromMap(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
       debugPrint('Error loading tag groups: $e');
