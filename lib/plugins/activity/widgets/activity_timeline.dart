@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/widgets/swipe_action/index.dart';
+import 'package:Memento/widgets/tags_dialog/models/tag_item.dart';
 
 // Custom painter for the dashed timeline
 class DashedLinePainter extends CustomPainter {
@@ -33,6 +34,10 @@ class ActivityTimeline extends StatelessWidget {
   final Function(ActivityRecord)? onDeleteActivity;
   final List<ActivityRecord> activities;
   final Function(ActivityRecord)? onActivityTap;
+  // 获取标签图标的函数
+  final List<IconData> Function(List<String> tagNames)? getTagIcons;
+  // 获取标签颜色的函数
+  final List<Color?> Function(List<String> tagNames)? getTagColors;
 
   const ActivityTimeline({
     super.key,
@@ -40,6 +45,8 @@ class ActivityTimeline extends StatelessWidget {
     this.onActivityTap,
     this.onUnrecordedTimeTap,
     this.onDeleteActivity,
+    this.getTagIcons,
+    this.getTagColors,
   });
 
   Color _getPrimaryColor(BuildContext context) => const Color(0xfff472b6);
@@ -98,12 +105,28 @@ class ActivityTimeline extends StatelessWidget {
 
   Widget _buildTimelineItem(BuildContext context, ActivityRecord activity) {
     final primaryColor = _getPrimaryColor(context);
-    final icon = _getActivityIcon(activity);
+    // 优先使用标签图标，如果没有标签或未提供 getTagIcons，则使用原有逻辑
+    List<IconData> tagIcons = [];
+    if (getTagIcons != null && activity.tags.isNotEmpty) {
+      tagIcons = getTagIcons!(activity.tags);
+    }
+    final IconData? displayIcon =
+        tagIcons.isNotEmpty ? tagIcons.first : _getActivityIcon(activity);
+
+    // 获取标签颜色，使用第一个标签的颜色
+    Color? capsuleColor;
+    if (getTagColors != null && activity.tags.isNotEmpty) {
+      final colors = getTagColors!(activity.tags);
+      // 使用第一个标签的颜色，如果为空则使用原有逻辑
+      capsuleColor = colors.firstOrNull;
+    }
+    // 如果没有获取到标签颜色，使用原有逻辑
+    capsuleColor ??= _getColorFromTag(context, activity);
+
     final duration = activity.endTime.difference(activity.startTime);
     final showDuration = duration.inMinutes > 0;
-    
+
     final double height = (duration.inMinutes * 1.5).clamp(64.0, 400.0);
-    final capsuleColor = _getColorFromTag(context, activity);
 
     return SwipeActionWrapper(
         key: ValueKey(activity.id),
@@ -156,7 +179,8 @@ class ActivityTimeline extends StatelessWidget {
                           child: Center(
                             child: Container(
                                 width: 48,
-                                height: height * 0.8,
+                          // 多图标时使用实际高度，单图标时使用80%
+                          height: tagIcons.length > 1 ? height : height * 0.8,
                                 decoration: BoxDecoration(
                                     color: capsuleColor,
                                     borderRadius: BorderRadius.circular(24),
@@ -165,14 +189,46 @@ class ActivityTimeline extends StatelessWidget {
                                         width: 1.5,
                                     )
                                 ),
-                                child: Center(
-                                    child: Icon(
-                                    icon,
-                                    color: primaryColor,
-                                    size: 28,
-                                    fill: 1.0,
+                          child:
+                              tagIcons.length > 1
+                                  ? // 多个标签时垂直显示图标
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 4.0,
                                     ),
-                                ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children:
+                                          tagIcons
+                                              .take(3) // 最多显示3个图标
+                                              .map(
+                                                (icon) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        bottom: 2.0,
+                                                      ),
+                                                  child: Icon(
+                                                    icon,
+                                                    color: primaryColor,
+                                                    size: 18,
+                                                    fill: 1.0,
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(),
+                                    ),
+                                  )
+                                  : Center(
+                                    child: Icon(
+                                      displayIcon ??
+                                          Icons.local_activity_outlined,
+                                      color: primaryColor,
+                                      size: 28,
+                                      fill: 1.0,
+                                    ),
+                                  ),
                             ),
                           ),
                         ),
@@ -225,7 +281,8 @@ class ActivityTimeline extends StatelessWidget {
                                                   fontSize: 10,
                                                   color: Theme.of(context).colorScheme.onSurface,
                                                 ),
-                                                backgroundColor: capsuleColor.withOpacity(0.7),
+                                              backgroundColor: capsuleColor
+                                                  ?.withOpacity(0.7),
                                                 padding: EdgeInsets.zero,
                                                 labelPadding: const EdgeInsets.symmetric(horizontal: 6.0),
                                                 visualDensity: VisualDensity.compact,
