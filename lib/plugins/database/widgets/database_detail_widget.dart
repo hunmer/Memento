@@ -8,6 +8,10 @@ import 'package:Memento/plugins/database/models/database_model.dart';
 import 'package:Memento/plugins/database/widgets/database_edit_widget.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../models/record.dart' as record_model;
 
 /// 记录排序选项
@@ -38,7 +42,6 @@ class DatabaseDetailWidget extends StatefulWidget {
 
 class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
   late Future<void> _loadingFuture;
-  bool _isGridView = false;
 
   /// 所有记录列表
   List<record_model.Record> _allRecords = [];
@@ -324,14 +327,6 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
       // 顶部操作按钮
       actions: [
         IconButton(
-          icon: Icon(_isGridView ? Icons.list : Icons.grid_view),
-          onPressed: () {
-            setState(() {
-              _isGridView = !_isGridView;
-            });
-          },
-        ),
-        IconButton(
           icon: const Icon(Icons.edit),
           onPressed: () {
             NavigationHelper.push(
@@ -362,7 +357,7 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
           // 主要内容
           _filteredRecords.isEmpty
               ? _buildEmptyState()
-              : _isGridView ? _buildGridView(database) : _buildListView(database),
+              : _buildMasonryView(database),
 
           // 浮动操作按钮
           Positioned(
@@ -433,9 +428,13 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
     );
   }
 
-  Widget _buildListView(DatabaseModel database) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  /// 构建瀑布流视图
+  Widget _buildMasonryView(DatabaseModel database) {
+    return MasonryGridView.count(
+      padding: const EdgeInsets.all(16),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
       itemCount: _filteredRecords.length,
       itemBuilder: (context, index) {
         final record = _filteredRecords[index];
@@ -444,12 +443,15 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
     );
   }
 
-  /// 构建记录卡片（列表模式）
+  /// 构建记录卡片
   Widget _buildRecordCard(DatabaseModel database, record_model.Record record) {
+    // 获取需要显示在预览中的字段
+    final previewFields =
+        database.fields.where((f) => f.showInPreview).toList();
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: () {
           NavigationHelper.push(
             context,
@@ -465,98 +467,89 @@ class _DatabaseDetailWidgetState extends State<DatabaseDetailWidget> {
         onLongPress: () {
           _showRecordMenu(context, record);
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 标题
-              Text(
-                record.fields['title']?.toString() ?? 'database_untitled_record'.tr,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 8),
-
-              // 更新时间
-              Text(
-                '更新于 ${_formatDateTime(record.updatedAt)}',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant
-                          .withOpacity(0.6),
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGridView(DatabaseModel database) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: _filteredRecords.length,
-      itemBuilder: (context, index) {
-        final record = _filteredRecords[index];
-        return Card(
-          child: InkWell(
-            onTap: () {
-              NavigationHelper.push(
-                context,
-                RecordEditWidget(
-                  controller: widget.controller,
-                  database: database,
-                  record: record,
-                ),
-              ).then((_) => setState(() {
-                _allRecords.clear();
-              }));
-            },
-            onLongPress: () {
-              _showRecordMenu(context, record);
-            },
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 400),
+          child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (record.fields['image'] != null)
-                    Image.network(record.fields['image'], height: 80),
-                  if (record.fields['image'] != null) const SizedBox(height: 8),
+                  // 标题
                   Text(
-                    record.fields['title']?.toString() ??
-                        'database_untitled_record'.tr,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    record.fields['title']?.toString() ?? 'database_untitled_record'.tr,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
+
+                  // 预览字段信息 - 使用 FormBuilderWrapper
+                  if (previewFields.isNotEmpty) ...[
+                    FormBuilderWrapper(
+                      config: FormConfig(
+                        fields: previewFields.map((field) {
+                          return FormFieldConfig(
+                            name: field.name,
+                            type: _mapFieldType(field.type),
+                            labelText: field.name,
+                            initialValue: record.fields[field.name],
+                            enabled: false, // 禁止编辑
+                          );
+                        }).toList(),
+                        onSubmit: (_) {}, // 空回调，不会触发
+                        showSubmitButton: false,
+                        showResetButton: false,
+                        fieldSpacing: 8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+
+                  // 更新时间
                   Text(
-                    _formatDateTime(record.updatedAt),
+                    '更新于 ${_formatDateTime(record.updatedAt)}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context)
                               .colorScheme
                               .onSurfaceVariant
-                              .withOpacity(0.6),
+                              .withOpacity(0.5),
+                          fontSize: 11,
                         ),
                   ),
                 ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
+  }
+
+  /// 将数据库字段类型映射到表单字段类型
+  FormFieldType _mapFieldType(String fieldType) {
+    switch (fieldType) {
+      case 'Text':
+        return FormFieldType.text;
+      case 'Long Text':
+        return FormFieldType.textArea;
+      case 'Integer':
+        return FormFieldType.number;
+      case 'Checkbox':
+        return FormFieldType.switchField;
+      case 'Date':
+        return FormFieldType.date;
+      case 'Time':
+        return FormFieldType.time;
+      case 'Date/Time':
+        return FormFieldType.date;
+      case 'Image':
+        return FormFieldType.imagePicker;
+      case 'Password':
+        return FormFieldType.password;
+      default:
+        return FormFieldType.text;
+    }
   }
 
   /// 格式化日期时间
