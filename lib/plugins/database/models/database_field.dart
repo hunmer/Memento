@@ -16,6 +16,9 @@ class DatabaseField {
     this.metadata,
   });
 
+  /// 是否在卡片预览中显示此字段
+  bool get showInPreview => metadata?['showInPreview'] == true;
+
   factory DatabaseField.fromMap(Map<String, dynamic> map) {
     return DatabaseField(
       id: map['id'],

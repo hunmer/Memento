@@ -152,32 +152,78 @@ class _DatabaseEditWidgetState extends State<DatabaseEditWidget>
           children:
               _fields
                   .map(
-                    (field) => ListTile(
-                      key: ValueKey(field.id),
-                      title: Text(field.name),
-                      subtitle: Text(field.type),
-                      leading: Icon(
-                        FieldController.fieldTypes[field.type] ?? Icons.help,
-                        color: Colors.deepPurple,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, size: 20),
-                            onPressed: () => _editField(field),
-                            tooltip: '编辑'.tr,
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, size: 20),
-                            onPressed: () => _deleteField(field),
-                            tooltip: '删除'.tr,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                          const Icon(Icons.drag_handle),
-                        ],
-                      ),
-                    ),
+                    (field) {
+                      // 解析 metadata 获取 showInPreview
+                      bool showInPreview = false;
+                      if (field.description != null && field.description!.isNotEmpty) {
+                        try {
+                          final metadata = jsonDecode(field.description!) as Map<String, dynamic>?;
+                          showInPreview = metadata?['showInPreview'] == true;
+                        } catch (e) {
+                          // 解析失败，使用默认值
+                        }
+                      }
+
+                      return ListTile(
+                        key: ValueKey(field.id),
+                        title: Text(field.name),
+                        subtitle: Text(field.type),
+                        leading: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // 预览显示 checkbox
+                            Checkbox(
+                              value: showInPreview,
+                              onChanged: (value) {
+                                setState(() {
+                                  // 更新 metadata 中的 showInPreview
+                                  Map<String, dynamic>? metadata;
+                                  if (field.description != null && field.description!.isNotEmpty) {
+                                    try {
+                                      metadata = jsonDecode(field.description!) as Map<String, dynamic>?;
+                                    } catch (e) {
+                                      metadata = {};
+                                    }
+                                  } else {
+                                    metadata = {};
+                                  }
+                                  metadata ??= {};
+                                  metadata['showInPreview'] = value ?? false;
+
+                                  final index = _fields.indexWhere((f) => f.id == field.id);
+                                  if (index >= 0) {
+                                    _fields[index] = field.copyWith(
+                                      description: jsonEncode(metadata),
+                                    );
+                                  }
+                                });
+                              },
+                            ),
+                            Icon(
+                              FieldController.fieldTypes[field.type] ?? Icons.help,
+                              color: Colors.deepPurple,
+                            ),
+                          ],
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 20),
+                              onPressed: () => _editField(field),
+                              tooltip: '编辑'.tr,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 20),
+                              onPressed: () => _deleteField(field),
+                              tooltip: '删除'.tr,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            const Icon(Icons.drag_handle),
+                          ],
+                        ),
+                      );
+                    },
                   )
                   .toList(),
         ),
