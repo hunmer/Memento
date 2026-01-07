@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/widgets/tags_dialog/models/models.dart';
 import 'activity_form_state.dart';
 
 class ActivityFormWidget extends StatefulWidget {
@@ -11,6 +12,7 @@ class ActivityFormWidget extends StatefulWidget {
   final DateTime? lastActivityEndTime;
   final List<String>? recentMoods;
   final List<String>? recentTags;
+  final List<TagGroupWithTags>? tagGroups;
 
   const ActivityFormWidget({
     super.key,
@@ -22,6 +24,7 @@ class ActivityFormWidget extends StatefulWidget {
     this.lastActivityEndTime,
     this.recentMoods,
     this.recentTags,
+    this.tagGroups,
   });
 
   @override

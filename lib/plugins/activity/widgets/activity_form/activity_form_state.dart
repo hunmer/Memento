@@ -6,6 +6,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/widgets/tags_dialog/models/models.dart';
+// ignore: unused_import
 import 'package:collection/collection.dart';
 import 'activity_form_utils.dart';
 import '../../../../../../core/services/toast_service.dart';
@@ -24,6 +25,28 @@ class ActivityFormState extends State<ActivityFormWidget> {
 
   // 从历史记录加载的最近标签
   List<String> _recentTags = [];
+
+  /// 获取所有标签组的标签列表（用于快捷选择）
+  List<String> _getAllQuickSelectTags() {
+    final tags = <String>[];
+
+    // 优先添加最近使用的标签
+    tags.addAll(_recentTags);
+
+    // 添加所有标签组中的标签
+    if (widget.tagGroups != null) {
+      for (final group in widget.tagGroups!) {
+        for (final tag in group.tags) {
+          // 避免重复添加
+          if (!tags.contains(tag.name)) {
+            tags.add(tag.name);
+          }
+        }
+      }
+    }
+
+    return tags;
+  }
 
   @override
   void didUpdateWidget(ActivityFormWidget oldWidget) {
@@ -157,7 +180,7 @@ class ActivityFormState extends State<ActivityFormWidget> {
         extra: {
           'primaryColor': primaryColor,
           'labelText': 'activity_tags'.tr,
-          'quickSelectTags': _recentTags,
+          'quickSelectTags': _getAllQuickSelectTags(),
         },
         onChanged: (value) => _tagsValue = value as List<String>?,
       ),
