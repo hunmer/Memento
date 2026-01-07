@@ -6,6 +6,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/widgets/tags_dialog/models/models.dart';
+import 'package:collection/collection.dart';
 import 'activity_form_utils.dart';
 import '../../../../../../core/services/toast_service.dart';
 
@@ -599,8 +600,8 @@ class ActivityFormState extends State<ActivityFormWidget> {
     for (final tag in inputTags) {
       bool isNewTag = true;
       for (final group in tagGroups) {
-        final tagNames = group.tags.map((t) => t.name).toList();
-        if (tagNames.contains(tag)) {
+        final foundTag = group.tags.firstWhereOrNull((t) => t.name == tag);
+        if (foundTag != null) {
           isNewTag = false;
           break;
         }
