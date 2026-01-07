@@ -1,10 +1,10 @@
-import 'package:Memento/core/event/event.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/widgets/activity_form.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/widgets/tags_dialog/models/models.dart';
 
 /// 活动编辑界面
 /// 用于创建和编辑活动记录
@@ -32,6 +32,7 @@ class ActivityEditScreen extends StatefulWidget {
 class _ActivityEditScreenState extends State<ActivityEditScreen> {
   List<String> recentMoods = [];
   List<String> recentTags = [];
+  List<TagGroupWithTags> tagGroups = [];
   DateTime? _defaultStartTime;
   DateTime? _defaultEndTime;
 
@@ -39,6 +40,7 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
   void initState() {
     super.initState();
     _loadRecentMoodsAndTags();
+    _loadTagGroups();
     _initDefaultTimes();
   }
 
@@ -110,6 +112,20 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
       }
     } catch (e) {
       debugPrint('加载最近心情和标签失败: $e');
+    }
+  }
+
+  Future<void> _loadTagGroups() async {
+    try {
+      final loadedGroups =
+          await ActivityPlugin.instance.activityService.getTagGroups();
+      if (mounted) {
+        setState(() {
+          tagGroups = loadedGroups;
+        });
+      }
+    } catch (e) {
+      debugPrint('加载标签组失败: $e');
     }
   }
 
@@ -202,6 +218,7 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
       initialEndTime: _defaultEndTime,
       recentMoods: recentMoods,
       recentTags: recentTags,
+      tagGroups: tagGroups,
       onSave: _saveActivity,
     );
 

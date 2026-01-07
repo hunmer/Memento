@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'activity_form/activity_form_widget.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/widgets/tags_dialog/models/models.dart';
 
 /// 活动表单组件
 /// 用于创建和编辑活动记录
@@ -13,6 +14,7 @@ class ActivityForm extends StatelessWidget {
   final DateTime? lastActivityEndTime;
   final List<String>? recentMoods;
   final List<String>? recentTags;
+  final List<TagGroupWithTags>? tagGroups;
 
   const ActivityForm({
     super.key,
@@ -24,6 +26,7 @@ class ActivityForm extends StatelessWidget {
     this.lastActivityEndTime,
     this.recentMoods,
     this.recentTags,
+    this.tagGroups,
   });
 
   @override
@@ -37,6 +40,7 @@ class ActivityForm extends StatelessWidget {
       lastActivityEndTime: lastActivityEndTime,
       recentMoods: recentMoods,
       recentTags: recentTags,
+      tagGroups: tagGroups,
     );
   }
 }
