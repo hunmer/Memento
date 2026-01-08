@@ -1,0 +1,352 @@
+import 'package:flutter/material.dart';
+import 'package:animated_flip_counter/animated_flip_counter.dart';
+
+/// 月度柱状图统计卡片示例
+class MonthlyBarChartExample extends StatelessWidget {
+  const MonthlyBarChartExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('月度柱状图统计卡片')),
+      body: Container(
+        color: isDark ? Colors.black : const Color(0xFFEBF1F5),
+        child: const Center(
+          child: MonthlyBarChartWidget(
+            totalValue: 890.93,
+            currentMonth: 5, // June (0-indexed)
+            monthlyData: [
+              MonthlyData(month: 'Jan', value: 35),
+              MonthlyData(month: 'Feb', value: 60),
+              MonthlyData(month: 'Mar', value: 45),
+              MonthlyData(month: 'Apr', value: 55),
+              MonthlyData(month: 'May', value: 40),
+              MonthlyData(month: 'Jun', value: 80),
+              MonthlyData(month: 'Jul', value: 38),
+              MonthlyData(month: 'Aug', value: 65),
+              MonthlyData(month: 'Sep', value: 25),
+              MonthlyData(month: 'Oct', value: 55),
+              MonthlyData(month: 'Nov', value: 30),
+              MonthlyData(month: 'Dec', value: 45),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 月度数据模型
+class MonthlyData {
+  final String month;
+  final double value; // 0-100 的百分比
+
+  const MonthlyData({
+    required this.month,
+    required this.value,
+  });
+}
+
+/// 月度柱状图统计小组件
+class MonthlyBarChartWidget extends StatefulWidget {
+  final double totalValue;
+  final int currentMonth; // 当前月份索引 (0-11)
+  final List<MonthlyData> monthlyData;
+
+  const MonthlyBarChartWidget({
+    super.key,
+    required this.totalValue,
+    required this.currentMonth,
+    required this.monthlyData,
+  });
+
+  @override
+  State<MonthlyBarChartWidget> createState() => _MonthlyBarChartWidgetState();
+}
+
+class _MonthlyBarChartWidgetState extends State<MonthlyBarChartWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final primaryColor = isDark
+        ? const Color(0xFF4FC3F7)
+        : Theme.of(context).colorScheme.primary;
+    final barBackgroundColor = isDark
+        ? const Color(0xFF2C2C2E)
+        : const Color(0xFFE5E7EB);
+
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _animation.value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - _animation.value)),
+            child: Container(
+              width: 280,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 标题和图标
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: AnimatedFlipCounter(
+                          value: widget.totalValue * _animation.value,
+                          fractionDigits: 2,
+                          prefix: '\$',
+                          textStyle: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.bar_chart,
+                          color: primaryColor,
+                          size: 20,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // 柱状图
+                  SizedBox(
+                    height: 224,
+                    child: Stack(
+                      children: [
+                        // Max 线
+                        Positioned(
+                          top: 22,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  height: 2,
+                                  color: isDark
+                                      ? Colors.grey.shade700
+                                      : const Color(0xFFD1D5DB).withOpacity(0.6),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                                'Max',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDark
+                                                      ? Colors.grey.shade500
+                                                      : const Color(0xFF9CA3AF),
+                                                  letterSpacing: 1.2,
+                                                ),
+                                              ),
+                            ],
+                          ),
+                        ),
+                        // 柱状图
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: _BarChart(
+                            data: widget.monthlyData,
+                            currentMonth: widget.currentMonth,
+                            animation: _animation,
+                            primaryColor: primaryColor,
+                            barBackgroundColor: barBackgroundColor,
+                            isDark: isDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 柱状图组件
+class _BarChart extends StatelessWidget {
+  final List<MonthlyData> data;
+  final int currentMonth;
+  final Animation<double> animation;
+  final Color primaryColor;
+  final Color barBackgroundColor;
+  final bool isDark;
+
+  const _BarChart({
+    required this.data,
+    required this.currentMonth,
+    required this.animation,
+    required this.primaryColor,
+    required this.barBackgroundColor,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(data.length, (index) {
+        final item = data[index];
+        final isCurrentMonth = index == currentMonth;
+
+        // 为每个柱子创建延迟动画，确保 end <= 1.0
+        final step = 0.04; // 12个月份，最大 end = 0.5 + 11 * 0.04 = 0.94
+        final barAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Interval(
+            index * step,
+            0.5 + index * step,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+        return _BarItem(
+          month: item.month,
+          value: item.value,
+          isCurrentMonth: isCurrentMonth,
+          animation: barAnimation,
+          primaryColor: primaryColor,
+          barBackgroundColor: barBackgroundColor,
+          isDark: isDark,
+        );
+      }),
+      ),
+    );
+  }
+}
+
+/// 单个柱子组件
+class _BarItem extends StatelessWidget {
+  final String month;
+  final double value;
+  final bool isCurrentMonth;
+  final Animation<double> animation;
+  final Color primaryColor;
+  final Color barBackgroundColor;
+  final bool isDark;
+
+  const _BarItem({
+    required this.month,
+    required this.value,
+    required this.isCurrentMonth,
+    required this.animation,
+    required this.primaryColor,
+    required this.barBackgroundColor,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final animatedValue = value * animation.value;
+
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            // 柱子
+            Container(
+              width: 16,
+              height: 140 * animatedValue / 100,
+              decoration: BoxDecoration(
+                color: isCurrentMonth ? primaryColor : barBackgroundColor,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(4),
+                  topRight: Radius.circular(4),
+                ),
+                boxShadow: isCurrentMonth
+                    ? [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // 月份标签
+            SizedBox(
+              width: 32,
+              child: Text(
+                month,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: isCurrentMonth ? FontWeight.bold : FontWeight.w500,
+                  color: isCurrentMonth
+                      ? primaryColor
+                      : (isDark ? Colors.grey.shade500 : const Color(0xFF9CA3AF)),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

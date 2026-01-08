@@ -90,10 +90,31 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
           ),
           _buildListItem(
             context,
+            icon: Icons.bar_chart,
+            title: '堆叠条形图组件',
+            subtitle: 'StackedBarChartWidget - 三层堆叠条形图展示组件',
+            route: '/widgets_gallery/stacked_bar_chart_widget',
+          ),
+          _buildListItem(
+            context,
             icon: Icons.donut_large,
             title: '堆叠环形图统计卡片',
             subtitle: 'StackedRingChartWidget - 多类别环形图统计卡片',
             route: '/widgets_gallery/stacked_ring_chart',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.calendar_view_month,
+            title: '月度柱状图统计卡片',
+            subtitle: 'MonthlyBarChartWidget - 12个月数据柱状图展示',
+            route: '/widgets_gallery/monthly_bar_chart',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.trending_up,
+            title: '收益趋势卡片',
+            subtitle: 'EarningsTrendCard - 收益趋势与折线图展示卡片',
+            route: '/widgets_gallery/earnings_trend_card',
           ),
           // 未来可以在这里添加更多桌面小组件示例
         ],

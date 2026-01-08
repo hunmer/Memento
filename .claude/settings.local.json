@@ -33,7 +33,8 @@
       "Skill(add-multi-filter)",
       "Skill(refactor-form-to-builder)",
       "Skill(add-home-widget-selector)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Skill(add-widget-from-prototype)"
     ],
     "deny": [],
     "ask": []
