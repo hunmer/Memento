@@ -43,6 +43,7 @@ import 'package:Memento/screens/widgets_gallery/screens/custom_dialog_example.da
 import 'package:Memento/screens/widgets_gallery/screens/smooth_bottom_sheet_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/file_preview_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/app_drawer_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/half_circle_gauge_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/super_cupertino_navigation_example.dart';
@@ -776,6 +777,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const FilePreviewExample());
       case '/widgets_gallery/app_drawer':
         return _createRoute(const AppDrawerExample());
+      case '/widgets_gallery/half_circle_gauge_widget':
+        return _createRoute(const HalfCircleGaugeWidgetExample());
       case '/widgets_gallery/widget_config_editor':
         return _createRoute(const WidgetConfigEditorExample());
       case '/widgets_gallery/preset_edit_form':

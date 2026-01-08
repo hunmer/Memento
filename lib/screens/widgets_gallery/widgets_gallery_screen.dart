@@ -191,6 +191,13 @@ class WidgetsGalleryScreen extends StatelessWidget {
           _buildSectionHeader(context, '其他组件'),
           _buildListItem(
             context,
+            icon: Icons.speed,
+            title: '半圆形统计小组件',
+            subtitle: 'HalfCircleGaugeWidget',
+            route: '/widgets_gallery/half_circle_gauge_widget',
+          ),
+          _buildListItem(
+            context,
             icon: Icons.apps,
             title: '小组件配置编辑器',
             subtitle: 'WidgetConfigEditor',
