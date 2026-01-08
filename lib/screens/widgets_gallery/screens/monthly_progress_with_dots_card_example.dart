@@ -1,3 +1,4 @@
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 
 /// 月度进度圆点卡片示例
@@ -27,7 +28,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
 }
 
 /// 月度进度圆点小组件
-class MonthlyProgressWithDotsCardWidget extends StatelessWidget {
+class MonthlyProgressWithDotsCardWidget extends StatefulWidget {
   /// 月份名称
   final String month;
 
@@ -61,89 +62,143 @@ class MonthlyProgressWithDotsCardWidget extends StatelessWidget {
   });
 
   @override
+  State<MonthlyProgressWithDotsCardWidget> createState() => _MonthlyProgressWithDotsCardWidgetState();
+}
+
+class _MonthlyProgressWithDotsCardWidgetState extends State<MonthlyProgressWithDotsCardWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // 颜色定义
-    const defaultActiveDotColor = Color(0xFFFDE047);
+    final defaultActiveDotColor = Theme.of(context).colorScheme.primary;
     const defaultInactiveDotColor = Color(0x33FFFFFF);
-    final textColor = Colors.white;
-    const subtitleColor = Color(0x99FFFFFF);
+    final textColor = Theme.of(context).colorScheme.onPrimary;
+    final subtitleColor = Theme.of(context).colorScheme.onPrimary.withOpacity(0.6);
 
-    final effectiveActiveDotColor = activeDotColor ?? defaultActiveDotColor;
-    final effectiveInactiveDotColor = inactiveDotColor ?? defaultInactiveDotColor;
+    final effectiveActiveDotColor = widget.activeDotColor ?? defaultActiveDotColor;
+    final effectiveInactiveDotColor = widget.inactiveDotColor ?? defaultInactiveDotColor;
 
-    return Container(
-      width: 250,
-      height: 250,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 圆点矩阵（3行，每行11个点，代表33天）
-          _DotMatrixGrid(
-            currentDay: currentDay,
-            activeDotColor: effectiveActiveDotColor,
-            inactiveDotColor: effectiveInactiveDotColor,
-          ),
-
-          // 底部信息
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                month,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: textColor,
-                  height: 1.2,
-                  letterSpacing: -0.5,
-                ),
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _animation.value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - _animation.value)),
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                borderRadius: BorderRadius.circular(24),
               ),
-              const SizedBox(height: 2),
-              Text(
-                '${currentDay}d/${totalDays}d • Passed',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: subtitleColor,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    percentage.toString(),
-                    style: TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.w800,
-                      color: textColor,
-                      height: 1,
-                      letterSpacing: -1.5,
-                    ),
+                  // 圆点矩阵（3行，每行11个点，代表33天）
+                  _DotMatrixGrid(
+                    currentDay: widget.currentDay,
+                    activeDotColor: effectiveActiveDotColor,
+                    inactiveDotColor: effectiveInactiveDotColor,
+                    animation: _animation,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '%',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: subtitleColor,
-                    ),
-                  ),
+
+                  // 底部信息
+                  _buildBottomInfo(textColor, subtitleColor),
                 ],
               ),
-            ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomInfo(Color textColor, Color subtitleColor) {
+    final infoAnimation = CurvedAnimation(
+      parent: _animation,
+      curve: const Interval(0.3, 1.0, curve: Curves.easeOutCubic),
+    );
+
+    return AnimatedBuilder(
+      animation: infoAnimation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: infoAnimation.value,
+          child: Transform.translate(
+            offset: Offset(0, 15 * (1 - infoAnimation.value)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.month,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                    height: 1.2,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${widget.currentDay}d/${widget.totalDays}d • Passed',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: subtitleColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    AnimatedFlipCounter(
+                      value: widget.percentage.toDouble() * infoAnimation.value,
+                      fractionDigits: 0,
+                      suffix: '%',
+                      textStyle: TextStyle(
+                        fontSize: 56,
+                        fontWeight: FontWeight.w800,
+                        color: textColor,
+                        height: 1,
+                        letterSpacing: -1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -153,11 +208,13 @@ class _DotMatrixGrid extends StatelessWidget {
   final int currentDay;
   final Color activeDotColor;
   final Color inactiveDotColor;
+  final Animation<double> animation;
 
   const _DotMatrixGrid({
     required this.currentDay,
     required this.activeDotColor,
     required this.inactiveDotColor,
+    required this.animation,
   });
 
   @override
@@ -178,6 +235,8 @@ class _DotMatrixGrid extends StatelessWidget {
                     isActive: dots[row * 11 + col],
                     activeColor: activeDotColor,
                     inactiveColor: inactiveDotColor,
+                    animation: animation,
+                    index: row * 11 + col,
                   ),
               ],
             ),
@@ -201,22 +260,43 @@ class _Dot extends StatelessWidget {
   final bool isActive;
   final Color activeColor;
   final Color inactiveColor;
+  final Animation<double> animation;
+  final int index;
 
   const _Dot({
     required this.isActive,
     required this.activeColor,
     required this.inactiveColor,
+    required this.animation,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: isActive ? activeColor : inactiveColor,
-        shape: BoxShape.circle,
+    final dotAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Interval(
+        (index * 0.02).clamp(0.0, 0.3),
+        0.3 + (index * 0.015).clamp(0.0, 0.3),
+        curve: Curves.easeOutCubic,
       ),
+    );
+
+    return AnimatedBuilder(
+      animation: dotAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: 0.3 + 0.7 * dotAnimation.value,
+          child: Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: isActive ? activeColor : inactiveColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
     );
   }
 }
