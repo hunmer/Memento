@@ -338,25 +338,6 @@ class _ContributionHeatmap extends StatelessWidget {
         // 热力图网格 (6列 x 6行)
         SizedBox(
           height: 160,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: List.generate(months.length, (col) {
-              return Expanded(
-                child: Column(
-                  children: List.generate(6, (row) {
-                    if (row > 0) {
-                      return const SizedBox(height: 8);
-                    }
-                    return const SizedBox.shrink();
-                  }),
-                ),
-              );
-            }),
-          ),
-        ),
-        // 使用 Stack 来实现热力图
-        SizedBox(
-          height: 160,
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -368,11 +349,15 @@ class _ContributionHeatmap extends StatelessWidget {
             itemBuilder: (context, index) {
               final col = index % 6;
               final row = index ~/ 6;
-              final level = row < data.length && col < data[row].length
-                  ? data[row][col]
+              // data[col][row] 因为外层是列（月份），内层是行
+              final level = col < data.length && row < data[col].length
+                  ? data[col][row]
                   : 0;
 
-              final step = 0.03;
+              // 确保所有 Interval 的 end 值不超过 1.0
+              // elementCount = 36, baseEnd = 0.6
+              // step <= (1.0 - 0.6) / 35 = 0.0114
+              final step = 0.01;
               final itemAnimation = CurvedAnimation(
                 parent: animation,
                 curve: Interval(
