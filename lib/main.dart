@@ -279,6 +279,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               routes: AppRoutes.routes,
               onGenerateRoute: AppRoutes.generateRoute,
               onGenerateTitle: (BuildContext context) => 'app_appTitle'.tr,
+              navigatorObservers: [AppRoutes()],
             ),
           ),
     );

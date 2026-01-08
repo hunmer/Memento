@@ -26,7 +26,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
 }
 
 /// 半圆形统计小组件
-class HalfCircleGaugeWidget extends StatelessWidget {
+class HalfCircleGaugeWidget extends StatefulWidget {
   final double totalBudget;
   final double remaining;
   final String currency;
@@ -38,8 +38,52 @@ class HalfCircleGaugeWidget extends StatelessWidget {
     this.currency = 'AED',
   });
 
-  double get progress => (totalBudget - remaining) / totalBudget;
+  @override
+  State<HalfCircleGaugeWidget> createState() => _HalfCircleGaugeWidgetState();
+}
+
+class _HalfCircleGaugeWidgetState extends State<HalfCircleGaugeWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _progressAnimation;
+
+  double get progress => (widget.totalBudget - widget.remaining) / widget.totalBudget;
   double get percentage => progress * 100;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    // 使用缓动曲线让动画更自然
+    _progressAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    );
+
+    // 启动动画
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(HalfCircleGaugeWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当数据变化时重新播放动画
+    if (oldWidget.totalBudget != widget.totalBudget ||
+        oldWidget.remaining != widget.remaining) {
+      _animationController.reset();
+      _animationController.forward();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,15 +134,20 @@ class HalfCircleGaugeWidget extends StatelessWidget {
                     height: 96,
                     child: Stack(
                       children: [
-                        // 背景圆弧
-                        CustomPaint(
-                          size: const Size(192, 96),
-                          painter: _GaugePainter(
-                            progress: progress,
-                            backgroundColor: gaugeBackgroundColor,
-                            progressColor: primaryColor,
-                            isDark: isDark,
-                          ),
+                        // 背景圆弧和进度圆弧（带动画）
+                        AnimatedBuilder(
+                          animation: _progressAnimation,
+                          builder: (context, child) {
+                            return CustomPaint(
+                              size: const Size(192, 96),
+                              painter: _GaugePainter(
+                                progress: progress * _progressAnimation.value,
+                                backgroundColor: gaugeBackgroundColor,
+                                progressColor: primaryColor,
+                                isDark: isDark,
+                              ),
+                            );
+                          },
                         ),
                         // 图标
                         Positioned(
@@ -201,7 +250,7 @@ class HalfCircleGaugeWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '$currency ',
+                  '${widget.currency} ',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -210,7 +259,7 @@ class HalfCircleGaugeWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatAmount(remaining),
+                  _formatAmount(widget.remaining),
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -219,7 +268,7 @@ class HalfCircleGaugeWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '.${_getDecimalPart(remaining)}',
+                  '.${_getDecimalPart(widget.remaining)}',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w500,

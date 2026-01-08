@@ -187,15 +187,20 @@ class WidgetsGalleryScreen extends StatelessWidget {
 
           const Divider(),
 
-          // 其他组件
-          _buildSectionHeader(context, '其他组件'),
+          // 桌面小组件
+          _buildSectionHeader(context, '桌面小组件'),
           _buildListItem(
             context,
-            icon: Icons.speed,
-            title: '半圆形统计小组件',
-            subtitle: 'HalfCircleGaugeWidget',
-            route: '/widgets_gallery/half_circle_gauge_widget',
+            icon: Icons.widgets,
+            title: '桌面小组件',
+            subtitle: 'HomeWidgets - 各种桌面小组件示例',
+            route: '/widgets_gallery/home_widgets',
           ),
+
+          const Divider(),
+
+          // 其他组件
+          _buildSectionHeader(context, '其他组件'),
           _buildListItem(
             context,
             icon: Icons.apps,

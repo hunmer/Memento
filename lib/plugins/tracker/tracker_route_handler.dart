@@ -13,8 +13,6 @@ class TrackerRouteHandler extends PluginRouteHandler {
   @override
   Route<dynamic>? handleRoute(RouteSettings settings) {
     final routeName = settings.name ?? '';
-    debugPrint('[TrackerRouteHandler] handleRoute called: routeName=$routeName, arguments=${settings.arguments}');
-
     // 处理目标追踪路由 - 格式: /tracker?goalId={goalId}
     // 用于小组件点击跳转到目标详情/计时器界面
     if (routeName == '/tracker' ||
@@ -22,8 +20,6 @@ class TrackerRouteHandler extends PluginRouteHandler {
       debugPrint('[TrackerRouteHandler] 匹配 /tracker 路由');
       return _handleTrackerRoute(routeName, settings.arguments);
     }
-
-    debugPrint('[TrackerRouteHandler] 未匹配任何路由，返回 null');
 
     // 处理目标追踪进度路由
     // 格式: /tracker/progress?goalId={goalId}&value={value}
