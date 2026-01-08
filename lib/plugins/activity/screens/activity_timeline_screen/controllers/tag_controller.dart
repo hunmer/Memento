@@ -1,9 +1,7 @@
-import 'dart:collection';
 import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
-import 'package:Memento/widgets/tags_dialog/models/models.dart';
 import 'package:Memento/widgets/tags_dialog/tags_dialog.dart';
 
 class TagController {

@@ -70,7 +70,6 @@ class _HomeGridState extends State<HomeGrid> {
   int? _hoveringIndex;
   String? _draggingItemId;
   _DropRegion? _hoveredDropZone;
-  _DropRegion? _appliedPreviewZone;
   Timer? _previewTimer;
   final List<String> _displayOrder = [];
   String? _previewDraggingId;
@@ -108,7 +107,6 @@ class _HomeGridState extends State<HomeGrid> {
   void _resetPreviewOrder() {
     _previewDraggingId = null;
     _pendingTargetIndex = null;
-    _appliedPreviewZone = null;
     _hoveredDropZone = null;
     _displayOrder
       ..clear()
@@ -351,7 +349,6 @@ class _HomeGridState extends State<HomeGrid> {
           _resetPreviewOrder();
         });
         _previewTimer?.cancel();
-        _appliedPreviewZone = null;
         widget.onDragEnded?.call();
       },
       child: AnimatedContainer(
@@ -542,7 +539,6 @@ class _HomeGridState extends State<HomeGrid> {
       }
       _hoveredDropZone = zone;
     });
-    _appliedPreviewZone = null;
     _previewTimer?.cancel();
     _previewTimer = Timer(const Duration(seconds: 1), () {
       _applyPreview(zone);
@@ -556,7 +552,6 @@ class _HomeGridState extends State<HomeGrid> {
         _resetPreviewOrder();
       } else {
         _hoveredDropZone = null;
-        _appliedPreviewZone = null;
       }
     });
     _previewTimer?.cancel();
@@ -612,7 +607,6 @@ class _HomeGridState extends State<HomeGrid> {
         ..addAll(newOrder);
       _previewDraggingId = draggedId;
       _pendingTargetIndex = actualTargetIndex;
-      _appliedPreviewZone = zone;
     });
     _previewTimer = null;
   }
@@ -705,7 +699,6 @@ class _HomeGridState extends State<HomeGrid> {
     });
     _previewTimer?.cancel();
     _previewTimer = null;
-    _appliedPreviewZone = null;
   }
 
   HomeItem? _findItemById(String id) {

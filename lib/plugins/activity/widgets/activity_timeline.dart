@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/widgets/swipe_action/index.dart';
-import 'package:Memento/widgets/tags_dialog/models/tag_item.dart';
 
 // Custom painter for the dashed timeline
 class DashedLinePainter extends CustomPainter {
@@ -110,7 +109,7 @@ class ActivityTimeline extends StatelessWidget {
     if (getTagIcons != null && activity.tags.isNotEmpty) {
       tagIcons = getTagIcons!(activity.tags);
     }
-    final IconData? displayIcon =
+    final IconData displayIcon =
         tagIcons.isNotEmpty ? tagIcons.first : _getActivityIcon(activity);
 
     // 获取标签颜色，使用第一个标签的颜色
@@ -222,8 +221,7 @@ class ActivityTimeline extends StatelessWidget {
                                   )
                                   : Center(
                                     child: Icon(
-                                      displayIcon ??
-                                          Icons.local_activity_outlined,
+                                      displayIcon,
                                       color: primaryColor,
                                       size: 28,
                                       fill: 1.0,

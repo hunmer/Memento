@@ -79,7 +79,6 @@ class LogService {
   static const String _logEnabledKey = 'log_enabled';
   static const String _logDirKey = 'logs';
   static const int _maxLogFiles = 10;
-  static const String _currentLogFileKey = 'current_log_file';
 
   // 状态
   bool _isEnabled = false;

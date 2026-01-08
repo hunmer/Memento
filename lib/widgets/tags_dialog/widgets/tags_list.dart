@@ -299,7 +299,6 @@ class _TagPillInherited extends InheritedWidget {
   final VoidCallback? onEdit;
 
   const _TagPillInherited({
-    super.key,
     required this.tag,
     required this.isSelected,
     required this.isBatchEditMode,
@@ -309,8 +308,8 @@ class _TagPillInherited extends InheritedWidget {
     this.onLongPress,
     this.onDelete,
     this.onEdit,
-    required Widget child,
-  }) : super(child: child);
+    required super.child,
+  });
 
   static _TagPillInherited of(BuildContext context) {
     final result = context.dependOnInheritedWidgetOfExactType<_TagPillInherited>();

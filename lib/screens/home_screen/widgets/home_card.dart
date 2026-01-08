@@ -396,19 +396,6 @@ class _HomeCardState extends State<HomeCard> {
     }
   }
 
-  /// 打开今日日记编辑界面
-  void _openStackItem(BuildContext context, HomeStackItem stackItem) {
-    if (stackItem.children.isEmpty) {
-      Toast.warning('????????');
-      return;
-    }
-    final activeIndex = stackItem.activeIndex.clamp(
-      0,
-      stackItem.children.length - 1,
-    );
-    final target = stackItem.children[activeIndex];
-    _openWidgetPlugin(context, target);
-  }
 
   Future<void> _openTodayDiaryEditor(BuildContext context) async {
     try {

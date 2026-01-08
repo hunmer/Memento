@@ -67,14 +67,14 @@ class EventManager {
     final id = 'sub_${_subscriptionIdCounter++}';
 
     // 包装处理器，在触发后自动取消订阅
-    Function(EventArgs) wrappedHandler = (args) {
+    wrappedHandler(EventArgs args) {
       if (_eventSubscriptions[eventName] != null) {
         // 执行原始处理器
         handler(args);
         // 取消订阅
         unsubscribeById(id);
       }
-    };
+    }
 
     final subscription = EventSubscription(id, eventName, wrappedHandler);
     _eventSubscriptions.putIfAbsent(eventName, () => []).add(subscription);
