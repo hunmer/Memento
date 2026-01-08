@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Personal Milestone Tracker Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#2b6cee", "background-light": "#f6f6f8", "background-dark": "#101622", "widget-light": "#FFFFFF", "widget-dark": "#151517", "lime-text-light": "#4d7c0f", "lime-text-dark": "#d9f99d", "blue-text-light": "#4f46e5", "blue-text-dark": "#a5b4fc"}, fontFamily: {display: "Manrope"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display p-6 transition-colors duration-300">
+<div class="w-[260px] h-[260px] bg-widget-light dark:bg-widget-dark rounded-[2.25rem] shadow-2xl dark:shadow-none p-6 flex flex-col justify-between transition-colors duration-300 relative overflow-hidden ring-1 ring-black/5 dark:ring-white/5">
+<div class="flex items-start">
+<div class="relative w-[3.75rem] h-[3.75rem] rounded-full overflow-hidden shadow-sm ring-2 ring-gray-100 dark:ring-white/10">
+<img alt="Portrait of a smiling baby in a pink hooded towel" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPuaYriTNZj_aRzOEEhoGRXOuhwyTTRssklQfbQOrtJLboxJj5BPDtQEJiouPbdl8Fyf1fkcO8kDgVUHaWkC2LL_Bwz4NPa-dxLcKp8bNYV6gp7HNf3YCUHbbh6lxYHU2gAfc3Ot1wO6PnfgQAZBwkTNwBYpsrGjTZ9WaQ8TH57VZvwvg2ranIpItpDK_gZRyiBnzHsmJ0CQS6SC1J6PhC05_JOHWl2k63hPclOmqBLBdQArbrj_9drOSPIcDt6ltyq7-Bq-pHDiNW"/>
+</div>
+</div>
+<div class="flex flex-col space-y-1 mt-1">
+<h2 class="text-[1.35rem] font-bold text-lime-text-light dark:text-lime-text-dark tracking-tight leading-snug">
+                Will’s life
+            </h2>
+<p class="text-[0.8rem] font-medium text-gray-500 dark:text-gray-400 leading-tight">
+                July 21, 2020 · 129 days
+            </p>
+</div>
+<div class="flex items-end mb-1">
+<span class="text-[4.2rem] leading-[0.85] font-bold text-blue-text-light dark:text-blue-text-dark tracking-tighter -ml-1">
+                0.46
+            </span>
+<div class="flex flex-col ml-3 mb-1.5 text-[0.9rem] font-semibold text-gray-400 dark:text-gray-500 leading-none space-y-[2px]">
+<span>years</span>
+<span>old</span>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 right-6 z-50">
+<button class="bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-5 py-3 rounded-full shadow-lg text-sm font-semibold border border-gray-200 dark:border-gray-700 hover:scale-105 transition-transform flex items-center gap-2" onclick="document.documentElement.classList.toggle('dark')">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Toggle Theme
+        </button>
+</div>
+</body></html>
