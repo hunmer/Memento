@@ -132,13 +132,6 @@ class FloatingBallManager {
   ) async {
     if (!context.mounted) return;
 
-    // 记录访问历史
-    RouteHistoryManager.recordPageVisit(
-      pageId: lastPage.pageId,
-      title: lastPage.title,
-      icon: lastPage.icon,
-    );
-
     switch (lastPage.pageId) {
       case 'tool_template':
         final templateService = AgentChatPlugin.instance.templateService;

@@ -20,6 +20,7 @@ import 'package:Memento/screens/widgets_gallery/screens/custom_dialog_example.da
 import 'package:Memento/screens/widgets_gallery/screens/smooth_bottom_sheet_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/file_preview_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/app_drawer_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/home_widgets_gallery_screen.dart';
 import 'package:Memento/screens/widgets_gallery/screens/half_circle_gauge_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
@@ -35,129 +36,134 @@ class WidgetGalleryRoutes implements RouteRegistry {
         // 组件展示主页
         RouteDefinition(
           path: '/widgets_gallery',
-          handler: (settings) => RouteHelpers.createRoute(const WidgetsGalleryScreen()),
+          handler: (settings) => RouteHelpers.createRoute(const WidgetsGalleryScreen(), settings: settings),
           description: '组件展示主页',
         ),
         RouteDefinition(
           path: 'widgets_gallery',
-          handler: (settings) => RouteHelpers.createRoute(const WidgetsGalleryScreen()),
+          handler: (settings) => RouteHelpers.createRoute(const WidgetsGalleryScreen(), settings: settings),
           description: '组件展示主页（别名）',
         ),
 
         // 各组件示例
         RouteDefinition(
           path: '/widgets_gallery/color_picker',
-          handler: (settings) => RouteHelpers.createRoute(const ColorPickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const ColorPickerExample(), settings: settings),
           description: '颜色选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/icon_picker',
-          handler: (settings) => RouteHelpers.createRoute(const IconPickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const IconPickerExample(), settings: settings),
           description: '图标选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/avatar_picker',
-          handler: (settings) => RouteHelpers.createRoute(const AvatarPickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const AvatarPickerExample(), settings: settings),
           description: '头像选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/circle_icon_picker',
-          handler: (settings) => RouteHelpers.createRoute(const CircleIconPickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const CircleIconPickerExample(), settings: settings),
           description: '圆形图标选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/calendar_strip_picker',
-          handler: (settings) => RouteHelpers.createRoute(const CalendarStripPickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const CalendarStripPickerExample(), settings: settings),
           description: '日历条选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/image_picker',
-          handler: (settings) => RouteHelpers.createRoute(const ImagePickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const ImagePickerExample(), settings: settings),
           description: '图片选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/location_picker',
-          handler: (settings) => RouteHelpers.createRoute(const LocationPickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const LocationPickerExample(), settings: settings),
           description: '位置选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/backup_time_picker',
-          handler: (settings) => RouteHelpers.createRoute(const BackupTimePickerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const BackupTimePickerExample(), settings: settings),
           description: '备份时间选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/memento_editor',
-          handler: (settings) => RouteHelpers.createRoute(const MementoEditorExample()),
+          handler: (settings) => RouteHelpers.createRoute(const MementoEditorExample(), settings: settings),
           description: '编辑器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/data_selector',
-          handler: (settings) => RouteHelpers.createRoute(const DataSelectorExample()),
+          handler: (settings) => RouteHelpers.createRoute(const DataSelectorExample(), settings: settings),
           description: '数据选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/enhanced_calendar',
-          handler: (settings) => RouteHelpers.createRoute(const EnhancedCalendarExample()),
+          handler: (settings) => RouteHelpers.createRoute(const EnhancedCalendarExample(), settings: settings),
           description: '增强日历示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/group_selector',
-          handler: (settings) => RouteHelpers.createRoute(const GroupSelectorExample()),
+          handler: (settings) => RouteHelpers.createRoute(const GroupSelectorExample(), settings: settings),
           description: '分组选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/simple_group_selector',
-          handler: (settings) => RouteHelpers.createRoute(const SimpleGroupSelectorExample()),
+          handler: (settings) => RouteHelpers.createRoute(const SimpleGroupSelectorExample(), settings: settings),
           description: '简单分组选择器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/tag_manager',
-          handler: (settings) => RouteHelpers.createRoute(const TagManagerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const TagManagerExample(), settings: settings),
           description: '标签管理器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/statistics',
-          handler: (settings) => RouteHelpers.createRoute(const StatisticsExample()),
+          handler: (settings) => RouteHelpers.createRoute(const StatisticsExample(), settings: settings),
           description: '统计组件示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/custom_dialog',
-          handler: (settings) => RouteHelpers.createRoute(const CustomDialogExample()),
+          handler: (settings) => RouteHelpers.createRoute(const CustomDialogExample(), settings: settings),
           description: '自定义对话框示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/smooth_bottom_sheet',
-          handler: (settings) => RouteHelpers.createRoute(const SmoothBottomSheetExample()),
+          handler: (settings) => RouteHelpers.createRoute(const SmoothBottomSheetExample(), settings: settings),
           description: '底部面板示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/file_preview',
-          handler: (settings) => RouteHelpers.createRoute(const FilePreviewExample()),
+          handler: (settings) => RouteHelpers.createRoute(const FilePreviewExample(), settings: settings),
           description: '文件预览示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/app_drawer',
-          handler: (settings) => RouteHelpers.createRoute(const AppDrawerExample()),
+          handler: (settings) => RouteHelpers.createRoute(const AppDrawerExample(), settings: settings),
           description: '抽屉示例',
         ),
         RouteDefinition(
+          path: '/widgets_gallery/home_widgets',
+          handler: (settings) => RouteHelpers.createRoute(const HomeWidgetsGalleryScreen(), settings: settings),
+          description: '桌面小组件示例列表',
+        ),
+        RouteDefinition(
           path: '/widgets_gallery/half_circle_gauge_widget',
-          handler: (settings) => RouteHelpers.createRoute(const HalfCircleGaugeWidgetExample()),
+          handler: (settings) => RouteHelpers.createRoute(const HalfCircleGaugeWidgetExample(), settings: settings),
           description: '半圆仪表盘示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/widget_config_editor',
-          handler: (settings) => RouteHelpers.createRoute(const WidgetConfigEditorExample()),
+          handler: (settings) => RouteHelpers.createRoute(const WidgetConfigEditorExample(), settings: settings),
           description: '组件配置编辑器示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/preset_edit_form',
-          handler: (settings) => RouteHelpers.createRoute(const PresetEditFormExample()),
+          handler: (settings) => RouteHelpers.createRoute(const PresetEditFormExample(), settings: settings),
           description: '预设编辑表单示例',
         ),
         RouteDefinition(
           path: '/widgets_gallery/super_cupertino_navigation',
-          handler: (settings) => RouteHelpers.createRoute(const SuperCupertinoNavigationExample()),
+          handler: (settings) => RouteHelpers.createRoute(const SuperCupertinoNavigationExample(), settings: settings),
           description: '导航示例',
         ),
       ];

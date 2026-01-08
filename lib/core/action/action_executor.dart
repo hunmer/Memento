@@ -12,6 +12,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/dialogs/plugin_list_dialog.dart';
 import 'package:Memento/widgets/route_history_dialog/route_history_dialog.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
+import 'package:Memento/screens/route.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/theme_controller.dart';
@@ -213,7 +214,10 @@ class BuiltInActionExecutor implements ActionExecutor {
     }
 
     // 导航到设置页面
-    NavigationHelper.push(context, const SettingsScreen(),
+    NavigationHelper.push(
+      context,
+      const SettingsScreen(),
+      routeName: AppRoutes.settings,
     );
 
     return ExecutionResult.success(data: {'action': 'openSettings'});
@@ -264,13 +268,6 @@ class BuiltInActionExecutor implements ActionExecutor {
         data: {'action': 'reopenLastRoute', 'message': 'No history'},
       );
     }
-
-    // 记录访问历史
-    RouteHistoryManager.recordPageVisit(
-      pageId: lastPage.pageId,
-      title: lastPage.title,
-      icon: lastPage.icon,
-    );
 
     // 根据页面ID导航到对应页面
     bool navigated = false;

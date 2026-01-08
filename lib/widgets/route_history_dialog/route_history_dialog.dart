@@ -223,46 +223,70 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
       leading: CircleAvatar(
         backgroundColor: theme.colorScheme.primaryContainer,
         child: Icon(
-          record.icon ?? Icons.description,
+          Icons.route,
           color: theme.colorScheme.onPrimaryContainer,
           size: 20,
         ),
       ),
       title: Text(
-        record.title,
+        record.pageId,
         style: const TextStyle(
           fontWeight: FontWeight.w500,
+          fontFamily: 'monospace',
+          fontSize: 13,
         ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
       ),
-      subtitle: Row(
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            Icons.access_time,
-            size: 14,
-            color: theme.colorScheme.outline,
+          // 时间和访问次数
+          Row(
+            children: [
+              Icon(
+                Icons.access_time,
+                size: 14,
+                color: theme.colorScheme.outline,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                record.getRelativeTime(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Icon(
+                Icons.touch_app,
+                size: 14,
+                color: theme.colorScheme.outline,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'widget_visits'.trParams({'count': record.visitCount.toString()}),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 4),
-          Text(
-            record.getRelativeTime(),
-            style: TextStyle(
-              fontSize: 12,
-              color: theme.colorScheme.outline,
+          // 参数显示
+          if (record.params != null && record.params!.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              _formatParams(record.params!),
+              style: TextStyle(
+                fontSize: 11,
+                color: theme.colorScheme.outline,
+                fontFamily: 'monospace',
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          const SizedBox(width: 12),
-          Icon(
-            Icons.touch_app,
-            size: 14,
-            color: theme.colorScheme.outline,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'widget_visits'.trParams({'count': record.visitCount.toString()}),
-            style: TextStyle(
-              fontSize: 12,
-              color: theme.colorScheme.outline,
-            ),
-          ),
+          ],
         ],
       ),
       onTap: () => _openPage(record),
@@ -271,5 +295,18 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
         color: theme.colorScheme.outline,
       ),
     );
+  }
+
+  /// 格式化参数显示
+  String _formatParams(Map<String, dynamic> params) {
+    final buffer = StringBuffer();
+    params.forEach((key, value) {
+      if (buffer.isNotEmpty) buffer.write(', ');
+      final valueStr = value.toString().length > 20
+          ? '${value.toString().substring(0, 20)}...'
+          : value.toString();
+      buffer.write('$key: $valueStr');
+    });
+    return buffer.toString();
   }
 }

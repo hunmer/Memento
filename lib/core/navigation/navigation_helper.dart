@@ -48,15 +48,19 @@ class NavigationHelper {
   static Future<T?> push<T extends Object?>(
     BuildContext context,
     Widget page, {
+    String? routeName,
     bool maintainState = true,
     bool fullscreenDialog = false,
   }) {
+    final settings = routeName != null ? RouteSettings(name: routeName) : null;
+
     if (_isIOS) {
       return Navigator.of(context).push<T>(
         CupertinoPageRoute<T>(
           builder: (context) => page,
           maintainState: maintainState,
           fullscreenDialog: fullscreenDialog,
+          settings: settings,
         ),
       );
     } else {
@@ -65,6 +69,7 @@ class NavigationHelper {
           builder: (context) => page,
           maintainState: maintainState,
           fullscreenDialog: fullscreenDialog,
+          settings: settings,
         ),
       );
     }
