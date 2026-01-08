@@ -455,10 +455,10 @@ class AppRoutes extends NavigatorObserver {
 
     switch (routeName) {
       case '/':
-        return _createRoute(const HomeScreen());
+        return _createRoute(const HomeScreen(), settings: settings);
       case '/tts':
       case 'tts':
-        return _createRoute(const TTSServicesScreen());
+        return _createRoute(const TTSServicesScreen(), settings: settings);
       case '/diary':
       case 'diary':
         return _createRoute(const DiaryMainView(), settings: settings);
@@ -480,13 +480,13 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(DiaryMainView(initialDate: selectedDate), settings: settings);
       case '/activity':
       case 'activity':
-        return _createRoute(const ActivityMainView());
+        return _createRoute(const ActivityMainView(), settings: settings);
       case '/checkin':
       case 'checkin':
-        return _createRoute(const CheckinMainView());
+        return _createRoute(const CheckinMainView(), settings: settings);
       case '/settings':
       case 'settings':
-        return _createRoute(const SettingsScreen());
+        return _createRoute(const SettingsScreen(), settings: settings);
       case '/agent_chat':
       case 'agent_chat':
         // 支持通过 conversationId 参数直接打开指定对话
@@ -497,7 +497,7 @@ class AppRoutes extends NavigatorObserver {
         } else if (settings.arguments is String) {
           conversationId = settings.arguments as String;
         }
-        return _createRoute(AgentChatMainView(conversationId: conversationId));
+        return _createRoute(AgentChatMainView(conversationId: conversationId), settings: settings);
 
       case '/agent_chat/chat':
       case 'agent_chat/chat':
@@ -510,7 +510,7 @@ class AppRoutes extends NavigatorObserver {
 
         if (chatConversationId == null) {
           debugPrint('错误: 缺少必需参数 conversationId');
-          return _createRoute(const AgentChatMainView());
+          return _createRoute(const AgentChatMainView(), settings: settings);
         }
 
         debugPrint('打开 Agent Chat 聊天页: conversationId=$chatConversationId');
@@ -521,7 +521,7 @@ class AppRoutes extends NavigatorObserver {
 
         if (controller == null) {
           debugPrint('错误: conversationController 未初始化');
-          return _createRoute(const AgentChatMainView());
+          return _createRoute(const AgentChatMainView(), settings: settings);
         }
 
         // 查找指定的会话
@@ -537,10 +537,11 @@ class AppRoutes extends NavigatorObserver {
               conversationService: controller.conversationService,
               getSettings: () => agentChatPlugin.settings,
             ),
+            settings: settings,
           );
         } catch (e) {
           debugPrint('错误: 找不到会话 $chatConversationId');
-          return _createRoute(const AgentChatMainView());
+          return _createRoute(const AgentChatMainView(), settings: settings);
         }
 
       case '/bill':
@@ -645,13 +646,13 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const BillMainView(), settings: settings);
       case '/calendar':
       case 'calendar':
-        return _createRoute(const CalendarMainView());
+        return _createRoute(const CalendarMainView(), settings: settings);
       case '/calendar_album':
       case 'calendar_album':
-        return _createRoute(const CalendarAlbumMainView());
+        return _createRoute(const CalendarAlbumMainView(), settings: settings);
       case '/contact':
       case 'contact':
-        return _createRoute(const ContactMainView());
+        return _createRoute(const ContactMainView(), settings: settings);
       case '/contact/detail':
       case 'contact/detail':
         // 联系人详情页（从小组件打开）
@@ -665,18 +666,19 @@ class AppRoutes extends NavigatorObserver {
           // 使用 FutureBuilder 来处理异步加载
           return _createRoute(
             _ContactDetailLoader(contactId: contactId),
+            settings: settings,
           );
         }
-        return _createRoute(const ContactMainView());
+        return _createRoute(const ContactMainView(), settings: settings);
       case '/database':
       case 'database':
-        return _createRoute(const DatabaseMainView());
+        return _createRoute(const DatabaseMainView(), settings: settings);
       case '/day':
       case 'day':
-        return _createRoute(const DayMainView());
+        return _createRoute(const DayMainView(), settings: settings);
       case '/goods':
       case 'goods':
-        return _createRoute(const GoodsMainView());
+        return _createRoute(const GoodsMainView(), settings: settings);
       case '/habits':
       case 'habits':
         // 支持从小组件跳转并传递 habitId 参数
@@ -684,13 +686,13 @@ class AppRoutes extends NavigatorObserver {
         if (settings.arguments is Map<String, dynamic>) {
           habitId = (settings.arguments as Map<String, dynamic>)['habitId'] as String?;
         }
-        return _createRoute(HabitsMainView(habitId: habitId));
+        return _createRoute(HabitsMainView(habitId: habitId), settings: settings);
       case '/nodes':
       case 'nodes':
-        return _createRoute(const NodesMainView());
+        return _createRoute(const NodesMainView(), settings: settings);
       case '/notes':
       case 'notes':
-        return _createRoute(const NotesMainView());
+        return _createRoute(const NotesMainView(), settings: settings);
       case '/notes/create':
       case 'notes/create':
         // 快速创建笔记页面
@@ -698,24 +700,27 @@ class AppRoutes extends NavigatorObserver {
         if (settings.arguments is Map<String, dynamic>) {
           folderId = (settings.arguments as Map<String, dynamic>)['folderId'] as String?;
         }
-        return _createRoute(NoteEditScreen(
-          onSave: (title, content) async {
-            final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
-            if (plugin != null) {
-              await plugin.controller.createNote(
-                title.isEmpty ? 'untitled'.tr : title,
-                content,
-                folderId ?? 'root',
-              );
-            }
-          },
-        ));
+        return _createRoute(
+          NoteEditScreen(
+            onSave: (title, content) async {
+              final plugin = PluginManager.instance.getPlugin('notes') as NotesPlugin?;
+              if (plugin != null) {
+                await plugin.controller.createNote(
+                  title.isEmpty ? 'untitled'.tr : title,
+                  content,
+                  folderId ?? 'root',
+                );
+              }
+            },
+          ),
+          settings: settings,
+        );
       case '/openai':
       case 'openai':
-        return _createRoute(const OpenAIMainView());
+        return _createRoute(const OpenAIMainView(), settings: settings);
       case '/scripts_center':
       case 'scripts_center':
-        return _createRoute(const ScriptsCenterMainView());
+        return _createRoute(const ScriptsCenterMainView(), settings: settings);
       case '/store':
       case 'store':
         // 支持通过 itemId 参数跳转到用户物品详情
@@ -730,9 +735,10 @@ class AppRoutes extends NavigatorObserver {
         if (itemId != null) {
           return _createRoute(
             _StoreUserItemRoute(itemId: itemId, autoUse: autoUse),
+            settings: settings,
           );
         }
-        return _createRoute(const StoreMainView());
+        return _createRoute(const StoreMainView(), settings: settings);
       case '/store/product_items':
       case 'store/product_items':
         // 商品物品列表页面
@@ -755,6 +761,7 @@ class AppRoutes extends NavigatorObserver {
             const Scaffold(
               body: Center(child: Text('参数错误：缺少商品ID')),
             ),
+            settings: settings,
           );
         }
 
@@ -768,6 +775,7 @@ class AppRoutes extends NavigatorObserver {
             const Scaffold(
               body: Center(child: Text('Store 插件未初始化')),
             ),
+            settings: settings,
           );
         }
 
@@ -779,6 +787,7 @@ class AppRoutes extends NavigatorObserver {
             autoUse: autoUse,
             autoBuy: autoBuy,
           ),
+          settings: settings,
         );
       case '/store/user_item':
       case 'store/user_item':
@@ -797,6 +806,7 @@ class AppRoutes extends NavigatorObserver {
             const Scaffold(
               body: Center(child: Text('参数错误：缺少物品ID')),
             ),
+            settings: settings,
           );
         }
 
@@ -810,6 +820,7 @@ class AppRoutes extends NavigatorObserver {
             const Scaffold(
               body: Center(child: Text('Store 插件未初始化')),
             ),
+            settings: settings,
           );
         }
 
@@ -829,6 +840,7 @@ class AppRoutes extends NavigatorObserver {
             const Scaffold(
               body: Center(child: Text('物品不存在')),
             ),
+            settings: settings,
           );
         }
 
@@ -840,24 +852,25 @@ class AppRoutes extends NavigatorObserver {
             initialIndex: 0,
             autoUse: autoUse,
           ),
+          settings: settings,
         );
       case '/store/points_history':
       case 'store/points_history':
         // 积分历史页面
-        return _createRoute(const PointsHistoryPage());
+        return _createRoute(const PointsHistoryPage(), settings: settings);
       case '/timer':
       case 'timer':
-        return _createRoute(const TimerMainView());
+        return _createRoute(const TimerMainView(), settings: settings);
       case '/timer_details':
         final arguments = settings.arguments as Map<String, dynamic>?;
         final taskId = arguments?['taskId'] as String?;
         if (taskId != null) {
-          return _createRoute(_TimerDetailsRoute(taskId: taskId));
+          return _createRoute(_TimerDetailsRoute(taskId: taskId), settings: settings);
         }
-        return _createRoute(const TimerMainView());
+        return _createRoute(const TimerMainView(), settings: settings);
       case '/todo':
       case 'todo':
-        return _createRoute(const TodoBottomBarView());
+        return _createRoute(const TodoBottomBarView(), settings: settings);
       case '/tracker':
       case 'tracker':
         // 支持通过 goalId 参数跳转到目标详情页面
@@ -875,88 +888,88 @@ class AppRoutes extends NavigatorObserver {
           );
         }
         // 没有 goalId，打开主视图
-        return _createRoute(const TrackerMainView());
+        return _createRoute(const TrackerMainView(), settings: settings);
       case '/floating_ball':
       case 'floating_ball':
-        return _createRoute(const FloatingBallScreen());
+        return _createRoute(const FloatingBallScreen(), settings: settings);
       case '/js_console':
       case 'js_console':
-        return _createRoute(const JSConsoleScreen());
+        return _createRoute(const JSConsoleScreen(), settings: settings);
       case '/json_dynamic_test':
       case 'json_dynamic_test':
-        return _createRoute(const JsonDynamicTestScreen());
+        return _createRoute(const JsonDynamicTestScreen(), settings: settings);
       case '/notification_test':
       case 'notification_test':
-        return _createRoute(const NotificationTestPage());
+        return _createRoute(const NotificationTestPage(), settings: settings);
       case '/data_selector_test':
       case 'data_selector_test':
-        return _createRoute(const DataSelectorTestScreen());
+        return _createRoute(const DataSelectorTestScreen(), settings: settings);
       case '/toast_test':
       case 'toast_test':
-        return _createRoute(const ToastTestScreen());
+        return _createRoute(const ToastTestScreen(), settings: settings);
       case '/swipe_action_test':
       case 'swipe_action_test':
-        return _createRoute(const SwipeActionTestScreen());
+        return _createRoute(const SwipeActionTestScreen(), settings: settings);
       case '/live_activities_test':
       case 'live_activities_test':
-        return _createRoute(const LiveActivitiesTestScreen());
+        return _createRoute(const LiveActivitiesTestScreen(), settings: settings);
       case '/form_fields_test':
       case 'form_fields_test':
-        return _createRoute(const FormFieldsTestScreen());
+        return _createRoute(const FormFieldsTestScreen(), settings: settings);
       case '/widgets_gallery':
       case 'widgets_gallery':
-        return _createRoute(const WidgetsGalleryScreen());
+        return _createRoute(const WidgetsGalleryScreen(), settings: settings);
       case '/widgets_gallery/color_picker':
-        return _createRoute(const ColorPickerExample());
+        return _createRoute(const ColorPickerExample(), settings: settings);
       case '/widgets_gallery/icon_picker':
-        return _createRoute(const IconPickerExample());
+        return _createRoute(const IconPickerExample(), settings: settings);
       case '/widgets_gallery/avatar_picker':
-        return _createRoute(const AvatarPickerExample());
+        return _createRoute(const AvatarPickerExample(), settings: settings);
       case '/widgets_gallery/circle_icon_picker':
-        return _createRoute(const CircleIconPickerExample());
+        return _createRoute(const CircleIconPickerExample(), settings: settings);
       case '/widgets_gallery/calendar_strip_picker':
-        return _createRoute(const CalendarStripPickerExample());
+        return _createRoute(const CalendarStripPickerExample(), settings: settings);
       case '/widgets_gallery/image_picker':
-        return _createRoute(const ImagePickerExample());
+        return _createRoute(const ImagePickerExample(), settings: settings);
       case '/widgets_gallery/location_picker':
-        return _createRoute(const LocationPickerExample());
+        return _createRoute(const LocationPickerExample(), settings: settings);
       case '/widgets_gallery/backup_time_picker':
-        return _createRoute(const BackupTimePickerExample());
+        return _createRoute(const BackupTimePickerExample(), settings: settings);
       case '/widgets_gallery/memento_editor':
-        return _createRoute(const MementoEditorExample());
+        return _createRoute(const MementoEditorExample(), settings: settings);
       case '/widgets_gallery/data_selector':
-        return _createRoute(const DataSelectorExample());
+        return _createRoute(const DataSelectorExample(), settings: settings);
       case '/widgets_gallery/enhanced_calendar':
-        return _createRoute(const EnhancedCalendarExample());
+        return _createRoute(const EnhancedCalendarExample(), settings: settings);
       case '/widgets_gallery/group_selector':
-        return _createRoute(const GroupSelectorExample());
+        return _createRoute(const GroupSelectorExample(), settings: settings);
       case '/widgets_gallery/simple_group_selector':
-        return _createRoute(const SimpleGroupSelectorExample());
+        return _createRoute(const SimpleGroupSelectorExample(), settings: settings);
       case '/widgets_gallery/tag_manager':
-        return _createRoute(const TagManagerExample());
+        return _createRoute(const TagManagerExample(), settings: settings);
       case '/widgets_gallery/statistics':
-        return _createRoute(const StatisticsExample());
+        return _createRoute(const StatisticsExample(), settings: settings);
       case '/widgets_gallery/custom_dialog':
-        return _createRoute(const CustomDialogExample());
+        return _createRoute(const CustomDialogExample(), settings: settings);
       case '/widgets_gallery/smooth_bottom_sheet':
-        return _createRoute(const SmoothBottomSheetExample());
+        return _createRoute(const SmoothBottomSheetExample(), settings: settings);
       case '/widgets_gallery/file_preview':
-        return _createRoute(const FilePreviewExample());
+        return _createRoute(const FilePreviewExample(), settings: settings);
       case '/widgets_gallery/app_drawer':
-        return _createRoute(const AppDrawerExample());
+        return _createRoute(const AppDrawerExample(), settings: settings);
       case '/widgets_gallery/home_widgets':
-        return _createRoute(const HomeWidgetsExample());
+        return _createRoute(const HomeWidgetsExample(), settings: settings);
       case '/widgets_gallery/half_circle_gauge_widget':
-        return _createRoute(const HalfCircleGaugeWidgetExample());
+        return _createRoute(const HalfCircleGaugeWidgetExample(), settings: settings);
       case '/widgets_gallery/widget_config_editor':
-        return _createRoute(const WidgetConfigEditorExample());
+        return _createRoute(const WidgetConfigEditorExample(), settings: settings);
       case '/widgets_gallery/preset_edit_form':
-        return _createRoute(const PresetEditFormExample());
+        return _createRoute(const PresetEditFormExample(), settings: settings);
       case '/widgets_gallery/super_cupertino_navigation':
-        return _createRoute(const SuperCupertinoNavigationExample());
+        return _createRoute(const SuperCupertinoNavigationExample(), settings: settings);
       case '/log':
       case 'log':
-        return _createRoute(const LogScreen());
+        return _createRoute(const LogScreen(), settings: settings);
       case '/chat':
       case 'chat':
         // 支持通过 channelId 参数直接打开指定频道
@@ -966,7 +979,7 @@ class AppRoutes extends NavigatorObserver {
         } else if (settings.arguments is String) {
           channelId = settings.arguments as String;
         }
-        return _createRoute(ChatMainView(channelId: channelId));
+        return _createRoute(ChatMainView(channelId: channelId), settings: settings);
 
       case '/chat/channel':
       case 'chat/channel':
@@ -980,11 +993,11 @@ class AppRoutes extends NavigatorObserver {
 
         if (chatChannelId == null) {
           debugPrint('错误: 缺少必需参数 channelId');
-          return _createRoute(const ChatMainView());
+          return _createRoute(const ChatMainView(), settings: settings);
         }
 
         debugPrint('打开 Chat 频道: channelId=$chatChannelId');
-        return _createRoute(ChatMainView(channelId: chatChannelId));
+        return _createRoute(ChatMainView(channelId: chatChannelId), settings: settings);
 
       case '/calendar_month_selector':
       case 'calendar_month_selector':
@@ -1005,7 +1018,7 @@ class AppRoutes extends NavigatorObserver {
           widgetId = settings.arguments as int;
         }
 
-        return _createRoute(CalendarMonthSelectorScreen(widgetId: widgetId));
+        return _createRoute(CalendarMonthSelectorScreen(widgetId: widgetId), settings: settings);
       case '/tracker_goal_selector':
       case 'tracker_goal_selector':
         // 目标追踪进度增减小组件配置界面
@@ -1027,6 +1040,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           TrackerGoalSelectorScreen(widgetId: trackerWidgetId),
+          settings: settings,
         );
       case '/tracker_goal_progress_selector':
       case 'tracker_goal_progress_selector':
@@ -1049,6 +1063,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           TrackerGoalProgressSelectorScreen(widgetId: trackerProgressWidgetId),
+          settings: settings,
         );
       case '/habit_timer_selector':
       case 'habit_timer_selector':
@@ -1071,6 +1086,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           HabitTimerSelectorScreen(widgetId: habitTimerWidgetId),
+          settings: settings,
         );
       case '/bill_shortcuts_selector':
       case 'bill_shortcuts_selector':
@@ -1093,6 +1109,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           BillShortcutsSelectorScreen(widgetId: billShortcutsWidgetId ?? 0),
+          settings: settings,
         );
       case '/activity_weekly_config':
       case 'activity_weekly_config':
@@ -1119,6 +1136,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           ActivityWeeklyConfigScreen(widgetId: activityWeeklyWidgetId),
+          settings: settings,
         );
       case '/activity_daily_config':
       case 'activity_daily_config':
@@ -1145,6 +1163,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           ActivityDailyConfigScreen(widgetId: activityDailyWidgetId),
+          settings: settings,
         );
       case '/habits_weekly_config':
       case 'habits_weekly_config':
@@ -1171,6 +1190,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           HabitsWeeklyConfigScreen(widgetId: habitsWeeklyWidgetId),
+          settings: settings,
         );
       case '/habit_group_list_selector':
       case 'habit_group_list_selector':
@@ -1193,6 +1213,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           HabitGroupListSelectorScreen(widgetId: habitGroupListWidgetId),
+          settings: settings,
         );
       case '/calendar_album_weekly_selector':
       case 'calendar_album_weekly_selector':
@@ -1215,6 +1236,7 @@ class AppRoutes extends NavigatorObserver {
 
         return _createRoute(
           CalendarAlbumWeeklySelectorScreen(widgetId: weeklyWidgetId),
+          settings: settings,
         );
       case '/habit_timer_dialog':
       case 'habit_timer_dialog':
@@ -1269,6 +1291,7 @@ class AppRoutes extends NavigatorObserver {
               ),
             ),
           ),
+          settings: settings,
         );
       case '/calendar_month/event':
       case 'calendar_month/event':
@@ -1294,14 +1317,14 @@ class AppRoutes extends NavigatorObserver {
 
         if (eventId == null) {
           // 没有 eventId 参数，回退到日历主视图
-          return _createRoute(const CalendarMainView());
+          return _createRoute(const CalendarMainView(), settings: settings);
         }
 
         // 获取日历插件实例
         final calendarPlugin = CalendarPlugin.instance;
         if (calendarPlugin == null) {
           debugPrint('CalendarPlugin 未初始化，回退到主视图');
-          return _createRoute(const CalendarMainView());
+          return _createRoute(const CalendarMainView(), settings: settings);
         }
 
         // 从日历控制器中查找事件
@@ -1400,7 +1423,7 @@ class AppRoutes extends NavigatorObserver {
 
         // 没有找到事件，回退到日历主视图
         debugPrint('未找到事件: $eventId');
-        return _createRoute(const CalendarMainView());
+        return _createRoute(const CalendarMainView(), settings: settings);
       case '/tag_statistics':
       case 'tag_statistics':
         // 标签统计页面（从桌面小组件打开）
@@ -1418,7 +1441,7 @@ class AppRoutes extends NavigatorObserver {
 
         if (tagName == null || tagName.isEmpty) {
           // 没有 tag 参数，回退到活动插件主页
-          return _createRoute(const ActivityMainView());
+          return _createRoute(const ActivityMainView(), settings: settings);
         }
 
         // 获取活动插件实例
@@ -1426,7 +1449,7 @@ class AppRoutes extends NavigatorObserver {
             PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
         if (activityPlugin == null) {
           debugPrint('ActivityPlugin 未初始化，回退到主视图');
-          return _createRoute(const ActivityMainView());
+          return _createRoute(const ActivityMainView(), settings: settings);
         }
 
         // 返回标签统计页面
