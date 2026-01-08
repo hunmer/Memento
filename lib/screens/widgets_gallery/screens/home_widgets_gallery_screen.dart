@@ -137,6 +137,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'ContributionHeatmapCard - 活跃度热力图网格展示卡片',
             route: '/widgets_gallery/contribution_heatmap_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.graphic_eq,
+            title: '音频波形小组件',
+            subtitle: 'AudioWaveformWidget - 音频播放波形动画展示组件',
+            route: '/widgets_gallery/audio_waveform_widget',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.access_time,
+            title: '时区滑块小组件',
+            subtitle: 'TimeZoneSliderWidget - 世界时区双滑块时间显示组件',
+            route: '/widgets_gallery/time_zone_slider_widget',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.storage,
+            title: '存储分段小组件',
+            subtitle: 'StorageBreakdownWidget - 设备存储分段统计展示组件',
+            route: '/widgets_gallery/storage_breakdown_widget',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
