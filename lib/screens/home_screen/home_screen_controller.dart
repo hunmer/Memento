@@ -348,7 +348,6 @@ class HomeScreenController extends ChangeNotifier {
       _currentBackgroundFit = backgroundFit;
       _currentBackgroundBlur = backgroundBlur;
       _globalWidgetOpacity = widgetOpacity;
-      debugPrint('背景图加载完成: path=$backgroundPath, opacity=$widgetOpacity');
     } catch (e) {
       debugPrint('加载背景图失败: $e');
     }
@@ -359,7 +358,6 @@ class HomeScreenController extends ChangeNotifier {
   void checkLaunchParameters() {
     if (isLaunchedFromWidget) {
       _launchedWithParameters = true;
-      debugPrint('应用通过桌面小组件启动');
       isLaunchedFromWidget = false;
       return;
     }

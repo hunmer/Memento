@@ -379,7 +379,6 @@ class NavigationHelper {
   /// 使用 BackSwipePageRoute 导航到新页面
   ///
   /// @deprecated 请使用 [openContainerWithHero] 替代，支持 OpenContainer 展开动画
-  @Deprecated('请使用 openContainerWithHero 替代')
   static Future<T?> openContainer<T extends Object?>(
     BuildContext context,
     WidgetBuilder builder, {
