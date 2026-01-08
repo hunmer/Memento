@@ -74,6 +74,20 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'VerticalBarChartCard - 垂直柱状图统计卡片',
             route: '/widgets_gallery/vertical_bar_chart_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.thermostat,
+            title: '趋势折线图',
+            subtitle: 'TrendLineChartWidget - 平滑曲线趋势展示组件',
+            route: '/widgets_gallery/trend_line_chart_widget',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.layers,
+            title: '堆叠柱状图卡片',
+            subtitle: 'StackedBarChartCard - 多年份数据堆叠对比卡片',
+            route: '/widgets_gallery/stacked_bar_chart_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),

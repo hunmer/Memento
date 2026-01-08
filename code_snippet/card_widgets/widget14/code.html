@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Expected Earnings Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#085f6d", // Dark teal for the pill background
+              "chart-blue": "#0284c7", // Specific blue for the chart line
+              "background-light": "#eef2f6",
+              "background-dark": "#0f172a",
+              "card-light": "#ffffff",
+              "card-dark": "#1e293b",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'widget': '2rem', // Increased border radius matching screenshot
+            },
+            boxShadow: {
+                'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.05)',
+            }
+          },
+        },
+      };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 antialiased transition-colors duration-300">
+<div class="w-full max-w-[340px] bg-card-light dark:bg-card-dark rounded-widget shadow-soft dark:shadow-none overflow-hidden relative flex flex-col pt-8 transition-colors duration-300">
+<div class="absolute top-6 right-6">
+<div class="w-10 h-10 bg-slate-50 dark:bg-slate-700 rounded-xl flex items-center justify-center space-x-1">
+<svg fill="none" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg">
+<rect class="fill-[#085f6d] dark:fill-[#38bdf8]" height="10" rx="1" width="3" x="4" y="10"></rect>
+<rect class="fill-[#085f6d] dark:fill-[#38bdf8]" height="16" rx="1" width="3" x="10" y="4"></rect>
+<rect class="fill-[#085f6d] dark:fill-[#38bdf8]" height="12" rx="1" width="3" x="16" y="8"></rect>
+</svg>
+</div>
+</div>
+<div class="flex flex-col items-center z-10 px-6">
+<h2 class="text-slate-500 dark:text-slate-400 font-medium text-sm tracking-tight mb-2">Expected earnings</h2>
+<div class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                €682.5
+            </div>
+<div class="mt-4">
+<span class="inline-flex items-center justify-center bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
+                    +2.45%
+                </span>
+</div>
+</div>
+<div class="w-full h-32 mt-6 relative">
+<svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 340 120">
+<defs>
+<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0284c7" stop-opacity="0.1"></stop>
+<stop offset="100%" stop-color="#0284c7" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M-10 80 
+                         C 20 90, 50 60, 70 50
+                         C 90 40, 100 110, 125 110
+                         C 150 110, 160 50, 185 40
+                         C 210 30, 220 70, 240 70
+                         C 260 70, 280 40, 310 50
+                         L 350 50 L 350 150 L -10 150 Z" fill="url(#chartGradient)"></path>
+<path class="drop-shadow-sm" d="M-10 80 
+                         C 20 90, 50 60, 70 50
+                         C 90 40, 100 110, 125 110
+                         C 150 110, 160 50, 185 40
+                         C 210 30, 220 70, 240 70
+                         C 260 70, 280 40, 310 50
+                         L 350 50" fill="none" stroke="#0284c7" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.5"></path>
+</svg>
+</div>
+</div>
+
+</body></html>

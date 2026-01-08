@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sales &amp; Contributions Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0070ad", // Muted azure blue from screenshot
+                        "background-light": "#eef2f6",
+                        "background-dark": "#111827",
+                        "grid-l1-light": "#e0f2fe", // sky-100
+                        "grid-l2-light": "#bae6fd", // sky-200
+                        "grid-l3-light": "#7dd3fc", // sky-300
+                        "grid-l4-light": "#0284c7", // sky-600
+                        "grid-l5-light": "#0c2b64", // deep navy
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen p-4 antialiased text-gray-900 dark:text-gray-100 transition-colors duration-300">
+<div class="w-full max-w-sm bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 relative transition-colors duration-300">
+<div class="flex justify-between items-start mb-1">
+<h1 class="text-2xl font-bold leading-tight text-gray-900 dark:text-white w-3/4">
+                Sales per employee per month
+            </h1>
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+<span class="material-icons-round text-xl">settings</span>
+</button>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">
+            263 contributions in the last year
+        </p>
+<div class="flex flex-wrap gap-2 mb-6">
+<button class="px-5 py-1.5 rounded-full text-sm font-bold bg-primary text-white shadow-sm hover:opacity-90 transition-opacity">
+                2016
+            </button>
+<button class="px-5 py-1.5 rounded-full text-sm font-bold bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                2017
+            </button>
+<button class="px-5 py-1.5 rounded-full text-sm font-bold bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                2018
+            </button>
+<button class="px-5 py-1.5 rounded-full text-sm font-bold bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                2019
+            </button>
+</div>
+<p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6">
+            Minim dolor in amet nulla laboris enim dolore consequatt.
+        </p>
+<div class="mb-6">
+<div class="grid grid-cols-6 gap-2 mb-3 text-center">
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Nov</span>
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Dec</span>
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Jan</span>
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Feb</span>
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Mar</span>
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Apr</span>
+</div>
+<div class="grid grid-cols-6 gap-2 h-40">
+<div class="flex flex-col gap-2 h-full justify-between">
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+</div>
+<div class="flex flex-col gap-2 h-full justify-between">
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-primary dark:bg-sky-500"></div>
+<div class="flex-1 rounded-sm bg-primary dark:bg-sky-500"></div>
+<div class="flex-1 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l2-light dark:bg-gray-600"></div>
+</div>
+<div class="flex flex-col gap-2 h-full justify-between">
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l3-light dark:bg-sky-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+</div>
+<div class="flex flex-col gap-2 h-full justify-between">
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l3-light dark:bg-sky-700"></div>
+<div class="flex-1 rounded-sm bg-primary dark:bg-sky-500"></div>
+<div class="flex-1 rounded-sm bg-grid-l2-light dark:bg-gray-600"></div>
+</div>
+<div class="flex flex-col gap-2 h-full justify-between">
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+<div class="flex-1 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+<div class="flex-1 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+</div>
+<div class="flex flex-col gap-2 h-full justify-between">
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l3-light dark:bg-sky-700"></div>
+<div class="flex-1 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+</div>
+</div>
+<style>.grid-cols-6 > div:nth-child(1) > div:nth-child(2) { @apply bg-grid-l1-light dark:bg-gray-700; }.grid-cols-6 > div:nth-child(2) > div:nth-child(2) { @apply bg-primary dark:bg-sky-500; }
+                .grid-cols-6 > div:nth-child(2) > div:nth-child(5) { @apply bg-grid-l5-light dark:bg-sky-200; }.grid-cols-6 > div:nth-child(3) > div:nth-child(2) { @apply bg-grid-l5-light dark:bg-sky-200; } 
+                .grid-cols-6 > div:nth-child(3) > div:nth-child(5) { @apply bg-grid-l5-light dark:bg-sky-200; } 
+                .grid-cols-6 > div:nth-child(3) > div:nth-child(6) { @apply bg-primary dark:bg-sky-500; }.grid-cols-6 > div:nth-child(4) > div:nth-child(3) { @apply bg-grid-l3-light dark:bg-sky-700; }
+                .grid-cols-6 > div:nth-child(4) > div:nth-child(5) { @apply bg-grid-l5-light dark:bg-sky-200; }
+                .grid-cols-6 > div:nth-child(4) > div:nth-child(6) { @apply bg-grid-l5-light dark:bg-sky-200; }.grid-cols-6 > div:nth-child(5) > div:nth-child(2) { @apply bg-grid-l3-light dark:bg-sky-700; }
+                .grid-cols-6 > div:nth-child(5) > div:nth-child(3) { @apply bg-grid-l3-light dark:bg-sky-700; }
+                .grid-cols-6 > div:nth-child(5) > div:nth-child(4) { @apply bg-grid-l3-light dark:bg-sky-700; }
+                .grid-cols-6 > div:nth-child(5) > div:nth-child(5) { @apply bg-grid-l2-light dark:bg-gray-600; }.grid-cols-6 > div:nth-child(6) > div:nth-child(3) { @apply bg-grid-l5-light dark:bg-sky-200; }
+                 .grid-cols-6 > div:nth-child(6) > div:nth-child(4) { @apply bg-grid-l1-light dark:bg-gray-700; }
+                 .grid-cols-6 > div:nth-child(6) > div:nth-child(5) { @apply bg-grid-l1-light dark:bg-gray-700; }
+            </style>
+</div>
+<div class="flex items-center justify-between mb-8">
+<a class="text-xs text-gray-700 dark:text-gray-300 underline hover:text-primary dark:hover:text-primary transition-colors" href="#">
+                Learn how we<br/>count contributions
+            </a>
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">Less</span>
+<div class="flex gap-1">
+<div class="w-3.5 h-3.5 rounded-sm bg-grid-l1-light dark:bg-gray-700"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-grid-l3-light dark:bg-sky-700"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-primary dark:bg-sky-500"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-grid-l5-light dark:bg-sky-200"></div>
+</div>
+<span class="text-xs font-bold text-gray-800 dark:text-gray-200">More</span>
+</div>
+</div>
+<button class="w-full py-3.5 bg-gray-100 dark:bg-gray-700 rounded-xl text-sm font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+            Show more activity
+        </button>
+</div>
+
+</body></html>

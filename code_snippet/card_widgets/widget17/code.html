@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Monthly Rainfall Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0ea5e9", // Sky blue color from the chart line
+                        "background-light": "#F3F4F6", // Light gray background
+                        "background-dark": "#111827", // Dark gray background
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1F2937",
+                        "text-primary-light": "#111827",
+                        "text-primary-dark": "#F9FAFB",
+                        "text-secondary-light": "#4B5563",
+                        "text-secondary-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem", // Highly rounded corners as per iOS widgets
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 font-display antialiased transition-colors duration-300">
+<div class="relative w-full max-w-sm bg-card-light dark:bg-card-dark rounded-3xl shadow-lg overflow-hidden transition-colors duration-300 flex flex-col">
+<div class="p-6 pb-2">
+<div class="flex justify-between items-start mb-2">
+<div>
+<h2 class="text-2xl font-bold text-text-primary-light dark:text-text-primary-dark leading-tight">
+                    Monthly Average<br/>Rainfall
+                </h2>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+<span class="material-icons-round text-gray-600 dark:text-gray-300 text-sm" style="font-size: 20px;">share</span>
+</button>
+</div>
+<div class="mb-4 pr-4">
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                Minim dolor in amet nulla laboris enim dolore consequatt.
+            </p>
+</div>
+</div>
+<div class="relative h-48 w-full mt-auto">
+<canvas id="rainfallChart"></canvas>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-card-light dark:from-card-dark to-transparent pointer-events-none"></div>
+</div>
+<script>
+        // Chart.js Configuration
+        const ctx = document.getElementById('rainfallChart').getContext('2d');
+        // Create a gradient for the fill
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, 'rgba(14, 165, 233, 0.2)'); // Light blue transparent
+        gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');   // Fading out
+        const rainfallChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'], // Extended data for wavy look
+                datasets: [{
+                    label: 'Rainfall',
+                    data: [12, 15, 13, 18, 14, 25, 22, 28, 20, 32, 28, 26, 35, 30, 38],
+                    borderColor: '#0ea5e9', // Primary blue color
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#0ea5e9',
+                    pointBorderColor: '#ffffff', // White border around points
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.4, // Smooth wavy curves (spline)
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Hide legend
+                    },
+                    tooltip: {
+                        enabled: false // Hide tooltips for cleaner look closer to screenshot
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false, // Hide X axis labels and grid
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        display: false, // Hide Y axis labels and grid
+                        grid: {
+                            display: false
+                        },
+                        min: 0,
+                        max: 50 // Provide some headroom
+                    }
+                },
+                layout: {
+                    padding: {
+                        left: -10, // Extend off edges slightly
+                        right: -10,
+                        bottom: -10,
+                        top: 10
+                    }
+                }
+            }
+        });
+    </script>
+</body></html>
