@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Multi-Tracker Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#007AFF", // Bright iOS Blue
+                        "background-light": "#F2F2F7", // iOS Light Background
+                        "background-dark": "#000000", // iOS Dark Background
+                        "widget-text-secondary": "rgba(255, 255, 255, 0.7)",
+                        "accent-yellow": "#FFD60A",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem", // Matches the rounded look of iOS widgets
+                    },
+                },
+            },
+        };
+    </script>
+<style>.circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.2);
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 3.8;
+            stroke-linecap: round;
+            animation: progress 1s ease-out forwards;
+        }
+        @keyframes progress {
+            0% { stroke-dasharray: 0 100; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display p-6 transition-colors duration-300">
+<div class="bg-primary w-full max-w-[380px] rounded-3xl p-5 shadow-2xl shadow-blue-500/20 dark:shadow-blue-900/30 flex flex-col gap-6 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 shrink-0">
+<img alt="Cat profile picture" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfRxGk8pcJlsh_xriFcXX_FuAVabk4UBMu1gdzfnWKzR-tvQEyGg0URJEH3nZIMkbs_8NwuY7fyLG5Ir0bl9G2n_Sms98cy1Ly32epVirm1bXGoUwuIYnFUp5cKMobSX9WEdZlBtbZfl1aZ1RX4shN6rQx2T4AWVZ-bVCN2tdryIk6Ynaq3Ee3S3fWrKJvRso-fv7WmQNJoUgefUbKbnF1TFuIZWCVgfRDIkUKH4mZqcy6zF6mpBit6tHPUs0VqDG3aahpzf_1o2hG"/>
+</div>
+<div class="flex flex-col">
+<h2 class="text-white font-bold text-[17px] leading-tight tracking-tight">Peach's Life</h2>
+<span class="text-widget-text-secondary text-[13px] font-medium mt-0.5">July 21, 2019 • 321 days</span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="text-white font-bold text-2xl leading-none tracking-tight">0.88</div>
+<div class="text-widget-text-secondary text-[13px] font-medium mt-0.5">years old</div>
+</div>
+</div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 relative flex items-center justify-center shrink-0">
+<svg class="circular-chart w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-accent-yellow" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="71, 100"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<h2 class="text-white font-bold text-[17px] leading-tight tracking-tight">2020 Progress</h2>
+<span class="text-widget-text-secondary text-[13px] font-medium mt-0.5">157d/366d • Passed</span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="text-white font-bold text-2xl leading-none tracking-tight">71.23</div>
+<div class="text-widget-text-secondary text-[13px] font-medium mt-0.5 text-right">%</div>
+</div>
+</div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 flex items-center justify-center shrink-0 text-3xl">
+                    🏡
+                </div>
+<div class="flex flex-col">
+<h2 class="text-white font-bold text-[17px] leading-tight tracking-tight">Work from home</h2>
+<span class="text-widget-text-secondary text-[13px] font-medium mt-0.5">Jan 22, 2020 • Passed</span>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="text-white font-bold text-2xl leading-none tracking-tight">239</div>
+<div class="text-widget-text-secondary text-[13px] font-medium mt-0.5">days</div>
+</div>
+</div>
+</div>
+
+</body></html>

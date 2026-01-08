@@ -25,6 +25,11 @@ import 'package:Memento/screens/widgets_gallery/screens/half_circle_gauge_widget
 import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/super_cupertino_navigation_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/segmented_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/milestone_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/circular_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/monthly_progress_with_dots_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/multi_tracker_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -165,6 +170,31 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/super_cupertino_navigation',
           handler: (settings) => RouteHelpers.createRoute(const SuperCupertinoNavigationExample(), settings: settings),
           description: '导航示例',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/segmented_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const SegmentedProgressCardExample(), settings: settings),
+          description: '分段进度条统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/milestone_card',
+          handler: (settings) => RouteHelpers.createRoute(const MilestoneCardExample(), settings: settings),
+          description: '里程碑追踪卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/circular_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const CircularProgressCardExample(), settings: settings),
+          description: '圆形进度卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/monthly_progress_with_dots_card',
+          handler: (settings) => RouteHelpers.createRoute(const MonthlyProgressWithDotsCardExample(), settings: settings),
+          description: '月度进度圆点卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/multi_tracker_card',
+          handler: (settings) => RouteHelpers.createRoute(const MultiTrackerCardExample(), settings: settings),
+          description: '多追踪器卡片',
         ),
       ];
 }

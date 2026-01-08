@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:Memento/screens/routing/route_helpers.dart';
 
 /// 桌面小组件展示列表页
 class HomeWidgetsGalleryScreen extends StatelessWidget {
@@ -19,6 +17,41 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             title: '半圆仪表盘',
             subtitle: 'HalfCircleGaugeWidget - 半圆形进度仪表盘',
             route: '/widgets_gallery/half_circle_gauge_widget',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '分段进度条卡片',
+            subtitle: 'SegmentedProgressCard - 多类别分段统计卡片',
+            route: '/widgets_gallery/segmented_progress_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.flag,
+            title: '里程碑追踪卡片',
+            subtitle: 'MilestoneCard - 时间里程碑追踪展示卡片',
+            route: '/widgets_gallery/milestone_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.donut_large,
+            title: '圆形进度卡片',
+            subtitle: 'CircularProgressCard - 圆形进度展示卡片',
+            route: '/widgets_gallery/circular_progress_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.calendar_month,
+            title: '月度进度圆点卡片',
+            subtitle: 'MonthlyProgressWithDotsCard - 圆点矩阵月度进度卡片',
+            route: '/widgets_gallery/monthly_progress_with_dots_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.dashboard,
+            title: '多追踪器卡片',
+            subtitle: 'MultiTrackerCard - 多指标追踪展示卡片',
+            route: '/widgets_gallery/multi_tracker_card',
           ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
