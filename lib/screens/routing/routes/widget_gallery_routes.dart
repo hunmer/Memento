@@ -39,6 +39,9 @@ import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_widget
 import 'package:Memento/screens/widgets_gallery/screens/stacked_ring_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/monthly_bar_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/earnings_trend_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/ranked_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/smooth_line_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/contribution_heatmap_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -249,6 +252,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/earnings_trend_card',
           handler: (settings) => RouteHelpers.createRoute(const EarningsTrendCardExample(), settings: settings),
           description: '收益趋势卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/ranked_bar_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const RankedBarChartCardExample(), settings: settings),
+          description: '排名条形图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/smooth_line_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const SmoothLineChartCardExample(), settings: settings),
+          description: '平滑折线图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/contribution_heatmap_card',
+          handler: (settings) => RouteHelpers.createRoute(const ContributionHeatmapCardExample(), settings: settings),
+          description: '贡献热力图卡片',
         ),
       ];
 }

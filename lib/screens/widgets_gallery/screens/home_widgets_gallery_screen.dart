@@ -116,6 +116,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'EarningsTrendCard - 收益趋势与折线图展示卡片',
             route: '/widgets_gallery/earnings_trend_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '排名条形图卡片',
+            subtitle: 'RankedBarChartCard - 水平排名条形图展示卡片',
+            route: '/widgets_gallery/ranked_bar_chart_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.show_chart,
+            title: '平滑折线图卡片',
+            subtitle: 'SmoothLineChartCard - 带渐变填充的平滑折线图卡片',
+            route: '/widgets_gallery/smooth_line_chart_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.grid_on,
+            title: '贡献热力图卡片',
+            subtitle: 'ContributionHeatmapCard - 活跃度热力图网格展示卡片',
+            route: '/widgets_gallery/contribution_heatmap_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
