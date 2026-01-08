@@ -30,6 +30,7 @@ import 'package:Memento/screens/widgets_gallery/screens/milestone_card_example.d
 import 'package:Memento/screens/widgets_gallery/screens/circular_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/monthly_progress_with_dots_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/multi_tracker_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/line_chart_trend_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -195,6 +196,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/multi_tracker_card',
           handler: (settings) => RouteHelpers.createRoute(const MultiTrackerCardExample(), settings: settings),
           description: '多追踪器卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/line_chart_trend_card',
+          handler: (settings) => RouteHelpers.createRoute(const LineChartTrendCardExample(), settings: settings),
+          description: '折线图趋势卡片',
         ),
       ];
 }
