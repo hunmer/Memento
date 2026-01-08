@@ -45,6 +45,9 @@ import 'package:Memento/screens/widgets_gallery/screens/contribution_heatmap_car
 import 'package:Memento/screens/widgets_gallery/screens/audio_waveform_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/time_zone_slider_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/storage_breakdown_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/route_tracking_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/watch_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/bar_chart_stats_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -285,6 +288,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/storage_breakdown_widget',
           handler: (settings) => RouteHelpers.createRoute(const StorageBreakdownWidgetExample(), settings: settings),
           description: '存储分段小组件',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/route_tracking_card',
+          handler: (settings) => RouteHelpers.createRoute(const RouteTrackingCardExample(), settings: settings),
+          description: '运输追踪路线卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/watch_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const WatchProgressCardExample(), settings: settings),
+          description: '观看进度卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/bar_chart_stats_card',
+          handler: (settings) => RouteHelpers.createRoute(const BarChartStatsCardExample(), settings: settings),
+          description: '柱状图统计卡片',
         ),
       ];
 }

@@ -158,6 +158,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'StorageBreakdownWidget - 设备存储分段统计展示组件',
             route: '/widgets_gallery/storage_breakdown_widget',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.route,
+            title: '运输追踪路线卡片',
+            subtitle: 'RouteTrackingCard - 路线追踪运输状态展示卡片',
+            route: '/widgets_gallery/route_tracking_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.play_circle,
+            title: '观看进度卡片',
+            subtitle: 'WatchProgressCard - 观看进度与历史记录展示卡片',
+            route: '/widgets_gallery/watch_progress_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '柱状图统计卡片',
+            subtitle: 'BarChartStatsCard - 柱状图数据统计展示卡片',
+            route: '/widgets_gallery/bar_chart_stats_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
