@@ -262,7 +262,11 @@ class PluginManager {
     // 记录打开历史
     recordPluginOpen(plugin);
     // 使用 NavigationHelper.push 以支持 iOS 左滑返回
-    NavigationHelper.push(context, plugin.buildMainView(context));
+    NavigationHelper.push(
+      context,
+      plugin.buildMainView(context),
+      routeName: '/plugin/${plugin.id}',
+    );
   }
 
   static toHomeScreen(BuildContext context) {

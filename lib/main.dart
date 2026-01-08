@@ -23,6 +23,7 @@ import 'core/services/plugin_widget_sync_helper.dart';
 import 'core/services/clipboard_service.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'screens/route.dart';
+import 'core/route/route_history_manager.dart';
 import 'screens/settings_screen/controllers/auto_update_controller.dart';
 
 // 从 app_initializer 导入全局变量
@@ -277,6 +278,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               initialRoute: AppRoutes.initialRoute,
               routes: AppRoutes.routes,
               onGenerateRoute: AppRoutes.generateRoute,
+              navigatorObservers: [RouteHistoryManager()],
               onGenerateTitle: (BuildContext context) => 'app_appTitle'.tr,
             ),
           ),

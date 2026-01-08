@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'page_visit_record.dart';
@@ -5,7 +6,8 @@ import 'page_visit_record.dart';
 /// 路由历史管理器
 ///
 /// 负责记录和管理页面访问历史，支持持久化存储
-class RouteHistoryManager {
+/// 可作为 NavigatorObserver 自动记录路由变化
+class RouteHistoryManager extends NavigatorObserver {
   static final RouteHistoryManager _instance = RouteHistoryManager._internal();
   factory RouteHistoryManager() => _instance;
   RouteHistoryManager._internal();
@@ -266,6 +268,137 @@ class RouteHistoryManager {
       'totalVisits': totalVisits,
       'mostVisitedPage': mostVisited,
     };
+  }
+
+  // ==================== NavigatorObserver 实现 ====================
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _recordRoute(route);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    // pop 操作不记录新路由，但可以更新当前上下文到前一个路由
+    if (previousRoute != null) {
+      _updateCurrentContextFromRoute(previousRoute);
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute != null) {
+      _recordRoute(newRoute);
+    }
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didRemove(route, previousRoute);
+    // remove 操作通常不记录
+  }
+
+  /// 从 Route 对象记录路由访问
+  void _recordRoute(Route<dynamic> route) {
+    final routeName = route.settings.name;
+
+    // 只有设置了路由名称的才能记录到历史（用于复原跳转）
+    if (routeName == null || routeName.isEmpty) {
+      // 没有路由名称，无法复原跳转，只更新当前上下文
+      _updateCurrentContextFromRoute(route);
+      return;
+    }
+
+    // 从 RouteSettings.arguments 提取参数
+    final args = route.settings.arguments;
+
+    // 更新当前路由上下文（用于"询问当前上下文"功能）
+    _currentRouteContext = PageVisitRecord(
+      pageId: routeName,
+      title: routeName,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      visitCount: 1,
+      params: _extractParams(args),
+    );
+
+    // 异步记录到历史（不阻塞 UI）
+    _recordToHistory(routeName, args);
+  }
+
+  /// 从 Route 对象更新当前上下文
+  void _updateCurrentContextFromRoute(Route<dynamic> route) {
+    final routeName = route.settings.name;
+    final args = route.settings.arguments;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    _currentRouteContext = PageVisitRecord(
+      pageId: routeName ?? 'unknown',
+      title: routeName ?? 'Unknown Route',
+      timestamp: now,
+      visitCount: 1,
+      params: _extractParams(args),
+    );
+  }
+
+  /// 从参数对象提取参数 Map
+  Map<String, dynamic>? _extractParams(dynamic args) {
+    if (args == null) return null;
+    if (args is Map<String, dynamic>) return args;
+    if (args is Map) return Map<String, dynamic>.from(args);
+    // 其他类型封装为参数
+    return {'value': args};
+  }
+
+  /// 异步记录到历史存储
+  Future<void> _recordToHistory(String routeName, dynamic args) async {
+    // 确保已初始化
+    if (!_initialized) {
+      await initialize();
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final params = _extractParams(args);
+
+    // 查找是否已存在该路由的记录
+    final existingIndex = _history.indexWhere(
+      (record) => record.pageId == routeName,
+    );
+
+    if (existingIndex != -1) {
+      // 更新现有记录
+      final existing = _history[existingIndex];
+      _history[existingIndex] = existing.copyWith(
+        timestamp: now,
+        visitCount: existing.visitCount + 1,
+        params: params,
+      );
+    } else {
+      // 创建新记录
+      final record = PageVisitRecord(
+        pageId: routeName,
+        title: routeName,
+        timestamp: now,
+        visitCount: 1,
+        params: params,
+      );
+      _history.insert(0, record);
+    }
+
+    // 按时间重新排序
+    _history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    // 限制历史记录数量
+    if (_history.length > _maxHistorySize) {
+      _history.removeRange(_maxHistorySize, _history.length);
+    }
+
+    // 异步保存
+    _saveHistory();
+
+    debugPrint('RouteHistoryManager: 记录路由 $routeName，参数: $params');
   }
 
   // ==================== 当前路由上下文管理 ====================

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/screens/settings_screen/settings_screen.dart';
+import 'package:Memento/screens/route.dart';
 // 导入全局实例
 
 class AppDrawer extends StatelessWidget {
@@ -72,6 +73,7 @@ class AppDrawer extends StatelessWidget {
                                     NavigationHelper.push(
                                       context,
                                       plugin.buildSettingsView(context),
+                                      routeName: '/plugin/${plugin.id}/settings',
                                     );
                                   }
                                 },
@@ -96,7 +98,11 @@ class AppDrawer extends StatelessWidget {
             title: Text('app_settings'.tr),
             onTap: () {
               Navigator.pop(context); // 先关闭抽屉
-              NavigationHelper.push(context, const SettingsScreen());
+              NavigationHelper.push(
+                context,
+                const SettingsScreen(),
+                routeName: AppRoutes.settings,
+              );
             },
           ),
         ],

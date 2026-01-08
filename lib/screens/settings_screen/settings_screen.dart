@@ -363,7 +363,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('settings_screen_dataManagementTitle'.tr),
             subtitle: Text('settings_screen_dataManagementSubtitle'.tr),
             onTap: () {
-              NavigationHelper.push(context, DataManagementScreen());
+              NavigationHelper.push(context, DataManagementScreen(), routeName: '/settings/data_management');
             },
           ),
           ListTile(
@@ -452,6 +452,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   NavigationHelper.push(
                     context,
                     const FloatingBallSettingsScreen(),
+                    routeName: '/settings/floating_ball_settings',
                   );
                 },
               );
@@ -744,7 +745,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('app_aboutTitle'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              NavigationHelper.push(context, const AboutScreen());
+              NavigationHelper.push(context, const AboutScreen(), routeName: '/settings/about');
             },
           ),
         ],
