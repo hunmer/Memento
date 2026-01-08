@@ -245,44 +245,49 @@ class _RankedBarWidget extends StatelessWidget {
           margin: EdgeInsets.only(bottom: isLast ? 0 : 1),
           child: Row(
             children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: 280 * item.value * animation.value,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: item.color,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(6),
-                    bottomRight: Radius.circular(6),
-                  ),
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(6),
+                  bottomRight: Radius.circular(6),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: textColor,
-                            letterSpacing: 0.5,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 280 * item.value * animation.value,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: item.color,
+                  ),
+                  child: ClipRect(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              item.label,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: textColor,
+                                letterSpacing: 0.5,
+                              ),
+                              overflow: TextOverflow.fade,
+                              softWrap: false,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                          const SizedBox(width: 8),
+                          AnimatedFlipCounter(
+                            value: item.value * 100 * animation.value,
+                            fractionDigits: 0,
+                            textStyle: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      AnimatedFlipCounter(
-                        value: item.value * 100 * animation.value,
-                        fractionDigits: 0,
-                        textStyle: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: textColor,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
