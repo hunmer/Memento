@@ -117,27 +117,8 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
               ),
               child: Column(
                 children: [
-                  // Header section
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: iconBgColor,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: _BarChartIcon(color: iconColor),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
+                  const SizedBox(height: 12),
+                  
                   // Title and value section
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -152,7 +133,7 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
                             letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,7 +159,7 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         _PercentageBadge(
                           percentage: widget.percentage,
                           animation: _animation,
@@ -191,7 +172,7 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
 
                   // Chart section
                   SizedBox(
-                    height: 120,
+                    height: 100,
                     width: double.infinity,
                     child: _LineChart(
                       data: widget.chartData,
