@@ -632,6 +632,47 @@ class SegmentedProgressCardWidget extends StatelessWidget {
 - 尺寸使用原型中的数值
 - 考虑深色/浅色模式差异
 
+### 问题 4: Interval 动画断言错误（end > 1.0）
+
+**错误信息：**
+```
+'package:flutter/src/animation/curves.dart': Failed assertion:
+line 180 pos 12: 'end <= 1.0': is not true.
+```
+
+**原因：**
+使用 `Interval` 实现多元素延迟动画时，最后一个元素的 end 值超过了 1.0。
+
+**解决方案：**
+```dart
+// ❌ 错误：step 太大导致 end 超出 1.0
+final step = 0.12;  // 对于 8 个元素，最大 end = 0.6 + 7 * 0.12 = 1.44
+
+// ✅ 正确：计算合适的 step 确保最大 end <= 1.0
+// 公式：step <= (1.0 - baseEnd) / (elementCount - 1)
+// 示例：8 个元素，baseEnd = 0.6
+// step <= (1.0 - 0.6) / 7 = 0.057
+final step = 0.05;  // 最大 end = 0.6 + 7 * 0.05 = 0.95
+
+final itemAnimation = CurvedAnimation(
+  parent: _animationController,
+  curve: Interval(
+    index * step,
+    0.6 + index * step,
+    curve: Curves.easeOutCubic,
+  ),
+);
+```
+
+**通用计算公式：**
+```dart
+// 确保所有 Interval 的 end 值不超过 1.0
+final elementCount = items.length;
+final baseEnd = 0.6;  // 第一个元素的结束位置
+final maxStep = (1.0 - baseEnd) / (elementCount - 1);
+final step = maxStep * 0.9;  // 留 10% 安全余量
+```
+
 ## Notes
 
 - 使用中文注释与现有代码库保持一致

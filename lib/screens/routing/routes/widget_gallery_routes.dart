@@ -35,7 +35,10 @@ import 'package:Memento/screens/widgets_gallery/screens/article_list_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/trend_line_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_ring_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/monthly_bar_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/earnings_trend_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -228,9 +231,24 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '堆叠柱状图卡片',
         ),
         RouteDefinition(
+          path: '/widgets_gallery/stacked_bar_chart_widget',
+          handler: (settings) => RouteHelpers.createRoute(const StackedBarChartWidgetExample(), settings: settings),
+          description: '堆叠条形图组件',
+        ),
+        RouteDefinition(
           path: '/widgets_gallery/stacked_ring_chart',
           handler: (settings) => RouteHelpers.createRoute(const StackedRingChartExample(), settings: settings),
           description: '堆叠环形图统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/monthly_bar_chart',
+          handler: (settings) => RouteHelpers.createRoute(const MonthlyBarChartExample(), settings: settings),
+          description: '月度柱状图统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/earnings_trend_card',
+          handler: (settings) => RouteHelpers.createRoute(const EarningsTrendCardExample(), settings: settings),
+          description: '收益趋势卡片',
         ),
       ];
 }
