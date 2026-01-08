@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/route/page_visit_record.dart';
-import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
-import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
-import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
+import 'package:Memento/screens/route.dart';
 
 /// 路由历史记录对话框
 ///
@@ -54,58 +51,14 @@ class _RouteHistoryDialogState extends State<RouteHistoryDialog> {
     if (!mounted) return;
     Navigator.of(context).pop();
 
-    // 根据 pageId 打开对应页面
-    switch (record.pageId) {
-      case 'tool_template':
-        await _openToolTemplatePage();
-        break;
-      case 'tool_management':
-        await _openToolManagementPage();
-        break;
-      default:
-        if (mounted) {
-          Toast.show('未知页面类型: ${record.pageId}');
-        }
+    // 使用路由路径直接跳转（不再需要手动记录历史，NavigatorObserver 会自动处理）
+    final result = await Navigator.pushNamed(context, record.pageId);
+
+    // 如果路由跳转失败，显示提示
+    if (result == null && mounted) {
+      // 某些路由可能返回 null，这不算失败
+      // 但如果需要处理错误，可以在这里添加逻辑
     }
-  }
-
-  /// 打开工具模板页面
-  Future<void> _openToolTemplatePage() async {
-    if (!mounted) return;
-
-    // 记录访问历史
-    RouteHistoryManager.recordPageVisit(
-      pageId: 'tool_template',
-      title: '工具模板管理',
-      icon: Icons.inventory_2_outlined,
-    );
-
-    final templateService = AgentChatPlugin.instance.templateService;
-    if (templateService == null) {
-      if (context.mounted) {
-        Toast.error('工具模板服务未初始化');
-      }
-      return;
-    }
-
-    await NavigationHelper.push(context, ToolTemplateScreen(
-          templateService: templateService,),
-    );
-  }
-
-  /// 打开工具管理页面
-  Future<void> _openToolManagementPage() async {
-    if (!mounted) return;
-
-    // 记录访问历史
-    RouteHistoryManager.recordPageVisit(
-      pageId: 'tool_management',
-      title: '工具配置管理',
-      icon: Icons.settings_outlined,
-    );
-
-    await NavigationHelper.push(context, const ToolManagementScreen(),
-    );
   }
 
   /// 清空历史记录

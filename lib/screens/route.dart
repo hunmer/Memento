@@ -44,12 +44,14 @@ import 'package:Memento/screens/widgets_gallery/screens/smooth_bottom_sheet_exam
 import 'package:Memento/screens/widgets_gallery/screens/file_preview_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/app_drawer_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/half_circle_gauge_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/home_widgets_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/widget_config_editor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/preset_edit_form_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/super_cupertino_navigation_example.dart';
 import 'package:Memento/screens/log_screen/log_screen.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/app_initializer.dart';
+import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:get/get.dart';
 
 // 插件路由导入
@@ -101,6 +103,14 @@ import 'package:Memento/plugins/goods/goods_route_handler.dart';
 import 'package:Memento/plugins/habits/habits_route_handler.dart';
 import 'package:Memento/plugins/tracker/tracker_route_handler.dart';
 
+/// 路由页面信息
+class _RoutePageInfo {
+  final String title;
+  final IconData icon;
+
+  const _RoutePageInfo({required this.title, required this.icon});
+}
+
 class AppRoutes extends NavigatorObserver {
   // 插件路由处理器列表
   static final List<PluginRouteHandler> _pluginRouteHandlers = [
@@ -110,6 +120,163 @@ class AppRoutes extends NavigatorObserver {
     HabitsRouteHandler(),
     TrackerRouteHandler(),
   ];
+
+  /// 路由路径到页面信息的映射
+  static const Map<String, _RoutePageInfo> _routeInfoMap = {
+    // 主要页面
+    '/': _RoutePageInfo(title: '主页', icon: Icons.home),
+    '/settings': _RoutePageInfo(title: '设置', icon: Icons.settings),
+    '/js_console': _RoutePageInfo(title: 'JS控制台', icon: Icons.code),
+    '/widgets_gallery': _RoutePageInfo(title: '组件展示', icon: Icons.widgets),
+
+    // 插件页面
+    '/chat': _RoutePageInfo(title: '聊天', icon: Icons.chat),
+    '/diary': _RoutePageInfo(title: '日记', icon: Icons.book),
+    '/activity': _RoutePageInfo(title: '活动', icon: Icons.timeline),
+    '/checkin': _RoutePageInfo(title: '打卡', icon: Icons.how_to_reg),
+    '/agent_chat': _RoutePageInfo(title: 'AI助手', icon: Icons.smart_toy),
+    '/bill': _RoutePageInfo(title: '账单', icon: Icons.account_balance_wallet),
+    '/calendar': _RoutePageInfo(title: '日历', icon: Icons.calendar_today),
+    '/calendar_album': _RoutePageInfo(title: '日记相册', icon: Icons.photo_album),
+    '/contact': _RoutePageInfo(title: '联系人', icon: Icons.contacts),
+    '/database': _RoutePageInfo(title: '数据库', icon: Icons.storage),
+    '/day': _RoutePageInfo(title: '纪念日', icon: Icons.cake),
+    '/goods': _RoutePageInfo(title: '物品', icon: Icons.inventory_2),
+    '/habits': _RoutePageInfo(title: '习惯', icon: Icons.self_improvement),
+    '/nodes': _RoutePageInfo(title: '笔记本', icon: Icons.note),
+    '/notes': _RoutePageInfo(title: '笔记', icon: Icons.note_alt),
+    '/openai': _RoutePageInfo(title: 'OpenAI', icon: Icons.psychology),
+    '/scripts_center': _RoutePageInfo(title: '脚本中心', icon: Icons.code),
+    '/store': _RoutePageInfo(title: '积分商店', icon: Icons.store),
+    '/timer': _RoutePageInfo(title: '计时器', icon: Icons.timer),
+    '/todo': _RoutePageInfo(title: '待办事项', icon: Icons.check_circle),
+    '/tracker': _RoutePageInfo(title: '目标追踪', icon: Icons.track_changes),
+    '/tts': _RoutePageInfo(title: '语音服务', icon: Icons.record_voice_over),
+    '/floating_ball': _RoutePageInfo(
+      title: '悬浮球',
+      icon: Icons.fiber_manual_record,
+    ),
+    '/webview/browser': _RoutePageInfo(title: '浏览器', icon: Icons.public),
+    '/log': _RoutePageInfo(title: '日志', icon: Icons.list_alt),
+
+    // 配置页面
+    '/tool_template': _RoutePageInfo(
+      title: '工具模板',
+      icon: Icons.inventory_2_outlined,
+    ),
+    '/tool_management': _RoutePageInfo(
+      title: '工具管理',
+      icon: Icons.settings_outlined,
+    ),
+    '/calendar_month_selector': _RoutePageInfo(
+      title: '日历月视图',
+      icon: Icons.calendar_view_month,
+    ),
+    '/tracker_goal_selector': _RoutePageInfo(title: '目标选择', icon: Icons.flag),
+    '/tracker_goal_progress_selector': _RoutePageInfo(
+      title: '目标进度',
+      icon: Icons.show_chart,
+    ),
+    '/habit_timer_selector': _RoutePageInfo(
+      title: '习惯计时器',
+      icon: Icons.timer_outlined,
+    ),
+    '/bill_shortcuts_selector': _RoutePageInfo(
+      title: '快捷记账',
+      icon: Icons.payment,
+    ),
+    '/activity_weekly_config': _RoutePageInfo(
+      title: '活动周视图',
+      icon: Icons.view_week,
+    ),
+    '/activity_daily_config': _RoutePageInfo(
+      title: '活动日视图',
+      icon: Icons.view_day,
+    ),
+    '/habits_weekly_config': _RoutePageInfo(
+      title: '习惯周视图',
+      icon: Icons.view_week,
+    ),
+    '/habit_group_list_selector': _RoutePageInfo(
+      title: '习惯分组',
+      icon: Icons.folder,
+    ),
+    '/calendar_album_weekly_selector': _RoutePageInfo(
+      title: '相册周视图',
+      icon: Icons.photo_library,
+    ),
+    '/tag_statistics': _RoutePageInfo(title: '标签统计', icon: Icons.bar_chart),
+  };
+
+  /// 获取路由页面信息
+  static _RoutePageInfo? _getRouteInfo(String routeName) {
+    // 尝试精确匹配
+    if (_routeInfoMap.containsKey(routeName)) {
+      return _routeInfoMap[routeName];
+    }
+
+    // 尝试前缀匹配（用于带参数的路由）
+    for (final entry in _routeInfoMap.entries) {
+      if (routeName.startsWith(entry.key)) {
+        return entry.value;
+      }
+    }
+
+    return null;
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _recordRouteVisit(route);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute != null) {
+      _recordRouteVisit(newRoute);
+    }
+  }
+
+  /// 记录路由访问
+  void _recordRouteVisit(Route<dynamic> route) {
+    final routeName = route.settings.name;
+    if (routeName == null) return;
+
+    // 排除不需要记录的路由
+    const excludedRoutes = ['/', '/widgets_gallery'];
+    if (excludedRoutes.contains(routeName)) {
+      return;
+    }
+
+    final routeInfo = _getRouteInfo(routeName);
+    if (routeInfo == null) {
+      // 如果没有预设信息，使用路由名称作为标题
+      RouteHistoryManager.recordPageVisit(
+        pageId: routeName,
+        title: _generateTitleFromRoute(routeName),
+        icon: Icons.description,
+      );
+    } else {
+      RouteHistoryManager.recordPageVisit(
+        pageId: routeName,
+        title: routeInfo.title,
+        icon: routeInfo.icon,
+      );
+    }
+  }
+
+  /// 从路由名称生成标题
+  static String _generateTitleFromRoute(String routeName) {
+    // 移除前导斜杠和特殊字符
+    var name = routeName.replaceAll('/', '_').replaceAll('_', ' ');
+    // 首字母大写
+    if (name.isNotEmpty) {
+      name = name[0].toUpperCase() + name.substring(1);
+    }
+    return name;
+  }
 
   // 判断是否可以返回上一级路由
   static bool canPop(BuildContext context) {
@@ -212,7 +379,7 @@ class AppRoutes extends NavigatorObserver {
   // 自定义页面过渡动画 - 无动画
   static Route _createRoute(Widget page, {RouteSettings? settings}) {
     return PageRouteBuilder(
-      settings: settings,
+      settings: settings ?? const RouteSettings(name: '/'),
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return child;
@@ -777,6 +944,8 @@ class AppRoutes extends NavigatorObserver {
         return _createRoute(const FilePreviewExample());
       case '/widgets_gallery/app_drawer':
         return _createRoute(const AppDrawerExample());
+      case '/widgets_gallery/home_widgets':
+        return _createRoute(const HomeWidgetsExample());
       case '/widgets_gallery/half_circle_gauge_widget':
         return _createRoute(const HalfCircleGaugeWidgetExample());
       case '/widgets_gallery/widget_config_editor':
