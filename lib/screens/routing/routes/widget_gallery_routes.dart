@@ -31,6 +31,8 @@ import 'package:Memento/screens/widgets_gallery/screens/circular_progress_card_e
 import 'package:Memento/screens/widgets_gallery/screens/monthly_progress_with_dots_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/multi_tracker_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/line_chart_trend_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/article_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -201,6 +203,16 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/line_chart_trend_card',
           handler: (settings) => RouteHelpers.createRoute(const LineChartTrendCardExample(), settings: settings),
           description: '折线图趋势卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/article_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const ArticleListCardExample(), settings: settings),
+          description: '文章列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/vertical_bar_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const VerticalBarChartCardExample(), settings: settings),
+          description: '垂直柱状图卡片',
         ),
       ];
 }

@@ -60,6 +60,20 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'LineChartTrendCard - 折线图趋势统计卡片',
             route: '/widgets_gallery/line_chart_trend_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.article,
+            title: '文章列表卡片',
+            subtitle: 'ArticleListCard - 文章内容展示列表卡片',
+            route: '/widgets_gallery/article_list_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '垂直柱状图卡片',
+            subtitle: 'VerticalBarChartCard - 垂直柱状图统计卡片',
+            route: '/widgets_gallery/vertical_bar_chart_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
