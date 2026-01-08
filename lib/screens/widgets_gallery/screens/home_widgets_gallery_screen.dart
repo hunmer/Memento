@@ -88,6 +88,13 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'StackedBarChartCard - 多年份数据堆叠对比卡片',
             route: '/widgets_gallery/stacked_bar_chart_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.donut_large,
+            title: '堆叠环形图统计卡片',
+            subtitle: 'StackedRingChartWidget - 多类别环形图统计卡片',
+            route: '/widgets_gallery/stacked_ring_chart',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),

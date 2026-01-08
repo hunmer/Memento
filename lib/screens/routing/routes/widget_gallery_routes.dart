@@ -35,6 +35,7 @@ import 'package:Memento/screens/widgets_gallery/screens/article_list_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/trend_line_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/stacked_ring_chart_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -225,6 +226,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/stacked_bar_chart_card',
           handler: (settings) => RouteHelpers.createRoute(const StackedBarChartCardExample(), settings: settings),
           description: '堆叠柱状图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/stacked_ring_chart',
+          handler: (settings) => RouteHelpers.createRoute(const StackedRingChartExample(), settings: settings),
+          description: '堆叠环形图统计卡片',
         ),
       ];
 }
