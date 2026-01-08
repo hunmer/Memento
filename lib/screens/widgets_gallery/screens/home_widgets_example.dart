@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/widgets_gallery/screens/half_circle_gauge_widget_example.dart';
 
 /// 桌面小组件示例列表页面
 ///

@@ -16,11 +16,13 @@ class StyledToast extends StatelessWidget {
 
 /// Toast 显示位置（存根）
 class StyledToastPosition {
+  // ignore: unused_field
+  final int _value;
+
   static const top = StyledToastPosition._(0);
   static const center = StyledToastPosition._(1);
   static const bottom = StyledToastPosition._(2);
 
-  final int _value;
   const StyledToastPosition._(this._value);
 }
 
@@ -37,6 +39,7 @@ class StyledToastAnimation {
   static const fadeRotate = StyledToastAnimation._(8);
   static const scaleRotate = StyledToastAnimation._(9);
 
+  // ignore: unused_field
   final int _value;
   const StyledToastAnimation._(this._value);
 }

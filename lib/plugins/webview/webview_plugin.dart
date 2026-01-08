@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io'
     show File, Directory, FileSystemEntity, FileSystemEntityType;
 import 'package:universal_platform/universal_platform.dart';
-import 'dart:math' show min;
 import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

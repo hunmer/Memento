@@ -30,7 +30,6 @@ class HomeScreenController extends ChangeNotifier {
   HomeItem? _draggingItemSnapshot;
 
   // 是否是首次加载，使用静态变量确保在热重载时保持状态
-  static bool _hasInitialized = false;
   // 是否正在打开插件
   bool _isOpeningPlugin = false;
   // 是否已经尝试过打开插件（无论成功与否）
@@ -121,7 +120,6 @@ class HomeScreenController extends ChangeNotifier {
 
   /// 标记为已初始化
   void markInitialized() {
-    _hasInitialized = true;
   }
 
   /// 布局管理器变化时的回调
@@ -356,43 +354,6 @@ class HomeScreenController extends ChangeNotifier {
     }
   }
 
-  /// 创建默认小组件
-  Future<void> _createDefaultWidgets() async {
-    final registry = HomeWidgetRegistry();
-    final allWidgets = registry.getAllWidgets();
-    if (allWidgets.isEmpty) {
-      debugPrint('没有注册任何小组件,跳过创建默认布局');
-      return;
-    }
-
-    final priorityPlugins = ['chat', 'openai', 'diary', 'activity', 'notes', 'todo', 'calendar', 'bill'];
-    final defaultWidgets = <dynamic>[];
-
-    for (final pluginId in priorityPlugins) {
-      final pluginWidgets = registry.getWidgetsByPlugin(pluginId);
-      if (pluginWidgets.isEmpty) continue;
-      final iconWidget = pluginWidgets.firstWhere(
-        (w) => w.defaultSize == HomeWidgetSize.small,
-        orElse: () => pluginWidgets.first,
-      );
-      defaultWidgets.add(iconWidget);
-    }
-
-    if (defaultWidgets.isEmpty) {
-      defaultWidgets.addAll(allWidgets.take(8));
-    }
-
-    for (final widget in defaultWidgets) {
-      final item = HomeWidgetItem(
-        id: _layoutManager.generateId(),
-        widgetId: widget.id,
-        size: widget.defaultSize,
-        config: {},
-      );
-      _layoutManager.addItem(item);
-    }
-    debugPrint('创建了 ${defaultWidgets.length} 个默认小组件');
-  }
 
   /// 检查启动参数
   void checkLaunchParameters() {
@@ -467,7 +428,6 @@ class HomeScreenController extends ChangeNotifier {
   }
 
   void _markInitialized() {
-    _hasInitialized = true;
   }
 
   /// 切换编辑模式

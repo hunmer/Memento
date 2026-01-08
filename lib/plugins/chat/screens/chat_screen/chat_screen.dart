@@ -253,13 +253,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.toggleMultiSelectMode();
   }
 
-  /// 删除单条消息并更新状态
-  Future<void> _deleteMessage(Message message) async {
-    await _messageOperations.deleteMessage(message);
-    if (mounted) {
-      _updateMessages(); // 更新消息列表
-    }
-  }
 
   /// 删除多条选中的消息
   Future<void> _deleteSelectedMessages() async {

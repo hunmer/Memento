@@ -26,7 +26,6 @@ import 'screens/route.dart';
 import 'screens/settings_screen/controllers/auto_update_controller.dart';
 
 // 从 app_initializer 导入全局变量
-import 'core/app_initializer.dart';
 
 void main() async {
   // 1. 捕获 Flutter Framework 错误（如 widget build 错误）
@@ -279,7 +278,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               routes: AppRoutes.routes,
               onGenerateRoute: AppRoutes.generateRoute,
               onGenerateTitle: (BuildContext context) => 'app_appTitle'.tr,
-              navigatorObservers: [AppRoutes()],
             ),
           ),
     );

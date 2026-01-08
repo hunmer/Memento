@@ -473,8 +473,7 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
                                 final hours = minutes ~/ 60;
                                 final mins = minutes % 60;
                                 final durationText = hours > 0
-                                    ? '${hours}小时${mins}分钟'
-                                    : '${mins}分钟';
+                                    ? '$hours小时$mins分钟' : '$mins分钟';
                                 Toast.show(
                                   '${DateFormat('H:mm').format(start)} - ${DateFormat('H:mm').format(end)} ($durationText)',
                                   gravity: ToastGravity.BOTTOM,

@@ -156,12 +156,12 @@ class AgentChatHomeWidgets {
     );
 
     // 获取小组件尺寸
-    final widgetSize = HomeWidgetSize.large; // 默认值，实际应从 context 获取
+// 默认值，实际应从 context 获取
 
     // 使用最新的会话数据
     final title = conversation.title;
     final lastMessagePreview = conversation.lastMessagePreview ?? '';
-    final lastMessageAt = conversation.lastMessageAt ?? DateTime.now();
+    final lastMessageAt = conversation.lastMessageAt;
     final agentId = conversation.agentId;
 
     return Material(
