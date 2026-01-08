@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sleep Time Tracker Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#00C968", // Vibrant green
+              "background-light": "#F3F5F9", // Soft background for page
+              "widget-light": "#FFFFFF",
+              "widget-dark": "#1F2937", // Gray-800
+              "text-secondary-light": "#6B7280", // Gray-500
+              "text-secondary-dark": "#9CA3AF", // Gray-400
+              "grid-light": "#E5E7EB", // Gray-200
+              "grid-dark": "#374151", // Gray-700
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              '3xl': '1.75rem', 
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        .bar-grow {
+            transform-origin: bottom;
+            animation: grow 0.8s ease-out forwards;
+        }
+        @keyframes grow {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-gray-900 min-h-screen flex items-center justify-center p-4">
+<div class="relative w-full max-w-[360px] bg-widget-light dark:bg-widget-dark rounded-[2rem] p-7 shadow-xl border border-gray-100 dark:border-gray-800 transition-colors duration-300">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Sleep Time</h2>
+<p class="text-sm text-text-secondary-light dark:text-text-secondary-dark font-medium">12 - 19 January 2025</p>
+</div>
+<div class="bg-primary h-12 w-12 rounded-full flex items-center justify-center shadow-lg shadow-green-100 dark:shadow-none">
+<span class="material-icons-round text-white text-2xl">bedtime</span>
+</div>
+</div>
+<div class="mb-8">
+<div class="flex items-baseline gap-2">
+<span class="text-5xl font-bold text-gray-900 dark:text-white tracking-tighter">6.5</span>
+<span class="text-xl font-bold text-gray-900 dark:text-white">hours</span>
+</div>
+<p class="text-base text-gray-500 dark:text-gray-400 mt-1 font-medium">Daily average</p>
+</div>
+<div class="w-full select-none">
+<div class="flex h-48 w-full gap-2">
+<div class="flex flex-col justify-between h-full text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium w-6 shrink-0 text-right pr-2 pb-1">
+<span>10</span>
+<span>8</span>
+<span>6</span>
+<span>4</span>
+<span>2</span>
+<span>0</span>
+</div>
+<div class="relative flex-1 h-full flex flex-col justify-between">
+<div class="absolute inset-0 flex flex-col justify-between z-0 pointer-events-none pb-1">
+<div class="border-b border-dashed border-grid-light dark:border-grid-dark h-0 w-full translate-y-[0.5em]"></div>
+<div class="border-b border-dashed border-grid-light dark:border-grid-dark h-0 w-full translate-y-[0.3em]"></div>
+<div class="border-b border-dashed border-grid-light dark:border-grid-dark h-0 w-full translate-y-[0.1em]"></div>
+<div class="border-b border-dashed border-grid-light dark:border-grid-dark h-0 w-full -translate-y-[0.1em]"></div>
+<div class="border-b border-dashed border-grid-light dark:border-grid-dark h-0 w-full -translate-y-[0.3em]"></div>
+<div class="border-b border-grid-light dark:border-grid-dark h-0 w-full"></div>
+</div>
+<div class="relative z-10 flex justify-between items-end h-full pl-1 pr-1 pb-[1px]">
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 32%;"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 52%; animation-delay: 0.1s;"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 95%; animation-delay: 0.2s;"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 58%; animation-delay: 0.3s;"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 32%; animation-delay: 0.4s;"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 92%; animation-delay: 0.5s;"></div>
+</div>
+<div class="flex flex-col items-center gap-2 group w-full">
+<div class="w-3 bg-primary rounded-t-md bar-grow hover:opacity-80 transition-opacity cursor-pointer" style="height: 72%; animation-delay: 0.6s;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex pl-8 pr-1 mt-3 justify-between text-xs text-text-secondary-light dark:text-text-secondary-dark font-medium w-full">
+<span class="w-full text-center">12/01</span>
+<span class="w-full text-center">13/01</span>
+<span class="w-full text-center">14/01</span>
+<span class="w-full text-center">15/01</span>
+<span class="w-full text-center">16/01</span>
+<span class="w-full text-center">17/01</span>
+<span class="w-full text-center">18/01</span>
+</div>
+</div>
+</div>
+
+</body></html>

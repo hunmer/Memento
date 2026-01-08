@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Shipment Tracking Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6", // Blue-500 equivalent for primary actions/highlights
+                        "background-light": "#f3f4f6", // gray-100
+                        "background-dark": "#000000", // black
+                        "widget-light": "#ffffff",
+                        "widget-dark": "#18181b", // zinc-900
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        "widget": "1.75rem", // ~28px matching iOS large radius
+                    },
+                },
+            },
+        };
+    </script>
+<style>.dashed-line {
+            background-image: linear-gradient(to bottom, currentColor 50%, transparent 50%);
+            background-size: 2px 8px;
+            background-repeat: repeat-y;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen p-6 transition-colors duration-300">
+<div class="relative w-full max-w-sm mx-auto">
+<div class="w-44 h-44 sm:w-48 sm:h-48 bg-widget-light dark:bg-widget-dark rounded-widget shadow-xl dark:shadow-2xl dark:shadow-black/50 p-5 flex flex-col justify-between transition-colors duration-300 overflow-hidden relative mx-auto">
+<div class="text-[0.8rem] font-medium text-gray-500 dark:text-gray-400 tracking-tight">
+                Wed, 8 Aug
+            </div>
+<div class="flex-1 flex mt-2 relative">
+<div class="flex flex-col items-center mr-3 pt-[0.35rem] pb-[0.35rem]">
+<div class="w-2.5 h-2.5 rounded-full border-2 border-gray-400 dark:border-gray-500 bg-transparent box-border z-10"></div>
+<div class="flex-1 w-px border-l-2 border-dashed border-gray-300 dark:border-gray-600 my-1 opacity-50"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-gray-800 dark:bg-white border-2 border-gray-300 dark:border-gray-500 z-10 ring-2 ring-widget-light dark:ring-widget-dark"></div>
+</div>
+<div class="flex flex-col justify-between w-full">
+<div class="flex flex-col leading-tight">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Stuttgart</span>
+<span class="text-[0.65rem] text-gray-500 dark:text-gray-400 mt-0.5">Mon, 8 Aug</span>
+</div>
+<div class="flex items-center text-gray-800 dark:text-gray-200">
+<span class="text-[0.8rem] font-medium mr-1.5">Shipped</span>
+<span class="material-icons-round text-sm transform rotate-45" style="font-size: 14px;">flight</span>
+</div>
+<div class="flex flex-col leading-tight">
+<span class="text-sm font-semibold text-gray-900 dark:text-white">Dubai</span>
+<span class="text-[0.65rem] text-gray-500 dark:text-gray-400 mt-0.5">Tue, 9 Aug</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center">
+<p class="text-xs text-gray-400 dark:text-gray-600 uppercase tracking-widest font-semibold">
+                iOS Widget Preview
+            </p>
+</div>
+</div>
+<script>
+        // Simple logic to help user verify both modes if they inspect the code, 
+        // though the prompt asked for styling that works in both. 
+        // This script purely sets a default if none exists, usually handled by OS.
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+</body></html>

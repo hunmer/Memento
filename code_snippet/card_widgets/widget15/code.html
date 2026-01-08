@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stacked Bar Chart Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0ea5e9", // Sky blue for primary accents
+                        "background-light": "#f1f5f9", // Slate 100 for page background
+                        "background-dark": "#0f172a", // Slate 900 for dark mode page background
+                        "card-light": "#ffffff",
+                        "card-dark": "#1e293b",
+                        "bar-dark": "#000045", // Deepest blue
+                        "bar-mid": "#0064a7", // Medium blue
+                        "bar-light": "#cceff9", // Lightest blue
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem", // Extra rounded for iOS widget feel
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }@keyframes rise {
+            from { height: 0; }
+            to { height: 100%; }
+        }
+        .animate-bar {
+            animation: rise 1s ease-out forwards;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-sm">
+<div class="bg-card-light dark:bg-card-dark rounded-DEFAULT shadow-lg p-6 relative overflow-hidden transition-colors duration-300">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<div class="flex gap-1 items-end h-6">
+<div class="w-1.5 h-3 bg-black dark:bg-white rounded-sm"></div>
+<div class="w-1.5 h-5 bg-black dark:bg-white rounded-sm"></div>
+<div class="w-1.5 h-4 bg-black dark:bg-white rounded-sm"></div>
+</div>
+<h1 class="text-xl font-bold text-gray-900 dark:text-white">Bar chart</h1>
+</div>
+<div class="flex items-center gap-1 text-primary dark:text-sky-400 font-semibold text-sm">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+<span>+86%</span>
+</div>
+</div>
+<div class="mb-8">
+<p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+                    Minim dolor in amet nulla laboris enim dolore consequatt...
+                </p>
+</div>
+<div class="flex items-end justify-between h-48 gap-2 sm:gap-3 px-1">
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[25%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[30%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[45%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[20%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[45%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[25%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[35%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[40%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[15%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[15%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[35%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[25%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[40%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[25%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[10%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[10%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[35%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[15%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[25%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[15%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[10%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+<div class="w-full h-full flex flex-col justify-end gap-0.5 group">
+<div class="h-[45%] bg-bar-light dark:bg-sky-200 w-full rounded-t-md opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[10%] bg-bar-mid dark:bg-sky-600 w-full opacity-90 transition-all hover:opacity-100"></div>
+<div class="h-[5%] bg-bar-dark dark:bg-sky-900 w-full rounded-b-md opacity-90 transition-all hover:opacity-100"></div>
+</div>
+</div>
+<div class="absolute inset-0 pointer-events-none"></div>
+</div>
+</div>
+
+</body></html>

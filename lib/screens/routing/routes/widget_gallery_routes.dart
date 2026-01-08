@@ -33,6 +33,8 @@ import 'package:Memento/screens/widgets_gallery/screens/multi_tracker_card_examp
 import 'package:Memento/screens/widgets_gallery/screens/line_chart_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/article_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/trend_line_chart_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -213,6 +215,16 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/vertical_bar_chart_card',
           handler: (settings) => RouteHelpers.createRoute(const VerticalBarChartCardExample(), settings: settings),
           description: '垂直柱状图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/trend_line_chart_widget',
+          handler: (settings) => RouteHelpers.createRoute(const TrendLineChartWidgetExample(), settings: settings),
+          description: '趋势折线图',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/stacked_bar_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const StackedBarChartCardExample(), settings: settings),
+          description: '堆叠柱状图卡片',
         ),
       ];
 }

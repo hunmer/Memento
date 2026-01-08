@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>World Population Statistics Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#0F4C81", // Deep Blue
+                        secondary: "#48C6E0", // Light Blue
+                        tertiary: "#A8DFF0", // Very Light Blue
+                        "background-light": "#F3F5F9",
+                        "background-dark": "#1a1a1a",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#2a2a2a",
+                        "text-light": "#111827",
+                        "text-dark": "#F3F4F6",
+                        "subtext-light": "#6B7280",
+                        "subtext-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem", // increased rounded corners
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4 font-display transition-colors duration-300">
+<div class="w-full max-w-sm bg-card-light dark:bg-card-dark rounded-3xl shadow-xl p-6 sm:p-8 relative overflow-hidden transition-colors duration-300">
+<div class="flex justify-between items-center mb-8">
+<h1 class="text-2xl font-bold text-text-light dark:text-text-dark tracking-tight">America</h1>
+<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary">
+<span class="material-icons-round text-text-light dark:text-text-dark" style="font-size: 28px;">filter_list</span>
+</button>
+</div>
+<div class="h-48 flex justify-between items-end gap-1.5 sm:gap-2 mb-8">
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[10%] w-full bg-gray-100 dark:bg-gray-700 rounded-full"></div>
+<div class="h-[15%] w-full bg-primary rounded-full"></div>
+<div class="h-[20%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[30%] w-full bg-secondary rounded-full"></div>
+<div class="h-[25%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[5%] w-full bg-primary rounded-full"></div>
+<div class="h-[35%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[15%] w-full bg-secondary rounded-full"></div>
+<div class="h-[45%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[5%] w-full bg-primary rounded-full"></div>
+<div class="h-[40%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[10%] w-full bg-secondary rounded-full"></div>
+<div class="h-[45%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[8%] w-full bg-primary rounded-full"></div>
+<div class="h-[25%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[17%] w-full bg-secondary rounded-full"></div>
+<div class="h-[50%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[6%] w-full bg-primary rounded-full"></div>
+<div class="h-[28%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[16%] w-full bg-secondary rounded-full"></div>
+<div class="h-[50%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[7%] w-full bg-primary rounded-full"></div>
+<div class="h-[20%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[13%] w-full bg-secondary rounded-full"></div>
+<div class="h-[60%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[12%] w-full bg-primary rounded-full"></div>
+<div class="h-[18%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[35%] w-full bg-secondary rounded-full"></div>
+<div class="h-[35%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[5%] w-full bg-primary rounded-full"></div>
+<div class="h-[45%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[15%] w-full bg-secondary rounded-full"></div>
+<div class="h-[35%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[9%] w-full bg-primary rounded-full"></div>
+<div class="h-[10%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[41%] w-full bg-secondary rounded-full"></div>
+<div class="h-[40%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[10%] w-full bg-primary rounded-full"></div>
+<div class="h-[15%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[35%] w-full bg-secondary rounded-full"></div>
+<div class="h-[40%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[6%] w-full bg-primary rounded-full"></div>
+<div class="h-[40%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[24%] w-full bg-secondary rounded-full"></div>
+<div class="h-[30%] w-full bg-primary rounded-full"></div>
+</div>
+<div class="w-3 flex flex-col justify-end h-full gap-1">
+<div class="h-[5%] w-full bg-primary rounded-full"></div>
+<div class="h-[45%] w-full bg-tertiary rounded-full"></div>
+<div class="h-[20%] w-full bg-secondary rounded-full"></div>
+<div class="h-[30%] w-full bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center gap-6 mb-8 text-sm font-semibold text-text-light dark:text-text-dark">
+<div class="flex items-center gap-2">
+<div class="w-6 h-3 bg-primary rounded-full"></div>
+<span>2010</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-3 bg-secondary rounded-full"></div>
+<span>2011</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-6 h-3 bg-tertiary rounded-full"></div>
+<span>2012</span>
+</div>
+</div>
+<div class="space-y-2">
+<h2 class="text-lg font-bold text-text-light dark:text-text-dark">Historic World Population</h2>
+<p class="text-subtext-light dark:text-subtext-dark text-sm leading-relaxed">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
+            </p>
+</div>
+</div>
+
+</body></html>

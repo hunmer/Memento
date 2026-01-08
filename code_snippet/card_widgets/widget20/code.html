@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Time Zone Display Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF453A", // iOS Red/Orange
+                        "background-light": "#F2F2F7", // iOS Light Gray Background
+                        "background-dark": "#000000", // iOS Dark Black Background
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1C1C1E",
+                        "accent-green": "#34C759", // iOS Green
+                    },
+                    fontFamily: {
+                        display: ["SF Pro Display", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "20px",
+                        'widget': "24px",
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6">
+<div class="w-[320px] h-[320px] bg-card-light dark:bg-card-dark rounded-widget shadow-lg p-6 flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
+<div class="flex flex-col space-y-1">
+<h1 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Shibuya, Tokyo</h1>
+<div class="flex items-center space-x-2 text-gray-500 dark:text-gray-400 text-sm font-medium">
+<span>GMT +9</span>
+<span>Aug 12</span>
+</div>
+</div>
+<div class="w-full py-4 relative">
+<div class="h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full relative">
+<div class="absolute top-0 left-0 h-full w-2/3 bg-primary rounded-full z-10"></div>
+<div class="absolute top-1/2 -translate-y-1/2 left-0 w-3 h-3 bg-primary rounded-full z-20 shadow-sm border border-white dark:border-gray-800"></div>
+<div class="absolute top-1/2 -translate-y-1/2 left-2/3 w-3 h-3 bg-primary rounded-full z-20 shadow-sm border border-white dark:border-gray-800"></div>
+<div class="absolute top-1/2 -translate-y-1/2 right-0 w-3 h-3 bg-gray-300 dark:bg-gray-600 rounded-full z-0"></div>
+</div>
+</div>
+<div class="flex items-end justify-between mt-auto">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-0.5">PM</span>
+<span class="text-5xl font-bold text-gray-900 dark:text-white tracking-tighter tabular-nums leading-none">10:25</span>
+</div>
+<div class="bg-accent-green text-white dark:text-black font-bold text-sm px-3 py-1.5 rounded-full mb-1 shadow-sm">
+                ~4H
+            </div>
+</div>
+</div>
+
+</body></html>
