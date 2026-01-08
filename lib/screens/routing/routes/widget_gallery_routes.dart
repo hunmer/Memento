@@ -42,6 +42,9 @@ import 'package:Memento/screens/widgets_gallery/screens/earnings_trend_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/ranked_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/smooth_line_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/contribution_heatmap_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/audio_waveform_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/time_zone_slider_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/storage_breakdown_widget_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -267,6 +270,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/contribution_heatmap_card',
           handler: (settings) => RouteHelpers.createRoute(const ContributionHeatmapCardExample(), settings: settings),
           description: '贡献热力图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/audio_waveform_widget',
+          handler: (settings) => RouteHelpers.createRoute(const AudioWaveformWidgetExample(), settings: settings),
+          description: '音频波形小组件',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/time_zone_slider_widget',
+          handler: (settings) => RouteHelpers.createRoute(const TimeZoneSliderWidgetExample(), settings: settings),
+          description: '时区滑块小组件',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/storage_breakdown_widget',
+          handler: (settings) => RouteHelpers.createRoute(const StorageBreakdownWidgetExample(), settings: settings),
+          description: '存储分段小组件',
         ),
       ];
 }
