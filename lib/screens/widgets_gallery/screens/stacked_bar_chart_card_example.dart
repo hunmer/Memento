@@ -245,11 +245,13 @@ class _StackedBarChartCardWidgetState extends State<StackedBarChartCardWidget>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: List.generate(widget.data.length, (columnIndex) {
+                        final start = (columnIndex * 0.04).clamp(0.0, 0.5);
+                        final end = (start + 0.5).clamp(0.0, 1.0);
                         final columnAnimation = CurvedAnimation(
                           parent: _animationController,
                           curve: Interval(
-                            columnIndex * 0.05,
-                            0.5 + columnIndex * 0.05,
+                            start,
+                            end,
                             curve: Curves.easeOutCubic,
                           ),
                         );
@@ -362,10 +364,10 @@ class _StackedBarColumn extends StatelessWidget {
             if (segment.value == 0) {
               return const SizedBox.shrink();
             }
-            final height = 4.0 + segment.value * 1.5; // 基础高度 + 比例高度
+            final height = 2.0 + segment.value * 1.1; // 基础高度 + 比例高度
             final color = categories[segment.categoryIndex].color;
             return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
+              padding: const EdgeInsets.only(bottom: 2),
               child: AnimatedBuilder(
                 animation: animation,
                 builder: (context, child) {
