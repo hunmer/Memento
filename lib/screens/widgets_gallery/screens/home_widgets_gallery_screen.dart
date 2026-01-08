@@ -53,6 +53,13 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'MultiTrackerCard - 多指标追踪展示卡片',
             route: '/widgets_gallery/multi_tracker_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.show_chart,
+            title: '折线图趋势卡片',
+            subtitle: 'LineChartTrendCard - 折线图趋势统计卡片',
+            route: '/widgets_gallery/line_chart_trend_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),

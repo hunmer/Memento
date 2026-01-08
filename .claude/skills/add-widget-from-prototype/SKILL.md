@@ -160,6 +160,35 @@ final primaryColor = const Color(0xFF7B57E0);
 final textColor = isDark ? Colors.white : Colors.grey.shade900;
 ```
 
+### 主题颜色适配要求
+
+**重要：组件必须适配 Flutter 主题颜色系统**
+
+当原型中的主色调与主题颜色接近时（如 Rose、Purple、Blue 等），应优先使用 `Theme.of(context).colorScheme` 中的颜色，而非硬编码颜色值。
+
+```dart
+// ✅ 推荐：使用主题颜色
+final primaryColor = Theme.of(context).colorScheme.primary;
+
+// ❌ 避免：硬编码颜色（除非与主题差异较大）
+final primaryColor = const Color(0xFFF43F5E);
+
+// 示例：根据情况选择颜色
+final primaryColor = isDark
+    ? const Color(0xFFFB7185)  // 深色模式使用原型颜色
+    : Theme.of(context).colorScheme.primary;  // 浅色模式使用主题色
+```
+
+**主题颜色映射参考：**
+
+| 原型颜色 | 主题颜色 | 使用场景 |
+|---------|---------|---------|
+| Rose (#F43F5E) | `colorScheme.error` 或 `colorScheme.primary` | 主色调 |
+| Purple (#7B57E0) | `colorScheme.primary` | 主色调 |
+| Blue (#3B82F6) | `colorScheme.primary` | 主色调 |
+| Green (#10B981) | `colorScheme.secondary` | 辅助色 |
+| Orange/Amber | `colorScheme.tertiary` | 第三色 |
+
 ### 布局转换
 
 HTML/Tailwind → Flutter 转换：
@@ -543,6 +572,7 @@ class SegmentedProgressCardWidget extends StatelessWidget {
 **代码质量：**
 - [ ] 组件名称通用、可复用
 - [ ] 支持深色/浅色主题
+- [ ] **适配主题颜色**：优先使用 `Theme.of(context).colorScheme` 而非硬编码颜色
 - [ ] 参数设计合理、可配置
 - [ ] 代码注释清晰（中文）
 
@@ -613,3 +643,4 @@ class SegmentedProgressCardWidget extends StatelessWidget {
 - 使用 `animated_flip_counter` 包实现数字翻转效果（项目已包含此依赖）
 - 动画时长推荐 1200ms，曲线使用 `Curves.easeOutCubic`
 - 多元素动画使用 `Interval` 实现依次延迟效果（每个延迟约 15%）
+- **必须适配主题颜色**：优先使用 `Theme.of(context).colorScheme` 中的颜色，确保组件与 App 主题一致
