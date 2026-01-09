@@ -60,6 +60,12 @@ import 'package:Memento/screens/widgets_gallery/screens/expense_donut_chart_exam
 import 'package:Memento/screens/widgets_gallery/screens/profile_card_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/portfolio_stacked_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/spending_trend_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/blood_pressure_tracker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/mood_tracker_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/stress_level_monitor_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/daily_todo_list_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weight_tracking_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weekly_steps_progress_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -375,6 +381,36 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/spending_trend_chart',
           handler: (settings) => RouteHelpers.createRoute(const SpendingTrendChartExample(), settings: settings),
           description: '支出趋势折线图',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/blood_pressure_tracker',
+          handler: (settings) => RouteHelpers.createRoute(const BloodPressureTrackerExample(), settings: settings),
+          description: '血压追踪器',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/mood_tracker_widget',
+          handler: (settings) => RouteHelpers.createRoute(const MoodTrackerWidgetExample(), settings: settings),
+          description: '心情追踪卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/stress_level_monitor',
+          handler: (settings) => RouteHelpers.createRoute(const StressLevelMonitorExample(), settings: settings),
+          description: '压力水平监测卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weight_tracking_widget',
+          handler: (settings) => RouteHelpers.createRoute(const WeightTrackingWidgetExample(), settings: settings),
+          description: '体重追踪柱状图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/daily_todo_list_widget',
+          handler: (settings) => RouteHelpers.createRoute(const DailyTodoListWidgetExample(), settings: settings),
+          description: '每日待办事项卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weekly_steps_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const WeeklyStepsProgressCardExample(), settings: settings),
+          description: '每周步数进度卡片',
         ),
       ];
 }
