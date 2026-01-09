@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stress Level Monitoring Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F98C2F", // Orange color from screenshot
+                        "background-light": "#EFEFEF", // Light grey background outside the widget
+                        "background-dark": "#121212", // Dark mode background
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1E1E1E",
+                        "text-light": "#1F2937",
+                        "text-dark": "#E5E7EB",
+                        "subtext-light": "#6B7280",
+                        "subtext-dark": "#9CA3AF",
+                        "bar-bg-light": "#E5E7EB",
+                        "bar-bg-dark": "#374151"
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem", // Highly rounded corners as per screenshot
+                        'capsule': '9999px',
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex items-center justify-center p-4 antialiased">
+<div class="w-full max-w-[380px] bg-card-light dark:bg-card-dark rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-800 transition-colors duration-200">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+<span class="material-icons-round text-primary text-xl">error</span>
+</div>
+<h2 class="text-xl font-semibold text-text-light dark:text-text-dark tracking-tight">Stress Level</h2>
+</div>
+<button class="flex items-center gap-1 text-subtext-light dark:text-subtext-dark hover:text-text-light dark:hover:text-text-dark transition-colors">
+<span class="text-base font-normal">Today</span>
+<span class="material-icons-round text-xl">chevron_right</span>
+</button>
+</div>
+<div class="flex items-end justify-between">
+<div class="flex flex-col mb-1">
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold text-text-light dark:text-text-dark tracking-tight">4.2</span>
+<span class="text-lg font-medium text-text-light dark:text-text-dark">pts</span>
+</div>
+<p class="text-lg text-subtext-light dark:text-subtext-dark mt-1 font-normal">Stressed Out</p>
+</div>
+<div class="flex items-end gap-3 select-none">
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 45%;"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">M</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 25%;"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">T</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 60%;"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">W</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 85%;"></div>
+</div>
+<span class="text-xs font-medium text-text-light dark:text-text-dark font-bold">T</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 35%;"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">F</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 15%;"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">S</span>
+</div>
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="relative w-3.5 h-16 bg-bar-bg-light dark:bg-bar-bg-dark rounded-capsule overflow-hidden">
+<div class="absolute bottom-0 left-0 w-full bg-primary rounded-capsule transition-all duration-500 ease-out group-hover:bg-orange-500" style="height: 40%;"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">S</span>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

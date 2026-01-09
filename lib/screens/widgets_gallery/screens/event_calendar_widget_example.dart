@@ -19,7 +19,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
             weekday: 'Wednesday',
             month: 'August',
             eventCount: 3,
-            weekDates: [12, 13, 14, 15, 16, 17],
+            weekDates: [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
             weekStartDay: 0, // Sunday
             reminder: 'Do not forget the weekly pill',
             reminderEmoji: '💊',
@@ -137,6 +137,7 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: 420,
+              height: 260,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(32),
@@ -149,77 +150,70 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                 ],
               ),
               padding: const EdgeInsets.all(20),
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 左侧日期区域
-                  SizedBox(
-                    width: 160,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _DateSection(
-                          day: widget.day,
-                          weekday: widget.weekday,
-                          month: widget.month,
-                          eventCount: widget.eventCount,
-                          primaryColor: primaryColor,
-                          animation: _animation,
-                        ),
-                        const SizedBox(height: 16),
-                        _WeekCalendar(
-                          weekDates: widget.weekDates,
-                          currentDay: widget.day,
-                          weekStartDay: widget.weekStartDay,
-                          primaryColor: primaryColor,
-                          isDark: isDark,
-                        ),
-                        const SizedBox(height: 8),
-                        _ReminderItem(
-                          emoji: widget.reminderEmoji,
-                          text: widget.reminder,
-                          animation: _animation,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // 右侧事件列表
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  // 上部分：日期区域 + 事件列表
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 左侧日期区域
+                      SizedBox(
+                        width: 180,
+                        child: Column(
                           children: [
-                            for (int i = 0; i < widget.events.length; i++) ...[
-                              if (i > 0) const SizedBox(height: 20),
-                              _EventCard(
-                                event: widget.events[i],
-                                animation: _animation,
-                                index: i,
-                              ),
-                            ],
+                            _DateSection(
+                              day: widget.day,
+                              weekday: widget.weekday,
+                              month: widget.month,
+                              eventCount: widget.eventCount,
+                              primaryColor: primaryColor,
+                              animation: _animation,
+                            ),
+                            const SizedBox(height: 16),
+                            _WeekCalendar(
+                              weekDates: widget.weekDates,
+                              currentDay: widget.day,
+                              weekStartDay: widget.weekStartDay,
+                              primaryColor: primaryColor,
+                              isDark: isDark,
+                            ),
                           ],
                         ),
-                        // 滚动指示条
-                        Positioned(
-                          right: 6,
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: Container(
-                              width: 4,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? Colors.grey.shade700
-                                    : Colors.grey.shade200,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                      ),
+                      const SizedBox(width: 10),
+                      // 右侧事件列表
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                for (
+                                  int i = 0;
+                                  i < widget.events.length;
+                                  i++
+                                ) ...[
+                                  if (i > 0) const SizedBox(height: 20),
+                                  _EventCard(
+                                    event: widget.events[i],
+                                    animation: _animation,
+                                    index: i,
+                                  ),
+                                ],
+                              ],
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // 下部分：提醒项（占整行）
+                  _ReminderItem(
+                    emoji: widget.reminderEmoji,
+                    text: widget.reminder,
+                    animation: _animation,
                   ),
                 ],
               ),
@@ -318,16 +312,20 @@ class _WeekCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const int daysPerRow = 7;
+
+    // 计算需要多少行
+    final rowCount = (weekDates.length / daysPerRow).ceil();
 
     return Column(
       children: [
-        // 星期标签
+        // 星期标签（只显示一行，7天）
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(
-            6,
+            7,
             (index) => SizedBox(
-              width: 24,
+              width: 20,
               child: Center(
                 child: Text(
                   weekdays[(weekStartDay + index) % 7],
@@ -342,59 +340,74 @@ class _WeekCalendar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        // 日期数字
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(6, (index) {
-            final day = weekDates[index];
-            final isCurrent = day == currentDay;
-            final isPast = day < currentDay;
+        // 日期数字（多行）
+        ...List.generate(rowCount, (rowIndex) {
+          final startIndex = rowIndex * daysPerRow;
+          final endIndex = (startIndex + daysPerRow).clamp(0, weekDates.length);
+          final rowDates = weekDates.sublist(startIndex, endIndex);
 
-            return SizedBox(
-              width: 24,
-              height: 24,
-              child: Center(
-                child: isCurrent
-                    ? Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? primaryColor.withOpacity(0.15)
-                              : const Color(0xFFFEE2E2),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryColor.withOpacity(0.2),
-                              blurRadius: 4,
+          return Padding(
+            padding: EdgeInsets.only(bottom: rowIndex < rowCount - 1 ? 4 : 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(rowDates.length, (index) {
+                final day = rowDates[index];
+                final isCurrent = day == currentDay;
+                final isPast = day < currentDay;
+
+                return SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: Center(
+                    child:
+                        isCurrent
+                            ? Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color:
+                                    isDark
+                                        ? primaryColor.withOpacity(0.15)
+                                        : const Color(0xFFFEE2E2),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryColor.withOpacity(0.2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '$day',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: primaryColor,
+                                  ),
+                                ),
+                              ),
+                            )
+                            : Text(
+                              '$day',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight:
+                                    isPast ? FontWeight.w400 : FontWeight.w500,
+                                color:
+                                    isPast
+                                        ? Colors.grey.shade400
+                                        : (isDark
+                                            ? Colors.grey.shade200
+                                            : Colors.grey.shade900),
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            '$day',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: primaryColor,
-                            ),
-                          ),
-                        ),
-                      )
-                    : Text(
-                        '$day',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isPast ? FontWeight.w400 : FontWeight.w500,
-                          color: isPast
-                              ? Colors.grey.shade400
-                              : (isDark ? Colors.grey.shade200 : Colors.grey.shade900),
-                        ),
-                      ),
-              ),
-            );
-          }),
-        ),
+                  ),
+                );
+              }),
+            ),
+          );
+        }),
       ],
     );
   }
