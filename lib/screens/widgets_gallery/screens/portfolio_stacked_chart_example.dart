@@ -291,6 +291,11 @@ class _StackedBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 计算所有数据中的最大总和，用于归一化高度
+    final maxTotal = monthlyData
+        .map((d) => d.stocks + d.funds + d.bonds)
+        .reduce((a, b) => a > b ? a : b);
+
     return SizedBox(
       height: 96,
       child: Row(
@@ -313,6 +318,7 @@ class _StackedBarChart extends StatelessWidget {
                 data: data,
                 animation: barAnimation,
                 isDark: isDark,
+                maxTotal: maxTotal,
               ),
             ),
           );
@@ -327,11 +333,13 @@ class _StackedBar extends StatelessWidget {
   final MonthlyData data;
   final Animation<double> animation;
   final bool isDark;
+  final int maxTotal;
 
   const _StackedBar({
     required this.data,
     required this.animation,
     required this.isDark,
+    required this.maxTotal,
   });
 
   @override
@@ -339,12 +347,28 @@ class _StackedBar extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
+        // 根据最大总和和可用高度(96)计算每部分的高度
+        final stocksHeight = (data.stocks / maxTotal) * 96 * animation.value;
+        final fundsHeight = (data.funds / maxTotal) * 96 * animation.value;
+        final bondsHeight = (data.bonds / maxTotal) * 96 * animation.value;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            // Stocks
+            // Bonds (底部)
             Container(
-              height: 2 * data.stocks * animation.value,
+              height: bondsHeight,
+              color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF000000),
+            ),
+            // Funds (中间)
+            Container(
+              height: fundsHeight,
+              color: const Color(0xFF2563EB),
+            ),
+            // Stocks (顶部)
+            Container(
+              height: stocksHeight,
               decoration: BoxDecoration(
                 color: const Color(0xFF94B8FF),
                 borderRadius: const BorderRadius.only(
@@ -352,16 +376,6 @@ class _StackedBar extends StatelessWidget {
                   topRight: Radius.circular(2),
                 ),
               ),
-            ),
-            // Funds
-            Container(
-              height: 2 * data.funds * animation.value,
-              color: const Color(0xFF2563EB),
-            ),
-            // Bonds
-            Container(
-              height: 2 * data.bonds * animation.value,
-              color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF000000),
             ),
           ],
         );

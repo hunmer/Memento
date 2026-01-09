@@ -74,9 +74,11 @@ class SpendingTrendChartWidget extends StatefulWidget {
 }
 
 class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late AnimationController _pointAnimationController;
+  late Animation<double> _pointAnimation;
 
   @override
   void initState() {
@@ -89,12 +91,31 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     );
+
+    // 当前点放大动画
+    _pointAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _pointAnimation = CurvedAnimation(
+      parent: _pointAnimationController,
+      curve: Curves.easeOutBack,
+    );
+
+    // 主动画完成后启动点动画
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _pointAnimationController.forward();
+      }
+    });
+
     _animationController.forward();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _pointAnimationController.dispose();
     super.dispose();
   }
 
@@ -160,6 +181,8 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                         borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(36),
                           topRight: Radius.circular(36),
+                          bottomLeft: Radius.circular(36),
+                          bottomRight: Radius.circular(36),
                         ),
                       ),
                       padding: const EdgeInsets.all(24),
@@ -208,6 +231,7 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                               primaryColor: primaryColor,
                               mutedColor: mutedColor,
                               animation: _animation,
+                              pointAnimation: _pointAnimation,
                               budgetLabel: widget.budgetLabel,
                               textColor: textColor,
                             ),
@@ -317,6 +341,7 @@ class _TrendLineChart extends StatelessWidget {
   final Color primaryColor;
   final Color mutedColor;
   final Animation<double> animation;
+  final Animation<double> pointAnimation;
   final String budgetLabel;
   final Color textColor;
 
@@ -329,6 +354,7 @@ class _TrendLineChart extends StatelessWidget {
     required this.primaryColor,
     required this.mutedColor,
     required this.animation,
+    required this.pointAnimation,
     required this.budgetLabel,
     required this.textColor,
   });
@@ -410,6 +436,7 @@ class _TrendLineChart extends StatelessWidget {
             primaryColor: primaryColor,
             mutedColor: mutedColor,
             animation: animation,
+            pointAnimation: pointAnimation,
           ),
         ),
         // X轴标签
@@ -444,6 +471,7 @@ class _LineChartPainterWidget extends StatelessWidget {
   final Color primaryColor;
   final Color mutedColor;
   final Animation<double> animation;
+  final Animation<double> pointAnimation;
 
   const _LineChartPainterWidget({
     required this.currentMonthData,
@@ -454,6 +482,7 @@ class _LineChartPainterWidget extends StatelessWidget {
     required this.primaryColor,
     required this.mutedColor,
     required this.animation,
+    required this.pointAnimation,
   });
 
   @override
@@ -461,17 +490,23 @@ class _LineChartPainterWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        return CustomPaint(
-          painter: _LineChartPainter(
-            currentMonthData: currentMonthData,
-            previousMonthData: previousMonthData,
-            currentPoint: currentPoint,
-            budgetAmount: budgetAmount,
-            maxAmount: maxAmount,
-            primaryColor: primaryColor,
-            mutedColor: mutedColor,
-            animation: animation.value,
-          ),
+        return AnimatedBuilder(
+          animation: pointAnimation,
+          builder: (context, child) {
+            return CustomPaint(
+              painter: _LineChartPainter(
+                currentMonthData: currentMonthData,
+                previousMonthData: previousMonthData,
+                currentPoint: currentPoint,
+                budgetAmount: budgetAmount,
+                maxAmount: maxAmount,
+                primaryColor: primaryColor,
+                mutedColor: mutedColor,
+                animation: animation.value,
+                pointAnimation: pointAnimation.value,
+              ),
+            );
+          },
         );
       },
     );
@@ -488,6 +523,7 @@ class _LineChartPainter extends CustomPainter {
   final Color primaryColor;
   final Color mutedColor;
   final double animation;
+  final double pointAnimation;
 
   _LineChartPainter({
     required this.currentMonthData,
@@ -498,6 +534,7 @@ class _LineChartPainter extends CustomPainter {
     required this.primaryColor,
     required this.mutedColor,
     required this.animation,
+    required this.pointAnimation,
   });
 
   @override
@@ -666,20 +703,26 @@ class _LineChartPainter extends CustomPainter {
     Color color,
     Size size,
   ) {
-    final pointIndex = ((data.length - 1) * animation).floor();
+    // 只在主动画接近完成时才开始绘制当前点
+    if (animation < 0.9) return;
+
+    final pointIndex = data.length - 1;
     final point = _getPointAtIndex(data, pointIndex, width, height, padding, size);
+
+    // 计算缩放比例：基于点动画值
+    final scale = pointAnimation.clamp(0.0, 1.0);
 
     // 外圈光晕
     final glowPaint = Paint()
-      ..color = color.withOpacity(0.3 * animation)
+      ..color = color.withOpacity(0.3 * scale)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(point, 8 * animation, glowPaint);
+    canvas.drawCircle(point, 8 * scale, glowPaint);
 
     // 内圈实心点
     final dotPaint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(point, 5 * animation, dotPaint);
+    canvas.drawCircle(point, 5 * scale, dotPaint);
   }
 
   Path _createPath(List<double> data, double width, double height, double padding, Size size) {
@@ -757,6 +800,7 @@ class _LineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
-    return oldDelegate.animation != animation;
+    return oldDelegate.animation != animation ||
+        oldDelegate.pointAnimation != pointAnimation;
   }
 }

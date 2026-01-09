@@ -106,6 +106,7 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: 340,
+              height: 500,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -154,12 +155,14 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
                   ),
                   const SizedBox(height: 16),
                   // 环形图
-                  SizedBox(
-                    width: 220,
-                    height: 220,
-                    child: _DonutChart(
-                      categories: widget.categories,
-                      animation: _animation,
+                  Center(
+                    child: SizedBox(
+                      width: 220,
+                      height: 220,
+                      child: _DonutChart(
+                        categories: widget.categories,
+                        animation: _animation,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
