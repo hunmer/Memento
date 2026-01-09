@@ -71,7 +71,7 @@ class MusicPlayerCardWidget extends StatefulWidget {
 }
 
 class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
   late AnimationController _progressController;
@@ -208,7 +208,6 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
               ],
             ),
           ),
-
           const SizedBox(height: 8),
 
           // 进度条

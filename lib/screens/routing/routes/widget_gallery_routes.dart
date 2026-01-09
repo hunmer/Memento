@@ -54,6 +54,12 @@ import 'package:Memento/screens/widgets_gallery/screens/weekly_bar_chart_card_ex
 import 'package:Memento/screens/widgets_gallery/screens/wallet_balance_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/habit_streak_tracker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/music_player_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/event_calendar_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/performance_bar_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/expense_donut_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/profile_card_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/portfolio_stacked_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/spending_trend_chart_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -339,6 +345,36 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/music_player_card',
           handler: (settings) => RouteHelpers.createRoute(const MusicPlayerCardExample(), settings: settings),
           description: '音乐播放器卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/event_calendar_widget',
+          handler: (settings) => RouteHelpers.createRoute(const EventCalendarWidgetExample(), settings: settings),
+          description: '日历事件卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/performance_bar_chart',
+          handler: (settings) => RouteHelpers.createRoute(const PerformanceBarChartExample(), settings: settings),
+          description: '性能指标柱状图',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/expense_donut_chart',
+          handler: (settings) => RouteHelpers.createRoute(const ExpenseDonutChartExample(), settings: settings),
+          description: '支出分类环形图',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/profile_card_widget',
+          handler: (settings) => RouteHelpers.createRoute(const ProfileCardWidgetExample(), settings: settings),
+          description: '个人资料卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/portfolio_stacked_chart',
+          handler: (settings) => RouteHelpers.createRoute(const PortfolioStackedChartExample(), settings: settings),
+          description: '投资组合堆叠图',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/spending_trend_chart',
+          handler: (settings) => RouteHelpers.createRoute(const SpendingTrendChartExample(), settings: settings),
+          description: '支出趋势折线图',
         ),
       ];
 }

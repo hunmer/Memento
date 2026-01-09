@@ -129,7 +129,7 @@ class _WeeklyBarChartCardWidgetState extends State<WeeklyBarChartCardWidget>
                         animation: _animation,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 10),
                     // 底部信息
                     Row(
                       children: [
@@ -137,16 +137,8 @@ class _WeeklyBarChartCardWidgetState extends State<WeeklyBarChartCardWidget>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                widget.title,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   SizedBox(
                                     width: 100,
@@ -164,7 +156,6 @@ class _WeeklyBarChartCardWidgetState extends State<WeeklyBarChartCardWidget>
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 16),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
