@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Calendar &amp; Events Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#EF4444", // Red from the '15'
+              "background-light": "#F2F4F8",
+              "background-dark": "#111827",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1F2937",
+              "subtle-light": "#9CA3AF",
+              "subtle-dark": "#6B7280",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'widget': "2rem", // Super rounded corners
+            },
+          },
+        },
+      };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-sans min-h-screen flex items-center justify-center p-6 transition-colors duration-300">
+<div class="w-full max-w-[420px] bg-card-light dark:bg-card-dark rounded-widget shadow-2xl p-5 flex gap-4 transition-colors duration-300 relative overflow-hidden">
+<div class="w-5/12 flex flex-col justify-between shrink-0">
+<div>
+<div class="flex items-start gap-1 mb-1">
+<span class="text-6xl font-medium text-primary tracking-tighter leading-none">15</span>
+<div class="flex flex-col pt-1">
+<span class="text-base font-semibold text-gray-900 dark:text-white leading-tight">Wednesday</span>
+<span class="text-[10px] text-gray-400 dark:text-gray-400 font-medium">August · 3 Events</span>
+</div>
+</div>
+</div>
+<div class="mt-4 mb-4">
+<div class="grid grid-cols-6 gap-y-2 text-center text-xs">
+<div class="text-gray-400 dark:text-gray-500">12</div>
+<div class="text-gray-900 dark:text-gray-200 font-medium">13</div>
+<div class="text-gray-900 dark:text-gray-200 font-medium">14</div>
+<div class="flex items-center justify-center">
+<div class="w-6 h-6 rounded-full bg-red-50 dark:bg-red-900/30 text-primary font-bold flex items-center justify-center shadow-sm">15</div>
+</div>
+<div class="text-gray-900 dark:text-gray-200 font-medium">16</div>
+<div class="text-gray-400 dark:text-gray-500">17</div>
+<div class="text-[10px] text-gray-400 dark:text-gray-600 uppercase">S</div>
+<div class="text-[10px] text-gray-400 dark:text-gray-600 uppercase">M</div>
+<div class="text-[10px] text-gray-400 dark:text-gray-600 uppercase">T</div>
+<div class="text-[10px] text-gray-400 dark:text-gray-600 uppercase font-bold text-gray-800 dark:text-gray-300">W</div>
+<div class="text-[10px] text-gray-400 dark:text-gray-600 uppercase">T</div>
+<div class="text-[10px] text-gray-400 dark:text-gray-600 uppercase">F</div>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-auto pt-2">
+<span class="text-lg leading-none transform -rotate-12">💊</span>
+<span class="text-[11px] font-medium text-gray-800 dark:text-gray-200 leading-tight">Do not forget the weekly pill</span>
+</div>
+</div>
+<div class="w-7/12 flex flex-col gap-5 pl-1">
+<div class="flex flex-col gap-1 border-l-[3px] border-indigo-700 pl-3 relative group">
+<h3 class="text-[13px] font-semibold text-gray-900 dark:text-white leading-tight">
+                    Meeting with developers about system design and its problems.
+                </h3>
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+<svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.5 4.5L1.5 6.5V17.5L8.5 19.5V4.5Z" fill="#525EAF"></path>
+<path d="M8.5 4.5L22.5 8V16L8.5 19.5V4.5Z" fill="#6264A7"></path>
+<path d="M15 8L22.5 8V16L15 16V8Z" fill="#8890D8"></path>
+<path d="M11 10.5C11 9.67157 11.6716 9 12.5 9C13.3284 9 14 9.67157 14 10.5C14 11.3284 13.3284 12 12.5 12C11.6716 12 11 11.3284 11 10.5Z" fill="white"></path>
+</svg>
+<span class="text-[11px] whitespace-nowrap">8:15 AM · 45 min</span>
+</div>
+</div>
+<div class="mt-1">
+<button class="bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-200 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors inline-block shadow-sm">
+                        Go to Meet
+                    </button>
+</div>
+</div>
+<div class="flex flex-col gap-1 border-l-[3px] border-emerald-500 pl-3">
+<h3 class="text-[13px] font-semibold text-gray-900 dark:text-white leading-tight">
+                    Interview with designers scheduled for the new marketing project.
+                </h3>
+<div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 mt-0.5">
+<svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22 6L16 10V14L22 18V6Z" fill="#00832D"></path>
+<path d="M13 17L13 7C13 5.34315 11.6569 4 10 4L5 4C3.34315 4 2 5.34315 2 7L2 17C2 18.6569 3.34315 20 5 20L10 20C11.6569 20 13 18.6569 13 17Z" fill="#00AC47"></path>
+<path d="M10 4L5 4C3.34315 4 2 5.34315 2 7L2 9.5L10 9.5L10 4Z" fill="#00832D"></path>
+<path d="M10 20L5 20C3.34315 20 2 18.6569 2 17L2 14.5L10 14.5L10 20Z" fill="#00832D"></path>
+<path d="M16 14L22 18V13.5L16 10V14Z" fill="#006622"></path>
+</svg>
+<span class="text-[11px] truncate">9:30 AM · 45 min · Office</span>
+</div>
+</div>
+</div>
+<div class="absolute right-1.5 top-1/2 -translate-y-1/2 w-1 h-12 bg-gray-200 dark:bg-gray-700 rounded-full opacity-50"></div>
+</div>
+<button class="fixed bottom-6 right-6 p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-full shadow-lg z-50" onclick="document.documentElement.classList.toggle('dark')">
+<svg class="h-6 w-6 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<svg class="h-6 w-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+
+</body></html>

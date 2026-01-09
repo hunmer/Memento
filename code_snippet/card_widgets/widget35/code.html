@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Investment Portfolio Overview Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563EB",
+              "background-light": "#FFFFFF",
+              "background-dark": "#0A0A0A",
+              "stocks-color": "#94B8FF",
+              "funds-color": "#2563EB",
+              "bonds-color": "#000000",
+              "bonds-color-dark": "#E5E7EB",
+            },
+            fontFamily: {
+              display: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+            },
+            borderRadius: {
+              DEFAULT: "12px",
+            },
+          },
+        },
+      };
+    </script>
+<style>
+      body {
+        background-color: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .widget-container {
+        width: 250px;
+        height: 250px;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display">
+<div class="widget-container bg-background-light dark:bg-background-dark p-5 rounded-[40px] shadow-sm flex flex-col justify-between overflow-hidden">
+<div>
+<span class="text-[13px] text-gray-400 dark:text-gray-500 font-medium">Overview</span>
+<div class="flex items-center gap-2 mt-1">
+<h1 class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">$231,471.24</h1>
+<div class="flex items-center px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 rounded-full">
+<span class="material-icons-round text-[12px] text-green-600 dark:text-green-400">trending_up</span>
+<span class="text-[10px] font-bold text-green-600 dark:text-green-400 ml-0.5">+12%</span>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-2.5">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-stocks-color"></div>
+<span class="text-[11px] text-gray-500 dark:text-gray-400">Stocks</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-funds-color"></div>
+<span class="text-[11px] text-gray-500 dark:text-gray-400">Funds</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-bonds-color dark:bg-bonds-color-dark"></div>
+<span class="text-[11px] text-gray-500 dark:text-gray-400">Bonds</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col flex-grow justify-end mt-4">
+<div class="flex items-end justify-between h-24 px-1 gap-[3px]">
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-12 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-8"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-8"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-10 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-7"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-9"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-8 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-6"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-8"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-6 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-5"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-7"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-4 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-4"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-6"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-3 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-9"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-7"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-6 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-2"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-8"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-5 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-3"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-6"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-4 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-4"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-5"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-8 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-10"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-6"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-10 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-8"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-8"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-6 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-6"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-7"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-5 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-4"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-6"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-1 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-9"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-7"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-4 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-2"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-3"></div>
+</div>
+<div class="flex flex-col w-full gap-[1px]">
+<div class="bg-stocks-color h-3 rounded-t-[2px]"></div>
+<div class="bg-funds-color h-2"></div>
+<div class="bg-bonds-color dark:bg-bonds-color-dark h-2"></div>
+</div>
+</div>
+<div class="flex justify-between px-1 mt-2">
+<span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">May</span>
+<span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Jul</span>
+<span class="text-[10px] text-gray-400 dark:text-gray-500 font-medium">Oct</span>
+</div>
+</div>
+</div>
+
+</body></html>

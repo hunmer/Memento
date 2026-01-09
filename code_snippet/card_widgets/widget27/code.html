@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weekly Transactions Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#007AFF", // iOS Blue
+                        "primary-light": "#E0F2FE",
+                        "primary-medium": "#BFDBFE",
+                        "background-light": "#F2F4F8",
+                        "background-dark": "#121212",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1C1C1E",
+                        "text-light": "#111827",
+                        "text-dark": "#F3F4F6",
+                        "subtext-light": "#6B7280",
+                        "subtext-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        '3xl': '1.5rem',
+                        '4xl': '2rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 antialiased font-sans transition-colors duration-300">
+<div class="w-full max-w-sm">
+<div class="bg-card-light dark:bg-card-dark rounded-[2.5rem] p-8 shadow-soft flex flex-col gap-6 transition-colors duration-300">
+<div class="flex items-end justify-between h-48 gap-2 sm:gap-3">
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[40%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[35%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[30%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[55%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[25%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[35%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[20%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[48%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[20%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[60%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[15%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[25%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Sat</span>
+</div>
+<div class="flex flex-col items-center gap-3 h-full justify-end flex-1 group">
+<div class="relative w-full h-full bg-gray-100 dark:bg-gray-800 rounded-t-xl rounded-b-xl overflow-hidden flex flex-col justify-end">
+<div class="absolute inset-0 bg-gray-50 dark:bg-gray-800/50"></div>
+<div class="relative h-[30%] bg-blue-200/50 dark:bg-blue-900/30 z-10 mx-auto w-[85%] rounded-t-xl mb-1"></div>
+<div class="relative w-[85%] mx-auto bg-gradient-to-b from-[#4FABFF] to-[#007AFF] h-[45%] rounded-xl z-20 shadow-[0_4px_12px_rgba(0,122,255,0.3)] transition-all duration-300 group-hover:brightness-110"></div>
+<div class="h-1"></div>
+</div>
+<span class="text-xs font-medium text-subtext-light dark:text-subtext-dark">Sun</span>
+</div>
+</div>
+<div class="flex flex-col items-start mt-2">
+<h2 class="text-xl font-semibold text-text-light dark:text-text-dark mb-1">Transactions</h2>
+<div class="flex items-center gap-4">
+<span class="text-4xl font-bold text-text-light dark:text-text-dark tracking-tight">54%</span>
+<div class="bg-blue-100 dark:bg-blue-900/40 text-primary dark:text-blue-300 px-3 py-1.5 rounded-full text-sm font-medium">
+                        vs last month
+                    </div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
