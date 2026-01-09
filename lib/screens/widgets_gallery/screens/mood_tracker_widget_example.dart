@@ -109,7 +109,6 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
           ),
         ),
       ),
-      ),
     );
   }
 }

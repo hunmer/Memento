@@ -166,6 +166,7 @@ class _WeeklyStepsProgressCardWidgetState
             offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
             child: Container(
               width: 380,
+              height: 600,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF111827) : Colors.white,
                 borderRadius: BorderRadius.circular(24),

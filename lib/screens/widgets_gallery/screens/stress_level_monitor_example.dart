@@ -175,12 +175,17 @@ class _StressLevelMonitorWidgetState extends State<StressLevelMonitorWidget>
           _buildHeader(isDark, primaryColor, surfaceColor),
           const SizedBox(height: 32),
 
-          // 当前分数和状态
-          _buildScoreSection(isDark, primaryColor),
-          const SizedBox(height: 24),
-
-          // 每周进度条
-          _buildWeeklyBars(isDark, primaryColor),
+          // 分数和进度条在同一行
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // 当前分数和状态
+              _buildScoreSection(isDark, primaryColor),
+              // 每周进度条靠右
+              _buildWeeklyBars(isDark, primaryColor),
+            ],
+          ),
         ],
       ),
     );
@@ -298,8 +303,6 @@ class _StressLevelMonitorWidgetState extends State<StressLevelMonitorWidget>
             ),
           ],
         ),
-        // 每周进度条
-        _buildWeeklyBars(isDark, primaryColor),
       ],
     );
   }
