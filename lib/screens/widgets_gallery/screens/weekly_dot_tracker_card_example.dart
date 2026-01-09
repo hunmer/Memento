@@ -108,6 +108,8 @@ class _WeeklyDotTrackerCardWidgetState extends State<WeeklyDotTrackerCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: 380,
+              height: 200,
+
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -195,9 +197,10 @@ class _WeeklyDotTrackerCardWidgetState extends State<WeeklyDotTrackerCardWidget>
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 50,
+          height: 54,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               AnimatedFlipCounter(
                 value: widget.currentValue * _animation.value,
@@ -210,15 +213,13 @@ class _WeeklyDotTrackerCardWidgetState extends State<WeeklyDotTrackerCardWidget>
                 ),
               ),
               const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(
-                  widget.unit,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: textColor.withOpacity(0.8),
-                  ),
+              Text(
+                widget.unit,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: textColor.withOpacity(0.8),
+                  height: 1.0,
                 ),
               ),
             ],
@@ -245,7 +246,10 @@ class _WeeklyDotTrackerCardWidgetState extends State<WeeklyDotTrackerCardWidget>
       children: List.generate(
         7,
         (index) {
-          final step = 0.07;
+          // 计算安全的 step 值，确保最大 end 值不超过 1.0
+          // 公式: step <= (1.0 - baseEnd) / (elementCount - 1)
+          // step <= (1.0 - 0.6) / 6 = 0.066
+          final step = 0.06;
           final itemAnimation = CurvedAnimation(
             parent: _animationController,
             curve: Interval(

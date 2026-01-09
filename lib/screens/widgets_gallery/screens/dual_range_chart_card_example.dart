@@ -173,7 +173,7 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 344,
+              width: 300,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -267,7 +267,9 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
           ...widget.ranges.asMap().entries.map((entry) {
             final index = entry.key;
             final data = entry.value;
-            final step = 0.08;
+            // 计算安全的 step 值，确保最大 end 值不超过 1.0
+            // 7 个元素，step <= (1.0 - 0.6) / 6 = 0.066
+            final step = 0.06;
             final itemAnimation = CurvedAnimation(
               parent: _animationController,
               curve: Interval(
@@ -414,9 +416,10 @@ class _RangeBar extends StatelessWidget {
     return Positioned(
       left: dayIndex * 48.0,
       child: SizedBox(
-        width: 48,
+        width: 12,
         height: 256,
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             // Primary Range Bar
             Positioned(
@@ -466,9 +469,9 @@ class _RangeBar extends StatelessWidget {
                 ],
               ),
             ),
-            // Day Label
+            // Day Label (positioned below the chart)
             Positioned(
-              bottom: 0,
+              bottom: -20,
               left: 0,
               right: 0,
               child: Center(

@@ -166,7 +166,7 @@ class _WeeklyStepsProgressCardWidgetState
             offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
             child: Container(
               width: 380,
-              height: 600,
+              height: 500,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF111827) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
@@ -189,7 +189,7 @@ class _WeeklyStepsProgressCardWidgetState
                     // 总步数和时间切换
                     _buildTotalSection(context, isDark, primaryColor),
                     const SizedBox(height: 24),
-                    // 柱状图
+                    // 柱状图区域（包含平均值参考线）
                     _buildChartSection(context, isDark, primaryColor),
                   ],
                 ),
@@ -256,19 +256,20 @@ class _WeeklyStepsProgressCardWidgetState
     bool isDark,
     Color primaryColor,
   ) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        SizedBox(
+          height: 40,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  SizedBox(
-                    width: 160,
+              SizedBox(
+                width: 140,
+                height: 40,
+                child: OverflowBox(
+                  maxWidth: 140,
+                  child: Center(
                     child: AnimatedFlipCounter(
                       value: widget.totalSteps.toDouble() * _counterAnimation.value,
                       fractionDigits: 0,
@@ -283,35 +284,40 @@ class _WeeklyStepsProgressCardWidgetState
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'steps',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? const Color(0xFF9CA3AF)
-                          : const Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                widget.dateRange,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: isDark
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF6B7280),
+              const SizedBox(width: 8),
+              SizedBox(
+                height: 17,
+                child: Text(
+                  'steps',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color:
+                        isDark
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF6B7280),
+                    height: 1.0,
+                  ),
                 ),
               ),
             ],
           ),
         ),
+        const SizedBox(height: 4),
+        Text(
+          widget.dateRange,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+          ),
+        ),
+        const SizedBox(height: 16),
         // 时间切换按钮
         Container(
+          width: double.infinity,
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF1F2937) : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(12),
@@ -319,9 +325,9 @@ class _WeeklyStepsProgressCardWidgetState
           padding: const EdgeInsets.all(4),
           child: Row(
             children: [
-              _buildTimeButton('Week', true, isDark),
-              _buildTimeButton('Month', false, isDark),
-              _buildTimeButton('Year', false, isDark),
+              Expanded(child: _buildTimeButton('Week', true, isDark)),
+              Expanded(child: _buildTimeButton('Month', false, isDark)),
+              Expanded(child: _buildTimeButton('Year', false, isDark)),
             ],
           ),
         ),
@@ -333,31 +339,32 @@ class _WeeklyStepsProgressCardWidgetState
   Widget _buildTimeButton(String label, bool isSelected, bool isDark) {
     final primaryColor = Theme.of(context).colorScheme.primary;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      margin: const EdgeInsets.symmetric(horizontal: 2),
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? isDark
-                    ? const Color(0xFF374151)
-                    : Colors.white
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: isSelected
-                ? [
+    return InkWell(
+      onTap: () {},
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              isSelected
+                  ? isDark
+                      ? const Color(0xFF374151)
+                      : Colors.white
+                  : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow:
+              isSelected
+                  ? [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
                   ]
-                : null,
-          ),
+                  : null,
+        ),
+        child: Center(
           child: Text(
             label,
             style: TextStyle(
@@ -383,39 +390,44 @@ class _WeeklyStepsProgressCardWidgetState
     bool isDark,
     Color primaryColor,
   ) {
+    final maxSteps = widget.dailyData
+        .map((d) => d.steps)
+        .reduce((a, b) => a > b ? a : b);
+    final chartHeight = 200.0;
+    final textHeight = 24.0;
+    final barAvailableHeight = chartHeight - textHeight;
+    final averageLineTop =
+        (1 - widget.averageSteps / maxSteps) * barAvailableHeight;
+
     return SizedBox(
-      height: 260,
+      height: chartHeight,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
+          // 柱状图
+          Padding(
+            padding: const EdgeInsets.only(left: 85),
+            child: SizedBox(
+              height: chartHeight,
+              child: _StepsBars(
+                dailyData: widget.dailyData,
+                animation: _fadeAnimation,
+                selectedIndex: _selectedIndex ?? 0,
+                maxSteps: maxSteps,
+                averageSteps: widget.averageSteps,
+                onTap: _selectDay,
+                isDark: isDark,
+                primaryColor: primaryColor,
+                availableHeight: chartHeight,
+              ),
+            ),
+          ),
           // 平均值参考线
           Positioned(
-            top: 0.65 * 260,
+            top: averageLineTop,
             left: 0,
             right: 0,
             child: _buildAverageLine(context, isDark, primaryColor),
-          ),
-          // 悬浮提示框
-          if (_selectedIndex != null)
-            Positioned(
-              top: 0.25 * 260,
-              left: 0.38,
-              right: 0,
-              child: _buildTooltip(context, isDark, primaryColor),
-            ),
-          // 柱状图
-          Positioned.fill(
-            top: 64,
-            bottom: 24,
-            child: _StepsBars(
-              dailyData: widget.dailyData,
-              animation: _fadeAnimation,
-              selectedIndex: _selectedIndex ?? 0,
-              maxSteps: widget.dailyData.map((d) => d.steps).reduce((a, b) => a > b ? a : b),
-              averageSteps: widget.averageSteps,
-              onTap: _selectDay,
-              isDark: isDark,
-              primaryColor: primaryColor,
-            ),
           ),
         ],
       ),
@@ -438,33 +450,53 @@ class _WeeklyStepsProgressCardWidgetState
               ),
             ),
             const SizedBox(height: 2),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                AnimatedFlipCounter(
-                  value: widget.averageSteps.toDouble() * _counterAnimation.value,
-                  fractionDigits: 0,
-                  textStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isDark
-                        ? const Color(0xFFF3F4F6)
-                        : const Color(0xFF111827),
+            SizedBox(
+              height: 16,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 16,
+                    child: OverflowBox(
+                      maxWidth: 40,
+                      child: Center(
+                        child: AnimatedFlipCounter(
+                          value:
+                              widget.averageSteps.toDouble() *
+                              _counterAnimation.value,
+                          fractionDigits: 0,
+                          textStyle: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                isDark
+                                    ? const Color(0xFFF3F4F6)
+                                    : const Color(0xFF111827),
+                            height: 1.0,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 2),
-                Text(
-                  'steps',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: isDark
-                        ? const Color(0xFF9CA3AF)
-                        : const Color(0xFF6B7280),
+                  const SizedBox(width: 2),
+                  SizedBox(
+                    height: 12,
+                    child: Text(
+                      'steps',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w400,
+                        color:
+                            isDark
+                                ? const Color(0xFF9CA3AF)
+                                : const Color(0xFF6B7280),
+                        height: 1.0,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -484,102 +516,6 @@ class _WeeklyStepsProgressCardWidgetState
     );
   }
 
-  /// 构建悬浮提示框
-  Widget _buildTooltip(BuildContext context, bool isDark, Color primaryColor) {
-    if (_selectedIndex == null) return const SizedBox.shrink();
-
-    final data = widget.dailyData[_selectedIndex!];
-
-    return Align(
-      alignment: const Alignment(-0.24, 0),
-      child: AnimatedOpacity(
-        opacity: _fadeAnimation.value,
-        duration: const Duration(milliseconds: 200),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF374151) : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? const Color(0xFF4B5563) : const Color(0xFFF3F4F6),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 6,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    data.date,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      color: isDark
-                          ? const Color(0xFFD1D5DB)
-                          : const Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  AnimatedFlipCounter(
-                    value: data.steps.toDouble() * _counterAnimation.value,
-                    fractionDigits: 0,
-                    textStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color:
-                          isDark ? Colors.white : const Color(0xFF111827),
-                    ),
-                  ),
-                  if (data.percentage != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        data.percentage!,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF10B981),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// 柱状图组件
@@ -592,6 +528,7 @@ class _StepsBars extends StatelessWidget {
   final Function(int) onTap;
   final bool isDark;
   final Color primaryColor;
+  final double availableHeight;
 
   const _StepsBars({
     required this.dailyData,
@@ -602,11 +539,13 @@ class _StepsBars extends StatelessWidget {
     required this.onTap,
     required this.isDark,
     required this.primaryColor,
+    required this.availableHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    final maxHeight = 180.0;
+    // 预留文字高度（12 + 12 = 24）
+    final maxHeight = availableHeight - 24;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -629,63 +568,74 @@ class _StepsBars extends StatelessWidget {
         return Expanded(
           child: GestureDetector(
             onTap: () => onTap(index),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AnimatedBuilder(
-                  animation: barAnimation,
-                  builder: (context, child) {
-                    return Container(
-                      height: barHeight * barAnimation.value,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        gradient: isSelected
-                            ? null
-                            : LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: isDark
-                                    ? [
-                                        const Color(0xFFFFD89E),
-                                        const Color(0xFFA66C1E),
-                                      ]
-                                    : [
-                                        const Color(0xFFFFD89E),
-                                        const Color(0xFFFFF0D9),
-                                      ],
-                              ),
-                        color: isSelected ? primaryColor : null,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: primaryColor.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : null,
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  data.day,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected
-                        ? isDark
-                            ? const Color(0xFFF3F4F6)
-                            : const Color(0xFF111827)
-                        : isDark
-                            ? const Color(0xFF9CA3AF)
-                            : const Color(0xFF6B7280),
+            child: OverflowBox(
+              alignment: Alignment.bottomCenter,
+              maxHeight: availableHeight,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedBuilder(
+                    animation: barAnimation,
+                    builder: (context, child) {
+                      return Container(
+                        constraints: BoxConstraints(maxHeight: maxHeight),
+                        height: barHeight * barAnimation.value,
+                        width: 20,
+                        decoration: BoxDecoration(
+                          gradient:
+                              isSelected
+                                  ? null
+                                  : LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors:
+                                        isDark
+                                            ? [
+                                              const Color(0xFFFFD89E),
+                                              const Color(0xFFA66C1E),
+                                            ]
+                                            : [
+                                              const Color(0xFFFFD89E),
+                                              const Color(0xFFFFF0D9),
+                                            ],
+                                  ),
+                          color: isSelected ? primaryColor : null,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow:
+                              isSelected
+                                  ? [
+                                    BoxShadow(
+                                      color: primaryColor.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                  : null,
+                        ),
+                      );
+                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Text(
+                    data.day,
+                    maxLines: 1,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color:
+                          isSelected
+                              ? isDark
+                                  ? const Color(0xFFF3F4F6)
+                                  : const Color(0xFF111827)
+                              : isDark
+                              ? const Color(0xFF9CA3AF)
+                              : const Color(0xFF6B7280),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

@@ -13,15 +13,7 @@ class MiniTrendCardExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('迷你趋势卡片')),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [const Color(0xFF064E3B), const Color(0xFF18181B)]
-                : [const Color(0xFFa3e635), const Color(0xFF10b981)],
-          ),
-        ),
+        color: isDark ? Colors.black : const Color(0xFFF3F4F6),
         child: const Center(
           child: MiniTrendCardWidget(
             title: 'Heart Rate',
@@ -94,6 +86,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
     final backgroundColor = isDark ? const Color(0xFF27272A) : Colors.white;
     final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
     final mutedColor = const Color(0xFF9CA3AF);
+    final borderColor = isDark ? const Color(0xFF3F3F46) : const Color(0xFFE5E7EB);
 
     final primaryColor = Theme.of(context).colorScheme.error;
 
@@ -110,6 +103,14 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: borderColor, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

@@ -373,7 +373,7 @@ class _TaskItem extends StatelessWidget {
       parent: animation,
       curve: Interval(
         0.2 + index * 0.1,
-        0.6 + index * 0.1,
+        (0.6 + index * 0.1).clamp(0.0, 1.0),
         curve: Curves.easeOutCubic,
       ),
     );
