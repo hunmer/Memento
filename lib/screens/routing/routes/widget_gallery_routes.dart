@@ -66,6 +66,9 @@ import 'package:Memento/screens/widgets_gallery/screens/stress_level_monitor_exa
 import 'package:Memento/screens/widgets_gallery/screens/daily_todo_list_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weight_tracking_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_steps_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/dual_range_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weekly_dot_tracker_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/mini_trend_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -411,6 +414,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/weekly_steps_progress_card',
           handler: (settings) => RouteHelpers.createRoute(const WeeklyStepsProgressCardExample(), settings: settings),
           description: '每周步数进度卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/dual_range_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const DualRangeChartCardExample(), settings: settings),
+          description: '双范围图表统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weekly_dot_tracker_card',
+          handler: (settings) => RouteHelpers.createRoute(const WeeklyDotTrackerCardExample(), settings: settings),
+          description: '周点阵追踪卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/mini_trend_card',
+          handler: (settings) => RouteHelpers.createRoute(const MiniTrendCardExample(), settings: settings),
+          description: '迷你趋势卡片',
         ),
       ];
 }

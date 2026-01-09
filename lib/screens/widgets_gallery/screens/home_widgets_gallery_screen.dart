@@ -305,6 +305,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'WeeklyStepsProgressCard - 每周步数柱状图统计卡片',
             route: '/widgets_gallery/weekly_steps_progress_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '双范围图表统计卡片',
+            subtitle: 'DualRangeChartCard - 双数值范围周统计图表卡片',
+            route: '/widgets_gallery/dual_range_chart_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.donut_large,
+            title: '周点阵追踪卡片',
+            subtitle: 'WeeklyDotTrackerCard - 周进度点阵追踪展示卡片',
+            route: '/widgets_gallery/weekly_dot_tracker_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.show_chart,
+            title: '迷你趋势卡片',
+            subtitle: 'MiniTrendCard - 迷你折线图趋势展示卡片',
+            route: '/widgets_gallery/mini_trend_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
