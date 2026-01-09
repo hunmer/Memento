@@ -179,6 +179,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'BarChartStatsCard - 柱状图数据统计展示卡片',
             route: '/widgets_gallery/bar_chart_stats_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.directions_run,
+            title: '活动进度卡片',
+            subtitle: 'ActivityProgressCard - 活动里程进度与点状进度卡片',
+            route: '/widgets_gallery/activity_progress_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '每日条形图卡片',
+            subtitle: 'DailyBarChartCard - 多日数据条形图展示卡片',
+            route: '/widgets_gallery/daily_bar_chart_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.calendar_view_week,
+            title: '周条形图卡片',
+            subtitle: 'WeeklyBarChartCard - 一周数据堆叠条形图展示卡片',
+            route: '/widgets_gallery/weekly_bar_chart_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),

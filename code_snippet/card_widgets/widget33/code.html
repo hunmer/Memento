@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Expenses Breakdown Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D8F57E", // The Lime color used for the badge
+                        "background-light": "#F3F4F6", // Light gray background for light mode context
+                        "background-dark": "#000000", // Deep black for dark mode context
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1C1C1E", // Apple dark gray
+                        "chart-purple": "#8B5CF6", // Violet
+                        "chart-lime": "#D8F57E", // Lime
+                        "chart-orange": "#FDBA74", // Orange
+                        "chart-teal": "#2DD4BF", // Teal/Emerald
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>.chart-segment {
+            transition: stroke-dasharray 0.3s ease;
+            transform-origin: center;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display p-6 transition-colors duration-300">
+<div class="w-full max-w-[340px] bg-card-light dark:bg-card-dark rounded-[2.5rem] p-6 shadow-2xl relative overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
+<div class="flex flex-col items-start gap-2 mb-4">
+<span class="bg-primary text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                Expenses
+            </span>
+<p class="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                In the past 7 days
+            </p>
+</div>
+<div class="relative w-full aspect-square max-h-[220px] mx-auto flex items-center justify-center my-2">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+<circle class="chart-segment" cx="50" cy="50" fill="none" r="40" stroke="#D8F57E" stroke-dasharray="55 196" stroke-dashoffset="0" stroke-linecap="round" stroke-width="8"></circle>
+<circle class="chart-segment" cx="50" cy="50" fill="none" r="40" stroke="#FDBA74" stroke-dasharray="50 201" stroke-dashoffset="-65" stroke-linecap="round" stroke-width="8"></circle>
+<circle class="chart-segment" cx="50" cy="50" fill="none" r="40" stroke="#2DD4BF" stroke-dasharray="80 171" stroke-dashoffset="-125" stroke-linecap="round" stroke-width="8"></circle>
+<circle class="chart-segment" cx="50" cy="50" fill="none" r="40" stroke="#A78BFA" stroke-dasharray="45 206" stroke-dashoffset="-215" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">32K</span>
+</div>
+</div>
+<div class="space-y-3 mt-4">
+<div class="flex items-center justify-between group cursor-default">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-chart-teal"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Relax</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">54%</span>
+</div>
+<div class="flex items-center justify-between group cursor-default">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-chart-purple"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Food</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">27%</span>
+</div>
+<div class="flex items-center justify-between group cursor-default">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-chart-lime"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Transport</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">12%</span>
+</div>
+<div class="flex items-center justify-between group cursor-default">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-chart-orange"></span>
+<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Pets</span>
+</div>
+<span class="text-sm font-semibold text-gray-900 dark:text-white">7%</span>
+</div>
+</div>
+</div>
+<script>
+        // Simple dark mode toggle logic for previewing both states
+        // In a real app, this would respect system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        // Uncomment below to force toggle on click for testing</script>
+
+</body></html>

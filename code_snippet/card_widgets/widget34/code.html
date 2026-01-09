@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Social Profile Card Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FFFFFF",
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#111827",
+                        "card-overlay": "rgba(255, 255, 255, 0.4)", // Translucent white for light mode overlay
+                        "card-overlay-dark": "rgba(0, 0, 0, 0.5)", // Translucent black for dark mode overlay
+                        "verified-green": "#22C55E", // Green for the checkmark
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        'widget': '3rem', // Large border radius for the specific widget shape
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display antialiased p-6">
+<div class="relative w-full max-w-[360px] aspect-[3/5] rounded-widget overflow-hidden shadow-soft group">
+<img alt="Portrait of Sophie Bennett" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQa5mwNY07R4lgli2Pgrxz3J9D6F6Plz6c9LGFNt4BYe9qp7wGfu6OnEFI-UAnneZ-qsWObIYUU_LVIN9_RypXCavX3hG7YUVTVgYgYhQiHXBBfy_W5EtO3oCjLBQ2eNlXRXxiKMEcC_tGq7UHLix8Zm7_Zawt0dvlp6ouuGhSkraBr9hjl6hKfAC5CL8rTgObw-xh-DnmtLVs5Msvp8N6dZgasjTEMmwR8or2JI6MCsXD0i43ZVNUATo21RHx95nyAFAf5zJuuDyg"/>
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/90 dark:to-black/90 h-full w-full"></div>
+<div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-white/80 via-white/40 to-transparent dark:from-black/90 dark:via-black/60 dark:to-transparent"></div>
+<div class="absolute bottom-0 left-0 right-0 p-8 pb-10 flex flex-col justify-end h-full z-10">
+<div class="flex items-center gap-2 mb-2">
+<h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    Sophie Bennett
+                </h1>
+<div class="text-green-600 bg-green-100 dark:bg-green-900 rounded-full p-[2px] flex items-center justify-center">
+<span class="material-icons-round text-lg leading-none" style="font-size: 20px;">verified</span>
+</div>
+</div>
+<p class="text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 font-medium mb-8 pr-4">
+                Product Designer who focuses on simplicity &amp; usability.
+            </p>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-1.5 text-gray-800 dark:text-gray-200">
+<span class="material-icons-outlined text-xl">person_outline</span>
+<span class="font-semibold text-base">312</span>
+</div>
+<div class="flex items-center gap-1.5 text-gray-800 dark:text-gray-200">
+<span class="material-icons-outlined text-xl">check_box_outline_blank</span> 
+<span class="font-semibold text-base">48</span>
+</div>
+</div>
+<button class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white px-5 py-2.5 rounded-full font-semibold text-sm shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    Follow 
+                    <span class="material-icons-round text-base font-bold">add</span>
+</button>
+</div>
+</div>
+</div>
+
+</body></html>

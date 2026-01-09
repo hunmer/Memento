@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weight Tracking Widget</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"Space Mono"', 'monospace'],
+                    },
+                    colors: {
+                        primary: "#ef4444", // Red-500
+                        "background-light": "#f3f4f6", // Gray-100
+                        "background-dark": "#09090b", // Zinc-950
+                        "card-light": "#ffffff",
+                        "card-dark": "#18181b", // Zinc-900
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-mono p-4">
+<div class="w-full max-w-[360px] bg-card-light dark:bg-card-dark rounded-[2.5rem] p-6 shadow-sm dark:shadow-none dark:border dark:border-zinc-800 relative overflow-hidden">
+<div class="flex justify-between items-start mb-10">
+<div class="flex items-baseline space-x-2">
+<h1 class="text-sm font-bold text-black dark:text-white tracking-wide">WEIGHT</h1>
+<span class="text-sm font-normal text-gray-300 dark:text-zinc-600 tracking-wide">BMI</span>
+</div>
+<div class="text-sm font-normal text-black dark:text-white tracking-wide">
+                -0.5
+            </div>
+</div>
+<div class="relative w-full h-32 flex">
+<div class="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-xs z-10">
+<span class="text-primary font-bold absolute bottom-[60%] translate-y-1/2">92</span>
+<span class="text-black dark:text-white absolute bottom-[15%]">89</span>
+</div>
+<div class="ml-10 flex-1 relative h-full flex items-end justify-between pr-2">
+<div class="absolute w-full border-t border-dashed border-primary/60 dark:border-primary/80 bottom-[60%] z-0"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 30%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 45%;"></div>
+<div class="w-[2px] flex flex-col justify-end z-10 h-full rounded-sm">
+<div class="w-full bg-primary mb-0" style="height: 5%;"></div> 
+<div class="w-full bg-black dark:bg-white" style="height: 60%;"></div>
+</div>
+<div class="w-[2px] flex flex-col justify-end z-10 h-full rounded-sm">
+<div class="w-full bg-primary" style="height: 10%;"></div>
+<div class="w-full bg-black dark:bg-white" style="height: 60%;"></div>
+</div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 55%;"></div>
+<div class="w-[2px] flex flex-col justify-end z-10 h-full rounded-sm">
+<div class="w-full bg-primary" style="height: 12%;"></div>
+<div class="w-full bg-black dark:bg-white" style="height: 60%;"></div>
+</div>
+<div class="w-[2px] flex flex-col justify-end z-10 h-full rounded-sm">
+<div class="w-full bg-primary" style="height: 2%;"></div>
+<div class="w-full bg-black dark:bg-white" style="height: 60%;"></div>
+</div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 40%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 35%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 48%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 42%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 38%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 50%;"></div>
+<div class="w-[2px] flex flex-col justify-end z-10 h-full rounded-sm">
+<div class="w-full bg-primary" style="height: 4%;"></div>
+<div class="w-full bg-black dark:bg-white" style="height: 60%;"></div>
+</div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 45%;"></div>
+<div class="w-[2px] flex flex-col justify-end z-10 h-full rounded-sm">
+<div class="w-full bg-primary" style="height: 8%;"></div>
+<div class="w-full bg-black dark:bg-white" style="height: 60%;"></div>
+</div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 52%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 25%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 55%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 58%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 40%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 45%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 55%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 20%;"></div>
+<div class="w-[2px] bg-black dark:bg-white z-10 rounded-sm" style="height: 58%;"></div>
+</div>
+</div>
+</div>
+
+</body></html>

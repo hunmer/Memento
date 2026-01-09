@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mileage Tracker Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#34D335", // Vibrant green from the screenshot
+                        "background-light": "#F2F2F7", // iOS system gray 6
+                        "background-dark": "#000000", // iOS pure black
+                        "widget-dark": "#1C1C1E", // iOS elevated gray
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        'widget': '1.5rem', // iOS widget curvature
+                    },
+                    backgroundImage: {
+                        'dot-pattern': 'radial-gradient(circle, #34D335 1px, transparent 1px)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>.bg-grid-dots {
+            background-size: 10px 10px;
+            mask-image: linear-gradient(to bottom left, black, transparent 70%);
+            -webkit-mask-image: linear-gradient(to bottom left, black, transparent 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-sans antialiased p-6">
+<div class="relative w-full max-w-[360px] h-[170px] bg-white dark:bg-[#1C1C1E] rounded-[26px] shadow-lg dark:shadow-none overflow-hidden p-5 flex flex-col justify-between select-none">
+<div class="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(#34D335_1px,transparent_1px)] [background-size:6px_6px] opacity-20 dark:opacity-30 mask-image-gradient pointer-events-none" style="mask-image: radial-gradient(circle at top right, black, transparent 80%); -webkit-mask-image: radial-gradient(circle at top right, black, transparent 80%);"></div>
+<div class="flex justify-between items-start z-10">
+<div class="flex flex-col">
+<h2 class="text-[17px] font-semibold text-gray-900 dark:text-white leading-tight">Mileage</h2>
+<span class="text-[13px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium">January 2025</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-sm">
+<span class="material-icons-round text-white text-[18px]" style="font-size: 18px;">directions_run</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between mt-auto mb-3 z-10">
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold text-gray-900 dark:text-white tracking-tight">153,20</span>
+<span class="text-lg font-medium text-gray-500 dark:text-gray-400">km</span>
+</div>
+<div class="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
+                15 activities
+            </div>
+</div>
+<div class="flex items-center gap-[5px] z-10 mt-1">
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div> 
+<div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div> 
+<div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div> 
+</div>
+</div>
+
+</body></html>

@@ -48,6 +48,9 @@ import 'package:Memento/screens/widgets_gallery/screens/storage_breakdown_widget
 import 'package:Memento/screens/widgets_gallery/screens/route_tracking_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/watch_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/bar_chart_stats_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/activity_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/daily_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weekly_bar_chart_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -303,6 +306,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/bar_chart_stats_card',
           handler: (settings) => RouteHelpers.createRoute(const BarChartStatsCardExample(), settings: settings),
           description: '柱状图统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/activity_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const ActivityProgressCardExample(), settings: settings),
+          description: '活动进度卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/daily_bar_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const DailyBarChartCardExample(), settings: settings),
+          description: '每日条形图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weekly_bar_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const WeeklyBarChartCardExample(), settings: settings),
+          description: '周条形图卡片',
         ),
       ];
 }
