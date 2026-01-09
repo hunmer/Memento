@@ -632,7 +632,139 @@ class SegmentedProgressCardWidget extends StatelessWidget {
 - 尺寸使用原型中的数值
 - 考虑深色/浅色模式差异
 
-### 问题 4: Interval 动画断言错误（end > 1.0）
+### 问题 4: 布局溢出错误（RenderFlex overflowed）
+
+**错误信息：**
+```
+A RenderFlex overflowed by X pixels on the bottom.
+The relevant error-causing widget was: Column
+```
+
+**原因：**
+在固定高度的容器中使用 `Spacer()` 或 Column 内容超出容器高度。
+
+**解决方案：**
+```dart
+// ❌ 错误：使用 Spacer 导致布局不可控
+Column(
+  children: [
+    HeaderWidget(),
+    Spacer(),
+    ContentWidget(),
+    FooterWidget(),
+  ],
+)
+
+// ✅ 正确：使用固定的 SizedBox
+Column(
+  mainAxisSize: MainAxisSize.min,  // 让 Column 只占用必需空间
+  children: [
+    HeaderWidget(),
+    const SizedBox(height: 20),  // 固定间距
+    ContentWidget(),
+    const SizedBox(height: 14),  // 固定间距
+    FooterWidget(),
+  ],
+)
+```
+
+**布局计算建议：**
+- 固定高度容器：仔细计算所有子组件高度总和
+- 使用 `mainAxisSize: MainAxisSize.min` 让 Column 自适应
+- 间距使用固定 `SizedBox` 而非 `Spacer()`
+
+### 问题 5: 动画时布局抖动
+
+**现象：**
+AnimatedFlipCounter 或其他动画元素导致布局在动画执行时抖动。
+
+**原因：**
+动画元素没有固定的尺寸约束，导致布局在动画过程中重新计算。
+
+**解决方案：**
+```dart
+// ❌ 错误：没有固定尺寸
+Row(
+  children: [
+    AnimatedFlipCounter(value: value * animation.value),
+    Text('km'),
+  ],
+)
+
+// ✅ 正确：给所有动画元素设置固定尺寸
+SizedBox(
+  height: 48,  // 固定整个行的高度
+  child: Row(
+    children: [
+      SizedBox(
+        width: 170,   // 固定数值宽度
+        height: 48,   // 固定数值高度
+        child: AnimatedFlipCounter(
+          value: value * animation.value,
+          textStyle: TextStyle(
+            fontSize: 40,
+            height: 1.0,  // 固定行高，防止文字变化影响布局
+          ),
+        ),
+      ),
+      const SizedBox(width: 4),
+      SizedBox(
+        height: 24,   // 固定单位高度
+        child: Text('km'),
+      ),
+    ],
+  ),
+)
+```
+
+**关键点：**
+1. 给包含动画的 Row 设置固定高度的 `SizedBox`
+2. 给 AnimatedFlipCounter 设置固定的 width 和 height
+3. 给 textStyle 添加 `height: 1.0` 固定行高
+4. 给所有 Text 组件包裹固定高度的 `SizedBox`
+5. 使用 `crossAxisAlignment: center` 而非 `baseline`
+
+### 问题 6: 装饰点阵超出卡片边界
+
+**原因：**
+使用 Container 装饰时，点阵绘制超出了圆角范围。
+
+**解决方案：**
+```dart
+// ❌ 错误：点阵可能超出圆角边界
+Positioned(
+  top: 0,
+  right: 0,
+  child: Container(
+    decoration: BoxDecoration(
+      color: primaryColor.withOpacity(0.2),
+      borderRadius: BorderRadius.only(topRight: Radius.circular(26)),
+    ),
+    child: CustomPaint(painter: _DotPatternPainter(...)),
+  ),
+)
+
+// ✅ 正确：使用 ClipRRect 裁剪 + 将透明度应用到颜色
+Positioned(
+  top: 0,
+  right: 0,
+  child: ClipRRect(
+    borderRadius: BorderRadius.only(topRight: Radius.circular(26)),
+    child: ShaderMask(
+      shaderCallback: (bounds) => RadialGradient(...).createShader(bounds),
+      blendMode: BlendMode.dstIn,
+      child: CustomPaint(
+        size: const Size(128, 128),  // 明确指定尺寸
+        painter: _DotPatternPainter(
+          color: primaryColor.withOpacity(0.2),  // 透明度在颜色上
+        ),
+      ),
+    ),
+  ),
+)
+```
+
+### 问题 7: Interval 动画断言错误（end > 1.0）
 
 **错误信息：**
 ```

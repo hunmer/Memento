@@ -200,6 +200,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'WeeklyBarChartCard - 一周数据堆叠条形图展示卡片',
             route: '/widgets_gallery/weekly_bar_chart_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.account_balance_wallet,
+            title: '钱包余额概览卡片',
+            subtitle: 'WalletBalanceCard - 钱包余额与收支统计卡片',
+            route: '/widgets_gallery/wallet_balance_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.local_fire_department,
+            title: '习惯连续打卡追踪器',
+            subtitle: 'HabitStreakTracker - 连续打卡天数追踪展示组件',
+            route: '/widgets_gallery/habit_streak_tracker',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.music_note,
+            title: '音乐播放器卡片',
+            subtitle: 'MusicPlayerCard - 音乐播放控制与歌词展示卡片',
+            route: '/widgets_gallery/music_player_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
