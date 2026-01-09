@@ -147,6 +147,7 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
             offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
             child: Container(
               width: 360,
+              height: 600,
               constraints: const BoxConstraints(minHeight: 400),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
