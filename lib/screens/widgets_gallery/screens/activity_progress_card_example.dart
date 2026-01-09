@@ -113,14 +113,9 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
                   Positioned(
                     top: 0,
                     right: 0,
-                    child: Container(
-                      width: 128,
-                      height: 128,
-                      decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(isDark ? 0.3 : 0.2),
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(26),
-                        ),
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(26),
                       ),
                       child: ShaderMask(
                         shaderCallback: (bounds) {
@@ -137,8 +132,9 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
                         },
                         blendMode: BlendMode.dstIn,
                         child: CustomPaint(
+                          size: const Size(128, 128),
                           painter: _DotPatternPainter(
-                            color: primaryColor,
+                            color: primaryColor.withOpacity(isDark ? 0.3 : 0.2),
                             dotSize: 1,
                             spacing: 6,
                           ),
@@ -151,6 +147,7 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // 标题和图标
                         Row(
@@ -200,49 +197,73 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
                             ),
                           ],
                         ),
-                        const Spacer(),
+                        const SizedBox(height: 20),
                         // 数值和活动数
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.baseline,
-                              textBaseline: TextBaseline.alphabetic,
-                              children: [
-                                AnimatedFlipCounter(
-                                  value: widget.value * _animation.value,
-                                  fractionDigits: 2,
-                                  textStyle: TextStyle(
-                                    fontSize: 40,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.grey.shade900,
-                                    letterSpacing: -0.5,
-                                  ),
+                        SizedBox(
+                          height: 48,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 48,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 170,
+                                      height: 48,
+                                      child: AnimatedFlipCounter(
+                                        value: widget.value * _animation.value,
+                                        fractionDigits: 2,
+                                        textStyle: TextStyle(
+                                          fontSize: 40,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              isDark
+                                                  ? Colors.white
+                                                  : Colors.grey.shade900,
+                                          letterSpacing: -0.5,
+                                          height: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    SizedBox(
+                                      height: 24,
+                                      child: Text(
+                                        widget.unit,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              isDark
+                                                  ? Colors.grey.shade400
+                                                  : Colors.grey.shade500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  widget.unit,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              '${widget.activities} activities',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                               ),
-                            ),
-                          ],
+                              SizedBox(
+                                height: 20,
+                                child: Text(
+                                  '${widget.activities} activities',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? Colors.grey.shade400
+                                            : Colors.grey.shade500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
                         // 进度点
                         _ProgressDots(
                           total: widget.totalProgress,

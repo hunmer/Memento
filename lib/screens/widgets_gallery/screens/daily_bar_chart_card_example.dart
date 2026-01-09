@@ -148,25 +148,27 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                     Positioned(
                       top: 0,
                       right: 0,
-                      child: Opacity(
-                        opacity: isDark ? 0.3 : 0.2,
-                        child: Container(
-                          width: 128,
-                          height: 128,
-                          decoration: BoxDecoration(
-                            gradient: RadialGradient(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topRight: Radius.circular(40),
+                        ),
+                        child: ShaderMask(
+                          shaderCallback: (bounds) {
+                            return RadialGradient(
                               center: Alignment.topRight,
                               radius: 1.0,
                               colors: [
-                                Colors.grey.shade600,
+                                Colors.black,
                                 Colors.transparent,
                               ],
                               stops: const [0.0, 0.8],
-                            ),
-                          ),
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.dstIn,
                           child: CustomPaint(
+                            size: const Size(128, 128),
                             painter: _DotPatternPainter(
-                              color: Colors.grey.shade600,
+                              color: Colors.grey.shade600.withOpacity(isDark ? 0.3 : 0.2),
                               dotSize: 1,
                               spacing: 6,
                             ),
@@ -238,37 +240,47 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                           ),
                           const SizedBox(height: 8),
                           // 数值显示
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            textBaseline: TextBaseline.alphabetic,
-                            children: [
-                              AnimatedFlipCounter(
-                                value:
-                                    widget.value.toDouble() * _animation.value,
-                                fractionDigits: 0,
-                                textStyle: TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      isDark
-                                          ? Colors.white
-                                          : Colors.grey.shade900,
-                                  letterSpacing: -1,
+                          SizedBox(
+                            height: 56,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 280,
+                                  height: 56,
+                                  child: AnimatedFlipCounter(
+                                    value:
+                                        widget.value.toDouble() * _animation.value,
+                                    fractionDigits: 0,
+                                    textStyle: TextStyle(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          isDark
+                                              ? Colors.white
+                                              : Colors.grey.shade900,
+                                      letterSpacing: -1,
+                                      height: 1.0,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                widget.unit,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                  color:
-                                      isDark
-                                          ? Colors.grey.shade400
-                                          : Colors.grey.shade500,
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                  height: 28,
+                                  child: Text(
+                                    widget.unit,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w500,
+                                      color:
+                                          isDark
+                                              ? Colors.grey.shade400
+                                              : Colors.grey.shade500,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 24),
                           // 条形图
@@ -309,11 +321,15 @@ class _DailyBars extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: List.generate(bars.length, (index) {
         final bar = bars[index];
+        // 确保 Interval 的 end 值不超过 1.0
+        // 公式：step <= (1.0 - baseEnd) / (elementCount - 1)
+        // step <= (1.0 - 0.55) / 29 = 0.0155
+        final step = 0.015;
         final barAnimation = CurvedAnimation(
           parent: animation,
           curve: Interval(
-            index * 0.025,
-            0.55 + index * 0.025,
+            index * step,
+            0.55 + index * step,
             curve: Curves.easeOutCubic,
           ),
         );

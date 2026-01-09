@@ -51,6 +51,9 @@ import 'package:Memento/screens/widgets_gallery/screens/bar_chart_stats_card_exa
 import 'package:Memento/screens/widgets_gallery/screens/activity_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/daily_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/wallet_balance_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/habit_streak_tracker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/music_player_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -321,6 +324,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/weekly_bar_chart_card',
           handler: (settings) => RouteHelpers.createRoute(const WeeklyBarChartCardExample(), settings: settings),
           description: '周条形图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/wallet_balance_card',
+          handler: (settings) => RouteHelpers.createRoute(const WalletBalanceCardExample(), settings: settings),
+          description: '钱包余额概览卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/habit_streak_tracker',
+          handler: (settings) => RouteHelpers.createRoute(const HabitStreakTrackerExample(), settings: settings),
+          description: '习惯连续打卡追踪器',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/music_player_card',
+          handler: (settings) => RouteHelpers.createRoute(const MusicPlayerCardExample(), settings: settings),
+          description: '音乐播放器卡片',
         ),
       ];
 }

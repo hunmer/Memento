@@ -148,15 +148,20 @@ class _WeeklyBarChartCardWidgetState extends State<WeeklyBarChartCardWidget>
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  AnimatedFlipCounter(
-                                    value: widget.percentage.toDouble() * _animation.value,
-                                    fractionDigits: 0,
-                                    suffix: '%',
-                                    textStyle: TextStyle(
-                                      fontSize: 40,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827),
-                                      letterSpacing: -0.5,
+                                  SizedBox(
+                                    width: 100,
+                                    height: 48,
+                                    child: AnimatedFlipCounter(
+                                      value: widget.percentage.toDouble() * _animation.value,
+                                      fractionDigits: 0,
+                                      suffix: '%',
+                                      textStyle: TextStyle(
+                                        fontSize: 40,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827),
+                                        letterSpacing: -0.5,
+                                        height: 1.0,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
@@ -215,11 +220,15 @@ class _WeeklyBars extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: List.generate(data.length, (index) {
         final item = data[index];
+        // 确保 Interval 的 end 值不超过 1.0
+        // 公式：step <= (1.0 - baseEnd) / (elementCount - 1)
+        // step <= (1.0 - 0.5) / 6 = 0.083
+        final step = 0.08;
         final barAnimation = CurvedAnimation(
           parent: animation,
           curve: Interval(
-            index * 0.1,
-            0.5 + index * 0.1,
+            index * step,
+            0.5 + index * step,
             curve: Curves.easeOutCubic,
           ),
         );
