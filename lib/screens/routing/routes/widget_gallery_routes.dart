@@ -108,6 +108,7 @@ import 'package:Memento/screens/widgets_gallery/screens/donut_chart_stats_card_e
 import 'package:Memento/screens/widgets_gallery/screens/news_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/news_update_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/inbox_message_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/upcoming_tasks_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/notes_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rounded_reminders_list_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/circular_metrics_card_example.dart';
@@ -120,6 +121,9 @@ import 'package:Memento/screens/widgets_gallery/screens/nutrition_progress_card_
 import 'package:Memento/screens/widgets_gallery/screens/trend_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/social_activity_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/screen_time_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/vertical_property_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/task_progress_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_widget_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -572,6 +576,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '圆角任务列表卡片',
         ),
         RouteDefinition(
+          path: '/widgets_gallery/upcoming_tasks_widget',
+          handler: (settings) => RouteHelpers.createRoute(const UpcomingTasksWidgetExample(), settings: settings),
+          description: '即将到来的任务小组件',
+        ),
+        RouteDefinition(
           path: '/widgets_gallery/journal_prompt_card',
           handler: (settings) => RouteHelpers.createRoute(const JournalPromptCardExample(), settings: settings),
           description: '日记提示卡片',
@@ -735,6 +744,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/screen_time_chart',
           handler: (settings) => RouteHelpers.createRoute(const ScreenTimeChartExample(), settings: settings),
           description: '屏幕时间统计图表',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/vertical_property_card',
+          handler: (settings) => RouteHelpers.createRoute(const VerticalPropertyCardExample(), settings: settings),
+          description: '垂直属性卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/task_progress_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const TaskProgressListCardExample(), settings: settings),
+          description: '任务进度列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/vertical_bar_chart_widget',
+          handler: (settings) => RouteHelpers.createRoute(const VerticalBarChartExample(), settings: settings),
+          description: '垂直条形图卡片',
         ),
       ];
 }
