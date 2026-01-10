@@ -81,6 +81,9 @@ import 'package:Memento/screens/widgets_gallery/screens/weekly_bars_card_example
 import 'package:Memento/screens/widgets_gallery/screens/medication_tracker_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/dual_bar_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/timeline_status_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/sleep_stage_chart_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -501,6 +504,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/modern_rounded_balance_widget',
           handler: (settings) => RouteHelpers.createRoute(const ModernRoundedBalanceWidgetExample(), settings: settings),
           description: '余额卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/dual_bar_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const DualBarChartCardExample(), settings: settings),
+          description: '双柱状图统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/timeline_status_card',
+          handler: (settings) => RouteHelpers.createRoute(const TimelineStatusCardExample(), settings: settings),
+          description: '时间线状态卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/sleep_stage_chart',
+          handler: (settings) => RouteHelpers.createRoute(const SleepStageChartExample(), settings: settings),
+          description: '睡眠阶段图表',
         ),
       ];
 }
