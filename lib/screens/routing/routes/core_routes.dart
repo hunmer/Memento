@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:Memento/screens/routing/route_definition.dart';
 import 'package:Memento/screens/routing/route_helpers.dart';
 import 'package:Memento/screens/home_screen/home_screen.dart';

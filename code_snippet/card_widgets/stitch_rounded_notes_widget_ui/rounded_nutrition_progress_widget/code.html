@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Nutrition Progress Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ff5a5f", // Approximating the pink/red color
+              "background-light": "#f3f4f6", // Light gray background for the page
+              "background-dark": "#1f2937", // Dark gray background for the page
+              "card-light": "#ffffff",
+              "card-dark": "#374151",
+              "text-gray-light": "#9ca3af",
+              "text-gray-dark": "#9ca3af",
+              "bar-bg-light": "#f3f4f6",
+              "bar-bg-dark": "#4b5563",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1.5rem", // Very rounded corners as seen in iOS widgets
+            },
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-[360px] bg-card-light dark:bg-card-dark rounded-DEFAULT shadow-lg p-5 flex flex-row h-auto overflow-hidden">
+<div class="flex-1 flex flex-col justify-between pr-4 border-r border-gray-100 dark:border-gray-600/50">
+<div class="flex items-center gap-1.5 mb-2">
+<span class="text-lg">🔥</span>
+<span class="text-sm font-medium text-text-gray-light dark:text-gray-400">Calories</span>
+</div>
+<div class="mt-2 mb-3">
+<h1 class="text-3xl font-bold text-gray-900 dark:text-white leading-tight">470 Cal</h1>
+</div>
+<div class="w-full bg-bar-bg-light dark:bg-bar-bg-dark h-2.5 rounded-full mb-3 overflow-hidden">
+<div class="bg-primary h-2.5 rounded-full w-[25%]"></div>
+</div>
+<div class="text-xs font-semibold text-primary dark:text-red-400 mt-auto">
+                1,360 Cal remaining
+            </div>
+</div>
+<div class="flex-1 flex flex-col justify-between pl-4 gap-4">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-xs font-semibold mb-1">
+<div class="flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
+<span>🍔</span>
+<span>Protein</span>
+</div>
+<span class="text-emerald-400 font-bold">66</span>
+</div>
+<div class="w-full bg-bar-bg-light dark:bg-bar-bg-dark h-1.5 rounded-full overflow-hidden">
+<div class="bg-emerald-400 h-1.5 rounded-full w-[70%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-xs font-semibold mb-1">
+<div class="flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
+<span>🍉</span>
+<span>Carbs</span>
+</div>
+<span class="text-orange-300 font-bold">35</span>
+</div>
+<div class="w-full bg-bar-bg-light dark:bg-bar-bg-dark h-1.5 rounded-full overflow-hidden">
+<div class="bg-orange-300 h-1.5 rounded-full w-[55%]"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between items-center text-xs font-semibold mb-1">
+<div class="flex items-center gap-1.5 text-gray-900 dark:text-gray-100">
+<span>🥛</span>
+<span>Fats</span>
+</div>
+<span class="text-blue-500 font-bold">210</span>
+</div>
+<div class="w-full bg-bar-bg-light dark:bg-bar-bg-dark h-1.5 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-1.5 rounded-full w-[65%]"></div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

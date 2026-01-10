@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Property Showcase Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        // Using the purple/blue from the screenshot context
+                        primary: "#5B5CE6", 
+                        "background-light": "#F3F4F6",
+                        "background-dark": "#18181B",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        // Custom radius to match the "pronounced rounded corners"
+                        'widget': '2rem', 
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-primary flex items-center justify-center min-h-screen p-6 font-sans antialiased">
+<div class="relative w-full max-w-[380px] h-[240px] bg-white dark:bg-zinc-800 rounded-widget shadow-2xl flex overflow-hidden transition-colors duration-300">
+<div class="w-1/2 relative h-full">
+<img alt="Modern living room interior with tan leather sofa, high ceilings, and pendant lighting" class="absolute inset-0 w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCIUN5u7_vXAmPtmC1n8CohO3eS0nZOPxCdcvHkmt1gIycehc3bA86brIYWSrJTWE6Wix61_MBSRyWe1uhT0fDO3PsKCQ3_BWhVESA4KhsovB-7V2yyRmartUzJ7Y-4imptSg_sOYJby5zQl_Nh7CLA6YSu-JvkZlW3V0aF1_x4aq5RKTHGwdFl9qEfHNSpTlpcmytGbAH2zOMnzAPVbgRmf4i8ef0MhxwxconBvFNmKy3QE5BzUvw5s8EDAwiCwlO_MrtTXCrvyA"/>
+</div>
+<div class="w-1/2 h-full flex flex-col justify-between p-5">
+<div class="flex items-center gap-1.5 text-gray-400 dark:text-zinc-400">
+<span class="material-icons-outlined text-base">schedule</span>
+<span class="text-xs font-medium tracking-wide">14:00</span>
+</div>
+<div class="flex-grow flex items-center">
+<h2 class="text-[1.15rem] font-bold leading-[1.3] text-gray-900 dark:text-white">
+                    A Georgian Masterpiece in the Heart
+                </h2>
+</div>
+<div class="flex items-center gap-1.5 text-gray-400 dark:text-zinc-400">
+<span class="material-icons-outlined text-base">calendar_today</span>
+<span class="text-xs font-medium tracking-wide">01 Feb 2020</span>
+</div>
+</div>
+</div>
+<script>
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+</body></html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Banking Balance Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#000000", // Using black as primary ink color for this minimalist design
+              "background-light": "#F2F2F7", // iOS Light Gray Background
+              "background-dark": "#000000", // iOS Dark Background
+              "card-light": "#FFFFFF",
+              "card-dark": "#1C1C1E",
+              "text-secondary-light": "#8E8E93",
+              "text-secondary-dark": "#98989D",
+              "badge-light": "#F3F4F6",
+              "badge-dark": "#2C2C2E",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1.5rem",
+              "widget": "2rem", // Extra rounded for iOS widget style
+            },
+            boxShadow: {
+                'widget': '0 4px 24px rgba(0, 0, 0, 0.04)',
+            }
+          },
+        },
+      };
+    </script>
+<style>body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display h-screen w-full flex items-center justify-center p-6 antialiased selection:bg-gray-200 dark:selection:bg-gray-700">
+<div class="w-[330px] h-[330px] bg-card-light dark:bg-card-dark rounded-widget shadow-widget p-7 flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
+<div class="flex justify-between items-center w-full">
+<h2 class="text-lg font-semibold text-black dark:text-white tracking-tight">
+                Citibank
+            </h2>
+<div class="px-3 py-1 bg-badge-light dark:bg-badge-dark rounded-full">
+<span class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wide">
+                    USD
+                </span>
+</div>
+</div>
+<div class="flex flex-col mb-4">
+<h1 class="text-[2.75rem] leading-tight font-bold text-black dark:text-white tracking-tight">
+                $1964.45
+            </h1>
+<p class="text-base font-medium text-text-secondary-light dark:text-text-secondary-dark mt-1">
+                Current balance
+            </p>
+</div>
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-1.5">
+<div class="flex items-center justify-center w-6 h-6 rounded-full bg-green-50 dark:bg-green-900/20">
+<span class="material-icons-round text-emerald-500 text-lg" style="font-size: 18px;">north</span>
+</div>
+<span class="text-lg font-medium text-black dark:text-white">
+                    4.7k
+                </span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="flex items-center justify-center w-6 h-6 rounded-full bg-red-50 dark:bg-red-900/20">
+<span class="material-icons-round text-rose-500 text-lg" style="font-size: 18px;">south</span>
+</div>
+<span class="text-lg font-medium text-black dark:text-white">
+                    2.8k
+                </span>
+</div>
+</div>
+</div>
+
+</body></html>

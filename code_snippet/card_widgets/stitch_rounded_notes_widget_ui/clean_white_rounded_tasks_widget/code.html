@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clean White Rounded Tasks Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3B82F6", // Blue color used for links/indicators
+              "background-light": "#F3F4F6", // Light gray background for canvas
+              "background-dark": "#111827", // Dark background for canvas
+              "card-light": "#FFFFFF",
+              "card-dark": "#1F2937",
+              "text-primary-light": "#111827",
+              "text-primary-dark": "#F9FAFB",
+              "text-secondary-light": "#9CA3AF",
+              "text-secondary-dark": "#9CA3AF",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1.5rem",
+              xl: "1rem",
+              "2xl": "1.5rem",
+              "3xl": "2rem",
+            },
+          },
+        },
+      };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display p-6 transition-colors duration-300">
+<div class="relative w-full max-w-[360px] aspect-[4/4.2] rounded-3xl bg-card-light dark:bg-card-dark shadow-xl p-6 flex flex-col justify-between transition-colors duration-300 overflow-hidden">
+<div class="mb-4">
+<h1 class="text-4xl font-medium text-text-primary-light dark:text-text-primary-dark tracking-tight">56</h1>
+<p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mt-1">Upcoming tasks</p>
+</div>
+<div class="flex-1 flex flex-col gap-3.5 overflow-hidden">
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-primary rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Design mobile UI dashboard for iOS</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-rose-400 rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Calculate budget and contract</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-amber-400 rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Search for a UI kit</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-primary rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Create HTML &amp; CSS for startup</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-emerald-400 rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Design search page for website</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-rose-400 rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Send an estimate budget for app</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-amber-400 rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Search for a mobile UI kit</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="w-1 h-4 bg-primary rounded-full shrink-0"></div>
+<span class="text-[15px] leading-tight text-text-primary-light dark:text-text-primary-dark truncate font-medium">Export assets for HTML developer</span>
+</div>
+</div>
+<div class="mt-4 pt-1">
+<button class="text-primary font-semibold text-[15px] hover:opacity-80 transition-opacity flex items-center gap-1">
+                +10 more
+            </button>
+</div>
+</div>
+<div class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden pointer-events-none opacity-40 dark:opacity-20">
+<div class="absolute top-1/4 -left-20 w-96 h-96 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+<div class="absolute top-1/4 -right-20 w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+<div class="absolute -bottom-32 left-20 w-96 h-96 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+</div>
+
+</body></html>

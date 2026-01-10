@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Enhanced Rounded Steps Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6", 
+                        "background-light": "#eff6ff", 
+                        "background-dark": "#0f172a", 
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }.ring-svg {
+            transform: rotate(-90deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gradient-to-br from-blue-400 to-blue-600 dark:from-slate-900 dark:to-slate-800 min-h-screen flex items-center justify-center p-6 antialiased selection:bg-blue-200 dark:selection:bg-blue-900">
+<div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl p-7 w-full max-w-[400px] relative overflow-hidden transition-all duration-300 mx-auto">
+<div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none dark:bg-blue-400/10"></div>
+<div class="flex justify-between items-center mb-5 relative z-10">
+<h2 class="text-gray-800 dark:text-gray-100 font-bold text-lg tracking-tight">Jan 23, 2025</h2>
+<a class="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors group" href="#">
+<span class="text-sm font-medium">16 Feb</span>
+<span class="material-symbols-rounded text-xl transform group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+</div>
+<div class="flex items-end justify-between relative z-10">
+<div class="flex flex-col mb-1">
+<div class="flex items-baseline gap-2 mb-2">
+<span class="text-[3.25rem] leading-none font-extrabold text-gray-900 dark:text-white tracking-tight">858</span>
+<span class="text-lg font-medium text-gray-500 dark:text-gray-400 -translate-y-1">steps</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex items-center justify-center">
+<span class="material-symbols-rounded text-orange-500 dark:text-orange-400 text-2xl drop-shadow-sm">local_fire_department</span>
+</div>
+<span class="text-gray-700 dark:text-gray-300 font-medium text-base">Normal</span>
+</div>
+</div>
+<div class="flex items-center space-x-3 mb-1">
+<div class="relative w-11 h-11 flex items-center justify-center">
+<svg class="w-full h-full ring-svg" viewBox="0 0 36 36">
+<path class="text-gray-100 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+<path class="text-orange-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="70, 100" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<span class="material-symbols-rounded absolute text-orange-500 text-[1.1rem]">footprint</span>
+</div>
+<div class="relative w-11 h-11 flex items-center justify-center">
+<svg class="w-full h-full ring-svg" viewBox="0 0 36 36">
+<path class="text-gray-100 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+<path class="text-blue-600" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="20, 100" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<div class="absolute w-3.5 h-3.5 bg-blue-600 rounded-[1px] transform rotate-45 flex items-center justify-center shadow-sm">
+<div class="w-1 h-1 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative w-11 h-11 flex items-center justify-center">
+<svg class="w-full h-full ring-svg" viewBox="0 0 36 36">
+<path class="text-gray-100 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="4"></path>
+<path class="text-gray-700 dark:text-gray-400" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="40, 100" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<span class="material-symbols-rounded absolute text-gray-700 dark:text-gray-400 text-[1.2rem]">directions_run</span>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

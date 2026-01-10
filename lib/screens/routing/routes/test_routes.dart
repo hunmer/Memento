@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:Memento/screens/routing/route_definition.dart';
 import 'package:Memento/screens/routing/route_helpers.dart';
 import 'package:Memento/screens/js_console/js_console_screen.dart';

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Task Progress Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#FBBC05", // Matches the yellow/amber progress bar
+              "background-light": "#6366F1", // Indigo base for background
+              "background-dark": "#312E81", // Dark indigo for background
+              "card-light": "#FFFFFF",
+              "card-dark": "#1E293B",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              "3xl": "1.75rem",
+              "4xl": "2.25rem", // Extra rounded for the widget look
+            },
+          },
+        },
+      };
+    </script>
+<style>body { transition: background-color 0.3s ease; }
+        .widget-card { transition: background-color 0.3s ease, color 0.3s ease; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-slate-900 dark:to-indigo-950 min-h-screen flex items-center justify-center p-6 font-sans antialiased">
+<div class="widget-card w-full max-w-sm bg-card-light dark:bg-card-dark rounded-4xl shadow-2xl overflow-hidden p-8 relative">
+<div class="mb-8">
+<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Widgefy UI kit</h1>
+<p class="text-gray-400 dark:text-gray-500 text-sm font-medium">Graphics design</p>
+</div>
+<div class="mb-8">
+<div class="flex justify-between items-center mb-3">
+<div class="flex items-center space-x-2 text-gray-400 dark:text-gray-500">
+<span class="material-icons-round text-lg">format_list_bulleted</span>
+<span class="text-sm font-medium">Progress</span>
+</div>
+<span class="text-gray-400 dark:text-gray-500 text-sm font-medium">7 / 14</span>
+</div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full w-1/2 transition-all duration-500 ease-out"></div>
+</div>
+</div>
+<div class="mb-8">
+<h3 class="text-gray-400 dark:text-gray-500 text-sm font-medium mb-2">Pending</h3>
+<div class="flex flex-col">
+<div class="py-4 border-b border-gray-100 dark:border-gray-700">
+<p class="text-gray-800 dark:text-gray-200 text-sm font-semibold leading-tight">
+                        Design search page for website
+                    </p>
+</div>
+<div class="py-4 border-b border-gray-100 dark:border-gray-700">
+<p class="text-gray-800 dark:text-gray-200 text-sm font-semibold leading-tight">
+                        Send an estimate budget for app
+                    </p>
+</div>
+<div class="py-4 border-b border-gray-100 dark:border-gray-700">
+<p class="text-gray-800 dark:text-gray-200 text-sm font-semibold leading-tight">
+                        Export assets for HTML developer
+                    </p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center space-x-5 text-gray-400 dark:text-gray-500">
+<div class="flex items-center space-x-1.5 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">
+<span class="material-icons-round text-lg">chat_bubble_outline</span>
+<span class="text-xs font-semibold">4</span>
+</div>
+<div class="flex items-center space-x-1.5 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer">
+<span class="material-icons-round text-lg transform rotate-45">attach_file</span>
+<span class="text-xs font-semibold">1</span>
+</div>
+</div>
+<div class="flex -space-x-3">
+<img alt="Team member 1" class="w-8 h-8 rounded-full border-2 border-white dark:border-card-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2E34rpRUxl41JgmYHEf1632M2dz9F_oHyMn1u_7r-NjLVTdySSTi5s7lu_cTAXGFLmZWp9kT0uLY51magEqProtp768PJrVo02zkPIXWrKsREg4NL-dmmUKOOD4hAfCgMokZmCopqoQt7RKjm7xlbEOYurKcdD3t4hq3PJgacmPs_iH-6oqGeI9TrmiH_yEgv1-T6l-RtbFcZUtoLrHgBuT0h2DvbL4WGT_fYukt5o_Q45rAE60lAnw44mCEIgdY2zbLktTzm4w"/>
+<img alt="Team member 2" class="w-8 h-8 rounded-full border-2 border-white dark:border-card-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNJkHVLv3wQgstyElOSle3RMoSWr-1-UxEnZqmIBu6HVJBFhfwEVxfjSb2EF0y5TOd4smsVGfSs9IMuxBYcWba5SH3ut3dmhIZt4PTJ9lPt9zvKN-1WqcNhn_qh01gVD5mexs_LSv-VKtPHL-uWTAtIZgo6SIZb8VEAqcU4CO0Fjt6T6GoH3RCcJtUC3ydsN6XvV3NEuQ6XoUfBGVz3OIk6fS0gI1PKNBf7GMCpxk18IGtag0TydvjITBc3Hzl_V11JYxf1ZK3eQ"/>
+<img alt="Team member 3" class="w-8 h-8 rounded-full border-2 border-white dark:border-card-dark object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlpM5lz1d7uhYRxL_1Zq-0vrok0JRfmuwmk8k1AH5S0j3On58wmS5sl6qAEY38keWvk6Y3lV5spuIId3ctczvjAHLSffWkMokpQVJtnfFReI0-GAnsAFWuVXBuFWhQnAS843wwP2ejdTd63AdnT8U9WA7bgEXVdzwx2vMLkFoXFc_8srCGXrFi-YMung8i3c_kmxbJHOR55SQTZWvQZmM08P0GHpEcfeC8xe236NTw6HV5HFYaMqT_kN-v5mdmHplJIiv-KL0uNQ"/>
+</div>
+</div>
+</div>
+
+</body></html>

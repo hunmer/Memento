@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 /// 支出趋势折线图示例
 class SpendingTrendChartExample extends StatelessWidget {

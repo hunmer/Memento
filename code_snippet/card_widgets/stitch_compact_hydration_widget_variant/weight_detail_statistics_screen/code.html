@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Weight Detail Statistics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#00C48C", // Vibrant green from screenshot
+                        "background-light": "#F9FAFB", // Very light grey
+                        "background-dark": "#111827", // dark slate
+                        "surface-light": "#FFFFFF",
+                        "surface-dark": "#1F2937",
+                        "text-light": "#1F2937",
+                        "text-dark": "#F3F4F6",
+                        "text-muted-light": "#6B7280",
+                        "text-muted-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                        '3xl': "1.5rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark min-h-screen flex justify-center overflow-hidden font-display transition-colors duration-300">
+<div class="w-full max-w-md h-full min-h-screen bg-background-light dark:bg-background-dark relative flex flex-col">
+<div class="h-12 w-full flex items-end justify-between px-6 pb-2 text-sm font-semibold text-text-light dark:text-text-dark">
+<span>9:41</span>
+<div class="flex items-center space-x-1">
+<span class="material-icons-round text-sm">signal_cellular_alt</span>
+<span class="material-icons-round text-sm">wifi</span>
+<span class="material-icons-round text-sm transform rotate-90">battery_full</span>
+</div>
+</div>
+<header class="flex items-center justify-between px-6 py-4">
+<button class="p-2 -ml-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-text-light dark:text-text-dark">
+<span class="material-icons-round text-2xl">chevron_left</span>
+</button>
+<h1 class="text-lg font-semibold text-text-light dark:text-text-dark">Weight</h1>
+<button class="p-2 -mr-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-text-light dark:text-text-dark">
+<span class="material-icons-round text-2xl">notifications_none</span>
+</button>
+</header>
+<main class="flex-1 flex flex-col px-6 pt-4 space-y-8">
+<div class="flex flex-col items-center justify-center space-y-2">
+<div class="flex items-center space-x-3 mb-1">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+<span class="material-icons-round text-white text-xl">monitor_weight</span>
+</div>
+<div class="flex items-baseline">
+<span class="text-5xl font-bold tracking-tight text-gray-900 dark:text-white">67.8</span>
+<span class="text-xl text-text-muted-light dark:text-text-muted-dark ml-1 font-medium">kg</span>
+</div>
+</div>
+<p class="text-text-muted-light dark:text-text-muted-dark text-sm">You're on a normal weight range</p>
+</div>
+<div class="bg-gray-100 dark:bg-surface-dark rounded-2xl p-1.5 flex justify-between items-center text-sm font-medium">
+<button class="flex-1 py-2 text-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors">1d</button>
+<button class="flex-1 py-2 text-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors">1w</button>
+<button class="flex-1 py-2 text-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors">1m</button>
+<button class="flex-1 py-2 text-center text-text-muted-light dark:text-text-muted-dark hover:text-primary transition-colors">1y</button>
+<button class="flex-1 py-2 text-center bg-white dark:bg-gray-600 shadow-sm rounded-xl text-gray-900 dark:text-white transition-all">All Time</button>
+</div>
+<div class="flex-1 w-full relative">
+<div class="w-full h-64 relative">
+<svg class="w-full h-full overflow-visible" viewBox="0 0 350 220">
+<defs>
+<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#00C48C" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#00C48C" stop-opacity="0"></stop>
+</linearGradient>
+<filter height="140%" id="shadow" width="140%" x="-20%" y="-20%">
+<fedropshadow dx="0" dy="4" flood-color="#00C48C" flood-opacity="0.3" stdDeviation="3"></fedropshadow>
+</filter>
+</defs>
+<g class="stroke-gray-200 dark:stroke-gray-700" stroke-dasharray="4,4" stroke-width="1">
+<line x1="0" x2="0" y1="0" y2="200"></line>
+<line x1="35" x2="35" y1="0" y2="200"></line>
+<line x1="70" x2="70" y1="0" y2="200"></line>
+<line x1="105" x2="105" y1="0" y2="200"></line>
+<line x1="140" x2="140" y1="0" y2="200"></line>
+<line x1="175" x2="175" y1="0" y2="200"></line>
+<line x1="210" x2="210" y1="0" y2="200"></line>
+<line x1="245" x2="245" y1="0" y2="200"></line>
+<line x1="280" x2="280" y1="0" y2="200"></line>
+<line x1="315" x2="315" y1="0" y2="200"></line>
+<line x1="350" x2="350" y1="0" y2="200"></line>
+</g>
+<g class="stroke-gray-200 dark:stroke-gray-700" stroke-dasharray="4,4" stroke-width="1">
+<line x1="0" x2="350" y1="50" y2="50"></line>
+<line x1="0" x2="350" y1="100" y2="100"></line>
+<line x1="0" x2="350" y1="150" y2="150"></line>
+<line x1="0" x2="350" y1="200" y2="200"></line>
+</g>
+<path d="M0,130 L32,110 L64,125 L96,40 L128,150 L160,125 L192,115 L224,180 L256,145 L288,135 L320,195 L350,195 L350,220 L0,220 Z" fill="url(#chartGradient)"></path>
+<path class="stroke-primary" d="M0,130 L32,110 L64,125 L96,40 L128,150 L160,125 L192,115 L224,180 L256,145 L288,135 L320,195 L350,195" fill="none" filter="url(#shadow)" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<g class="fill-primary stroke-white dark:stroke-background-dark" stroke-width="3">
+<circle cx="32" cy="110" r="5"></circle>
+<circle cx="64" cy="125" r="5"></circle>
+<circle cx="96" cy="40" r="5"></circle> 
+<circle cx="128" cy="150" r="5"></circle>
+<circle cx="160" cy="125" r="5"></circle>
+<circle cx="192" cy="115" r="5"></circle>
+<circle cx="224" cy="180" r="5"></circle> 
+<circle cx="256" cy="145" r="5"></circle>
+<circle cx="288" cy="135" r="5"></circle>
+<circle cx="320" cy="195" r="5"></circle>
+</g>
+</svg>
+<div class="flex justify-between mt-4 px-0 w-full text-xs text-text-muted-light dark:text-text-muted-dark font-medium">
+<span class="w-6 text-center">12</span>
+<span class="w-6 text-center">13</span>
+<span class="w-6 text-center">14</span>
+<span class="w-6 text-center">15</span>
+<span class="w-6 text-center">16</span>
+<span class="w-6 text-center">17</span>
+<span class="w-6 text-center">18</span>
+<span class="w-6 text-center">19</span>
+<span class="w-6 text-center">20</span>
+<span class="w-6 text-center">21</span>
+<span class="w-6 text-center">22</span>
+<span class="w-6 text-center">23</span>
+</div>
+</div>
+</div>
+</main>
+<div class="h-8 w-full flex justify-center items-center pb-2">
+<div class="w-32 h-1 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+</div>
+</div>
+<script>
+        // Simple script to toggle dark mode for testing purposes
+        // In a real app, this would respect system preferences
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+</body></html>

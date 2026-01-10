@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sleep Analysis Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#EBB305", // The golden yellow seen in the background/accents
+              "background-light": "#FDFDFD", // Clean whiteish background for the card
+              "background-dark": "#1E1E1E", // Dark mode background
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#2C2C2C",
+              "sleep-green": "#9CB573", // Core sleep color
+              "sleep-orange": "#E99547", // Irregularity/REM-ish color in the bar
+              "sleep-purple": "#C8B6F9", // Another phase
+              "sleep-yellow": "#F4CD26", // Post-REM color
+              "sleep-brown": "#8D6E63", // REM label color (though bar is orange in pic, legend says brown... following visual bar color for chart, legend color for legend dots)
+              "text-brown": "#5D4037", // Main text color
+              "bubble-brown": "#4E342E", // Tooltip background
+            },
+            fontFamily: {
+              display: ["Nunito", "ui-rounded", "system-ui", "sans-serif"],
+              sans: ["Nunito", "ui-rounded", "system-ui", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1.5rem",
+              'xl': '1rem',
+              '2xl': '1.5rem',
+              '3xl': '2rem',
+              '4xl': '2.5rem', // Extra pronounced
+            },
+            boxShadow: {
+              'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+              'inner-light': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.03)',
+            }
+          },
+        },
+      };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Nunito', sans-serif;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }.tooltip-tail {
+            width: 0; 
+            height: 0; 
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #4E342E;
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }.grid-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: #E5E7EB;
+        }
+        .dark .grid-line {
+            background-color: #404040;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-primary flex items-center justify-center min-h-screen p-4 sm:p-8">
+<div class="relative w-full max-w-md mx-auto bg-background-light dark:bg-background-dark rounded-[3rem] shadow-soft overflow-hidden border-4 border-white dark:border-zinc-800 p-6 sm:p-8">
+<div class="flex justify-between items-center bg-[#F8F5F2] dark:bg-zinc-800/50 rounded-full p-1.5 mb-8 overflow-x-auto no-scrollbar">
+<button class="flex-1 px-3 py-2 text-sm font-bold text-text-brown/60 dark:text-gray-400 whitespace-nowrap hover:text-text-brown dark:hover:text-white transition-colors">1 Day</button>
+<button class="flex-1 px-4 py-2 text-sm font-bold text-text-brown dark:text-white bg-white dark:bg-zinc-700 rounded-full shadow-sm whitespace-nowrap">1 Week</button>
+<button class="flex-1 px-3 py-2 text-sm font-bold text-text-brown/60 dark:text-gray-400 whitespace-nowrap hover:text-text-brown dark:hover:text-white transition-colors">1 Month</button>
+<button class="flex-1 px-3 py-2 text-sm font-bold text-text-brown/60 dark:text-gray-400 whitespace-nowrap hover:text-text-brown dark:hover:text-white transition-colors">1 Year</button>
+<button class="flex-1 px-3 py-2 text-sm font-bold text-text-brown/60 dark:text-gray-400 whitespace-nowrap hover:text-text-brown dark:hover:text-white transition-colors">All Time</button>
+</div>
+<div class="relative h-64 mb-6">
+<div class="absolute inset-0 flex justify-between pointer-events-none z-0 px-2 pb-6">
+<div class="relative w-full h-full flex justify-between">
+<div class="h-full w-px bg-gray-200 dark:bg-zinc-700"></div>
+<div class="h-full w-px bg-gray-200 dark:bg-zinc-700"></div>
+<div class="h-full w-px bg-gray-200 dark:bg-zinc-700"></div>
+<div class="h-full w-px bg-gray-200 dark:bg-zinc-700"></div>
+<div class="h-full w-px bg-gray-200 dark:bg-zinc-700"></div>
+</div>
+</div>
+<div class="absolute bottom-0 w-full flex justify-between text-xs font-semibold text-gray-400 dark:text-gray-500 px-0">
+<span>11:00</span>
+<span>12:00</span>
+<span>13:00</span>
+<span>14:00</span>
+<span>15:00</span>
+</div>
+<div class="absolute inset-0 z-10 px-2 pb-8 pt-4">
+<div class="absolute top-[20%] left-0 w-[55%] h-12 bg-sleep-green rounded-full shadow-sm dark:brightness-90"></div>
+<div class="absolute top-[65%] left-[30%] w-10 h-10 bg-sleep-yellow rounded-full shadow-sm dark:brightness-90"></div>
+<div class="absolute top-[45%] left-[45%] w-[38%] h-12 bg-sleep-orange rounded-full shadow-sm dark:brightness-90 relative group cursor-pointer">
+<div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-full transition-opacity"></div>
+</div>
+<div class="absolute top-[70%] right-[5%] w-[15%] h-12 bg-sleep-purple rounded-full shadow-sm dark:brightness-90"></div>
+<div class="absolute top-[10%] right-[10%] z-20 flex flex-col items-center">
+<div class="bg-bubble-brown text-white text-sm font-bold py-2 px-4 rounded-full shadow-lg whitespace-nowrap relative">
+                        Sleep Irregularity
+                        <div class="tooltip-tail"></div>
+</div>
+<div class="w-px h-24 bg-bubble-brown dark:bg-bubble-brown mt-2"></div>
+<div class="absolute bottom-[-10px] left-[5px] transform translate-y-full">
+<img alt="cursor" class="w-6 h-6 drop-shadow-md filter invert grayscale contrast-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgc0A_FfKOrUXSwQkgMO36UmT4_awwysCy0YV1z_OJhZ8tiUkjl-ksOEnTZ2iFuNcsw37X0xJFvIb0tza8c_bn4uj8lqTYcbE1-VZUWgENrk0h4qn1FsKpZSWHkHrj69RP_1rlCnho3_CMcbbRPRfLq_6rZCwZHBMrLCCKDb9Iy5ytMRUWKTVr9MNXpTUz8RS2yNwA2CnjDicQqLSt03BEPHTpkT_oLUJ16lFs8-faR0pku1uR1dxW2mREF-2jmFmLn-xqjsp9t90"/>
+<svg class="w-8 h-8 fill-white stroke-black stroke-2 drop-shadow-md" style="filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));" viewBox="0 0 24 24">
+<path d="M10,2l5.09,11.64L19.36,12.73,12,20.09,4.64,12.73l4.27,1.09Z" style="display:none;"></path> 
+</svg>
+<svg class="absolute -top-1 -left-1 drop-shadow-md" fill="white" height="32" viewBox="0 0 24 24" width="32" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 21.5L17.5 13L13 10V3C13 2.44772 12.5523 2 12 2C11.4477 2 11 2.44772 11 3V10H10C9.44772 10 9 10.4477 9 11V21.5Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M7.6 21.3C7.6 21.3 4 17.5 4 14C4 12 5.5 10.5 7 11.5L9 12.5" fill="white" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M16 21.5H9" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+<path d="M16 21.5C16 21.5 19.5 18 19.5 15C19.5 13 18 11.5 17 12.5L13.5 15" fill="white" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<div class="flex justify-between items-center px-4 mt-8">
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-sleep-green"></div>
+<span class="text-text-brown dark:text-gray-200 font-bold text-lg">Core</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-[#8D6E63]"></div> 
+<span class="text-text-brown dark:text-gray-200 font-bold text-lg">REM</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 rounded-full bg-sleep-yellow"></div>
+<span class="text-text-brown dark:text-gray-200 font-bold text-lg">Post-REM</span>
+</div>
+</div>
+</div>
+
+</body></html>

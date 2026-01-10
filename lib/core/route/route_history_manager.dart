@@ -295,11 +295,6 @@ class RouteHistoryManager extends NavigatorObserver {
     }
   }
 
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didRemove(route, previousRoute);
-    // remove 操作通常不记录
-  }
 
   /// 从 Route 对象记录路由访问
   void _recordRoute(Route<dynamic> route) {

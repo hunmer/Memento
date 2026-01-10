@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Weather Forecast Widget UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#a7f3d0", // Light green for the icon background
+                        "background-light": "#f3f4f6", // Light grey background for the page
+                        "background-dark": "#111827", // Dark background for the page
+                        "card-light": "#ffffff", // White card
+                        "card-dark": "#1f2937", // Dark card for dark mode fallback
+                        "bar-active": "#5D837F", // Darker blue-grey from screenshot
+                        "bar-inactive": "#A5D3E3", // Light blue from screenshot
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem", // Pronounced rounded corners
+                        "xl": "1.75rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 antialiased selection:bg-green-100 selection:text-green-900">
+<div class="w-full max-w-[340px]">
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-6 shadow-xl relative overflow-hidden transition-all duration-300">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 bg-green-200 dark:bg-green-900 rounded-full flex items-center justify-center shadow-sm">
+<span class="material-icons-round text-green-800 dark:text-green-300 text-sm">wb_sunny</span>
+</div>
+<span class="text-gray-900 dark:text-white font-medium text-base tracking-wide">Weather</span>
+</div>
+<div class="flex space-x-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-icons-round text-xl">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-icons-round text-xl">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="space-y-1 mb-8">
+<div class="text-gray-500 dark:text-gray-400 text-sm font-medium">London</div>
+<div class="text-gray-900 dark:text-white text-2xl font-bold tracking-tight">Heavy showers</div>
+<div class="text-gray-900 dark:text-white text-xl font-medium">12° <span class="text-gray-400 dark:text-gray-500 ml-1">4°</span></div>
+</div>
+<div class="flex items-end justify-between h-16 space-x-[6px] px-1">
+<div class="w-3 bg-slate-500 dark:bg-slate-600 rounded-full h-[70%]" title="Current"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[60%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[55%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[45%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[35%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[30%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[25%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[20%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[20%]"></div>
+<div class="w-3 bg-sky-200 dark:bg-sky-700 rounded-full h-[25%]"></div>
+</div>
+</div>
+</div>
+
+</body></html>

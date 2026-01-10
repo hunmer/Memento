@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Progress Widget UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#5B4DBC", // Deep purple background
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#18181b", // Zinc 900
+                        "accent-teal": "#4ADE80", // Using a vibrant green-teal
+                        "text-secondary-light": "#9CA3AF", // Gray 400
+                        "text-secondary-dark": "#6B7280", // Gray 500
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        'widget': '2rem', // 32px for that distinct iOS widget look
+                    },
+                },
+            },
+        };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-primary min-h-screen flex items-center justify-center font-display p-6">
+<div class="w-full max-w-[360px] bg-card-light dark:bg-card-dark rounded-widget p-7 shadow-2xl transition-colors duration-300">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-icons-round text-text-secondary-light text-xl">schedule</span>
+<span class="text-xs font-bold tracking-[0.15em] text-text-secondary-light uppercase">Progress</span>
+</div>
+<div class="flex items-end justify-between">
+<div class="flex flex-col relative z-10">
+<div class="flex items-start">
+<h1 class="text-5xl font-extrabold text-black dark:text-white tracking-tight leading-none">360</h1>
+<span class="material-icons-round text-gray-400 text-2xl ml-1 -mt-1 transform translate-y-1">arrow_upward</span>
+</div>
+<p class="text-gray-900 dark:text-gray-300 font-semibold text-sm mt-2">Tasks left</p>
+</div>
+<div class="relative w-36 h-20 -mr-2 mb-2">
+<svg class="w-full h-full overflow-visible" viewBox="0 0 140 60">
+<path d="M 0 45 
+                           Q 15 55, 30 45 
+                           T 55 35 
+                           T 80 15 
+                           Q 100 25, 115 25 
+                           T 140 45" fill="none" stroke="#4ADE80" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<circle class="text-card-light dark:text-card-dark transition-colors duration-300" cx="80" cy="15" fill="#4ADE80" r="4.5" stroke="currentColor" stroke-width="3"></circle>
+</svg>
+</div>
+</div>
+<div class="flex items-center justify-between mt-8">
+<div class="text-[#4ADE80] font-bold text-sm tracking-wide">
+                +40 (15.40%)
+            </div>
+<div class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">
+                Updated 1hr ago
+            </div>
+</div>
+</div>
+
+</body></html>

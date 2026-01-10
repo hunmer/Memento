@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 /// 垂直柱状图卡片示例
 class VerticalBarChartCardExample extends StatelessWidget {

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Budget Tracker Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#34d399", // Teal/Emerald accent color
+                        "background-light": "#F3F4F6", 
+                        "background-dark": "#18181b", 
+                        "card-light": "#ffffff",
+                        "card-dark": "#27272a",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        '3xl': "1.75rem",
+                        '4xl': "2.25rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-rounded {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#5E5CE6] dark:bg-background-dark min-h-screen flex items-center justify-center p-6 transition-colors duration-300">
+<div class="w-full max-w-[340px] bg-card-light dark:bg-card-dark rounded-4xl shadow-2xl p-7 relative overflow-hidden transition-colors duration-300">
+<div class="flex items-center space-x-2 mb-6 opacity-80">
+<span class="material-symbols-rounded text-gray-400 dark:text-gray-500 text-lg">schedule</span>
+<span class="text-[11px] font-bold tracking-[0.1em] text-gray-400 dark:text-gray-500 uppercase">Budget</span>
+</div>
+<div class="flex justify-between items-center mb-7">
+<div class="flex flex-col">
+<div class="flex items-start space-x-1.5 translate-y-1">
+<h1 class="text-[32px] leading-none font-bold text-gray-900 dark:text-white tracking-tight">$142.000</h1>
+<span class="material-symbols-rounded text-primary text-base transform -scale-x-100 rotate-12 mt-1">
+                        reply
+                    </span>
+</div>
+<p class="text-gray-400 dark:text-gray-500 text-sm mt-2 font-medium">Total income</p>
+</div>
+<div class="relative w-[100px] h-12 flex items-center justify-end">
+<div class="absolute top-[55%] left-0 right-0 border-t border-dashed border-gray-100 dark:border-gray-700 w-full z-0"></div>
+<svg class="w-full h-full overflow-visible z-10" viewBox="0 0 100 50">
+<path class="stroke-primary" d="M0 35 C 10 35, 15 45, 25 35 S 40 10, 50 12 S 70 30, 80 20 S 95 35, 100 45" fill="none" stroke="#34d399" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+<div class="flex justify-between items-center mt-auto pt-1">
+<div class="text-primary font-bold text-xs tracking-wide">
+                +40 (15.40%)
+            </div>
+<div class="text-gray-400 dark:text-gray-500 text-[11px] font-medium">
+                Updated 1hr ago
+            </div>
+</div>
+</div>
+
+</body></html>

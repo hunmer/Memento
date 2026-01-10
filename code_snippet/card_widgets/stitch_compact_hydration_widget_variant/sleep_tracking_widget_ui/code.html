@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sleep Tracking Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F36E24", // Vibrant orange from the screenshot
+                        "background-light": "#F2F8F2", // Very light green tint for main background
+                        "background-dark": "#1C1C1E", // iOS dark mode bg
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#2C2C2E",
+                        "text-primary-light": "#111827",
+                        "text-primary-dark": "#FFFFFF",
+                        "text-secondary-light": "#6B7280",
+                        "text-secondary-dark": "#9CA3AF",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        "3xl": "1.75rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>.ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4">
+<div class="w-full max-w-sm">
+<div class="bg-card-light dark:bg-card-dark rounded-3xl shadow-lg dark:shadow-none p-6 relative overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-rounded text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">
+                        bedtime
+                    </span>
+<h2 class="text-xl font-semibold text-text-primary-light dark:text-text-primary-dark">Sleep</h2>
+</div>
+<button class="flex items-center text-text-secondary-light dark:text-text-secondary-dark hover:text-primary transition-colors text-sm font-medium">
+                    Today
+                    <span class="material-symbols-rounded text-lg ml-0.5">chevron_right</span>
+</button>
+</div>
+<div class="flex items-end justify-between">
+<div class="flex flex-col mb-1">
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold text-text-primary-light dark:text-text-primary-dark tracking-tight">3.57</span>
+<span class="text-lg text-text-secondary-light dark:text-text-secondary-dark font-medium">hr</span>
+</div>
+<p class="text-text-secondary-light dark:text-text-secondary-dark font-medium mt-1">Insomniac</p>
+</div>
+<div class="flex gap-2 sm:gap-3">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-text-primary-light dark:text-text-secondary-dark">check</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="0" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">M</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-gray-300 dark:text-gray-600">close</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="20" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">T</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-text-primary-light dark:text-text-secondary-dark">check</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="0" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">W</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-text-primary-light dark:text-text-secondary-dark">check</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="5" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">T</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-gray-300 dark:text-gray-600">close</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="25" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">F</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-gray-300 dark:text-gray-600">close</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="15" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">S</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-rounded text-xs text-text-primary-light dark:text-text-secondary-dark">check</span>
+<div class="relative w-6 h-6 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-200 dark:text-gray-600" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-width="2.5"></circle>
+<circle class="text-primary" cx="12" cy="12" fill="transparent" r="10" stroke="currentColor" stroke-dasharray="62.8" stroke-dashoffset="0" stroke-width="2.5"></circle>
+</svg>
+</div>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark uppercase">S</span>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 -z-10 bg-gradient-to-br from-[#4ade80]/20 to-[#22c55e]/20 pointer-events-none opacity-50 dark:opacity-10"></div>
+</div>
+
+</body></html>

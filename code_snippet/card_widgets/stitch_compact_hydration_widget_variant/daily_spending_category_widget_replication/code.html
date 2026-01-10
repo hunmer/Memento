@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Spending Category Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#FFFFFF", // White is the primary contrast color here
+              "background-light": "#F2F2F7", // iOS light mode system gray 6
+              "background-dark": "#000000", // Deep black as requested
+              "card-dark": "#1C1C1E", // Slightly lighter for dark mode cards if needed, though image shows pure black
+              "text-secondary": "#8E8E93", // iOS system gray
+              "accent-yellow": "#FFD60A",
+              "accent-red": "#FF453A",
+              "accent-blue": "#0A84FF",
+              "accent-gray": "#8E8E93",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "1.5rem", // Large iOS widget radius
+            },
+            spacing: {
+              'widget-w': '170px', // Approximate small widget width
+              'widget-h': '170px', // Approximate small widget height
+            }
+          },
+        },
+      };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-zinc-900 min-h-screen flex items-center justify-center font-display p-6 transition-colors duration-300">
+<div class="relative group">
+<div class="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] bg-white dark:bg-black rounded-[2rem] p-5 flex flex-col justify-between shadow-xl ring-1 ring-black/5 dark:ring-white/10 overflow-hidden relative">
+<div class="flex flex-col gap-1">
+<h2 class="text-sm font-medium text-text-secondary uppercase tracking-tight">Today Spending</h2>
+<div class="flex items-baseline gap-1.5">
+<span class="text-3xl sm:text-4xl font-bold text-black dark:text-white tracking-tight">$322</span>
+<span class="text-lg sm:text-xl font-medium text-text-secondary">/ 443</span>
+</div>
+</div>
+<div class="flex flex-row items-end justify-between mt-2 h-full">
+<div class="h-24 w-8 sm:w-10 flex flex-col rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-800">
+<div class="bg-accent-yellow h-[45%] w-full"></div>
+<div class="bg-accent-red h-[25%] w-full"></div>
+<div class="bg-accent-blue h-[20%] w-full"></div>
+<div class="bg-accent-gray h-[10%] w-full"></div>
+</div>
+<div class="flex flex-col gap-1.5 w-full pl-3 sm:pl-4 justify-end pb-0.5">
+<div class="flex items-center justify-between text-xs sm:text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-accent-yellow rounded-sm"></div>
+<span class="text-black dark:text-gray-200 font-medium">House</span>
+</div>
+<span class="text-black dark:text-white font-semibold">$31</span>
+</div>
+<div class="flex items-center justify-between text-xs sm:text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-accent-red rounded-sm"></div>
+<span class="text-black dark:text-gray-200 font-medium">Food</span>
+</div>
+<span class="text-black dark:text-white font-semibold">$37</span>
+</div>
+<div class="flex items-center justify-between text-xs sm:text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-accent-blue rounded-sm"></div>
+<span class="text-black dark:text-gray-200 font-medium">Fitness</span>
+</div>
+<span class="text-black dark:text-white font-semibold">$43</span>
+</div>
+<div class="flex items-center justify-between text-xs sm:text-sm">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-accent-gray rounded-sm"></div>
+<span class="text-black dark:text-gray-200 font-medium">Other</span>
+</div>
+<span class="text-black dark:text-white font-semibold">$11</span>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-[2.2rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200 -z-10"></div>
+</div>
+
+</body></html>

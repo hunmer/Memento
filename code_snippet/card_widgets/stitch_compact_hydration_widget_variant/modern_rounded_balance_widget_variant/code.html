@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Card Balance Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Inter', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: "#000000", 
+                        "background-light": "#F2F2F7", 
+                        "background-dark": "#1C1C1E",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#2C2C2E",
+                        "text-primary-light": "#000000",
+                        "text-primary-dark": "#FFFFFF",
+                        "text-secondary-light": "#8E8E93",
+                        "text-secondary-dark": "#AEAEB2",
+                        "bar-bg-light": "#EFEFF4",
+                        "bar-bg-dark": "#3A3A3C",
+                    },
+                    borderRadius: {
+                        'xl': '1.5rem',
+                        '2xl': '2rem',
+                        '3xl': '2.5rem', 
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 30px rgba(0,0,0,0.04)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 font-sans antialiased">
+<div class="w-full max-w-[340px] bg-card-light dark:bg-card-dark rounded-3xl p-6 shadow-soft transition-colors duration-300">
+<div class="mb-8">
+<h2 class="text-base font-medium text-text-primary-light dark:text-text-primary-dark mb-1">
+                Card Balance
+            </h2>
+<div class="flex items-baseline gap-2 flex-col">
+<span class="text-4xl font-bold tracking-tight text-text-primary-light dark:text-text-primary-dark">
+                    $1,682.55
+                </span>
+<span class="text-lg text-text-secondary-light dark:text-text-secondary-dark font-medium">
+                    $8,317.45 Available
+                </span>
+</div>
+</div>
+<div class="flex justify-between items-end h-[80px] w-full px-1">
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[45%] bg-gradient-to-t from-orange-400 via-purple-400 to-purple-300 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">M</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[65%] bg-gradient-to-t from-red-400 via-green-500 to-pink-400 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">T</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[35%] bg-gradient-to-t from-yellow-400 via-blue-400 to-purple-400 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">W</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[75%] bg-gradient-to-t from-red-400 via-yellow-400 to-purple-400 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">T</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[70%] bg-gradient-to-t from-green-500 via-blue-500 to-purple-500 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">F</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[90%] bg-gradient-to-t from-red-400 via-orange-400 to-blue-500 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">S</span>
+</div>
+<div class="flex flex-col items-center gap-3 group">
+<div class="relative w-[18px] h-14 bg-bar-bg-light dark:bg-bar-bg-dark rounded-full overflow-hidden flex items-end">
+<div class="w-full h-[30%] bg-gradient-to-t from-red-400 via-purple-400 to-purple-200 rounded-b-full"></div>
+</div>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">S</span>
+</div>
+</div>
+</div>
+
+</body></html>

@@ -11,7 +11,6 @@ import 'package:Memento/plugins/agent_chat/screens/agent_chat_settings_screen.da
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
-import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/swipe_action/index.dart';
 

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Heart Rate Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#f43f5e", // Rose-500 equivalent
+                        "background-light": "#ecfccb", // Light lime/green tint for background context
+                        "background-dark": "#0f172a", // Slate-900
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px rgba(244, 63, 94, 0.3)',
+                    }
+                },
+            },
+        };
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gradient-to-br from-green-200 to-green-400 dark:from-slate-900 dark:to-slate-800 min-h-screen flex items-center justify-center p-6 selection:bg-rose-200 selection:text-rose-900">
+<div class="bg-white dark:bg-zinc-900 rounded-5xl w-full max-w-sm h-32 pl-4 pr-1 py-3 flex items-center justify-between shadow-soft relative overflow-hidden transition-colors duration-300">
+<div class="flex items-center space-x-4 z-10 flex-shrink-0">
+<div class="w-12 h-12 bg-gray-50 dark:bg-zinc-800 rounded-2xl flex items-center justify-center flex-shrink-0">
+<svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+</svg>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-gray-900 dark:text-gray-100 tracking-wide">Heart Rate</span>
+<div class="flex items-baseline mt-[-2px]">
+<span class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">97</span>
+<span class="text-gray-400 dark:text-gray-500 text-sm font-medium ml-1">bpm</span>
+</div>
+</div>
+</div>
+<div class="h-full flex-grow relative w-32 ml-2">
+<svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 140 60">
+<defs>
+<linearGradient id="gradient-fill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#f43f5e" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#f43f5e" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path class="opacity-100" d="
+                    M 5,30 
+                    C 15,30 20,5 30,5 
+                    C 40,5 40,55 50,55 
+                    C 60,55 60,15 70,15 
+                    C 80,15 90,45 100,45 
+                    C 110,45 115,35 125,35 
+                    C 130,35 135,25 135,25
+                    L 135,70 L 5,70 Z" fill="url(#gradient-fill)"></path>
+<path d="
+                    M 5,30 
+                    C 15,30 20,5 30,5 
+                    C 40,5 40,55 50,55 
+                    C 60,55 60,15 70,15 
+                    C 80,15 90,45 100,45 
+                    C 110,45 115,35 125,35 
+                    C 130,35 135,25 135,25" fill="none" stroke="#f43f5e" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<circle cx="5" cy="30" fill="#f43f5e" r="3.5"></circle>
+<circle cx="135" cy="25" fill="#f43f5e" r="3.5"></circle>
+</svg>
+</div>
+</div>
+<div class="fixed top-0 left-0 w-full h-full -z-10 bg-gradient-to-br from-green-200 via-green-100 to-green-300 dark:from-zinc-900 dark:via-zinc-800 dark:to-zinc-900 opacity-50 pointer-events-none"></div>
+
+</body></html>
