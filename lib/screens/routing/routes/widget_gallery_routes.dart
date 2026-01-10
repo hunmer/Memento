@@ -108,6 +108,12 @@ import 'package:Memento/screens/widgets_gallery/screens/news_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/news_update_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/inbox_message_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/notes_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/rounded_reminders_list_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/circular_metrics_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/rental_preview_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/split_image_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/curve_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/nutrition_progress_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -663,6 +669,36 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/news_update_card',
           handler: (settings) => RouteHelpers.createRoute(const NewsUpdateCardExample(), settings: settings),
           description: '新闻更新卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/circular_metrics_card',
+          handler: (settings) => RouteHelpers.createRoute(const CircularMetricsCardExample(), settings: settings),
+          description: '环形指标卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/rental_preview_card',
+          handler: (settings) => RouteHelpers.createRoute(const RentalPreviewCardExample(), settings: settings),
+          description: '租赁预览卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/rounded_reminders_list',
+          handler: (settings) => RouteHelpers.createRoute(const RoundedRemindersListExample(), settings: settings),
+          description: '圆角提醒事项列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/split_image_card',
+          handler: (settings) => RouteHelpers.createRoute(const SplitImageCardExample(), settings: settings),
+          description: '图片分割卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/curve_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const CurveProgressCardExample(), settings: settings),
+          description: '曲线进度卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/nutrition_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const NutritionProgressCardExample(), settings: settings),
+          description: '营养进度追踪卡片',
         ),
       ];
 }
