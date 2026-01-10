@@ -276,21 +276,23 @@ class _MoodChartCardWidgetState extends State<MoodChartCardWidget>
               final barAnimation = CurvedAnimation(
                 parent: _animationController,
                 curve: Interval(
-                  index * 0.05,
-                  0.5 + index * 0.05,
+                  index * 0.04,
+                  (0.5 + index * 0.04).clamp(0.0, 1.0),
                   curve: Curves.easeOutCubic,
                 ),
               );
 
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index < widget.dailyValues.length - 1 ? 6 : 0,
-                ),
-                child: _MoodBar(
-                  value: data.value,
-                  color: data.isPositive ? primaryColor : secondaryColor,
-                  trackColor: trackColor,
-                  animation: barAnimation,
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: index < widget.dailyValues.length - 1 ? 6 : 0,
+                  ),
+                  child: _MoodBar(
+                    value: data.value,
+                    color: data.isPositive ? primaryColor : secondaryColor,
+                    trackColor: trackColor,
+                    animation: barAnimation,
+                  ),
                 ),
               );
             }),
@@ -362,7 +364,7 @@ class _MoodChartCardWidgetState extends State<MoodChartCardWidget>
                   parent: _animationController,
                   curve: Interval(
                     0.3 + index * 0.08,
-                    0.7,
+                    (0.3 + (index + 1) * 0.08).clamp(0.0, 1.0),
                     curve: Curves.easeOutCubic,
                   ),
                 );
@@ -400,27 +402,25 @@ class _MoodBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: AnimatedBuilder(
-        animation: animation,
-        builder: (context, child) {
-          return Container(
-            height: 160,
-            decoration: BoxDecoration(
-              color: trackColor,
-              borderRadius: BorderRadius.circular(8),
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Container(
+          height: 160,
+          decoration: BoxDecoration(
+            color: trackColor,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: 160 * value * animation.value,
+              color: color,
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 160 * value * animation.value,
-                color: color,
-              ),
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

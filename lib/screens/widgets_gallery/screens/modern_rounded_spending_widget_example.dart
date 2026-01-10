@@ -109,13 +109,6 @@ class _ModernRoundedSpendingWidgetState
     final secondaryTextColor =
         isDark ? const Color(0xFFAEAEB2) : const Color(0xFF8E8E93);
 
-    // 计算每个分类的占比
-    final totalAmount = widget.categories.fold<double>(
-        0, (sum, category) => sum + category.amount);
-    final segments = widget.categories.map((category) {
-      return (totalAmount > 0) ? category.amount / totalAmount : 0.0;
-    }).toList();
-
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -198,11 +191,12 @@ class _ModernRoundedSpendingWidgetState
                       child: Row(
                         children: List.generate(widget.categories.length, (index) {
                           final category = widget.categories[index];
-                          final width = segments[index] * _animation.value;
-                          return Container(
-                            width: width * 340,
-                            height: 10,
-                            color: category.color,
+                          return Expanded(
+                            flex: (category.amount * 100).toInt(),
+                            child: Container(
+                              height: 10,
+                              color: category.color,
+                            ),
                           );
                         }),
                       ),
