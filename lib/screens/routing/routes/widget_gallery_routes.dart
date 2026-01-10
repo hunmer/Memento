@@ -102,6 +102,12 @@ import 'package:Memento/screens/widgets_gallery/screens/budget_trend_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/multi_metric_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/icon_circular_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/color_tag_task_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/holiday_rental_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/donut_chart_stats_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/news_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/news_update_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/inbox_message_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/notes_list_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -627,6 +633,36 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/color_tag_task_card',
           handler: (settings) => RouteHelpers.createRoute(const ColorTagTaskCardExample(), settings: settings),
           description: '彩色标签任务列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/holiday_rental_card',
+          handler: (settings) => RouteHelpers.createRoute(const HolidayRentalCardExample(), settings: settings),
+          description: '假期租赁卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/donut_chart_stats_card',
+          handler: (settings) => RouteHelpers.createRoute(const DonutChartStatsCardExample(), settings: settings),
+          description: '甜甜圈图统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/inbox_message_card',
+          handler: (settings) => RouteHelpers.createRoute(const InboxMessageCardExample(), settings: settings),
+          description: '收件箱消息卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/notes_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const NotesListCardExample(), settings: settings),
+          description: '笔记列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/news_card',
+          handler: (settings) => RouteHelpers.createRoute(const NewsCardExample(), settings: settings),
+          description: '新闻卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/news_update_card',
+          handler: (settings) => RouteHelpers.createRoute(const NewsUpdateCardExample(), settings: settings),
+          description: '新闻更新卡片',
         ),
       ];
 }
