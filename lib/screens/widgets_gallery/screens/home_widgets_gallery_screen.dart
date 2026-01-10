@@ -410,6 +410,27 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'ModernRoundedBalanceWidget - 余额与周支出统计卡片',
             route: '/widgets_gallery/modern_rounded_balance_widget',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '双柱状图统计卡片',
+            subtitle: 'DualBarChartCard - 双数值柱状图对比展示卡片',
+            route: '/widgets_gallery/dual_bar_chart_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.timeline,
+            title: '时间线状态卡片',
+            subtitle: 'TimelineStatusCard - 时间进度状态展示卡片',
+            route: '/widgets_gallery/timeline_status_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.bedtime,
+            title: '睡眠阶段图表',
+            subtitle: 'SleepStageChart - 睡眠阶段气泡可视化图表',
+            route: '/widgets_gallery/sleep_stage_chart',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),
