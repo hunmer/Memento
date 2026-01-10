@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 /// 文章列表卡片示例
 class ArticleListCardExample extends StatelessWidget {

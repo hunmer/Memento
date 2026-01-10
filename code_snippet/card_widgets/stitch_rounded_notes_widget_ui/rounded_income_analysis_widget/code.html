@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Income Analysis Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                        "chart-yellow": "#fcd34d", // amber-300
+                        "chart-green": "#6ee7b7", // emerald-300
+                        "chart-blue": "#4f46e5", // indigo-600
+                        "chart-pink": "#f472b6", // pink-400
+                        "bg-light": "#ffffff",
+                        "bg-dark": "#1e293b", // slate-800
+                        "surface-light": "#f8fafc", // slate-50
+                        "surface-dark": "#334155", // slate-700
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        '4xl': '2rem',
+                    },
+                },
+            },
+        };
+    </script>
+<style>.conic-chart {
+            background: conic-gradient(
+                #6ee7b7 0deg 80deg,#fbbf24 80deg 240deg,#f472b6 240deg 290deg,#4f46e5 290deg 360deg);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-50/50 min-h-screen flex items-center justify-center p-4 font-display antialiased">
+<div class="w-full max-w-[24rem] h-auto bg-bg-light dark:bg-bg-dark rounded-4xl shadow-2xl overflow-hidden flex flex-row border border-gray-100 dark:border-gray-700">
+<div class="w-[45%] p-5 flex flex-col items-center justify-center space-y-5 bg-white dark:bg-slate-800">
+<div class="relative w-24 h-24">
+<div class="w-full h-full rounded-full conic-chart transform -rotate-45"></div>
+<div class="absolute inset-[22%] bg-white dark:bg-slate-800 rounded-full"></div>
+</div>
+<div class="text-center">
+<div class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">$85964.45</div>
+<div class="text-xs text-gray-400 font-medium mt-1">Income</div>
+</div>
+</div>
+<div class="w-[55%] bg-surface-light dark:bg-slate-900/50 p-6 flex flex-col justify-center space-y-5">
+<div class="flex items-center space-x-3">
+<div class="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-indigo-600 flex items-center justify-center">
+<div class="w-1 h-1 bg-white rounded-full opacity-90"></div>
+</div>
+<span class="text-[0.7rem] sm:text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Marketing Channels</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-emerald-300 flex items-center justify-center">
+<div class="w-1 h-1 bg-white rounded-full opacity-90"></div>
+</div>
+<span class="text-[0.7rem] sm:text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Direct Sales</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center">
+<div class="w-1 h-1 bg-white rounded-full opacity-90"></div>
+</div>
+<span class="text-[0.7rem] sm:text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Offline Channels</span>
+</div>
+<div class="flex items-center space-x-3">
+<div class="flex-shrink-0 w-3.5 h-3.5 rounded-full bg-pink-400 flex items-center justify-center">
+<div class="w-1 h-1 bg-white rounded-full opacity-90"></div>
+</div>
+<span class="text-[0.7rem] sm:text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">Other Channels</span>
+</div>
+</div>
+</div>
+</body></html>

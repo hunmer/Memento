@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Vertical Property Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#5081EE", // Matching the specific blue from the screenshot
+              "background-light": "#Eef2ff", // Light indigo tint
+              "background-dark": "#0f172a", // Dark slate
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              "card": "1.75rem", // ~28px smooth curve
+            },
+            boxShadow: {
+                'card': '0 20px 40px -5px rgba(0, 0, 0, 0.1), 0 10px 20px -5px rgba(0, 0, 0, 0.04)',
+            }
+          },
+        },
+      };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-slate-900 dark:to-slate-800 min-h-screen flex items-center justify-center p-6 antialiased">
+<div class="w-full max-w-[340px] bg-white dark:bg-slate-800 rounded-card shadow-card overflow-hidden flex flex-col transition-colors duration-300">
+<div class="relative h-60 w-full shrink-0">
+<img alt="Modern living room interior with tan leather sofa and light green walls" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7I66qiADm9mcjQGh_wAlfWQP6o_hcJfNgeDqcih2g1QHBlHCKvyr2pKBHtvA7G9qkBB3ZlP8pV7HlhnjfuPHiGjMPGzWh1xuHfO7v8SfNXgAWZovbI2iz72aJb6Hv7xp-OyHsP6g6c9kEUTGIaMPDQGhQcCFX0vPVzVxyO2S1BOu1b7ivc_pI3JZwjIwM_D1pNiIMj9KZJrNr5K2R8eog0iEFsvVF4TJ1GpdtlCyNpfzLI9iGyc-_WhLEcfYEmXF1DGs_QyUxRg"/>
+</div>
+<div class="flex flex-col p-6 bg-white dark:bg-slate-800 h-full">
+<h2 class="text-[1.35rem] leading-tight font-bold text-gray-900 dark:text-white mb-3">
+                A Georgian Masterpiece in the Heart
+            </h2>
+<div class="flex items-center space-x-4 mb-4 text-gray-400 dark:text-gray-400 text-[0.8rem] font-medium tracking-wide">
+<div class="flex items-center gap-1.5">
+<span class="material-icons-outlined text-base">calendar_today</span>
+<span>01 Feb 2020</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-icons-outlined text-base">schedule</span>
+<span>14:00</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-icons-outlined text-base">cloud_queue</span>
+<span>8° F</span>
+</div>
+</div>
+<p class="text-sm text-gray-500 dark:text-gray-300 leading-relaxed mb-6 font-normal">
+                When I first got into the advertising business, I was looking for the magical combination
+            </p>
+<a class="mt-auto inline-flex items-center text-primary font-semibold text-sm hover:opacity-80 transition-opacity" href="#">
+<span class="material-icons-outlined text-xl mr-2">my_location</span>
+                Get directions
+            </a>
+</div>
+</div>
+<div class="fixed top-6 right-6 z-50">
+<button class="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white p-2 rounded-full shadow-lg transition-all" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined block">brightness_6</span>
+</button>
+</div>
+
+</body></html>

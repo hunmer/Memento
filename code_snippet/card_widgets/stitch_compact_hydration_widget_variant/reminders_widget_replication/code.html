@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reminders Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              // iOS System Red
+              primary: "#FF3B30", 
+              // iOS System Gray 6 (Light)
+              "background-light": "#F2F2F7",
+              // iOS System Background (Dark)
+              "background-dark": "#000000",
+              // Widget Backgrounds
+              "card-light": "#FFFFFF",
+              "card-dark": "#1C1C1E",
+              // Separator colors
+              "separator-light": "#E5E5EA",
+              "separator-dark": "#38383A",
+            },
+            fontFamily: {
+              display: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'widget': "1.35rem", // Specific radius for iOS widgets
+            },
+            boxShadow: {
+              'ios': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+            }
+          },
+        },
+      };
+    </script>
+<style>.dotted-line {
+            border-bottom: 1.5px dotted #E5E5EA;
+        }
+        .dark .dotted-line {
+            border-bottom-color: #38383A;
+        }.ios-checkbox {
+            transition: all 0.2s ease;
+        }
+        .ios-checkbox:active {
+            background-color: #E5E5EA;
+        }
+        .dark .ios-checkbox:active {
+            background-color: #3A3A3C;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display flex items-center justify-center min-h-screen p-6 transition-colors duration-300">
+<div class="w-[170px] h-[170px] sm:w-[200px] sm:h-[200px] bg-card-light dark:bg-card-dark rounded-widget shadow-ios p-4 flex flex-col relative transition-colors duration-300 select-none overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<h2 class="text-primary font-semibold text-[15px] sm:text-base tracking-tight leading-tight">Reminders</h2>
+</div>
+<span class="text-2xl sm:text-3xl font-bold text-black dark:text-white leading-none -mt-1 tracking-tight font-display">18</span>
+</div>
+<div class="flex flex-col flex-1 gap-2 mt-1">
+<div class="flex items-start gap-3 group">
+<div class="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-[1.5px] border-gray-300 dark:border-gray-500 ios-checkbox cursor-pointer"></div>
+<div class="flex-1 min-w-0">
+<p class="text-[13px] sm:text-[14px] font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">
+                        Pick up arts &amp;...
+                    </p>
+<div class="mt-2.5 dotted-line w-full"></div>
+</div>
+</div>
+<div class="flex items-start gap-3 group">
+<div class="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-[1.5px] border-gray-300 dark:border-gray-500 ios-checkbox cursor-pointer"></div>
+<div class="flex-1 min-w-0">
+<p class="text-[13px] sm:text-[14px] font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">
+                        Send cookie...
+                    </p>
+<div class="mt-2.5 dotted-line w-full"></div>
+</div>
+</div>
+<div class="flex items-start gap-3 group">
+<div class="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full border-[1.5px] border-gray-300 dark:border-gray-500 ios-checkbox cursor-pointer"></div>
+<div class="flex-1 min-w-0">
+<p class="text-[13px] sm:text-[14px] font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">
+                        Book club prep
+                    </p>
+</div>
+</div>
+</div>
+</div>
+<div class="sr-only">
+        iOS Reminders Widget Replication. Displays a list of tasks with a count.
+    </div>
+
+</body></html>

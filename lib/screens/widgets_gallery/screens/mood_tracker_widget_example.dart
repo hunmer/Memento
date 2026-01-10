@@ -57,7 +57,7 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
 
   String _currentMoodText = 'Happy';
   int _loggedCount = 2;
-  int _totalCount = 5;
+  final int _totalCount = 5;
 
   void _onDayTapped(int index) {
     setState(() {

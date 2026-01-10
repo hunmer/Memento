@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Minimalist White Tasks Widget</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6", // Blue used for the +10 more and accents
+                        "background-light": "#F3F4F6", // General app background
+                        "background-dark": "#1F2937",
+                        "widget-light": "#FFFFFF",
+                        "widget-dark": "#171717",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        '3xl': '1.5rem',
+                        '4xl': '2rem',
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-100 dark:bg-background-dark min-h-screen flex items-center justify-center p-6">
+<div class="w-full max-w-sm bg-widget-light dark:bg-widget-dark rounded-[2rem] p-7 shadow-xl flex flex-row gap-6 items-start transition-colors duration-300">
+<div class="flex flex-col justify-center pt-2">
+<h1 class="text-6xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none">56</h1>
+<p class="text-xs font-medium text-gray-400 dark:text-gray-500 mt-2 leading-tight w-16">Upcoming tasks</p>
+</div>
+<div class="flex flex-col gap-3.5 flex-1 min-w-0">
+<div class="flex items-center group">
+<div class="w-[3px] h-3.5 bg-blue-500 rounded-full mr-3 shrink-0"></div>
+<span class="text-[0.9rem] font-medium text-gray-700 dark:text-gray-200 truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                        Design mobile dashboard
+                    </span>
+</div>
+<div class="flex items-center group">
+<div class="w-[3px] h-3.5 bg-pink-500 rounded-full mr-3 shrink-0"></div>
+<span class="text-[0.9rem] font-medium text-gray-700 dark:text-gray-200 truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                        Budget and contract
+                    </span>
+</div>
+<div class="flex items-center group">
+<div class="w-[3px] h-3.5 bg-orange-400 rounded-full mr-3 shrink-0"></div>
+<span class="text-[0.9rem] font-medium text-gray-700 dark:text-gray-200 truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                        Search for a UI kit
+                    </span>
+</div>
+<div class="flex items-center group">
+<div class="w-[3px] h-3.5 bg-emerald-400 rounded-full mr-3 shrink-0"></div>
+<span class="text-[0.9rem] font-medium text-gray-700 dark:text-gray-200 truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                        Prepare HTML &amp; CSS
+                    </span>
+</div>
+<div class="mt-1">
+<a class="text-primary hover:text-blue-600 dark:hover:text-blue-400 text-sm font-semibold transition-colors" href="#">
+                        +10 more
+                    </a>
+</div>
+</div>
+</div>
+</body></html>

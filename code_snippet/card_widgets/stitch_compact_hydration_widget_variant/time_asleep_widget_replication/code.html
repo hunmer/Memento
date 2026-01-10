@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Time Asleep Widget</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4B006E", // Deep purple background
+                        "primary-light": "#C084FC", // Light purple for bars
+                        "primary-lighter": "#E9D5FF", // Even lighter for icon bg
+                        "background-light": "#E2E8F0", 
+                        "background-dark": "#0F172A", 
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 antialiased">
+<div class="relative w-80 h-80 bg-primary rounded-[2rem] overflow-hidden shadow-2xl flex flex-col justify-between p-6">
+<div class="flex items-start">
+<div class="w-8 h-8 rounded-full bg-[#A855F7] flex items-center justify-center opacity-80">
+<span class="material-icons text-white text-sm">bed</span>
+</div>
+</div>
+<div class="absolute top-0 right-0 h-full w-1/2 flex flex-col items-end gap-[6px] py-4 pointer-events-none">
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[80%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[95%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[90%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[98%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[85%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[75%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[90%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[96%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[80%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[60%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[45%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[70%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[40%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[35%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[50%] opacity-90 translate-x-2"></div>
+<div class="h-4 bg-[#C084FC] rounded-l-full w-[45%] opacity-90 translate-x-2"></div>
+</div>
+<div class="z-10 mt-auto">
+<h3 class="text-[#D8B4FE] text-xs font-semibold tracking-widest uppercase mb-1 opacity-90">Time Asleep</h3>
+<div class="flex items-baseline gap-2">
+<span class="text-white text-5xl font-semibold tracking-tight">7h 15m</span>
+<span class="material-icons text-[#D8B4FE] text-2xl font-bold transform rotate-45">arrow_upward</span>
+</div>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Spending Widget</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#007AFF", // iOS System Blue
+                        "background-light": "#F2F2F7", // iOS System Grouped Background Light
+                        "background-dark": "#1C1C1E", // iOS System Grouped Background Dark
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#000000", // Pure black for OLED/High contrast feel
+                        // Data Visualization Colors
+                        "chart-red": "#FF3B30",
+                        "chart-blue": "#007AFF",
+                        "chart-yellow": "#FFCC00",
+                        "chart-grey": "#8E8E93",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        'super': '2.5rem', // Exaggerated rounded corners for pill aesthetic
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 antialiased font-display selection:bg-primary selection:text-white">
+<div class="w-full max-w-[340px]">
+<div class="bg-card-light dark:bg-card-dark rounded-super p-8 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.15)] dark:shadow-none border border-transparent dark:border-white/10 ring-1 ring-black/5 dark:ring-white/5 relative overflow-hidden">
+<div class="flex flex-col mb-6">
+<h2 class="text-gray-500 dark:text-gray-400 text-[15px] font-medium mb-1.5 tracking-wide">Today Spending</h2>
+<div class="flex items-baseline space-x-2.5">
+<span class="text-[40px] leading-tight font-bold text-gray-900 dark:text-white tracking-tight">$322</span>
+<span class="text-xl text-gray-400 dark:text-gray-600 font-medium">/ 443</span>
+</div>
+</div>
+<div class="flex h-2.5 w-full rounded-full overflow-hidden mb-8 bg-gray-100 dark:bg-gray-800">
+<div class="h-full bg-chart-red w-[35%]"></div>
+<div class="h-full bg-chart-blue w-[30%]"></div>
+<div class="h-full bg-chart-yellow w-[25%]"></div>
+<div class="h-full bg-chart-grey w-[10%]"></div>
+</div>
+<div class="space-y-[18px]">
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3.5">
+<div class="w-4 h-4 rounded-[4px] bg-chart-red shadow-sm"></div>
+<span class="text-gray-700 dark:text-gray-200 font-medium text-[16px]">Food</span>
+</div>
+<span class="text-gray-900 dark:text-white font-semibold text-[16px] tracking-tight">$37</span>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3.5">
+<div class="w-4 h-4 rounded-[4px] bg-chart-blue shadow-sm"></div>
+<span class="text-gray-700 dark:text-gray-200 font-medium text-[16px]">Fitness</span>
+</div>
+<span class="text-gray-900 dark:text-white font-semibold text-[16px] tracking-tight">$43</span>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3.5">
+<div class="w-4 h-4 rounded-[4px] bg-chart-yellow shadow-sm"></div>
+<span class="text-gray-700 dark:text-gray-200 font-medium text-[16px]">Transport</span>
+</div>
+<span class="text-gray-900 dark:text-white font-semibold text-[16px] tracking-tight">$31</span>
+</div>
+<div class="flex items-center justify-between group">
+<div class="flex items-center gap-3.5">
+<div class="w-4 h-4 rounded-[4px] bg-chart-grey shadow-sm"></div>
+<span class="text-gray-700 dark:text-gray-200 font-medium text-[16px]">Other</span>
+</div>
+<span class="text-gray-900 dark:text-white font-semibold text-[16px] tracking-tight">$11</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // Simple script to toggle dark mode based on system preference for preview
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+
+</body></html>

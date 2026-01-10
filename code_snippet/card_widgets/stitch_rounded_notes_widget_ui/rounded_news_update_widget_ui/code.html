@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded News Update Widget UI</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF9F0A", // iOS System Orange
+                        "background-light": "#F2F2F7", // iOS System Grouped Background Light
+                        "background-dark": "#000000", // iOS System Background Dark
+                        "card-dark": "#1C1C1E", // iOS Card Dark
+                        "icon-bg": "#2C2C2E",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                        '3xl': "1.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center font-display p-6 transition-colors duration-300">
+<div class="relative w-full max-w-[340px] h-auto min-h-[170px] bg-white dark:bg-card-dark rounded-3xl shadow-xl dark:shadow-none p-5 flex flex-col justify-between transition-colors duration-300 overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="w-10 h-10 rounded-full bg-icon-bg flex items-center justify-center shrink-0">
+<span class="material-icons-round text-primary text-xl">bolt</span>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 z-10">
+<div class="w-1.5 h-1.5 rounded-full bg-black dark:bg-white"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+<div class="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+</div>
+</div>
+<div class="mt-3 pr-6">
+<h2 class="text-[17px] leading-snug font-bold text-black dark:text-white line-clamp-3">
+                "I confess." The Belarusian pro-governmental telegram channel published a video of Roman Protasevich
+            </h2>
+</div>
+<div class="mt-3">
+<p class="text-[13px] font-medium text-gray-400 dark:text-gray-500">
+                4 minutes ago
+            </p>
+</div>
+</div>
+<div class="fixed bottom-6 right-6">
+<button class="p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg text-gray-800 dark:text-white transition-all hover:scale-105 active:scale-95" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-round">brightness_6</span>
+</button>
+</div>
+
+</body></html>

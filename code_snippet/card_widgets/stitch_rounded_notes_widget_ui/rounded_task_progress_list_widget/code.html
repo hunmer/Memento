@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Task Progress List Widget</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3b82f6",
+              "background-light": "#f3f4f6", // Light gray page bg
+              "background-dark": "#000000",   // Black page bg
+              "card-light": "#ffffff",
+              "card-dark": "#1c1c1e",
+              "text-main-light": "#111827",
+              "text-main-dark": "#f9fafb",
+              "text-sub-light": "#9ca3af",
+              "text-sub-dark": "#6b7280",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'widget': "1.75rem", // Approx 28px for that smooth iOS look
+            },
+          },
+        },
+      };
+    </script>
+<style>::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.5);
+            border-radius: 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 font-sans relative overflow-hidden transition-colors duration-300">
+<div class="fixed inset-0 -z-10 bg-gradient-to-br from-orange-400 via-red-400 to-purple-600 opacity-90 dark:opacity-60 blur-3xl scale-125 transform"></div>
+<div class="w-full max-w-[360px] bg-card-light dark:bg-card-dark rounded-widget shadow-2xl p-6 relative z-10">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-icons-round text-text-sub-light dark:text-text-sub-dark text-lg">check_circle_outline</span>
+<span class="text-sm font-medium text-text-sub-light dark:text-text-sub-dark tracking-wide">Progress</span>
+</div>
+<div class="flex flex-col space-y-5">
+<div class="group flex flex-col gap-4 border-b border-gray-100 dark:border-zinc-800 pb-5 last:border-0 last:pb-0">
+<div class="flex justify-between items-center w-full">
+<div class="flex flex-col max-w-[70%]">
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark leading-tight">Design mobile UI dashboard</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-1.5 font-medium">24 mins ago</p>
+</div>
+<div class="w-12 h-1.5 bg-gray-100 dark:bg-zinc-700 rounded-full overflow-hidden flex-shrink-0">
+<div class="h-full bg-emerald-400 rounded-full w-full shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-4 border-b border-gray-100 dark:border-zinc-800 pb-5 last:border-0 last:pb-0">
+<div class="flex justify-between items-center w-full">
+<div class="flex flex-col max-w-[70%]">
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark leading-tight">Calculate budget and contract</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-1.5 font-medium">54 mins ago</p>
+</div>
+<div class="w-12 h-1.5 bg-gray-100 dark:bg-zinc-700 rounded-full overflow-hidden flex-shrink-0 relative">
+<div class="h-full bg-amber-400 rounded-full w-8/12 shadow-[0_0_8px_rgba(251,191,36,0.5)]"></div>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-4 border-b border-gray-100 dark:border-zinc-800 pb-5 last:border-0 last:pb-0">
+<div class="flex justify-between items-center w-full">
+<div class="flex flex-col max-w-[70%]">
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark leading-tight">Search for a UI kit</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-1.5 font-medium">54 mins ago</p>
+</div>
+<div class="w-12 h-1.5 bg-gray-100 dark:bg-zinc-700 rounded-full overflow-hidden flex-shrink-0">
+<div class="h-full bg-emerald-400 rounded-full w-full shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-4 border-b border-gray-100 dark:border-zinc-800 pb-5 last:border-0 last:pb-0">
+<div class="flex justify-between items-center w-full">
+<div class="flex flex-col max-w-[70%]">
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark leading-tight">Design search page for website</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-1.5 font-medium">54 mins ago</p>
+</div>
+<div class="w-12 h-1.5 bg-gray-100 dark:bg-zinc-700 rounded-full overflow-hidden flex-shrink-0">
+<div class="h-full bg-rose-400 rounded-full w-3/12 shadow-[0_0_8px_rgba(251,113,133,0.5)]"></div>
+</div>
+</div>
+</div>
+<div class="group flex flex-col gap-4 border-b border-gray-100 dark:border-zinc-800 pb-5 last:border-0 last:pb-0">
+<div class="flex justify-between items-center w-full">
+<div class="flex flex-col max-w-[70%]">
+<h3 class="text-sm font-bold text-text-main-light dark:text-text-main-dark leading-tight">Create HTML &amp; CSS for startup</h3>
+<p class="text-xs text-text-sub-light dark:text-text-sub-dark mt-1.5 font-medium">54 mins ago</p>
+</div>
+<div class="w-12 h-1.5 bg-gray-100 dark:bg-zinc-700 rounded-full overflow-hidden flex-shrink-0">
+<div class="h-full bg-rose-400 rounded-full w-3/12 shadow-[0_0_8px_rgba(251,113,133,0.5)]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-2">
+<a class="text-primary hover:text-blue-600 dark:hover:text-blue-400 text-sm font-bold transition-colors duration-200 inline-block" href="#">
+                +10 more
+            </a>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Task List Widget UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#5A72EA", // The blue/indigo shade from the icon and link
+              "background-light": "#545AE7", // The purple background from the screenshot
+              "background-dark": "#1e1b4b", // A dark indigo for dark mode
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              '3xl': '1.5rem',
+              '4xl': '2rem', // Extra rounded for the card
+            },
+          },
+        },
+      };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-4 font-display antialiased transition-colors duration-300">
+<div class="bg-white dark:bg-slate-800 w-full max-w-[380px] rounded-4xl p-6 shadow-xl flex flex-row gap-6">
+<div class="flex flex-col justify-between w-1/3 pt-1">
+<div>
+<div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-icons-round text-white text-2xl">format_list_bulleted</span>
+</div>
+</div>
+<div class="pb-1">
+<div class="text-5xl font-medium text-slate-900 dark:text-white tracking-tight">48</div>
+<div class="text-gray-400 dark:text-gray-400 text-sm mt-1 font-medium">Upcoming</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<ul class="flex flex-col">
+<li class="border-b border-gray-100 dark:border-slate-700 py-3 first:pt-1">
+<p class="text-[13px] font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                        Design mobile UI dashboard
+                    </p>
+</li>
+<li class="border-b border-gray-100 dark:border-slate-700 py-3">
+<p class="text-[13px] font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                        Calculate budget and contract
+                    </p>
+</li>
+<li class="border-b border-gray-100 dark:border-slate-700 py-3">
+<p class="text-[13px] font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                        Search for a UI kit
+                    </p>
+</li>
+<li class="border-b border-gray-100 dark:border-slate-700 py-3">
+<p class="text-[13px] font-semibold text-slate-800 dark:text-slate-200 leading-tight">
+                        Create HTML &amp; CSS for startup
+                    </p>
+</li>
+</ul>
+<div class="pt-3">
+<a class="text-primary font-bold text-sm hover:opacity-80 transition-opacity" href="#">
+                    +10 more
+                </a>
+</div>
+</div>
+</div>
+
+</body></html>

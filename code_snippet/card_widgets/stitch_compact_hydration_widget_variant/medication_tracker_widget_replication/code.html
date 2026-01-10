@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medication Tracker Widget</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#84cc16", // Lime-500 equivalent for the vibrant green
+                        "background-light": "#f3f4f6", // Light gray background for the page
+                        "background-dark": "#18181b", // Zinc-900 for dark mode page bg
+                        "widget-light": "#ffffff",
+                        "widget-dark": "#27272a", // Zinc-800 for dark mode widget bg
+                        "text-primary-light": "#111827",
+                        "text-primary-dark": "#f9fafb",
+                        "text-secondary-light": "#6b7280",
+                        "text-secondary-dark": "#9ca3af",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        'widget': '1.75rem', // Pronounced rounded corners typical of iOS widgets
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>.pill-progress-container {
+            position: relative;
+            width: 100%;
+            height: 70px;}
+        .pill-track {
+            fill: none;
+            stroke: #ecfccb;stroke-width: 10;
+            stroke-linecap: round;
+        }
+        .dark .pill-track {
+            stroke: #3f6212;}
+        .pill-progress {
+            fill: none;
+            stroke: #84cc16;stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 400;stroke-dashoffset: 100;transition: stroke-dashoffset 1s ease-in-out;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 font-sans antialiased transition-colors duration-300">
+<div class="w-full max-w-[200px] aspect-square bg-widget-light dark:bg-widget-dark rounded-widget shadow-soft p-5 flex flex-col justify-between transition-colors duration-300 relative overflow-hidden">
+<div class="flex items-start justify-between w-full">
+<h2 class="text-sm font-semibold text-text-primary-light dark:text-text-primary-dark tracking-tight">Medications</h2>
+<span class="material-icons-outlined text-gray-300 dark:text-gray-500 text-[20px]">
+                medication
+            </span>
+</div>
+<div class="flex flex-col mt-1 mb-2">
+<div class="flex items-baseline gap-1">
+<span class="text-3xl font-bold text-text-primary-light dark:text-text-primary-dark tracking-tight">547</span>
+<span class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">meds</span>
+</div>
+</div>
+<div class="w-full mt-auto">
+<svg class="w-full h-auto drop-shadow-sm" viewBox="0 0 160 80">
+<defs>
+<path d="M 40 10 L 120 10 A 30 30 0 0 1 120 70 L 40 70 A 30 30 0 0 1 40 10 Z" id="pillPath"></path>
+</defs>
+<path class="fill-none stroke-lime-100 dark:stroke-zinc-700 stroke-[12]" d="M 40 10 L 120 10 A 30 30 0 0 1 120 70 L 40 70 A 30 30 0 0 1 40 10 Z" stroke-linecap="round"></path>
+<path class="fill-none stroke-primary stroke-[12]" d="M 40 10 L 120 10 A 30 30 0 0 1 120 70 L 40 70 A 30 30 0 0 1 40 10 Z" stroke-dasharray="348" stroke-dashoffset="80" stroke-linecap="round" style="transform-origin: center; transform: rotate(0deg);"></path>
+</svg>
+</div>
+</div>
+
+</body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rounded Stocks Tracker Widget UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#86efac", // A soft pastel green for the icon background
+                        "background-light": "#ffffff",
+                        "background-dark": "#161618", // Deep charcoal/black for dark mode
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1rem",
+                        'widget': "2rem", // 32px for pronounced corners
+                    },
+                    boxShadow: {
+                        'widget-light': '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
+                        'widget-dark': '0 20px 40px -10px rgba(0, 0, 0, 0.5)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gray-100 dark:bg-black min-h-screen flex items-center justify-center p-6 font-display antialiased text-gray-900 dark:text-white transition-colors duration-300">
+<div class="relative w-full max-w-[340px] bg-background-light dark:bg-background-dark rounded-widget shadow-widget-light dark:shadow-widget-dark p-6 overflow-hidden border border-transparent dark:border-white/5">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+<svg class="h-5 w-5 text-green-900" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h1 class="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Stocks</h1>
+</div>
+<div class="flex items-center gap-4 text-gray-400 dark:text-gray-400">
+<button class="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<button class="hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<div class="w-8 flex-shrink-0 flex justify-start">
+<svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="flex flex-col flex-grow">
+<span class="text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">ELM.35</span>
+<span class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">7,877.05</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-sm font-bold text-green-600 dark:text-green-400">+0.37%</span>
+<span class="text-sm font-medium text-green-600 dark:text-green-400 opacity-80">+29.06</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="w-8 flex-shrink-0 flex justify-start">
+<svg class="h-6 w-6 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 14l-7 7m0 0l-7-7m7 7V3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="flex flex-col flex-grow">
+<span class="text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">URP.20</span>
+<span class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">5,009.71</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-sm font-bold text-red-500 dark:text-red-400">-0.25%</span>
+<span class="text-sm font-medium text-red-500 dark:text-red-400 opacity-80">-12.50</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="w-8 flex-shrink-0 flex justify-start">
+<svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="flex flex-col flex-grow">
+<span class="text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">CAC.40</span>
+<span class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">1,958.08</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-sm font-bold text-green-600 dark:text-green-400">+0.52%</span>
+<span class="text-sm font-medium text-green-600 dark:text-green-400 opacity-80">+10.13</span>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="w-8 flex-shrink-0 flex justify-start">
+<svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 10l7-7m0 0l7 7m-7-7v18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="flex flex-col flex-grow">
+<span class="text-sm font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">YET</span>
+<span class="text-lg font-bold text-gray-900 dark:text-white tracking-tight">8,023.26</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-sm font-bold text-green-600 dark:text-green-400">+0.52%</span>
+<span class="text-sm font-medium text-green-600 dark:text-green-400 opacity-80">+41.75</span>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

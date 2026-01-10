@@ -1,6 +1,5 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 
 /// 平滑折线图卡片示例
 class SmoothLineChartCardExample extends StatelessWidget {

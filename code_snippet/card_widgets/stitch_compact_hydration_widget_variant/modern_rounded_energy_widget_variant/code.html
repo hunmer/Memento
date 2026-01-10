@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Modern Rounded Energy Widget Variant</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#00E076", // Bright green from the screenshot
+              "background-light": "#F2F2F7", // iOS system gray background
+              "background-dark": "#000000", // iOS dark background
+              "widget-light": "#FFFFFF",
+              "widget-dark": "#1C1C1E",
+              "text-primary-light": "#000000",
+              "text-primary-dark": "#FFFFFF",
+              "text-secondary-light": "#8E8E93",
+              "text-secondary-dark": "#98989D",
+              "accent-orange": "#FF9F0A",
+            },
+            fontFamily: {
+              display: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.5rem",
+              'widget': "2rem", // Extra pronounced rounded corners as requested
+            },
+          },
+        },
+      };
+    </script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>.timeline-grid {
+            background-image: linear-gradient(to right, #E5E5EA 1px, transparent 1px);
+            background-size: 33.33% 100%;
+        }
+        .dark .timeline-grid {
+            background-image: linear-gradient(to right, #3A3A3C 1px, transparent 1px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center p-6 font-display antialiased transition-colors duration-300">
+<div class="w-[170px] h-[170px] bg-widget-light dark:bg-widget-dark rounded-widget shadow-lg p-4 flex flex-col justify-between relative overflow-hidden transition-colors duration-300">
+<div class="flex flex-col gap-0.5 z-10">
+<div class="flex items-center gap-1">
+<span class="text-[13px] font-semibold text-text-primary-light dark:text-text-primary-dark tracking-tight">Tiburon</span>
+<span class="material-icons-round text-[12px] text-text-primary-light dark:text-text-primary-dark transform rotate-45">navigation</span>
+</div>
+<h1 class="text-[22px] font-bold text-text-primary-light dark:text-text-primary-dark leading-tight tracking-tight">
+                Cleaner
+            </h1>
+<p class="text-[11px] leading-[1.3] text-text-secondary-light dark:text-text-secondary-dark mt-0.5">
+                Electricity is cleaner until 2:00 PM.
+            </p>
+</div>
+<div class="relative w-full h-12 mt-auto">
+<div class="absolute inset-0 w-full h-8 top-0 left-0 timeline-grid opacity-50 pointer-events-none"></div>
+<div class="relative h-8 w-full flex items-center">
+<div class="absolute left-0 top-1 bottom-1 w-1 bg-accent-orange rounded-full z-20"></div>
+<div class="absolute left-1 top-1 bottom-1 w-[65%] bg-primary rounded-r-lg z-10"></div>
+</div>
+<div class="flex justify-between w-full mt-1 px-0.5">
+<span class="text-[10px] font-bold text-text-primary-light dark:text-text-primary-dark uppercase tracking-wide">Now</span>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark absolute left-[33%] transform -translate-x-1/2">12PM</span>
+<span class="text-[10px] font-medium text-text-secondary-light dark:text-text-secondary-dark absolute left-[66%] transform -translate-x-1/2">3PM</span>
+</div>
+</div>
+</div>
+<div class="absolute bottom-20 text-center opacity-0 pointer-events-none">
+<span class="text-xs font-medium text-white drop-shadow-md">Home</span>
+</div>
+
+</body></html>

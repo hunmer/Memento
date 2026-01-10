@@ -16,7 +16,6 @@ import 'package:Memento/plugins/agent_chat/services/message_detail_service.dart'
 import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
-import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';

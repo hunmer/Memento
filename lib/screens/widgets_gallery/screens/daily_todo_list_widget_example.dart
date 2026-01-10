@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 /// 每日待办事项卡片示例
 class DailyTodoListWidgetExample extends StatelessWidget {

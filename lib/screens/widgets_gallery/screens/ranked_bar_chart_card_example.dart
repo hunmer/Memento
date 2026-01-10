@@ -198,7 +198,7 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget>
                             animation: itemAnimation,
                             isLast: index == widget.items.length - 1,
                           );
-                        }).toList(),
+                        }),
                         const SizedBox(height: 32),
                         Text(
                           widget.footer,
