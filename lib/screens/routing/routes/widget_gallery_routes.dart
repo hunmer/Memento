@@ -88,6 +88,7 @@ import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/rounded_task_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_sleep_tracker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.dart';
@@ -110,8 +111,10 @@ import 'package:Memento/screens/widgets_gallery/screens/inbox_message_card_examp
 import 'package:Memento/screens/widgets_gallery/screens/notes_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rounded_reminders_list_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/circular_metrics_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/colorful_shortcuts_grid_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rental_preview_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/split_image_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/social_profile_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/curve_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/nutrition_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/trend_list_card_example.dart';
@@ -564,6 +567,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '任务列表卡片',
         ),
         RouteDefinition(
+          path: '/widgets_gallery/rounded_task_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const RoundedTaskListCardExample(), settings: settings),
+          description: '圆角任务列表卡片',
+        ),
+        RouteDefinition(
           path: '/widgets_gallery/journal_prompt_card',
           handler: (settings) => RouteHelpers.createRoute(const JournalPromptCardExample(), settings: settings),
           description: '日记提示卡片',
@@ -679,6 +687,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '环形指标卡片',
         ),
         RouteDefinition(
+          path: '/widgets_gallery/colorful_shortcuts_grid',
+          handler: (settings) => RouteHelpers.createRoute(const ColorfulShortcutsGridExample(), settings: settings),
+          description: '彩色快捷方式网格',
+        ),
+        RouteDefinition(
           path: '/widgets_gallery/rental_preview_card',
           handler: (settings) => RouteHelpers.createRoute(const RentalPreviewCardExample(), settings: settings),
           description: '租赁预览卡片',
@@ -692,6 +705,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/split_image_card',
           handler: (settings) => RouteHelpers.createRoute(const SplitImageCardExample(), settings: settings),
           description: '图片分割卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/social_profile_card',
+          handler: (settings) => RouteHelpers.createRoute(const SocialProfileCardExample(), settings: settings),
+          description: '社交资料卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/curve_progress_card',

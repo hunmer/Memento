@@ -182,7 +182,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
                         ),
                       ),
                     ),
-                    const SizedBox(height: -45),
+                    const SizedBox(height: 3),
                     // 用户信息
                     _UserHeader(
                       user: widget.user,
