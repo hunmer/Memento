@@ -342,29 +342,35 @@ class _DonutChartPainter extends CustomPainter {
     // 计算总角度（360度）
     final totalAngle = 2 * math.pi;
     var startAngle = -math.pi / 2; // 从顶部开始
+    var drawnAngle = 0.0; // 已绘制的角度
 
     // 绘制每个扇形
     for (final category in categories) {
-      final sweepAngle = totalAngle * category.value * progress;
+      final categorySweepAngle = totalAngle * category.value; // 扇形的完整角度
+      final remainingAngle = totalAngle * progress - drawnAngle; // 剩余可绘制角度
 
-      if (sweepAngle > 0) {
-        final paint = Paint()
-          ..color = category.color
-          ..style = PaintingStyle.fill;
+      if (remainingAngle <= 0) break; // 进度已用完，停止绘制
 
-        // 绘制扇形
-        final path = Path();
-        path.moveTo(center.dx, center.dy);
-        path.addArc(
-          Rect.fromCircle(center: center, radius: radius),
-          startAngle,
-          sweepAngle,
-        );
-        path.close();
-        canvas.drawPath(path, paint);
+      // 计算本次要绘制的角度（取扇形完整角度和剩余角度的较小值）
+      final sweepAngle = categorySweepAngle < remainingAngle
+          ? categorySweepAngle
+          : remainingAngle;
 
-        startAngle += sweepAngle;
-      }
+      final paint = Paint()
+        ..color = category.color
+        ..style = PaintingStyle.fill;
+
+      // 绘制扇形（使用 useCenter=true 才能正确绘制扇形）
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        true,
+        paint,
+      );
+
+      startAngle += categorySweepAngle; // 使用完整角度更新起始位置
+      drawnAngle += sweepAngle; // 累加已绘制的角度
     }
 
     // 绘制中心白色圆（创建甜甜圈效果）
