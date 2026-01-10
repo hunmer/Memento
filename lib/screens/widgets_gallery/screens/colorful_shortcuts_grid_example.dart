@@ -21,11 +21,7 @@ class ColorfulShortcutsGridExample extends StatelessWidget {
                 label: 'Block Off an Hour',
                 color: const Color(0xFFFF5E63),
               ),
-              ShortcutItem(
-                icon: Icons.timer,
-                label: 'Take a Break',
-                color: const Color(0xFFFF8A65),
-              ),
+           
               ShortcutItem(
                 icon: Icons.collections,
                 label: 'Make GIF',
