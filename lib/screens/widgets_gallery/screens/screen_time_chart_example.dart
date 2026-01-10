@@ -133,7 +133,24 @@ class _ScreenTimeChartWidgetState extends State<ScreenTimeChartWidget>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     );
-    _animationController.forward();
+    // 确保动画立即开始播放
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _animationController.forward();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(ScreenTimeChartWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // 当数据变化时重新播放动画
+    if (oldWidget.dataPoints != widget.dataPoints ||
+        oldWidget.totalHours != widget.totalHours ||
+        oldWidget.totalMinutes != widget.totalMinutes) {
+      _animationController.reset();
+      _animationController.forward();
+    }
   }
 
   @override
