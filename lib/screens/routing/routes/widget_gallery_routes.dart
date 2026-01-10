@@ -77,6 +77,10 @@ import 'package:Memento/screens/widgets_gallery/screens/message_list_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/daily_schedule_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/expense_comparison_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/activity_rings_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weekly_bars_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/medication_tracker_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -477,6 +481,26 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/activity_rings_card',
           handler: (settings) => RouteHelpers.createRoute(const ActivityRingsCardExample(), settings: settings),
           description: '活动圆环卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weekly_bars_card',
+          handler: (settings) => RouteHelpers.createRoute(const WeeklyBarsCardExample(), settings: settings),
+          description: '周柱状图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/medication_tracker_widget',
+          handler: (settings) => RouteHelpers.createRoute(const MedicationTrackerWidgetExample(), settings: settings),
+          description: '药物追踪器卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/modern_egfr_health_widget',
+          handler: (settings) => RouteHelpers.createRoute(const ModernEgfrHealthWidgetExample(), settings: settings),
+          description: 'eGFR 健康指标卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/modern_rounded_balance_widget',
+          handler: (settings) => RouteHelpers.createRoute(const ModernRoundedBalanceWidgetExample(), settings: settings),
+          description: '余额卡片',
         ),
       ];
 }

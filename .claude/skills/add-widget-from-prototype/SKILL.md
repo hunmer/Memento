@@ -374,26 +374,138 @@ class _ProgressPainter extends CustomPainter {
 
 **必需实现：** 组件中的数值显示必须使用 `AnimatedFlipCounter`
 
-**实现方式：**
+**⚠️ 防止布局抖动的固定尺寸约束（必须遵守）**
+
+`AnimatedFlipCounter` 在动画过程中会改变内容尺寸，必须添加固定尺寸约束防止布局抖动：
+
+```dart
+// ✅ 正确：完整的固定尺寸约束模式
+SizedBox(
+  height: 54,  // 1. 外层 Row 固定高度
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,  // 2. 使用 center 而非 baseline
+    children: [
+      SizedBox(
+        width: 160,  // 3. AnimatedFlipCounter 固定宽度和高度
+        height: 52,
+        child: AnimatedFlipCounter(
+          value: data.value * itemAnimation.value,
+          fractionDigits: data.value % 1 != 0 ? 2 : 0,
+          textStyle: TextStyle(
+            fontSize: 48,
+            fontWeight: FontWeight.w800,
+            height: 1.0,  // 4. 固定行高
+          ),
+        ),
+      ),
+      const SizedBox(width: 6),
+      SizedBox(
+        height: 22,  // 5. 单位 Text 固定高度
+        child: Text(
+          'unit',
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.0,  // 6. 固定行高
+          ),
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+**❌ 错误示例（会导致布局抖动）：**
+```dart
+// ❌ 错误 1: 使用 baseline 对齐
+Row(
+  crossAxisAlignment: CrossAxisAlignment.baseline,  // 会导致抖动
+  textBaseline: TextBaseline.alphabetic,
+  children: [
+    AnimatedFlipCounter(...),
+    Text('unit'),
+  ],
+)
+
+// ❌ 错误 2: 没有固定宽度
+Row(
+  children: [
+    SizedBox(
+      height: 52,  // 只有高度，没有宽度
+      child: AnimatedFlipCounter(...),
+    ),
+    Text('unit'),
+  ],
+)
+
+// ❌ 错误 3: Text 没有固定高度
+Row(
+  children: [
+    AnimatedFlipCounter(...),
+    Text('unit'),  // 没有包裹 SizedBox
+  ],
+)
+```
+
+**固定尺寸计算公式：**
+```dart
+// AnimatedFlipCounter 的宽度应足够容纳最大值
+final counterWidth = maxWidthDigitCount * fontSize * 0.6 + padding;
+
+// 示例计算：
+// fontSize: 48, 最大3位整数 + 1位小数 = 4个字符
+// width = 4 * 48 * 0.6 ≈ 115，取安全值 160
+
+// 外层 Row 高度 = max(counterHeight, unitHeight) + alignment
+final rowHeight = max(52, 22) = 54;
+```
+
+**完整实现模式：**
 ```dart
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 
 // 在 AnimatedBuilder 中使用
-AnimatedFlipCounter(
-  value: data.value * itemAnimation.value,  // 从 0 增长到目标值
-  fractionDigits: data.value % 1 != 0 ? 2 : 0,  // 自动识别整数/小数
-  textStyle: const TextStyle(
-    color: Colors.white,
-    fontSize: 24,
-    fontWeight: FontWeight.w700,
+SizedBox(
+  height: 54,
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      SizedBox(
+        width: 160,  // 根据最大值计算
+        height: 52,
+        child: AnimatedFlipCounter(
+          value: data.value * itemAnimation.value,  // 从 0 增长到目标值
+          fractionDigits: data.value % 1 != 0 ? 2 : 0,  // 自动识别整数/小数
+          textStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 48,
+            fontWeight: FontWeight.w800,
+            height: 1.0,  // 固定行高防止文字变化影响布局
+          ),
+        ),
+      ),
+      const SizedBox(width: 6),
+      SizedBox(
+        height: 22,  // 单位固定高度
+        child: Text(
+          'unit',
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.0,  // 固定行高
+          ),
+        ),
+      ),
+    ],
   ),
 ),
 ```
 
-**注意：**
-- 必须乘以动画值：`value * animation.value`
-- 自动判断是否需要小数位数
-- 保持与原设计一致的文本样式
+**检查清单：**
+- [ ] AnimatedFlipCounter 有固定 `width` 和 `height`
+- [ ] 外层 Row 有固定 `height`（使用 `SizedBox` 包裹）
+- [ ] 使用 `crossAxisAlignment: center` 而非 `baseline`
+- [ ] 所有 Text 组件都有固定高度 `SizedBox`
+- [ ] 所有 textStyle 都有 `height: 1.0`
+- [ ] 数值必须乘以动画值：`value * animation.value`
 
 #### 4. 多元素延迟动画
 
@@ -582,6 +694,9 @@ class SegmentedProgressCardWidget extends StatelessWidget {
 - [ ] 多个元素依次延迟出现（Interval 延迟）
 - [ ] 进度条/仪表盘包含动画（CustomPainter + animation.value）
 - [ ] 数值显示使用 AnimatedFlipCounter（value * animation.value）
+- [ ] **AnimatedFlipCounter 有固定 width 和 height**
+- [ ] **外层 Row 有固定高度，使用 center 对齐**
+- [ ] **所有 Text 组件有固定高度和 height: 1.0**
 - [ ] 动画时长约 1200ms，使用 easeOutCubic 曲线
 - [ ] 动画资源正确释放（dispose 中调用 controller.dispose()）
 
@@ -673,56 +788,126 @@ Column(
 - 使用 `mainAxisSize: MainAxisSize.min` 让 Column 自适应
 - 间距使用固定 `SizedBox` 而非 `Spacer()`
 
-### 问题 5: 动画时布局抖动
+### 问题 5: AnimatedFlipCounter 动画时布局抖动
 
 **现象：**
-AnimatedFlipCounter 或其他动画元素导致布局在动画执行时抖动。
+AnimatedFlipCounter 导致布局在动画执行时上下抖动或整体跳动。
 
-**原因：**
-动画元素没有固定的尺寸约束，导致布局在动画过程中重新计算。
+**根本原因：**
+1. `AnimatedFlipCounter` 在动画过程中数字位数变化（如 0 → 547），导致宽度变化
+2. 使用 `CrossAxisAlignment.baseline` 对齐时，Flutter 会重新计算基线位置
+3. 没有固定尺寸约束，布局引擎在动画过程中不断重新计算
 
-**解决方案：**
+**完整解决方案：**
+
 ```dart
-// ❌ 错误：没有固定尺寸
+// ❌ 错误 1: 使用 baseline 对齐（最常见错误）
 Row(
+  crossAxisAlignment: CrossAxisAlignment.baseline,  // ❌ 会导致抖动
+  textBaseline: TextBaseline.alphabetic,
   children: [
     AnimatedFlipCounter(value: value * animation.value),
     Text('km'),
   ],
 )
 
-// ✅ 正确：给所有动画元素设置固定尺寸
+// ❌ 错误 2: 只固定高度，没有固定宽度
 SizedBox(
-  height: 48,  // 固定整个行的高度
+  height: 48,  // ❌ 只有高度，宽度仍会变化
+  child: Row(
+    children: [
+      AnimatedFlipCounter(value: value * animation.value),
+      Text('km'),
+    ],
+  ),
+)
+
+// ❌ 错误 3: Text 没有固定高度
+SizedBox(
+  height: 48,
   child: Row(
     children: [
       SizedBox(
-        width: 170,   // 固定数值宽度
-        height: 48,   // 固定数值高度
+        width: 170,
+        height: 48,
+        child: AnimatedFlipCounter(value: value * animation.value),
+      ),
+      Text('km'),  // ❌ 没有包裹 SizedBox，高度不固定
+    ],
+  ),
+)
+
+// ✅ 正确：完整固定尺寸约束模式
+SizedBox(
+  height: 54,  // 1. 外层固定高度（足够容纳最大元素）
+  child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,  // 2. 使用 center 而非 baseline
+    children: [
+      SizedBox(
+        width: 160,   // 3. AnimatedFlipCounter 固定宽度（根据最大值计算）
+        height: 52,   // 4. AnimatedFlipCounter 固定高度
         child: AnimatedFlipCounter(
           value: value * animation.value,
           textStyle: TextStyle(
-            fontSize: 40,
-            height: 1.0,  // 固定行高，防止文字变化影响布局
+            fontSize: 48,
+            fontWeight: FontWeight.w800,
+            height: 1.0,  // 5. 固定行高（防止文字行高变化）
           ),
         ),
       ),
-      const SizedBox(width: 4),
+      const SizedBox(width: 6),
       SizedBox(
-        height: 24,   // 固定单位高度
-        child: Text('km'),
+        height: 22,  // 6. 单位 Text 固定高度
+        child: Text(
+          'km',
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.0,  // 7. 固定行高
+          ),
+        ),
       ),
     ],
   ),
 )
 ```
 
-**关键点：**
-1. 给包含动画的 Row 设置固定高度的 `SizedBox`
-2. 给 AnimatedFlipCounter 设置固定的 width 和 height
-3. 给 textStyle 添加 `height: 1.0` 固定行高
-4. 给所有 Text 组件包裹固定高度的 `SizedBox`
-5. 使用 `crossAxisAlignment: center` 而非 `baseline`
+**尺寸计算公式：**
+
+```dart
+// AnimatedFlipCounter 宽度计算
+// 预估最大位数 × 字体大小 × 字符宽度系数 + 安全余量
+final counterWidth = (maxIntegerDigits + maxFractionDigits + 1) * fontSize * 0.6 + 20;
+
+// 示例：
+// 最大值: 999.99 (3位整数 + 2位小数 + 1个小数点 = 6个字符)
+// fontSize: 48
+// width = 6 * 48 * 0.6 + 20 ≈ 193，取整到 200 或更大安全值
+
+// 外层 Row 高度计算
+final rowHeight = max(counterHeight, unitHeight) + verticalPadding;
+
+// 示例：
+// counterHeight: 52, unitHeight: 22
+// rowHeight = max(52, 22) = 54
+```
+
+**快速参考尺寸表：**
+
+| 字体大小 | 预估位数 | 推荐宽度 | Row高度 |
+|---------|---------|---------|--------|
+| 24px | 3-4位 | 80-100px | 32px |
+| 36px | 3-4位 | 120-140px | 42px |
+| 48px | 3-4位 | 160-180px | 54px |
+| 60px | 3-4位 | 200-220px | 66px |
+
+**检查清单：**
+- [ ] AnimatedFlipCounter 有固定 `width`（必须）
+- [ ] AnimatedFlipCounter 有固定 `height`（必须）
+- [ ] 外层 Row 有固定 `height`（使用 `SizedBox` 包裹）
+- [ ] 使用 `CrossAxisAlignment.center` 而非 `baseline`
+- [ ] 所有 Text 都有固定高度 `SizedBox`
+- [ ] 所有 textStyle 都有 `height: 1.0`
+- [ ] 数值乘以动画值：`value * animation.value`
 
 ### 问题 6: 装饰点阵超出卡片边界
 
