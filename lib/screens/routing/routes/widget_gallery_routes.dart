@@ -97,6 +97,11 @@ import 'package:Memento/screens/widgets_gallery/screens/hydration_tracker_widget
 import 'package:Memento/screens/widgets_gallery/screens/trend_value_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weight_trend_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/account_balance_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/budget_trend_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/multi_metric_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/icon_circular_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/color_tag_task_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -597,6 +602,31 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/weight_trend_chart',
           handler: (settings) => RouteHelpers.createRoute(const WeightTrendChartExample(), settings: settings),
           description: '体重趋势图表',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/account_balance_card',
+          handler: (settings) => RouteHelpers.createRoute(const AccountBalanceCardExample(), settings: settings),
+          description: '账户余额卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/budget_trend_card',
+          handler: (settings) => RouteHelpers.createRoute(const BudgetTrendCardExample(), settings: settings),
+          description: '预算趋势卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/multi_metric_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const MultiMetricProgressCardExample(), settings: settings),
+          description: '多指标进度跟踪卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/icon_circular_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const IconCircularProgressCardExample(), settings: settings),
+          description: '图标圆形进度卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/color_tag_task_card',
+          handler: (settings) => RouteHelpers.createRoute(const ColorTagTaskCardExample(), settings: settings),
+          description: '彩色标签任务列表卡片',
         ),
       ];
 }
