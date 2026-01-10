@@ -15,16 +15,16 @@ class SegmentedProgressCardExample extends StatelessWidget {
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: SegmentedProgressCardWidget(
-            title: 'Today Spending',
+            title: '今日支出',
+            currentValue: 322,
+            targetValue: 443,
             segments: [
-              SegmentData(label: 'Groceries', value: 45, color: Color(0xFFE14462)),
-              SegmentData(label: 'Clothes', value: 12, color: Color(0xFF7B57E0)),
-              SegmentData(label: 'Leisure', value: 8, color: Color(0xFF5BAE28)),
-              SegmentData(label: 'Car', value: 15, color: Color(0xFF4A4A4C)),
+              SegmentData(label: '餐饮', value: 37, color: Color(0xFFFF3B30)),
+              SegmentData(label: '健身', value: 43, color: Color(0xFF007AFF)),
+              SegmentData(label: '交通', value: 31, color: Color(0xFFFFCC00)),
+              SegmentData(label: '其他', value: 11, color: Color(0xFF8E8E93)),
             ],
-            available: 5089.49,
-            percentage: 46,
-            currency: 'AED',
+            unit: '\$',
           ),
         ),
       ),
@@ -47,23 +47,33 @@ class SegmentData {
 
 /// 分段进度条统计小组件
 class SegmentedProgressCardWidget extends StatefulWidget {
+  /// 卡片标题
   final String title;
+
+  /// 当前值
+  final double currentValue;
+
+  /// 目标值
+  final double targetValue;
+
+  /// 分段数据
   final List<SegmentData> segments;
-  final double available;
-  final int percentage;
-  final String currency;
+
+  /// 数值单位
+  final String unit;
 
   const SegmentedProgressCardWidget({
     super.key,
     required this.title,
+    required this.currentValue,
+    required this.targetValue,
     required this.segments,
-    required this.available,
-    required this.percentage,
-    this.currency = 'AED',
+    this.unit = '',
   });
 
   @override
-  State<SegmentedProgressCardWidget> createState() => _SegmentedProgressCardWidgetState();
+  State<SegmentedProgressCardWidget> createState() =>
+      _SegmentedProgressCardWidgetState();
 }
 
 class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidget>
@@ -94,8 +104,6 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF2C2C2E).withOpacity(0.5) : const Color(0xFFE5E5EA);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -104,310 +112,231 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
           opacity: _animation.value,
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: borderColor, width: 0.5),
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 标题栏
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                        ),
-                      ),
-                      Icon(
-                        Icons.more_horiz,
-                        size: 18,
-                        color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // 分段进度条
-                  _SegmentedProgressBar(
-                    segments: widget.segments,
-                    isDark: isDark,
-                    animation: _animation,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // 图例
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 8,
-                    children: widget.segments.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final segment = entry.value;
-                      return _LegendItem(
-                        label: segment.label,
-                        color: segment.color,
-                        isDark: isDark,
-                        animation: _animation,
-                        index: index,
-                      );
-                    }).toList(),
-                  ),
-
-                  const Spacer(),
-
-                  // 底部可用金额
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Available',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.2,
-                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // 金额
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '${widget.currency} ',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                                ),
-                              ),
-                              AnimatedFlipCounter(
-                                value: widget.available * _animation.value,
-                                fractionDigits: 2,
-                                textStyle: TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.grey.shade900,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                          // 百分比
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: AnimatedFlipCounter(
-                              value: widget.percentage.toDouble() * _animation.value,
-                              fractionDigits: 0,
-                              suffix: '%',
-                              textStyle: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            child: child,
           ),
         );
       },
+      child: Container(
+        width: 340,
+        decoration: BoxDecoration(
+          color: isDark ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 40,
+                offset: const Offset(0, 12),
+              ),
+          ],
+          border: isDark ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
+        ),
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 标题和数值
+            _buildHeader(context, isDark),
+            const SizedBox(height: 32),
+            // 分段进度条
+            _buildProgressBar(context, isDark),
+            const SizedBox(height: 32),
+            // 分段列表
+            ..._buildSegmentList(context, isDark),
+          ],
+        ),
+      ),
     );
   }
-}
 
-/// 分段进度条
-class _SegmentedProgressBar extends StatelessWidget {
-  final List<SegmentData> segments;
-  final bool isDark;
-  final Animation<double> animation;
+  /// 构建标题和数值部分
+  Widget _buildHeader(BuildContext context, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          widget.title,
+          style: TextStyle(
+            color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 48,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 180,
+                height: 40,
+                child: AnimatedFlipCounter(
+                  value: widget.currentValue * _animation.value,
+                  fractionDigits: 0,
+                  textStyle: TextStyle(
+                    color: isDark ? Colors.white : Colors.grey.shade900,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              SizedBox(
+                height: 20,
+                child: Text(
+                  '/ ${widget.targetValue.toInt()}',
+                  style: TextStyle(
+                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-  const _SegmentedProgressBar({
-    required this.segments,
-    required this.isDark,
-    required this.animation,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final backgroundColor = isDark ? Colors.black.withOpacity(0.4) : const Color(0xFFF5F5F5);
-    final dividerColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+  /// 构建分段进度条
+  Widget _buildProgressBar(BuildContext context, bool isDark) {
+    final totalValue = widget.segments.fold<double>(0, (sum, seg) => sum + seg.value);
 
     return Container(
-      height: 24,
+      height: 10,
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(5),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(5),
         child: Row(
-          children: _buildSegments(dividerColor),
+          children: widget.segments.map((segment) {
+            final percentage = totalValue > 0 ? segment.value / totalValue : 0;
+            return Expanded(
+              flex: (percentage * 100).toInt(),
+              child: Container(
+                color: segment.color,
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
   }
 
-  List<Widget> _buildSegments(Color dividerColor) {
-    final List<Widget> widgets = [];
+  /// 构建分段列表
+  List<Widget> _buildSegmentList(BuildContext context, bool isDark) {
+    final List<Widget> items = [];
 
-    for (int i = 0; i < segments.length; i++) {
-      final segment = segments[i];
-      final segmentAnimation = CurvedAnimation(
-        parent: animation,
-        curve: Interval(i * 0.1, 0.6 + i * 0.1, curve: Curves.easeOutCubic),
+    for (int i = 0; i < widget.segments.length; i++) {
+      final segment = widget.segments[i];
+
+      // 为每个列表项创建延迟动画
+      final itemAnimation = CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          i * 0.08,
+          0.5 + i * 0.08,
+          curve: Curves.easeOutCubic,
+        ),
       );
 
-      // 分隔线
       if (i > 0) {
-        widgets.add(
-          Container(
-            width: 2,
-            color: dividerColor,
-          ),
-        );
+        items.add(const SizedBox(height: 18));
       }
 
-      // 进度段
-      widgets.add(
-        Expanded(
-          flex: (segment.value * 100).toInt(),
-          child: AnimatedBuilder(
-            animation: segmentAnimation,
-            builder: (context, child) {
-              return FractionallySizedBox(
-                widthFactor: segmentAnimation.value,
-                alignment: Alignment.centerLeft,
-                child: Container(
-                  color: segment.color,
+      items.add(
+        AnimatedBuilder(
+          animation: itemAnimation,
+          builder: (context, child) {
+            return Opacity(
+              opacity: itemAnimation.value,
+              child: Transform.translate(
+                offset: Offset(0, 10 * (1 - itemAnimation.value)),
+                child: _SegmentItem(
+                  segment: segment,
+                  isDark: isDark,
+                  animation: itemAnimation,
+                  unit: widget.unit,
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       );
     }
 
-    // 剩余空白区域
-    final usedValue = segments.fold<double>(0, (sum, s) => sum + s.value);
-    final remaining = 100 - usedValue;
-    if (remaining > 0) {
-      widgets.add(
-        Container(
-          width: 2,
-          color: dividerColor,
-        ),
-      );
-      widgets.add(
-        Expanded(
-          flex: remaining.toInt(),
-          child: Container(
-            color: isDark ? Colors.black : const Color(0xFFE5E5EA),
-          ),
-        ),
-      );
-    }
-
-    return widgets;
+    return items;
   }
 }
 
-/// 图例项
-class _LegendItem extends StatelessWidget {
-  final String label;
-  final Color color;
+/// 单个分段项
+class _SegmentItem extends StatelessWidget {
+  final SegmentData segment;
   final bool isDark;
   final Animation<double> animation;
-  final int index;
+  final String unit;
 
-  const _LegendItem({
-    required this.label,
-    required this.color,
+  const _SegmentItem({
+    required this.segment,
     required this.isDark,
     required this.animation,
-    required this.index,
+    required this.unit,
   });
 
   @override
   Widget build(BuildContext context) {
-    final itemAnimation = CurvedAnimation(
-      parent: animation,
-      curve: Interval(
-        0.3 + index * 0.1,
-        (0.8 + index * 0.1).clamp(0.0, 1.0),
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
-    return AnimatedBuilder(
-      animation: itemAnimation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: itemAnimation.value,
-          child: Transform.translate(
-            offset: Offset(0, 10 * (1 - itemAnimation.value)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: color.withOpacity(0.3),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
-                  ),
-                ),
-              ],
+    return Row(
+      children: [
+        // 颜色指示器
+        Container(
+          width: 16,
+          height: 16,
+          decoration: BoxDecoration(
+            color: segment.color,
+            borderRadius: BorderRadius.circular(4),
+            boxShadow: [
+              BoxShadow(
+                color: segment.color.withOpacity(0.3),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 14),
+        // 标签
+        Text(
+          segment.label,
+          style: TextStyle(
+            color: isDark ? Colors.grey.shade200 : Colors.grey.shade700,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Spacer(),
+        // 数值
+        SizedBox(
+          height: 20,
+          child: Text(
+            unit == '' ? '${segment.value.toInt()}' : '$unit${segment.value.toInt()}',
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.grey.shade900,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              height: 1.0,
             ),
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 }

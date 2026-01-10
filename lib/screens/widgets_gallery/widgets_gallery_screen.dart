@@ -196,6 +196,13 @@ class WidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'HomeWidgets - 各种桌面小组件示例',
             route: '/widgets_gallery/home_widgets',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.account_balance_wallet,
+            title: '月度账单卡片',
+            subtitle: 'MonthlyBillCard - 收入支出统计卡片',
+            route: '/widgets_gallery/monthly_bill_card',
+          ),
 
           const Divider(),
 

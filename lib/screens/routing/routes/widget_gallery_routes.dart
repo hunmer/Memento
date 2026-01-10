@@ -84,6 +84,15 @@ import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_w
 import 'package:Memento/screens/widgets_gallery/screens/dual_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_status_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_stage_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/task_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weekly_sleep_tracker_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_mood_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_spending_widget_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -519,6 +528,51 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/sleep_stage_chart',
           handler: (settings) => RouteHelpers.createRoute(const SleepStageChartExample(), settings: settings),
           description: '睡眠阶段图表',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/monthly_bill_card',
+          handler: (settings) => RouteHelpers.createRoute(const MonthlyBillCardExample(), settings: settings),
+          description: '月度账单卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/task_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const TaskListCardExample(), settings: settings),
+          description: '任务列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/journal_prompt_card',
+          handler: (settings) => RouteHelpers.createRoute(const JournalPromptCardExample(), settings: settings),
+          description: '日记提示卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/sleep_tracking_card',
+          handler: (settings) => RouteHelpers.createRoute(const SleepTrackingCardExample(), settings: settings),
+          description: '睡眠追踪卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weekly_sleep_tracker',
+          handler: (settings) => RouteHelpers.createRoute(const WeeklySleepTrackerExample(), settings: settings),
+          description: '周睡眠追踪小组件',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/mood_chart_card',
+          handler: (settings) => RouteHelpers.createRoute(const MoodChartCardExample(), settings: settings),
+          description: '心情图表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/daily_reflection_card',
+          handler: (settings) => RouteHelpers.createRoute(const DailyReflectionCardExample(), settings: settings),
+          description: '每日反思卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/modern_rounded_mood_widget',
+          handler: (settings) => RouteHelpers.createRoute(const ModernRoundedMoodWidgetExample(), settings: settings),
+          description: '现代化圆角心情追踪小组件',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/modern_rounded_spending_widget',
+          handler: (settings) => RouteHelpers.createRoute(const ModernRoundedSpendingWidgetExample(), settings: settings),
+          description: '消费卡片',
         ),
       ];
 }
