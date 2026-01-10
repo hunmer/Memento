@@ -93,6 +93,10 @@ import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_ex
 import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_mood_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_spending_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/hydration_tracker_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/trend_value_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weight_trend_chart_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -573,6 +577,26 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/modern_rounded_spending_widget',
           handler: (settings) => RouteHelpers.createRoute(const ModernRoundedSpendingWidgetExample(), settings: settings),
           description: '消费卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/hydration_tracker_widget',
+          handler: (settings) => RouteHelpers.createRoute(const HydrationTrackerWidgetExample(), settings: settings),
+          description: '饮水追踪器',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/trend_value_card',
+          handler: (settings) => RouteHelpers.createRoute(const TrendValueCardExample(), settings: settings),
+          description: '趨勢數值卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/sleep_duration_card',
+          handler: (settings) => RouteHelpers.createRoute(const SleepDurationCardExample(), settings: settings),
+          description: '睡眠时长统计卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weight_trend_chart',
+          handler: (settings) => RouteHelpers.createRoute(const WeightTrendChartExample(), settings: settings),
+          description: '体重趋势图表',
         ),
       ];
 }
