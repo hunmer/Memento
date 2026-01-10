@@ -657,6 +657,13 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
           ),
           _buildListItem(
             context,
+            icon: Icons.event_available,
+            title: '即将到来的任务小组件',
+            subtitle: 'UpcomingTasksWidget - 任务计数与彩色标签列表展示组件',
+            route: '/widgets_gallery/upcoming_tasks_widget',
+          ),
+          _buildListItem(
+            context,
             icon: Icons.person_outline,
             title: '社交资料卡片',
             subtitle: 'SocialProfileCard - 社交媒体用户资料展示卡片',
@@ -682,6 +689,34 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             title: '屏幕时间统计图表',
             subtitle: 'ScreenTimeChartWidget - 堆叠柱状图展示屏幕使用时间',
             route: '/widgets_gallery/screen_time_chart',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.image,
+            title: '垂直属性卡片',
+            subtitle: 'VerticalPropertyCard - 图片+信息的垂直展示卡片',
+            route: '/widgets_gallery/vertical_property_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.task_alt,
+            title: '任务进度列表卡片',
+            subtitle: 'TaskProgressListCard - 带进度条的任务列表展示卡片',
+            route: '/widgets_gallery/task_progress_list_card',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.bar_chart,
+            title: '垂直条形图卡片',
+            subtitle: 'VerticalBarChartWidget - 天气预报垂直条形图展示卡片',
+            route: '/widgets_gallery/vertical_bar_chart_widget',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.pie_chart,
+            title: '任务进度卡片',
+            subtitle: 'TaskProgressCard - 任务完成进度与待办事项卡片',
+            route: '/widgets_gallery/task_progress_card',
           ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
