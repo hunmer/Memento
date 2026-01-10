@@ -114,6 +114,9 @@ import 'package:Memento/screens/widgets_gallery/screens/rental_preview_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/split_image_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/curve_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/nutrition_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/trend_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/social_activity_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/screen_time_chart_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -699,6 +702,21 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/nutrition_progress_card',
           handler: (settings) => RouteHelpers.createRoute(const NutritionProgressCardExample(), settings: settings),
           description: '营养进度追踪卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/trend_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const TrendListCardExample(), settings: settings),
+          description: '趋势列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/social_activity_card',
+          handler: (settings) => RouteHelpers.createRoute(const SocialActivityCardExample(), settings: settings),
+          description: '社交活动动态卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/screen_time_chart',
+          handler: (settings) => RouteHelpers.createRoute(const ScreenTimeChartExample(), settings: settings),
+          description: '屏幕时间统计图表',
         ),
       ];
 }
