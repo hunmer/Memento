@@ -69,6 +69,10 @@ import 'package:Memento/screens/widgets_gallery/screens/weekly_steps_progress_ca
 import 'package:Memento/screens/widgets_gallery/screens/dual_range_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_dot_tracker_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/mini_trend_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/daily_events_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/score_card_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/category_stack_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/timeline_schedule_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -429,6 +433,26 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/mini_trend_card',
           handler: (settings) => RouteHelpers.createRoute(const MiniTrendCardExample(), settings: settings),
           description: '迷你趋势卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/daily_events_card',
+          handler: (settings) => RouteHelpers.createRoute(const DailyEventsCardExample(), settings: settings),
+          description: '日期事件卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/score_card_widget',
+          handler: (settings) => RouteHelpers.createRoute(const ScoreCardWidgetExample(), settings: settings),
+          description: '分数卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/category_stack_widget',
+          handler: (settings) => RouteHelpers.createRoute(const CategoryStackWidgetExample(), settings: settings),
+          description: '分类堆叠消费卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/timeline_schedule_card',
+          handler: (settings) => RouteHelpers.createRoute(const TimelineScheduleCardExample(), settings: settings),
+          description: '时间线日程卡片',
         ),
       ];
 }
