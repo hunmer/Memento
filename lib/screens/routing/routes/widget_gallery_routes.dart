@@ -73,6 +73,10 @@ import 'package:Memento/screens/widgets_gallery/screens/daily_events_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/score_card_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/category_stack_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_schedule_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/message_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/daily_schedule_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/expense_comparison_chart_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/activity_rings_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -453,6 +457,26 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/timeline_schedule_card',
           handler: (settings) => RouteHelpers.createRoute(const TimelineScheduleCardExample(), settings: settings),
           description: '时间线日程卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/message_list_card',
+          handler: (settings) => RouteHelpers.createRoute(const MessageListCardExample(), settings: settings),
+          description: '邮件列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/daily_schedule_card',
+          handler: (settings) => RouteHelpers.createRoute(const DailyScheduleCardExample(), settings: settings),
+          description: '每日日程卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/expense_comparison_chart',
+          handler: (settings) => RouteHelpers.createRoute(const ExpenseComparisonChartExample(), settings: settings),
+          description: '支出对比图表',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/activity_rings_card',
+          handler: (settings) => RouteHelpers.createRoute(const ActivityRingsCardExample(), settings: settings),
+          description: '活动圆环卡片',
         ),
       ];
 }
