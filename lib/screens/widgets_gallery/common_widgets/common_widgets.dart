@@ -29,6 +29,9 @@ import '../screens/dual_slider_widget_example.dart';
 import '../screens/daily_todo_list_widget_example.dart';
 import '../screens/upcoming_tasks_widget_example.dart';
 import 'widgets/social_profile_card.dart';
+import 'widgets/mini_trend_card.dart';
+import 'widgets/modern_rounded_spending_widget.dart';
+import '../screens/wallet_balance_card_example.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -61,6 +64,9 @@ enum CommonWidgetId {
   imageDisplayCard,
   weightTrendChart,
   socialProfileCard,
+  miniTrendCard,
+  modernRoundedSpendingWidget,
+  walletBalanceCard,
 }
 
 /// 公共小组件元数据
@@ -301,6 +307,30 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.miniTrendCard: CommonWidgetMetadata(
+      id: CommonWidgetId.miniTrendCard,
+      name: '迷你趋势卡片',
+      description: '显示标题、图标、当前数值、单位、副标题、星期标签和趋势折线图',
+      icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.modernRoundedSpendingWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.modernRoundedSpendingWidget,
+      name: '现代圆角消费卡片',
+      description: '显示当前消费、预算、分类进度条和分类列表，支持动画效果',
+      icon: Icons.payments_outlined,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.walletBalanceCard: CommonWidgetMetadata(
+      id: CommonWidgetId.walletBalanceCard,
+      name: '钱包余额概览卡片',
+      description: '显示钱包余额、可用余额、收入支出统计和操作按钮，支持动画效果',
+      icon: Icons.account_balance_wallet,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -388,6 +418,12 @@ class CommonWidgetBuilder {
         return WeightTrendChartWidget.fromProps(props, size);
       case CommonWidgetId.socialProfileCard:
         return SocialProfileCardWidget.fromProps(props, size);
+      case CommonWidgetId.miniTrendCard:
+        return MiniTrendCardWidget.fromProps(props, size);
+      case CommonWidgetId.modernRoundedSpendingWidget:
+        return ModernRoundedSpendingWidget.fromProps(props, size);
+      case CommonWidgetId.walletBalanceCard:
+        return WalletBalanceCardWidget.fromProps(props, size);
     }
   }
 }

@@ -1,6 +1,6 @@
 # 桌面小组件转换清单
 
-> 已转换：73/95 | 未转换：20
+> 已转换：76/95 | 未转换：17
 
 最后更新：2026-01-12
 
@@ -71,6 +71,8 @@
 - [x] 睡眠时长统计卡片 - `sleep_duration_card`
 - [x] 饮水追踪器 - `hydration_tracker_widget` → `hydrationTrackerCard`
 - [x] 个人资料卡片 - `profile_card_widget` → `profileCardCard`
+- [x] 余额卡片 - `modern_rounded_balance_widget` → `ModernRoundedBalanceCard` (使用 `BalanceCardData` 数据模型，支持 JSON 序列化)
+- [x] 活动圆环卡片 - `activity_rings_card` → `ActivityRingsCard` (使用 `RingCardData` 数据模型)
 
 ### 列表/消息类(已完成转换，但未在common_widgets.dart 注册)
 - [ ] 每日日程卡片 - `daily_schedule_card`
@@ -99,19 +101,18 @@
 
 ### 媒体/娱乐类
 - [ ] 音乐播放器卡片 - `music_player_card`
-- [ ] 日历事件卡片 - `event_calendar_widget` → 建议：事件日历卡片
+- [x] 日历事件卡片 - `event_calendar_widget` → `EventCalendarCard` (使用 `CalendarEventData` 数据模型，支持 JSON 序列化)
 
 ### 财务类（需重命名）
 - [ ] 钱包余额概览卡片 - `wallet_balance_card` → 建议：余额概览卡片
 - [ ] 账户余额卡片 - `account_balance_card`
 - [ ] 预算趋势卡片 - `budget_trend_card`
-- [ ] 余额卡片 - `modern_rounded_balance_widget`
 - [ ] 消费卡片 - `modern_rounded_spending_widget`
 
 ### 趋势/数据类
 - [ ] 迷你趋势卡片 - `mini_trend_card`
 - [ ] 分数卡片 - `score_card_widget`
-- [ ] 活动圆环卡片 - `activity_rings_card`
+- [x] 活动圆环卡片 - `activity_rings_card` → `ActivityRingsCard` (使用 `RingCardData` 数据模型)
 - [ ] 趨勢數值卡片 - `trend_value_card`
 - [ ] 趋势列表卡片 - `trend_list_card`
 
