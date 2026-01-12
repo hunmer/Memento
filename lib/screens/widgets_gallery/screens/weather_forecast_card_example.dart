@@ -1,3 +1,4 @@
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 
 /// 天气预报卡片示例
@@ -279,22 +280,25 @@ class _WeatherForecastCardWidgetState extends State<WeatherForecastCardWidget>
 
   /// 构建温度趋势图表
   Widget _buildTemperatureChart(BuildContext context, bool isDark) {
+    final bars = <Widget>[];
+    for (int i = 0; i < widget.temperatureHistory.length; i++) {
+      if (i > 0) {
+        bars.add(const SizedBox(width: 6));
+      }
+      bars.add(_TemperatureBarWidget(
+        height: widget.temperatureHistory[i],
+        isCurrent: i == 0,
+        isDark: isDark,
+        animation: _fadeInAnimation,
+        index: i,
+      ));
+    }
+
     return SizedBox(
       height: 64,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: List.generate(widget.temperatureHistory.length, (index) {
-          final barHeight = widget.temperatureHistory[index];
-          final isCurrent = index == 0;
-
-          return _TemperatureBarWidget(
-            height: barHeight,
-            isCurrent: isCurrent,
-            isDark: isDark,
-            animation: _fadeInAnimation,
-            index: index,
-          );
-        }).expand((widget) => [widget, const SizedBox(width: 6)]).take(widget.temperatureHistory.length * 2 - 1).toList(),
+        children: bars,
       ),
     );
   }
@@ -319,11 +323,12 @@ class _TemperatureBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 计算每个柱子的延迟动画
+    final end = (0.4 + index * 0.06).clamp(0.0, 1.0);
     final barAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * 0.08,
-        0.5 + index * 0.08,
+        index * 0.06,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );
