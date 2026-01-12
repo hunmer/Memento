@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 分类堆叠消费卡片示例
 class CategoryStackWidgetExample extends StatelessWidget {
@@ -65,6 +66,26 @@ class CategoryData {
     required this.color,
     required this.percentage,
   });
+
+  /// 从 JSON 创建
+  factory CategoryData.fromJson(Map<String, dynamic> json) {
+    return CategoryData(
+      label: json['label'] as String? ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      color: Color(json['color'] as int? ?? 0xFF000000),
+      percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'amount': amount,
+      'color': color.value,
+      'percentage': percentage,
+    };
+  }
 }
 
 /// 分类堆叠消费小组件
@@ -83,6 +104,25 @@ class CategoryStackWidget extends StatefulWidget {
     this.currency = '\$',
     required this.categories,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory CategoryStackWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final categoriesList = (props['categories'] as List<dynamic>?)
+            ?.map((e) => CategoryData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return CategoryStackWidget(
+      title: props['title'] as String? ?? '',
+      currentAmount: (props['currentAmount'] as num?)?.toDouble() ?? 0.0,
+      targetAmount: (props['targetAmount'] as num?)?.toDouble() ?? 0.0,
+      currency: props['currency'] as String? ?? '\$',
+      categories: categoriesList,
+    );
+  }
 
   @override
   State<CategoryStackWidget> createState() => _CategoryStackWidgetState();

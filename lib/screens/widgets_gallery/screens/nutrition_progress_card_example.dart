@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 营养进度卡片示例
 class NutritionProgressCardExample extends StatelessWidget {
@@ -57,6 +58,24 @@ class NutritionData {
     required this.total,
     required this.unit,
   });
+
+  /// 从 JSON 创建
+  factory NutritionData.fromJson(Map<String, dynamic> json) {
+    return NutritionData(
+      current: (json['current'] as num?)?.toDouble() ?? 0.0,
+      total: (json['total'] as num?)?.toDouble() ?? 0.0,
+      unit: json['unit'] as String? ?? '',
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'current': current,
+      'total': total,
+      'unit': unit,
+    };
+  }
 }
 
 /// 营养素数据模型
@@ -74,6 +93,28 @@ class NutrientData {
     required this.total,
     required this.color,
   });
+
+  /// 从 JSON 创建
+  factory NutrientData.fromJson(Map<String, dynamic> json) {
+    return NutrientData(
+      icon: json['icon'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      current: (json['current'] as num?)?.toDouble() ?? 0.0,
+      total: (json['total'] as num?)?.toDouble() ?? 0.0,
+      color: Color(json['color'] as int? ?? 0xFF000000),
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'icon': icon,
+      'name': name,
+      'current': current,
+      'total': total,
+      'color': color.value,
+    };
+  }
 }
 
 /// 营养进度卡片小组件
@@ -89,6 +130,26 @@ class NutritionProgressCardWidget extends StatefulWidget {
     required this.calories,
     required this.nutrients,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory NutritionProgressCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final caloriesData = props['calories'] != null
+        ? NutritionData.fromJson(props['calories'] as Map<String, dynamic>)
+        : const NutritionData(current: 0, total: 100, unit: '');
+
+    final nutrientsList = (props['nutrients'] as List<dynamic>?)
+            ?.map((e) => NutrientData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return NutritionProgressCardWidget(
+      calories: caloriesData,
+      nutrients: nutrientsList,
+    );
+  }
 
   @override
   State<NutritionProgressCardWidget> createState() =>
