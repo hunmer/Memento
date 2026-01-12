@@ -33,6 +33,11 @@ export 'timeline_schedule_card.dart';
 export 'task_progress_list_card.dart';
 export 'rounded_task_list_card.dart';
 export 'notes_list_card.dart';
+export 'modern_rounded_balance_card.dart';
+export 'activity_rings_card.dart';
+
+// 导出活动圆环卡片数据模型
+export 'activity_rings_card.dart' show RingCardData;
 
 // 导出点阵追踪卡片数据模型
 export 'dot_tracker_card.dart' show DotTrackerCardData;
@@ -55,5 +60,12 @@ export 'rounded_reminders_list_card.dart' show ReminderItem;
 // 导出笔记列表卡片数据模型
 export 'notes_list_card.dart' show NoteItem;
 
+// 导出余额卡片数据模型
+export 'modern_rounded_balance_card.dart' show BalanceCardData;
+
 // 导出收件箱消息卡片数据模型
 export 'inbox_message_card.dart' show InboxMessage;
+export 'event_calendar_card.dart';
+
+// 导出事件日历卡片数据模型
+export 'event_calendar_card.dart' show CalendarEventData;

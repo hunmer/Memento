@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 钱包余额概览卡片示例
 class WalletBalanceCardExample extends StatelessWidget {
@@ -58,6 +59,21 @@ class WalletBalanceCardWidget extends StatefulWidget {
     required this.income,
     required this.expenses,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory WalletBalanceCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return WalletBalanceCardWidget(
+      avatarUrl: props['avatarUrl'] as String? ?? '',
+      availableBalance: (props['availableBalance'] as num?)?.toDouble() ?? 0.0,
+      totalBalance: (props['totalBalance'] as num?)?.toDouble() ?? 0.0,
+      changePercent: props['changePercent'] as int? ?? 0,
+      income: (props['income'] as num?)?.toDouble() ?? 0.0,
+      expenses: (props['expenses'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 
   @override
   State<WalletBalanceCardWidget> createState() =>

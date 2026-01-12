@@ -241,15 +241,13 @@ class _ActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
         final displayValue = (action.value * animation.value).round();
 
         return Padding(
-          padding: EdgeInsets.only(bottom: action != actions.last ? 12 : 0),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -303,6 +301,4 @@ class _ActionItem extends StatelessWidget {
       },
     );
   }
-
-  List<ActionData> get actions => [action];
 }
