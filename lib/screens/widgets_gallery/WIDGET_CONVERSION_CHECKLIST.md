@@ -1,10 +1,10 @@
 # 桌面小组件转换清单
 
-> 已转换：93/95 | 未转换：2
+> 已转换：95/95 | 未转换：0
 
 最后更新：2026-01-12
 
-## ✅ 已转换组件 (93/95)
+## ✅ 已转换组件 (95/95)
 
 - [x] 半圆仪表盘 - `half_circle_gauge_widget` → `halfGaugeCard`
 - [x] 预算趋势卡片 - `budget_trend_card` → `budgetTrendCard`
@@ -88,6 +88,8 @@
 - [x] 每日反思卡片 - `daily_reflection_card` → `dailyReflectionCard` (使用 `DailyReflectionCardData` 数据模型，支持 JSON 序列化)
 - [x] 彩色快捷方式网格 - `colorful_shortcuts_grid` → `colorfulShortcutsGrid` (使用 `ColorfulShortcutsGridData` 和 `ShortcutItemData` 数据模型，支持 JSON 序列化)
 - [x] 社交活动动态卡片 - `social_activity_card` → `socialActivityCard` (使用 `SocialUser` 和 `SocialPost` 数据模型，支持 JSON 序列化)
+- [x] 天气预报卡片 - `weather_forecast_card` → `weatherForecastCard` (支持 fromProps 工厂方法，淡入和上滑动画，数字翻转效果)
+- [x] 时间线状态卡片 - `timeline_status_card` → `timelineStatusCard` (使用 `TimelineStatusCardData` 数据模型，支持 JSON 序列化)
 
 ### 列表/消息类(已完成转换，但未在common_widgets.dart 注册)
 - [ ] 每日日程卡片 - `daily_schedule_card`
@@ -137,10 +139,8 @@
 - [x] 社交活动动态卡片 - `social_activity_card` → `socialActivityCard` (使用 `SocialUser` 和 `SocialPost` 数据模型，支持 JSON 序列化)
 - [x] 彩色快捷方式网格 - `colorful_shortcuts_grid` → `colorfulShortcutsGrid` (使用 `ColorfulShortcutsGridData` 和 `ShortcutItemData` 数据模型，支持 JSON 序列化)
 - [x] 图标圆形进度卡片 - `icon_circular_progress_card` → `iconCircularProgressCard` (使用 `IconCircularProgressCardWidget` 组件，支持动画效果和自定义颜色)
-- [ ] 彩色标签任务列表卡片 - `color_tag_task_card`
-- [ ] 月度账单卡片 - `monthly_bill_card`
-- [ ] 时间线状态卡片 - `timeline_status_card`
-- [ ] 天气预报卡片 - `weather_forecast_card`
+- [x] 月度账单卡片 - `monthly_bill_card` → `monthlyBillCard` (使用 `MonthlyBillCardData` 数据模型，支持 JSON 序列化)
+- [x] 彩色标签任务列表卡片 - `color_tag_task_card` → `colorTagTaskCard` (使用 `ColorTagTaskCardData` 和 `ColorTagTaskItem` 数据模型，支持 JSON 序列化)
 
 ---
 
