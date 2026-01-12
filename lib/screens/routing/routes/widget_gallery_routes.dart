@@ -124,6 +124,8 @@ import 'package:Memento/screens/widgets_gallery/screens/screen_time_chart_exampl
 import 'package:Memento/screens/widgets_gallery/screens/vertical_property_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_progress_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/weather_forecast_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/task_list_stat_card_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -759,6 +761,16 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/vertical_bar_chart_widget',
           handler: (settings) => RouteHelpers.createRoute(const VerticalBarChartExample(), settings: settings),
           description: '垂直条形图卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/weather_forecast_card',
+          handler: (settings) => RouteHelpers.createRoute(const WeatherForecastCardExample(), settings: settings),
+          description: '天气预报卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/task_list_stat_card',
+          handler: (settings) => RouteHelpers.createRoute(const TaskListStatCardExample(), settings: settings),
+          description: '任务统计列表卡片',
         ),
       ];
 }
