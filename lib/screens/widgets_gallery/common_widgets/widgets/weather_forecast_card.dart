@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 天气预报卡片
 ///
@@ -31,7 +32,10 @@ class WeatherForecastCard extends StatefulWidget {
   });
 
   /// 从属性数据创建组件
-  factory WeatherForecastCard.fromProps(Map<String, dynamic> props) {
+  factory WeatherForecastCard.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
     return WeatherForecastCard(
       cityName: props['cityName'] as String? ?? 'Unknown',
       weatherDescription: props['weatherDescription'] as String? ?? '',

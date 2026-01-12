@@ -64,6 +64,8 @@ class MusicPlayerCardWidget extends StatefulWidget {
     required this.currentPosition,
     required this.totalDuration,
     this.isPlaying = true,
+  });
+
   /// 从 props 创建实例（用于公共小组件系统）
   factory MusicPlayerCardWidget.fromProps(
     Map<String, dynamic> props,
@@ -78,7 +80,6 @@ class MusicPlayerCardWidget extends StatefulWidget {
       isPlaying: props['isPlaying'] as bool? ?? true,
     );
   }
-  });
 
   @override
   State<MusicPlayerCardWidget> createState() => _MusicPlayerCardWidgetState();

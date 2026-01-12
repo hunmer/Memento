@@ -263,7 +263,7 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
         animation: itemAnimation,
         isDark: isDark,
         isLast: i == widget.tasks.length - 1,
-        onTap: widget.onTaskTap != null ? (index) => widget.onTaskTap!(i) : null,
+        onTap: widget.onTaskTap != null ? () => widget.onTaskTap!(i) : null,
       ));
     }
 
