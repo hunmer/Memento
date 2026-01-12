@@ -15,19 +15,19 @@ import 'widgets/sleep_stage_chart_card.dart';
 import 'widgets/weight_trend_chart.dart';
 import 'widgets/image_display_card.dart';
 import 'widgets/split_image_card.dart';
-import '../screens/segmented_progress_card_example.dart';
+import 'widgets/segmented_progress_card.dart';
 import 'widgets/profile_card_card.dart';
-import '../screens/milestone_card_example.dart';
-import '../screens/monthly_progress_with_dots_card_example.dart';
-import '../screens/multi_metric_progress_card_example.dart';
-import '../screens/contribution_heatmap_card_example.dart';
-import '../screens/smooth_line_chart_card_example.dart';
-import '../screens/vertical_bar_chart_card_example.dart';
-import '../screens/message_list_card_example.dart';
-import '../screens/revenue_trend_card_example.dart';
-import '../screens/dual_slider_widget_example.dart';
-import '../screens/daily_todo_list_widget_example.dart';
-import '../screens/upcoming_tasks_widget_example.dart';
+import 'widgets/milestone_card.dart';
+import 'widgets/monthly_progress_with_dots_card.dart';
+import 'widgets/multi_metric_progress_card.dart';
+import 'widgets/contribution_heatmap_card.dart';
+import 'widgets/smooth_line_chart_card.dart';
+import 'widgets/vertical_bar_chart_card.dart';
+import 'widgets/message_list_card.dart';
+import 'widgets/revenue_trend_card.dart';
+import 'widgets/dual_slider_widget.dart';
+import 'widgets/daily_todo_list_widget.dart';
+import 'widgets/upcoming_tasks_widget.dart';
 import 'widgets/social_profile_card.dart';
 import 'widgets/mini_trend_card.dart';
 import 'widgets/budget_trend_card.dart';
@@ -39,7 +39,7 @@ import 'widgets/score_card_widget.dart';
 import 'widgets/trend_value_card.dart';
 import 'widgets/trend_list_card.dart';
 import 'widgets/modern_egfr_health_widget.dart';
-import '../screens/mood_chart_card_example.dart';
+import 'widgets/mood_chart_card.dart';
 import 'widgets/news_update_card.dart';
 import 'widgets/news_card.dart';
 import 'widgets/daily_events_card.dart';
@@ -645,7 +645,6 @@ class CommonWidgetBuilder {
         return NewsUpdateCardWidget.fromProps(props, size);
       case CommonWidgetId.newsCard:
         return NewsCardWidget.fromProps(props, size);
-
       case CommonWidgetId.modernEgfrHealthWidget:
         return ModernEgfrHealthWidget.fromProps(props, size);
       case CommonWidgetId.moodChartCard:
