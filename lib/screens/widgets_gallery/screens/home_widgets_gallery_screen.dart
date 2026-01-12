@@ -210,7 +210,7 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
           _buildListItem(
             context,
             icon: Icons.local_fire_department,
-            title: '习惯连续打卡追踪器',
+            title: '连续打卡追踪器',
             subtitle: 'HabitStreakTracker - 连续打卡天数追踪展示组件',
             route: '/widgets_gallery/habit_streak_tracker',
           ),

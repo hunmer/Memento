@@ -406,7 +406,7 @@ class WidgetGalleryRoutes implements RouteRegistry {
         RouteDefinition(
           path: '/widgets_gallery/habit_streak_tracker',
           handler: (settings) => RouteHelpers.createRoute(const HabitStreakTrackerExample(), settings: settings),
-          description: '习惯连续打卡追踪器',
+          description: '连续打卡追踪器',
         ),
         RouteDefinition(
           path: '/widgets_gallery/music_player_card',

@@ -1,7 +1,7 @@
 import 'package:Memento/widgets/common/index.dart';
 import 'package:flutter/material.dart';
 
-/// 习惯连续打卡追踪器示例
+/// 连续打卡追踪器示例
 class HabitStreakTrackerExample extends StatelessWidget {
   const HabitStreakTrackerExample({super.key});
 
@@ -10,7 +10,7 @@ class HabitStreakTrackerExample extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('习惯连续打卡追踪器')),
+      appBar: AppBar(title: const Text('连续打卡追踪器')),
       body: Container(
         color: isDark ? const Color(0xFF18181B) : const Color(0xFFF3F4F6),
         child: const Center(
