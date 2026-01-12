@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 每日待办事项卡片示例
 class DailyTodoListWidgetExample extends StatelessWidget {
@@ -49,6 +50,22 @@ class TodoTask {
     required this.isCompleted,
   });
 
+  /// 从 JSON 创建
+  factory TodoTask.fromJson(Map<String, dynamic> json) {
+    return TodoTask(
+      title: json['title'] as String? ?? '',
+      isCompleted: json['isCompleted'] as bool? ?? false,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'isCompleted': isCompleted,
+    };
+  }
+
   TodoTask copyWith({
     String? title,
     bool? isCompleted,
@@ -71,6 +88,24 @@ class TodoReminder {
     required this.hashtag,
     required this.hashtagEmoji,
   });
+
+  /// 从 JSON 创建
+  factory TodoReminder.fromJson(Map<String, dynamic> json) {
+    return TodoReminder(
+      text: json['text'] as String? ?? '',
+      hashtag: json['hashtag'] as String? ?? '',
+      hashtagEmoji: json['hashtagEmoji'] as String? ?? '',
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'hashtag': hashtag,
+      'hashtagEmoji': hashtagEmoji,
+    };
+  }
 }
 
 /// 每日待办事项小组件
@@ -87,6 +122,33 @@ class DailyTodoListWidget extends StatefulWidget {
     required this.tasks,
     required this.reminder,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory DailyTodoListWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final tasksList = (props['tasks'] as List<dynamic>?)
+            ?.map((e) => TodoTask.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    final reminderJson = props['reminder'] as Map<String, dynamic>?;
+    final reminder = reminderJson != null
+        ? TodoReminder.fromJson(reminderJson)
+        : const TodoReminder(
+            text: '',
+            hashtag: '',
+            hashtagEmoji: '',
+          );
+
+    return DailyTodoListWidget(
+      date: props['date'] as String? ?? '',
+      time: props['time'] as String? ?? '',
+      tasks: tasksList,
+      reminder: reminder,
+    );
+  }
 
   @override
   State<DailyTodoListWidget> createState() => _DailyTodoListWidgetState();

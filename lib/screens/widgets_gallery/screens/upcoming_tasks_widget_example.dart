@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 即将到来的任务小组件示例
 class UpcomingTasksWidgetExample extends StatelessWidget {
@@ -39,6 +40,22 @@ class TaskItem {
     required this.title,
     required this.color,
   });
+
+  /// 从 JSON 创建（用于公共小组件系统）
+  factory TaskItem.fromJson(Map<String, dynamic> json) {
+    return TaskItem(
+      title: json['title'] as String? ?? '',
+      color: Color(json['color'] as int? ?? 0xFF000000),
+    );
+  }
+
+  /// 转换为 JSON（用于公共小组件系统）
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'color': color.value,
+    };
+  }
 }
 
 /// 即将到来的任务小组件
@@ -53,6 +70,23 @@ class UpcomingTasksWidget extends StatefulWidget {
     required this.tasks,
     this.moreCount = 0,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory UpcomingTasksWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final tasksList = (props['tasks'] as List<dynamic>?)
+            ?.map((e) => TaskItem.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return UpcomingTasksWidget(
+      taskCount: props['taskCount'] as int? ?? 0,
+      tasks: tasksList,
+      moreCount: props['moreCount'] as int? ?? 0,
+    );
+  }
 
   @override
   State<UpcomingTasksWidget> createState() => _UpcomingTasksWidgetState();

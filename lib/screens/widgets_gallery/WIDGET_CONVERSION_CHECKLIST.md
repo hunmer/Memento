@@ -1,6 +1,6 @@
 # 桌面小组件转换清单
 
-> 已转换：49/95 | 未转换：44
+> 已转换：61/95 | 未转换：32
 
 最后更新：2026-01-12
 
@@ -55,6 +55,26 @@
 - [x] 双数值追踪卡片 - `blood_pressure_tracker_example` → `DualValueTrackerCard` (已更新示例文件)
 - [x] 心情追踪卡片 - `mood_tracker_widget` → `EmotionTrackerCard` (使用 `DailyEmotion` 和 `EmotionType` 数据模型，支持 JSON 序列化)
 - [x] 压力水平监测卡片 - `stress_level_monitor_example` → `LevelMonitorCard` (使用 `WeeklyLevelData` 数据模型，支持 JSON 序列化)
+- [x] 时间线日程卡片 - `timeline_schedule_card` → `TimelineScheduleCard` (使用 `TimelineEvent` 和 `SpecialEvent` 数据模型，支持 JSON 序列化)
+- [x] 任务进度列表卡片 - `task_progress_list_card` → `TaskProgressListCard` (使用 `TaskItem` 数据模型和 `TaskStatus` 枚举，支持 JSON 序列化)
+- [x] 圆角任务列表卡片 - `rounded_task_list_card` → `RoundedTaskListCard` (使用 `TaskListItem` 数据模型，支持 JSON 序列化)
+- [x] 笔记列表卡片 - `notes_list_card` → `NotesListCard` (使用 `NoteItem` 数据模型，支持 JSON 序列化)
+- [x] 圆角提醒事项列表卡片 - `rounded_reminders_list` → `ReminderListCard` (使用 `ReminderItem` 数据模型，支持 JSON 序列化)
+- [x] 每日程卡片 - `daily_schedule_card` → `DailyScheduleCard` (使用 `EventData` 和 `EventColor` 数据模型，支持 JSON 序列化)
+- [x] 每日待办事项卡片 - `daily_todo_list_widget` → `DailyTodoListWidget` (使用 `TodoTask` 和 `TodoReminder` 数据模型，支持 JSON 序列化)
+- [x] 收件箱消息卡片 - `inbox_message_card` → `InboxMessageCard` (使用 `InboxMessage` 数据模型，支持 JSON 序列化)
+- [x] 任务列表卡片 - `task_list_card` → `TaskListCard` (支持动画效果和计数器)
+- [x] 圆角任务进度小组件 - `rounded_task_progress_widget` → `RoundedTaskProgressWidget` (支持任务进度和团队成员头像)
+- [x] 即将到来的任务小组件 - `upcoming_tasks_widget` → `UpcomingTasksWidget` (使用 `TaskItem` 数据模型，支持 JSON 序列化)
+- [x] 周睡眠追踪小组件 - `weekly_sleep_tracker` → `weeklySleepTrackerCard`
+- [x] 睡眠时长统计卡片 - `sleep_duration_card`
+- [x] 饮水追踪器 - `hydration_tracker_widget` → `hydrationTrackerCard`
+
+### 列表/消息类(已完成转换，但未在common_widgets.dart 注册)
+- [ ] 每日日程卡片 - `daily_schedule_card`
+- [ ] 收件箱消息卡片 - `inbox_message_card`
+- [ ] 任务列表卡片 - `task_list_card`
+- [ ] 圆角任务进度小组件 - `rounded_task_progress_widget`
 
 ## ❌ 未转换组件
 
@@ -65,23 +85,7 @@
 - [ ] 习惯连续打卡追踪器 - `habit_streak_tracker` → 建议：连续打卡追踪器
 - [ ] 睡眠阶段图表 - `sleep_stage_chart`
 - [ ] 睡眠追踪卡片 - `sleep_tracking_card`
-- [x] 周睡眠追踪小组件 - `weekly_sleep_tracker` → `weeklySleepTrackerCard`
-- [x] 睡眠时长统计卡片 - `sleep_duration_card`
 - [ ] 体重趋势图表 - `weight_trend_chart`
-- [x] 饮水追踪器 - `hydration_tracker_widget` → `hydrationTrackerCard`
-
-### 列表/消息类
-- [ ] 时间线日程卡片 - `timeline_schedule_card`
-- [ ] 每日日程卡片 - `daily_schedule_card`
-- [ ] 圆角提醒事项列表卡片 - `rounded_reminders_list`
-- [ ] 每日待办事项卡片 - `daily_todo_list_widget`
-- [ ] 笔记列表卡片 - `notes_list_card`
-- [ ] 收件箱消息卡片 - `inbox_message_card`
-- [ ] 任务列表卡片 - `task_list_card`
-- [ ] 任务进度列表卡片 - `task_progress_list_card`
-- [ ] 圆角任务列表卡片 - `rounded_task_list_card`
-- [ ] 圆角任务进度小组件 - `rounded_task_progress_widget`
-- [ ] 即将到来的任务小组件 - `upcoming_tasks_widget`
 
 ### 资料卡片类（需重命名）
 - [ ] 个人资料卡片 - `profile_card_widget`
