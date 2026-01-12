@@ -4,11 +4,17 @@ import 'widgets/circular_progress_card.dart';
 import 'widgets/activity_progress_card.dart';
 import 'widgets/half_gauge_card.dart';
 import 'widgets/task_progress_card.dart';
+import 'widgets/audio_waveform_card.dart';
+import 'widgets/line_chart_trend_card.dart';
 import '../screens/segmented_progress_card_example.dart';
 import '../screens/milestone_card_example.dart';
 import '../screens/monthly_progress_with_dots_card_example.dart';
+import '../screens/multi_metric_progress_card_example.dart';
 import '../screens/contribution_heatmap_card_example.dart';
 import '../screens/smooth_line_chart_card_example.dart';
+import '../screens/vertical_bar_chart_card_example.dart';
+import '../screens/message_list_card_example.dart';
+import '../screens/dual_slider_widget_example.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -16,11 +22,17 @@ enum CommonWidgetId {
   activityProgressCard,
   halfGaugeCard,
   taskProgressCard,
+  audioWaveformCard,
   segmentedProgressCard,
   milestoneCard,
   monthlyProgressDotsCard,
+  multiMetricProgressCard,
   contributionHeatmapCard,
   smoothLineChartCard,
+  lineChartTrendCard,
+  verticalBarChartCard,
+  messageListCard,
+  dualSliderCard,
 }
 
 /// 公共小组件元数据
@@ -77,6 +89,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.audioWaveformCard: CommonWidgetMetadata(
+      id: CommonWidgetId.audioWaveformCard,
+      name: '音频波形卡片',
+      description: '显示音频录制信息、时长和波形可视化',
+      icon: Icons.graphic_eq,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
     CommonWidgetId.segmentedProgressCard: CommonWidgetMetadata(
       id: CommonWidgetId.segmentedProgressCard,
       name: '分段进度条卡片',
@@ -101,6 +121,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.multiMetricProgressCard: CommonWidgetMetadata(
+      id: CommonWidgetId.multiMetricProgressCard,
+      name: '多指标进度卡片',
+      description: '多指标进度展示卡片，带圆形进度环',
+      icon: Icons.dashboard,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
     CommonWidgetId.contributionHeatmapCard: CommonWidgetMetadata(
       id: CommonWidgetId.contributionHeatmapCard,
       name: '贡献热力图卡片',
@@ -114,6 +142,38 @@ class CommonWidgetsRegistry {
       name: '平滑折线图卡片',
       description: '带渐变填充的平滑折线图卡片',
       icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.verticalBarChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.verticalBarChartCard,
+      name: '垂直柱状图卡片',
+      description: '双数据系列垂直柱状图展示卡片',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.lineChartTrendCard: CommonWidgetMetadata(
+      id: CommonWidgetId.lineChartTrendCard,
+      name: '折线图趋势卡片',
+      description: '折线图趋势统计卡片',
+      icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.messageListCard: CommonWidgetMetadata(
+      id: CommonWidgetId.messageListCard,
+      name: '消息列表卡片',
+      description: '消息列表展示卡片，支持置顶消息和消息列表',
+      icon: Icons.message,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.dualSliderCard: CommonWidgetMetadata(
+      id: CommonWidgetId.dualSliderCard,
+      name: '双滑块小组件',
+      description: '通用双滑块数值显示组件，支持自定义标签和进度',
+      icon: Icons.access_time,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
@@ -135,6 +195,7 @@ class CommonWidgetsRegistry {
   }
 }
 
+
 /// 公共小组件构建器
 class CommonWidgetBuilder {
   /// 构建公共小组件
@@ -153,16 +214,28 @@ class CommonWidgetBuilder {
         return HalfGaugeCardWidget.fromProps(props, size);
       case CommonWidgetId.taskProgressCard:
         return TaskProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.audioWaveformCard:
+        return AudioWaveformCardWidget.fromProps(props, size);
       case CommonWidgetId.segmentedProgressCard:
         return SegmentedProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.milestoneCard:
         return MilestoneCardWidget.fromProps(props, size);
       case CommonWidgetId.monthlyProgressDotsCard:
         return MonthlyProgressWithDotsCardWidget.fromProps(props, size);
+      case CommonWidgetId.multiMetricProgressCard:
+        return MultiMetricProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.contributionHeatmapCard:
         return ContributionHeatmapCardWidget.fromProps(props, size);
       case CommonWidgetId.smoothLineChartCard:
         return SmoothLineChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.lineChartTrendCard:
+        return LineChartTrendCardWidget.fromProps(props, size);
+      case CommonWidgetId.verticalBarChartCard:
+        return VerticalBarChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.messageListCard:
+        return MessageListCardWidget.fromProps(props, size);
+      case CommonWidgetId.dualSliderCard:
+        return DualSliderWidget.fromProps(props, size);
     }
   }
 }

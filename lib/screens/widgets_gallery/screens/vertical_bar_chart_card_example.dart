@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 垂直柱状图卡片示例
 class VerticalBarChartCardExample extends StatelessWidget {
@@ -43,6 +44,22 @@ class BarData {
     required this.value1,
     required this.value2,
   });
+
+  /// 从 JSON 创建（用于公共小组件系统）
+  factory BarData.fromJson(Map<String, dynamic> json) {
+    return BarData(
+      value1: (json['value1'] as num?)?.toDouble() ?? 0.0,
+      value2: (json['value2'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// 转换为 JSON（用于公共小组件系统）
+  Map<String, dynamic> toJson() {
+    return {
+      'value1': value1,
+      'value2': value2,
+    };
+  }
 }
 
 /// 垂直柱状图卡片小组件
@@ -52,6 +69,8 @@ class VerticalBarChartCardWidget extends StatefulWidget {
   final String dataLabel1;
   final String dataLabel2;
   final List<BarData> bars;
+  final Color? primaryColor;
+  final Color? secondaryColor;
 
   const VerticalBarChartCardWidget({
     super.key,
@@ -60,7 +79,34 @@ class VerticalBarChartCardWidget extends StatefulWidget {
     required this.dataLabel1,
     required this.dataLabel2,
     required this.bars,
+    this.primaryColor,
+    this.secondaryColor,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory VerticalBarChartCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final barsList = (props['bars'] as List<dynamic>?)
+            ?.map((e) => BarData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return VerticalBarChartCardWidget(
+      title: props['title'] as String? ?? '',
+      subtitle: props['subtitle'] as String? ?? '',
+      dataLabel1: props['dataLabel1'] as String? ?? '',
+      dataLabel2: props['dataLabel2'] as String? ?? '',
+      bars: barsList,
+      primaryColor: props['primaryColor'] != null
+          ? Color(props['primaryColor'] as int)
+          : null,
+      secondaryColor: props['secondaryColor'] != null
+          ? Color(props['secondaryColor'] as int)
+          : null,
+    );
+  }
 
   @override
   State<VerticalBarChartCardWidget> createState() =>
@@ -95,8 +141,10 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = const Color(0xFF0072B5);
-    final secondaryColor = const Color(0xFF00A8CC);
+    final primaryColor =
+        widget.primaryColor ?? const Color(0xFF0072B5);
+    final secondaryColor =
+        widget.secondaryColor ?? const Color(0xFF00A8CC);
 
     return AnimatedBuilder(
       animation: _animation,

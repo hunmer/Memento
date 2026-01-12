@@ -49,9 +49,9 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
           _buildListItem(
             context,
             icon: Icons.dashboard,
-            title: '多追踪器卡片',
-            subtitle: 'MultiTrackerCard - 多指标追踪展示卡片',
-            route: '/widgets_gallery/multi_tracker_card',
+            title: '多指标进度卡片',
+            subtitle: 'MultiMetricProgressCard - 多指标进度展示卡片',
+            route: '/widgets_gallery/multi_metric_progress_card',
           ),
           _buildListItem(
             context,
@@ -147,9 +147,9 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
           _buildListItem(
             context,
             icon: Icons.access_time,
-            title: '时区滑块小组件',
-            subtitle: 'TimeZoneSliderWidget - 世界时区双滑块时间显示组件',
-            route: '/widgets_gallery/time_zone_slider_widget',
+            title: '双滑块小组件',
+            subtitle: 'DualSliderWidget - 通用双滑块数值显示组件',
+            route: '/widgets_gallery/dual_slider_widget',
           ),
           _buildListItem(
             context,
