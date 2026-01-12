@@ -8,6 +8,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
+import 'package:Memento/screens/home_screen/widgets/common_widget_selector_dialog.dart';
 
 /// 添加小组件对话框 - 使用 SuperCupertinoNavigationWrapper 重构版本
 class AddWidgetDialog extends StatefulWidget {
@@ -279,6 +280,24 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
     );
   }
 
+  /// 处理小组件点击
+  void _handleWidgetTap(HomeWidget widget) async {
+    if (widget.supportsCommonWidgets) {
+      // 打开公共小组件选择对话框
+      await showDialog(
+        context: context,
+        builder: (context) => CommonWidgetSelectorDialog(
+          pluginWidget: widget,
+          folderId: this.widget.folderId,
+          replaceWidgetItemId: this.widget.replaceWidgetItemId,
+        ),
+      );
+    } else {
+      // 原有逻辑：直接添加
+      _addWidget(widget);
+    }
+  }
+
   /// 添加小组件或替换现有小组件
   void _addWidget(HomeWidget widget) async {
     final layoutManager = HomeLayoutManager();
@@ -392,7 +411,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _addWidget(widget),
+        onTap: () => _handleWidgetTap(widget),
         child: Stack(
           children: [
             Column(
@@ -486,6 +505,35 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                           .toList(),
                     ),
             ),
+
+            // 公共小组件适配标签 - 左上角
+            if (widget.supportsCommonWidgets)
+              Positioned(
+                top: 4,
+                left: 4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.apps, size: 12, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        '适配公共组件',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),

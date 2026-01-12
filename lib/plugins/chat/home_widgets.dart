@@ -74,6 +74,9 @@ class ChatHomeWidgets {
         navigationHandler: _navigateToChannel,
         dataSelector: _extractChannelData,
 
+        // 公共小组件提供者
+        commonWidgetsProvider: _provideCommonWidgets,
+
         builder: (context, config) {
           return GenericSelectorWidget(
             widgetDefinition: registry.getWidget('chat_channel_selector')!,
@@ -82,6 +85,54 @@ class ChatHomeWidgets {
         },
       ),
     );
+  }
+
+  /// 公共小组件提供者函数
+  static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+    Map<String, dynamic> data,
+  ) {
+    // data 包含：id, title, lastMessage, lastMessageTime, messageCount
+    final messageCount = (data['messageCount'] as int?) ?? 0;
+    final title = (data['title'] as String?) ?? '频道';
+
+    return {
+      // 圆形进度卡片：显示消息完成度（假设 100 条消息为满）
+      'circularProgressCard': {
+        'title': title,
+        'subtitle': '$messageCount 条消息',
+        'percentage': (messageCount / 100 * 100).clamp(0, 100).toDouble(),
+        'progress': (messageCount / 100).clamp(0.0, 1.0),
+      },
+
+      // 活动进度卡片：显示消息统计
+      'activityProgressCard': {
+        'title': title,
+        'subtitle': '今日消息',
+        'value': messageCount.toDouble(),
+        'unit': '条',
+        'activities': 1,
+        'totalProgress': 10,
+        'completedProgress': messageCount % 10,
+      },
+
+      // 任务进度卡片：显示最近消息预览
+      'taskProgressCard': {
+        'title': title,
+        'subtitle': '最近消息',
+        'completedTasks': messageCount % 20,
+        'totalTasks': 20,
+        'pendingTasks': _getPendingTasks(data),
+      },
+    };
+  }
+
+  /// 获取待办任务列表
+  static List<String> _getPendingTasks(Map<String, dynamic> data) {
+    final lastMessage = data['lastMessage'] as String?;
+    if (lastMessage != null && lastMessage.isNotEmpty) {
+      return [lastMessage];
+    }
+    return [];
   }
 
   /// 从选择器数据数组中提取小组件需要的数据

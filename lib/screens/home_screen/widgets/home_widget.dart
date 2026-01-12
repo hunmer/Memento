@@ -49,6 +49,42 @@ typedef SelectorNavigationHandler = void Function(
 /// ```
 typedef SelectorDataSelector = Map<String, dynamic> Function(List<dynamic> dataArray);
 
+/// 公共小组件提供者函数类型
+///
+/// 插件可以定义此函数，根据选择的数据返回可用的公共小组件及其 props 配置
+///
+/// 参数：
+/// - data: 从数据选择器获取并处理后的数据（Map 格式）
+///
+/// 返回：
+/// - Map<公共小组件ID, Props配置>：每个公共小组件及其对应的 props
+///
+/// 示例：
+/// ```dart
+/// commonWidgetsProvider: (data) {
+///   return {
+///     'circularProgressCard': {
+///       'title': data['title'],
+///       'subtitle': '${data['count']} 条消息',
+///       'percentage': (data['count'] / 100 * 100).clamp(0, 100),
+///       'progress': (data['count'] / 100).clamp(0.0, 1.0),
+///     },
+///     'activityProgressCard': {
+///       'title': data['title'],
+///       'subtitle': '今日活动',
+///       'value': data['count'].toDouble(),
+///       'unit': '个',
+///       'activities': data['count'],
+///       'totalProgress': 10,
+///       'completedProgress': data['count'] % 10,
+///     },
+///   };
+/// }
+/// ```
+typedef CommonWidgetsProvider = Map<String, Map<String, dynamic>> Function(
+  Map<String, dynamic> data,
+);
+
 /// 主页小组件定义
 ///
 /// 每个插件可以注册多个小组件，这些小组件会在"添加组件"对话框中显示
@@ -119,6 +155,16 @@ class HomeWidget {
   /// 如果未提供，默认将 dataArray 合并为一个 Map
   final SelectorDataSelector? dataSelector;
 
+  // ===== 公共小组件相关字段（可选） =====
+
+  /// 公共小组件提供者（可选）
+  ///
+  /// 如果提供，该小组件支持适配公共小组件
+  /// 用户在选择数据后，可以选择使用哪个公共小组件来渲染
+  ///
+  /// 函数接收处理后的数据，返回可用的公共小组件 ID 及其 props 配置
+  final CommonWidgetsProvider? commonWidgetsProvider;
+
   const HomeWidget({
     required this.id,
     required this.pluginId,
@@ -136,6 +182,8 @@ class HomeWidget {
     this.dataRenderer,
     this.navigationHandler,
     this.dataSelector,
+    // 公共小组件相关
+    this.commonWidgetsProvider,
   });
 
   /// 构建小组件
@@ -154,4 +202,7 @@ class HomeWidget {
 
   /// 是否为选择器小组件
   bool get isSelectorWidget => selectorId != null;
+
+  /// 是否支持公共小组件
+  bool get supportsCommonWidgets => commonWidgetsProvider != null;
 }

@@ -34,18 +34,37 @@ class SelectorWidgetConfig {
   /// 最后更新时间
   final DateTime? lastUpdated;
 
+  // ===== 公共小组件相关字段（可选） =====
+
+  /// 选中的公共小组件 ID（可选）
+  ///
+  /// 如果用户选择了公共小组件样式，则保存公共小组件的 ID
+  final String? commonWidgetId;
+
+  /// 公共小组件的 Props（可选）
+  ///
+  /// 保存渲染公共小组件所需的 props 配置
+  final Map<String, dynamic>? commonWidgetProps;
+
   SelectorWidgetConfig({
     this.selectedData,
     this.lastUpdated,
+    this.commonWidgetId,
+    this.commonWidgetProps,
   });
 
   /// 是否已配置
   bool get isConfigured => selectedData != null;
 
+  /// 是否使用了公共小组件
+  bool get usesCommonWidget => commonWidgetId != null;
+
   /// 转换为 JSON
   Map<String, dynamic> toJson() => {
     'selectedData': selectedData,
     'lastUpdated': lastUpdated?.toIso8601String(),
+    'commonWidgetId': commonWidgetId,
+    'commonWidgetProps': commonWidgetProps,
   };
 
   /// 从 JSON 加载
@@ -55,6 +74,8 @@ class SelectorWidgetConfig {
       lastUpdated: json['lastUpdated'] != null
         ? DateTime.parse(json['lastUpdated'] as String)
         : null,
+      commonWidgetId: json['commonWidgetId'] as String?,
+      commonWidgetProps: json['commonWidgetProps'] as Map<String, dynamic>?,
     );
   }
 
