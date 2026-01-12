@@ -10,7 +10,9 @@ import 'widgets/earnings_trend_card.dart';
 import 'widgets/watch_progress_card.dart';
 import 'widgets/weekly_sleep_tracker_card.dart';
 import 'widgets/stress_level_monitor_card.dart';
+import 'widgets/sleep_tracking_card_widget.dart';
 import '../screens/segmented_progress_card_example.dart';
+import 'widgets/profile_card_card.dart';
 import '../screens/milestone_card_example.dart';
 import '../screens/monthly_progress_with_dots_card_example.dart';
 import '../screens/multi_metric_progress_card_example.dart';
@@ -45,8 +47,12 @@ enum CommonWidgetId {
   watchProgressCard,
   stressLevelMonitor,
   weeklySleepTrackerCard,
+  sleepTrackingCard,
   dailyTodoListCard,
+  profileCardCard,
   upcomingTasksWidget,
+  imageDisplayCard,
+  weightTrendChart,
 }
 
 /// 公共小组件元数据
@@ -225,6 +231,7 @@ class CommonWidgetsRegistry {
     ),
     CommonWidgetId.weeklySleepTrackerCard: CommonWidgetMetadata(
       id: CommonWidgetId.weeklySleepTrackerCard,
+  sleepTrackingCard,
       name: '每周睡眠追踪',
       description: '显示总睡眠时长、状态标签和每周7天的进度环，支持动画效果',
       icon: Icons.bedtime_rounded,
