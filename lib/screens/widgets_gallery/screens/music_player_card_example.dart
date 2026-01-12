@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 音乐播放器卡片示例
 class MusicPlayerCardExample extends StatelessWidget {
@@ -63,6 +64,20 @@ class MusicPlayerCardWidget extends StatefulWidget {
     required this.currentPosition,
     required this.totalDuration,
     this.isPlaying = true,
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory MusicPlayerCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return MusicPlayerCardWidget(
+      albumArtUrl: props['albumArtUrl'] as String? ?? '',
+      title: props['title'] as String? ?? '',
+      lyrics: (props['lyrics'] as List<dynamic>?)?.cast<String>() ?? [],
+      currentPosition: props['currentPosition'] as int? ?? 0,
+      totalDuration: props['totalDuration'] as int? ?? 0,
+      isPlaying: props['isPlaying'] as bool? ?? true,
+    );
+  }
   });
 
   @override

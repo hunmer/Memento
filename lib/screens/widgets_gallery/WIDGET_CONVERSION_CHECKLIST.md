@@ -98,10 +98,10 @@
 - [x] 租赁预览卡片 - `rental_preview_card` → `statusDisplayCard` (状态展示卡片)
 - [x] 垂直属性卡片 - `vertical_property_card` → `verticalInfoCard` (垂直信息卡片)
 - [x] 图片分割卡片 - `split_image_card` → `splitImageCard`
+- [x] 日历事件卡片 - `event_calendar_widget` → `EventCalendarCard` (使用 `CalendarEventData` 数据模型，支持 JSON 序列化)
 
 ### 媒体/娱乐类
 - [ ] 音乐播放器卡片 - `music_player_card`
-- [x] 日历事件卡片 - `event_calendar_widget` → `EventCalendarCard` (使用 `CalendarEventData` 数据模型，支持 JSON 序列化)
 
 ### 财务类（需重命名）
 - [ ] 钱包余额概览卡片 - `wallet_balance_card` → 建议：余额概览卡片
