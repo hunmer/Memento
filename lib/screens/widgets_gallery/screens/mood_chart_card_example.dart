@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 心情图表卡片示例
 class MoodChartCardExample extends StatelessWidget {
@@ -50,10 +51,40 @@ class DailyMoodData {
   final bool isPositive;
 
   const DailyMoodData({required this.value, required this.isPositive});
+
+  /// 从 JSON 创建
+  factory DailyMoodData.fromJson(Map<String, dynamic> json) {
+    return DailyMoodData(
+      value: (json['value'] as num?)?.toDouble() ?? 0.0,
+      isPositive: json['isPositive'] as bool? ?? false,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'isPositive': isPositive,
+    };
+  }
 }
 
 /// 心情表情枚举
 enum MoodEmoji { happy, good, neutral, sad, bad }
+
+/// MoodEmoji 扩展，添加 JSON 序列化支持
+extension MoodEmojiExtension on MoodEmoji {
+  String toJson() {
+    return name;
+  }
+
+  static MoodEmoji fromJson(String value) {
+    return MoodEmoji.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => MoodEmoji.neutral,
+    );
+  }
+}
 
 /// 心情图表卡片小组件
 class MoodChartCardWidget extends StatefulWidget {
@@ -65,6 +96,27 @@ class MoodChartCardWidget extends StatefulWidget {
     required this.dailyValues,
     required this.weeklyMoods,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory MoodChartCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final dailyValuesList = (props['dailyValues'] as List<dynamic>?)
+            ?.map((e) => DailyMoodData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    final weeklyMoodsList = (props['weeklyMoods'] as List<dynamic>?)
+            ?.map((e) => MoodEmojiExtension.fromJson(e as String))
+            .toList() ??
+        const [];
+
+    return MoodChartCardWidget(
+      dailyValues: dailyValuesList,
+      weeklyMoods: weeklyMoodsList,
+    );
+  }
 
   @override
   State<MoodChartCardWidget> createState() => _MoodChartCardWidgetState();
