@@ -123,6 +123,8 @@ import 'package:Memento/screens/widgets_gallery/screens/social_activity_card_exa
 import 'package:Memento/screens/widgets_gallery/screens/screen_time_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_property_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_progress_list_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/task_progress_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/rounded_task_progress_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weather_forecast_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_stat_card_example.dart';
@@ -763,9 +765,19 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '垂直条形图卡片',
         ),
         RouteDefinition(
+          path: '/widgets_gallery/rounded_task_progress_widget',
+          handler: (settings) => RouteHelpers.createRoute(const RoundedTaskProgressWidgetExample(), settings: settings),
+          description: '圆角任务进度小组件',
+        ),
+        RouteDefinition(
           path: '/widgets_gallery/weather_forecast_card',
           handler: (settings) => RouteHelpers.createRoute(const WeatherForecastCardExample(), settings: settings),
           description: '天气预报卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/task_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const TaskProgressCardExample(), settings: settings),
+          description: '任务进度卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/task_list_stat_card',

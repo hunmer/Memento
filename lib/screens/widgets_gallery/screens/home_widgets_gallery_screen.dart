@@ -718,6 +718,20 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
             subtitle: 'TaskProgressCard - 任务完成进度与待办事项卡片',
             route: '/widgets_gallery/task_progress_card',
           ),
+          _buildListItem(
+            context,
+            icon: Icons.task_alt,
+            title: '圆角任务进度小组件',
+            subtitle: 'RoundedTaskProgressWidget - 圆角风格的任务进度展示小组件',
+            route: '/widgets_gallery/rounded_task_progress_widget',
+          ),
+          _buildListItem(
+            context,
+            icon: Icons.wb_sunny,
+            title: '天气预报卡片',
+            subtitle: 'WeatherForecastCard - 天气预报与温度趋势展示卡片',
+            route: '/widgets_gallery/weather_forecast_card',
+          ),
           // 未来可以在这里添加更多桌面小组件示例
         ],
       ),

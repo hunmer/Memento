@@ -424,11 +424,12 @@ class _BarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final end = (0.4 + index * 0.07).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * 0.08,
-        0.4 + index * 0.08,
+        index * 0.07,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );
