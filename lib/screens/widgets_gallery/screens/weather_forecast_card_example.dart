@@ -1,5 +1,7 @@
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/weather_forecast_card.dart';
 import 'package:Memento/widgets/common/index.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 天气预报卡片示例
 ///
@@ -51,7 +53,7 @@ class WeatherForecastCardPropsExample extends StatelessWidget {
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: Center(
-          child: WeatherForecastCard.fromProps(props),
+          child: WeatherForecastCard.fromProps(props, HomeWidgetSize.medium),
         ),
       ),
     );

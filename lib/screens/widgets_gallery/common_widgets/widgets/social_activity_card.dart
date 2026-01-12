@@ -1,5 +1,5 @@
+import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_flipcounter/animated_flip_counter.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import '../models/social_activity_card_data.dart';
 

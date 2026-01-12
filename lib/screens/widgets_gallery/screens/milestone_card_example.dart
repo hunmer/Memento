@@ -33,7 +33,7 @@ class MilestoneCardExample extends StatelessWidget {
 /// 里程碑追踪小组件
 class MilestoneCardWidget extends StatefulWidget {
   /// 头像图片 URL
-  final String imageUrl;
+  final String? imageUrl;
 
   /// 标题
   final String title;
@@ -193,16 +193,21 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                 ),
               ),
               child: ClipOval(
-                child: Image.network(
-                  widget.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey.shade300,
-                      child: const Icon(Icons.person, size: 32),
-                    );
-                  },
-                ),
+                child: widget.imageUrl != null
+                    ? Image.network(
+                        widget.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade300,
+                            child: const Icon(Icons.person, size: 32),
+                          );
+                        },
+                      )
+                    : Container(
+                        color: Colors.grey.shade300,
+                        child: const Icon(Icons.person, size: 32),
+                      ),
               ),
             ),
           ),
