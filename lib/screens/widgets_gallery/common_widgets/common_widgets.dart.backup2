@@ -9,14 +9,8 @@ import 'widgets/line_chart_trend_card.dart';
 import 'widgets/earnings_trend_card.dart';
 import 'widgets/watch_progress_card.dart';
 import 'widgets/weekly_sleep_tracker_card.dart';
-import 'widgets/sleep_tracking_card_widget.dart';
 import 'widgets/stress_level_monitor_card.dart';
-import 'widgets/sleep_stage_chart_card.dart';
-import 'widgets/weight_trend_chart.dart';
-import 'widgets/image_display_card.dart';
-import 'widgets/split_image_card.dart';
 import '../screens/segmented_progress_card_example.dart';
-import 'widgets/profile_card_card.dart';
 import '../screens/milestone_card_example.dart';
 import '../screens/monthly_progress_with_dots_card_example.dart';
 import '../screens/multi_metric_progress_card_example.dart';
@@ -28,7 +22,6 @@ import '../screens/revenue_trend_card_example.dart';
 import '../screens/dual_slider_widget_example.dart';
 import '../screens/daily_todo_list_widget_example.dart';
 import '../screens/upcoming_tasks_widget_example.dart';
-import 'widgets/social_profile_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -52,15 +45,8 @@ enum CommonWidgetId {
   watchProgressCard,
   stressLevelMonitor,
   weeklySleepTrackerCard,
-  sleepTrackingCard,
   dailyTodoListCard,
   upcomingTasksWidget,
-  profileCardCard,
-  sleepStageChartCard,
-  splitImageCard,
-  imageDisplayCard,
-  weightTrendChart,
-  socialProfileCard,
 }
 
 /// 公共小组件元数据
@@ -245,14 +231,6 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
-    CommonWidgetId.sleepTrackingCard: CommonWidgetMetadata(
-      id: CommonWidgetId.sleepTrackingCard,
-      name: '睡眠追踪卡片',
-      description: '显示睡眠时长、标签和每周7天的进度环，支持动画效果',
-      icon: Icons.bedtime_outlined,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-    ),
     CommonWidgetId.dailyTodoListCard: CommonWidgetMetadata(
       id: CommonWidgetId.dailyTodoListCard,
       name: '每日待办事项卡片',
@@ -266,38 +244,6 @@ class CommonWidgetsRegistry {
       name: '即将到来的任务小组件',
       description: '显示任务计数、任务列表和更多任务数量，支持动画效果',
       icon: Icons.task_alt,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-    ),
-    CommonWidgetId.profileCardCard: CommonWidgetMetadata(
-      id: CommonWidgetId.profileCardCard,
-      name: '个人资料卡片',
-      description: '展示用户个人信息，包括背景图、姓名、认证标志、简介和关注统计',
-      icon: Icons.account_circle,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-    ),
-    CommonWidgetId.sleepStageChartCard: CommonWidgetMetadata(
-      id: CommonWidgetId.sleepStageChartCard,
-      name: '睡眠阶段图表',
-      description: '展示睡眠阶段的可视化图表，支持动画效果和时间范围选择',
-      icon: Icons.bedtime_outlined,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-    ),
-    CommonWidgetId.splitImageCard: CommonWidgetMetadata(
-      id: CommonWidgetId.splitImageCard,
-      name: '图片分割卡片',
-      description: '左右分屏布局的卡片组件，左侧展示图片，右侧展示信息',
-      icon: Icons.image,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-    ),
-    CommonWidgetId.socialProfileCard: CommonWidgetMetadata(
-      id: CommonWidgetId.socialProfileCard,
-      name: '社交资料卡片',
-      description: '显示用户头像、名称、账号、标签、内容和社交统计数据',
-      icon: Icons.person,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
@@ -366,8 +312,6 @@ class CommonWidgetBuilder {
         return RevenueTrendCardWidget.fromProps(props, size);
       case CommonWidgetId.watchProgressCard:
         return WatchProgressCardWidget.fromProps(props, size);
-      case CommonWidgetId.sleepTrackingCard:
-        return SleepTrackingCardWidget.fromProps(props, size);
       case CommonWidgetId.stressLevelMonitor:
         return StressLevelMonitorWidget.fromProps(props, size);
       case CommonWidgetId.weeklySleepTrackerCard:
@@ -376,18 +320,6 @@ class CommonWidgetBuilder {
         return DailyTodoListWidget.fromProps(props, size);
       case CommonWidgetId.upcomingTasksWidget:
         return UpcomingTasksWidget.fromProps(props, size);
-      case CommonWidgetId.splitImageCard:
-        return SplitImageCardWidget.fromProps(props, size);
-      case CommonWidgetId.profileCardCard:
-        return ProfileCardWidget.fromProps(props, size);
-      case CommonWidgetId.sleepStageChartCard:
-        return SleepStageChartCardWidget.fromProps(props, size);
-      case CommonWidgetId.imageDisplayCard:
-        return ImageDisplayCardWidget.fromProps(props, size);
-      case CommonWidgetId.weightTrendChart:
-        return WeightTrendChartWidget.fromProps(props, size);
-      case CommonWidgetId.socialProfileCard:
-        return SocialProfileCardWidget.fromProps(props, size);
     }
   }
 }

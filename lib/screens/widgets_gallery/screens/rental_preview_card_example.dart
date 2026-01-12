@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 租赁预览卡片示例
 class RentalPreviewCardExample extends StatelessWidget {
@@ -62,6 +63,22 @@ class RentalPreviewCardWidget extends StatefulWidget {
     required this.date,
     required this.duration,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory RentalPreviewCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return RentalPreviewCardWidget(
+      imageUrl: props['imageUrl'] as String? ?? '',
+      status: props['status'] as String? ?? '',
+      rating: (props['rating'] as num?)?.toDouble() ?? 0.0,
+      title: props['title'] as String? ?? '',
+      description: props['description'] as String? ?? '',
+      date: props['date'] as String? ?? '',
+      duration: props['duration'] as String? ?? '',
+    );
+  }
 
   @override
   State<RentalPreviewCardWidget> createState() =>

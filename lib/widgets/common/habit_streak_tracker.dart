@@ -1,9 +1,9 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 
-/// 习惯连续打卡追踪器
+/// 连续打卡追踪器
 ///
-/// 用于展示习惯打卡的连续天数、最长连续天数和完成状态。
+/// 用于展示打卡的连续天数、最长连续天数和完成状态。
 /// 支持动画效果，包含进入动画和网格逐项动画。
 class HabitStreakTracker extends StatefulWidget {
   /// 当前连续天数

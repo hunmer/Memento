@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/sleep_tracking_card_widget.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_tracking_card_data.dart';
 
 /// 睡眠追踪卡片示例
+///
+/// 展示如何使用 SleepTrackingCardWidget 公共小组件
 class SleepTrackingCardExample extends StatelessWidget {
   const SleepTrackingCardExample({super.key});
 
@@ -13,19 +17,22 @@ class SleepTrackingCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('睡眠追踪卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: SleepTrackingCard(
-            sleepHours: 3.57,
-            sleepLabel: 'Insomniac',
-            weeklyProgress: [
-              WeekSleepData(day: 'M', achieved: true, progress: 1.0),
-              WeekSleepData(day: 'T', achieved: false, progress: 0.68),
-              WeekSleepData(day: 'W', achieved: true, progress: 1.0),
-              WeekSleepData(day: 'T', achieved: true, progress: 0.92),
-              WeekSleepData(day: 'F', achieved: false, progress: 0.6),
-              WeekSleepData(day: 'S', achieved: false, progress: 0.76),
-              WeekSleepData(day: 'S', achieved: true, progress: 1.0),
-            ],
+        child: Center(
+          child: SleepTrackingCardWidget(
+            data: SleepTrackingCardData(
+              sleepHours: 3.57,
+              sleepLabel: 'Insomniac',
+              weeklyProgress: [
+                DaySleepData(day: 'M', achieved: true, progress: 1.0),
+                DaySleepData(day: 'T', achieved: false, progress: 0.68),
+                DaySleepData(day: 'W', achieved: true, progress: 1.0),
+                DaySleepData(day: 'T', achieved: true, progress: 0.92),
+                DaySleepData(day: 'F', achieved: false, progress: 0.6),
+                DaySleepData(day: 'S', achieved: false, progress: 0.76),
+                DaySleepData(day: 'S', achieved: true, progress: 1.0),
+              ],
+            ),
+            size: HomeWidgetSize.large,
           ),
         ),
       ),
