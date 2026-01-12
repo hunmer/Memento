@@ -82,3 +82,4 @@ node_modules/*
 packages/memento-mock/node_modules/*
 ios/build/ios/XCBuildData/*
 .DS_Store
+*-cwd

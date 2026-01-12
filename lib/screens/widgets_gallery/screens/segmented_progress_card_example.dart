@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 分段进度条统计卡片示例
 class SegmentedProgressCardExample extends StatelessWidget {
@@ -43,6 +44,24 @@ class SegmentData {
     required this.value,
     required this.color,
   });
+
+  /// 从 JSON 创建
+  factory SegmentData.fromJson(Map<String, dynamic> json) {
+    return SegmentData(
+      label: json['label'] as String? ?? '',
+      value: (json['value'] as num?)?.toDouble() ?? 0.0,
+      color: Color(json['color'] as int? ?? 0xFF000000),
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'value': value,
+      'color': color.value,
+    };
+  }
 }
 
 /// 分段进度条统计小组件
@@ -70,6 +89,25 @@ class SegmentedProgressCardWidget extends StatefulWidget {
     required this.segments,
     this.unit = '',
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory SegmentedProgressCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final segmentsList = (props['segments'] as List<dynamic>?)
+            ?.map((e) => SegmentData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return SegmentedProgressCardWidget(
+      title: props['title'] as String? ?? '',
+      currentValue: (props['currentValue'] as num?)?.toDouble() ?? 0.0,
+      targetValue: (props['targetValue'] as num?)?.toDouble() ?? 0.0,
+      segments: segmentsList,
+      unit: props['unit'] as String? ?? '',
+    );
+  }
 
   @override
   State<SegmentedProgressCardWidget> createState() =>

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 平滑曲线图表卡片示例（汽车统计风格）
 class SmoothLineChartCardExample extends StatelessWidget {
@@ -47,6 +48,22 @@ class DataPoint {
     required this.x,
     required this.y,
   });
+
+  /// 从 JSON 创建
+  factory DataPoint.fromJson(Map<String, dynamic> json) {
+    return DataPoint(
+      x: (json['x'] as num?)?.toDouble() ?? 0.0,
+      y: (json['y'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'x': x,
+      'y': y,
+    };
+  }
 }
 
 /// 平滑曲线图表小组件
@@ -74,8 +91,36 @@ class SmoothLineChartCardWidget extends StatefulWidget {
     this.distanceUnit = '',
   });
 
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory SmoothLineChartCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final pointsList = (props['dataPoints'] as List<dynamic>?)
+            ?.map((e) => DataPoint.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+    final labelsList = (props['timeLabels'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        const [];
+
+    return SmoothLineChartCardWidget(
+      title: props['title'] as String? ?? '',
+      subtitle: props['subtitle'] as String? ?? '',
+      date: props['date'] as String? ?? '',
+      dataPoints: pointsList,
+      maxValue: (props['maxValue'] as num?)?.toDouble() ?? 100.0,
+      timeLabels: labelsList,
+      primaryColor: props.containsKey('primaryColor')
+          ? Color(props['primaryColor'] as int)
+          : const Color(0xFFFF7F56),
+    );
+  }
+
   @override
-  State<SmoothLineChartCardWidget> createState() => _SmoothLineChartCardWidgetState();
+  State<SmoothLineChartCardWidget> createState() =>
+      _SmoothLineChartCardWidgetState();
 }
 
 class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>

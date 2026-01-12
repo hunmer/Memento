@@ -4,6 +4,11 @@ import 'widgets/circular_progress_card.dart';
 import 'widgets/activity_progress_card.dart';
 import 'widgets/half_gauge_card.dart';
 import 'widgets/task_progress_card.dart';
+import '../screens/segmented_progress_card_example.dart';
+import '../screens/milestone_card_example.dart';
+import '../screens/monthly_progress_with_dots_card_example.dart';
+import '../screens/contribution_heatmap_card_example.dart';
+import '../screens/smooth_line_chart_card_example.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -11,6 +16,11 @@ enum CommonWidgetId {
   activityProgressCard,
   halfGaugeCard,
   taskProgressCard,
+  segmentedProgressCard,
+  milestoneCard,
+  monthlyProgressDotsCard,
+  contributionHeatmapCard,
+  smoothLineChartCard,
 }
 
 /// 公共小组件元数据
@@ -67,6 +77,46 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.segmentedProgressCard: CommonWidgetMetadata(
+      id: CommonWidgetId.segmentedProgressCard,
+      name: '分段进度条卡片',
+      description: '多类别分段统计卡片',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.milestoneCard: CommonWidgetMetadata(
+      id: CommonWidgetId.milestoneCard,
+      name: '里程碑追踪卡片',
+      description: '时间里程碑追踪展示卡片',
+      icon: Icons.flag,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.monthlyProgressDotsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.monthlyProgressDotsCard,
+      name: '月度进度圆点卡片',
+      description: '圆点矩阵月度进度卡片',
+      icon: Icons.calendar_month,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.contributionHeatmapCard: CommonWidgetMetadata(
+      id: CommonWidgetId.contributionHeatmapCard,
+      name: '贡献热力图卡片',
+      description: '活跃度热力图网格展示卡片',
+      icon: Icons.grid_on,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.smoothLineChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.smoothLineChartCard,
+      name: '平滑折线图卡片',
+      description: '带渐变填充的平滑折线图卡片',
+      icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -103,6 +153,16 @@ class CommonWidgetBuilder {
         return HalfGaugeCardWidget.fromProps(props, size);
       case CommonWidgetId.taskProgressCard:
         return TaskProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.segmentedProgressCard:
+        return SegmentedProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.milestoneCard:
+        return MilestoneCardWidget.fromProps(props, size);
+      case CommonWidgetId.monthlyProgressDotsCard:
+        return MonthlyProgressWithDotsCardWidget.fromProps(props, size);
+      case CommonWidgetId.contributionHeatmapCard:
+        return ContributionHeatmapCardWidget.fromProps(props, size);
+      case CommonWidgetId.smoothLineChartCard:
+        return SmoothLineChartCardWidget.fromProps(props, size);
     }
   }
 }
