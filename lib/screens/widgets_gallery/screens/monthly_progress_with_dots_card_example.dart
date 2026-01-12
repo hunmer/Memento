@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 月度进度圆点卡片示例
 class MonthlyProgressWithDotsCardExample extends StatelessWidget {
@@ -61,8 +62,31 @@ class MonthlyProgressWithDotsCardWidget extends StatefulWidget {
     this.inactiveDotColor,
   });
 
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory MonthlyProgressWithDotsCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return MonthlyProgressWithDotsCardWidget(
+      month: props['month'] as String? ?? '',
+      currentDay: props['currentDay'] as int? ?? 0,
+      totalDays: props['totalDays'] as int? ?? 31,
+      percentage: props['percentage'] as int? ?? 0,
+      backgroundColor: props.containsKey('backgroundColor')
+          ? Color(props['backgroundColor'] as int)
+          : const Color(0xFF148690),
+      activeDotColor: props['activeDotColor'] != null
+          ? Color(props['activeDotColor'] as int)
+          : null,
+      inactiveDotColor: props['inactiveDotColor'] != null
+          ? Color(props['inactiveDotColor'] as int)
+          : null,
+    );
+  }
+
   @override
-  State<MonthlyProgressWithDotsCardWidget> createState() => _MonthlyProgressWithDotsCardWidgetState();
+  State<MonthlyProgressWithDotsCardWidget> createState() =>
+      _MonthlyProgressWithDotsCardWidgetState();
 }
 
 class _MonthlyProgressWithDotsCardWidgetState extends State<MonthlyProgressWithDotsCardWidget>

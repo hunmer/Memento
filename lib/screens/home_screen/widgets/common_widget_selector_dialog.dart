@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_carousel/infinite_carousel.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
@@ -255,22 +256,21 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.0,
-              ),
+            child: InfiniteCarousel.builder(
+              loop: false,
               itemCount: _availableCommonWidgets.length,
-              itemBuilder: (context, index) {
+              itemExtent: 200,
+              itemBuilder: (context, index, realIndex) {
                 final widgetId = _availableCommonWidgets.keys.elementAt(index);
                 final metadata = CommonWidgetsRegistry.getMetadata(
                   CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
                 );
                 final isSelected = _selectedCommonWidgetId == widgetId;
 
-                return _buildCommonWidgetCard(metadata, widgetId, isSelected);
+                return Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: _buildCommonWidgetCard(metadata, widgetId, isSelected),
+                );
               },
             ),
           ),
@@ -294,45 +294,45 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
         });
       },
       child: Container(
+        width: 200,
         decoration: BoxDecoration(
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).colorScheme.primary
-                : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
+                    : Colors.transparent,
+            width: 3,
           ),
           borderRadius: BorderRadius.circular(12),
-          color: isSelected
-              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-              : Colors.white,
         ),
-        padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             // 预览小组件
             Expanded(
-              child: Center(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: CommonWidgetBuilder.build(
-                    context,
-                    CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
-                    props,
-                    metadata.defaultSize,
-                  ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12),
+                ),
+                child: CommonWidgetBuilder.build(
+                  context,
+                  CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
+                  props,
+                  metadata.defaultSize,
                 ),
               ),
             ),
-            const SizedBox(height: 6),
             // 名称
-            Text(
-              metadata.name,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                metadata.name,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

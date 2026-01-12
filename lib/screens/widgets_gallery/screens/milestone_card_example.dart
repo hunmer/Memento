@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 里程碑追踪卡片示例
 class MilestoneCardExample extends StatelessWidget {
@@ -62,6 +63,22 @@ class MilestoneCardWidget extends StatefulWidget {
     required this.unit,
     this.suffix = '',
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory MilestoneCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return MilestoneCardWidget(
+      imageUrl: props['imageUrl'] as String?,
+      title: props['title'] as String? ?? '',
+      date: props['date'] as String? ?? '',
+      daysCount: props['daysCount'] as int? ?? 0,
+      value: props['value'] as String? ?? '0',
+      unit: props['unit'] as String? ?? '',
+      suffix: props['suffix'] as String? ?? '',
+    );
+  }
 
   @override
   State<MilestoneCardWidget> createState() => _MilestoneCardWidgetState();

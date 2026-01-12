@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 贡献热力图卡片示例
 class ContributionHeatmapCardExample extends StatelessWidget {
@@ -60,8 +61,46 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
     required this.showMoreLabel,
   });
 
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory ContributionHeatmapCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final yearsList = (props['years'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        ['2024'];
+    final monthsList = (props['months'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    final heatmapDataList = (props['heatmapData'] as List<dynamic>?)
+            ?.map((e) => (e as List<dynamic>).map((v) => v as int).toList())
+            .toList() ??
+        [
+          [0, 0, 0, 0, 0, 0],
+          [0, 1, 2, 1, 0, 0],
+          [0, 2, 3, 2, 1, 0],
+          [0, 1, 2, 3, 2, 1],
+          [0, 0, 1, 2, 1, 0],
+          [0, 0, 0, 1, 0, 0],
+        ];
+
+    return ContributionHeatmapCardWidget(
+      title: props['title'] as String? ?? '',
+      contributionCount: props['contributionCount'] as String? ?? '',
+      years: yearsList,
+      selectedYear: props['selectedYear'] as String? ?? yearsList.first,
+      months: monthsList,
+      heatmapData: heatmapDataList,
+      description: props['description'] as String? ?? '',
+      showMoreLabel: props['showMoreLabel'] as String? ?? 'Show more',
+    );
+  }
+
   @override
-  State<ContributionHeatmapCardWidget> createState() => _ContributionHeatmapCardWidgetState();
+  State<ContributionHeatmapCardWidget> createState() =>
+      _ContributionHeatmapCardWidgetState();
 }
 
 class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardWidget>
