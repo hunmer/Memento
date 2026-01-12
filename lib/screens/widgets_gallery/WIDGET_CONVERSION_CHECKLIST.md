@@ -1,6 +1,6 @@
 # 桌面小组件转换清单
 
-> 已转换：15/95 | 未转换：80
+> 已转换：25/95 | 未转换：70
 
 最后更新：2025-01-12
 
@@ -21,20 +21,20 @@
 - [x] 双滑块小组件 - `time_zone_slider_widget` → `dualSliderCard` *(已重命名)*
 - [x] 活动进度卡片 - `activity_progress_card` → `activityProgressCard`
 - [x] 任务进度卡片 - `task_progress_card` → `taskProgressCard`
+- [x] 趋势折线图 - `trend_line_chart_widget` → `trendLineChartWidget`
+- [x] 堆叠柱状图卡片 - `stacked_bar_chart_card` → `stackedBarChartCard`
+- [x] 堆叠条形图组件 - `stacked_bar_chart_widget` → `stackedBarChartWidget`
+- [x] 堆叠环形图统计卡片 - `stacked_ring_chart` → `stackedRingChartCard`
+- [x] 月度柱状图统计卡片 - `monthly_bar_chart` → `monthlyBarChartCard`
+- [x] 收益趋势卡片 - `earnings_trend_card` → `earningsTrendCard`
+- [x] 排名条形图卡片 - `ranked_bar_chart_card` → `rankedBarChartCard`
+- [x] 柱状图统计卡片 - `bar_chart_stats_card` → `barChartStatsCard`
+- [x] 每日条形图卡片 - `daily_bar_chart_card` → `dailyBarChartCard`
+- [x] 周条形图卡片 - `weekly_bar_chart_card` → `weeklyBarChartCard`
 
 ## ❌ 未转换组件
 
 ### 图表类
-- [ ] 趋势折线图 - `trend_line_chart_widget`
-- [ ] 堆叠柱状图卡片 - `stacked_bar_chart_card`
-- [ ] 堆叠条形图组件 - `stacked_bar_chart_widget`
-- [ ] 堆叠环形图统计卡片 - `stacked_ring_chart`
-- [ ] 月度柱状图统计卡片 - `monthly_bar_chart`
-- [ ] 收益趋势卡片 - `earnings_trend_card`
-- [ ] 排名条形图卡片 - `ranked_bar_chart_card`
-- [ ] 柱状图统计卡片 - `bar_chart_stats_card`
-- [ ] 每日条形图卡片 - `daily_bar_chart_card`
-- [ ] 周条形图卡片 - `weekly_bar_chart_card`
 - [ ] 支出分类环形图 - `expense_donut_chart`
 - [ ] 投资组合堆叠图 - `portfolio_stacked_chart`
 - [ ] 支出趋势折线图 - `spending_trend_chart`

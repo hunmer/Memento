@@ -274,9 +274,101 @@ case CommonWidgetId.{componentId}:
   return {WidgetClassName}.fromProps(props, size);
 ```
 
-### 7. Update Migration Skill Documentation
+### 7. Update Example File to Use Common Widget
 
-在 `.claude/skills/migrate-home-widget-common-widgets.md` 中添加新组件的使用示例：
+**重要**: 当组件被提取到 `lib/screens/widgets_gallery/common_widgets/widgets/` 后，必须修改对应的示例文件，让它使用 common_widgets 中的组件，而不是在示例文件中重复定义组件。
+
+#### Step 7.1: Identify the Example File
+
+示例文件位于 `lib/screens/widgets_gallery/screens/` 目录下，命名为 `{component_name}_example.dart`。
+
+#### Step 7.2: Update the Example File
+
+修改示例文件结构：
+
+**Before (示例文件定义组件):**
+```dart
+// lib/screens/widgets_gallery/screens/earnings_trend_card_example.dart
+import 'package:flutter/material.dart';
+
+class EarningsTrendCardWidget extends StatefulWidget {
+  // ... 组件定义
+}
+
+class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget> {
+  // ... 状态定义
+}
+
+class EarningsTrendCardExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: EarningsTrendCardWidget(
+        // ... 参数
+      ),
+    );
+  }
+}
+```
+
+**After (示例文件使用 common_widgets):**
+```dart
+// lib/screens/widgets_gallery/screens/earnings_trend_card_example.dart
+import 'package:flutter/material.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/earnings_trend_card.dart';
+
+class EarningsTrendCardExample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('收益趋势卡片')),
+      body: Center(
+        child: EarningsTrendCardWidget(
+          // ... 参数
+        ),
+      ),
+    );
+  }
+}
+```
+
+#### Step 7.3: Remove Duplicate Component Definition
+
+从示例文件中删除：
+- 组件类定义（如 `class EarningsTrendCardWidget extends StatefulWidget`）
+- 组件状态类定义（如 `class _EarningsTrendCardWidgetState extends State`）
+- 任何与组件实现相关的私有类
+
+保留：
+- 示例页面类（`*Example` 类）
+- 展示组件用法的代码
+
+#### Step 7.4: Update Import in common_widgets.dart
+
+确保 `common_widgets.dart` 中的 import 指向正确的位置：
+
+```dart
+// 如果组件已提取到 common_widgets/widgets/
+import 'widgets/earnings_trend_card.dart';
+
+// 如果组件仍在 screens/ 目录
+import '../screens/earnings_trend_card_example.dart';
+```
+
+**判断规则**：
+- 如果 `lib/screens/widgets_gallery/common_widgets/widgets/{name}.dart` 存在 → 使用 `import 'widgets/{name}.dart';`
+- 否则 → 使用 `import '../screens/{name}_example.dart';`
+
+#### Step 7.5: Verify the Changes
+
+运行 `flutter analyze` 确保无错误：
+
+```bash
+flutter analyze lib/screens/widgets_gallery/screens/{example_file}.dart
+flutter analyze lib/screens/widgets_gallery/common_widgets/common_widgets.dart
+```
+
+### 8. Update Migration Skill Documentation
 
 ```markdown
 ### SegmentedProgressCard
@@ -497,7 +589,8 @@ Widget _buildImage() {
 - [ ] 在 `CommonWidgetId` 枚举中添加了新 ID
 - [ ] 在 `metadata` 中添加了组件元数据
 - [ ] 在 `CommonWidgetBuilder.build()` 中添加了 case 分支
-- [ ] 运行 `flutter analyze` 无错误
+- [ ] **如果组件已提取到 `common_widgets/widgets/`，修改示例文件使用 common_widgets**
+- [ ] **运行 `flutter analyze` 无错误**
 
 ## Testing
 

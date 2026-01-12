@@ -1,0 +1,328 @@
+import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+
+/// 周条形数据（公共小组件版本）
+class CommonWeeklyBarData {
+  final String label;
+  final double upperHeight;
+  final double lowerHeight;
+
+  const CommonWeeklyBarData({
+    required this.label,
+    required this.upperHeight,
+    required this.lowerHeight,
+  });
+
+  /// 从 JSON 创建
+  factory CommonWeeklyBarData.fromJson(Map<String, dynamic> json) {
+    return CommonWeeklyBarData(
+      label: json['label'] as String? ?? '',
+      upperHeight: (json['upperHeight'] as num?)?.toDouble() ?? 0.0,
+      lowerHeight: (json['lowerHeight'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'upperHeight': upperHeight,
+      'lowerHeight': lowerHeight,
+    };
+  }
+}
+
+/// 周条形图小组件（公共小组件版本）
+class CommonWeeklyBarChartCardWidget extends StatefulWidget {
+  final String title;
+  final String subtitle;
+  final int percentage;
+  final List<CommonWeeklyBarData> weeklyData;
+
+  const CommonWeeklyBarChartCardWidget({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.percentage,
+    required this.weeklyData,
+  });
+
+  /// 从 props 创建实例
+  factory CommonWeeklyBarChartCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final weeklyDataList = props['weeklyData'] as List?;
+    final weeklyData = weeklyDataList?.map((item) {
+      return CommonWeeklyBarData.fromJson(item as Map<String, dynamic>);
+    }).toList() ?? <CommonWeeklyBarData>[];
+
+    return CommonWeeklyBarChartCardWidget(
+      title: props['title'] as String? ?? '',
+      subtitle: props['subtitle'] as String? ?? '',
+      percentage: props['percentage'] as int? ?? 0,
+      weeklyData: weeklyData,
+    );
+  }
+
+  @override
+  State<CommonWeeklyBarChartCardWidget> createState() =>
+      _CommonWeeklyBarChartCardWidgetState();
+}
+
+class _CommonWeeklyBarChartCardWidgetState
+    extends State<CommonWeeklyBarChartCardWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _animation.value,
+          child: Transform.translate(
+            offset: Offset(0, 20 * (1 - _animation.value)),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 条形图区域
+                    SizedBox(
+                      height: 150,
+                      child: _WeeklyBars(
+                        data: widget.weeklyData,
+                        animation: _animation,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // 底部信息
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    height: 32,
+                                    child: AnimatedFlipCounter(
+                                      value: widget.percentage.toDouble() *
+                                          _animation.value,
+                                      fractionDigits: 0,
+                                      suffix: '%',
+                                      textStyle: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDark
+                                            ? const Color(0xFFF3F4F6)
+                                            : const Color(0xFF111827),
+                                        letterSpacing: -0.5,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? primaryColor.withOpacity(0.2)
+                                          : const Color(0xFFBFDBFE),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      widget.subtitle,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 周条形图组件
+class _WeeklyBars extends StatelessWidget {
+  final List<CommonWeeklyBarData> data;
+  final Animation<double> animation;
+
+  const _WeeklyBars({
+    required this.data,
+    required this.animation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final lightColor = isDark
+        ? Colors.blue.shade900.withOpacity(0.3)
+        : Colors.blue.shade200.withOpacity(0.5);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: List.generate(data.length, (index) {
+        final item = data[index];
+        final step = 0.08;
+        final barAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Interval(
+            index * step,
+            0.5 + index * step,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: index < data.length - 1 ? 8 : 0),
+            child: Column(
+              children: [
+                // 条形图容器
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF1F2937)
+                          : const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // 上层浅色条
+                        AnimatedBuilder(
+                          animation: barAnimation,
+                          builder: (context, child) {
+                            return Container(
+                              height: 100 *
+                                  item.upperHeight *
+                                  barAnimation.value,
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 6),
+                              decoration: BoxDecoration(
+                                color: lightColor,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(6),
+                                  topRight: Radius.circular(6),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 2),
+                        // 下层主条
+                        AnimatedBuilder(
+                          animation: barAnimation,
+                          builder: (context, child) {
+                            return Container(
+                              height: 100 *
+                                  item.lowerHeight *
+                                  barAnimation.value,
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 5),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    const Color(0xFF4FABFF),
+                                    primaryColor,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryColor.withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 2),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // 标签
+                Text(
+                  item.label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF6B7280),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
