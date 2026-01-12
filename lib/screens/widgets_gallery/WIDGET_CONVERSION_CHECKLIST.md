@@ -1,12 +1,14 @@
 # 桌面小组件转换清单
 
-> 已转换：76/95 | 未转换：17
+> 已转换：83/95 | 未转换：12
 
 最后更新：2026-01-12
 
-## ✅ 已转换组件
+## ✅ 已转换组件 (83/95)
 
 - [x] 半圆仪表盘 - `half_circle_gauge_widget` → `halfGaugeCard`
+- [x] 预算趋势卡片 - `budget_trend_card` → `budgetTrendCard`
+- [x] 钱包余额概览卡片 - `wallet_balance_card` → `walletBalanceCard`
 - [x] 分段进度条卡片 - `segmented_progress_card` → `segmentedProgressCard`
 - [x] 里程碑追踪卡片 - `milestone_card` → `milestoneCard`
 - [x] 圆形进度卡片 - `circular_progress_card` → `circularProgressCard`
@@ -72,7 +74,12 @@
 - [x] 饮水追踪器 - `hydration_tracker_widget` → `hydrationTrackerCard`
 - [x] 个人资料卡片 - `profile_card_widget` → `profileCardCard`
 - [x] 余额卡片 - `modern_rounded_balance_widget` → `ModernRoundedBalanceCard` (使用 `BalanceCardData` 数据模型，支持 JSON 序列化)
+- [x] 账户余额卡片 - `account_balance_card` → `accountBalanceCard` (使用 `AccountBalanceCardData` 数据模型，支持 JSON 序列化)
+- [x] 现代圆角消费卡片 - `modern_rounded_spending_widget` → `modernRoundedSpendingWidget` (使用 `SpendingCategory` 数据模型，支持 JSON 序列化)
 - [x] 活动圆环卡片 - `activity_rings_card` → `ActivityRingsCard` (使用 `RingCardData` 数据模型)
+- [x] 音乐播放器卡片 - `music_player_card` → `musicPlayerCard`
+- [x] 分数卡片 - `score_card_widget` → `scoreCardWidget` (使用 `ActionData` 数据模型，支持 JSON 序列化)
+- [x] 趨勢數值卡片 - `trend_value_card` → `trendValueCard` (使用 `TrendDataPoint` 数据模型，支持 JSON 序列化)
 
 ### 列表/消息类(已完成转换，但未在common_widgets.dart 注册)
 - [ ] 每日日程卡片 - `daily_schedule_card`
@@ -99,22 +106,19 @@
 - [x] 垂直属性卡片 - `vertical_property_card` → `verticalInfoCard` (垂直信息卡片)
 - [x] 图片分割卡片 - `split_image_card` → `splitImageCard`
 - [x] 日历事件卡片 - `event_calendar_widget` → `EventCalendarCard` (使用 `CalendarEventData` 数据模型，支持 JSON 序列化)
+- [x] 迷你趋势卡片 - `mini_trend_card`
+- [x] 活动圆环卡片 - `activity_rings_card` → `ActivityRingsCard` (使用 `RingCardData` 数据模型)
 
 ### 媒体/娱乐类
-- [ ] 音乐播放器卡片 - `music_player_card`
+（暂无待转换的媒体/娱乐类组件）
 
 ### 财务类（需重命名）
-- [ ] 钱包余额概览卡片 - `wallet_balance_card` → 建议：余额概览卡片
-- [ ] 账户余额卡片 - `account_balance_card`
-- [ ] 预算趋势卡片 - `budget_trend_card`
-- [ ] 消费卡片 - `modern_rounded_spending_widget`
+- [x] 账户余额卡片 - `account_balance_card` → `accountBalanceCard`
 
 ### 趋势/数据类
-- [ ] 迷你趋势卡片 - `mini_trend_card`
-- [ ] 分数卡片 - `score_card_widget`
-- [x] 活动圆环卡片 - `activity_rings_card` → `ActivityRingsCard` (使用 `RingCardData` 数据模型)
-- [ ] 趨勢數值卡片 - `trend_value_card`
-- [ ] 趋势列表卡片 - `trend_list_card`
+- [x] 分数卡片 - `score_card_widget` → `scoreCardWidget` (使用 `ActionData` 数据模型，支持 JSON 序列化)
+- [x] 趨勢數值卡片 - `trend_value_card` → `trendValueCard` (使用 `TrendDataPoint` 数据模型，支持 JSON 序列化)
+- [x] 趋势列表卡片 - `trend_list_card` → `trendListCard` (使用 `TrendListCardData` 数据模型，支持 JSON 序列化)
 
 ### 其他
 - [ ] 日期事件卡片 - `daily_events_card`

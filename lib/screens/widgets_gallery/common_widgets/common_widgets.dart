@@ -30,8 +30,14 @@ import '../screens/daily_todo_list_widget_example.dart';
 import '../screens/upcoming_tasks_widget_example.dart';
 import 'widgets/social_profile_card.dart';
 import 'widgets/mini_trend_card.dart';
+import 'widgets/budget_trend_card.dart';
+import 'widgets/account_balance_card.dart';
 import 'widgets/modern_rounded_spending_widget.dart';
-import '../screens/wallet_balance_card_example.dart';
+import 'widgets/wallet_balance_card.dart';
+import 'widgets/music_player_card.dart';
+import 'widgets/score_card_widget.dart';
+import 'widgets/trend_value_card.dart';
+import 'widgets/trend_list_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -65,8 +71,14 @@ enum CommonWidgetId {
   weightTrendChart,
   socialProfileCard,
   miniTrendCard,
+  budgetTrendCard,
+  accountBalanceCard,
   modernRoundedSpendingWidget,
   walletBalanceCard,
+  musicPlayerCard,
+  scoreCardWidget,
+  trendValueCard,
+  trendListCard,
 }
 
 /// 公共小组件元数据
@@ -315,6 +327,22 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.budgetTrendCard: CommonWidgetMetadata(
+      id: CommonWidgetId.budgetTrendCard,
+      name: '预算趋势卡片',
+      description: '通用的带迷你曲线图的数值展示卡片，支持标签、数值显示（带翻转动画）、迷你曲线图、变化百分比和更新时间',
+      icon: Icons.trending_up,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.accountBalanceCard: CommonWidgetMetadata(
+      id: CommonWidgetId.accountBalanceCard,
+      name: '账户余额卡片',
+      description: '显示多个账户的余额信息，包括账户名称、图标、账单数量和余额，支持正负余额显示和入场动画效果',
+      icon: Icons.account_balance,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
     CommonWidgetId.modernRoundedSpendingWidget: CommonWidgetMetadata(
       id: CommonWidgetId.modernRoundedSpendingWidget,
       name: '现代圆角消费卡片',
@@ -330,6 +358,38 @@ class CommonWidgetsRegistry {
       icon: Icons.account_balance_wallet,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.musicPlayerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.musicPlayerCard,
+      name: '音乐播放器卡片',
+      description: '显示专辑封面、歌词、播放进度和控制按钮，支持动画效果',
+      icon: Icons.music_note,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.scoreCardWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.scoreCardWidget,
+      name: '分数卡片',
+      description: '显示分数、等级和行为列表，支持翻转计数动画和渐变背景',
+      icon: Icons.scoreboard,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.trendValueCard: CommonWidgetMetadata(
+      id: CommonWidgetId.trendValueCard,
+      name: '趋势数值卡片',
+      description: '通用的数值展示卡片，支持数值和单位显示（带翻转动画）、趋势指示（上升/下降）、曲线图表（带渐变填充）和附加信息（日期、BMI等）',
+      icon: Icons.trending_up,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.trendListCard: CommonWidgetMetadata(
+      id: CommonWidgetId.trendListCard,
+      name: '趋势列表卡片',
+      description: '股票/指数价格与涨跌幅列表卡片，支持多个趋势项展示，带翻转计数动画和入场效果',
+      icon: Icons.trending_up,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
   };
 
@@ -420,10 +480,22 @@ class CommonWidgetBuilder {
         return SocialProfileCardWidget.fromProps(props, size);
       case CommonWidgetId.miniTrendCard:
         return MiniTrendCardWidget.fromProps(props, size);
+      case CommonWidgetId.budgetTrendCard:
+        return BudgetTrendCardWidget.fromProps(props, size);
+      case CommonWidgetId.accountBalanceCard:
+        return AccountBalanceCardWidget.fromProps(props, size);
       case CommonWidgetId.modernRoundedSpendingWidget:
         return ModernRoundedSpendingWidget.fromProps(props, size);
       case CommonWidgetId.walletBalanceCard:
         return WalletBalanceCardWidget.fromProps(props, size);
+      case CommonWidgetId.musicPlayerCard:
+        return MusicPlayerCardWidget.fromProps(props, size);
+      case CommonWidgetId.scoreCardWidget:
+        return ScoreCardWidget.fromProps(props, size);
+      case CommonWidgetId.trendValueCard:
+        return TrendValueCardWidget.fromProps(props, size);
+      case CommonWidgetId.trendListCard:
+        return TrendListCardWidget.fromProps(props, size);
     }
   }
 }
