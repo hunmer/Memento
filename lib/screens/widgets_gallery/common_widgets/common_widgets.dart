@@ -38,10 +38,22 @@ import 'widgets/music_player_card.dart';
 import 'widgets/score_card_widget.dart';
 import 'widgets/trend_value_card.dart';
 import 'widgets/trend_list_card.dart';
+import 'widgets/modern_egfr_health_widget.dart';
+import '../screens/mood_chart_card_example.dart';
+import 'widgets/news_update_card.dart';
+import 'widgets/news_card.dart';
+import 'widgets/daily_events_card.dart';
+import 'widgets/daily_reflection_card.dart';
+import 'widgets/colorful_shortcuts_grid.dart';
+import 'widgets/journal_prompt_card.dart';
+import 'widgets/social_activity_card.dart';
+import 'widgets/icon_circular_progress_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
   circularProgressCard,
+  socialActivityCard,
+  iconCircularProgressCard,
   activityProgressCard,
   halfGaugeCard,
   taskProgressCard,
@@ -79,6 +91,14 @@ enum CommonWidgetId {
   scoreCardWidget,
   trendValueCard,
   trendListCard,
+  moodChartCard,
+  newsUpdateCard,
+  newsCard,
+  dailyEventsCard,
+  modernEgfrHealthWidget,
+  dailyReflectionCard,
+  colorfulShortcutsGrid,
+  journalPromptCard,
 }
 
 /// 公共小组件元数据
@@ -108,6 +128,14 @@ class CommonWidgetsRegistry {
       name: '圆形进度卡片',
       description: '显示百分比进度，带圆形进度环',
       icon: Icons.circle_outlined,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.iconCircularProgressCard: CommonWidgetMetadata(
+      id: CommonWidgetId.iconCircularProgressCard,
+      name: '图标圆形进度卡片',
+      description: '显示带圆形进度条的卡片，支持图标、通知点、标题和副标题',
+      icon: Icons.control_point_duplicate,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
@@ -391,6 +419,79 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.modernEgfrHealthWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.modernEgfrHealthWidget,
+      name: '健康指标卡片',
+      description: '通用的健康指标展示卡片，支持标题、图标、数值（带翻转动画）、单位和状态指示器',
+      icon: Icons.favorite,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.newsUpdateCard: CommonWidgetMetadata(
+      id: CommonWidgetId.newsUpdateCard,
+      name: '新闻更新卡片',
+      description: '显示新闻标题、时间戳和分页指示器，支持动画效果',
+      icon: Icons.newspaper,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.newsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.newsCard,
+      name: '新闻卡片',
+      description: '显示头条新闻、分类标签和新闻列表，支持动画效果',
+      icon: Icons.article,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+
+    CommonWidgetId.moodChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.moodChartCard,
+      name: '心情图表卡片',
+      description: '显示每日情绪柱状图和每周心情历史记录，支持动画效果和多种心情表情',
+      icon: Icons.sentiment_satisfied_alt,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.dailyEventsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.dailyEventsCard,
+      name: '每日事件卡片',
+      description: '显示星期、日期和当日事件列表，支持翻转计数动画',
+      icon: Icons.event,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.dailyReflectionCard: CommonWidgetMetadata(
+      id: CommonWidgetId.dailyReflectionCard,
+      name: '每日反思卡片',
+      description: '引导用户每日思考和记录的卡片，包含星期几、引导性问题和操作按钮',
+      icon: Icons.lightbulb_outline,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.colorfulShortcutsGrid: CommonWidgetMetadata(
+      id: CommonWidgetId.colorfulShortcutsGrid,
+      name: '彩色快捷方式网格',
+      description: '显示带颜色背景的快捷方式网格，支持动画效果和自定义图标',
+      icon: Icons.grid_view,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.journalPromptCard: CommonWidgetMetadata(
+      id: CommonWidgetId.journalPromptCard,
+      name: '日记提示卡片',
+      description: '显示星期几、提示性问题和操作按钮（新建、同步），支持动画效果和自定义蝴蝶图标',
+      icon: Icons.book,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.socialActivityCard: CommonWidgetMetadata(
+      id: CommonWidgetId.socialActivityCard,
+      name: '社交活动动态卡片',
+      description: '显示用户头像、名称、关注数和社交动态列表，支持翻转计数动画和互动数据',
+      icon: Icons.people,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -422,6 +523,8 @@ class CommonWidgetBuilder {
     switch (widgetId) {
       case CommonWidgetId.circularProgressCard:
         return CircularProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.iconCircularProgressCard:
+        return IconCircularProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.activityProgressCard:
         return ActivityProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.halfGaugeCard:
@@ -496,6 +599,25 @@ class CommonWidgetBuilder {
         return TrendValueCardWidget.fromProps(props, size);
       case CommonWidgetId.trendListCard:
         return TrendListCardWidget.fromProps(props, size);
+      case CommonWidgetId.newsUpdateCard:
+        return NewsUpdateCardWidget.fromProps(props, size);
+      case CommonWidgetId.newsCard:
+        return NewsCardWidget.fromProps(props, size);
+
+      case CommonWidgetId.modernEgfrHealthWidget:
+        return ModernEgfrHealthWidget.fromProps(props, size);
+      case CommonWidgetId.moodChartCard:
+        return MoodChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.dailyEventsCard:
+        return DailyEventsCardWidget.fromProps(props, size);
+      case CommonWidgetId.dailyReflectionCard:
+        return DailyReflectionCardWidget.fromProps(props, size);
+      case CommonWidgetId.colorfulShortcutsGrid:
+        return ColorfulShortcutsGridWidget.fromProps(props, size);
+      case CommonWidgetId.journalPromptCard:
+        return JournalPromptCardWidget.fromProps(props, size);
+      case CommonWidgetId.socialActivityCard:
+        return SocialActivityCardWidget.fromProps(props, size);
     }
   }
 }

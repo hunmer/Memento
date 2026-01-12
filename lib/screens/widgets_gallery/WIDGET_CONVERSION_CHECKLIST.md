@@ -1,10 +1,10 @@
 # 桌面小组件转换清单
 
-> 已转换：83/95 | 未转换：12
+> 已转换：93/95 | 未转换：2
 
 最后更新：2026-01-12
 
-## ✅ 已转换组件 (83/95)
+## ✅ 已转换组件 (93/95)
 
 - [x] 半圆仪表盘 - `half_circle_gauge_widget` → `halfGaugeCard`
 - [x] 预算趋势卡片 - `budget_trend_card` → `budgetTrendCard`
@@ -80,6 +80,14 @@
 - [x] 音乐播放器卡片 - `music_player_card` → `musicPlayerCard`
 - [x] 分数卡片 - `score_card_widget` → `scoreCardWidget` (使用 `ActionData` 数据模型，支持 JSON 序列化)
 - [x] 趨勢數值卡片 - `trend_value_card` → `trendValueCard` (使用 `TrendDataPoint` 数据模型，支持 JSON 序列化)
+- [x] 健康指标卡片 - `modern_egfr_health_widget` → `modernEgfrHealthWidget`
+- [x] 新闻卡片 - `news_card` → `newsCard` (使用 `NewsCardData` 数据模型，支持 JSON 序列化)
+- [x] 新闻更新卡片 - `news_update_card` → `newsUpdateCard` (已添加到 common_widgets.dart)
+- [x] 每日事件卡片 - `daily_events_card` → `dailyEventsCard` (使用 `DailyEventData` 和 `DailyEventsCardData` 数据模型，支持 JSON 序列化)
+- [x] 心情图表卡片 - `mood_chart_card` → `moodChartCard` (使用 `DailyMoodData` 数据模型和 `MoodEmoji` 枚举，支持 JSON 序列化)
+- [x] 每日反思卡片 - `daily_reflection_card` → `dailyReflectionCard` (使用 `DailyReflectionCardData` 数据模型，支持 JSON 序列化)
+- [x] 彩色快捷方式网格 - `colorful_shortcuts_grid` → `colorfulShortcutsGrid` (使用 `ColorfulShortcutsGridData` 和 `ShortcutItemData` 数据模型，支持 JSON 序列化)
+- [x] 社交活动动态卡片 - `social_activity_card` → `socialActivityCard` (使用 `SocialUser` 和 `SocialPost` 数据模型，支持 JSON 序列化)
 
 ### 列表/消息类(已完成转换，但未在common_widgets.dart 注册)
 - [ ] 每日日程卡片 - `daily_schedule_card`
@@ -121,16 +129,14 @@
 - [x] 趋势列表卡片 - `trend_list_card` → `trendListCard` (使用 `TrendListCardData` 数据模型，支持 JSON 序列化)
 
 ### 其他
-- [ ] 日期事件卡片 - `daily_events_card`
-- [ ] 新闻卡片 - `news_card`
-- [ ] 新闻更新卡片 - `news_update_card`
-- [ ] eGFR 健康指标卡片 - `modern_egfr_health_widget` → 建议：健康指标卡片
-- [ ] 心情图表卡片 - `mood_chart_card`
-- [ ] 日记提示卡片 - `journal_prompt_card`
-- [ ] 每日反思卡片 - `daily_reflection_card`
-- [ ] 社交活动动态卡片 - `social_activity_card`
-- [ ] 彩色快捷方式网格 - `colorful_shortcuts_grid`
-- [ ] 图标圆形进度卡片 - `icon_circular_progress_card`
+- [x] eGFR 健康指标卡片 - `modern_egfr_health_widget` → `modernEgfrHealthWidget` (健康指标卡片)
+- [x] 新闻更新卡片 - `news_update_card` → `newsUpdateCard` (已添加到 common_widgets.dart)
+- [x] 每日事件卡片 - `daily_events_card` → `dailyEventsCard` (使用 `DailyEventData` 和 `DailyEventsCardData` 数据模型，支持 JSON 序列化)
+- [x] 新闻卡片 - `news_card` → `newsCard` (使用 `NewsCardData` 数据模型，支持 JSON 序列化)
+- [x] 日记提示卡片 - `journal_prompt_card` → `journalPromptCard` (使用 `JournalPromptCardData` 数据模型，支持 JSON 序列化)
+- [x] 社交活动动态卡片 - `social_activity_card` → `socialActivityCard` (使用 `SocialUser` 和 `SocialPost` 数据模型，支持 JSON 序列化)
+- [x] 彩色快捷方式网格 - `colorful_shortcuts_grid` → `colorfulShortcutsGrid` (使用 `ColorfulShortcutsGridData` 和 `ShortcutItemData` 数据模型，支持 JSON 序列化)
+- [x] 图标圆形进度卡片 - `icon_circular_progress_card` → `iconCircularProgressCard` (使用 `IconCircularProgressCardWidget` 组件，支持动画效果和自定义颜色)
 - [ ] 彩色标签任务列表卡片 - `color_tag_task_card`
 - [ ] 月度账单卡片 - `monthly_bill_card`
 - [ ] 时间线状态卡片 - `timeline_status_card`
