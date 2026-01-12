@@ -6,6 +6,7 @@ import 'widgets/half_gauge_card.dart';
 import 'widgets/task_progress_card.dart';
 import 'widgets/audio_waveform_card.dart';
 import 'widgets/line_chart_trend_card.dart';
+import 'widgets/earnings_trend_card.dart';
 import '../screens/segmented_progress_card_example.dart';
 import '../screens/milestone_card_example.dart';
 import '../screens/monthly_progress_with_dots_card_example.dart';
@@ -33,6 +34,7 @@ enum CommonWidgetId {
   verticalBarChartCard,
   messageListCard,
   dualSliderCard,
+  earningsTrendCard,
 }
 
 /// 公共小组件元数据
@@ -177,6 +179,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.earningsTrendCard: CommonWidgetMetadata(
+      id: CommonWidgetId.earningsTrendCard,
+      name: '收益趋势卡片',
+      description: '显示收益趋势、货币数值、百分比变化和平滑折线图',
+      icon: Icons.trending_up,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -236,6 +246,8 @@ class CommonWidgetBuilder {
         return MessageListCardWidget.fromProps(props, size);
       case CommonWidgetId.dualSliderCard:
         return DualSliderWidget.fromProps(props, size);
+      case CommonWidgetId.earningsTrendCard:
+        return EarningsTrendCardWidget.fromProps(props, size);
     }
   }
 }

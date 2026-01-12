@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 排名条形图卡片示例
 class RankedBarChartCardExample extends StatelessWidget {
@@ -47,6 +48,24 @@ class RankedBarItem {
     required this.value,
     required this.color,
   });
+
+  /// 从 JSON 创建
+  factory RankedBarItem.fromJson(Map<String, dynamic> json) {
+    return RankedBarItem(
+      label: json['label'] as String? ?? '',
+      value: (json['value'] as num?)?.toDouble() ?? 0.0,
+      color: Color(json['color'] as int? ?? 0xFF000000),
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'value': value,
+      'color': color.value,
+    };
+  }
 }
 
 /// 排名条形图小组件
@@ -65,6 +84,25 @@ class RankedBarChartCardWidget extends StatefulWidget {
     required this.items,
     required this.footer,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory RankedBarChartCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final itemsList = (props['items'] as List<dynamic>?)
+            ?.map((e) => RankedBarItem.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return RankedBarChartCardWidget(
+      title: props['title'] as String? ?? '',
+      subtitle: props['subtitle'] as String? ?? '',
+      itemCount: props['itemCount'] as String? ?? '',
+      items: itemsList,
+      footer: props['footer'] as String? ?? '',
+    );
+  }
 
   @override
   State<RankedBarChartCardWidget> createState() => _RankedBarChartCardWidgetState();
