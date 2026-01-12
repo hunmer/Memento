@@ -1,27 +1,28 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
-/// 时区滑块小组件示例
-class TimeZoneSliderWidgetExample extends StatelessWidget {
-  const TimeZoneSliderWidgetExample({super.key});
+/// 双滑块小组件示例
+class DualSliderWidgetExample extends StatelessWidget {
+  const DualSliderWidgetExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('时区滑块小组件')),
+      appBar: AppBar(title: const Text('双滑块小组件')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
-          child: TimeZoneSliderWidget(
-            location: 'Shibuya, Tokyo',
-            gmtOffset: '+9',
-            date: 'Aug 12',
-            hour: 10,
-            minute: 25,
+          child: DualSliderWidget(
+            label1: 'Shibuya, Tokyo',
+            label2: '+9',
+            label3: 'Aug 12',
+            value1: 10,
+            value2: 25,
             isPM: true,
-            timeDifference: '~4H',
+            badgeText: '~4H',
           ),
         ),
       ),
@@ -29,53 +30,116 @@ class TimeZoneSliderWidgetExample extends StatelessWidget {
   }
 }
 
-/// 时区数据模型
-class TimeZoneData {
-  final String location;
-  final String gmtOffset;
-  final String date;
-  final int hour;
-  final int minute;
+/// 双滑块数据模型
+class DualSliderData {
+  final String label1;
+  final String label2;
+  final String label3;
+  final int value1;
+  final int value2;
   final bool isPM;
-  final String timeDifference;
+  final String badgeText;
 
-  const TimeZoneData({
-    required this.location,
-    required this.gmtOffset,
-    required this.date,
-    required this.hour,
-    required this.minute,
+  const DualSliderData({
+    required this.label1,
+    required this.label2,
+    required this.label3,
+    required this.value1,
+    required this.value2,
     required this.isPM,
-    required this.timeDifference,
+    required this.badgeText,
   });
+
+  /// 从 JSON 创建（用于公共小组件系统）
+  factory DualSliderData.fromJson(Map<String, dynamic> json) {
+    return DualSliderData(
+      label1: json['label1'] as String? ?? '',
+      label2: json['label2'] as String? ?? '',
+      label3: json['label3'] as String? ?? '',
+      value1: json['value1'] as int? ?? 0,
+      value2: json['value2'] as int? ?? 0,
+      isPM: json['isPM'] as bool? ?? false,
+      badgeText: json['badgeText'] as String? ?? '',
+    );
+  }
+
+  /// 转换为 JSON（用于公共小组件系统）
+  Map<String, dynamic> toJson() {
+    return {
+      'label1': label1,
+      'label2': label2,
+      'label3': label3,
+      'value1': value1,
+      'value2': value2,
+      'isPM': isPM,
+      'badgeText': badgeText,
+    };
+  }
 }
 
-/// 时区滑块小组件
-class TimeZoneSliderWidget extends StatefulWidget {
-  final String location;
-  final String gmtOffset;
-  final String date;
-  final int hour;
-  final int minute;
-  final bool isPM;
-  final String timeDifference;
+/// 双滑块小组件
+///
+/// 通用的双滑块展示组件，支持自定义标签和数值显示
+/// 适用于各种需要双值对比的场景，如时区对比、进度追踪等
+class DualSliderWidget extends StatefulWidget {
+  /// 第一个标签（通常为主标题，如地点名称）
+  final String label1;
 
-  const TimeZoneSliderWidget({
+  /// 第二个标签（通常为副标题，如偏移量）
+  final String label2;
+
+  /// 第三个标签（通常为日期或附加信息）
+  final String label3;
+
+  /// 第一个数值（通常为小时的十位）
+  final int value1;
+
+  /// 第二个数值（通常为小时的个位或分钟）
+  final int value2;
+
+  /// 是否为下午（PM）
+  final bool isPM;
+
+  /// 徽章文本（如时差信息）
+  final String badgeText;
+
+  /// 进度值（0.0 到 1.0）
+  final double progress;
+
+  const DualSliderWidget({
     super.key,
-    required this.location,
-    required this.gmtOffset,
-    required this.date,
-    required this.hour,
-    required this.minute,
+    required this.label1,
+    required this.label2,
+    required this.label3,
+    required this.value1,
+    required this.value2,
     required this.isPM,
-    required this.timeDifference,
+    required this.badgeText,
+    this.progress = 0.67,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory DualSliderWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return DualSliderWidget(
+      label1: props['label1'] as String? ?? '',
+      label2: props['label2'] as String? ?? '',
+      label3: props['label3'] as String? ?? '',
+      value1: props['value1'] as int? ?? 0,
+      value2: props['value2'] as int? ?? 0,
+      isPM: props['isPM'] as bool? ?? false,
+      badgeText: props['badgeText'] as String? ?? '',
+      progress: (props['progress'] as num?)?.toDouble() ?? 0.67,
+    );
+  }
 
   @override
-  State<TimeZoneSliderWidget> createState() => _TimeZoneSliderWidgetState();
+  State<DualSliderWidget> createState() => _DualSliderWidgetState();
 }
 
-class _TimeZoneSliderWidgetState extends State<TimeZoneSliderWidget>
+class _DualSliderWidgetState extends State<DualSliderWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -131,36 +195,36 @@ class _TimeZoneSliderWidgetState extends State<TimeZoneSliderWidget>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // 顶部：地点和时区信息
-                  _LocationInfo(
-                    location: widget.location,
-                    gmtOffset: widget.gmtOffset,
-                    date: widget.date,
+                  // 顶部：标签信息
+                  _LabelInfo(
+                    label1: widget.label1,
+                    label2: widget.label2,
+                    label3: widget.label3,
                     animation: _animation,
                     isDark: isDark,
                   ),
 
                   // 中间：滑块进度条
                   _SliderTrack(
-                    progress: 0.67,
+                    progress: widget.progress,
                     primaryColor: primaryColor,
                     isDark: isDark,
                     animation: _animation,
                   ),
 
-                  // 底部：时间和时差标签
+                  // 底部：数值和徽章标签
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _TimeDisplay(
-                        hour: widget.hour,
-                        minute: widget.minute,
+                      _ValueDisplay(
+                        value1: widget.value1,
+                        value2: widget.value2,
                         isPM: widget.isPM,
                         animation: _animation,
                         isDark: isDark,
                       ),
-                      _TimeDifferenceBadge(
-                        timeDifference: widget.timeDifference,
+                      _Badge(
+                        badgeText: widget.badgeText,
                         animation: _animation,
                       ),
                     ],
@@ -175,18 +239,18 @@ class _TimeZoneSliderWidgetState extends State<TimeZoneSliderWidget>
   }
 }
 
-/// 地点信息
-class _LocationInfo extends StatelessWidget {
-  final String location;
-  final String gmtOffset;
-  final String date;
+/// 标签信息
+class _LabelInfo extends StatelessWidget {
+  final String label1;
+  final String label2;
+  final String label3;
   final Animation<double> animation;
   final bool isDark;
 
-  const _LocationInfo({
-    required this.location,
-    required this.gmtOffset,
-    required this.date,
+  const _LabelInfo({
+    required this.label1,
+    required this.label2,
+    required this.label3,
     required this.animation,
     required this.isDark,
   });
@@ -209,7 +273,7 @@ class _LocationInfo extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  location,
+                  label1,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
@@ -221,7 +285,7 @@ class _LocationInfo extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      gmtOffset,
+                      label2,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -230,7 +294,7 @@ class _LocationInfo extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      date,
+                      label3,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -369,17 +433,17 @@ class _SliderTrack extends StatelessWidget {
   }
 }
 
-/// 时间显示
-class _TimeDisplay extends StatelessWidget {
-  final int hour;
-  final int minute;
+/// 数值显示
+class _ValueDisplay extends StatelessWidget {
+  final int value1;
+  final int value2;
   final bool isPM;
   final Animation<double> animation;
   final bool isDark;
 
-  const _TimeDisplay({
-    required this.hour,
-    required this.minute,
+  const _ValueDisplay({
+    required this.value1,
+    required this.value2,
     required this.isPM,
     required this.animation,
     required this.isDark,
@@ -415,7 +479,7 @@ class _TimeDisplay extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     AnimatedFlipCounter(
-                      value: hour * itemAnimation.value,
+                      value: value1 * itemAnimation.value,
                       textStyle: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
@@ -442,7 +506,7 @@ class _TimeDisplay extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: AnimatedFlipCounter(
-                        value: minute * itemAnimation.value,
+                        value: value2 * itemAnimation.value,
                         textStyle: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
@@ -464,13 +528,13 @@ class _TimeDisplay extends StatelessWidget {
   }
 }
 
-/// 时差标签
-class _TimeDifferenceBadge extends StatelessWidget {
-  final String timeDifference;
+/// 徽章标签
+class _Badge extends StatelessWidget {
+  final String badgeText;
   final Animation<double> animation;
 
-  const _TimeDifferenceBadge({
-    required this.timeDifference,
+  const _Badge({
+    required this.badgeText,
     required this.animation,
   });
 
@@ -499,7 +563,7 @@ class _TimeDifferenceBadge extends StatelessWidget {
               ],
             ),
             child: Text(
-              timeDifference,
+              badgeText,
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

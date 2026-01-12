@@ -178,6 +178,7 @@ static List<String> _getPendingTasks(Map<String, dynamic> data) {
 | `activityProgressCard` | 活动进度卡片 | `title`, `subtitle`, `value`, `unit`, `activities`, `totalProgress`, `completedProgress` |
 | `halfGaugeCard` | 半圆仪表盘 | `title`, `totalBudget`, `remaining`, `currency` |
 | `taskProgressCard` | 任务进度卡片 | `title`, `subtitle`, `completedTasks`, `totalTasks`, `pendingTasks` |
+| `messageListCard` | 消息列表卡片 | `featuredMessage`, `messages` |
 
 ### Props 说明
 
@@ -222,6 +223,27 @@ static List<String> _getPendingTasks(Map<String, dynamic> data) {
   'completedTasks': int,            // 已完成任务数
   'totalTasks': int,                // 总任务数
   'pendingTasks': List<String>,      // 待办任务列表
+}
+```
+
+#### MessageListCard
+```dart
+{
+  'featuredMessage': {
+    'sender': String,       // 置顶消息发送者
+    'title': String,        // 置顶消息标题
+    'summary': String,      // 置顶消息摘要
+    'avatarUrl': String,    // 置顶消息头像URL
+  },
+  'messages': [
+    {
+      'title': String,      // 消息标题
+      'sender': String,     // 发送者
+      'channel': String,    // 频道/来源
+      'avatarUrl': String,  // 头像URL
+    },
+    // ... 更多消息
+  ],
 }
 ```
 
@@ -428,6 +450,52 @@ static Map<String, Map<String, dynamic>> _provideCommonWidgets(
 }
 ```
 
+### Chat Plugin Example - MessageListCard
+
+```dart
+/// 公共小组件提供者函数 - 聊天插件（消息列表卡片）
+static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+  Map<String, dynamic> data,
+) {
+  final messages = (data['recentMessages'] as List<dynamic>?) ?? [];
+  final pinnedMessage = data['pinnedMessage'] as Map<String, dynamic>?;
+  final channelName = (data['channelName'] as String?) ?? '频道';
+
+  // 构建置顶消息
+  final featuredMsg = pinnedMessage != null
+      ? {
+          'sender': (pinnedMessage['sender'] as String?) ?? '系统',
+          'title': (pinnedMessage['title'] as String?) ?? '置顶消息',
+          'summary': (pinnedMessage['content'] as String?) ?? '',
+          'avatarUrl': (pinnedMessage['avatarUrl'] as String?) ?? '',
+        }
+      : {
+          'sender': '系统',
+          'title': '欢迎来到 $channelName',
+          'summary': '这是您在 $channelName 的最新动态',
+          'avatarUrl': '',
+        };
+
+  // 构建消息列表
+  final messageList = messages.take(4).map((msg) {
+    final msgMap = msg as Map<String, dynamic>;
+    return {
+      'title': (msgMap['title'] as String?) ?? '消息',
+      'sender': (msgMap['sender'] as String?) ?? '未知',
+      'channel': (msgMap['channel'] as String?) ?? channelName,
+      'avatarUrl': (msgMap['avatarUrl'] as String?) ?? '',
+    };
+  }).toList();
+
+  return {
+    'messageListCard': {
+      'featuredMessage': featuredMsg,
+      'messages': messageList,
+    },
+  };
+}
+```
+
 ## Key Concepts
 
 ### 1. commonWidgetsProvider 函数
@@ -484,6 +552,7 @@ final title = (data['title'] as String?) ?? '默认标题';
 | 数值 + 单位 | `activityProgressCard` |
 | 预算/余额 | `halfGaugeCard` |
 | 任务列表 | `taskProgressCard` |
+| 消息列表 | `messageListCard` |
 
 ### 2. Props 命名一致性
 

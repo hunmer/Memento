@@ -1,7 +1,8 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
-/// 多指标进度跟踪卡片示例
+/// 多指标进度卡片示例
 class MultiMetricProgressCardExample extends StatelessWidget {
   const MultiMetricProgressCardExample({super.key});
 
@@ -10,76 +11,41 @@ class MultiMetricProgressCardExample extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('多指标进度跟踪卡片')),
+      appBar: AppBar(title: const Text('多指标进度卡片')),
       body: Container(
-        color: isDark ? Colors.black : const Color(0xFFF2F4F8),
+        color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: MultiMetricProgressCardWidget(
-            title: 'Calories',
-            titleIcon: '🔥',
-            currentValue: 470,
-            targetValue: 1830,
-            unit: 'Cal',
-            remainingText: '1,360 Cal remaining',
-            metrics: [
-              MetricData(
-                icon: '🍔',
-                label: 'Protein',
-                value: 66,
-                maxValue: 110,
-                color: Color(0xFF34D399),
+            trackers: [
+              MetricProgressData(
+                emoji: '🐱',
+                progress: 88.0,
+                progressColor: Color(0xFFFFD60A),
+                title: "Peach's Life",
+                subtitle: 'July 21, 2019 • 321 days',
+                value: 0.88,
+                unit: 'years old',
               ),
-              MetricData(
-                icon: '🍽️',
-                label: 'Fasting',
-                value: 1,
-                maxValue: 16,
-                color: Color(0xFFF87171),
-                isGray: true,
+              MetricProgressData(
+                emoji: '📅',
+                progress: 71.23,
+                progressColor: Color(0xFFFFD60A),
+                title: '2020 Progress',
+                subtitle: '157d/366d • Passed',
+                value: 71.23,
+                unit: '%',
               ),
-              MetricData(
-                icon: '🍪',
-                label: 'Carbs',
-                value: 35,
-                maxValue: 88,
-                color: Color(0xFFFBBF24),
-              ),
-              MetricData(
-                icon: '🥦',
-                label: 'Vegetables',
-                value: 230,
-                maxValue: 287,
-                color: Color(0xFF34D399),
-              ),
-              MetricData(
-                icon: '🥛',
-                label: 'Fats',
-                value: 210,
-                maxValue: 300,
-                color: Color(0xFF60A5FA),
-              ),
-              MetricData(
-                icon: '🍉',
-                label: 'Fruits',
-                value: 130,
-                maxValue: 260,
-                color: Color(0xFFFBBF24),
-              ),
-              MetricData(
-                icon: '🧂',
-                label: 'Sodium',
-                value: 120,
-                maxValue: 2400,
-                color: Color(0xFF9CA3AF),
-              ),
-              MetricData(
-                icon: '🪵',
-                label: 'Fiber',
-                value: 90,
-                maxValue: 1800,
-                color: Color(0xFF9CA3AF),
+              MetricProgressData(
+                emoji: '🏡',
+                progress: 65.5,
+                progressColor: Color(0xFF34C759),
+                title: 'Work from home',
+                subtitle: 'Jan 22, 2020 • Passed',
+                value: 239,
+                unit: 'days',
               ),
             ],
+            backgroundColor: Color(0xFF007AFF),
           ),
         ),
       ),
@@ -87,77 +53,101 @@ class MultiMetricProgressCardExample extends StatelessWidget {
   }
 }
 
-/// 指标数据模型
-class MetricData {
-  /// 图标（Emoji 或图标名称）
-  final String icon;
+/// 指标进度数据模型
+class MetricProgressData {
+  /// Emoji图标
+  final String emoji;
 
-  /// 标签文本
-  final String label;
-
-  /// 当前值
-  final double value;
-
-  /// 最大值（用于计算进度）
-  final double maxValue;
+  /// 进度值 0-100
+  final double progress;
 
   /// 进度条颜色
-  final Color color;
+  final Color progressColor;
 
-  /// 是否使用灰色显示（禁用状态）
-  final bool isGray;
-
-  const MetricData({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.maxValue,
-    required this.color,
-    this.isGray = false,
-  });
-}
-
-/// 多指标进度跟踪小组件
-class MultiMetricProgressCardWidget extends StatefulWidget {
-  /// 标题文本
+  /// 标题
   final String title;
 
-  /// 标题图标（Emoji）
-  final String titleIcon;
+  /// 副标题
+  final String subtitle;
 
-  /// 当前主指标值
-  final double currentValue;
+  /// 数值
+  final double value;
 
-  /// 目标主指标值
-  final double targetValue;
-
-  /// 数值单位
+  /// 单位
   final String unit;
 
-  /// 剩余量文本
-  final String remainingText;
+  const MetricProgressData({
+    required this.emoji,
+    required this.progress,
+    required this.progressColor,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.unit,
+  });
 
-  /// 子指标列表
-  final List<MetricData> metrics;
+  /// 从 JSON 创建（用于公共小组件系统）
+  factory MetricProgressData.fromJson(Map<String, dynamic> json) {
+    return MetricProgressData(
+      emoji: json['emoji'] as String? ?? '',
+      progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
+      progressColor: Color(json['progressColor'] as int? ?? 0xFF000000),
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
+      value: (json['value'] as num?)?.toDouble() ?? 0.0,
+      unit: json['unit'] as String? ?? '',
+    );
+  }
+
+  /// 转换为 JSON（用于公共小组件系统）
+  Map<String, dynamic> toJson() {
+    return {
+      'emoji': emoji,
+      'progress': progress,
+      'progressColor': progressColor.value,
+      'title': title,
+      'subtitle': subtitle,
+      'value': value,
+      'unit': unit,
+    };
+  }
+}
+
+/// 多指标进度卡片小组件
+class MultiMetricProgressCardWidget extends StatefulWidget {
+  /// 追踪器数据列表
+  final List<MetricProgressData> trackers;
+
+  /// 卡片背景色
+  final Color backgroundColor;
 
   const MultiMetricProgressCardWidget({
     super.key,
-    required this.title,
-    required this.titleIcon,
-    required this.currentValue,
-    required this.targetValue,
-    required this.unit,
-    required this.remainingText,
-    required this.metrics,
+    required this.trackers,
+    required this.backgroundColor,
   });
 
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory MultiMetricProgressCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final trackersList = (props['trackers'] as List<dynamic>?)
+            ?.map((e) => MetricProgressData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return MultiMetricProgressCardWidget(
+      trackers: trackersList,
+      backgroundColor: Color(props['backgroundColor'] as int? ?? 0xFF007AFF),
+    );
+  }
+
   @override
-  State<MultiMetricProgressCardWidget> createState() =>
-      _MultiMetricProgressCardWidgetState();
+  State<MultiMetricProgressCardWidget> createState() => _MultiMetricProgressCardWidgetState();
 }
 
-class _MultiMetricProgressCardWidgetState
-    extends State<MultiMetricProgressCardWidget>
+class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -184,303 +174,152 @@ class _MultiMetricProgressCardWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark ? const Color(0xFF2C2D31) : Colors.white;
-    final primaryColor = isDark
-        ? const Color(0xFFFF6B6B)
-        : Theme.of(context).colorScheme.primary;
-    final textColorPrimary =
-        isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
-    final textColorSecondary = const Color(0xFF9CA3AF);
-
-    final progress = widget.currentValue / widget.targetValue;
-
-    return AnimatedBuilder(
-      animation: _animation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: _animation.value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - _animation.value)),
-            child: Container(
-              width: 380,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 40,
-                    offset: const Offset(0, -10),
+    return Container(
+      width: 380,
+      constraints: const BoxConstraints(minWidth: 280),
+      decoration: BoxDecoration(
+        color: widget.backgroundColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: widget.backgroundColor.withOpacity(0.2),
+            blurRadius: 40,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            // 渐变叠加层
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.white.withOpacity(0.1), Colors.transparent],
                   ),
-                ],
+                ),
               ),
+            ),
+            // 追踪器列表
+            Padding(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 主指标部分
-                  _buildMainMetricSection(
-                    isDark: isDark,
-                    primaryColor: primaryColor,
-                    textColorPrimary: textColorPrimary,
-                    textColorSecondary: textColorSecondary,
-                    progress: progress,
-                  ),
-                  const SizedBox(height: 32),
-                  // 子指标网格
-                  _buildMetricsGrid(isDark),
+                  for (int i = 0; i < widget.trackers.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 24),
+                    _MetricProgressItem(
+                      data: widget.trackers[i],
+                      animation: _animation,
+                      index: i,
+                    ),
+                  ],
                 ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildMainMetricSection({
-    required bool isDark,
-    required Color primaryColor,
-    required Color textColorPrimary,
-    required Color textColorSecondary,
-    required double progress,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 标题行
-        Row(
-          children: [
-            Text(
-              widget.titleIcon,
-              style: const TextStyle(fontSize: 18),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: textColorSecondary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        // 数值显示
-        SizedBox(
-          height: 54,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 160,
-                height: 52,
-                child: AnimatedFlipCounter(
-                  value: widget.currentValue * _animation.value,
-                  fractionDigits: 0,
-                  textStyle: TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w800,
-                    color: textColorPrimary,
-                    height: 1.0,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              SizedBox(
-                height: 22,
-                child: Text(
-                  widget.unit,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: textColorPrimary,
-                    height: 1.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        // 进度条
-        Container(
-          height: 12,
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: FractionallySizedBox(
-                widthFactor: progress * _animation.value,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // 剩余量文本
-        Text(
-          widget.remainingText,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: primaryColor.withOpacity(0.9),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetricsGrid(bool isDark) {
-    final backgroundColor =
-        isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 32,
-        mainAxisSpacing: 28,
-        childAspectRatio: 2.8,
       ),
-      itemCount: widget.metrics.length,
-      itemBuilder: (context, index) {
-        final metric = widget.metrics[index];
-
-        // 为每个元素创建延迟动画
-        final itemAnimation = CurvedAnimation(
-          parent: _animationController,
-          curve: Interval(
-            index * 0.08,
-            0.5 + index * 0.08,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-        return _MetricItemWidget(
-          metric: metric,
-          backgroundColor: backgroundColor,
-          animation: itemAnimation,
-          isDark: isDark,
-        );
-      },
     );
   }
 }
 
-/// 子指标项组件
-class _MetricItemWidget extends StatelessWidget {
-  final MetricData metric;
-  final Color backgroundColor;
+/// 单个指标进度项
+class _MetricProgressItem extends StatelessWidget {
+  final MetricProgressData data;
   final Animation<double> animation;
-  final bool isDark;
+  final int index;
 
-  const _MetricItemWidget({
-    required this.metric,
-    required this.backgroundColor,
+  const _MetricProgressItem({
+    required this.data,
     required this.animation,
-    required this.isDark,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
-    final progress = metric.value / metric.maxValue;
-    final textColor =
-        isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827);
-    final displayColor = metric.isGray
-        ? (isDark ? Colors.grey.shade600 : Colors.grey.shade400)
-        : metric.color;
-
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
+        // 为每个项目添加延迟动画
+        final itemAnimation = CurvedAnimation(
+          parent: animation,
+          curve: Interval(
+            index * 0.15,
+            0.6 + index * 0.15,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
         return Opacity(
-          opacity: animation.value,
+          opacity: itemAnimation.value,
           child: Transform.translate(
-            offset: Offset(0, 10 * (1 - animation.value)),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            offset: Offset(0, 20 * (1 - itemAnimation.value)),
+            child: Row(
               children: [
-                // 标签和数值行
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // 图标和标签
-                    Row(
-                      children: [
-                        Text(
-                          metric.icon,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: metric.isGray
-                                ? textColor.withOpacity(0.5)
-                                : textColor,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          metric.label,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: textColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    // 数值
-                    SizedBox(
-                      height: 20,
-                      child: AnimatedFlipCounter(
-                        value: metric.value * animation.value,
-                        fractionDigits: metric.value % 1 != 0 ? 1 : 0,
-                        textStyle: TextStyle(
-                          fontSize: 14,
+                // 带进度条的图标
+                _IconWithProgress(
+                  emoji: data.emoji,
+                  progress: data.progress,
+                  progressColor: data.progressColor,
+                  animation: itemAnimation,
+                ),
+                const SizedBox(width: 16),
+                // 标题和副标题
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
                           fontWeight: FontWeight.w700,
-                          color: displayColor,
-                          height: 1.0,
+                          letterSpacing: -0.5,
                         ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        data.subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.7),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // 数值和单位
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    AnimatedFlipCounter(
+                      value: data.value * itemAnimation.value,
+                      fractionDigits: data.value % 1 != 0 ? 2 : 0,
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.5,
+                        height: 1.0,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      data.unit,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 8),
-                // 进度条
-                Container(
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FractionallySizedBox(
-                        widthFactor: progress * animation.value,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: displayColor,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -488,5 +327,99 @@ class _MetricItemWidget extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// 带进度条的图标
+class _IconWithProgress extends StatelessWidget {
+  final String emoji;
+  final double progress;
+  final Color progressColor;
+  final Animation<double> animation;
+
+  const _IconWithProgress({
+    required this.emoji,
+    required this.progress,
+    required this.progressColor,
+    required this.animation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 56,
+      height: 56,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (context, child) {
+          return CustomPaint(
+            painter: _CircularProgressPainter(
+              progress: progress / 100 * animation.value,
+              progressColor: progressColor,
+              backgroundColor: Colors.white.withOpacity(0.2),
+            ),
+            child: Center(
+              child: Text(emoji, style: const TextStyle(fontSize: 28)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// 圆形进度条绘制器
+class _CircularProgressPainter extends CustomPainter {
+  final double progress;
+  final Color progressColor;
+  final Color backgroundColor;
+
+  _CircularProgressPainter({
+    required this.progress,
+    required this.progressColor,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 2; // 留出边距
+
+    // 背景圆环
+    final backgroundPaint =
+        Paint()
+          ..color = backgroundColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.8
+          ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, backgroundPaint);
+
+    // 进度圆弧
+    if (progress > 0) {
+      final progressPaint =
+          Paint()
+            ..color = progressColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3.8
+            ..strokeCap = StrokeCap.round;
+
+      const startAngle = -90 * 3.14159 / 180; // 从顶部开始
+      final sweepAngle = 2 * 3.14159 * progress;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        false,
+        progressPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.progressColor != progressColor;
   }
 }

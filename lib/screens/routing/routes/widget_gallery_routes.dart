@@ -29,7 +29,7 @@ import 'package:Memento/screens/widgets_gallery/screens/segmented_progress_card_
 import 'package:Memento/screens/widgets_gallery/screens/milestone_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/circular_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/monthly_progress_with_dots_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/multi_tracker_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/multi_metric_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/line_chart_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/article_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_card_example.dart';
@@ -43,7 +43,7 @@ import 'package:Memento/screens/widgets_gallery/screens/ranked_bar_chart_card_ex
 import 'package:Memento/screens/widgets_gallery/screens/smooth_line_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/contribution_heatmap_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/audio_waveform_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/time_zone_slider_widget_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/dual_slider_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/storage_breakdown_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/route_tracking_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/watch_progress_card_example.dart';
@@ -100,7 +100,6 @@ import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/weight_trend_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/account_balance_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/budget_trend_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/multi_metric_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/icon_circular_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/color_tag_task_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/holiday_rental_card_example.dart';
@@ -290,9 +289,9 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '月度进度圆点卡片',
         ),
         RouteDefinition(
-          path: '/widgets_gallery/multi_tracker_card',
-          handler: (settings) => RouteHelpers.createRoute(const MultiTrackerCardExample(), settings: settings),
-          description: '多追踪器卡片',
+          path: '/widgets_gallery/multi_metric_progress_card',
+          handler: (settings) => RouteHelpers.createRoute(const MultiMetricProgressCardExample(), settings: settings),
+          description: '多指标进度卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/line_chart_trend_card',
@@ -360,9 +359,9 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '音频波形小组件',
         ),
         RouteDefinition(
-          path: '/widgets_gallery/time_zone_slider_widget',
-          handler: (settings) => RouteHelpers.createRoute(const TimeZoneSliderWidgetExample(), settings: settings),
-          description: '时区滑块小组件',
+          path: '/widgets_gallery/dual_slider_widget',
+          handler: (settings) => RouteHelpers.createRoute(const DualSliderWidgetExample(), settings: settings),
+          description: '双滑块小组件',
         ),
         RouteDefinition(
           path: '/widgets_gallery/storage_breakdown_widget',
