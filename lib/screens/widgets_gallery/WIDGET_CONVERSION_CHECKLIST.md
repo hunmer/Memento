@@ -1,6 +1,6 @@
 # 桌面小组件转换清单
 
-> 已转换：31/95 | 未转换：62
+> 已转换：49/95 | 未转换：44
 
 最后更新：2026-01-12
 
@@ -39,35 +39,36 @@
 - [x] 支出对比图表 - `expense_comparison_chart` → `expenseComparisonChart`
 - [x] 支出趋势折线图 - `spending_trend_chart` → `spendingTrendChart`
 - [x] 收入趋势卡片 - `revenue_trend_card` → `revenueTrendCard`
+- [x] 投资组合堆叠图 - `portfolio_stacked_chart`
+- [x] 性能指标柱状图 - `performance_bar_chart`
+- [x] 双范围图表统计卡片 - `dual_range_chart_card`
+- [x] 周柱状图卡片 - `weekly_bars_card`
+- [x] 曲线进度卡片 - `curve_progress_card`
+- [x] 屏幕时间统计图表 - `screen_time_chart`
+- [x] 垂直条形图卡片 - `vertical_bar_chart_widget`
+- [x] 每周步数进度卡片 - `weekly_steps_progress_card` → `WeeklyStepsProgressCard`
+- [x] 运输追踪路线卡片 - `route_tracking_card` → `RouteTrackingCardWidget`
+- [x] 周点阵追踪卡片 - `weekly_dot_tracker_card` → `DotTrackerCardWidget` (使用 `DotTrackerCardData` 数据模型，支持 JSON 序列化，已更新示例文件)
+- [x] 体重追踪柱状图卡片 - `weight_tracking_widget` → `WeightTrackingCard` (使用 `WeightTrackingData` 数据模型，支持 JSON 序列化)
+- [x] 观看进度卡片 - `watch_progress_card` → `watchProgressCard`
+- [x] 存储分段小组件 - `storage_breakdown_widget` → `StorageBreakdownCard` (使用 `SegmentedCategory` 数据模型，支持 JSON 序列化)
+- [x] 双数值追踪卡片 - `blood_pressure_tracker_example` → `DualValueTrackerCard` (已更新示例文件)
+- [x] 心情追踪卡片 - `mood_tracker_widget` → `EmotionTrackerCard` (使用 `DailyEmotion` 和 `EmotionType` 数据模型，支持 JSON 序列化)
+- [x] 压力水平监测卡片 - `stress_level_monitor_example` → `LevelMonitorCard` (使用 `WeeklyLevelData` 数据模型，支持 JSON 序列化)
 
 ## ❌ 未转换组件
 
 ### 图表类
-- [ ] 投资组合堆叠图 - `portfolio_stacked_chart`
-- [ ] 性能指标柱状图 - `performance_bar_chart`
-- [ ] 双范围图表统计卡片 - `dual_range_chart_card`
-- [ ] 周柱状图卡片 - `weekly_bars_card`
-- [ ] 曲线进度卡片 - `curve_progress_card`
-- [ ] 屏幕时间统计图表 - `screen_time_chart`
-- [ ] 垂直条形图卡片 - `vertical_bar_chart_widget`
+（暂无待转换的图表类组件）
 
 ### 追踪/健康类（需重命名为通用名称）
-- [ ] 存储分段小组件 - `storage_breakdown_widget` → 建议：分段统计卡片
-- [ ] 运输追踪路线卡片 - `route_tracking_card` → 建议：路线状态卡片
-- [ ] 观看进度卡片 - `watch_progress_card` → 建议：媒体进度卡片
 - [ ] 习惯连续打卡追踪器 - `habit_streak_tracker` → 建议：连续打卡追踪器
-- [ ] 血压追踪器 - `blood_pressure_tracker` → 建议：双数值追踪卡片
-- [ ] 心情追踪卡片 - `mood_tracker_widget` → 建议：情绪追踪卡片
-- [ ] 压力水平监测卡片 - `stress_level_monitor` → 建议：水平监测卡片
-- [ ] 体重追踪柱状图卡片 - `weight_tracking_widget` → 建议：体重追踪卡片
-- [ ] 每周步数进度卡片 - `weekly_steps_progress_card` → 建议：每周进度卡片
-- [ ] 周点阵追踪卡片 - `weekly_dot_tracker_card` → 建议：点阵追踪卡片
 - [ ] 睡眠阶段图表 - `sleep_stage_chart`
 - [ ] 睡眠追踪卡片 - `sleep_tracking_card`
-- [ ] 周睡眠追踪小组件 - `weekly_sleep_tracker`
-- [ ] 睡眠时长统计卡片 - `sleep_duration_card`
+- [x] 周睡眠追踪小组件 - `weekly_sleep_tracker` → `weeklySleepTrackerCard`
+- [x] 睡眠时长统计卡片 - `sleep_duration_card`
 - [ ] 体重趋势图表 - `weight_trend_chart`
-- [ ] 饮水追踪器 - `hydration_tracker_widget` → 建议：每日目标追踪器
+- [x] 饮水追踪器 - `hydration_tracker_widget` → `hydrationTrackerCard`
 
 ### 列表/消息类
 - [ ] 时间线日程卡片 - `timeline_schedule_card`

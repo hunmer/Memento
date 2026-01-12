@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 屏幕时间数据分段
 class ScreenTimeSegment {
@@ -83,22 +82,6 @@ class ScreenTimeChartCardWidget extends StatefulWidget {
     required this.totalMinutes,
     required this.dataPoints,
   });
-
-  /// 从 props 创建实例
-  factory ScreenTimeChartCardWidget.fromProps(
-    Map<String, dynamic> props,
-    HomeWidgetSize size,
-  ) {
-    return ScreenTimeChartCardWidget(
-      avatarUrl: props['avatarUrl'] as String?,
-      totalHours: props['totalHours'] as int? ?? 0,
-      totalMinutes: props['totalMinutes'] as int? ?? 0,
-      dataPoints: (props['dataPoints'] as List<dynamic>?)
-              ?.map((e) => ScreenTimeDataPoint.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-    );
-  }
 
   @override
   State<ScreenTimeChartCardWidget> createState() =>
