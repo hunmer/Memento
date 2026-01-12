@@ -349,7 +349,7 @@ class _DayColumn extends StatelessWidget {
         const SizedBox(height: 12),
         // 特殊事件（仅明天）
         if (!isToday && specialEvent != null) ...[
-          Container(
+          SizedBox(
             height: 56,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
