@@ -58,6 +58,13 @@ class HomeWidgetRegistry {
     return getWidgetsByCategory().keys.toList()..sort();
   }
 
+  /// 获取支持公共小组件的插件小组件列表
+  List<HomeWidget> getWidgetsSupportingCommonWidgets() {
+    return _widgets.values
+        .where((widget) => widget.supportsCommonWidgets)
+        .toList();
+  }
+
   /// 清空所有注册（主要用于测试）
   void clear() {
     _widgets.clear();

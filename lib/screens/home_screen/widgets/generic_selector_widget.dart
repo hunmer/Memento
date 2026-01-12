@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 
 /// 通用选择器小组件
 ///
@@ -52,6 +54,11 @@ class GenericSelectorWidget extends StatelessWidget {
     // 判断是否已配置
     if (selectorConfig == null || !selectorConfig.isConfigured) {
       return _buildUnconfiguredWidget(context);
+    }
+
+    // 检查是否有公共小组件配置
+    if (selectorConfig.usesCommonWidget) {
+      return _buildCommonWidget(context, selectorConfig);
     }
 
     // 恢复 SelectorResult
@@ -124,6 +131,35 @@ class GenericSelectorWidget extends StatelessWidget {
     }
 
     return original;
+  }
+
+  /// 构建公共小组件
+  Widget _buildCommonWidget(
+    BuildContext context,
+    SelectorWidgetConfig selectorConfig,
+  ) {
+    try {
+      final widgetId = selectorConfig.commonWidgetId!;
+      final props = selectorConfig.commonWidgetProps!;
+      final size = config['widgetSize'] as HomeWidgetSize? ??
+          widgetDefinition.defaultSize;
+
+      // 将字符串 ID 转换为枚举值
+      final commonWidgetId = CommonWidgetsRegistry.fromString(widgetId);
+      if (commonWidgetId == null) {
+        return _buildErrorWidget(context, '未知的公共组件: $widgetId');
+      }
+
+      return CommonWidgetBuilder.build(
+        context,
+        commonWidgetId,
+        props,
+        size,
+      );
+    } catch (e) {
+      debugPrint('[GenericSelectorWidget] 构建公共组件失败: $e');
+      return _buildErrorWidget(context, '渲染公共组件失败');
+    }
   }
 
   /// 构建未配置状态的占位小组件
