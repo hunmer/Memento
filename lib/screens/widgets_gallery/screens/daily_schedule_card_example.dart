@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 每日日程卡片示例
 class DailyScheduleCardExample extends StatelessWidget {
@@ -85,6 +86,17 @@ class DailyScheduleCardExample extends StatelessWidget {
 /// 活动颜色枚举
 enum EventColor { orange, green, blue, red, gray }
 
+/// 活动颜色扩展，提供 JSON 序列化支持
+extension EventColorExtension on EventColor {
+  String toJson() => name;
+  static EventColor fromJson(String value) {
+    return EventColor.values.firstWhere(
+      (e) => e.name == value,
+      orElse: () => EventColor.orange,
+    );
+  }
+}
+
 /// 活动数据模型
 class EventData {
   final String title;
@@ -108,6 +120,42 @@ class EventData {
     this.isAllDay = false,
     this.icon,
   });
+
+  /// 从 JSON 创建
+  factory EventData.fromJson(Map<String, dynamic> json) {
+    return EventData(
+      title: json['title'] as String? ?? '',
+      startTime: json['startTime'] as String? ?? '',
+      startPeriod: json['startPeriod'] as String? ?? '',
+      endTime: json['endTime'] as String? ?? '',
+      endPeriod: json['endPeriod'] as String? ?? '',
+      color: EventColorExtension.fromJson(json['color'] as String? ?? 'orange'),
+      location: json['location'] as String?,
+      isAllDay: json['isAllDay'] as bool? ?? false,
+      icon: _parseIcon(json['iconCodePoint'] as int?),
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'startTime': startTime,
+      'startPeriod': startPeriod,
+      'endTime': endTime,
+      'endPeriod': endPeriod,
+      'color': color.toJson(),
+      'location': location,
+      'isAllDay': isAllDay,
+      'iconCodePoint': icon?.codePoint,
+    };
+  }
+
+  /// 解析图标
+  static IconData? _parseIcon(int? codePoint) {
+    if (codePoint == null) return null;
+    return IconData(codePoint, fontFamily: 'MaterialIcons');
+  }
 }
 
 /// 每日日程小组件
@@ -122,6 +170,27 @@ class DailyScheduleCardWidget extends StatefulWidget {
     required this.todayEvents,
     required this.tomorrowEvents,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory DailyScheduleCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final todayEventsList = (props['todayEvents'] as List<dynamic>?)
+            ?.map((e) => EventData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+    final tomorrowEventsList = (props['tomorrowEvents'] as List<dynamic>?)
+            ?.map((e) => EventData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return DailyScheduleCardWidget(
+      todayDate: props['todayDate'] as String? ?? '',
+      todayEvents: todayEventsList,
+      tomorrowEvents: tomorrowEventsList,
+    );
+  }
 
   @override
   State<DailyScheduleCardWidget> createState() =>

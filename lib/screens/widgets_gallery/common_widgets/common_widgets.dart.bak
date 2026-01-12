@@ -20,8 +20,6 @@ import '../screens/vertical_bar_chart_card_example.dart';
 import '../screens/message_list_card_example.dart';
 import '../screens/revenue_trend_card_example.dart';
 import '../screens/dual_slider_widget_example.dart';
-import '../screens/daily_todo_list_widget_example.dart';
-import '../screens/upcoming_tasks_widget_example.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -45,8 +43,6 @@ enum CommonWidgetId {
   watchProgressCard,
   stressLevelMonitor,
   weeklySleepTrackerCard,
-  dailyTodoListCard,
-  upcomingTasksWidget,
 }
 
 /// 公共小组件元数据
@@ -231,22 +227,6 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
-    CommonWidgetId.dailyTodoListCard: CommonWidgetMetadata(
-      id: CommonWidgetId.dailyTodoListCard,
-      name: '每日待办事项卡片',
-      description: '显示日期、时间和待办任务列表，支持任务切换和提醒信息',
-      icon: Icons.check_circle_outline,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
-    ),
-    CommonWidgetId.upcomingTasksWidget: CommonWidgetMetadata(
-      id: CommonWidgetId.upcomingTasksWidget,
-      name: '即将到来的任务小组件',
-      description: '显示任务计数、任务列表和更多任务数量，支持动画效果',
-      icon: Icons.task_alt,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
-    ),
   };
 
   /// 获取元数据
@@ -316,10 +296,6 @@ class CommonWidgetBuilder {
         return StressLevelMonitorWidget.fromProps(props, size);
       case CommonWidgetId.weeklySleepTrackerCard:
         return WeeklySleepTrackerCardWidget.fromProps(props, size);
-      case CommonWidgetId.dailyTodoListCard:
-        return DailyTodoListWidget.fromProps(props, size);
-      case CommonWidgetId.upcomingTasksWidget:
-        return UpcomingTasksWidget.fromProps(props, size);
     }
   }
 }

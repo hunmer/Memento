@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 圆角任务进度小组件示例
 class RoundedTaskProgressWidgetExample extends StatelessWidget {
@@ -73,6 +74,27 @@ class RoundedTaskProgressWidget extends StatefulWidget {
     required this.attachmentCount,
     required this.teamAvatars,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory RoundedTaskProgressWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return RoundedTaskProgressWidget(
+      title: props['title'] as String? ?? '',
+      subtitle: props['subtitle'] as String? ?? '',
+      completedTasks: props['completedTasks'] as int? ?? 0,
+      totalTasks: props['totalTasks'] as int? ?? 0,
+      pendingTasks: (props['pendingTasks'] as List<dynamic>?)
+              ?.cast<String>() ??
+          const [],
+      commentCount: props['commentCount'] as int? ?? 0,
+      attachmentCount: props['attachmentCount'] as int? ?? 0,
+      teamAvatars: (props['teamAvatars'] as List<dynamic>?)
+              ?.cast<String>() ??
+          const [],
+    );
+  }
 
   @override
   State<RoundedTaskProgressWidget> createState() =>
