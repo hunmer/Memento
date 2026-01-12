@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 收入趋势卡片示例
 class RevenueTrendCardExample extends StatelessWidget {
@@ -62,6 +63,28 @@ class RevenueTrendCardWidget extends StatefulWidget {
     required this.dates,
     required this.highlightIndex,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory RevenueTrendCardWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return RevenueTrendCardWidget(
+      value: (props['value'] as num?)?.toDouble() ?? 0.0,
+      currency: props['currency'] as String? ?? '\$',
+      percentage: props['percentage'] as int? ?? 0,
+      period: props['period'] as String? ?? 'Weekly',
+      chartData: (props['chartData'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          [0, 0, 0, 0, 0],
+      dates: (props['dates'] as List<dynamic>?)
+              ?.map((e) => e as int)
+              .toList() ??
+          [1, 2, 3, 4, 5],
+      highlightIndex: props['highlightIndex'] as int? ?? 0,
+    );
+  }
 
   @override
   State<RevenueTrendCardWidget> createState() => _RevenueTrendCardWidgetState();

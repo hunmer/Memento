@@ -15,6 +15,7 @@ import '../screens/contribution_heatmap_card_example.dart';
 import '../screens/smooth_line_chart_card_example.dart';
 import '../screens/vertical_bar_chart_card_example.dart';
 import '../screens/message_list_card_example.dart';
+import '../screens/revenue_trend_card_example.dart';
 import '../screens/dual_slider_widget_example.dart';
 
 /// 公共小组件 ID 枚举
@@ -35,6 +36,7 @@ enum CommonWidgetId {
   messageListCard,
   dualSliderCard,
   earningsTrendCard,
+  revenueTrendCard,
 }
 
 /// 公共小组件元数据
@@ -187,6 +189,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.revenueTrendCard: CommonWidgetMetadata(
+      id: CommonWidgetId.revenueTrendCard,
+      name: '收入趋势卡片',
+      description: '显示收入趋势、货币数值、百分比变化和曲线图，支持日期标签和高亮点',
+      icon: Icons.trending_up,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -248,6 +258,8 @@ class CommonWidgetBuilder {
         return DualSliderWidget.fromProps(props, size);
       case CommonWidgetId.earningsTrendCard:
         return EarningsTrendCardWidget.fromProps(props, size);
+      case CommonWidgetId.revenueTrendCard:
+        return RevenueTrendCardWidget.fromProps(props, size);
     }
   }
 }

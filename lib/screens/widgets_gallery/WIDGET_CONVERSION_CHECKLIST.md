@@ -1,8 +1,8 @@
 # 桌面小组件转换清单
 
-> 已转换：25/95 | 未转换：70
+> 已转换：31/95 | 未转换：62
 
-最后更新：2025-01-12
+最后更新：2026-01-12
 
 ## ✅ 已转换组件
 
@@ -31,24 +31,23 @@
 - [x] 柱状图统计卡片 - `bar_chart_stats_card` → `barChartStatsCard`
 - [x] 每日条形图卡片 - `daily_bar_chart_card` → `dailyBarChartCard`
 - [x] 周条形图卡片 - `weekly_bar_chart_card` → `weeklyBarChartCard`
+- [x] 支出分类环形图 - `expense_donut_chart` → `categoryDonutChartCard` *(已重命名)*
+- [x] 营养进度卡片 - `nutrition_progress_card` → `nutritionProgressCard`
+- [x] 分类堆叠消费卡片 - `category_stack_widget` → `categoryStackCard`
+- [x] 双柱状图统计卡片 - `dual_bar_chart_card` → `dualBarChartCard`
+ - [x] 环形指标卡片 - `circular_metrics_card` → `circularMetricsCard`
+- [x] 支出对比图表 - `expense_comparison_chart` → `expenseComparisonChart`
+- [x] 支出趋势折线图 - `spending_trend_chart` → `spendingTrendChart`
+- [x] 收入趋势卡片 - `revenue_trend_card` → `revenueTrendCard`
 
 ## ❌ 未转换组件
 
 ### 图表类
-- [ ] 支出分类环形图 - `expense_donut_chart`
 - [ ] 投资组合堆叠图 - `portfolio_stacked_chart`
-- [ ] 支出趋势折线图 - `spending_trend_chart`
 - [ ] 性能指标柱状图 - `performance_bar_chart`
 - [ ] 双范围图表统计卡片 - `dual_range_chart_card`
-- [ ] 分类堆叠消费卡片 - `category_stack_widget`
-- [ ] 支出对比图表 - `expense_comparison_chart`
 - [ ] 周柱状图卡片 - `weekly_bars_card`
-- [ ] 双柱状图统计卡片 - `dual_bar_chart_card`
-- [ ] 甜甜圈图统计卡片 - `donut_chart_stats_card`
-- [ ] 环形指标卡片 - `circular_metrics_card`
-- [ ] 营养进度卡片 - `nutrition_progress_card`
 - [ ] 曲线进度卡片 - `curve_progress_card`
-- [ ] 收入趋势卡片 - `revenue_trend_card`
 - [ ] 屏幕时间统计图表 - `screen_time_chart`
 - [ ] 垂直条形图卡片 - `vertical_bar_chart_widget`
 
