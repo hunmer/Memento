@@ -7,6 +7,9 @@ import 'widgets/task_progress_card.dart';
 import 'widgets/audio_waveform_card.dart';
 import 'widgets/line_chart_trend_card.dart';
 import 'widgets/earnings_trend_card.dart';
+import 'widgets/watch_progress_card.dart';
+import 'widgets/weekly_sleep_tracker_card.dart';
+import 'widgets/stress_level_monitor_card.dart';
 import '../screens/segmented_progress_card_example.dart';
 import '../screens/milestone_card_example.dart';
 import '../screens/monthly_progress_with_dots_card_example.dart';
@@ -37,6 +40,9 @@ enum CommonWidgetId {
   dualSliderCard,
   earningsTrendCard,
   revenueTrendCard,
+  watchProgressCard,
+  stressLevelMonitor,
+  weeklySleepTrackerCard,
 }
 
 /// 公共小组件元数据
@@ -197,6 +203,30 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.watchProgressCard: CommonWidgetMetadata(
+      id: CommonWidgetId.watchProgressCard,
+      name: '观看进度卡片',
+      description: '显示用户观看进度、当前/总数和观看项目列表',
+      icon: Icons.play_circle_outline,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.stressLevelMonitor: CommonWidgetMetadata(
+      id: CommonWidgetId.stressLevelMonitor,
+      name: '压力水平监测',
+      description: '显示当前压力分数、状态描述和每周7天的柱状图数据，支持动画效果',
+      icon: Icons.psychology_outlined,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.weeklySleepTrackerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.weeklySleepTrackerCard,
+      name: '每周睡眠追踪',
+      description: '显示总睡眠时长、状态标签和每周7天的进度环，支持动画效果',
+      icon: Icons.bedtime_rounded,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -260,6 +290,12 @@ class CommonWidgetBuilder {
         return EarningsTrendCardWidget.fromProps(props, size);
       case CommonWidgetId.revenueTrendCard:
         return RevenueTrendCardWidget.fromProps(props, size);
+      case CommonWidgetId.watchProgressCard:
+        return WatchProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.stressLevelMonitor:
+        return StressLevelMonitorWidget.fromProps(props, size);
+      case CommonWidgetId.weeklySleepTrackerCard:
+        return WeeklySleepTrackerCardWidget.fromProps(props, size);
     }
   }
 }
