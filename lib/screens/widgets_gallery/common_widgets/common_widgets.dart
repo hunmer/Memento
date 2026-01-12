@@ -48,12 +48,17 @@ import 'widgets/colorful_shortcuts_grid.dart';
 import 'widgets/journal_prompt_card.dart';
 import 'widgets/social_activity_card.dart';
 import 'widgets/icon_circular_progress_card.dart';
+import 'widgets/monthly_bill_card.dart';
+import 'widgets/color_tag_task_card.dart';
+import 'widgets/weather_forecast_card.dart';
+import 'widgets/timeline_status_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
   circularProgressCard,
   socialActivityCard,
   iconCircularProgressCard,
+  colorTagTaskCard,
   activityProgressCard,
   halfGaugeCard,
   taskProgressCard,
@@ -99,6 +104,9 @@ enum CommonWidgetId {
   dailyReflectionCard,
   colorfulShortcutsGrid,
   journalPromptCard,
+  monthlyBillCard,
+  weatherForecastCard,
+  timelineStatusCard,
 }
 
 /// 公共小组件元数据
@@ -138,6 +146,14 @@ class CommonWidgetsRegistry {
       icon: Icons.control_point_duplicate,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.colorTagTaskCard: CommonWidgetMetadata(
+      id: CommonWidgetId.colorTagTaskCard,
+      name: '彩色标签任务列表卡片',
+      description: '显示带彩色标签的任务列表，支持翻转计数动画和入场效果',
+      icon: Icons.label,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
     ),
     CommonWidgetId.activityProgressCard: CommonWidgetMetadata(
       id: CommonWidgetId.activityProgressCard,
@@ -492,6 +508,30 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.monthlyBillCard: CommonWidgetMetadata(
+      id: CommonWidgetId.monthlyBillCard,
+      name: '月度账单卡片',
+      description: '显示月度账单信息，包括收入、支出和结余，支持翻转计数动画和入场效果',
+      icon: Icons.receipt_long,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.weatherForecastCard: CommonWidgetMetadata(
+      id: CommonWidgetId.weatherForecastCard,
+      name: '天气预报卡片',
+      description: '显示城市天气、温度信息和温度趋势图，支持翻转计数动画和入场效果',
+      icon: Icons.cloud,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.timelineStatusCard: CommonWidgetMetadata(
+      id: CommonWidgetId.timelineStatusCard,
+      name: '时间线状态卡片',
+      description: '显示位置、标题、描述和时间线进度，支持动画效果和网格背景',
+      icon: Icons.timeline,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -525,6 +565,8 @@ class CommonWidgetBuilder {
         return CircularProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.iconCircularProgressCard:
         return IconCircularProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.colorTagTaskCard:
+        return ColorTagTaskCardWidget.fromProps(props, size);
       case CommonWidgetId.activityProgressCard:
         return ActivityProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.halfGaugeCard:
@@ -618,6 +660,12 @@ class CommonWidgetBuilder {
         return JournalPromptCardWidget.fromProps(props, size);
       case CommonWidgetId.socialActivityCard:
         return SocialActivityCardWidget.fromProps(props, size);
+      case CommonWidgetId.monthlyBillCard:
+        return MonthlyBillCardWidget.fromProps(props, size);
+      case CommonWidgetId.weatherForecastCard:
+        return WeatherForecastCard.fromProps(props, size);
+      case CommonWidgetId.timelineStatusCard:
+        return TimelineStatusCardWidget.fromProps(props, size);
     }
   }
 }
