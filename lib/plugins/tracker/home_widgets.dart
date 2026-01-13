@@ -73,6 +73,10 @@ class TrackerHomeWidgets {
         dataRenderer: _renderGoalData,
         navigationHandler: _navigateToGoalDetail,
         dataSelector: _extractGoalData,
+
+        // 公共小组件提供者
+        commonWidgetsProvider: _provideCommonWidgets,
+
         builder:
             (context, config) => GenericSelectorWidget(
               widgetDefinition: registry.getWidget('tracker_goal_selector')!,
@@ -80,6 +84,192 @@ class TrackerHomeWidgets {
             ),
       ),
     );
+  }
+
+  /// 公共小组件提供者函数
+  static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+    Map<String, dynamic> data,
+  ) {
+    // data 包含：id, name, icon, iconColor, currentValue, targetValue, unitType
+    final name = (data['name'] as String?) ?? '目标';
+    final currentValue = (data['currentValue'] as double?) ?? 0.0;
+    final targetValue = (data['targetValue'] as double?) ?? 1.0;
+    final unitType = (data['unitType'] as String?) ?? '';
+    final progress = (targetValue > 0 ? (currentValue / targetValue) : 0).clamp(0.0, 1.0);
+    final percentage = (progress * 100).toInt();
+
+    return {
+      // 圆形进度卡片：显示目标完成度
+      'circularProgressCard': {
+        'title': name,
+        'subtitle': '已完 $currentValue / $targetValue $unitType',
+        'percentage': percentage.toDouble(),
+        'progress': progress,
+      },
+
+      // 活动进度卡片：显示目标统计
+      'activityProgressCard': {
+        'title': name,
+        'subtitle': '今日进度',
+        'value': currentValue,
+        'unit': unitType,
+        'activities': 1,
+        'totalProgress': 10,
+        'completedProgress': (percentage / 10).clamp(0, 10).toInt(),
+      },
+
+      // 任务进度卡片：显示目标进度
+      'taskProgressCard': {
+        'title': name,
+        'subtitle': '目标进度',
+        'completedTasks': percentage ~/ 5,
+        'totalTasks': 20,
+        'pendingTasks': _getPendingMilestones(currentValue, targetValue, unitType),
+      },
+
+      // 里程碑卡片：显示目标追踪
+      'milestoneCard': {
+        'imageUrl': null,
+        'title': name,
+        'date': _formatDate(DateTime.now()),
+        'daysCount': percentage,
+        'value': currentValue.toStringAsFixed(1),
+        'unit': unitType,
+        'suffix': '/ $targetValue',
+      },
+
+      // 现代健康指标卡片
+      'modernEgfrHealthWidget': {
+        'title': name,
+        'value': currentValue,
+        'unit': unitType,
+        'date': _formatDate(DateTime.now()),
+        'status': percentage >= 100 ? '已完成' : '进行中',
+        'icon': 0xe25b, // Icons.track_changes codePoint
+      },
+
+      // 图标圆形进度卡片
+      'iconCircularProgressCard': {
+        'progress': progress,
+        'icon': 0xe25b, // Icons.track_changes codePoint
+        'title': name,
+        'subtitle': '已完 $currentValue / $targetValue $unitType',
+        'showNotification': false,
+      },
+
+      // 半仪表盘卡片
+      'halfGaugeCard': {
+        'title': name,
+        'totalBudget': targetValue,
+        'remaining': (targetValue - currentValue).clamp(0, double.infinity),
+        'currency': unitType,
+      },
+
+      // 分段进度条卡片
+      'segmentedProgressCard': {
+        'title': name,
+        'currentValue': currentValue,
+        'targetValue': targetValue,
+        'segments': _generateSegments(currentValue, targetValue),
+        'unit': unitType,
+      },
+
+      // 月度进度点卡片
+      'monthlyProgressDotsCard': {
+        'month': '${DateTime.now().month}月',
+        'currentDay': DateTime.now().day,
+        'totalDays': _daysInMonth(DateTime.now()),
+        'percentage': percentage,
+      },
+
+      // 多指标进度卡片
+      'multiMetricProgressCard': {
+        'metrics': _generateMetrics(currentValue, targetValue, unitType, percentage),
+      },
+    };
+  }
+
+  /// 生成分段数据
+  static List<Map<String, dynamic>> _generateSegments(
+    double current,
+    double target,
+  ) {
+    final segmentValue = (target / 5).ceilToDouble(); // 分成5段
+
+    return List.generate(5, (index) {
+      final segmentTarget = (index + 1) * segmentValue;
+      final segmentProgress = ((current / segmentTarget).clamp(0.0, 1.0) * 100).toInt();
+      return {
+        'label': '${index + 1}级',
+        'progress': segmentProgress,
+        'color': 0xFF4CAF50, // 绿色
+      };
+    });
+  }
+
+  /// 生成多指标数据
+  static List<Map<String, dynamic>> _generateMetrics(
+    double current,
+    double target,
+    String unit,
+    int percentage,
+  ) {
+    return [
+      {
+        'emoji': '🎯',
+        'progress': percentage.toDouble() / 100,
+        'progressColor': 0xFF4CAF50,
+        'title': '当前进度',
+        'subtitle': '$current / $target',
+        'value': current,
+        'unit': unit,
+      },
+      {
+        'emoji': '📊',
+        'progress': (percentage / 100).clamp(0.0, 1.0),
+        'progressColor': 0xFF2196F3,
+        'title': '完成率',
+        'subtitle': '已完成',
+        'value': percentage.toDouble(),
+        'unit': '%',
+      },
+      {
+        'emoji': '⏳',
+        'progress': ((target - current).clamp(0, double.infinity) / target).clamp(0.0, 1.0),
+        'progressColor': 0xFFFF9800,
+        'title': '剩余',
+        'subtitle': '还需努力',
+        'value': (target - current).clamp(0, double.infinity),
+        'unit': unit,
+      },
+    ];
+  }
+
+  /// 获取当月天数
+  static int _daysInMonth(DateTime date) {
+    final nextMonth = DateTime(date.year, date.month + 1, 1);
+    final lastDayOfCurrentMonth = nextMonth.subtract(const Duration(days: 1));
+    return lastDayOfCurrentMonth.day;
+  }
+
+  /// 获取待完成的里程碑列表
+  static List<String> _getPendingMilestones(
+    double current,
+    double target,
+    String unit,
+  ) {
+    final remaining = (target - current).clamp(0, double.infinity);
+    if (remaining <= 0) return ['🎉 已达成目标'];
+
+    return [
+      '还需 $remaining ${unit.isNotEmpty ? unit : "单位"}',
+      '进度: ${((current / target) * 100).toStringAsFixed(0)}%',
+    ];
+  }
+
+  /// 格式化日期
+  static String _formatDate(DateTime date) {
+    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
   }
 
   /// 从选择器数据数组中提取小组件需要的数据
