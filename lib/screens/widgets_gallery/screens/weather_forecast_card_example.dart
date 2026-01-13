@@ -1,5 +1,4 @@
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/weather_forecast_card.dart';
-import 'package:Memento/widgets/common/index.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 

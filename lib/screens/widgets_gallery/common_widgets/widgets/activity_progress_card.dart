@@ -80,6 +80,7 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Container(
+            width: 300,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,

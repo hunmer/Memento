@@ -134,6 +134,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
+              width: 250,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -295,22 +296,6 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                 ],
               ),
             ],
-          ),
-        ),
-        // 设置按钮（可选，可以改为自定义图标按钮）
-        SizedBox(
-          width: 40,
-          height: 40,
-          child: Container(
-            decoration: BoxDecoration(
-              color: buttonBgColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.settings,
-              color: iconColor,
-              size: 20,
-            ),
           ),
         ),
       ],
