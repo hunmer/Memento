@@ -52,6 +52,14 @@ import 'widgets/monthly_bill_card.dart';
 import 'widgets/color_tag_task_card.dart';
 import 'widgets/weather_forecast_card.dart';
 import 'widgets/timeline_status_card.dart';
+import 'widgets/spending_trend_chart.dart';
+import 'widgets/modern_rounded_mood_widget.dart';
+import 'widgets/daily_schedule_card.dart';
+import 'widgets/article_list_card.dart';
+import 'widgets/event_calendar_widget.dart';
+import 'widgets/rounded_task_progress_widget.dart';
+import 'widgets/dual_range_chart_card.dart';
+import 'widgets/daily_bar_chart_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -107,6 +115,14 @@ enum CommonWidgetId {
   monthlyBillCard,
   weatherForecastCard,
   timelineStatusCard,
+  spendingTrendChart,
+  modernRoundedMoodWidget,
+  dailyScheduleCard,
+  articleListCard,
+  eventCalendarWidget,
+  roundedTaskProgressWidget,
+  dualRangeChartCard,
+  dailyBarChartCard,
 }
 
 /// 公共小组件元数据
@@ -532,6 +548,70 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.medium,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.spendingTrendChart: CommonWidgetMetadata(
+      id: CommonWidgetId.spendingTrendChart,
+      name: '支出趋势折线图',
+      description: '显示支出趋势对比的折线图卡片，支持当前月与上月对比、预算线显示和平滑曲线动画',
+      icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.modernRoundedMoodWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.modernRoundedMoodWidget,
+      name: '现代化心情追踪',
+      description: '周视图柱状图显示每日心情值，支持积极/消极情绪区分、7天心情历史和当前日期高亮',
+      icon: Icons.sentiment_satisfied_alt,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.dailyScheduleCard: CommonWidgetMetadata(
+      id: CommonWidgetId.dailyScheduleCard,
+      name: '每日日程卡片',
+      description: '显示日期、今日活动和明日活动列表，支持时间活动和全天活动',
+      icon: Icons.event,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.articleListCard: CommonWidgetMetadata(
+      id: CommonWidgetId.articleListCard,
+      name: '文章列表卡片',
+      description: '显示特色文章和普通文章列表，支持图片展示和动画效果',
+      icon: Icons.article,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.eventCalendarWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.eventCalendarWidget,
+      name: '日历事件小组件',
+      description: '显示日期、周日历和事件列表，支持活动计数和提醒信息',
+      icon: Icons.calendar_today,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.roundedTaskProgressWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.roundedTaskProgressWidget,
+      name: '圆角任务进度小组件',
+      description: '显示项目标题、进度条、待办任务列表、评论数、附件数和团队成员头像',
+      icon: Icons.task_alt,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.dualRangeChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.dualRangeChartCard,
+      name: '双范围图表统计卡片',
+      description: '显示双范围柱状图，支持日期选择、周视图和范围汇总数据',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.dailyBarChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.dailyBarChartCard,
+      name: '每日条形图卡片',
+      description: '显示每日数据条形图，支持标题、副标题、数值显示和多种颜色',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -665,6 +745,22 @@ class CommonWidgetBuilder {
         return WeatherForecastCard.fromProps(props, size);
       case CommonWidgetId.timelineStatusCard:
         return TimelineStatusCardWidget.fromProps(props, size);
+      case CommonWidgetId.spendingTrendChart:
+        return SpendingTrendChartWidget.fromProps(props, size);
+      case CommonWidgetId.modernRoundedMoodWidget:
+        return ModernRoundedMoodWidget.fromProps(props, size);
+      case CommonWidgetId.dailyScheduleCard:
+        return DailyScheduleCardWidget.fromProps(props, size);
+      case CommonWidgetId.articleListCard:
+        return ArticleListCardWidget.fromProps(props, size);
+      case CommonWidgetId.eventCalendarWidget:
+        return EventCalendarWidget.fromProps(props, size);
+      case CommonWidgetId.roundedTaskProgressWidget:
+        return RoundedTaskProgressWidget.fromProps(props, size);
+      case CommonWidgetId.dualRangeChartCard:
+        return DualRangeChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.dailyBarChartCard:
+        return DailyBarChartCardWidget.fromProps(props, size);
     }
   }
 }
