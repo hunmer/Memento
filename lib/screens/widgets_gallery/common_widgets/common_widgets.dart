@@ -72,6 +72,7 @@ import 'widgets/rounded_property_card.dart';
 import 'widgets/task_list_stat_card.dart';
 import 'widgets/vertical_property_card.dart';
 import 'widgets/task_progress_list.dart';
+import 'widgets/medication_tracker_widget.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -147,6 +148,7 @@ enum CommonWidgetId {
   taskListStatCard,
   verticalPropertyCard,
   taskProgressList,
+  medicationTrackerWidget,
 }
 
 /// 公共小组件元数据
@@ -732,6 +734,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.medicationTrackerWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.medicationTrackerWidget,
+      name: '药物追踪器',
+      description: '显示药物数量和进度，带胶囊形状进度条',
+      icon: Icons.medication_outlined,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -905,6 +915,8 @@ class CommonWidgetBuilder {
         return VerticalPropertyCardWidget.fromProps(props, size);
       case CommonWidgetId.taskProgressList:
         return TaskProgressListWidget.fromProps(props, size);
+      case CommonWidgetId.medicationTrackerWidget:
+        return MedicationTrackerWidget.fromProps(props, size);
     }
   }
 }
