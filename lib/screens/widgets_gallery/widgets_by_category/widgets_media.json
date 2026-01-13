@@ -1,0 +1,144 @@
+{
+  "version": "1.0.0",
+  "description": "媒体类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "media",
+    "name": "媒体类",
+    "description": "音频、视频等媒体相关组件"
+  },
+  "widgets": [
+    {
+      "name": "AudioWaveformCardWidget",
+      "displayName": "音频波形小组件",
+      "description": "音频录制信息卡片，含波形可视化动画",
+      "category": "media",
+      "file": "audio_waveform_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "音频标题"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "录制日期"
+        },
+        {
+          "name": "duration",
+          "type": "Duration",
+          "required": true,
+          "description": "音频时长",
+          "note": "fromProps 中使用 durationInSeconds (int) 参数"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "主题色"
+        }
+      ]
+    },
+    {
+      "name": "MusicPlayerCardWidget",
+      "displayName": "音乐播放器卡片",
+      "description": "显示专辑封面、歌词、播放进度和控制按钮",
+      "category": "media",
+      "file": "music_player_card.dart",
+      "parameters": [
+        {
+          "name": "albumArtUrl",
+          "type": "String",
+          "required": true,
+          "description": "专辑封面 URL"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "歌曲标题"
+        },
+        {
+          "name": "lyrics",
+          "type": "List<String>",
+          "required": true,
+          "description": "歌词列表"
+        },
+        {
+          "name": "currentPosition",
+          "type": "int",
+          "required": true,
+          "description": "当前播放位置（秒）"
+        },
+        {
+          "name": "totalDuration",
+          "type": "int",
+          "required": true,
+          "description": "总时长（秒）"
+        },
+        {
+          "name": "isPlaying",
+          "type": "bool",
+          "required": false,
+          "default": "true",
+          "description": "是否正在播放"
+        }
+      ]
+    },
+    {
+      "name": "AudioWaveformCardWidget",
+      "displayName": "音频波形卡片",
+      "description": "显示音频录制信息和波形可视化",
+      "category": "media",
+      "file": "audio_waveform_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "音频标题"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "录制日期"
+        },
+        {
+          "name": "durationInSeconds",
+          "type": "int",
+          "required": true,
+          "description": "音频时长（秒数）"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "description": "主题色（可选）"
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}

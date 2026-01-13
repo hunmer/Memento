@@ -1,0 +1,341 @@
+{
+  "version": "1.0.0",
+  "description": "工具类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "utility",
+    "name": "工具类",
+    "description": "通用工具组件"
+  },
+  "widgets": [
+    {
+      "name": "DualSliderWidget",
+      "displayName": "双滑块小组件",
+      "description": "通用双滑块数值显示组件，适用于时区对比等场景",
+      "category": "utility",
+      "file": "dual_slider_widget.dart",
+      "parameters": [
+        {
+          "name": "label1",
+          "type": "String",
+          "required": true,
+          "description": "第一个标签 (主标题，如地点名称)"
+        },
+        {
+          "name": "label2",
+          "type": "String",
+          "required": true,
+          "description": "第二个标签 (副标题，如偏移量)"
+        },
+        {
+          "name": "label3",
+          "type": "String",
+          "required": true,
+          "description": "第三个标签 (日期或附加信息)"
+        },
+        {
+          "name": "value1",
+          "type": "int",
+          "required": true,
+          "description": "第一个数值 (如小时的十位)"
+        },
+        {
+          "name": "value2",
+          "type": "int",
+          "required": true,
+          "description": "第二个数值 (如小时的个位或分钟)"
+        },
+        {
+          "name": "isPM",
+          "type": "bool",
+          "required": true,
+          "description": "是否为下午 (PM)"
+        },
+        {
+          "name": "badgeText",
+          "type": "String",
+          "required": true,
+          "description": "徽章文本 (如时差信息)"
+        },
+        {
+          "name": "progress",
+          "type": "double",
+          "required": false,
+          "defaultValue": 0.67,
+          "description": "进度值 (0.0 到 1.0)"
+        }
+      ]
+    },
+    {
+      "name": "ScoreCardWidget",
+      "displayName": "分数卡片",
+      "description": "显示分数、等级和行为列表",
+      "category": "utility",
+      "file": "score_card_widget.dart",
+      "parameters": [
+        {
+          "name": "score",
+          "type": "int",
+          "required": true,
+          "description": "分数"
+        },
+        {
+          "name": "grade",
+          "type": "String",
+          "required": true,
+          "description": "等级"
+        },
+        {
+          "name": "actions",
+          "type": "List<ActionData>",
+          "required": true,
+          "description": "行为数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "行为标签"
+            },
+            {
+              "name": "value",
+              "type": "int",
+              "description": "变化值"
+            },
+            {
+              "name": "isPositive",
+              "type": "bool",
+              "description": "是否为正向变化"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ColorfulShortcutsGridWidget",
+      "displayName": "彩色快捷方式网格",
+      "description": "可配置列数、间距的快捷方式网格",
+      "category": "utility",
+      "file": "colorful_shortcuts_grid.dart",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "ColorfulShortcutsGridData",
+          "required": true,
+          "description": "网格数据",
+          "subParameters": [
+            {
+              "name": "shortcuts",
+              "type": "List<ShortcutItemData>",
+              "description": "快捷方式列表",
+              "subParameters": [
+                {
+                  "name": "iconName",
+                  "type": "String",
+                  "description": "图标名称（Material Icons）"
+                },
+                {
+                  "name": "label",
+                  "type": "String",
+                  "description": "标签文本"
+                },
+                {
+                  "name": "color",
+                  "type": "int",
+                  "description": "背景颜色（ARGB int）"
+                },
+                {
+                  "name": "iconTransform",
+                  "type": "List<double>?",
+                  "description": "图标变换矩阵（可选，16个浮点数）"
+                }
+              ]
+            },
+            {
+              "name": "columns",
+              "type": "int",
+              "description": "列数（默认2）"
+            },
+            {
+              "name": "itemHeight",
+              "type": "double",
+              "description": "项目高度（默认100）"
+            },
+            {
+              "name": "spacing",
+              "type": "double",
+              "description": "间距（默认14）"
+            },
+            {
+              "name": "borderRadius",
+              "type": "double",
+              "description": "边框圆角（默认40）"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WeatherForecastCard",
+      "displayName": "天气预报卡片",
+      "description": "展示城市天气信息和温度趋势的卡片",
+      "category": "utility",
+      "file": "weather_forecast_card.dart",
+      "parameters": [
+        {
+          "name": "cityName",
+          "type": "String",
+          "required": true,
+          "description": "城市名称"
+        },
+        {
+          "name": "weatherDescription",
+          "type": "String",
+          "required": true,
+          "description": "天气描述"
+        },
+        {
+          "name": "currentTemp",
+          "type": "double",
+          "required": true,
+          "description": "当前温度"
+        },
+        {
+          "name": "lowTemp",
+          "type": "double",
+          "required": true,
+          "description": "最低温度"
+        },
+        {
+          "name": "temperatureHistory",
+          "type": "List<double>",
+          "required": true,
+          "description": "温度历史数据（用于绘制柱状图）"
+        }
+      ]
+    },
+    {
+      "name": "TimelineStatusCardWidget",
+      "displayName": "时间线状态卡片",
+      "description": "用于显示时间线进度和状态信息",
+      "category": "utility",
+      "file": "timeline_status_card.dart",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "TimelineStatusCardData",
+          "required": true,
+          "description": "时间线状态卡片数据",
+          "subParameters": [
+            {
+              "name": "location",
+              "type": "String",
+              "description": "位置名称"
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "description": "主标题"
+            },
+            {
+              "name": "description",
+              "type": "String",
+              "description": "描述文本"
+            },
+            {
+              "name": "progressPercent",
+              "type": "double",
+              "description": "进度百分比 (0.0 - 1.0)"
+            },
+            {
+              "name": "currentTimeLabel",
+              "type": "String",
+              "description": "当前时间标签"
+            },
+            {
+              "name": "timeLabels",
+              "type": "List<String>",
+              "description": "时间标签列表"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DualSliderWidget",
+      "displayName": "双滑块小组件",
+      "description": "显示双滑块进度条，适用于时区对比、进度追踪等场景",
+      "category": "utility",
+      "file": "dual_slider_widget.dart",
+      "parameters": [
+        {
+          "name": "label1",
+          "type": "String",
+          "required": true,
+          "description": "第一个标签（主标题）"
+        },
+        {
+          "name": "label2",
+          "type": "String",
+          "required": true,
+          "description": "第二个标签（副标题）"
+        },
+        {
+          "name": "label3",
+          "type": "String",
+          "required": true,
+          "description": "第三个标签（日期或附加信息）"
+        },
+        {
+          "name": "value1",
+          "type": "int",
+          "required": true,
+          "description": "第一个数值（小时的十位）"
+        },
+        {
+          "name": "value2",
+          "type": "int",
+          "required": true,
+          "description": "第二个数值（小时的个位或分钟）"
+        },
+        {
+          "name": "isPM",
+          "type": "bool",
+          "required": true,
+          "description": "是否为下午（PM）"
+        },
+        {
+          "name": "badgeText",
+          "type": "String",
+          "required": true,
+          "description": "徽章文本（如时差信息）"
+        },
+        {
+          "name": "progress",
+          "type": "double",
+          "required": false,
+          "defaultValue": "0.67",
+          "description": "进度值（0.0 - 1.0）"
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}

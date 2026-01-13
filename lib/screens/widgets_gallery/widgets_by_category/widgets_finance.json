@@ -1,0 +1,548 @@
+{
+  "version": "1.0.0",
+  "description": "财务类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "finance",
+    "name": "财务类",
+    "description": "钱包、账单等财务相关组件"
+  },
+  "widgets": [
+    {
+      "name": "WalletBalanceCardWidget",
+      "displayName": "钱包余额概览卡片",
+      "description": "钱包余额与收支统计卡片，含操作按钮",
+      "category": "finance",
+      "file": "wallet_balance_card.dart",
+      "parameters": [
+        {
+          "name": "avatarUrl",
+          "type": "String",
+          "required": true,
+          "description": "头像图片 URL"
+        },
+        {
+          "name": "availableBalance",
+          "type": "double",
+          "required": true,
+          "description": "可用余额"
+        },
+        {
+          "name": "totalBalance",
+          "type": "double",
+          "required": true,
+          "description": "总余额"
+        },
+        {
+          "name": "changePercent",
+          "type": "int",
+          "required": true,
+          "description": "变化百分比"
+        },
+        {
+          "name": "income",
+          "type": "double",
+          "required": true,
+          "description": "收入"
+        },
+        {
+          "name": "expenses",
+          "type": "double",
+          "required": true,
+          "description": "支出"
+        }
+      ]
+    },
+    {
+      "name": "EarningsTrendCardWidget",
+      "displayName": "收益趋势卡片",
+      "description": "收益趋势展示卡片，含折线图和百分比变化",
+      "category": "finance",
+      "file": "earnings_trend_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题文本"
+        },
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "主要数值"
+        },
+        {
+          "name": "currency",
+          "type": "String",
+          "required": true,
+          "description": "货币符号"
+        },
+        {
+          "name": "percentage",
+          "type": "double",
+          "required": true,
+          "description": "变化百分比"
+        },
+        {
+          "name": "chartData",
+          "type": "List<double>",
+          "required": true,
+          "description": "图表数据点 (Y坐标值，0-120范围)"
+        }
+      ]
+    },
+    {
+      "name": "ExpenseComparisonChartCardWidget",
+      "displayName": "支出对比图表卡片",
+      "description": "支出对比展示卡片，支持上月与本月数据对比",
+      "category": "finance",
+      "file": "expense_comparison_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题文本"
+        },
+        {
+          "name": "currentAmount",
+          "type": "double",
+          "required": true,
+          "description": "本月金额"
+        },
+        {
+          "name": "changePercent",
+          "type": "double",
+          "required": true,
+          "description": "变化百分比"
+        },
+        {
+          "name": "dailyData",
+          "type": "List<DailyExpenseDataModel>",
+          "required": true,
+          "description": "日数据列表",
+          "subParameters": [
+            {
+              "name": "lastMonth",
+              "type": "double",
+              "description": "上月数据"
+            },
+            {
+              "name": "currentMonth",
+              "type": "double",
+              "description": "本月数据"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SpendingTrendChartWidget",
+      "displayName": "支出趋势折线图",
+      "description": "支出趋势对比折线图，支持当前月与上月对比、预算线显示",
+      "category": "finance",
+      "file": "spending_trend_chart.dart",
+      "parameters": [
+        {
+          "name": "dateRange",
+          "type": "String",
+          "required": true,
+          "description": "日期范围文本"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "currentMonthLabel",
+          "type": "String",
+          "required": true,
+          "description": "当前月标签"
+        },
+        {
+          "name": "previousMonthLabel",
+          "type": "String",
+          "required": true,
+          "description": "上月标签"
+        },
+        {
+          "name": "budgetAmount",
+          "type": "double",
+          "required": true,
+          "description": "预算金额"
+        },
+        {
+          "name": "budgetLabel",
+          "type": "String",
+          "required": true,
+          "description": "预算标签"
+        },
+        {
+          "name": "startLabel",
+          "type": "String",
+          "required": true,
+          "description": "X轴开始标签"
+        },
+        {
+          "name": "middleLabel",
+          "type": "String",
+          "required": true,
+          "description": "X轴中间标签"
+        },
+        {
+          "name": "endLabel",
+          "type": "String",
+          "required": true,
+          "description": "X轴结束标签"
+        },
+        {
+          "name": "currentMonthData",
+          "type": "List<double>",
+          "required": true,
+          "description": "当前月数据点"
+        },
+        {
+          "name": "previousMonthData",
+          "type": "List<double>",
+          "required": true,
+          "description": "上月数据点"
+        },
+        {
+          "name": "currentPoint",
+          "type": "double",
+          "required": true,
+          "description": "当前点值"
+        },
+        {
+          "name": "maxAmount",
+          "type": "double",
+          "required": true,
+          "description": "最大金额（用于Y轴缩放）"
+        }
+      ]
+    },
+    {
+      "name": "ModernRoundedSpendingWidget",
+      "displayName": "现代圆角消费卡片",
+      "description": "显示当前消费、预算、分类进度条和分类列表",
+      "category": "finance",
+      "file": "modern_rounded_spending_widget.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "currentSpending",
+          "type": "double",
+          "required": true,
+          "description": "当前消费金额"
+        },
+        {
+          "name": "budget",
+          "type": "double",
+          "required": true,
+          "description": "预算金额"
+        },
+        {
+          "name": "categories",
+          "type": "List<SpendingCategory>",
+          "required": true,
+          "description": "消费分类列表",
+          "subParameters": [
+            {
+              "name": "name",
+              "type": "String",
+              "description": "分类名称"
+            },
+            {
+              "name": "amount",
+              "type": "double",
+              "description": "金额"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分类颜色"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BudgetTrendCardWidget",
+      "displayName": "预算趋势卡片",
+      "description": "带迷你曲线图的数值展示卡片，支持前缀后缀、变化百分比和更新时间",
+      "category": "finance",
+      "file": "budget_trend_card.dart",
+      "parameters": [
+        {
+          "name": "label",
+          "type": "String",
+          "required": true,
+          "description": "卡片标签（如 Budget、Expense）"
+        },
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "数值"
+        },
+        {
+          "name": "valuePrefix",
+          "type": "String",
+          "required": false,
+          "default": "''",
+          "description": "数值前缀（如 $、¥）"
+        },
+        {
+          "name": "valueSuffix",
+          "type": "String",
+          "required": false,
+          "default": "''",
+          "description": "数值后缀（如 %）"
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "required": true,
+          "description": "描述文本"
+        },
+        {
+          "name": "chartData",
+          "type": "List<double>",
+          "required": true,
+          "description": "图表数据（Y坐标值，0-100范围）"
+        },
+        {
+          "name": "changeValue",
+          "type": "double",
+          "required": true,
+          "description": "变化值"
+        },
+        {
+          "name": "changePercent",
+          "type": "double",
+          "required": true,
+          "description": "变化百分比"
+        },
+        {
+          "name": "updateTime",
+          "type": "String",
+          "required": true,
+          "description": "更新时间"
+        }
+      ]
+    },
+    {
+      "name": "AccountBalanceCardWidget",
+      "displayName": "账户余额卡片",
+      "description": "显示多个账户的余额信息，支持正负余额显示",
+      "category": "finance",
+      "file": "account_balance_card.dart",
+      "parameters": [
+        {
+          "name": "accounts",
+          "type": "List<AccountBalanceCardData>",
+          "required": true,
+          "description": "账户列表（JSON 字符串格式）",
+          "subParameters": [
+            {
+              "name": "name",
+              "type": "String",
+              "description": "账户名称"
+            },
+            {
+              "name": "iconName",
+              "type": "String",
+              "description": "图标名称（Material Icons）"
+            },
+            {
+              "name": "iconColor",
+              "type": "String",
+              "description": "图标颜色（十六进制，如 #3498DB）"
+            },
+            {
+              "name": "billCount",
+              "type": "int",
+              "description": "账单数量"
+            },
+            {
+              "name": "balance",
+              "type": "double",
+              "description": "余额"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CategoryStackWidget",
+      "displayName": "分类堆叠消费卡片",
+      "description": "显示当前金额、目标金额和堆叠柱状图",
+      "category": "finance",
+      "file": "category_stack_widget.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "currentAmount",
+          "type": "double",
+          "required": true,
+          "description": "当前金额"
+        },
+        {
+          "name": "targetAmount",
+          "type": "double",
+          "required": true,
+          "description": "目标金额"
+        },
+        {
+          "name": "currency",
+          "type": "String",
+          "required": false,
+          "default": "'$'",
+          "description": "货币符号"
+        },
+        {
+          "name": "categories",
+          "type": "List<CategoryData>",
+          "required": true,
+          "description": "分类数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分类名称"
+            },
+            {
+              "name": "amount",
+              "type": "double",
+              "description": "金额"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分类颜色（ARGB int）"
+            },
+            {
+              "name": "percentage",
+              "type": "double",
+              "description": "百分比（0-1）"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WalletBalanceCardWidget",
+      "displayName": "钱包余额卡片",
+      "description": "显示钱包余额、可用余额、收入支出统计和操作按钮",
+      "category": "finance",
+      "file": "wallet_balance_card.dart",
+      "parameters": [
+        {
+          "name": "avatarUrl",
+          "type": "String",
+          "required": true,
+          "description": "头像 URL"
+        },
+        {
+          "name": "availableBalance",
+          "type": "double",
+          "required": true,
+          "description": "可用余额"
+        },
+        {
+          "name": "totalBalance",
+          "type": "double",
+          "required": true,
+          "description": "总余额"
+        },
+        {
+          "name": "changePercent",
+          "type": "int",
+          "required": true,
+          "description": "变化百分比"
+        },
+        {
+          "name": "income",
+          "type": "double",
+          "required": true,
+          "description": "收入"
+        },
+        {
+          "name": "expenses",
+          "type": "double",
+          "required": true,
+          "description": "支出"
+        }
+      ]
+    },
+    {
+      "name": "MonthlyBillCardWidget",
+      "displayName": "月度账单统计卡片",
+      "description": "显示月度收入、支出和结余",
+      "category": "finance",
+      "file": "monthly_bill_card.dart",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "MonthlyBillCardData",
+          "required": true,
+          "description": "账单数据",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "账单标题"
+            },
+            {
+              "name": "income",
+              "type": "double",
+              "description": "收入金额"
+            },
+            {
+              "name": "expense",
+              "type": "double",
+              "description": "支出金额"
+            },
+            {
+              "name": "balance",
+              "type": "double",
+              "description": "结余金额"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}

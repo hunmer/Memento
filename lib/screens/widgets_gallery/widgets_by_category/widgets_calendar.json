@@ -1,0 +1,256 @@
+{
+  "version": "1.0.0",
+  "description": "日历类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "calendar",
+    "name": "日历类",
+    "description": "日历、时间相关组件"
+  },
+  "widgets": [
+    {
+      "name": "MonthlyProgressWithDotsCardWidget",
+      "displayName": "月度进度圆点卡片",
+      "description": "圆点矩阵月度进度卡片，3行11列圆点显示月度进度",
+      "category": "calendar",
+      "file": "monthly_progress_with_dots_card.dart",
+      "parameters": [
+        {
+          "name": "month",
+          "type": "String",
+          "required": true,
+          "description": "月份名称"
+        },
+        {
+          "name": "currentDay",
+          "type": "int",
+          "required": true,
+          "description": "当前天数"
+        },
+        {
+          "name": "totalDays",
+          "type": "int",
+          "required": true,
+          "description": "总天数"
+        },
+        {
+          "name": "percentage",
+          "type": "int",
+          "required": true,
+          "description": "完成百分比"
+        },
+        {
+          "name": "backgroundColor",
+          "type": "Color",
+          "required": true,
+          "description": "卡片背景颜色"
+        },
+        {
+          "name": "activeDotColor",
+          "type": "Color?",
+          "required": false,
+          "description": "已过日期的颜色"
+        },
+        {
+          "name": "inactiveDotColor",
+          "type": "Color?",
+          "required": false,
+          "description": "未过日期的颜色"
+        }
+      ]
+    },
+    {
+      "name": "DailyEventsCardWidget",
+      "displayName": "每日事件卡片",
+      "description": "显示星期、日期和当日事件列表",
+      "category": "calendar",
+      "file": "daily_events_card.dart",
+      "parameters": [
+        {
+          "name": "weekday",
+          "type": "String",
+          "required": true,
+          "description": "星期标签"
+        },
+        {
+          "name": "day",
+          "type": "int",
+          "required": true,
+          "description": "日期（几号）"
+        },
+        {
+          "name": "events",
+          "type": "List<DailyEventData>",
+          "required": true,
+          "description": "事件数据列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "事件标题"
+            },
+            {
+              "name": "time",
+              "type": "String",
+              "description": "时间"
+            },
+            {
+              "name": "colorValue",
+              "type": "int",
+              "description": "左侧条颜色（ARGB int）"
+            },
+            {
+              "name": "backgroundColorLightValue",
+              "type": "int",
+              "description": "浅色模式背景色（ARGB int）"
+            },
+            {
+              "name": "backgroundColorDarkValue",
+              "type": "int",
+              "description": "深色模式背景色（ARGB int）"
+            },
+            {
+              "name": "textColorLightValue",
+              "type": "int",
+              "description": "浅色模式文字色（ARGB int）"
+            },
+            {
+              "name": "textColorDarkValue",
+              "type": "int",
+              "description": "深色模式文字色（ARGB int）"
+            },
+            {
+              "name": "subtextLightValue",
+              "type": "int",
+              "description": "浅色模式副文字色（ARGB int）"
+            },
+            {
+              "name": "subtextDarkValue",
+              "type": "int",
+              "description": "深色模式副文字色（ARGB int）"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EventCalendarWidget",
+      "displayName": "日历事件小组件",
+      "description": "显示日期、星期日历和事件列表",
+      "category": "calendar",
+      "file": "event_calendar_widget.dart",
+      "parameters": [
+        {
+          "name": "day",
+          "type": "int",
+          "required": true,
+          "description": "当前日期"
+        },
+        {
+          "name": "weekday",
+          "type": "String",
+          "required": true,
+          "description": "星期"
+        },
+        {
+          "name": "month",
+          "type": "String",
+          "required": true,
+          "description": "月份"
+        },
+        {
+          "name": "eventCount",
+          "type": "int",
+          "required": true,
+          "description": "事件数量"
+        },
+        {
+          "name": "weekDates",
+          "type": "List<int>",
+          "required": true,
+          "description": "周日期列表"
+        },
+        {
+          "name": "weekStartDay",
+          "type": "int",
+          "required": true,
+          "description": "周开始日（0=周日）"
+        },
+        {
+          "name": "reminder",
+          "type": "String",
+          "required": true,
+          "description": "提醒文本"
+        },
+        {
+          "name": "reminderEmoji",
+          "type": "String",
+          "required": true,
+          "description": "提醒表情"
+        },
+        {
+          "name": "events",
+          "type": "List<EventData>",
+          "required": true,
+          "description": "事件列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "事件标题"
+            },
+            {
+              "name": "time",
+              "type": "String",
+              "description": "时间"
+            },
+            {
+              "name": "duration",
+              "type": "String",
+              "description": "持续时间"
+            },
+            {
+              "name": "location",
+              "type": "String",
+              "description": "地点"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色"
+            },
+            {
+              "name": "iconColor",
+              "type": "Color",
+              "description": "图标颜色"
+            },
+            {
+              "name": "buttonLabel",
+              "type": "String",
+              "description": "按钮标签"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}
