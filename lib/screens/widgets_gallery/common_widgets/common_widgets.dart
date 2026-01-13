@@ -61,6 +61,10 @@ import 'widgets/rounded_task_progress_widget.dart';
 import 'widgets/dual_range_chart_card.dart';
 import 'widgets/daily_bar_chart_card.dart';
 import 'widgets/nutrition_progress_card.dart';
+import 'widgets/portfolio_stacked_chart.dart';
+import 'widgets/activity_rings_card.dart';
+import 'widgets/category_stack_widget.dart';
+import 'widgets/performance_bar_chart.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -125,6 +129,10 @@ enum CommonWidgetId {
   dualRangeChartCard,
   dailyBarChartCard,
   nutritionProgressCard,
+  portfolioStackedChart,
+  activityRingsCard,
+  categoryStackWidget,
+  performanceBarChart,
 }
 
 /// 公共小组件元数据
@@ -622,6 +630,38 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.portfolioStackedChart: CommonWidgetMetadata(
+      id: CommonWidgetId.portfolioStackedChart,
+      name: '投资组合堆叠图',
+      description: '显示投资组合的堆叠柱状图，支持多种资产类型和月度数据展示',
+      icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.activityRingsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.activityRingsCard,
+      name: '活动圆环卡片',
+      description: '显示活动圆环（步数、卡路里等），支持日期和状态显示',
+      icon: Icons.fitness_center,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.categoryStackWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.categoryStackWidget,
+      name: '分类堆叠消费卡片',
+      description: '显示分类消费堆叠图，支持当前金额、目标金额和分类列表',
+      icon: Icons.pie_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.performanceBarChart: CommonWidgetMetadata(
+      id: CommonWidgetId.performanceBarChart,
+      name: '性能指标柱状图',
+      description: '显示性能指标柱状图，支持增长百分比和时间周期',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -773,6 +813,14 @@ class CommonWidgetBuilder {
         return DailyBarChartCardWidget.fromProps(props, size);
       case CommonWidgetId.nutritionProgressCard:
         return NutritionProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.portfolioStackedChart:
+        return PortfolioStackedChartWidget.fromProps(props, size);
+      case CommonWidgetId.activityRingsCard:
+        return ActivityRingsCardWidget.fromProps(props, size);
+      case CommonWidgetId.categoryStackWidget:
+        return CategoryStackWidget.fromProps(props, size);
+      case CommonWidgetId.performanceBarChart:
+        return PerformanceBarChartWidget.fromProps(props, size);
     }
   }
 }
