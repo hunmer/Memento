@@ -1,0 +1,2019 @@
+{
+  "version": "1.0.0",
+  "description": "图表类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "chart",
+    "name": "图表类",
+    "description": "数据可视化图表组件"
+  },
+  "widgets": [
+    {
+      "name": "LineChartTrendCardWidget",
+      "displayName": "折线图趋势卡片",
+      "description": "折线图趋势统计卡片，显示数值和变化率",
+      "category": "chart",
+      "file": "line_chart_trend_card.dart",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "主数值"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "required": true,
+          "description": "标签文本"
+        },
+        {
+          "name": "changePercent",
+          "type": "double",
+          "required": true,
+          "description": "变化百分比，正数上升负数下降"
+        },
+        {
+          "name": "dataPoints",
+          "type": "List<double>",
+          "required": true,
+          "description": "数据点列表 (0-100 表示高度百分比)"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "",
+          "description": "单位前缀"
+        }
+      ]
+    },
+    {
+      "name": "VerticalBarChartCardWidget",
+      "displayName": "垂直柱状图卡片",
+      "description": "垂直柱状图统计卡片，支持双数据系列",
+      "category": "chart",
+      "file": "vertical_bar_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "dataLabel1",
+          "type": "String",
+          "required": true,
+          "description": "第一个数据系列标签"
+        },
+        {
+          "name": "dataLabel2",
+          "type": "String",
+          "required": true,
+          "description": "第二个数据系列标签"
+        },
+        {
+          "name": "bars",
+          "type": "List<BarData>",
+          "required": true,
+          "description": "柱状图数据列表",
+          "subParameters": [
+            {
+              "name": "value1",
+              "type": "double",
+              "description": "第一个系列的值"
+            },
+            {
+              "name": "value2",
+              "type": "double",
+              "description": "第二个系列的值"
+            }
+          ]
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "主色调"
+        },
+        {
+          "name": "secondaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "次色调"
+        }
+      ]
+    },
+    {
+      "name": "StackedRingChartCardWidget",
+      "displayName": "堆叠环形图统计卡片",
+      "description": "多类别环形图统计卡片，显示存储等分段数据",
+      "category": "chart",
+      "file": "stacked_ring_chart_card.dart",
+      "parameters": [
+        {
+          "name": "segments",
+          "type": "List<RingSegmentData>",
+          "required": true,
+          "description": "环形数据段列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分段标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "分段数值"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分段颜色"
+            }
+          ]
+        },
+        {
+          "name": "total",
+          "type": "double",
+          "required": true,
+          "description": "总容量"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "usedValue",
+          "type": "double",
+          "required": true,
+          "description": "已使用值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "",
+          "description": "单位 (如 GB、MB)"
+        },
+        {
+          "name": "usedLabel",
+          "type": "String?",
+          "required": false,
+          "description": "使用量标签，默认 'Used storage'"
+        }
+      ]
+    },
+    {
+      "name": "CommonWeeklyBarChartCardWidget",
+      "displayName": "周柱状图统计卡片",
+      "description": "周数据双层柱状图，支持上层浅色和下层深色条形",
+      "category": "chart",
+      "file": "weekly_bar_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题，显示在右下角标签"
+        },
+        {
+          "name": "percentage",
+          "type": "int",
+          "required": true,
+          "description": "百分比数值，显示在左下角"
+        },
+        {
+          "name": "weeklyData",
+          "type": "List<CommonWeeklyBarData>",
+          "required": true,
+          "description": "周数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签文本 (如星期几)"
+            },
+            {
+              "name": "upperHeight",
+              "type": "double",
+              "description": "上层浅色条高度 (0.0-1.0)"
+            },
+            {
+              "name": "lowerHeight",
+              "type": "double",
+              "description": "下层深色条高度 (0.0-1.0)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DailyBarChartCardWidget",
+      "displayName": "每日条形图卡片",
+      "description": "每日数据条形图卡片，支持双色条形显示",
+      "category": "chart",
+      "file": "daily_bar_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "value",
+          "type": "int",
+          "required": true,
+          "description": "主数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "单位"
+        },
+        {
+          "name": "bars",
+          "type": "List<DailyBarData>",
+          "required": true,
+          "description": "条形数据列表",
+          "subParameters": [
+            {
+              "name": "height",
+              "type": "double",
+              "description": "条形高度 (0.0-1.0)"
+            },
+            {
+              "name": "color",
+              "type": "DailyBarColor",
+              "description": "条形颜色枚举 (teal 或 red)",
+              "enumValues": [
+                "teal",
+                "red"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DualRangeChartCardWidget",
+      "displayName": "双范围图表统计卡片",
+      "description": "双范围每日数据图表，显示两组范围的统计数据",
+      "category": "chart",
+      "file": "dual_range_chart_card.dart",
+      "parameters": [
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期文本 (如 'January 2025')"
+        },
+        {
+          "name": "weekDays",
+          "type": "List<String>",
+          "required": true,
+          "description": "星期标签列表 (如 ['Wed', 'Thu', ...])"
+        },
+        {
+          "name": "ranges",
+          "type": "List<DualRangeData>",
+          "required": true,
+          "description": "双范围数据列表",
+          "subParameters": [
+            {
+              "name": "day",
+              "type": "String",
+              "description": "星期标签"
+            },
+            {
+              "name": "primaryRange",
+              "type": "RangeData",
+              "description": "主要范围",
+              "nestedParameters": [
+                {
+                  "name": "min",
+                  "type": "double",
+                  "description": "最小值"
+                },
+                {
+                  "name": "max",
+                  "type": "double",
+                  "description": "最大值"
+                },
+                {
+                  "name": "startPercent",
+                  "type": "double",
+                  "description": "起始位置百分比 (0.0-1.0)"
+                },
+                {
+                  "name": "heightPercent",
+                  "type": "double",
+                  "description": "高度百分比 (0.0-1.0)"
+                }
+              ]
+            },
+            {
+              "name": "secondaryRange",
+              "type": "RangeData",
+              "description": "次要范围"
+            }
+          ]
+        },
+        {
+          "name": "primarySummary",
+          "type": "RangeSummary",
+          "required": true,
+          "description": "主要范围汇总",
+          "subParameters": [
+            {
+              "name": "min",
+              "type": "int",
+              "description": "最小值"
+            },
+            {
+              "name": "max",
+              "type": "int",
+              "description": "最大值"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签文本"
+            }
+          ]
+        },
+        {
+          "name": "secondarySummary",
+          "type": "RangeSummary",
+          "required": true,
+          "description": "次要范围汇总"
+        }
+      ]
+    },
+    {
+      "name": "BarChartStatsCardWidget",
+      "displayName": "柱状图统计卡片",
+      "description": "垂直柱状图统计卡片，带平均值显示和图标",
+      "category": "chart",
+      "file": "bar_chart_stats_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "dateRange",
+          "type": "String",
+          "required": true,
+          "description": "日期范围文本"
+        },
+        {
+          "name": "averageValue",
+          "type": "double",
+          "required": true,
+          "description": "平均值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "单位"
+        },
+        {
+          "name": "icon",
+          "type": "String",
+          "required": true,
+          "description": "图标名称 (支持: bar_chart, directions_run, favorite, fitness_center, local_fire_department, water_drop, restaurant, work, school, shopping_cart, flight, bedtime, alarm, timer, schedule, event)"
+        },
+        {
+          "name": "iconColor",
+          "type": "Color",
+          "required": true,
+          "description": "图标颜色"
+        },
+        {
+          "name": "data",
+          "type": "List<double>",
+          "required": true,
+          "description": "柱状图数据点列表"
+        },
+        {
+          "name": "labels",
+          "type": "List<String>",
+          "required": true,
+          "description": "X轴标签列表"
+        },
+        {
+          "name": "maxValue",
+          "type": "double",
+          "required": true,
+          "description": "Y轴最大值"
+        }
+      ]
+    },
+    {
+      "name": "DonutChartStatsCardWidget",
+      "displayName": "甜甜圈图统计卡片",
+      "description": "环形图统计卡片，显示分类数据占比",
+      "category": "chart",
+      "file": "donut_chart_stats_card.dart",
+      "parameters": [
+        {
+          "name": "totalValue",
+          "type": "double",
+          "required": true,
+          "description": "总数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "",
+          "description": "单位"
+        },
+        {
+          "name": "totalLabel",
+          "type": "String",
+          "required": false,
+          "defaultValue": "Total",
+          "description": "总数值标签"
+        },
+        {
+          "name": "categories",
+          "type": "List<ChartCategoryData>",
+          "required": true,
+          "description": "分类数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分类标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "占比值 (0-1)"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分类颜色"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CategoryDonutChartCardWidget",
+      "displayName": "分类环形图卡片",
+      "description": "分类环形图统计卡片，带顶部徽章和分类列表",
+      "category": "chart",
+      "file": "category_donut_chart_card.dart",
+      "parameters": [
+        {
+          "name": "badgeLabel",
+          "type": "String",
+          "required": true,
+          "description": "顶部徽章标签"
+        },
+        {
+          "name": "timePeriod",
+          "type": "String",
+          "required": true,
+          "description": "时间周期描述"
+        },
+        {
+          "name": "totalAmount",
+          "type": "double",
+          "required": true,
+          "description": "总金额数值"
+        },
+        {
+          "name": "totalUnit",
+          "type": "String",
+          "required": true,
+          "description": "总金额单位（如 K、M 等）"
+        },
+        {
+          "name": "categories",
+          "type": "List<CategoryChartData>",
+          "required": true,
+          "description": "分类数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分类标签"
+            },
+            {
+              "name": "percentage",
+              "type": "double",
+              "description": "百分比 (0-100)"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分类颜色"
+            }
+          ]
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "主色调（用于徽章背景）"
+        }
+      ]
+    },
+    {
+      "name": "DualBarChartCardWidget",
+      "displayName": "双柱状图统计卡片",
+      "description": "双数据系列柱状图，支持主次数值对比",
+      "category": "chart",
+      "file": "dual_bar_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期"
+        },
+        {
+          "name": "primaryValue",
+          "type": "int",
+          "required": true,
+          "description": "主数值"
+        },
+        {
+          "name": "secondaryValue",
+          "type": "int",
+          "required": true,
+          "description": "次数值"
+        },
+        {
+          "name": "primaryLabel",
+          "type": "String",
+          "required": true,
+          "description": "主标签"
+        },
+        {
+          "name": "secondaryLabel",
+          "type": "String",
+          "required": true,
+          "description": "次标签"
+        },
+        {
+          "name": "warningStage",
+          "type": "String?",
+          "required": false,
+          "description": "警告阶段（可选）"
+        },
+        {
+          "name": "chartData",
+          "type": "List<DualBarData>",
+          "required": true,
+          "description": "图表数据列表",
+          "subParameters": [
+            {
+              "name": "primary",
+              "type": "double",
+              "description": "主数值"
+            },
+            {
+              "name": "secondary",
+              "type": "double",
+              "description": "次数值"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WeeklyBarsCardWidget",
+      "displayName": "周柱状图卡片",
+      "description": "显示一周7天数据的柱状图，支持渐变效果和动画",
+      "category": "chart",
+      "file": "weekly_bars_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "icon",
+          "type": "String|int",
+          "required": true,
+          "description": "标题图标 (支持: water_drop, fitness, local_fire_department, directions_run) 或图标代码点"
+        },
+        {
+          "name": "currentValue",
+          "type": "double",
+          "required": true,
+          "description": "当前数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "数值单位"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "required": true,
+          "description": "状态文本"
+        },
+        {
+          "name": "dailyValues",
+          "type": "List<double>",
+          "required": true,
+          "description": "7天的数值 (0.0 - 1.0)"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "主色调"
+        }
+      ]
+    },
+    {
+      "name": "WeightTrendChartWidget",
+      "displayName": "体重趋势图表",
+      "description": "带动画的趋势折线图，支持时间范围筛选和交互式工具提示",
+      "category": "chart",
+      "file": "weight_trend_chart.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String?",
+          "required": false,
+          "description": "卡片标题"
+        },
+        {
+          "name": "icon",
+          "type": "int?",
+          "required": false,
+          "description": "图标代码点"
+        },
+        {
+          "name": "currentValue",
+          "type": "double",
+          "required": true,
+          "description": "当前数值"
+        },
+        {
+          "name": "statusText",
+          "type": "String",
+          "required": true,
+          "description": "状态文本描述"
+        },
+        {
+          "name": "valueUnit",
+          "type": "String",
+          "required": true,
+          "description": "数值单位"
+        },
+        {
+          "name": "dataPoints",
+          "type": "List<TrendDataPoint>",
+          "required": true,
+          "description": "数据点列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "X轴标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            }
+          ]
+        },
+        {
+          "name": "timeFilters",
+          "type": "List<String>?",
+          "required": false,
+          "description": "时间筛选器标签"
+        },
+        {
+          "name": "initialFilterIndex",
+          "type": "int",
+          "required": false,
+          "defaultValue": 4,
+          "description": "初始选中的筛选器索引"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "主色调"
+        },
+        {
+          "name": "showGrid",
+          "type": "bool",
+          "required": false,
+          "defaultValue": true,
+          "description": "是否显示图表背景网格"
+        },
+        {
+          "name": "showDots",
+          "type": "bool",
+          "required": false,
+          "defaultValue": true,
+          "description": "是否显示数据点"
+        },
+        {
+          "name": "showGradient",
+          "type": "bool",
+          "required": false,
+          "defaultValue": true,
+          "description": "是否显示渐变填充"
+        }
+      ]
+    },
+    {
+      "name": "MiniTrendCardWidget",
+      "displayName": "迷你趋势卡片",
+      "description": "显示标题、图标、当前数值、单位、副标题、星期标签和趋势折线图",
+      "category": "chart",
+      "file": "mini_trend_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "icon",
+          "type": "String",
+          "required": true,
+          "description": "图标名称 (支持: monitor_heart, favorite, fitness_center, speed, timeline)"
+        },
+        {
+          "name": "currentValue",
+          "type": "int",
+          "required": true,
+          "description": "当前数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "单位"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "weekDays",
+          "type": "List<String>",
+          "required": true,
+          "description": "星期标签（7个字符）"
+        },
+        {
+          "name": "trendData",
+          "type": "List<double>",
+          "required": true,
+          "description": "趋势数据 (0-100之间)"
+        }
+      ]
+    },
+    {
+      "name": "TrendValueCardWidget",
+      "displayName": "趋势数值卡片",
+      "description": "通用数值展示卡片，支持趋势指示、曲线图表和附加信息",
+      "category": "chart",
+      "file": "trend_value_card.dart",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "当前数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "数值单位"
+        },
+        {
+          "name": "trendValue",
+          "type": "double",
+          "required": true,
+          "description": "趋势变化值（正数上升，负数下降）"
+        },
+        {
+          "name": "trendUnit",
+          "type": "String",
+          "required": true,
+          "description": "趋势单位"
+        },
+        {
+          "name": "chartData",
+          "type": "List<double>",
+          "required": true,
+          "description": "图表数据（Y坐标值，0-100范围）"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期文本"
+        },
+        {
+          "name": "additionalInfo",
+          "type": "List<String>",
+          "required": false,
+          "default": "[]",
+          "description": "附加信息列表"
+        },
+        {
+          "name": "trendLabel",
+          "type": "String",
+          "required": false,
+          "default": "'vs last week'",
+          "description": "趋势标签"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "default": "null",
+          "description": "主色调（可选）"
+        }
+      ]
+    },
+    {
+      "name": "TrendListCardWidget",
+      "displayName": "趋势列表卡片",
+      "description": "显示股票、指数、价格等带有趋势变化的列表数据",
+      "category": "chart",
+      "file": "trend_list_card.dart",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "TrendListCardData",
+          "required": true,
+          "description": "卡片数据（包含标题、图标和趋势项列表）",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "卡片标题"
+            },
+            {
+              "name": "iconName",
+              "type": "String",
+              "description": "卡片图标名称"
+            },
+            {
+              "name": "items",
+              "type": "List<TrendItemData>",
+              "description": "趋势项列表",
+              "subParameters": [
+                {
+                  "name": "symbol",
+                  "type": "String",
+                  "description": "符号/名称（如股票代码）"
+                },
+                {
+                  "name": "value",
+                  "type": "double",
+                  "description": "当前数值"
+                },
+                {
+                  "name": "percentChange",
+                  "type": "double",
+                  "description": "变化百分比"
+                },
+                {
+                  "name": "valueChange",
+                  "type": "double",
+                  "description": "变化数值"
+                },
+                {
+                  "name": "isPositive",
+                  "type": "bool",
+                  "description": "是否为正向变化（上涨）"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BarChartStatsCardWidget",
+      "displayName": "柱状图统计卡片",
+      "description": "带柱状图的统计卡片，支持标题、日期范围、平均值和自定义图标颜色",
+      "category": "chart",
+      "file": "bar_chart_stats_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "dateRange",
+          "type": "String",
+          "required": true,
+          "description": "日期范围"
+        },
+        {
+          "name": "averageValue",
+          "type": "double",
+          "required": true,
+          "description": "平均值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "数值单位"
+        },
+        {
+          "name": "icon",
+          "type": "String",
+          "required": false,
+          "default": "'bar_chart'",
+          "description": "图标名称（Material Icons）"
+        },
+        {
+          "name": "iconColor",
+          "type": "Color",
+          "required": true,
+          "description": "图标颜色（支持 String/#int/Color）"
+        },
+        {
+          "name": "data",
+          "type": "List<double>",
+          "required": true,
+          "description": "柱状图数据列表"
+        },
+        {
+          "name": "labels",
+          "type": "List<String>",
+          "required": true,
+          "description": "X轴标签列表"
+        },
+        {
+          "name": "maxValue",
+          "type": "double",
+          "required": true,
+          "description": "Y轴最大值"
+        }
+      ]
+    },
+    {
+      "name": "CategoryDonutChartCardWidget",
+      "displayName": "分类环形图卡片",
+      "description": "显示分类环形图、总金额和分类列表",
+      "category": "chart",
+      "file": "category_donut_chart_card.dart",
+      "parameters": [
+        {
+          "name": "badgeLabel",
+          "type": "String",
+          "required": true,
+          "description": "徽章标签"
+        },
+        {
+          "name": "timePeriod",
+          "type": "String",
+          "required": true,
+          "description": "时间周期"
+        },
+        {
+          "name": "totalAmount",
+          "type": "double",
+          "required": true,
+          "description": "总金额"
+        },
+        {
+          "name": "totalUnit",
+          "type": "String",
+          "required": true,
+          "description": "总金额单位（如 K、M）"
+        },
+        {
+          "name": "categories",
+          "type": "List<CategoryChartData>",
+          "required": true,
+          "description": "分类数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分类名称"
+            },
+            {
+              "name": "percentage",
+              "type": "double",
+              "description": "百分比（0-100）"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分类颜色（ARGB int）"
+            }
+          ]
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "default": "null",
+          "description": "主色调（ARGB int，可选）"
+        }
+      ]
+    },
+    {
+      "name": "ContributionHeatmapCardWidget",
+      "displayName": "贡献热力图卡片",
+      "description": "显示贡献热力图、年份选择器和贡献计数",
+      "category": "chart",
+      "file": "contribution_heatmap_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "contributionCount",
+          "type": "String",
+          "required": true,
+          "description": "贡献计数文本"
+        },
+        {
+          "name": "years",
+          "type": "List<String>",
+          "required": true,
+          "description": "年份列表"
+        },
+        {
+          "name": "selectedYear",
+          "type": "String",
+          "required": true,
+          "description": "选中的年份"
+        },
+        {
+          "name": "months",
+          "type": "List<String>",
+          "required": true,
+          "description": "月份标签列表"
+        },
+        {
+          "name": "heatmapData",
+          "type": "List<List<int>>",
+          "required": true,
+          "description": "热力图数据（二维数组，值0-4表示等级）"
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "required": true,
+          "description": "描述文本"
+        },
+        {
+          "name": "showMoreLabel",
+          "type": "String",
+          "required": true,
+          "description": "显示更多按钮标签"
+        }
+      ]
+    },
+    {
+      "name": "LineChartTrendCardWidget",
+      "displayName": "折线图趋势卡片",
+      "description": "显示数值趋势折线图和变化百分比",
+      "category": "chart",
+      "file": "line_chart_trend_card.dart",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "主数值"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "required": true,
+          "description": "标签文本"
+        },
+        {
+          "name": "changePercent",
+          "type": "double",
+          "required": true,
+          "description": "变化百分比（正数上升，负数下降）"
+        },
+        {
+          "name": "dataPoints",
+          "type": "List<double>",
+          "required": true,
+          "description": "数据点列表（0-100之间，表示图表高度百分比）"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "''",
+          "description": "单位前缀"
+        }
+      ]
+    },
+    {
+      "name": "DonutChartStatsCardWidget",
+      "displayName": "甜甜圈图统计卡片",
+      "description": "显示甜甜圈图和分类数据列表",
+      "category": "chart",
+      "file": "donut_chart_stats_card.dart",
+      "parameters": [
+        {
+          "name": "totalValue",
+          "type": "double",
+          "required": true,
+          "description": "总数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "''",
+          "description": "单位"
+        },
+        {
+          "name": "totalLabel",
+          "type": "String",
+          "required": false,
+          "defaultValue": "Total",
+          "description": "总数值标签"
+        },
+        {
+          "name": "categories",
+          "type": "List<ChartCategoryData>",
+          "required": true,
+          "description": "分类数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分类标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "分类占比（0-1）"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分类颜色"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SpendingTrendChartWidget",
+      "displayName": "支出趋势折线图",
+      "description": "显示支出趋势对比，支持当前月与上月对比、预算线显示",
+      "category": "chart",
+      "file": "spending_trend_chart.dart",
+      "parameters": [
+        {
+          "name": "dateRange",
+          "type": "String",
+          "required": true,
+          "description": "日期范围文本"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "currentMonthLabel",
+          "type": "String",
+          "required": true,
+          "description": "当前月标签"
+        },
+        {
+          "name": "previousMonthLabel",
+          "type": "String",
+          "required": true,
+          "description": "上月标签"
+        },
+        {
+          "name": "budgetAmount",
+          "type": "double",
+          "required": true,
+          "description": "预算金额"
+        },
+        {
+          "name": "budgetLabel",
+          "type": "String",
+          "required": true,
+          "description": "预算标签"
+        },
+        {
+          "name": "startLabel",
+          "type": "String",
+          "required": true,
+          "description": "X轴开始标签"
+        },
+        {
+          "name": "middleLabel",
+          "type": "String",
+          "required": true,
+          "description": "X轴中间标签"
+        },
+        {
+          "name": "endLabel",
+          "type": "String",
+          "required": true,
+          "description": "X轴结束标签"
+        },
+        {
+          "name": "currentMonthData",
+          "type": "List<double>",
+          "required": true,
+          "description": "当前月数据点列表"
+        },
+        {
+          "name": "previousMonthData",
+          "type": "List<double>",
+          "required": true,
+          "description": "上月数据点列表"
+        },
+        {
+          "name": "currentPoint",
+          "type": "double",
+          "required": true,
+          "description": "当前点值"
+        },
+        {
+          "name": "maxAmount",
+          "type": "double",
+          "required": true,
+          "description": "最大金额（用于Y轴缩放）"
+        }
+      ]
+    },
+    {
+      "name": "WeeklyBarsCardWidget",
+      "displayName": "周柱状图卡片",
+      "description": "显示一周7天的数据柱状图，支持渐变效果和动画",
+      "category": "chart",
+      "file": "weekly_bars_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "icon",
+          "type": "IconData",
+          "required": true,
+          "description": "标题图标（使用codePoint整数或字符串名称）"
+        },
+        {
+          "name": "currentValue",
+          "type": "double",
+          "required": true,
+          "description": "当前数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "数值单位"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "required": true,
+          "description": "状态文本"
+        },
+        {
+          "name": "dailyValues",
+          "type": "List<double>",
+          "required": true,
+          "description": "7天的数值（0.0 - 1.0）"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "description": "主色调（可选）"
+        }
+      ]
+    },
+    {
+      "name": "WeightTrendChartWidget",
+      "displayName": "体重趋势图表",
+      "description": "显示带动画的趋势折线图，支持时间范围筛选和交互式工具提示",
+      "category": "chart",
+      "file": "weight_trend_chart.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": false,
+          "description": "卡片标题"
+        },
+        {
+          "name": "icon",
+          "type": "IconData",
+          "required": false,
+          "description": "图标（使用codePoint整数）"
+        },
+        {
+          "name": "currentValue",
+          "type": "double",
+          "required": true,
+          "description": "当前数值"
+        },
+        {
+          "name": "statusText",
+          "type": "String",
+          "required": true,
+          "description": "状态文本描述"
+        },
+        {
+          "name": "valueUnit",
+          "type": "String",
+          "required": true,
+          "description": "数值单位"
+        },
+        {
+          "name": "dataPoints",
+          "type": "List<TrendDataPoint>",
+          "required": true,
+          "description": "数据点列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "X轴标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            }
+          ]
+        },
+        {
+          "name": "timeFilters",
+          "type": "List<String>",
+          "required": false,
+          "description": "时间筛选器标签"
+        },
+        {
+          "name": "initialFilterIndex",
+          "type": "int",
+          "required": false,
+          "defaultValue": "4",
+          "description": "初始选中的筛选器索引"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "description": "主色调"
+        },
+        {
+          "name": "showGrid",
+          "type": "bool",
+          "required": false,
+          "defaultValue": "true",
+          "description": "是否显示图表背景网格"
+        },
+        {
+          "name": "showDots",
+          "type": "bool",
+          "required": false,
+          "defaultValue": "true",
+          "description": "是否显示数据点"
+        },
+        {
+          "name": "showGradient",
+          "type": "bool",
+          "required": false,
+          "defaultValue": "true",
+          "description": "是否显示渐变填充"
+        }
+      ]
+    },
+    {
+      "name": "MoodChartCardWidget",
+      "displayName": "心情图表卡片",
+      "description": "显示心情数据的柱状图，支持emoji或颜色显示",
+      "category": "chart",
+      "file": "mood_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "moods",
+          "type": "List<MoodEntry>",
+          "required": true,
+          "description": "心情数据列表",
+          "subParameters": [
+            {
+              "name": "emoji",
+              "type": "String",
+              "description": "emoji表情"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签"
+            },
+            {
+              "name": "value",
+              "type": "int",
+              "description": "数值"
+            }
+          ]
+        },
+        {
+          "name": "displayType",
+          "type": "MoodType",
+          "required": false,
+          "defaultValue": "emoji",
+          "description": "显示类型（枚举：emoji、color）"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "defaultValue": "0xFF6366F1",
+          "description": "主题颜色"
+        }
+      ]
+    },
+    {
+      "name": "StackedRingChartCardWidget",
+      "displayName": "堆叠环形图卡片",
+      "description": "显示存储使用情况的堆叠环形图",
+      "category": "chart",
+      "file": "stacked_ring_chart_card.dart",
+      "parameters": [
+        {
+          "name": "segments",
+          "type": "List<RingSegmentData>",
+          "required": true,
+          "description": "环形数据段列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色"
+            }
+          ]
+        },
+        {
+          "name": "total",
+          "type": "double",
+          "required": true,
+          "description": "总容量"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "usedValue",
+          "type": "double",
+          "required": true,
+          "description": "已使用值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "''",
+          "description": "单位（如 GB、MB 等）"
+        },
+        {
+          "name": "usedLabel",
+          "type": "String",
+          "required": false,
+          "description": "使用量标签（默认为 'Used storage'）"
+        }
+      ]
+    },
+    {
+      "name": "SmoothLineChartCardWidget",
+      "displayName": "平滑曲线图表卡片",
+      "description": "显示平滑曲线趋势图，支持时间范围切换",
+      "category": "chart",
+      "file": "smooth_line_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期文本"
+        },
+        {
+          "name": "dataPoints",
+          "type": "List<DataPoint>",
+          "required": true,
+          "description": "数据点列表",
+          "subParameters": [
+            {
+              "name": "x",
+              "type": "double",
+              "description": "X坐标"
+            },
+            {
+              "name": "y",
+              "type": "double",
+              "description": "Y坐标"
+            }
+          ]
+        },
+        {
+          "name": "maxValue",
+          "type": "double",
+          "required": true,
+          "description": "最大值"
+        },
+        {
+          "name": "timeLabels",
+          "type": "List<String>",
+          "required": true,
+          "description": "时间标签列表"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "defaultValue": "0xFFFF7F56",
+          "description": "主色调"
+        }
+      ]
+    },
+    {
+      "name": "SleepStageChartCardWidget",
+      "displayName": "睡眠阶段图表卡片",
+      "description": "显示睡眠阶段气泡图，支持时间范围切换",
+      "category": "chart",
+      "file": "sleep_stage_chart_card.dart",
+      "parameters": [
+        {
+          "name": "sleepStages",
+          "type": "List<SleepStageData>",
+          "required": true,
+          "description": "睡眠阶段数据",
+          "subParameters": [
+            {
+              "name": "type",
+              "type": "SleepStageType",
+              "description": "阶段类型（枚举：core、rem、postREM、deep）"
+            },
+            {
+              "name": "left",
+              "type": "double",
+              "description": "左边距（0-100）"
+            },
+            {
+              "name": "topPercent",
+              "type": "double",
+              "description": "顶部百分比（0-100）"
+            },
+            {
+              "name": "widthPercent",
+              "type": "double",
+              "description": "宽度百分比（0-100）"
+            },
+            {
+              "name": "height",
+              "type": "double",
+              "description": "高度"
+            }
+          ]
+        },
+        {
+          "name": "selectedTab",
+          "type": "int",
+          "required": false,
+          "defaultValue": "1",
+          "description": "初始选中标签索引"
+        },
+        {
+          "name": "showTooltip",
+          "type": "bool",
+          "required": false,
+          "defaultValue": "true",
+          "description": "是否显示工具提示"
+        },
+        {
+          "name": "timeLabels",
+          "type": "List<String>",
+          "required": false,
+          "defaultValue": "['11:00', '12:00', '13:00', '14:00', '15:00']",
+          "description": "时间标签"
+        }
+      ]
+    },
+    {
+      "name": "VerticalBarChartCardWidget",
+      "displayName": "垂直柱状图卡片",
+      "description": "显示双值堆叠柱状图",
+      "category": "chart",
+      "file": "vertical_bar_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "dataLabel1",
+          "type": "String",
+          "required": true,
+          "description": "数据标签1"
+        },
+        {
+          "name": "dataLabel2",
+          "type": "String",
+          "required": true,
+          "description": "数据标签2"
+        },
+        {
+          "name": "bars",
+          "type": "List<BarData>",
+          "required": true,
+          "description": "柱状数据",
+          "subParameters": [
+            {
+              "name": "value1",
+              "type": "double",
+              "description": "第一个值"
+            },
+            {
+              "name": "value2",
+              "type": "double",
+              "description": "第二个值"
+            }
+          ]
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "defaultValue": "0xFF0072B5",
+          "description": "主色调"
+        },
+        {
+          "name": "secondaryColor",
+          "type": "Color",
+          "required": false,
+          "defaultValue": "0xFF00A8CC",
+          "description": "次要颜色"
+        }
+      ]
+    },
+    {
+      "name": "PerformanceBarChartWidget",
+      "displayName": "性能指标柱状图",
+      "description": "显示增长率、时间周期和柱状图",
+      "category": "chart",
+      "file": "performance_bar_chart.dart",
+      "parameters": [
+        {
+          "name": "badgeLabel",
+          "type": "String",
+          "required": true,
+          "description": "徽章标签"
+        },
+        {
+          "name": "growthPercentage",
+          "type": "double",
+          "required": true,
+          "description": "增长百分比"
+        },
+        {
+          "name": "timePeriod",
+          "type": "String",
+          "required": true,
+          "description": "时间周期"
+        },
+        {
+          "name": "barData",
+          "type": "List<PerformanceBarData>",
+          "required": true,
+          "description": "柱状图数据",
+          "subParameters": [
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签"
+            }
+          ]
+        },
+        {
+          "name": "footerLabel",
+          "type": "String",
+          "required": true,
+          "description": "底部标签"
+        }
+      ]
+    },
+    {
+      "name": "PortfolioStackedChartWidget",
+      "displayName": "投资组合堆叠图",
+      "description": "显示投资组合的堆叠柱状图",
+      "category": "chart",
+      "file": "portfolio_stacked_chart.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "totalAmount",
+          "type": "double",
+          "required": true,
+          "description": "总金额"
+        },
+        {
+          "name": "growthPercentage",
+          "type": "double",
+          "required": true,
+          "description": "增长百分比"
+        },
+        {
+          "name": "assetTypes",
+          "type": "List<AssetType>",
+          "required": true,
+          "description": "资产类型列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色"
+            }
+          ]
+        },
+        {
+          "name": "monthlyData",
+          "type": "List<MonthlyData>",
+          "required": true,
+          "description": "月度数据",
+          "subParameters": [
+            {
+              "name": "stocks",
+              "type": "int",
+              "description": "股票"
+            },
+            {
+              "name": "funds",
+              "type": "int",
+              "description": "基金"
+            },
+            {
+              "name": "bonds",
+              "type": "int",
+              "description": "债券"
+            }
+          ]
+        },
+        {
+          "name": "monthLabels",
+          "type": "List<String>",
+          "required": true,
+          "description": "月份标签"
+        }
+      ]
+    },
+    {
+      "name": "RevenueTrendCardWidget",
+      "displayName": "收入趋势卡片",
+      "description": "显示收入数值、百分比变化和曲线图",
+      "category": "chart",
+      "file": "revenue_trend_card.dart",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "数值"
+        },
+        {
+          "name": "currency",
+          "type": "String",
+          "required": true,
+          "defaultValue": "'$'",
+          "description": "货币符号"
+        },
+        {
+          "name": "percentage",
+          "type": "int",
+          "required": true,
+          "description": "百分比变化"
+        },
+        {
+          "name": "period",
+          "type": "String",
+          "required": true,
+          "defaultValue": "'Weekly'",
+          "description": "时间周期"
+        },
+        {
+          "name": "chartData",
+          "type": "List<double>",
+          "required": true,
+          "description": "图表数据点（Y坐标值，0-120范围）"
+        },
+        {
+          "name": "dates",
+          "type": "List<int>",
+          "required": true,
+          "description": "日期标签"
+        },
+        {
+          "name": "highlightIndex",
+          "type": "int",
+          "required": true,
+          "description": "高亮点的索引"
+        }
+      ]
+    },
+    {
+      "name": "CommonWeeklyBarChartCardWidget",
+      "displayName": "公共周柱状图卡片",
+      "description": "显示周柱状图和百分比信息",
+      "category": "chart",
+      "file": "weekly_bar_chart_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "percentage",
+          "type": "int",
+          "required": true,
+          "description": "百分比"
+        },
+        {
+          "name": "weeklyData",
+          "type": "List<CommonWeeklyBarData>",
+          "required": true,
+          "description": "周数据列表",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签"
+            },
+            {
+              "name": "upperHeight",
+              "type": "double",
+              "description": "上层高度（0-1）"
+            },
+            {
+              "name": "lowerHeight",
+              "type": "double",
+              "description": "下层高度（0-1）"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}

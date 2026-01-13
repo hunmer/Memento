@@ -1,0 +1,1184 @@
+{
+  "version": "1.0.0",
+  "description": "内容类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "content",
+    "name": "内容类",
+    "description": "文章、笔记等内容展示组件"
+  },
+  "widgets": [
+    {
+      "name": "ArticleListCardWidget",
+      "displayName": "文章列表卡片",
+      "description": "文章内容展示列表卡片，包含特色文章和文章列表",
+      "category": "content",
+      "file": "article_list_card.dart",
+      "parameters": [
+        {
+          "name": "featuredArticle",
+          "type": "FeaturedArticleData",
+          "required": true,
+          "description": "特色文章数据",
+          "subParameters": [
+            {
+              "name": "author",
+              "type": "String",
+              "description": "作者名"
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "description": "文章标题"
+            },
+            {
+              "name": "summary",
+              "type": "String",
+              "description": "文章摘要"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "封面图片 URL"
+            }
+          ]
+        },
+        {
+          "name": "articles",
+          "type": "List<ArticleData>",
+          "required": true,
+          "description": "普通文章列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "文章标题"
+            },
+            {
+              "name": "author",
+              "type": "String",
+              "description": "作者名"
+            },
+            {
+              "name": "publication",
+              "type": "String",
+              "description": "发布媒体"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "封面图片 URL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TaskListCardWidget",
+      "displayName": "任务列表卡片",
+      "description": "任务列表展示，含图标、计数和任务项",
+      "category": "content",
+      "file": "task_list_card.dart",
+      "parameters": [
+        {
+          "name": "icon",
+          "type": "String|IconData",
+          "required": true,
+          "description": "图标或图标代码点"
+        },
+        {
+          "name": "iconBackgroundColor",
+          "type": "Color",
+          "required": true,
+          "description": "图标背景颜色"
+        },
+        {
+          "name": "count",
+          "type": "int",
+          "required": true,
+          "description": "任务总数"
+        },
+        {
+          "name": "countLabel",
+          "type": "String",
+          "required": true,
+          "defaultValue": "Tasks",
+          "description": "计数标签"
+        },
+        {
+          "name": "items",
+          "type": "List<String>",
+          "required": true,
+          "description": "任务项列表"
+        },
+        {
+          "name": "moreCount",
+          "type": "int",
+          "required": true,
+          "description": "更多任务数量"
+        }
+      ]
+    },
+    {
+      "name": "NotesListCardWidget",
+      "displayName": "笔记列表卡片",
+      "description": "笔记列表展示，含标题、时间和预览",
+      "category": "content",
+      "file": "notes_list_card.dart",
+      "parameters": [
+        {
+          "name": "notes",
+          "type": "List<NoteItem>",
+          "required": true,
+          "description": "笔记项列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "笔记标题"
+            },
+            {
+              "name": "time",
+              "type": "String",
+              "description": "时间"
+            },
+            {
+              "name": "preview",
+              "type": "String",
+              "description": "预览文本"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String?",
+              "description": "图片 URL（可选）"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ImageDisplayCardWidget",
+      "displayName": "图片展示卡片",
+      "description": "通用图片展示卡片，含标题、标签、日期和评分",
+      "category": "content",
+      "file": "image_display_card.dart",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "图片 URL"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题（支持换行）"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "required": true,
+          "description": "标签文本（如 'Upcoming'）"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期文本"
+        },
+        {
+          "name": "rating",
+          "type": "double",
+          "required": true,
+          "description": "评分 (0-5)"
+        },
+        {
+          "name": "icon",
+          "type": "int?",
+          "required": false,
+          "description": "右上角图标代码点"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color?",
+          "required": false,
+          "description": "主色调（用于评分和标签）"
+        },
+        {
+          "name": "accentColor",
+          "type": "Color?",
+          "required": false,
+          "description": "强调色（用于标签）"
+        }
+      ]
+    },
+    {
+      "name": "SocialProfileCardWidget",
+      "displayName": "社交资料卡片",
+      "description": "社交媒体资料展示，含头像、粉丝数和内容",
+      "category": "content",
+      "file": "social_profile_card.dart",
+      "parameters": [
+        {
+          "name": "avatarUrl",
+          "type": "String",
+          "required": true,
+          "description": "头像 URL"
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true,
+          "description": "用户名"
+        },
+        {
+          "name": "handle",
+          "type": "String",
+          "required": true,
+          "description": "账号"
+        },
+        {
+          "name": "followers",
+          "type": "int",
+          "required": true,
+          "description": "粉丝数"
+        },
+        {
+          "name": "posts",
+          "type": "int",
+          "required": true,
+          "description": "帖子数"
+        },
+        {
+          "name": "tag",
+          "type": "String",
+          "required": true,
+          "description": "标签"
+        },
+        {
+          "name": "content",
+          "type": "String",
+          "required": true,
+          "description": "内容"
+        },
+        {
+          "name": "comments",
+          "type": "int",
+          "required": true,
+          "description": "评论数"
+        },
+        {
+          "name": "shares",
+          "type": "int",
+          "required": true,
+          "description": "转发数"
+        }
+      ]
+    },
+    {
+      "name": "ProfileCardWidget",
+      "displayName": "个人资料卡片",
+      "description": "用户个人信息展示卡片，含头像、姓名、认证标志、关注数等",
+      "category": "content",
+      "file": "profile_card_card.dart",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "背景图片 URL"
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true,
+          "description": "姓名"
+        },
+        {
+          "name": "isVerified",
+          "type": "bool",
+          "required": true,
+          "description": "是否认证"
+        },
+        {
+          "name": "bio",
+          "type": "String",
+          "required": true,
+          "description": "简介"
+        },
+        {
+          "name": "followersCount",
+          "type": "int",
+          "required": true,
+          "description": "粉丝数"
+        },
+        {
+          "name": "followingCount",
+          "type": "int",
+          "required": true,
+          "description": "关注数"
+        }
+      ]
+    },
+    {
+      "name": "SplitImageCardWidget",
+      "displayName": "图片分割卡片",
+      "description": "左右分屏布局卡片，左侧展示图片，右侧展示信息",
+      "category": "content",
+      "file": "split_image_card.dart",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "左侧图片 URL"
+        },
+        {
+          "name": "topIcon",
+          "type": "int?",
+          "required": false,
+          "description": "顶部图标代码点"
+        },
+        {
+          "name": "topText",
+          "type": "String",
+          "required": true,
+          "description": "顶部文字"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "主标题"
+        },
+        {
+          "name": "bottomIcon",
+          "type": "int?",
+          "required": false,
+          "description": "底部图标代码点"
+        },
+        {
+          "name": "bottomText",
+          "type": "String",
+          "required": true,
+          "description": "底部文字"
+        }
+      ]
+    },
+    {
+      "name": "NewsUpdateCardWidget",
+      "displayName": "新闻更新卡片",
+      "description": "显示新闻标题、时间戳和分页指示器",
+      "category": "content",
+      "file": "news_update_card.dart",
+      "parameters": [
+        {
+          "name": "icon",
+          "type": "String",
+          "required": true,
+          "description": "图标名称（支持: bolt, flash_on, notification_important, newspaper, article, rss_feed）"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "新闻标题"
+        },
+        {
+          "name": "timestamp",
+          "type": "String",
+          "required": true,
+          "description": "时间戳"
+        },
+        {
+          "name": "currentIndex",
+          "type": "int",
+          "required": false,
+          "default": "0",
+          "description": "当前索引"
+        },
+        {
+          "name": "totalItems",
+          "type": "int",
+          "required": false,
+          "default": "4",
+          "description": "总项目数"
+        }
+      ]
+    },
+    {
+      "name": "NewsCardWidget",
+      "displayName": "新闻卡片",
+      "description": "显示头条新闻、分类标签和新闻列表",
+      "category": "content",
+      "file": "news_card.dart",
+      "parameters": [
+        {
+          "name": "featuredNews",
+          "type": "FeaturedNewsData",
+          "required": true,
+          "description": "头条新闻",
+          "subParameters": [
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "图片 URL"
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "description": "标题"
+            }
+          ]
+        },
+        {
+          "name": "category",
+          "type": "String",
+          "required": true,
+          "description": "分类标签"
+        },
+        {
+          "name": "newsItems",
+          "type": "List<NewsItemData>",
+          "required": true,
+          "description": "新闻列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "标题"
+            },
+            {
+              "name": "time",
+              "type": "String",
+              "description": "时间（如 26 hrs ago）"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "缩略图 URL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ArticleListCardWidget",
+      "displayName": "文章列表卡片",
+      "description": "显示特色文章和普通文章列表",
+      "category": "content",
+      "file": "article_list_card.dart",
+      "parameters": [
+        {
+          "name": "featuredArticle",
+          "type": "FeaturedArticleData",
+          "required": true,
+          "description": "特色文章",
+          "subParameters": [
+            {
+              "name": "author",
+              "type": "String",
+              "description": "作者"
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "description": "标题"
+            },
+            {
+              "name": "summary",
+              "type": "String",
+              "description": "摘要"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "图片 URL"
+            }
+          ]
+        },
+        {
+          "name": "articles",
+          "type": "List<ArticleData>",
+          "required": true,
+          "description": "普通文章列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "标题"
+            },
+            {
+              "name": "author",
+              "type": "String",
+              "description": "作者"
+            },
+            {
+              "name": "publication",
+              "type": "String",
+              "description": "发布媒体"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "图片 URL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ColorTagTaskCardWidget",
+      "displayName": "彩色标签任务卡片",
+      "description": "显示任务总数、标签和带彩色标签的任务列表",
+      "category": "content",
+      "file": "color_tag_task_card.dart",
+      "parameters": [
+        {
+          "name": "data",
+          "type": "ColorTagTaskCardData",
+          "required": true,
+          "description": "卡片数据",
+          "subParameters": [
+            {
+              "name": "taskCount",
+              "type": "int",
+              "description": "任务总数"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签文本"
+            },
+            {
+              "name": "tasks",
+              "type": "List<ColorTagTaskItem>",
+              "description": "任务项列表",
+              "subParameters": [
+                {
+                  "name": "title",
+                  "type": "String",
+                  "description": "任务标题"
+                },
+                {
+                  "name": "color",
+                  "type": "int",
+                  "description": "标签颜色（ARGB int）"
+                }
+              ]
+            },
+            {
+              "name": "moreCount",
+              "type": "int",
+              "description": "更多任务数量"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TaskListCardWidget",
+      "displayName": "任务列表卡片",
+      "description": "显示任务列表、数量统计和图标标识",
+      "category": "content",
+      "file": "task_list_card.dart",
+      "parameters": [
+        {
+          "name": "icon",
+          "type": "IconData",
+          "required": true,
+          "description": "图标（使用codePoint整数或字符串名称）"
+        },
+        {
+          "name": "iconBackgroundColor",
+          "type": "Color",
+          "required": true,
+          "description": "图标背景颜色"
+        },
+        {
+          "name": "count",
+          "type": "int",
+          "required": true,
+          "description": "任务总数"
+        },
+        {
+          "name": "countLabel",
+          "type": "String",
+          "required": true,
+          "description": "计数标签"
+        },
+        {
+          "name": "items",
+          "type": "List<String>",
+          "required": true,
+          "description": "任务项列表"
+        },
+        {
+          "name": "moreCount",
+          "type": "int",
+          "required": true,
+          "description": "更多任务数量"
+        }
+      ]
+    },
+    {
+      "name": "NotesListCardWidget",
+      "displayName": "笔记列表卡片",
+      "description": "显示笔记列表，支持标题、时间、预览和图片",
+      "category": "content",
+      "file": "notes_list_card.dart",
+      "parameters": [
+        {
+          "name": "notes",
+          "type": "List<NoteItem>",
+          "required": true,
+          "description": "笔记列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "笔记标题"
+            },
+            {
+              "name": "time",
+              "type": "String",
+              "description": "时间"
+            },
+            {
+              "name": "preview",
+              "type": "String",
+              "description": "预览文本"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "图片URL（可选）"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ImageDisplayCardWidget",
+      "displayName": "图片展示卡片",
+      "description": "通用的图片展示卡片，支持显示图片、标题、标签、日期和评分",
+      "category": "content",
+      "file": "image_display_card.dart",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "图片 URL"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题（支持换行）"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "required": true,
+          "description": "标签文本（如 'Upcoming'）"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期文本"
+        },
+        {
+          "name": "rating",
+          "type": "double",
+          "required": true,
+          "description": "评分（0-5）"
+        },
+        {
+          "name": "icon",
+          "type": "IconData",
+          "required": false,
+          "description": "右上角图标（使用codePoint整数）"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "description": "主色调（用于评分和标签）"
+        },
+        {
+          "name": "accentColor",
+          "type": "Color",
+          "required": false,
+          "description": "强调色（用于标签）"
+        }
+      ]
+    },
+    {
+      "name": "SocialProfileCardWidget",
+      "displayName": "社交资料卡片",
+      "description": "显示用户头像、信息和社交统计（粉丝、帖子、评论、转发）",
+      "category": "content",
+      "file": "social_profile_card.dart",
+      "parameters": [
+        {
+          "name": "avatarUrl",
+          "type": "String",
+          "required": true,
+          "description": "头像 URL"
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "required": true,
+          "description": "用户名"
+        },
+        {
+          "name": "handle",
+          "type": "String",
+          "required": true,
+          "description": "账号"
+        },
+        {
+          "name": "followers",
+          "type": "int",
+          "required": true,
+          "description": "粉丝数"
+        },
+        {
+          "name": "posts",
+          "type": "int",
+          "required": true,
+          "description": "帖子数"
+        },
+        {
+          "name": "tag",
+          "type": "String",
+          "required": true,
+          "description": "标签"
+        },
+        {
+          "name": "content",
+          "type": "String",
+          "required": true,
+          "description": "内容"
+        },
+        {
+          "name": "comments",
+          "type": "int",
+          "required": true,
+          "description": "评论数"
+        },
+        {
+          "name": "shares",
+          "type": "int",
+          "required": true,
+          "description": "转发数"
+        }
+      ]
+    },
+    {
+      "name": "VerticalPropertyCardWidget",
+      "displayName": "垂直属性卡片",
+      "description": "显示属性图片、标题、元数据、描述和操作按钮",
+      "category": "content",
+      "file": "vertical_property_card.dart",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "图片URL"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "metadata",
+          "type": "List<PropertyMetadata>",
+          "required": true,
+          "description": "元数据列表（图标+文字）",
+          "subParameters": [
+            {
+              "name": "icon",
+              "type": "String",
+              "description": "图标名称（如 'Icons.calendar_today'）"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签文本"
+            }
+          ]
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "required": true,
+          "description": "描述文本"
+        },
+        {
+          "name": "actionLabel",
+          "type": "String",
+          "required": true,
+          "description": "操作标签"
+        },
+        {
+          "name": "actionIcon",
+          "type": "String",
+          "required": true,
+          "description": "操作图标名称（如 'Icons.my_location'）"
+        }
+      ]
+    },
+    {
+      "name": "UpcomingTasksWidget",
+      "displayName": "即将到来的任务",
+      "description": "显示任务数量和任务列表",
+      "category": "content",
+      "file": "upcoming_tasks_widget.dart",
+      "parameters": [
+        {
+          "name": "taskCount",
+          "type": "int",
+          "required": true,
+          "description": "任务总数"
+        },
+        {
+          "name": "tasks",
+          "type": "List<TaskItem>",
+          "required": true,
+          "description": "任务列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "任务标题"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "任务颜色"
+            }
+          ]
+        },
+        {
+          "name": "moreCount",
+          "type": "int",
+          "required": false,
+          "defaultValue": "0",
+          "description": "更多任务数量"
+        }
+      ]
+    },
+    {
+      "name": "TaskListStatCardWidget",
+      "displayName": "任务统计列表卡片",
+      "description": "显示任务数量、状态标签和任务列表",
+      "category": "content",
+      "file": "task_list_stat_card.dart",
+      "parameters": [
+        {
+          "name": "icon",
+          "type": "IconData",
+          "required": true,
+          "description": "图标（使用字符串名称，如 'Icons.format_list_bulleted'）"
+        },
+        {
+          "name": "count",
+          "type": "int",
+          "required": true,
+          "description": "任务总数"
+        },
+        {
+          "name": "statusLabel",
+          "type": "String",
+          "required": true,
+          "description": "状态标签（如 'Upcoming'）"
+        },
+        {
+          "name": "tasks",
+          "type": "List<String>",
+          "required": true,
+          "description": "任务列表"
+        },
+        {
+          "name": "remainingCount",
+          "type": "int",
+          "required": true,
+          "description": "剩余任务数量"
+        },
+        {
+          "name": "primaryColor",
+          "type": "Color",
+          "required": false,
+          "description": "主色调（可选）"
+        }
+      ]
+    },
+    {
+      "name": "SocialActivityCardWidget",
+      "displayName": "社交活动动态卡片",
+      "description": "显示用户信息和社交动态列表",
+      "category": "content",
+      "file": "social_activity_card.dart",
+      "parameters": [
+        {
+          "name": "user",
+          "type": "SocialUser",
+          "required": true,
+          "description": "用户信息",
+          "subParameters": [
+            {
+              "name": "name",
+              "type": "String",
+              "description": "用户名"
+            },
+            {
+              "name": "username",
+              "type": "String",
+              "description": "账号名"
+            },
+            {
+              "name": "avatarUrl",
+              "type": "String",
+              "description": "头像URL"
+            },
+            {
+              "name": "followerCount",
+              "type": "int",
+              "description": "粉丝数"
+            }
+          ]
+        },
+        {
+          "name": "posts",
+          "type": "List<SocialPost>",
+          "required": true,
+          "description": "社交动态列表",
+          "subParameters": [
+            {
+              "name": "hashtag",
+              "type": "String",
+              "description": "话题标签"
+            },
+            {
+              "name": "content",
+              "type": "String",
+              "description": "内容文本"
+            },
+            {
+              "name": "commentCount",
+              "type": "int",
+              "description": "评论数"
+            },
+            {
+              "name": "repostCount",
+              "type": "int",
+              "description": "转发数"
+            },
+            {
+              "name": "imageUrl",
+              "type": "String",
+              "description": "图片URL"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DailyTodoListWidget",
+      "displayName": "每日待办事项列表",
+      "description": "显示日期、时间和可交互的待办任务列表",
+      "category": "content",
+      "file": "daily_todo_list_widget.dart",
+      "parameters": [
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期"
+        },
+        {
+          "name": "time",
+          "type": "String",
+          "required": true,
+          "description": "时间"
+        },
+        {
+          "name": "tasks",
+          "type": "List<TodoTask>",
+          "required": true,
+          "description": "待办任务列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "任务标题"
+            },
+            {
+              "name": "isCompleted",
+              "type": "bool",
+              "description": "是否已完成"
+            }
+          ]
+        },
+        {
+          "name": "reminder",
+          "type": "TodoReminder",
+          "required": true,
+          "description": "提醒信息",
+          "subParameters": [
+            {
+              "name": "text",
+              "type": "String",
+              "description": "提醒文本"
+            },
+            {
+              "name": "hashtag",
+              "type": "String",
+              "description": "话题标签"
+            },
+            {
+              "name": "hashtagEmoji",
+              "type": "String",
+              "description": "话题表情"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "RoundedPropertyCardWidget",
+      "displayName": "圆角属性卡片",
+      "description": "显示属性图片、标题、元数据、描述和操作按钮",
+      "category": "content",
+      "file": "rounded_property_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "图片URL"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期"
+        },
+        {
+          "name": "time",
+          "type": "String",
+          "required": true,
+          "description": "时间"
+        },
+        {
+          "name": "temperature",
+          "type": "String",
+          "required": true,
+          "description": "温度"
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "required": true,
+          "description": "描述文本"
+        },
+        {
+          "name": "actionLabel",
+          "type": "String",
+          "required": true,
+          "description": "操作标签"
+        },
+        {
+          "name": "actionIcon",
+          "type": "String",
+          "required": true,
+          "description": "操作图标名称（如 'Icons.my_location'）"
+        }
+      ]
+    },
+    {
+      "name": "RentalPreviewCardWidget",
+      "displayName": "租赁预览卡片",
+      "description": "显示房产图片、状态、评分和详情",
+      "category": "content",
+      "file": "rental_preview_card.dart",
+      "parameters": [
+        {
+          "name": "imageUrl",
+          "type": "String",
+          "required": true,
+          "description": "图片URL"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "required": true,
+          "description": "状态标签"
+        },
+        {
+          "name": "rating",
+          "type": "double",
+          "required": true,
+          "description": "评分"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "description",
+          "type": "String",
+          "required": true,
+          "description": "描述文本"
+        },
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期"
+        },
+        {
+          "name": "duration",
+          "type": "String",
+          "required": true,
+          "description": "时长"
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}

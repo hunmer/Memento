@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "description": "小组件参数文档索引",
+  "lastUpdated": "2025-01-13",
+  "categories": {
+    "progress": {
+      "name": "进度类",
+      "description": "显示各类进度和完成度的组件",
+      "file": "widgets_progress.json",
+      "widgetCount": 20
+    },
+    "tracking": {
+      "name": "追踪类",
+      "description": "习惯、活动追踪组件",
+      "file": "widgets_tracking.json",
+      "widgetCount": 18
+    },
+    "calendar": {
+      "name": "日历类",
+      "description": "日历、时间相关组件",
+      "file": "widgets_calendar.json",
+      "widgetCount": 3
+    },
+    "chart": {
+      "name": "图表类",
+      "description": "数据可视化图表组件",
+      "file": "widgets_chart.json",
+      "widgetCount": 32
+    },
+    "content": {
+      "name": "内容类",
+      "description": "文章、笔记等内容展示组件",
+      "file": "widgets_content.json",
+      "widgetCount": 22
+    },
+    "finance": {
+      "name": "财务类",
+      "description": "钱包、账单等财务相关组件",
+      "file": "widgets_finance.json",
+      "widgetCount": 10
+    },
+    "media": {
+      "name": "媒体类",
+      "description": "音频、视频等媒体相关组件",
+      "file": "widgets_media.json",
+      "widgetCount": 3
+    },
+    "utility": {
+      "name": "工具类",
+      "description": "通用工具组件",
+      "file": "widgets_utility.json",
+      "widgetCount": 6
+    }
+  },
+  "totalWidgets": 114
+}

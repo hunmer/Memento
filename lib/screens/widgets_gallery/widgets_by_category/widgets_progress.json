@@ -1,0 +1,1018 @@
+{
+  "version": "1.0.0",
+  "description": "进度类小组件参数文档",
+  "lastUpdated": "2025-01-13",
+  "category": {
+    "key": "progress",
+    "name": "进度类",
+    "description": "显示各类进度和完成度的组件"
+  },
+  "widgets": [
+    {
+      "name": "HalfGaugeCardWidget",
+      "displayName": "半圆仪表盘",
+      "description": "半圆形的预算/进度仪表盘，显示剩余金额和进度",
+      "category": "progress",
+      "file": "half_gauge_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": false,
+          "defaultValue": "Shopping",
+          "description": "仪表盘标题，显示在顶部"
+        },
+        {
+          "name": "totalBudget",
+          "type": "double",
+          "required": true,
+          "description": "总预算金额"
+        },
+        {
+          "name": "remaining",
+          "type": "double",
+          "required": true,
+          "description": "剩余金额"
+        },
+        {
+          "name": "currency",
+          "type": "String",
+          "required": false,
+          "defaultValue": "AED",
+          "description": "货币符号或代码"
+        }
+      ]
+    },
+    {
+      "name": "SegmentedProgressCardWidget",
+      "displayName": "分段进度条卡片",
+      "description": "多类别分段统计卡片，支持多个分类的进度显示",
+      "category": "progress",
+      "file": "segmented_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "currentValue",
+          "type": "double",
+          "required": true,
+          "description": "当前值"
+        },
+        {
+          "name": "targetValue",
+          "type": "double",
+          "required": true,
+          "description": "目标值"
+        },
+        {
+          "name": "segments",
+          "type": "List<SegmentData>",
+          "required": true,
+          "description": "分段数据列表，每个包含 label、value、color",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "分段标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "分段数值"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "分段颜色"
+            }
+          ]
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "",
+          "description": "数值单位"
+        }
+      ]
+    },
+    {
+      "name": "CircularProgressCardWidget",
+      "displayName": "圆形进度卡片",
+      "description": "圆形进度展示卡片，带进度环和百分比",
+      "category": "progress",
+      "file": "circular_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题，显示天数等信息"
+        },
+        {
+          "name": "percentage",
+          "type": "double",
+          "required": true,
+          "description": "百分比数值 (0-100)"
+        },
+        {
+          "name": "progress",
+          "type": "double",
+          "required": true,
+          "description": "进度值 (0.0-1.0)"
+        },
+        {
+          "name": "progressColor",
+          "type": "Color?",
+          "required": false,
+          "description": "进度条颜色，默认使用主题色"
+        }
+      ]
+    },
+    {
+      "name": "MultiMetricProgressCardWidget",
+      "displayName": "多指标进度卡片",
+      "description": "多个指标进度展示卡片，支持 emoji 图标和进度环",
+      "category": "progress",
+      "file": "multi_metric_progress_card.dart",
+      "parameters": [
+        {
+          "name": "trackers",
+          "type": "List<MetricProgressData>",
+          "required": true,
+          "description": "追踪器数据列表",
+          "subParameters": [
+            {
+              "name": "emoji",
+              "type": "String",
+              "description": "Emoji 图标"
+            },
+            {
+              "name": "progress",
+              "type": "double",
+              "description": "进度值 0-100"
+            },
+            {
+              "name": "progressColor",
+              "type": "Color",
+              "description": "进度条颜色"
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "description": "标题"
+            },
+            {
+              "name": "subtitle",
+              "type": "String",
+              "description": "副标题"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            },
+            {
+              "name": "unit",
+              "type": "String",
+              "description": "单位"
+            }
+          ]
+        },
+        {
+          "name": "backgroundColor",
+          "type": "Color",
+          "required": true,
+          "description": "卡片背景颜色"
+        }
+      ]
+    },
+    {
+      "name": "TaskProgressCardWidget",
+      "displayName": "任务进度卡片",
+      "description": "任务进度展示卡片，显示已完成/总数和待办列表",
+      "category": "progress",
+      "file": "task_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "completedTasks",
+          "type": "int",
+          "required": true,
+          "description": "已完成任务数"
+        },
+        {
+          "name": "totalTasks",
+          "type": "int",
+          "required": true,
+          "description": "总任务数"
+        },
+        {
+          "name": "pendingTasks",
+          "type": "List<String>",
+          "required": false,
+          "defaultValue": "[]",
+          "description": "待办任务文本列表"
+        }
+      ]
+    },
+    {
+      "name": "CircularMetricsCardWidget",
+      "displayName": "环形指标卡片",
+      "description": "多指标环形进度展示卡片，支持4个指标2x2排列",
+      "category": "progress",
+      "file": "circular_metrics_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "metrics",
+          "type": "List<MetricData>",
+          "required": true,
+          "description": "指标数据列表（最多4个）",
+          "subParameters": [
+            {
+              "name": "icon",
+              "type": "int",
+              "description": "图标代码点 (IconData.codePoint)"
+            },
+            {
+              "name": "value",
+              "type": "String",
+              "description": "数值文本"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签文本"
+            },
+            {
+              "name": "progress",
+              "type": "double",
+              "description": "进度值 (0.0-1.0)"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CurveProgressCardWidget",
+      "displayName": "曲线进度卡片",
+      "description": "曲线进度展示卡片，含数值动画和曲线图",
+      "category": "progress",
+      "file": "curve_progress_card.dart",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "主数值"
+        },
+        {
+          "name": "label",
+          "type": "String",
+          "required": true,
+          "description": "数值标签"
+        },
+        {
+          "name": "change",
+          "type": "double",
+          "required": true,
+          "description": "变化量"
+        },
+        {
+          "name": "changePercent",
+          "type": "double",
+          "required": true,
+          "description": "变化百分比"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "",
+          "description": "单位"
+        },
+        {
+          "name": "icon",
+          "type": "int",
+          "required": false,
+          "defaultValue": "Icons.schedule",
+          "description": "图标代码点 (IconData.codePoint)"
+        },
+        {
+          "name": "categoryLabel",
+          "type": "String",
+          "required": false,
+          "defaultValue": "Progress",
+          "description": "分类标签"
+        },
+        {
+          "name": "lastUpdated",
+          "type": "String",
+          "required": false,
+          "defaultValue": "",
+          "description": "更新时间文本"
+        }
+      ]
+    },
+    {
+      "name": "ActivityProgressCardWidget",
+      "displayName": "活动进度卡片",
+      "description": "显示数值、单位、活动数和进度点",
+      "category": "progress",
+      "file": "activity_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "value",
+          "type": "double",
+          "required": true,
+          "description": "数值"
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": true,
+          "description": "单位"
+        },
+        {
+          "name": "activities",
+          "type": "int",
+          "required": true,
+          "description": "活动数"
+        },
+        {
+          "name": "totalProgress",
+          "type": "int",
+          "required": true,
+          "description": "总进度数"
+        },
+        {
+          "name": "completedProgress",
+          "type": "int",
+          "required": true,
+          "description": "已完成进度数"
+        }
+      ]
+    },
+    {
+      "name": "ActivityRingsCardWidget",
+      "displayName": "活动圆环卡片",
+      "description": "显示日期、步数、状态和圆环进度",
+      "category": "progress",
+      "file": "activity_rings_card.dart",
+      "parameters": [
+        {
+          "name": "date",
+          "type": "String",
+          "required": true,
+          "description": "日期标签"
+        },
+        {
+          "name": "steps",
+          "type": "int",
+          "required": true,
+          "description": "步数"
+        },
+        {
+          "name": "status",
+          "type": "String",
+          "required": true,
+          "description": "状态文本"
+        },
+        {
+          "name": "rings",
+          "type": "List<RingData>",
+          "required": true,
+          "description": "圆环数据列表",
+          "subParameters": [
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值（0-100）"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色（ARGB int）"
+            },
+            {
+              "name": "iconCodePoint",
+              "type": "int?",
+              "description": "图标 codePoint（可选）"
+            },
+            {
+              "name": "isDiamond",
+              "type": "bool",
+              "description": "是否菱形样式"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CircularMetricsCardWidget",
+      "displayName": "环形指标卡片",
+      "description": "4个环形指标网格，每个带图标、数值、标签和进度",
+      "category": "progress",
+      "file": "circular_metrics_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "metrics",
+          "type": "List<MetricData>",
+          "required": true,
+          "description": "指标数据列表（最多4个，不足用默认值填充）",
+          "subParameters": [
+            {
+              "name": "icon",
+              "type": "int",
+              "description": "图标 codePoint（Material Icons）"
+            },
+            {
+              "name": "value",
+              "type": "String",
+              "description": "数值文本"
+            },
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签文本"
+            },
+            {
+              "name": "progress",
+              "type": "double",
+              "description": "进度（0-1）"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色（ARGB int）"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CircularProgressCardWidget",
+      "displayName": "圆形进度卡片",
+      "description": "显示圆形进度环和百分比数值",
+      "category": "progress",
+      "file": "circular_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题（显示天数等信息）"
+        },
+        {
+          "name": "percentage",
+          "type": "double",
+          "required": true,
+          "description": "百分比数值（0-100）"
+        },
+        {
+          "name": "progress",
+          "type": "double",
+          "required": true,
+          "description": "进度值（0.0-1.0）"
+        },
+        {
+          "name": "progressColor",
+          "type": "Color",
+          "required": false,
+          "description": "进度颜色（可选，默认使用主题色）"
+        }
+      ]
+    },
+    {
+      "name": "HalfGaugeCardWidget",
+      "displayName": "半圆仪表盘",
+      "description": "半圆形的预算/进度仪表盘，显示剩余金额和进度",
+      "category": "progress",
+      "file": "half_gauge_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": false,
+          "defaultValue": "Shopping",
+          "description": "仪表盘标题，显示在顶部"
+        },
+        {
+          "name": "totalBudget",
+          "type": "double",
+          "required": true,
+          "description": "总预算金额"
+        },
+        {
+          "name": "remaining",
+          "type": "double",
+          "required": true,
+          "description": "剩余金额"
+        },
+        {
+          "name": "currency",
+          "type": "String",
+          "required": false,
+          "defaultValue": "AED",
+          "description": "货币符号或代码"
+        }
+      ]
+    },
+    {
+      "name": "TaskProgressCardWidget",
+      "displayName": "任务进度卡片",
+      "description": "显示任务完成进度和待办任务列表",
+      "category": "progress",
+      "file": "task_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "completedTasks",
+          "type": "int",
+          "required": true,
+          "description": "已完成任务数量"
+        },
+        {
+          "name": "totalTasks",
+          "type": "int",
+          "required": true,
+          "description": "总任务数量"
+        },
+        {
+          "name": "pendingTasks",
+          "type": "List<String>",
+          "required": false,
+          "defaultValue": "[]",
+          "description": "待办任务列表（最多显示3个）"
+        }
+      ]
+    },
+    {
+      "name": "NutritionProgressCardWidget",
+      "displayName": "营养进度卡片",
+      "description": "显示卡路里和营养素（蛋白质、碳水、脂肪等）的进度",
+      "category": "progress",
+      "file": "nutrition_progress_card.dart",
+      "parameters": [
+        {
+          "name": "calories",
+          "type": "NutritionData",
+          "required": true,
+          "description": "卡路里数据",
+          "subParameters": [
+            {
+              "name": "current",
+              "type": "double",
+              "description": "当前值"
+            },
+            {
+              "name": "total",
+              "type": "double",
+              "description": "目标值"
+            },
+            {
+              "name": "unit",
+              "type": "String",
+              "description": "单位"
+            }
+          ]
+        },
+        {
+          "name": "nutrients",
+          "type": "List<NutrientData>",
+          "required": true,
+          "description": "营养素列表",
+          "subParameters": [
+            {
+              "name": "icon",
+              "type": "String",
+              "description": "图标emoji"
+            },
+            {
+              "name": "name",
+              "type": "String",
+              "description": "名称"
+            },
+            {
+              "name": "current",
+              "type": "double",
+              "description": "当前值"
+            },
+            {
+              "name": "total",
+              "type": "double",
+              "description": "目标值"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TaskProgressListWidget",
+      "displayName": "任务进度列表",
+      "description": "显示任务列表及其进度条",
+      "category": "progress",
+      "file": "task_progress_list.dart",
+      "parameters": [
+        {
+          "name": "tasks",
+          "type": "List<TaskProgressData>",
+          "required": true,
+          "description": "任务列表",
+          "subParameters": [
+            {
+              "name": "title",
+              "type": "String",
+              "description": "任务标题"
+            },
+            {
+              "name": "time",
+              "type": "String",
+              "description": "时间"
+            },
+            {
+              "name": "progress",
+              "type": "double",
+              "description": "进度 (0.0 - 1.0)"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "进度颜色"
+            }
+          ]
+        },
+        {
+          "name": "moreCount",
+          "type": "int",
+          "required": false,
+          "defaultValue": "0",
+          "description": "更多任务数量"
+        }
+      ]
+    },
+    {
+      "name": "SegmentedProgressCardWidget",
+      "displayName": "分段进度条统计卡片",
+      "description": "显示分段进度条和分段列表",
+      "category": "progress",
+      "file": "segmented_progress_card.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "卡片标题"
+        },
+        {
+          "name": "currentValue",
+          "type": "double",
+          "required": true,
+          "description": "当前值"
+        },
+        {
+          "name": "targetValue",
+          "type": "double",
+          "required": true,
+          "description": "目标值"
+        },
+        {
+          "name": "segments",
+          "type": "List<SegmentData>",
+          "required": true,
+          "description": "分段数据",
+          "subParameters": [
+            {
+              "name": "label",
+              "type": "String",
+              "description": "标签"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            },
+            {
+              "name": "color",
+              "type": "Color",
+              "description": "颜色"
+            }
+          ]
+        },
+        {
+          "name": "unit",
+          "type": "String",
+          "required": false,
+          "defaultValue": "''",
+          "description": "单位"
+        }
+      ]
+    },
+    {
+      "name": "RoundedTaskProgressWidget",
+      "displayName": "圆角任务进度组件",
+      "description": "显示任务进度、待办任务列表和团队头像",
+      "category": "progress",
+      "file": "rounded_task_progress_widget.dart",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "completedTasks",
+          "type": "int",
+          "required": true,
+          "description": "已完成任务数"
+        },
+        {
+          "name": "totalTasks",
+          "type": "int",
+          "required": true,
+          "description": "总任务数"
+        },
+        {
+          "name": "pendingTasks",
+          "type": "List<String>",
+          "required": true,
+          "description": "待办任务列表"
+        },
+        {
+          "name": "commentCount",
+          "type": "int",
+          "required": true,
+          "description": "评论数"
+        },
+        {
+          "name": "attachmentCount",
+          "type": "int",
+          "required": true,
+          "description": "附件数"
+        },
+        {
+          "name": "teamAvatars",
+          "type": "List<String>",
+          "required": true,
+          "description": "团队成员头像URL列表"
+        }
+      ]
+    },
+    {
+      "name": "MultiMetricProgressCardWidget",
+      "displayName": "多指标进度卡片",
+      "description": "显示多个带进度环的指标",
+      "category": "progress",
+      "file": "multi_metric_progress_card.dart",
+      "parameters": [
+        {
+          "name": "trackers",
+          "type": "List<MetricProgressData>",
+          "required": true,
+          "description": "追踪器数据列表",
+          "subParameters": [
+            {
+              "name": "emoji",
+              "type": "String",
+              "description": "Emoji图标"
+            },
+            {
+              "name": "progress",
+              "type": "double",
+              "description": "进度值（0-100）"
+            },
+            {
+              "name": "progressColor",
+              "type": "Color",
+              "description": "进度条颜色"
+            },
+            {
+              "name": "title",
+              "type": "String",
+              "description": "标题"
+            },
+            {
+              "name": "subtitle",
+              "type": "String",
+              "description": "副标题"
+            },
+            {
+              "name": "value",
+              "type": "double",
+              "description": "数值"
+            },
+            {
+              "name": "unit",
+              "type": "String",
+              "description": "单位"
+            }
+          ]
+        },
+        {
+          "name": "backgroundColor",
+          "type": "Color",
+          "required": true,
+          "defaultValue": "0xFF007AFF",
+          "description": "卡片背景色"
+        }
+      ]
+    },
+    {
+      "name": "MonthlyProgressWithDotsCardWidget",
+      "displayName": "月度进度圆点卡片",
+      "description": "显示月份进度和圆点矩阵（3x11=33天）",
+      "category": "progress",
+      "file": "monthly_progress_with_dots_card.dart",
+      "parameters": [
+        {
+          "name": "month",
+          "type": "String",
+          "required": true,
+          "description": "月份名称"
+        },
+        {
+          "name": "currentDay",
+          "type": "int",
+          "required": true,
+          "description": "当前天数"
+        },
+        {
+          "name": "totalDays",
+          "type": "int",
+          "required": true,
+          "defaultValue": "31",
+          "description": "总天数"
+        },
+        {
+          "name": "percentage",
+          "type": "int",
+          "required": true,
+          "description": "百分比"
+        },
+        {
+          "name": "backgroundColor",
+          "type": "Color",
+          "required": true,
+          "defaultValue": "0xFF148690",
+          "description": "背景颜色"
+        },
+        {
+          "name": "activeDotColor",
+          "type": "Color",
+          "required": false,
+          "description": "已过日期的颜色"
+        },
+        {
+          "name": "inactiveDotColor",
+          "type": "Color",
+          "required": false,
+          "description": "未过日期的颜色"
+        }
+      ]
+    },
+    {
+      "name": "IconCircularProgressCardWidget",
+      "displayName": "图标圆形进度卡片",
+      "description": "显示带圆形进度条的卡片，支持图标、通知点、标题和副标题",
+      "category": "progress",
+      "file": "icon_circular_progress_card.dart",
+      "parameters": [
+        {
+          "name": "progress",
+          "type": "double",
+          "required": true,
+          "description": "进度值（0.0 - 1.0）"
+        },
+        {
+          "name": "icon",
+          "type": "int",
+          "required": true,
+          "description": "中心图标codePoint"
+        },
+        {
+          "name": "title",
+          "type": "String",
+          "required": true,
+          "description": "标题"
+        },
+        {
+          "name": "subtitle",
+          "type": "String",
+          "required": true,
+          "description": "副标题"
+        },
+        {
+          "name": "showNotification",
+          "type": "bool",
+          "required": false,
+          "defaultValue": "false",
+          "description": "是否显示通知点"
+        },
+        {
+          "name": "progressColor",
+          "type": "Color",
+          "required": false,
+          "description": "进度颜色（可选）"
+        }
+      ]
+    }
+  ],
+  "commonParameters": {
+    "Color": {
+      "type": "int",
+      "description": "颜色值，使用 ARGB 格式的整数 (如 0xFF007AFF)",
+      "examples": [
+        "0xFF007AFF - 蓝色",
+        "0xFFFF3B30 - 红色",
+        "0xFF34C759 - 绿色",
+        "0xFFFFCC00 - 黄色",
+        "0xFF8E8E93 - 灰色"
+      ]
+    },
+    "Duration": {
+      "note": "在 JSON 序列化时需要转换为秒数",
+      "example": {
+        "durationInSeconds": 125
+      }
+    }
+  }
+}
