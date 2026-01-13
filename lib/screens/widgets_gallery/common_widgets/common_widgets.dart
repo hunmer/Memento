@@ -60,6 +60,7 @@ import 'widgets/event_calendar_widget.dart';
 import 'widgets/rounded_task_progress_widget.dart';
 import 'widgets/dual_range_chart_card.dart';
 import 'widgets/daily_bar_chart_card.dart';
+import 'widgets/nutrition_progress_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -123,6 +124,7 @@ enum CommonWidgetId {
   roundedTaskProgressWidget,
   dualRangeChartCard,
   dailyBarChartCard,
+  nutritionProgressCard,
 }
 
 /// 公共小组件元数据
@@ -612,6 +614,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.nutritionProgressCard: CommonWidgetMetadata(
+      id: CommonWidgetId.nutritionProgressCard,
+      name: '营养进度卡片',
+      description: '显示卡路里和营养素（蛋白质、碳水化合物、脂肪）进度，支持动画计数',
+      icon: Icons.restaurant,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -761,6 +771,8 @@ class CommonWidgetBuilder {
         return DualRangeChartCardWidget.fromProps(props, size);
       case CommonWidgetId.dailyBarChartCard:
         return DailyBarChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.nutritionProgressCard:
+        return NutritionProgressCardWidget.fromProps(props, size);
     }
   }
 }
