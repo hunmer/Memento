@@ -110,6 +110,8 @@ class _CommonWeeklyBarChartCardWidgetState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
+              height: 300,
+              width: 300,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),

@@ -1,6 +1,5 @@
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/color_tag_task_card_data.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/color_tag_task_card.dart';
 
 /// 彩色标签任务列表卡片示例
