@@ -65,6 +65,13 @@ import 'widgets/portfolio_stacked_chart.dart';
 import 'widgets/activity_rings_card.dart';
 import 'widgets/category_stack_widget.dart';
 import 'widgets/performance_bar_chart.dart';
+import 'widgets/expense_donut_chart.dart';
+import 'widgets/ranked_bar_chart_card.dart';
+import 'widgets/rental_preview_card.dart';
+import 'widgets/rounded_property_card.dart';
+import 'widgets/task_list_stat_card.dart';
+import 'widgets/vertical_property_card.dart';
+import 'widgets/task_progress_list.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -133,6 +140,13 @@ enum CommonWidgetId {
   activityRingsCard,
   categoryStackWidget,
   performanceBarChart,
+  expenseDonutChart,
+  rankedBarChartCard,
+  rentalPreviewCard,
+  roundedPropertyCard,
+  taskListStatCard,
+  verticalPropertyCard,
+  taskProgressList,
 }
 
 /// 公共小组件元数据
@@ -662,6 +676,62 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.expenseDonutChart: CommonWidgetMetadata(
+      id: CommonWidgetId.expenseDonutChart,
+      name: '支出分类环形图',
+      description: '显示支出分类的环形图和分类列表，支持总额显示和翻转计数动画',
+      icon: Icons.pie_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.rankedBarChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.rankedBarChartCard,
+      name: '排名条形图卡片',
+      description: '显示排名条形图列表，支持标题、副标题、条目计数和页脚文本',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.rentalPreviewCard: CommonWidgetMetadata(
+      id: CommonWidgetId.rentalPreviewCard,
+      name: '租赁预览卡片',
+      description: '显示租赁信息的卡片，包含图片、标题、评分、描述和时间',
+      icon: Icons.home_work,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.roundedPropertyCard: CommonWidgetMetadata(
+      id: CommonWidgetId.roundedPropertyCard,
+      name: '圆角属性卡片',
+      description: '显示房地产属性的卡片，包含图片、标题、元数据和描述',
+      icon: Icons.home,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.taskListStatCard: CommonWidgetMetadata(
+      id: CommonWidgetId.taskListStatCard,
+      name: '任务统计列表卡片',
+      description: '显示任务统计和列表的卡片，包含图标、计数和任务列表',
+      icon: Icons.format_list_bulleted,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.verticalPropertyCard: CommonWidgetMetadata(
+      id: CommonWidgetId.verticalPropertyCard,
+      name: '垂直属性卡片',
+      description: '显示属性信息的垂直卡片，包含图片、标题、元数据和操作按钮',
+      icon: Icons.home_outlined,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.taskProgressList: CommonWidgetMetadata(
+      id: CommonWidgetId.taskProgressList,
+      name: '任务进度列表',
+      description: '显示任务进度列表，包含任务标题、时间和进度条',
+      icon: Icons.task_alt,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -821,6 +891,20 @@ class CommonWidgetBuilder {
         return CategoryStackWidget.fromProps(props, size);
       case CommonWidgetId.performanceBarChart:
         return PerformanceBarChartWidget.fromProps(props, size);
+      case CommonWidgetId.expenseDonutChart:
+        return ExpenseDonutChartWidget.fromProps(props, size);
+      case CommonWidgetId.rankedBarChartCard:
+        return RankedBarChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.rentalPreviewCard:
+        return RentalPreviewCardWidget.fromProps(props, size);
+      case CommonWidgetId.roundedPropertyCard:
+        return RoundedPropertyCardWidget.fromProps(props, size);
+      case CommonWidgetId.taskListStatCard:
+        return TaskListStatCardWidget.fromProps(props, size);
+      case CommonWidgetId.verticalPropertyCard:
+        return VerticalPropertyCardWidget.fromProps(props, size);
+      case CommonWidgetId.taskProgressList:
+        return TaskProgressListWidget.fromProps(props, size);
     }
   }
 }
