@@ -260,6 +260,13 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     final primaryLight =
         isDark ? primaryColor.withOpacity(0.3) : primaryColor.withOpacity(0.4);
 
+    // 数值显示（使用 Positioned 定位在右上角）
+    final valueDisplay = Positioned(
+      top: 16,
+      right: 24,
+      child: _buildValueDisplay(textColor, mutedColor),
+    );
+
     final animatedChild = AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -272,47 +279,39 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
           ),
         );
       },
-      child: Container(
-        width: widget.width ?? double.infinity,
-        height: widget.height ?? double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 标题栏
-            _buildHeader(context, isDark, primaryColor, textColor, mutedColor),
-            const SizedBox(height: 16),
-
-            // 主要内容
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // 数值显示
-                _buildValueDisplay(textColor, mutedColor),
-                // 点阵进度
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: _buildDotsGrid(primaryColor, primaryLight),
-                  ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: widget.width ?? double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 4),
+                  spreadRadius: 0,
                 ),
               ],
             ),
-          ],
-        ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 标题栏（包含 status 作为副标题）
+                _buildHeader(context, isDark, primaryColor, textColor, mutedColor),
+                const SizedBox(height: 16),
+                // 点阵进度（占满宽度）
+                _buildDotsGrid(primaryColor, primaryLight),
+              ],
+            ),
+          ),
+          // 数值显示在左上角（使用 Positioned，不受 padding 影响）
+          valueDisplay,
+        ],
       ),
     );
 
@@ -330,16 +329,18 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
   Widget _buildHeader(BuildContext context, bool isDark, Color primaryColor,
       Color textColor, Color mutedColor) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
+        Icon(
+          widget.icon,
+          color: primaryColor,
+          size: 28,
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-                widget.icon,
-                color: primaryColor,
-                size: 28,
-              ),
-            const SizedBox(width: 10),
             Text(
               widget.title,
               style: TextStyle(
@@ -349,74 +350,46 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
                 letterSpacing: -0.5,
               ),
             ),
-          ],
-        ),
-        TextButton.icon(
-          onPressed: widget.onTap,
-          icon: Icon(
-            Icons.chevron_right,
-            color: mutedColor,
-            size: 20,
-          ),
-          label: Text(
-            'Today',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: mutedColor,
+            const SizedBox(height: 2),
+            Text(
+              widget.status,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: mutedColor,
+              ),
             ),
-          ),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          ),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildValueDisplay(Color textColor, Color mutedColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          height: 54,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              AnimatedFlipCounter(
-                value: widget.enableAnimation
-                    ? widget.currentValue * _animation.value
-                    : widget.currentValue.toDouble(),
-                textStyle: TextStyle(
-                  fontSize: 44,
-                  fontWeight: FontWeight.w800,
-                  color: textColor,
-                  height: 1.0,
-                  letterSpacing: -1,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                widget.unit,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: textColor.withOpacity(0.8),
-                  height: 1.0,
-                ),
-              ),
-            ],
+        AnimatedFlipCounter(
+          value: widget.enableAnimation
+              ? widget.currentValue * _animation.value
+              : widget.currentValue.toDouble(),
+          textStyle: TextStyle(
+            fontSize: 44,
+            fontWeight: FontWeight.w800,
+            color: textColor,
+            height: 1.0,
+            letterSpacing: -1,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(width: 6),
         Text(
-          widget.status,
+          widget.unit,
           style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: mutedColor,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: textColor.withOpacity(0.8),
+            height: 1.0,
           ),
         ),
       ],
