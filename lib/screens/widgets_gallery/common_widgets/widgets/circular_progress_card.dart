@@ -101,6 +101,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Container(
+            width: 150,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: backgroundColor,
