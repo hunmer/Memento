@@ -38,7 +38,7 @@ import 'widgets/score_card_widget.dart';
 import 'widgets/trend_value_card.dart';
 import 'widgets/trend_list_card.dart';
 import 'widgets/modern_flip_counter_card.dart';
-import 'widgets/mood_chart_card.dart';
+import 'widgets/chart_icon_display_card.dart';
 import 'widgets/news_update_card.dart';
 import 'widgets/news_card.dart';
 import 'widgets/daily_events_card.dart';
@@ -886,7 +886,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.modernEgfrHealthWidget:
         return ModernFlipCounterCard.fromProps(props, size);
       case CommonWidgetId.moodChartCard:
-        return MoodChartCardWidget.fromProps(props, size);
+        return ChartIconDisplayCard.fromProps(props, size);
       case CommonWidgetId.dailyEventsCard:
         return DailyEventsCardWidget.fromProps(props, size);
       case CommonWidgetId.dailyReflectionCard:

@@ -19,7 +19,7 @@ import 'package:Memento/screens/widgets_gallery/screens/rounded_task_progress_wi
 import 'package:Memento/screens/widgets_gallery/screens/milestone_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/watch_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/mood_tracker_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/chart_icon_display_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stress_level_monitor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
@@ -400,7 +400,7 @@ class _WidgetRegistry {
         () => const WatchProgressCardExample(),
     '/widgets_gallery/mood_tracker_widget':
         () => const MoodTrackerWidgetExample(),
-    '/widgets_gallery/mood_chart_card': () => const MoodChartCardExample(),
+    '/widgets_gallery/mood_chart_card': () => const ChartIconDisplayCardExample(),
     '/widgets_gallery/stress_level_monitor':
         () => const StressLevelMonitorExample(),
     '/widgets_gallery/sleep_tracking_card':

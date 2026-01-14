@@ -623,7 +623,7 @@
       "parameters": [
         {
           "name": "calories",
-          "type": "NutritionData",
+          "type": "ColumnProgressData",
           "required": true,
           "description": "卡路里数据",
           "subParameters": [
@@ -646,7 +646,7 @@
         },
         {
           "name": "nutrients",
-          "type": "List<NutrientData>",
+          "type": "List<ProgressItemData>",
           "required": true,
           "description": "营养素列表",
           "subParameters": [

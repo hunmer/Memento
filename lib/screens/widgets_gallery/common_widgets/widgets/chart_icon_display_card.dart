@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
-/// 心情数据模型
-class MoodEntry {
+/// 图表图标数据模型
+class ChartIconEntry {
   final String emoji;
   final String label;
   final int value;
 
-  const MoodEntry({
+  const ChartIconEntry({
     required this.emoji,
     required this.label,
     required this.value,
   });
 
   /// 从 JSON 创建
-  factory MoodEntry.fromJson(Map<String, dynamic> json) {
-    return MoodEntry(
+  factory ChartIconEntry.fromJson(Map<String, dynamic> json) {
+    return ChartIconEntry(
       emoji: json['emoji'] as String? ?? '',
       label: json['label'] as String? ?? '',
       value: json['value'] as int? ?? 0,
@@ -33,36 +33,36 @@ class MoodEntry {
 }
 
 /// 心情类型枚举
-enum MoodType {
+enum ChartIconType {
   emoji,
   color,
 }
 
 /// 心情类型扩展
-extension MoodTypeExtension on MoodType {
+extension ChartIconTypeExtension on ChartIconType {
   String toJson() {
     switch (this) {
-      case MoodType.emoji:
+      case ChartIconType.emoji:
         return 'emoji';
-      case MoodType.color:
+      case ChartIconType.color:
         return 'color';
     }
   }
 
-  static MoodType fromJson(String value) {
+  static ChartIconType fromJson(String value) {
     switch (value) {
       case 'emoji':
-        return MoodType.emoji;
+        return ChartIconType.emoji;
       case 'color':
-        return MoodType.color;
+        return ChartIconType.color;
       default:
-        return MoodType.emoji;
+        return ChartIconType.emoji;
     }
   }
 }
 
-/// 心情图表卡片小组件
-class MoodChartCardWidget extends StatefulWidget {
+/// 图标展示图表卡片小组件
+class ChartIconDisplayCard extends StatefulWidget {
   /// 标题
   final String title;
 
@@ -70,40 +70,40 @@ class MoodChartCardWidget extends StatefulWidget {
   final String subtitle;
 
   /// 心情数据列表
-  final List<MoodEntry> moods;
+  final List<ChartIconEntry> moods;
 
   /// 显示类型（emoji 或 color）
-  final MoodType displayType;
+  final ChartIconType displayType;
 
   /// 主题颜色
   final Color primaryColor;
 
-  const MoodChartCardWidget({
+  const ChartIconDisplayCard({
     super.key,
     required this.title,
     required this.subtitle,
     required this.moods,
-    this.displayType = MoodType.emoji,
+    this.displayType = ChartIconType.emoji,
     this.primaryColor = const Color(0xFF6366F1),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
-  factory MoodChartCardWidget.fromProps(
+  factory ChartIconDisplayCard.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
     final moodsList = (props['moods'] as List<dynamic>?)
-            ?.map((e) => MoodEntry.fromJson(e as Map<String, dynamic>))
+            ?.map((e) => ChartIconEntry.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
 
-    return MoodChartCardWidget(
+    return ChartIconDisplayCard(
       title: props['title'] as String? ?? '',
       subtitle: props['subtitle'] as String? ?? '',
       moods: moodsList,
       displayType: props['displayType'] != null
-          ? MoodTypeExtension.fromJson(props['displayType'] as String)
-          : MoodType.emoji,
+          ? ChartIconTypeExtension.fromJson(props['displayType'] as String)
+          : ChartIconType.emoji,
       primaryColor: props.containsKey('primaryColor')
           ? Color(props['primaryColor'] as int)
           : const Color(0xFF6366F1),
@@ -111,10 +111,10 @@ class MoodChartCardWidget extends StatefulWidget {
   }
 
   @override
-  State<MoodChartCardWidget> createState() => _MoodChartCardWidgetState();
+  State<ChartIconDisplayCard> createState() => _ChartIconDisplayCardState();
 }
 
-class _MoodChartCardWidgetState extends State<MoodChartCardWidget>
+class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -297,10 +297,10 @@ class _MoodChartCardWidgetState extends State<MoodChartCardWidget>
 
 /// 单个心情柱
 class _MoodBar extends StatelessWidget {
-  final MoodEntry mood;
+  final ChartIconEntry mood;
   final int maxValue;
   final Animation<double> animation;
-  final MoodType displayType;
+  final ChartIconType displayType;
   final Color primaryColor;
   final bool isDark;
 
@@ -327,14 +327,14 @@ class _MoodBar extends StatelessWidget {
               return Container(
                 height: barHeight * animation.value,
                 decoration: BoxDecoration(
-                  color: displayType == MoodType.color
+                  color: displayType == ChartIconType.color
                       ? primaryColor.withOpacity(0.7)
                       : isDark
                           ? Colors.grey.shade700
                           : Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: displayType == MoodType.emoji
+                child: displayType == ChartIconType.emoji
                     ? Center(
                         child: Text(
                           mood.emoji,
