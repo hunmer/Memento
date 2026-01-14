@@ -246,61 +246,47 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: Row(
+            child: Column(
               children: [
-                // 左侧垂直 TabBar
-                SizedBox(
-                  width: 120,
-                  child: SingleChildScrollView(
-                    child: IntrinsicHeight(
-                      child: ExtendedTabBar(
-                        controller: _tabController,
-                        scrollDirection: Axis.vertical,
-                        isScrollable: true,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        labelColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                        labelStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        unselectedLabelStyle: const TextStyle(fontSize: 14),
-                        tabs:
-                            _availableCommonWidgets.keys.map((widgetId) {
-                          final metadata =
-                              CommonWidgetsRegistry.getMetadata(
-                                CommonWidgetId.values.firstWhere(
-                                  (e) => e.name == widgetId,
-                                ),
-                              );
-                          return SizedBox(
-                            height: 48,
-                            child: ExtendedTab(
-                              text: metadata.name,
-                              scrollDirection: Axis.vertical,
-                            ),
-                            );
-                        }).toList(),
-                      ),
-                    ),
+                // 顶部水平 TabBar
+                ExtendedTabBar(
+                  controller: _tabController,
+                  scrollDirection: Axis.horizontal,
+                  isScrollable: true,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelColor: Theme.of(context).colorScheme.primary,
+                  unselectedLabelColor:
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                  labelStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
+                  unselectedLabelStyle: const TextStyle(fontSize: 14),
+                  tabs: _availableCommonWidgets.keys.map((widgetId) {
+                    final metadata = CommonWidgetsRegistry.getMetadata(
+                      CommonWidgetId.values.firstWhere(
+                        (e) => e.name == widgetId,
+                      ),
+                    );
+                    return Tab(
+                      text: metadata.name,
+                    );
+                  }).toList(),
                 ),
-                const SizedBox(width: 8),
-                // 右侧 TabBarView 展示预览
+                const SizedBox(height: 8),
+                // 下方 TabBarView 展示预览
                 Expanded(
                   child: ExtendedTabBarView(
                     controller: _tabController,
-                    scrollDirection: Axis.vertical,
-                    children:
-                        _availableCommonWidgets.keys.map((widgetId) {
-                          final metadata = CommonWidgetsRegistry.getMetadata(
-                            CommonWidgetId.values.firstWhere(
-                              (e) => e.name == widgetId,
-                            ),
-                          );
-                          return _buildCommonWidgetPreview(metadata, widgetId);
-                        }).toList(),
+                    scrollDirection: Axis.horizontal,
+                    children: _availableCommonWidgets.keys.map((widgetId) {
+                      final metadata = CommonWidgetsRegistry.getMetadata(
+                        CommonWidgetId.values.firstWhere(
+                          (e) => e.name == widgetId,
+                        ),
+                      );
+                      return _buildCommonWidgetPreview(metadata, widgetId);
+                    }).toList(),
                   ),
                 ),
               ],
