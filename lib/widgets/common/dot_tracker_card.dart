@@ -273,8 +273,8 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         );
       },
       child: Container(
-        width: widget.width ?? 380,
-        height: widget.height ?? 200,
+        width: widget.width ?? double.infinity,
+        height: widget.height ?? double.infinity,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -293,7 +293,7 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
           children: [
             // 标题栏
             _buildHeader(context, isDark, primaryColor, textColor, mutedColor),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
 
             // 主要内容
             Row(
@@ -303,7 +303,12 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
                 // 数值显示
                 _buildValueDisplay(textColor, mutedColor),
                 // 点阵进度
-                _buildDotsGrid(primaryColor, primaryLight),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _buildDotsGrid(primaryColor, primaryLight),
+                  ),
+                ),
               ],
             ),
           ],
@@ -422,33 +427,135 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final emptyDotColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
 
-    return Row(
-      children: List.generate(
-        7,
-        (index) {
-          // 计算安全的 step 值，确保最大 end 值不超过 1.0
-          // 公式: step <= (1.0 - baseEnd) / (elementCount - 1)
-          // step <= (1.0 - 0.6) / 6 = 0.066
-          final step = 0.06;
-          final itemAnimation = CurvedAnimation(
-            parent: _animationController,
-            curve: Interval(
-              index * step,
-              0.6 + index * step,
-              curve: Curves.easeOutCubic,
-            ),
-          );
+    // 根据实际天数动态计算
+    final dayCount = widget.weekDays.length;
 
-          return _DayDotColumn(
-            day: widget.weekDays[index],
-            dotStates: widget.dotStates[index],
-            primaryColor: primaryColor,
-            primaryLight: primaryLight,
-            emptyDotColor: emptyDotColor,
-            animation: widget.enableAnimation ? itemAnimation : AlwaysStoppedAnimation(1.0),
+    // 小于等于14天用单行，否则用多行网格布局
+    if (dayCount <= 14) {
+      final step = dayCount > 1 ? 0.35 / (dayCount - 1) : 0.0;
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          // 优先保证间距
+          final spacing = 4.0;
+          final totalSpacing = spacing * (dayCount - 1);
+          final availableWidth = constraints.maxWidth - totalSpacing;
+          var dotSize = availableWidth / dayCount;
+          dotSize = dotSize.clamp(4.0, 20.0);
+
+          return Row(
+            children:
+                List.generate(dayCount, (index) {
+                  final itemAnimation = CurvedAnimation(
+                    parent: _animationController,
+                    curve: Interval(
+                      index * step,
+                      0.65 + index * step,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  );
+                  return Padding(
+                    padding: EdgeInsets.only(right: index < dayCount - 1 ? spacing : 0),
+                    child: _DayDotColumn(
+                      day: widget.weekDays[index],
+                      dotStates: widget.dotStates[index],
+                      primaryColor: primaryColor,
+                      primaryLight: primaryLight,
+                      emptyDotColor: emptyDotColor,
+                      animation:
+                          widget.enableAnimation
+                              ? itemAnimation
+                              : AlwaysStoppedAnimation(1.0),
+                      totalDays: dayCount,
+                      dotSize: dotSize,
+                      dotSpacing: spacing,
+                    ),
+                  );
+                }).toList(),
           );
         },
-      ).toList(),
+      );
+    }
+
+    // 多行网格布局：计算行数和每行天数
+    final rowCount = dayCount > 30 ? 5 : 3;
+    final daysPerRow = (dayCount / rowCount).ceil();
+
+    // 计算动画步长
+    final step = dayCount > 1 ? 0.35 / (dayCount - 1) : 0.0;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 优先保证间距
+        final spacing = 4.0;
+        final rowSpacing = 8.0;
+        final maxDaysInRow = dayCount - (rowCount - 1) * daysPerRow;
+        final totalSpacing = spacing * (maxDaysInRow - 1);
+        final availableWidth = constraints.maxWidth - totalSpacing;
+        // 根据高度限制圆点大小：(总高度 - 行间距) / 行数
+        final maxDotSizeByHeight =
+            (constraints.maxHeight - rowSpacing * (rowCount - 1)) / rowCount;
+        var dotSize = availableWidth / maxDaysInRow;
+        dotSize = dotSize.clamp(4.0, maxDotSizeByHeight.clamp(4.0, 16.0));
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children:
+              List.generate(rowCount, (rowIndex) {
+                final startIndex = rowIndex * daysPerRow;
+                final endIndex = (startIndex + daysPerRow).clamp(0, dayCount);
+                final rowDays = endIndex - startIndex;
+
+                if (startIndex >= dayCount) return const SizedBox.shrink();
+
+                // 判断是否为最后一行且不满
+                final isLastRow = rowIndex == rowCount - 1;
+                final isNotFull = rowDays < maxDaysInRow;
+
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: rowIndex < rowCount - 1 ? rowSpacing : 0,
+                  ),
+                  child: Row(
+                    // 最后一行不满时左对齐，否则均匀分布
+                    mainAxisAlignment: (isLastRow && isNotFull)
+                        ? MainAxisAlignment.start
+                        : MainAxisAlignment.spaceEvenly,
+                    children:
+                        List.generate(rowDays, (colIndex) {
+                          final index = startIndex + colIndex;
+                          final itemAnimation = CurvedAnimation(
+                            parent: _animationController,
+                            curve: Interval(
+                              index * step,
+                              0.65 + index * step,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          );
+                          // 只有非最后一行或最后一行满的时候才加右边距
+                          final needRightPadding = !(isLastRow && isNotFull) && colIndex < rowDays - 1;
+                          return Padding(
+                            padding: EdgeInsets.only(right: needRightPadding ? spacing : 0),
+                            child: _DayDotColumn(
+                              day: widget.weekDays[index],
+                              dotStates: widget.dotStates[index],
+                              primaryColor: primaryColor,
+                              primaryLight: primaryLight,
+                              emptyDotColor: emptyDotColor,
+                              animation:
+                                  widget.enableAnimation
+                                      ? itemAnimation
+                                      : AlwaysStoppedAnimation(1.0),
+                              totalDays: dayCount,
+                              dotSize: dotSize,
+                              dotSpacing: spacing,
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                );
+              }).toList(),
+        );
+      },
     );
   }
 }
@@ -461,6 +568,9 @@ class _DayDotColumn extends StatelessWidget {
   final Color primaryLight;
   final Color emptyDotColor;
   final Animation<double> animation;
+  final int totalDays;
+  final double dotSize;
+  final double dotSpacing;
 
   const _DayDotColumn({
     required this.day,
@@ -469,58 +579,41 @@ class _DayDotColumn extends StatelessWidget {
     required this.primaryLight,
     required this.emptyDotColor,
     required this.animation,
+    this.totalDays = 7,
+    required this.dotSize,
+    required this.dotSpacing,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              3,
-              (index) {
-                final isEnabled = index < dotStates.length && dotStates[index];
-                return AnimatedBuilder(
-                  animation: animation,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: isEnabled ? animation.value : 1.0,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 6),
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: isEnabled
-                              ? (index == 0 && dotStates.every((s) => !s)
-                                  ? primaryLight
-                                  : primaryColor)
-                              : emptyDotColor,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            day,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF9CA3AF)
-                  : const Color(0xFF6B7280),
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        dotStates.length, (index) {
+        final isEnabled = dotStates[index];
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: isEnabled ? animation.value : 1.0,
+              child: Container(
+                margin: EdgeInsets.only(bottom: dotSpacing),
+                width: dotSize,
+                height: dotSize,
+                decoration: BoxDecoration(
+                  color:
+                      isEnabled
+                          ? (index == 0 && dotStates.every((s) => !s)
+                              ? primaryLight
+                              : primaryColor)
+                          : emptyDotColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }
