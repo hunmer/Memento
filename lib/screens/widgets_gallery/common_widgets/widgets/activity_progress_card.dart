@@ -153,20 +153,18 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
 
                 // 数值和活动数
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Expanded(
-                      child: AnimatedFlipCounter(
-                        value: widget.value * _animation.value,
-                        fractionDigits: 1,
-                        textStyle: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.grey.shade900,
-                        ),
+                    AnimatedFlipCounter(
+                      value: widget.value * _animation.value,
+                      fractionDigits: 1,
+                      textStyle: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.grey.shade900,
                       ),
                     ),
+                    const SizedBox(width: 4),
                     SizedBox(
                       height: 20,
                       child: Text(
@@ -180,6 +178,7 @@ class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
                         ),
                       ),
                     ),
+                    const Spacer(),
                     if (widget.activities > 0)
                       Text(
                         '${widget.activities} 活动',
