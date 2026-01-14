@@ -9,7 +9,6 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
-import 'package:Memento/widgets/event_listener_container.dart';
 import 'checkin_plugin.dart';
 import 'models/checkin_item.dart';
 
@@ -70,7 +69,6 @@ class CheckinHomeWidgets {
         supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
         category: 'home_categoryRecord'.tr,
         selectorId: 'checkin.item',
-        dataRenderer: _renderCheckinItemData,
         navigationHandler: _navigateToCheckinItem,
         dataSelector: _extractCheckinItemData,
         // 公共小组件提供者
@@ -222,6 +220,31 @@ class CheckinHomeWidgets {
         }),
         'checkedDays': weeklyCheckins,
         'totalDays': 7,
+      },
+
+      // 签到项目卡片：显示项目图标、名称、今日状态和热力图
+      'checkinItemCard': {
+        'id': data['id'],
+        'title': name,
+        'subtitle': group.isNotEmpty ? group : '签到',
+        'iconCodePoint': iconCode,
+        'color': colorValue,
+        'isCheckedToday': isCheckedToday,
+        // 周数据（用于 medium 尺寸）
+        'weekData': List.generate(7, (index) {
+          final i = 6 - index;
+          final date = DateTime.now().subtract(Duration(days: i));
+          final dateStr =
+              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+          final hasRecord = item?.checkInRecords.containsKey(dateStr) == true &&
+              (item?.checkInRecords[dateStr]?.isEmpty == false);
+          return {
+            'day': '周${['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1]}',
+            'isChecked': hasRecord,
+          };
+        }),
+        // 月度数据（用于 large 尺寸）
+        'daysData': _generateMonthlyDotsData(item),
       },
     };
   }
@@ -450,296 +473,6 @@ class CheckinHomeWidgets {
           ),
         ],
       ),
-    );
-  }
-
-  // ===== 签到项目选择器小组件相关方法 =====
-
-  /// 渲染签到项目数据
-  static Widget _renderCheckinItemData(
-    BuildContext context,
-    SelectorResult result,
-    Map<String, dynamic> config,
-  ) {
-    // 从初始化数据中获取项目ID
-    final itemData = result.data as Map<String, dynamic>;
-    final itemId = itemData['id'] as String?;
-
-    if (itemId == null) {
-      return _buildErrorWidget(context, '项目不存在');
-    }
-
-    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return EventListenerContainer(
-          events: const ['checkin_deleted'],
-          onEvent: () => setState(() {}),
-          child: _buildCheckinItemWidget(context, itemId, config),
-        );
-      },
-    );
-  }
-
-  /// 构建签到项目小组件内容（获取最新数据）
-  static Widget _buildCheckinItemWidget(
-    BuildContext context,
-    String itemId,
-    Map<String, dynamic> config,
-  ) {
-    final theme = Theme.of(context);
-
-    // 从 PluginManager 获取最新的项目数据
-    final plugin =
-        PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
-    if (plugin == null) {
-      return _buildErrorWidget(context, '插件不可用');
-    }
-
-    // 查找对应项目
-    CheckinItem? checkinItem;
-    try {
-      checkinItem = plugin.checkinItems.firstWhere(
-        (i) => i.id == itemId,
-        orElse: () => throw Exception('项目不存在'),
-      );
-    } catch (e) {
-      return _buildErrorWidget(context, '项目不存在');
-    }
-
-    final name = checkinItem.name;
-    final group = checkinItem.group;
-    final iconCode = checkinItem.icon.codePoint;
-    final colorValue = checkinItem.color.value;
-    final isCheckedToday = checkinItem.isCheckedToday();
-    final itemColor = Color(colorValue);
-
-    // 获取卡片大小
-    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
-    final showHeatmap =
-        widgetSize == HomeWidgetSize.medium ||
-        widgetSize == HomeWidgetSize.large;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 习惯图标和标题（占据左上角）
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: itemColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  IconData(iconCode, fontFamily: 'MaterialIcons'),
-                  color: itemColor,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (group != null)
-                      Text(
-                        group,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.outline,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
-              ),
-              // 右上角打卡状态
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color:
-                      isCheckedToday
-                          ? Colors.green.withOpacity(0.15)
-                          : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color:
-                        isCheckedToday
-                            ? Colors.green.withOpacity(0.3)
-                            : Colors.grey.withOpacity(0.2),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isCheckedToday
-                          ? Icons.check_circle
-                          : Icons.circle_outlined,
-                      size: 14,
-                      color: isCheckedToday ? Colors.green : Colors.grey,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      isCheckedToday ? '已打卡' : '未打卡',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isCheckedToday ? Colors.green : Colors.grey,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          // 热力图（根据卡片大小显示不同范围）
-          if (showHeatmap) ...[
-            const SizedBox(height: 12),
-            _buildHeatmapGrid(context, checkinItem, itemColor, widgetSize!),
-          ],
-        ],
-      ),
-    );
-  }
-
-  /// 构建热力图网格
-  static Widget _buildHeatmapGrid(
-    BuildContext context,
-    CheckinItem item,
-    Color itemColor,
-    HomeWidgetSize size,
-  ) {
-    final today = DateTime.now();
-    final List<int> checkStatus = [];
-    final List<bool> isChecked = [];
-
-    if (size == HomeWidgetSize.medium) {
-      // medium: 显示过去7天
-      for (int i = 6; i >= 0; i--) {
-        final date = today.subtract(Duration(days: i));
-        final dateStr =
-            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-        checkStatus.add(date.day);
-        isChecked.add(
-          item.checkInRecords.containsKey(dateStr) &&
-              item.checkInRecords[dateStr]!.isNotEmpty,
-        );
-      }
-    } else {
-      // large: 显示当月所有日期
-      final daysInMonth = DateTime(today.year, today.month + 1, 0).day;
-      for (int day = 1; day <= daysInMonth; day++) {
-        final dateStr =
-            '${today.year}-${today.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
-        checkStatus.add(day);
-        isChecked.add(
-          item.checkInRecords.containsKey(dateStr) &&
-              item.checkInRecords[dateStr]!.isNotEmpty,
-        );
-      }
-
-      // 居中显示：首尾添加空网格占位
-      final daysInMonthMod = daysInMonth % 7;
-      if (daysInMonthMod != 0) {
-        final emptyCount = 7 - daysInMonthMod;
-        final emptyAtStart = emptyCount ~/ 2;
-        final emptyAtEnd = emptyCount - emptyAtStart;
-
-        for (int i = 0; i < emptyAtStart; i++) {
-          checkStatus.insert(0, 0); // 0表示空网格占位
-          isChecked.insert(0, false);
-        }
-        for (int i = 0; i < emptyAtEnd; i++) {
-          checkStatus.add(0);
-          isChecked.add(false);
-        }
-      }
-    }
-
-    final crossAxisCount = 7;
-    final spacing = size == HomeWidgetSize.medium ? 4.0 : 3.0;
-    final showNumber = size == HomeWidgetSize.large;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final maxHeight = constraints.maxHeight;
-
-        final totalWidthSpacing = (crossAxisCount - 1) * spacing;
-        final cellWidth = (maxWidth - totalWidthSpacing) / crossAxisCount;
-
-        final totalItems = checkStatus.length;
-        final rows = (totalItems / crossAxisCount).ceil();
-
-        final totalHeightSpacing = (rows - 1) * spacing;
-        final cellHeight = (maxHeight - totalHeightSpacing) / rows;
-
-        final cellSize = cellWidth < cellHeight ? cellWidth : cellHeight;
-        final fontSize = cellSize * 0.4;
-
-        final totalHeight = rows * cellSize + (rows - 1) * spacing;
-
-        return SizedBox(
-          height: totalHeight.clamp(0.0, maxHeight),
-          child: Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            alignment: WrapAlignment.start,
-            runAlignment: WrapAlignment.start,
-            children: List.generate(checkStatus.length, (index) {
-              final day = checkStatus[index];
-              final checked = isChecked[index];
-
-              if (day == 0) {
-                // 空网格占位
-                return SizedBox(width: cellSize, height: cellSize);
-              }
-
-              return SizedBox(
-                width: cellSize,
-                height: cellSize,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color:
-                        checked
-                            ? itemColor.withOpacity(0.6)
-                            : itemColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(cellSize / 3),
-                  ),
-                  child:
-                      showNumber
-                          ? Center(
-                            child: Text(
-                              '$day',
-                              style: TextStyle(
-                                fontSize: fontSize,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          )
-                          : null,
-                ),
-              );
-            }),
-          ),
-        );
-      },
     );
   }
 
