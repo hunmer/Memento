@@ -246,40 +246,6 @@
       ]
     },
     {
-      "name": "WeeklySleepTrackerCardWidget",
-      "displayName": "周睡眠追踪卡片",
-      "description": "周睡眠数据追踪，显示总时长和每天进度环",
-      "category": "tracking",
-      "file": "weekly_sleep_tracker_card.dart",
-      "note": "已弃用，使用 lib/widgets/common 中的 WeeklySleepTrackerCard 代替",
-      "parameters": [
-        {
-          "name": "totalHours",
-          "type": "double",
-          "required": true,
-          "description": "总睡眠时长（小时）"
-        },
-        {
-          "name": "statusLabel",
-          "type": "String",
-          "required": true,
-          "description": "状态标签（如 'Insomniac'）"
-        },
-        {
-          "name": "weeklyData",
-          "type": "List<DaySleepData>",
-          "required": true,
-          "description": "每周数据（7天）"
-        },
-        {
-          "name": "primaryColor",
-          "type": "Color?",
-          "required": false,
-          "description": "主色调"
-        }
-      ]
-    },
-    {
       "name": "StressLevelMonitorWidget",
       "displayName": "压力水平监测卡片",
       "description": "压力水平监测，显示分数、状态和周数据柱状图",
@@ -575,51 +541,6 @@
               "description": "是否已记录"
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "WeeklySleepTrackerCardWidget",
-      "displayName": "睡眠追踪卡片",
-      "description": "显示总睡眠时长、状态标签和每周7天的进度环",
-      "category": "tracking",
-      "file": "weekly_sleep_tracker_card.dart",
-      "parameters": [
-        {
-          "name": "totalHours",
-          "type": "double",
-          "required": true,
-          "description": "总睡眠时长（小时）"
-        },
-        {
-          "name": "statusLabel",
-          "type": "String",
-          "required": true,
-          "description": "状态标签（如 'Insomniac'）"
-        },
-        {
-          "name": "weeklyData",
-          "type": "List<DaySleepData>",
-          "required": true,
-          "description": "每周数据（7天）",
-          "subParameters": [
-            {
-              "name": "hours",
-              "type": "double",
-              "description": "睡眠小时数"
-            },
-            {
-              "name": "isCompleted",
-              "type": "bool",
-              "description": "是否完成"
-            }
-          ]
-        },
-        {
-          "name": "primaryColor",
-          "type": "Color",
-          "required": false,
-          "description": "主色调（可选）"
         }
       ]
     },
