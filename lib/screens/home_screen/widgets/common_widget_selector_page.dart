@@ -39,8 +39,11 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
   /// Tab控制器
   late TabController _tabController;
 
-  /// 当前选择的数据
+  /// 当前选择的数据（经过 dataSelector 转换后的）
   Map<String, dynamic>? _selectedData;
+
+  /// 原始的 SelectorResult（用于保存完整的配置信息）
+  SelectorResult? _originalSelectorResult;
 
   /// 可用的公共小组件列表
   Map<String, Map<String, dynamic>> _availableCommonWidgets = {};
@@ -162,6 +165,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                     onPressed: () {
                       setState(() {
                         _selectedData = null;
+                        _originalSelectorResult = null;
                         _availableCommonWidgets = {};
                       });
                     },
@@ -352,6 +356,9 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
   void _onDataSelected(SelectorResult? result) {
     if (result == null) return;
 
+    // 保存原始的 SelectorResult
+    _originalSelectorResult = result;
+
     // 转换数据格式
     Map<String, dynamic> data;
     if (result.data is Map) {
@@ -410,7 +417,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
   /// 确认选择
   void _confirmSelection() {
-    if (_selectedData == null || _availableCommonWidgets.isEmpty) return;
+    if (_selectedData == null || _availableCommonWidgets.isEmpty || _originalSelectorResult == null) return;
 
     // 从当前激活的 tab 获取选中的 widgetId
     final index = _tabController.index;
@@ -418,9 +425,10 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
     final layoutManager = HomeLayoutManager();
 
-    // 生成 selectorWidgetConfig
+    // 使用原始 SelectorResult 的 toMap() 来保存完整的配置信息
+    // 这样可以保留 plugin、selector、path 等信息，确保导航功能正常
     final selectorConfig = SelectorWidgetConfig(
-      selectedData: {'data': _selectedData},
+      selectedData: _originalSelectorResult!.toMap(),
       lastUpdated: DateTime.now(),
       commonWidgetId: widgetId,
       commonWidgetProps: _availableCommonWidgets[widgetId],
