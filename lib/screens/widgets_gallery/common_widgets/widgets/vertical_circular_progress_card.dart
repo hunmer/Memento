@@ -74,7 +74,7 @@ class VerticalCircularProgressCard extends StatefulWidget {
     VerticalCircularProgressCardData? data;
 
     if (props.containsKey('data')) {
-      // 如果 data 是字符串，尝试解析
+      // 如果有 data 字段，从 data 中解析（向后兼容）
       final dataValue = props['data'];
       if (dataValue is String) {
         try {
@@ -85,36 +85,51 @@ class VerticalCircularProgressCard extends StatefulWidget {
       } else if (dataValue is Map<String, dynamic>) {
         data = VerticalCircularProgressCardData.fromJson(dataValue);
       }
+    } else {
+      // 如果没有 data 字段，直接从 props 根级别解析（与其他组件保持一致）
+      try {
+        data = VerticalCircularProgressCardData.fromJson(props);
+      } catch (e) {
+        debugPrint('Failed to parse VerticalCircularProgressCardData from props: $e');
+      }
     }
 
     // 如果解析失败，使用默认值
     data ??= VerticalCircularProgressCardData.createDefault();
 
+    // 处理 icon：支持 int (codePoint) 或 IconData
+    IconData? icon;
+    final iconValue = props['icon'];
+    if (iconValue is IconData) {
+      icon = iconValue;
+    } else if (iconValue is int) {
+      icon = IconData(iconValue, fontFamily: 'MaterialIcons');
+    }
+
     return VerticalCircularProgressCard(
       data: data,
       size: size,
-      icon: props['icon'] as IconData?,
+      icon: icon,
       width: props['width'] as double?,
       padding: props['padding'] as EdgeInsetsGeometry?,
       borderRadius: props['borderRadius'] as double?,
       showShadow: props['showShadow'] as bool?,
-      animationDuration: props['animationDuration'] != null
-          ? Duration(
-              milliseconds:
-                  props['animationDuration'] as int? ?? 1200,
-            )
-          : null,
+      animationDuration:
+          props['animationDuration'] != null
+              ? Duration(
+                milliseconds: props['animationDuration'] as int? ?? 1200,
+              )
+              : null,
       onActionTap: props['onActionTap'] as VoidCallback?,
     );
   }
 
   /// 将组件配置转换为属性映射（用于保存配置）
-  static Map<String, dynamic> toProps(VerticalCircularProgressCardData data,
-      {HomeWidgetSize? size}) {
-    return {
-      'data': data.toJsonString(),
-      if (size != null) 'size': size.name,
-    };
+  static Map<String, dynamic> toProps(
+    VerticalCircularProgressCardData data, {
+    HomeWidgetSize? size,
+  }) {
+    return {'data': data.toJsonString(), if (size != null) 'size': size.name};
   }
 
   @override
@@ -122,7 +137,8 @@ class VerticalCircularProgressCard extends StatefulWidget {
       _VerticalCircularProgressCardState();
 }
 
-class _VerticalCircularProgressCardState extends State<VerticalCircularProgressCard>
+class _VerticalCircularProgressCardState
+    extends State<VerticalCircularProgressCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -160,21 +176,20 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.width ?? _getDefaultWidth(),
+              width: widget.width ?? double.maxFinite,
               padding: widget.padding ?? const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                borderRadius:
-                    BorderRadius.circular(widget.borderRadius ?? 28),
+                borderRadius: BorderRadius.circular(widget.borderRadius ?? 28),
                 boxShadow:
                     (widget.showShadow ?? (!isDark))
                         ? [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 20,
-                              offset: const Offset(0, 4),
-                            ),
-                          ]
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
                         : null,
               ),
               child: Column(
@@ -197,9 +212,7 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
   Color _getPrimaryColor(bool isDark) {
     if (widget.data.primaryColor != null) {
       try {
-        return Color(
-          int.parse(widget.data.primaryColor!, radix: 16),
-        );
+        return Color(int.parse(widget.data.primaryColor!, radix: 16));
       } catch (e) {
         debugPrint('Failed to parse primaryColor: ${widget.data.primaryColor}');
       }
@@ -207,26 +220,6 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
     return isDark
         ? const Color(0xFFF36E24)
         : Theme.of(context).colorScheme.primary;
-  }
-
-  double _getDefaultWidth() {
-    switch (widget.size) {
-      case HomeWidgetSize.small:
-        return 300;
-      case HomeWidgetSize.medium:
-        return 350;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 400;
-      case HomeWidgetSize.wide:
-        return 600;
-      case HomeWidgetSize.wide2:
-        return 600;
-      case HomeWidgetSize.wide3:
-        return 600;
-      case HomeWidgetSize.custom:
-        return 400;
-    }
   }
 
   Widget _buildHeader(BuildContext context, bool isDark, Color primaryColor) {
@@ -270,18 +263,20 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? const Color(0xFF9CA3AF)
-                        : const Color(0xFF6B7280),
+                    color:
+                        isDark
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF6B7280),
                   ),
                 ),
                 const SizedBox(width: 4),
                 Icon(
                   Icons.chevron_right_rounded,
                   size: 20,
-                  color: isDark
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF6B7280),
+                  color:
+                      isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
                 ),
               ],
             ),
@@ -307,11 +302,10 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 90,
                     height: 48,
                     child: AnimatedFlipCounter(
                       value: widget.data.mainValue * _animation.value,
-                      fractionDigits: 2,
+                      fractionDigits: 0,
                       textStyle: TextStyle(
                         fontSize: 40,
                         fontWeight: FontWeight.w700,
@@ -324,13 +318,14 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
                   SizedBox(
                     height: 20,
                     child: Text(
-                      'hr',
+                      widget.data.unit,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? const Color(0xFF9CA3AF)
-                            : const Color(0xFF6B7280),
+                        color:
+                            isDark
+                                ? const Color(0xFF9CA3AF)
+                                : const Color(0xFF6B7280),
                         height: 1.0,
                       ),
                     ),
@@ -344,7 +339,8 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                color:
+                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
               ),
             ),
           ],
@@ -409,11 +405,12 @@ class _DaySleepIndicator extends StatelessWidget {
             Icon(
               dayData.achieved ? Icons.check_rounded : Icons.close_rounded,
               size: 16,
-              color: dayData.achieved
-                  ? (isDark ? Colors.white : const Color(0xFF111827))
-                  : (isDark
-                      ? const Color(0xFF4B5563)
-                      : const Color(0xFFD1D5DB)),
+              color:
+                  dayData.achieved
+                      ? (isDark ? Colors.white : const Color(0xFF111827))
+                      : (isDark
+                          ? const Color(0xFF4B5563)
+                          : const Color(0xFFD1D5DB)),
             ),
             const SizedBox(height: 4),
             SizedBox(
@@ -437,7 +434,8 @@ class _DaySleepIndicator extends StatelessWidget {
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,
-                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                color:
+                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
               ),
             ),
           ],
@@ -466,21 +464,23 @@ class _CircleProgressPainter extends CustomPainter {
     final strokeWidth = 2.5;
 
     // 绘制背景圆环
-    final backgroundPaint = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final backgroundPaint =
+        Paint()
+          ..color = backgroundColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, backgroundPaint);
 
     // 绘制进度圆弧
     if (progress > 0) {
-      final progressPaint = Paint()
-        ..color = primaryColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
+      final progressPaint =
+          Paint()
+            ..color = primaryColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = StrokeCap.round;
 
       const startAngle = -3.141592653589793238 / 2; // 从顶部开始
       final sweepAngle = 2 * 3.141592653589793238 * progress;

@@ -805,6 +805,7 @@ class HomeScreenView extends StatelessWidget {
 
     int customWidth = item.size == HomeWidgetSize.custom ? (item.config['customWidth'] as int? ?? 2) : 2;
     int customHeight = item.size == HomeWidgetSize.custom ? (item.config['customHeight'] as int? ?? 2) : 2;
+    HomeWidgetSize? selectedSize = item.size;
 
     showDialog(
       context: context,
@@ -816,7 +817,7 @@ class HomeScreenView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ...supportedSizes.map((size) {
-                  final isSelected = size == item.size;
+                  final isSelected = size == selectedSize;
                   final sizeLabel = _getSizeLabel(size);
                   return RadioListTile<HomeWidgetSize>(
                     title: Text(sizeLabel),
@@ -824,24 +825,30 @@ class HomeScreenView extends StatelessWidget {
                         ? Text('screens_customSizeDesc'.tr)
                         : Text('screens_widgetSize'.trParams({'width': size.width.toString(), 'height': size.height.toString()})),
                     value: size,
-                    groupValue: item.size,
+                    groupValue: selectedSize,
                     selected: isSelected,
                     onChanged: (HomeWidgetSize? newSize) {
                       if (newSize != null) {
-                        Navigator.pop(context);
-                        _saveWidgetSize(context, item, newSize, customWidth, customHeight);
+                        setDialogState(() {
+                          selectedSize = newSize;
+                          if (newSize != HomeWidgetSize.custom) {
+                            // 选择非自定义尺寸时，重置自定义尺寸为默认值
+                            customWidth = 2;
+                            customHeight = 2;
+                          }
+                        });
                       }
                     },
                   );
                 }),
-                if (hasCustom && item.size == HomeWidgetSize.custom) ...[
+                if (hasCustom && selectedSize == HomeWidgetSize.custom) ...[
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
                   Text('screens_customSizeAdjust'.tr, style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
-                  _buildSizeSlider(context, '宽度', customWidth, (v) => customWidth = v.toInt(), (v) => customWidth = v.toInt()),
-                  _buildSizeSlider(context, '高度', customHeight, (v) => customHeight = v.toInt(), (v) => customHeight = v.toInt()),
+                  _buildSizeSlider(context, '宽度', customWidth, (v) => setDialogState(() => customWidth = v.toInt()), (v) => setDialogState(() => customWidth = v.toInt())),
+                  _buildSizeSlider(context, '高度', customHeight, (v) => setDialogState(() => customHeight = v.toInt()), (v) => setDialogState(() => customHeight = v.toInt())),
                   const SizedBox(height: 8),
                   Text('screens_customSizePreview'.trParams({'width': customWidth.toString(), 'height': customHeight.toString()}),
                       style: Theme.of(context).textTheme.bodySmall),
@@ -859,7 +866,17 @@ class HomeScreenView extends StatelessWidget {
                 ],
               ],
             ),
-            actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr))],
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
+              if (selectedSize != HomeWidgetSize.custom)
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _saveWidgetSize(context, item, selectedSize!, customWidth, customHeight);
+                  },
+                  child: Text('screens_confirm'.tr),
+                ),
+            ],
           );
         },
       ),

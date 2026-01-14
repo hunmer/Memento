@@ -189,22 +189,11 @@ class CheckinHomeWidgets {
       // 睡眠追踪卡片（复用）：显示连续签到天数作为睡眠数据
       'sleepTrackingCard': {
         'title': name,
-        'sleepHours': consecutiveDays.toDouble(),
-        'sleepGoal': 30.0, // 30天习惯养成
-        'deepSleepHours': (consecutiveDays * 0.7).toDouble(), // 约70%的有效天数
-        'weekData': List.generate(7, (index) {
-          final i = 6 - index;
-          final date = DateTime.now().subtract(Duration(days: i));
-          final dateStr =
-              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-          final hasRecord = item?.checkInRecords.containsKey(dateStr) == true &&
-              (item?.checkInRecords[dateStr]?.isEmpty == false);
-          return {
-            'day': '周${['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1]}',
-            'hours': hasRecord ? (consecutiveDays / 7.0).clamp(0.0, 12.0) : 0.0,
-            'hasData': hasRecord,
-          };
-        }),
+        'mainValue': consecutiveDays.toDouble(),
+        'statusLabel': consecutiveDays >= 30 ? '习惯养成' : '持续打卡',
+        'unit': '次',
+        'icon': iconCode,
+        'weeklyProgress': _generateWeekProgressFromMonday(item),
       },
 
       // 习惯连续追踪：显示连续签到和里程碑
@@ -366,6 +355,34 @@ class CheckinHomeWidgets {
         'iconCodePoint': isChecked ? 0xe5ca : 0xe5c8, // check_circle / circle_outlined
         'emotionType': isChecked ? 'positive' : 'neutral',
         'isLogged': isChecked,
+      });
+    }
+
+    return result;
+  }
+
+  /// 生成从周一开始的周进度数据（用于 sleepTrackingCard）
+  static List<Map<String, dynamic>> _generateWeekProgressFromMonday(CheckinItem? item) {
+    final today = DateTime.now();
+    final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
+    final result = <Map<String, dynamic>>[];
+
+    // 找到本周一的日期（DateTime.weekday: 1=周一, 7=周日）
+    final monday = today.subtract(Duration(days: today.weekday - 1));
+
+    // 从周一开始生成7天的数据
+    for (int i = 0; i < 7; i++) {
+      final date = monday.add(Duration(days: i));
+      final dateStr =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final isChecked =
+          item?.checkInRecords.containsKey(dateStr) == true &&
+          (item?.checkInRecords[dateStr]?.isEmpty == false);
+
+      result.add({
+        'day': weekDays[i],
+        'achieved': isChecked,
+        'progress': isChecked ? 1.0 : 0.0,
       });
     }
 
