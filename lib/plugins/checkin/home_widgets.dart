@@ -73,6 +73,8 @@ class CheckinHomeWidgets {
         dataRenderer: _renderCheckinItemData,
         navigationHandler: _navigateToCheckinItem,
         dataSelector: _extractCheckinItemData,
+        // 公共小组件提供者
+        commonWidgetsProvider: _provideCommonWidgets,
         builder:
             (context, config) => GenericSelectorWidget(
               widgetDefinition: registry.getWidget('checkin_item_selector')!,
@@ -80,6 +82,182 @@ class CheckinHomeWidgets {
             ),
       ),
     );
+  }
+
+  /// 公共小组件提供者函数
+  static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+    Map<String, dynamic> data,
+  ) {
+    // data 包含：id, name, group, icon, color
+    final name = (data['name'] as String?) ?? '签到项目';
+    final group = (data['group'] as String?) ?? '';
+    final colorValue = (data['color'] as int?) ?? 0xFF007AFF;
+    final iconCode = (data['icon'] as int?) ?? Icons.checklist.codePoint;
+
+    // 获取插件实例以获取实时数据
+    final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+    CheckinItem? item;
+    int consecutiveDays = 0;
+    int todayCheckins = 0;
+    bool isCheckedToday = false;
+
+    if (plugin != null) {
+      final itemId = data['id'] as String?;
+      if (itemId != null) {
+        try {
+          item = plugin.checkinItems.firstWhere(
+            (i) => i.id == itemId,
+            orElse: () => throw Exception('项目不存在'),
+          );
+          consecutiveDays = item.getConsecutiveDays();
+          isCheckedToday = item.isCheckedToday();
+          todayCheckins = item.getTodayRecords().length;
+        } catch (_) {
+          // 项目不存在，使用默认值
+        }
+      }
+    }
+
+    // 计算本周签到天数
+    int weeklyCheckins = 0;
+    if (item != null) {
+      final today = DateTime.now();
+      for (int i = 0; i < 7; i++) {
+        final date = today.subtract(Duration(days: i));
+        final dateStr =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        if (item.checkInRecords.containsKey(dateStr) &&
+            item.checkInRecords[dateStr]!.isNotEmpty) {
+          weeklyCheckins++;
+        }
+      }
+    }
+
+    return {
+      // 圆形进度卡片：显示本周签到进度
+      'circularProgressCard': {
+        'title': name,
+        'subtitle': group.isNotEmpty ? group : '签到',
+        'percentage': (weeklyCheckins / 7 * 100).clamp(0, 100).toDouble(),
+        'progress': (weeklyCheckins / 7).clamp(0.0, 1.0),
+      },
+
+      // 活动进度卡片：显示连续签到天数
+      'activityProgressCard': {
+        'title': name,
+        'subtitle': '连续签到',
+        'value': consecutiveDays.toDouble(),
+        'unit': '天',
+        'activities': weeklyCheckins,
+        'totalProgress': 7,
+        'completedProgress': weeklyCheckins,
+      },
+
+      // 任务进度卡片：显示今日签到状态
+      'taskProgressCard': {
+        'title': name,
+        'subtitle': isCheckedToday ? '今日已签' : '今日未签',
+        'completedTasks': isCheckedToday ? 1 : 0,
+        'totalTasks': 1,
+        'pendingTasks': isCheckedToday ? <String>[] : <String>['点击签到'],
+      },
+
+      // 里程碑卡片：显示连续签到里程碑
+      'milestoneCard': {
+        'imageUrl': null,
+        'title': name,
+        'date': DateTime.now().toString().substring(0, 10),
+        'daysCount': consecutiveDays,
+        'value': '$consecutiveDays',
+        'unit': '天',
+        'suffix': consecutiveDays > 0 ? '连续签到' : '开始签到',
+      },
+
+      // 观看进度卡片（复用）：显示本周签到详情
+      'watchProgressCard': {
+        'userName': name,
+        'lastWatched': isCheckedToday ? '今日已签到' : '今日未签到',
+        'currentCount': weeklyCheckins,
+        'totalCount': 7,
+        'items': List.generate(
+          weeklyCheckins,
+          (index) => {'title': '第${weeklyCheckins - index}次签到', 'thumbnailUrl': null},
+        ),
+      },
+
+      // 每日事件卡片（复用）：显示本周签到状态
+      'dailyEventsCard': {
+        'events': List.generate(
+          weeklyCheckins,
+          (index) => {'title': '签到记录', 'time': '已完成'},
+        ),
+      },
+
+      // 现代 eGFR 健康指标卡片（复用）：显示连续天数
+      'modernEgfrHealthWidget': {
+        'title': name,
+        'value': consecutiveDays.toDouble(),
+        'unit': '天',
+        'date': DateTime.now().toString().substring(0, 10),
+        'status': consecutiveDays >= 30
+            ? '习惯养成'
+            : consecutiveDays >= 7
+                ? '坚持中'
+                : consecutiveDays > 0 ? '刚开始' : '未开始',
+        'icon': iconCode,
+        'primaryColor': colorValue,
+        'statusColor': consecutiveDays >= 30 ? 0xFF34C759 : consecutiveDays >= 7 ? 0xFFFFCC00 : 0xFF8E8E93,
+      },
+
+      // 图标圆形进度卡片：显示签到进度
+      'iconCircularProgressCard': {
+        'icon': iconCode,
+        'title': name,
+        'subtitle': group.isNotEmpty ? group : '签到',
+        'percentage': (weeklyCheckins / 7 * 100).clamp(0, 100).toDouble(),
+        'progress': (weeklyCheckins / 7).clamp(0.0, 1.0),
+        'showNotification': !isCheckedToday,
+      },
+
+      // 睡眠时长卡片（复用）：显示今日签到次数作为时长
+      'sleepDurationCard': {
+        'durationInMinutes': todayCheckins * 60,
+        'trend': isCheckedToday ? 'up' : 'neutral',
+      },
+
+      // 心情追踪卡片（复用）：显示本周签到状态
+      'moodTrackerCard': {
+        'currentEmotionText': isCheckedToday ? '今日已签' : '今日未签',
+        'loggedCount': weeklyCheckins,
+        'totalCount': 7,
+        'weekEmotions': _generateWeekEmotions(item),
+      },
+    };
+  }
+
+  /// 生成周情绪数据（复用心情追踪卡片的数据结构）
+  static List<Map<String, dynamic>> _generateWeekEmotions(CheckinItem? item) {
+    final today = DateTime.now();
+    final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
+    final result = <Map<String, dynamic>>[];
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dateStr =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final isChecked =
+          item?.checkInRecords.containsKey(dateStr) == true &&
+          (item?.checkInRecords[dateStr]?.isEmpty == false);
+
+      result.add({
+        'day': weekDays[date.weekday - 1],
+        'iconCodePoint': isChecked ? 0xe5ca : 0xe5c8, // check_circle / circle_outlined
+        'emotionType': isChecked ? 'positive' : 'neutral',
+        'isLogged': isChecked,
+      });
+    }
+
+    return result;
   }
 
   /// 从选择器数据数组中提取小组件需要的数据

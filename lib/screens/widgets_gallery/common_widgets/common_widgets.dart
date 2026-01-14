@@ -73,6 +73,8 @@ import 'widgets/task_list_stat_card.dart';
 import 'widgets/vertical_property_card.dart';
 import 'widgets/task_progress_list.dart';
 import 'widgets/medication_tracker_widget.dart';
+import 'widgets/sleep_duration_card.dart';
+import 'widgets/mood_tracker_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -149,6 +151,8 @@ enum CommonWidgetId {
   verticalPropertyCard,
   taskProgressList,
   medicationTrackerWidget,
+  sleepDurationCard,
+  moodTrackerCard,
 }
 
 /// 公共小组件元数据
@@ -742,6 +746,22 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.medium,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.sleepDurationCard: CommonWidgetMetadata(
+      id: CommonWidgetId.sleepDurationCard,
+      name: '睡眠时长统计卡片',
+      description: '显示睡眠时长、趋势和睡眠周期可视化',
+      icon: Icons.bedtime_outlined,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.moodTrackerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.moodTrackerCard,
+      name: '心情追踪卡片',
+      description: '显示情绪记录和每周情绪数据',
+      icon: Icons.sentiment_satisfied_alt,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -917,6 +937,10 @@ class CommonWidgetBuilder {
         return TaskProgressListWidget.fromProps(props, size);
       case CommonWidgetId.medicationTrackerWidget:
         return MedicationTrackerWidget.fromProps(props, size);
+      case CommonWidgetId.sleepDurationCard:
+        return SleepDurationCardWidget.fromProps(props, size);
+      case CommonWidgetId.moodTrackerCard:
+        return MoodTrackerCardWidget.fromProps(props, size);
     }
   }
 }

@@ -118,15 +118,6 @@ class TrackerHomeWidgets {
         'completedProgress': (percentage / 10).clamp(0, 10).toInt(),
       },
 
-      // 任务进度卡片：显示目标进度
-      'taskProgressCard': {
-        'title': name,
-        'subtitle': '目标进度',
-        'completedTasks': percentage ~/ 5,
-        'totalTasks': 20,
-        'pendingTasks': _getPendingMilestones(currentValue, targetValue, unitType),
-      },
-
       // 里程碑卡片：显示目标追踪
       'milestoneCard': {
         'imageUrl': null,
@@ -136,16 +127,6 @@ class TrackerHomeWidgets {
         'value': currentValue.toStringAsFixed(1),
         'unit': unitType,
         'suffix': '/ $targetValue',
-      },
-
-      // 现代健康指标卡片
-      'modernEgfrHealthWidget': {
-        'title': name,
-        'value': currentValue,
-        'unit': unitType,
-        'date': _formatDate(DateTime.now()),
-        'status': percentage >= 100 ? '已完成' : '进行中',
-        'icon': 0xe25b, // Icons.track_changes codePoint
       },
 
       // 图标圆形进度卡片
@@ -165,26 +146,12 @@ class TrackerHomeWidgets {
         'currency': unitType,
       },
 
-      // 分段进度条卡片
-      'segmentedProgressCard': {
-        'title': name,
-        'currentValue': currentValue,
-        'targetValue': targetValue,
-        'segments': _generateSegments(currentValue, targetValue),
-        'unit': unitType,
-      },
-
       // 月度进度点卡片
       'monthlyProgressDotsCard': {
         'month': '${DateTime.now().month}月',
         'currentDay': DateTime.now().day,
         'totalDays': _daysInMonth(DateTime.now()),
         'percentage': percentage,
-      },
-
-      // 多指标进度卡片
-      'multiMetricProgressCard': {
-        'metrics': _generateMetrics(currentValue, targetValue, unitType, percentage),
       },
     };
   }

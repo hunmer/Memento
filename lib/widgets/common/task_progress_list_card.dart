@@ -248,12 +248,13 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
         widgets.add(const SizedBox(height: 20));
       }
 
-      // 计算每个任务的动画延迟
+      // 计算每个任务的动画延迟，确保 end 不超过 1.0
+      final end = (0.6 + i * 0.12).clamp(0.0, 1.0);
       final itemAnimation = CurvedAnimation(
         parent: _animationController,
         curve: Interval(
           i * 0.12,
-          0.6 + i * 0.12,
+          end,
           curve: Curves.easeOutCubic,
         ),
       );
