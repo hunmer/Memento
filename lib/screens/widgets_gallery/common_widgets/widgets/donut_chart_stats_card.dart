@@ -17,12 +17,16 @@ class DonutChartStatsCardWidget extends StatefulWidget {
   /// 分类数据列表
   final List<ChartCategoryData> categories;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DonutChartStatsCardWidget({
     super.key,
     required this.totalValue,
     this.unit = '',
     this.totalLabel = 'Total',
     required this.categories,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -79,6 +83,7 @@ class DonutChartStatsCardWidget extends StatefulWidget {
       unit: props['unit'] as String? ?? '',
       totalLabel: props['totalLabel'] as String? ?? 'Total',
       categories: parseCategories(props['categories']),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -131,8 +136,8 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
         );
       },
       child: Container(
-        width: 384,
-        height: 200,
+        width: widget.inline ? double.maxFinite : 384,
+        height: widget.inline ? double.maxFinite : 200,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(32),

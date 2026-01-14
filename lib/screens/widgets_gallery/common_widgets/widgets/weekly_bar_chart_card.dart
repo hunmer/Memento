@@ -39,6 +39,8 @@ class CommonWeeklyBarChartCardWidget extends StatefulWidget {
   final String subtitle;
   final int percentage;
   final List<CommonWeeklyBarData> weeklyData;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const CommonWeeklyBarChartCardWidget({
     super.key,
@@ -46,6 +48,7 @@ class CommonWeeklyBarChartCardWidget extends StatefulWidget {
     required this.subtitle,
     required this.percentage,
     required this.weeklyData,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -63,6 +66,7 @@ class CommonWeeklyBarChartCardWidget extends StatefulWidget {
       subtitle: props['subtitle'] as String? ?? '',
       percentage: props['percentage'] as int? ?? 0,
       weeklyData: weeklyData,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -110,8 +114,8 @@ class _CommonWeeklyBarChartCardWidgetState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height: 300,
-              width: 300,
+              height: widget.inline ? double.maxFinite : 300,
+              width: widget.inline ? double.maxFinite : 300,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),

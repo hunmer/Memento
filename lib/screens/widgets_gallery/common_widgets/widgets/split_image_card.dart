@@ -29,6 +29,8 @@ class SplitImageCardWidget extends StatefulWidget {
 
   /// 底部图标代码（用于序列化）
   final int? bottomIconCode;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SplitImageCardWidget({
     super.key,
@@ -40,6 +42,7 @@ class SplitImageCardWidget extends StatefulWidget {
     required this.bottomText,
     this.topIconCode,
     this.bottomIconCode,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -60,6 +63,7 @@ class SplitImageCardWidget extends StatefulWidget {
           : null,
       topIconCode: props['topIconCode'] as int?,
       bottomIconCode: props['bottomIconCode'] as int?,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -108,8 +112,8 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
         );
       },
       child: Container(
-        width: 380,
-        height: 240,
+        width: widget.inline ? double.maxFinite : 380,
+        height: widget.inline ? double.maxFinite : 240,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF27272A) : Colors.white,
           borderRadius: BorderRadius.circular(32),

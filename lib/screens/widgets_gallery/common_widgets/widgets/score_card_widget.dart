@@ -14,12 +14,15 @@ class ScoreCardWidget extends StatefulWidget {
 
   /// 行为数据列表
   final List<ActionData> actions;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const ScoreCardWidget({
     super.key,
     required this.score,
     required this.grade,
     required this.actions,
+    this.inline = false,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -42,6 +45,7 @@ class ScoreCardWidget extends StatefulWidget {
       score: props['score'] as int? ?? 0,
       grade: props['grade'] as String? ?? 'A',
       actions: actions,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -87,8 +91,8 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 288,
-              height: 288,
+              width: widget.inline ? double.maxFinite : 288,
+              height: widget.inline ? double.maxFinite : 288,
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : const Color(0xFF1C1C1E),
                 borderRadius: BorderRadius.circular(32),

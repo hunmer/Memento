@@ -107,6 +107,9 @@ class DualRangeChartCardWidget extends StatefulWidget {
   final RangeSummary primarySummary;
   final RangeSummary secondarySummary;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DualRangeChartCardWidget({
     super.key,
     required this.date,
@@ -114,6 +117,7 @@ class DualRangeChartCardWidget extends StatefulWidget {
     required this.ranges,
     required this.primarySummary,
     required this.secondarySummary,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -130,6 +134,7 @@ class DualRangeChartCardWidget extends StatefulWidget {
       ranges: rangesList,
       primarySummary: RangeSummary.fromJson(props['primarySummary'] as Map<String, dynamic>? ?? {}),
       secondarySummary: RangeSummary.fromJson(props['secondarySummary'] as Map<String, dynamic>? ?? {}),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -182,7 +187,7 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 300,
+              width: widget.inline ? double.maxFinite : 300,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(32)),
               child: Column(

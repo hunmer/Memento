@@ -8,9 +8,13 @@ class TimelineStatusCardWidget extends StatefulWidget {
   /// 卡片数据
   final TimelineStatusCardData data;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TimelineStatusCardWidget({
     super.key,
     required this.data,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -20,6 +24,7 @@ class TimelineStatusCardWidget extends StatefulWidget {
   ) {
     return TimelineStatusCardWidget(
       data: TimelineStatusCardData.fromJson(props),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -68,8 +73,8 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
         );
       },
       child: Container(
-        width: 170,
-        height: 170,
+        width: widget.inline ? double.maxFinite : 170,
+        height: widget.inline ? double.maxFinite : 170,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           borderRadius: BorderRadius.circular(32),

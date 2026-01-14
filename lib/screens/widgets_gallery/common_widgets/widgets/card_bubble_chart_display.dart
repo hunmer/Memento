@@ -60,12 +60,16 @@ class CardBubbleChartDisplay extends StatefulWidget {
   /// 时间标签列表
   final List<String> timeLabels;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CardBubbleChartDisplay({
     super.key,
     required this.sleepStages,
     this.selectedTab = 1,
     this.showTooltip = true,
     this.timeLabels = const ['11:00', '12:00', '13:00', '14:00', '15:00'],
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -90,6 +94,7 @@ class CardBubbleChartDisplay extends StatefulWidget {
       selectedTab: props['selectedTab'] as int? ?? 1,
       showTooltip: props['showTooltip'] as bool? ?? true,
       timeLabels: timeLabels,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -137,6 +142,7 @@ class _CardBubbleChartDisplayState extends State<CardBubbleChartDisplay>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
+              width: widget.inline ? double.maxFinite : null,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1E1E) : Colors.white,

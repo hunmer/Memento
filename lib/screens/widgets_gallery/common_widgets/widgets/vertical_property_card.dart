@@ -63,6 +63,9 @@ class VerticalPropertyCardWidget extends StatefulWidget {
   /// 操作图标
   final IconData actionIcon;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const VerticalPropertyCardWidget({
     super.key,
     required this.imageUrl,
@@ -71,6 +74,7 @@ class VerticalPropertyCardWidget extends StatefulWidget {
     required this.description,
     required this.actionLabel,
     required this.actionIcon,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -91,6 +95,7 @@ class VerticalPropertyCardWidget extends StatefulWidget {
       actionLabel: props['actionLabel'] as String? ?? '',
       actionIcon: PropertyMetadata._iconFromString(
           props['actionIcon'] as String? ?? 'Icons.my_location'),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -142,7 +147,7 @@ class _VerticalPropertyCardWidgetState
         );
       },
       child: Container(
-        width: 340,
+        width: widget.inline ? double.maxFinite : 340,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(28),

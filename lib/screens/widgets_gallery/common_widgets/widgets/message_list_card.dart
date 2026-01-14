@@ -76,10 +76,14 @@ class MessageListCardWidget extends StatefulWidget {
   final FeaturedMessageData featuredMessage;
   final List<MessageData> messages;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MessageListCardWidget({
     super.key,
     required this.featuredMessage,
     required this.messages,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -103,6 +107,7 @@ class MessageListCardWidget extends StatefulWidget {
               ?.map((e) => MessageData.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -151,8 +156,8 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
         );
       },
       child: Container(
-        width: 375,
-        height: 600,
+        width: widget.inline ? double.maxFinite : 375,
+        height: widget.inline ? double.maxFinite : 600,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : Colors.white,
           borderRadius: BorderRadius.circular(32),

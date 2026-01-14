@@ -12,6 +12,9 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
   final String description;
   final String showMoreLabel;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ContributionHeatmapCardWidget({
     super.key,
     required this.title,
@@ -22,6 +25,7 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
     required this.heatmapData,
     required this.description,
     required this.showMoreLabel,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -58,6 +62,7 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
       heatmapData: heatmapDataList,
       description: props['description'] as String? ?? '',
       showMoreLabel: props['showMoreLabel'] as String? ?? 'Show more',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -105,8 +110,8 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
-              constraints: const BoxConstraints(maxWidth: 360),
+              width: widget.inline ? double.maxFinite : 360,
+              constraints: widget.inline ? null : const BoxConstraints(maxWidth: 360),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),

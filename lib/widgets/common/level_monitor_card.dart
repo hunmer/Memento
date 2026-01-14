@@ -98,6 +98,9 @@ class LevelMonitorCard extends StatefulWidget {
   /// 柱状图点击回调
   final void Function(int index, WeeklyLevelData data)? onBarTap;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const LevelMonitorCard({
     super.key,
     required this.title,
@@ -108,6 +111,7 @@ class LevelMonitorCard extends StatefulWidget {
     this.scoreUnit = 'pts',
     this.onTodayTap,
     this.onBarTap,
+    this.inline = false,
   });
 
   @override
@@ -194,7 +198,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
         : primaryColor.withOpacity(0.1);
 
     return Container(
-      width: 380,
+      width: widget.inline ? double.maxFinite : 380,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: backgroundColor,

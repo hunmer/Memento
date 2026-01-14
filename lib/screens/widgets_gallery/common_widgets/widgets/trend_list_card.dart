@@ -9,9 +9,13 @@ class TrendListCardWidget extends StatefulWidget {
   /// 卡片数据
   final TrendListCardData data;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TrendListCardWidget({
     super.key,
     required this.data,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -21,6 +25,7 @@ class TrendListCardWidget extends StatefulWidget {
   ) {
     return TrendListCardWidget(
       data: TrendListCardData.fromJson(props),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -66,7 +71,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
+              width: widget.inline ? double.maxFinite : 340,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,

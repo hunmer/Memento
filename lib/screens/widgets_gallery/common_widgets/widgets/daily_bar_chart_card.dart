@@ -49,6 +49,9 @@ class DailyBarChartCardWidget extends StatefulWidget {
   final String unit;
   final List<DailyBarData> bars;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DailyBarChartCardWidget({
     super.key,
     required this.title,
@@ -56,6 +59,7 @@ class DailyBarChartCardWidget extends StatefulWidget {
     required this.value,
     required this.unit,
     required this.bars,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -71,6 +75,7 @@ class DailyBarChartCardWidget extends StatefulWidget {
       value: props['value'] as int? ?? 0,
       unit: props['unit'] as String? ?? '',
       bars: barsList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -115,8 +120,8 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 384,
-              height: 280,
+              width: widget.inline ? double.maxFinite : 384,
+              height: widget.inline ? double.maxFinite : 280,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
                 borderRadius: BorderRadius.circular(40),

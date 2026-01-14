@@ -81,10 +81,10 @@ class CheckinHomeWidgets {
             builder: (context, setState) {
               return EventListenerContainer(
                 events: const [
-                  'checkin_completed',  // 打卡完成
-                  'checkin_cancelled',  // 取消打卡
-                  'checkin_reset',      // 重置记录
-                  'checkin_deleted',    // 删除项目
+                  'checkin_completed', // 打卡完成
+                  'checkin_cancelled', // 取消打卡
+                  'checkin_reset', // 重置记录
+                  'checkin_deleted', // 删除项目
                 ],
                 onEvent: () => setState(() {}),
                 child: _buildDynamicSelectorWidget(
@@ -111,7 +111,8 @@ class CheckinHomeWidgets {
     final iconCode = (data['icon'] as int?) ?? Icons.checklist.codePoint;
 
     // 获取插件实例以获取实时数据
-    final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+    final plugin =
+        PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
     CheckinItem? item;
     int consecutiveDays = 0;
     int todayCheckins = 0;
@@ -150,7 +151,6 @@ class CheckinHomeWidgets {
     }
 
     return {
-  
       // 活动进度卡片：显示连续签到天数
       'activityProgressCard': {
         'title': name,
@@ -162,28 +162,22 @@ class CheckinHomeWidgets {
         'completedProgress': weeklyCheckins,
       },
 
-      // 心情追踪卡片（复用）：显示本周签到状态
-      'moodTrackerCard': {
-        'currentEmotionText': isCheckedToday ? '今日已签' : '今日未签',
-        'loggedCount': weeklyCheckins,
-        'totalCount': 7,
-        'weekEmotions': _generateWeekEmotions(item),
-      },
-
       // 月度进度带点卡片：显示当月签到进度
       'monthlyProgressDotsCard': {
         'title': name,
-        'subtitle': group.isNotEmpty ? group : '签到',
-        'month': '${DateTime.now().month}月',
-        'currentDay': DateTime.now().day,
-        'year': DateTime.now().year,
-        'totalDays': DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
-        'checkedDays': _getMonthlyCheckinCount(item),
-        'daysData': _generateMonthlyDotsData(item),
-        'percentage': ((_getMonthlyCheckinCount(item) /
-                    DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day) *
-                100)
-            .toInt(),
+        'subtitle': '${DateTime.now().month}月 • ${_getMonthlyCheckinCount(item)}d/${DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day}d',
+        'currentDay': _getMonthlyCheckinCount(item),
+        'totalDays':
+            DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
+        'percentage':
+            ((_getMonthlyCheckinCount(item) /
+                        DateTime(
+                          DateTime.now().year,
+                          DateTime.now().month + 1,
+                          0,
+                        ).day) *
+                    100)
+                .toInt(),
       },
 
       // 睡眠追踪卡片（复用）：显示连续签到天数作为睡眠数据
@@ -213,7 +207,8 @@ class CheckinHomeWidgets {
         'subtitle': group.isNotEmpty ? group : '签到',
         'iconCodePoint': iconCode,
         'currentValue': _getMonthlyCheckinCount(item),
-        'totalDays': DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
+        'totalDays':
+            DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
         'daysData': _generateMonthlyDotsData(item),
       },
 
@@ -231,7 +226,8 @@ class CheckinHomeWidgets {
           final date = DateTime.now().subtract(Duration(days: i));
           final dateStr =
               '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-          final hasRecord = item?.checkInRecords.containsKey(dateStr) == true &&
+          final hasRecord =
+              item?.checkInRecords.containsKey(dateStr) == true &&
               (item?.checkInRecords[dateStr]?.isEmpty == false);
           return {
             'day': '周${['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1]}',
@@ -265,7 +261,9 @@ class CheckinHomeWidgets {
   }
 
   /// 生成月度点数据
-  static List<Map<String, dynamic>> _generateMonthlyDotsData(CheckinItem? item) {
+  static List<Map<String, dynamic>> _generateMonthlyDotsData(
+    CheckinItem? item,
+  ) {
     final today = DateTime.now();
     final daysInMonth = DateTime(today.year, today.month + 1, 0).day;
     final result = <Map<String, dynamic>>[];
@@ -273,7 +271,8 @@ class CheckinHomeWidgets {
     for (int day = 1; day <= daysInMonth; day++) {
       final dateStr =
           '${today.year}-${today.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
-      final hasRecord = item?.checkInRecords.containsKey(dateStr) == true &&
+      final hasRecord =
+          item?.checkInRecords.containsKey(dateStr) == true &&
           (item?.checkInRecords[dateStr]?.isEmpty == false);
 
       result.add({
@@ -297,7 +296,11 @@ class CheckinHomeWidgets {
 
     for (final dateStr in sortedDates) {
       final parts = dateStr.split('-');
-      final date = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+      final date = DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2]),
+      );
 
       if (lastDate == null) {
         currentStreak = 1;
@@ -328,7 +331,8 @@ class CheckinHomeWidgets {
         'days': milestone,
         'label': milestone >= 365 ? '一年' : '$milestone天',
         'isReached': currentStreak >= milestone,
-        'isCurrent': currentStreak < milestone &&
+        'isCurrent':
+            currentStreak < milestone &&
             (result.isEmpty || currentStreak > (result.last['days'] as int)),
       });
     }
@@ -352,7 +356,8 @@ class CheckinHomeWidgets {
 
       result.add({
         'day': weekDays[date.weekday - 1],
-        'iconCodePoint': isChecked ? 0xe5ca : 0xe5c8, // check_circle / circle_outlined
+        'iconCodePoint':
+            isChecked ? 0xe5ca : 0xe5c8, // check_circle / circle_outlined
         'emotionType': isChecked ? 'positive' : 'neutral',
         'isLogged': isChecked,
       });
@@ -362,7 +367,9 @@ class CheckinHomeWidgets {
   }
 
   /// 生成从周一开始的周进度数据（用于 sleepTrackingCard）
-  static List<Map<String, dynamic>> _generateWeekProgressFromMonday(CheckinItem? item) {
+  static List<Map<String, dynamic>> _generateWeekProgressFromMonday(
+    CheckinItem? item,
+  ) {
     final today = DateTime.now();
     final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
     final result = <Map<String, dynamic>>[];

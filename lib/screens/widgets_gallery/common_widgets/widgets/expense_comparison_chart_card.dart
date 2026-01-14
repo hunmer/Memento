@@ -22,12 +22,16 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
   /// 日数据列表
   final List<DailyExpenseDataModel> dailyData;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ExpenseComparisonChartCardWidget({
     super.key,
     required this.title,
     required this.currentAmount,
     required this.changePercent,
     required this.dailyData,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -49,6 +53,7 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
       currentAmount: (props['currentAmount'] as num?)?.toDouble() ?? 0.0,
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0.0,
       dailyData: dailyData,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -96,7 +101,7 @@ class _ExpenseComparisonChartCardWidgetState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 400,
+              width: widget.inline ? double.maxFinite : 400,
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,

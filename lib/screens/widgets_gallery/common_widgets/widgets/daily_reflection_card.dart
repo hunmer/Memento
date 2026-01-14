@@ -25,6 +25,9 @@ class DailyReflectionCardWidget extends StatefulWidget {
   /// 卡片大小（用于自适应）
   final HomeWidgetSize size;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DailyReflectionCardWidget({
     super.key,
     required this.dayOfWeek,
@@ -32,6 +35,7 @@ class DailyReflectionCardWidget extends StatefulWidget {
     this.darkBackgroundColor,
     this.primaryColor,
     this.size = HomeWidgetSize.large,
+    this.inline = false,
   });
 
   /// 从 props 创建
@@ -53,6 +57,7 @@ class DailyReflectionCardWidget extends StatefulWidget {
           ? Color(data.primaryColor!)
           : null,
       size: size,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -110,8 +115,8 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
         );
       },
       child: Container(
-        width: 340,
-        height: 340,
+        width: widget.inline ? double.maxFinite : 340,
+        height: widget.inline ? double.maxFinite : 340,
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(32),

@@ -37,6 +37,8 @@ class VerticalBarChartCardWidget extends StatefulWidget {
   final List<BarData> bars;
   final Color? primaryColor;
   final Color? secondaryColor;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const VerticalBarChartCardWidget({
     super.key,
@@ -47,6 +49,7 @@ class VerticalBarChartCardWidget extends StatefulWidget {
     required this.bars,
     this.primaryColor,
     this.secondaryColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -71,6 +74,7 @@ class VerticalBarChartCardWidget extends StatefulWidget {
       secondaryColor: props['secondaryColor'] != null
           ? Color(props['secondaryColor'] as int)
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -124,8 +128,8 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
         );
       },
       child: Container(
-        width: 350,
-        height: 320,
+        width: widget.inline ? double.maxFinite : 350,
+        height: widget.inline ? double.maxFinite : 320,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
           borderRadius: BorderRadius.circular(40),

@@ -19,6 +19,9 @@ class LineChartTrendCardWidget extends StatefulWidget {
   /// 单位前缀
   final String unit;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const LineChartTrendCardWidget({
     super.key,
     required this.value,
@@ -26,6 +29,7 @@ class LineChartTrendCardWidget extends StatefulWidget {
     required this.changePercent,
     required this.dataPoints,
     this.unit = '',
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -42,6 +46,7 @@ class LineChartTrendCardWidget extends StatefulWidget {
               .toList() ??
           [],
       unit: props['unit'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -94,7 +99,7 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
+              width: widget.inline ? double.maxFinite : 320,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,

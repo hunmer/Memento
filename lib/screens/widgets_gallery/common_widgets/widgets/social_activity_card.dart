@@ -9,11 +9,14 @@ import '../models/social_activity_card_data.dart';
 class SocialActivityCardWidget extends StatefulWidget {
   final SocialUser user;
   final List<SocialPost> posts;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SocialActivityCardWidget({
     super.key,
     required this.user,
     required this.posts,
+    this.inline = false,
   });
 
   /// 从属性映射创建组件
@@ -28,6 +31,7 @@ class SocialActivityCardWidget extends StatefulWidget {
     return SocialActivityCardWidget(
       user: data.user,
       posts: data.posts,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -77,7 +81,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
         );
       },
       child: Container(
-        width: 375,
+        width: widget.inline ? double.maxFinite : 375,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(32),

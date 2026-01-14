@@ -24,6 +24,9 @@ class CardEmojiIconDisplay extends StatelessWidget {
   /// 历史记录点击回调
   final VoidCallback? onHistoryTap;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CardEmojiIconDisplay({
     super.key,
     required this.currentEmotionText,
@@ -32,6 +35,7 @@ class CardEmojiIconDisplay extends StatelessWidget {
     required this.weekEmotions,
     this.onDayTapped,
     this.onHistoryTap,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -65,6 +69,7 @@ class CardEmojiIconDisplay extends StatelessWidget {
       weekEmotions: weekEmotions,
       onDayTapped: null, // 由外部传入
       onHistoryTap: null, // 由外部传入
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -77,6 +82,7 @@ class CardEmojiIconDisplay extends StatelessWidget {
       weekEmotions: weekEmotions,
       onDayTapped: onDayTapped ?? (index) {},
       onHistoryTap: onHistoryTap,
+      inline: inline,
     );
   }
 }

@@ -11,6 +11,8 @@ class RoundedTaskProgressWidget extends StatefulWidget {
   final int commentCount;
   final int attachmentCount;
   final List<String> teamAvatars;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const RoundedTaskProgressWidget({
     super.key,
@@ -22,6 +24,7 @@ class RoundedTaskProgressWidget extends StatefulWidget {
     required this.commentCount,
     required this.attachmentCount,
     required this.teamAvatars,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -38,6 +41,7 @@ class RoundedTaskProgressWidget extends StatefulWidget {
       commentCount: props['commentCount'] as int? ?? 0,
       attachmentCount: props['attachmentCount'] as int? ?? 0,
       teamAvatars: (props['teamAvatars'] as List<dynamic>?)?.cast<String>() ?? const [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -85,7 +89,7 @@ class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
           child: Opacity(
             opacity: _progressAnimation.value,
             child: Container(
-              width: 380,
+              width: widget.inline ? double.maxFinite : 380,
               constraints: const BoxConstraints(minHeight: 400),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,

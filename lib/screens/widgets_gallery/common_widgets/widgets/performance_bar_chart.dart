@@ -37,6 +37,9 @@ class PerformanceBarChartWidget extends StatefulWidget {
   final List<PerformanceBarData> barData;
   final String footerLabel;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const PerformanceBarChartWidget({
     super.key,
     required this.badgeLabel,
@@ -44,6 +47,7 @@ class PerformanceBarChartWidget extends StatefulWidget {
     required this.timePeriod,
     required this.barData,
     required this.footerLabel,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -62,6 +66,7 @@ class PerformanceBarChartWidget extends StatefulWidget {
       timePeriod: props['timePeriod'] as String? ?? '',
       barData: barDataList,
       footerLabel: props['footerLabel'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -110,8 +115,8 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
-              height: 420,
+              width: widget.inline ? double.maxFinite : 360,
+              height: widget.inline ? double.maxFinite : 420,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181b) : Colors.white,

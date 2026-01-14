@@ -50,6 +50,9 @@ class WatchProgressCardWidget extends StatefulWidget {
   /// 进度颜色
   final Color? progressColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const WatchProgressCardWidget({
     super.key,
     required this.userName,
@@ -58,6 +61,7 @@ class WatchProgressCardWidget extends StatefulWidget {
     required this.totalCount,
     required this.items,
     this.progressColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -84,6 +88,7 @@ class WatchProgressCardWidget extends StatefulWidget {
       progressColor: props['progressColor'] != null
           ? Color(props['progressColor'] as int)
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -146,7 +151,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
+              width: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),

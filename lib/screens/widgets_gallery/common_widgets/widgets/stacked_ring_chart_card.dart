@@ -54,6 +54,9 @@ class StackedRingChartCardWidget extends StatefulWidget {
   /// 使用量标签（默认为 "Used storage"）
   final String? usedLabel;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const StackedRingChartCardWidget({
     super.key,
     required this.segments,
@@ -62,6 +65,7 @@ class StackedRingChartCardWidget extends StatefulWidget {
     required this.usedValue,
     this.unit = '',
     this.usedLabel,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -81,6 +85,7 @@ class StackedRingChartCardWidget extends StatefulWidget {
       usedValue: (props['usedValue'] as num?)?.toDouble() ?? 0.0,
       unit: props['unit'] as String? ?? '',
       usedLabel: props['usedLabel'] as String?,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -134,7 +139,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 250,
+              width: widget.inline ? double.maxFinite : 250,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: backgroundColor,

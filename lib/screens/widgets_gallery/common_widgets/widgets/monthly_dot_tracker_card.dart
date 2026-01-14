@@ -10,10 +10,14 @@ class MonthlyDotTrackerCardWidget extends StatelessWidget {
   final Map<String, dynamic> props;
   final HomeWidgetSize size;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MonthlyDotTrackerCardWidget({
     super.key,
     required this.props,
     required this.size,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -24,6 +28,7 @@ class MonthlyDotTrackerCardWidget extends StatelessWidget {
     return MonthlyDotTrackerCardWidget(
       props: props,
       size: size,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -85,6 +90,7 @@ class MonthlyDotTrackerCardWidget extends StatelessWidget {
       weekDays: weekDays,
       dotStates: dotStates,
       enableAnimation: true,
+      inline: inline,
     );
   }
 }

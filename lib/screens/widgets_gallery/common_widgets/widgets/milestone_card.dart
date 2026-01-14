@@ -25,6 +25,9 @@ class MilestoneCardWidget extends StatefulWidget {
   /// 数值后缀
   final String suffix;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MilestoneCardWidget({
     super.key,
     required this.imageUrl,
@@ -34,6 +37,7 @@ class MilestoneCardWidget extends StatefulWidget {
     required this.value,
     required this.unit,
     this.suffix = '',
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -49,6 +53,7 @@ class MilestoneCardWidget extends StatefulWidget {
       value: props['value'] as String? ?? '0',
       unit: props['unit'] as String? ?? '',
       suffix: props['suffix'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -113,8 +118,8 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 260,
-              height: 260,
+              width: widget.inline ? double.maxFinite : 260,
+              height: widget.inline ? double.maxFinite : 260,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(36),

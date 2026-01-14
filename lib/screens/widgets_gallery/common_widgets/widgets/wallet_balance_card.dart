@@ -24,6 +24,9 @@ class WalletBalanceCardWidget extends StatefulWidget {
   /// 支出
   final double expenses;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const WalletBalanceCardWidget({
     super.key,
     required this.avatarUrl,
@@ -32,6 +35,7 @@ class WalletBalanceCardWidget extends StatefulWidget {
     required this.changePercent,
     required this.income,
     required this.expenses,
+    this.inline = false,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -46,6 +50,7 @@ class WalletBalanceCardWidget extends StatefulWidget {
       changePercent: props['changePercent'] as int? ?? 0,
       income: (props['income'] as num?)?.toDouble() ?? 0.0,
       expenses: (props['expenses'] as num?)?.toDouble() ?? 0.0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -107,7 +112,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
     final progress = widget.availableBalance / widget.totalBalance;
 
     return Container(
-      width: 340,
+      width: widget.inline ? double.maxFinite : 340,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: backgroundColor,

@@ -49,10 +49,14 @@ class CircularMetricsCardWidget extends StatefulWidget {
   /// 指标数据列表
   final List<MetricData> metrics;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CircularMetricsCardWidget({
     super.key,
     required this.title,
     required this.metrics,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -68,6 +72,7 @@ class CircularMetricsCardWidget extends StatefulWidget {
     return CircularMetricsCardWidget(
       title: props['title'] as String? ?? 'Overview',
       metrics: metrics,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -115,8 +120,8 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 380,
-              height: 280,
+              width: widget.inline ? double.maxFinite : 380,
+              height: widget.inline ? double.maxFinite : 280,
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
                 color: backgroundColor,

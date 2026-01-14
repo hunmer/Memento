@@ -30,6 +30,8 @@ class SocialProfileCardWidget extends StatefulWidget {
 
   /// 转发数
   final int shares;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SocialProfileCardWidget({
     super.key,
@@ -42,6 +44,7 @@ class SocialProfileCardWidget extends StatefulWidget {
     required this.content,
     required this.comments,
     required this.shares,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -59,6 +62,7 @@ class SocialProfileCardWidget extends StatefulWidget {
       content: props['content'] as String? ?? '',
       comments: (props['comments'] as num?)?.toInt() ?? 0,
       shares: (props['shares'] as num?)?.toInt() ?? 0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

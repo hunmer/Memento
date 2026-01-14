@@ -49,6 +49,8 @@ class SpendingTrendChartWidget extends StatefulWidget {
 
   /// 最大金额（用于Y轴缩放）
   final double maxAmount;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SpendingTrendChartWidget({
     super.key,
@@ -65,6 +67,7 @@ class SpendingTrendChartWidget extends StatefulWidget {
     required this.previousMonthData,
     required this.currentPoint,
     required this.maxAmount,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -92,6 +95,7 @@ class SpendingTrendChartWidget extends StatefulWidget {
           [2800, 2400, 2000, 1600, 1200],
       currentPoint: (props['currentPoint'] as num?)?.toDouble() ?? 1600,
       maxAmount: (props['maxAmount'] as num?)?.toDouble() ?? 4000,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -163,8 +167,8 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
-              height: 320,
+              width: widget.inline ? double.maxFinite : 320,
+              height: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: headerColor,
                 borderRadius: BorderRadius.circular(40),

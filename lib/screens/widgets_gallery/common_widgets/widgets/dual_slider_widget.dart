@@ -78,6 +78,9 @@ class DualSliderWidget extends StatefulWidget {
   /// 进度值（0.0 到 1.0）
   final double progress;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DualSliderWidget({
     super.key,
     required this.label1,
@@ -88,6 +91,7 @@ class DualSliderWidget extends StatefulWidget {
     required this.isPM,
     required this.badgeText,
     this.progress = 0.67,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -104,6 +108,7 @@ class DualSliderWidget extends StatefulWidget {
       isPM: props['isPM'] as bool? ?? false,
       badgeText: props['badgeText'] as String? ?? '',
       progress: (props['progress'] as num?)?.toDouble() ?? 0.67,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -150,8 +155,8 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
-              height: 320,
+              width: widget.inline ? double.maxFinite : 320,
+              height: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),

@@ -22,6 +22,9 @@ class WeatherForecastCard extends StatefulWidget {
   /// 温度历史数据（用于绘制柱状图）
   final List<double> temperatureHistory;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const WeatherForecastCard({
     super.key,
     required this.cityName,
@@ -29,6 +32,7 @@ class WeatherForecastCard extends StatefulWidget {
     required this.currentTemp,
     required this.lowTemp,
     required this.temperatureHistory,
+    this.inline = false,
   });
 
   /// 从属性数据创建组件
@@ -45,6 +49,7 @@ class WeatherForecastCard extends StatefulWidget {
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -95,7 +100,7 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
         );
       },
       child: Container(
-        width: 340,
+        width: widget.inline ? double.maxFinite : 340,
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : Colors.white,

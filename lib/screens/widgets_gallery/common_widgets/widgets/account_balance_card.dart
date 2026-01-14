@@ -12,9 +12,13 @@ class AccountBalanceCardWidget extends StatefulWidget {
   /// 账户列表
   final List<AccountBalanceCardData> accounts;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const AccountBalanceCardWidget({
     super.key,
     required this.accounts,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -29,6 +33,7 @@ class AccountBalanceCardWidget extends StatefulWidget {
 
     return AccountBalanceCardWidget(
       accounts: accounts,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

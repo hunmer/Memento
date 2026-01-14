@@ -24,6 +24,9 @@ class RentalPreviewCardWidget extends StatefulWidget {
   /// 时长
   final String duration;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const RentalPreviewCardWidget({
     super.key,
     required this.imageUrl,
@@ -33,6 +36,7 @@ class RentalPreviewCardWidget extends StatefulWidget {
     required this.description,
     required this.date,
     required this.duration,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -48,6 +52,7 @@ class RentalPreviewCardWidget extends StatefulWidget {
       description: props['description'] as String? ?? '',
       date: props['date'] as String? ?? '',
       duration: props['duration'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -99,7 +104,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
         );
       },
       child: Container(
-        width: 340,
+        width: widget.inline ? double.maxFinite : 340,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(28),

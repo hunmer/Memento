@@ -23,6 +23,9 @@ class MusicPlayerCardWidget extends StatefulWidget {
   /// 是否正在播放
   final bool isPlaying;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MusicPlayerCardWidget({
     super.key,
     required this.albumArtUrl,
@@ -31,6 +34,7 @@ class MusicPlayerCardWidget extends StatefulWidget {
     required this.currentPosition,
     required this.totalDuration,
     this.isPlaying = true,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -45,6 +49,7 @@ class MusicPlayerCardWidget extends StatefulWidget {
       currentPosition: props['currentPosition'] as int? ?? 0,
       totalDuration: props['totalDuration'] as int? ?? 0,
       isPlaying: props['isPlaying'] as bool? ?? true,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -120,8 +125,8 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
         isDark ? const Color(0xFF71717A) : const Color(0xFFA1A1AA);
 
     return Container(
-      width: 340,
-      height: 306,
+      width: widget.inline ? double.maxFinite : 340,
+      height: widget.inline ? double.maxFinite : 306,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: backgroundColor,

@@ -56,6 +56,8 @@ class RoundedPropertyCardWidget extends StatefulWidget {
   final String description;
   final String actionLabel;
   final IconData actionIcon;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const RoundedPropertyCardWidget({
     super.key,
@@ -67,6 +69,7 @@ class RoundedPropertyCardWidget extends StatefulWidget {
     required this.description,
     required this.actionLabel,
     required this.actionIcon,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -83,6 +86,7 @@ class RoundedPropertyCardWidget extends StatefulWidget {
       description: props['description'] as String? ?? '',
       actionLabel: props['actionLabel'] as String? ?? '',
       actionIcon: PropertyMetadataItem._iconFromString(props['actionIcon'] as String? ?? 'Icons.my_location'),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -145,7 +149,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
           child: Transform.translate(
             offset: Offset(0, _slideAnimation.value),
             child: Container(
-              width: 340,
+              width: widget.inline ? double.maxFinite : 340,
               decoration: BoxDecoration(
                 color: cardBackgroundColor,
                 borderRadius: BorderRadius.circular(28),

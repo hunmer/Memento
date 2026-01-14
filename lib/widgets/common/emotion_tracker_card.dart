@@ -121,6 +121,9 @@ class EmotionTrackerCard extends StatefulWidget {
   /// 历史记录点击回调
   final VoidCallback? onHistoryTap;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const EmotionTrackerCard({
     super.key,
     required this.currentEmotionText,
@@ -129,6 +132,7 @@ class EmotionTrackerCard extends StatefulWidget {
     required this.weekEmotions,
     required this.onDayTapped,
     this.onHistoryTap,
+    this.inline = false,
   });
 
   @override
@@ -167,7 +171,7 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
       opacity: _fadeAnimation,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 24),
-        constraints: const BoxConstraints(maxWidth: 400),
+        constraints: BoxConstraints(maxWidth: widget.inline ? double.maxFinite : 400),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),

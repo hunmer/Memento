@@ -54,6 +54,9 @@ class CardTrendLineChart extends StatefulWidget {
   /// 是否显示渐变填充
   final bool showGradient;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CardTrendLineChart({
     super.key,
     this.title,
@@ -69,6 +72,7 @@ class CardTrendLineChart extends StatefulWidget {
     this.showGrid = true,
     this.showDots = true,
     this.showGradient = true,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -97,6 +101,7 @@ class CardTrendLineChart extends StatefulWidget {
       showGrid: props['showGrid'] as bool? ?? true,
       showDots: props['showDots'] as bool? ?? true,
       showGradient: props['showGradient'] as bool? ?? true,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

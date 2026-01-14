@@ -217,6 +217,9 @@ class TimelineScheduleCard extends StatefulWidget {
   /// 明天的更多事件颜色（可选）
   final List<Color>? tomorrowMoreEventsColors;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TimelineScheduleCard({
     super.key,
     required this.todayWeekday,
@@ -230,6 +233,7 @@ class TimelineScheduleCard extends StatefulWidget {
     this.todayMoreEventsColors,
     this.tomorrowMoreEventsCount,
     this.tomorrowMoreEventsColors,
+    this.inline = false,
   });
 
   @override
@@ -274,8 +278,8 @@ class _TimelineScheduleCardState extends State<TimelineScheduleCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height: 500,
-              width: 500,
+              height: widget.inline ? double.maxFinite : 500,
+              width: widget.inline ? double.maxFinite : 500,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),

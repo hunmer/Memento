@@ -13,11 +13,15 @@ class SquarePillProgressCard extends StatefulWidget {
   /// 进度值 (0.0 - 1.0)
   final double progress;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const SquarePillProgressCard({
     super.key,
     required this.medicationCount,
     this.unit = 'meds',
     required this.progress,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -29,6 +33,7 @@ class SquarePillProgressCard extends StatefulWidget {
       medicationCount: props['medicationCount'] as int? ?? 0,
       unit: props['unit'] as String? ?? 'meds',
       progress: (props['progress'] as num?)?.toDouble() ?? 0.0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -76,8 +81,8 @@ class _SquarePillProgressCardState extends State<SquarePillProgressCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 200,
-              height: 200,
+              width: widget.inline ? double.maxFinite : 200,
+              height: widget.inline ? double.maxFinite : 200,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(28),

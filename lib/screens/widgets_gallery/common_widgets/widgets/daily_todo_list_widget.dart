@@ -76,12 +76,16 @@ class DailyTodoListWidget extends StatefulWidget {
   final List<TodoTask> tasks;
   final TodoReminder reminder;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DailyTodoListWidget({
     super.key,
     required this.date,
     required this.time,
     required this.tasks,
     required this.reminder,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -108,6 +112,7 @@ class DailyTodoListWidget extends StatefulWidget {
       time: props['time'] as String? ?? '',
       tasks: tasksList,
       reminder: reminder,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -168,8 +173,8 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
             child: Container(
-              width: 360,
-              height: 600,
+              width: widget.inline ? double.maxFinite : 360,
+              height: widget.inline ? double.maxFinite : 600,
               constraints: const BoxConstraints(minHeight: 400),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181B) : Colors.white,

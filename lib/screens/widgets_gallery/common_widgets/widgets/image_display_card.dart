@@ -29,6 +29,9 @@ class ImageDisplayCardWidget extends StatefulWidget {
   /// 强调色（用于标签）
   final Color? accentColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ImageDisplayCardWidget({
     super.key,
     required this.imageUrl,
@@ -39,6 +42,7 @@ class ImageDisplayCardWidget extends StatefulWidget {
     this.icon,
     this.primaryColor,
     this.accentColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -61,6 +65,7 @@ class ImageDisplayCardWidget extends StatefulWidget {
       accentColor: props['accentColor'] != null
           ? Color(props['accentColor'] as int)
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -127,8 +132,8 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: 380,
-              height: 200,
+              width: widget.inline ? double.maxFinite : 380,
+              height: widget.inline ? double.maxFinite : 200,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: cardColor,

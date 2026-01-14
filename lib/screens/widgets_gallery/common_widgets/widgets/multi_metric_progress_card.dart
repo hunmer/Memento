@@ -70,10 +70,14 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
   /// 卡片背景色
   final Color backgroundColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MultiMetricProgressCardWidget({
     super.key,
     required this.trackers,
     required this.backgroundColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -89,6 +93,7 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
     return MultiMetricProgressCardWidget(
       trackers: trackersList,
       backgroundColor: Color(props['backgroundColor'] as int? ?? 0xFF007AFF),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -124,8 +129,8 @@ class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardW
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 380,
-      constraints: const BoxConstraints(minWidth: 280),
+      width: widget.inline ? double.maxFinite : 380,
+      constraints: widget.inline ? null : const BoxConstraints(minWidth: 280),
       decoration: BoxDecoration(
         color: widget.backgroundColor,
         borderRadius: BorderRadius.circular(24),

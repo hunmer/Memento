@@ -14,11 +14,15 @@ class NewsCardWidget extends StatefulWidget {
   /// 新闻列表
   final List<NewsItemData> newsItems;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const NewsCardWidget({
     super.key,
     required this.featuredNews,
     required this.category,
     required this.newsItems,
+    this.inline = false,
   });
 
   /// 从属性创建（用于动态渲染）
@@ -31,6 +35,7 @@ class NewsCardWidget extends StatefulWidget {
       featuredNews: data.featuredNews,
       category: data.category,
       newsItems: data.newsItems,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -95,7 +100,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
         );
       },
       child: Container(
-        width: double.infinity,
+        width: widget.inline ? double.maxFinite : double.infinity,
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(28),

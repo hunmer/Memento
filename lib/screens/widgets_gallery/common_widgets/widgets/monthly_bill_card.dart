@@ -12,9 +12,13 @@ class MonthlyBillCardWidget extends StatefulWidget {
   /// 账单数据
   final MonthlyBillCardData data;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MonthlyBillCardWidget({
     super.key,
     required this.data,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -29,6 +33,7 @@ class MonthlyBillCardWidget extends StatefulWidget {
 
     return MonthlyBillCardWidget(
       data: data,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -83,7 +88,8 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
+              width: widget.inline ? double.maxFinite : null,
+              constraints: widget.inline ? null : const BoxConstraints(maxWidth: 400),
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,

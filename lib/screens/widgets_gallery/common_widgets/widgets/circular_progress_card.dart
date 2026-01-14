@@ -20,6 +20,9 @@ class CircularProgressCardWidget extends StatefulWidget {
   /// 进度颜色
   final Color? progressColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CircularProgressCardWidget({
     super.key,
     required this.title,
@@ -27,6 +30,7 @@ class CircularProgressCardWidget extends StatefulWidget {
     required this.percentage,
     required this.progress,
     this.progressColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -42,6 +46,7 @@ class CircularProgressCardWidget extends StatefulWidget {
       progressColor: props['progressColor'] != null
           ? Color(props['progressColor'] as int)
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -101,7 +106,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Container(
-            width: 150,
+            width: widget.inline ? double.maxFinite : 150,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: backgroundColor,

@@ -34,6 +34,9 @@ class CardBarChartMonitor extends StatelessWidget {
   /// 柱状图点击回调
   final Function(int index, WeeklyLevelData data)? onBarTap;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CardBarChartMonitor({
     super.key,
     required this.title,
@@ -44,6 +47,7 @@ class CardBarChartMonitor extends StatelessWidget {
     required this.weeklyData,
     this.onTodayTap,
     this.onBarTap,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -65,6 +69,7 @@ class CardBarChartMonitor extends StatelessWidget {
       weeklyData: weeklyData,
       onTodayTap: null, // 回调无法从 props 恢复
       onBarTap: null, // 回调无法从 props 恢复
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -85,6 +90,7 @@ class CardBarChartMonitor extends StatelessWidget {
       weeklyData: weeklyData,
       onTodayTap: onTodayTap ?? () {},
       onBarTap: onBarTap ?? (_, __) {},
+      inline: inline,
     );
   }
 }

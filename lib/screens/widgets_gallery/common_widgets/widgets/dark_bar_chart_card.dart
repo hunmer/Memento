@@ -15,10 +15,14 @@ class DarkBarChartCard extends StatefulWidget {
   /// 趋势（上升、下降、中性）
   final BarChartTrend trend;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DarkBarChartCard({
     super.key,
     required this.durationInMinutes,
     this.trend = BarChartTrend.neutral,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -46,6 +50,7 @@ class DarkBarChartCard extends StatefulWidget {
     return DarkBarChartCard(
       durationInMinutes: props['durationInMinutes'] as int? ?? 0,
       trend: parseTrend(props['trend']),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -99,8 +104,8 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: 320,
-              height: 320,
+              width: widget.inline ? double.maxFinite : 320,
+              height: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),

@@ -34,6 +34,9 @@ class RankedBarChartCardWidget extends StatefulWidget {
   final List<RankedBarItem> items;
   final String footer;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const RankedBarChartCardWidget({
     super.key,
     required this.title,
@@ -41,6 +44,7 @@ class RankedBarChartCardWidget extends StatefulWidget {
     required this.itemCount,
     required this.items,
     required this.footer,
+    this.inline = false,
   });
 
   factory RankedBarChartCardWidget.fromProps(Map<String, dynamic> props, HomeWidgetSize size) {
@@ -51,6 +55,7 @@ class RankedBarChartCardWidget extends StatefulWidget {
       itemCount: props['itemCount'] as String? ?? '',
       items: itemsList,
       footer: props['footer'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -89,8 +94,8 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget> wit
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
-              constraints: const BoxConstraints(maxWidth: 360),
+              width: widget.inline ? double.maxFinite : 360,
+              constraints: widget.inline ? null : const BoxConstraints(maxWidth: 360),
               decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(32), boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.1), blurRadius: 20, offset: const Offset(0, 4))]),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(32),

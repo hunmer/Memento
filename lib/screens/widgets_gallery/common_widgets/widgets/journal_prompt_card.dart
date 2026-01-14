@@ -18,12 +18,16 @@ class JournalPromptCardWidget extends StatefulWidget {
   /// 同步按钮回调（在通用小组件中使用空实现）
   final VoidCallback onSyncPressed;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const JournalPromptCardWidget({
     super.key,
     required this.weekday,
     required this.prompt,
     required this.onNewPressed,
     required this.onSyncPressed,
+    this.inline = false,
   });
 
   /// 从属性创建（用于动态渲染）
@@ -37,6 +41,7 @@ class JournalPromptCardWidget extends StatefulWidget {
       prompt: data.prompt,
       onNewPressed: () {}, // 通用小组件中不执行实际操作
       onSyncPressed: () {}, // 通用小组件中不执行实际操作
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

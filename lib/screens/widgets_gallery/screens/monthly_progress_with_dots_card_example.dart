@@ -15,7 +15,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: MonthlyProgressWithDotsCardWidget(
-            month: 'September',
+            title: 'September',
             currentDay: 18,
             totalDays: 31,
             percentage: 58,

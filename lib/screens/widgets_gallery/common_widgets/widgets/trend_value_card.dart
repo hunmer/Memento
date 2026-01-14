@@ -66,6 +66,9 @@ class TrendValueCardWidget extends StatefulWidget {
   /// 主色调
   final Color? primaryColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TrendValueCardWidget({
     super.key,
     required this.value,
@@ -77,6 +80,7 @@ class TrendValueCardWidget extends StatefulWidget {
     this.additionalInfo = const [],
     this.trendLabel = 'vs last week',
     this.primaryColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -102,6 +106,7 @@ class TrendValueCardWidget extends StatefulWidget {
       primaryColor: props['primaryColor'] != null
           ? Color(int.parse(props['primaryColor'] as String))
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -153,7 +158,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
-              width: 384,
+              width: widget.inline ? double.maxFinite : 384,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,

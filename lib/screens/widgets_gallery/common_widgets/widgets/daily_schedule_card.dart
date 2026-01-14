@@ -83,11 +83,15 @@ class DailyScheduleCardWidget extends StatefulWidget {
   final List<EventData> todayEvents;
   final List<EventData> tomorrowEvents;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DailyScheduleCardWidget({
     super.key,
     required this.todayDate,
     required this.todayEvents,
     required this.tomorrowEvents,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -108,6 +112,7 @@ class DailyScheduleCardWidget extends StatefulWidget {
       todayDate: props['todayDate'] as String? ?? '',
       todayEvents: todayEventsList,
       tomorrowEvents: tomorrowEventsList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -153,7 +158,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
+              width: widget.inline ? double.maxFinite : 360,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF171717) : Colors.white,

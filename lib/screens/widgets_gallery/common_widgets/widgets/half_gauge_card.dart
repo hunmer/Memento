@@ -9,12 +9,16 @@ class HalfGaugeCardWidget extends StatefulWidget {
   final double remaining;
   final String currency;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const HalfGaugeCardWidget({
     super.key,
     this.title = 'Shopping',
     required this.totalBudget,
     required this.remaining,
     this.currency = 'AED',
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -27,6 +31,7 @@ class HalfGaugeCardWidget extends StatefulWidget {
       totalBudget: (props['totalBudget'] as num?)?.toDouble() ?? 0.0,
       remaining: (props['remaining'] as num?)?.toDouble() ?? 0.0,
       currency: props['currency'] as String? ?? 'AED',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

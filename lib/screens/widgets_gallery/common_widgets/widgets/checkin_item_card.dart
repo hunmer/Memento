@@ -8,10 +8,14 @@ class CheckinItemCardWidget extends StatelessWidget {
   final Map<String, dynamic> props;
   final HomeWidgetSize size;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CheckinItemCardWidget({
     super.key,
     required this.props,
     required this.size,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -22,6 +26,7 @@ class CheckinItemCardWidget extends StatelessWidget {
     return CheckinItemCardWidget(
       props: props,
       size: size,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
