@@ -16,7 +16,7 @@ class SleepDurationCardExample extends StatelessWidget {
         child: const Center(
           child: DarkBarChartCard(
             durationInMinutes: 435, // 7小时15分钟
-            trend: SleepTrend.up,
+            trend: BarChartTrend.up,
           ),
         ),
       ),

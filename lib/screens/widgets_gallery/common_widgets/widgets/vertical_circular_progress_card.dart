@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_tracking_card_data.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/models/vertical_circular_progress_card_data.dart';
 
 /// 上下布局圆环进度卡片公共小组件
 ///
@@ -13,11 +13,11 @@ import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_trac
 /// 使用示例：
 /// ```dart
 /// VerticalCircularProgressCard(
-///   data: SleepTrackingCardData(
-///     sleepHours: 7.5,
-///     sleepLabel: 'Good Sleep',
+///   data: VerticalCircularProgressCardData(
+///     mainValue: 7.5,
+///     statusLabel: 'Good Sleep',
 ///     weeklyProgress: [
-///       DaySleepData(day: 'M', achieved: true, progress: 1.0),
+///       CircularProgressItemData(day: 'M', achieved: true, progress: 1.0),
 ///       // ... 其他6天
 ///     ],
 ///   ),
@@ -26,7 +26,7 @@ import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_trac
 /// ```
 class VerticalCircularProgressCard extends StatefulWidget {
   /// 数据模型
-  final SleepTrackingCardData data;
+  final VerticalCircularProgressCardData data;
 
   /// 小组件尺寸
   final HomeWidgetSize size;
@@ -71,24 +71,24 @@ class VerticalCircularProgressCard extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     // 尝试从 props 中解析 data
-    SleepTrackingCardData? data;
+    VerticalCircularProgressCardData? data;
 
     if (props.containsKey('data')) {
       // 如果 data 是字符串，尝试解析
       final dataValue = props['data'];
       if (dataValue is String) {
         try {
-          data = SleepTrackingCardData.fromJsonString(dataValue);
+          data = VerticalCircularProgressCardData.fromJsonString(dataValue);
         } catch (e) {
-          debugPrint('Failed to parse SleepTrackingCardData: $e');
+          debugPrint('Failed to parse VerticalCircularProgressCardData: $e');
         }
       } else if (dataValue is Map<String, dynamic>) {
-        data = SleepTrackingCardData.fromJson(dataValue);
+        data = VerticalCircularProgressCardData.fromJson(dataValue);
       }
     }
 
     // 如果解析失败，使用默认值
-    data ??= SleepTrackingCardData.createDefault();
+    data ??= VerticalCircularProgressCardData.createDefault();
 
     return VerticalCircularProgressCard(
       data: data,
@@ -109,7 +109,7 @@ class VerticalCircularProgressCard extends StatefulWidget {
   }
 
   /// 将组件配置转换为属性映射（用于保存配置）
-  static Map<String, dynamic> toProps(SleepTrackingCardData data,
+  static Map<String, dynamic> toProps(VerticalCircularProgressCardData data,
       {HomeWidgetSize? size}) {
     return {
       'data': data.toJsonString(),
@@ -310,7 +310,7 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
                     width: 90,
                     height: 48,
                     child: AnimatedFlipCounter(
-                      value: widget.data.sleepHours * _animation.value,
+                      value: widget.data.mainValue * _animation.value,
                       fractionDigits: 2,
                       textStyle: TextStyle(
                         fontSize: 40,
@@ -340,7 +340,7 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
             ),
             const SizedBox(height: 4),
             Text(
-              widget.data.sleepLabel,
+              widget.data.statusLabel,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -384,7 +384,7 @@ class _VerticalCircularProgressCardState extends State<VerticalCircularProgressC
 
 /// 日睡眠进度指示器
 class _DaySleepIndicator extends StatelessWidget {
-  final DaySleepData dayData;
+  final CircularProgressItemData dayData;
   final Color primaryColor;
   final bool isDark;
   final Animation<double> animation;

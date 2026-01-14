@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
-/// 心情数据模型
-class MoodEntry {
+/// 柱状图标数据模型
+class BarIconEntry {
   final String dayLabel;
   final double positiveValue;
   final double negativeValue;
-  final MoodType moodType;
+  final BarIconType moodType;
   final bool isToday;
 
-  const MoodEntry({
+  const BarIconEntry({
     required this.dayLabel,
     required this.positiveValue,
     required this.negativeValue,
@@ -18,12 +18,12 @@ class MoodEntry {
   });
 
   /// 从 JSON 创建
-  factory MoodEntry.fromJson(Map<String, dynamic> json) {
-    return MoodEntry(
+  factory BarIconEntry.fromJson(Map<String, dynamic> json) {
+    return BarIconEntry(
       dayLabel: json['dayLabel'] as String? ?? '',
       positiveValue: (json['positiveValue'] as num?)?.toDouble() ?? 0.0,
       negativeValue: (json['negativeValue'] as num?)?.toDouble() ?? 0.0,
-      moodType: MoodTypeExtension.fromJson(json['moodType'] as String? ?? 'positive'),
+      moodType: BarIconTypeExtension.fromJson(json['moodType'] as String? ?? 'positive'),
       isToday: json['isToday'] as bool? ?? false,
     );
   }
@@ -41,19 +41,19 @@ class MoodEntry {
 }
 
 /// 心情类型枚举
-enum MoodType {
+enum BarIconType {
   positive,
   negative,
 }
 
 /// 心情类型扩展
-extension MoodTypeExtension on MoodType {
+extension BarIconTypeExtension on BarIconType {
   String toJson() => name;
 
-  static MoodType fromJson(String value) {
-    return MoodType.values.firstWhere(
+  static BarIconType fromJson(String value) {
+    return BarIconType.values.firstWhere(
       (e) => e.name == value,
-      orElse: () => MoodType.positive,
+      orElse: () => BarIconType.positive,
     );
   }
 }
@@ -69,7 +69,7 @@ enum MoodIconType {
 
 /// 现代化圆角心情追踪小组件
 class ModernRoundedBarIconCard extends StatelessWidget {
-  final List<MoodEntry> weekMoods;
+  final List<BarIconEntry> weekMoods;
 
   const ModernRoundedBarIconCard({
     super.key,
@@ -82,51 +82,51 @@ class ModernRoundedBarIconCard extends StatelessWidget {
     HomeWidgetSize size,
   ) {
     final moodsList = (props['weekMoods'] as List<dynamic>?)
-            ?.map((e) => MoodEntry.fromJson(e as Map<String, dynamic>))
+            ?.map((e) => BarIconEntry.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'M',
             positiveValue: 0.15,
             negativeValue: 0.0,
-            moodType: MoodType.positive,
+            moodType: BarIconType.positive,
           ),
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'T',
             positiveValue: 0.25,
             negativeValue: 0.0,
-            moodType: MoodType.positive,
+            moodType: BarIconType.positive,
           ),
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'W',
             positiveValue: 0.40,
             negativeValue: 0.0,
-            moodType: MoodType.positive,
+            moodType: BarIconType.positive,
           ),
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'T',
             positiveValue: 0.65,
             negativeValue: 0.0,
-            moodType: MoodType.positive,
+            moodType: BarIconType.positive,
           ),
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'F',
             positiveValue: 0.85,
             negativeValue: 0.0,
-            moodType: MoodType.positive,
+            moodType: BarIconType.positive,
             isToday: true,
           ),
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'S',
             positiveValue: 0.0,
             negativeValue: 0.15,
-            moodType: MoodType.negative,
+            moodType: BarIconType.negative,
           ),
-          MoodEntry(
+          BarIconEntry(
             dayLabel: 'S',
             positiveValue: 0.0,
             negativeValue: 0.55,
-            moodType: MoodType.negative,
+            moodType: BarIconType.negative,
           ),
         ];
 
@@ -228,7 +228,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMoodBar(BuildContext context, MoodEntry mood, bool isDark) {
+  Widget _buildMoodBar(BuildContext context, BarIconEntry mood, bool isDark) {
     final primaryColor = const Color(0xFF9DB36D);
     final secondaryColor = const Color(0xFFE88D3E);
     final trackColor = isDark ? const Color(0xFF374151) : const Color(0xFFF2F4EF);

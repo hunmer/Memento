@@ -183,7 +183,7 @@
         },
         {
           "name": "trend",
-          "type": "SleepTrend",
+          "type": "BarChartTrend",
           "required": false,
           "defaultValue": "neutral",
           "description": "趋势 (up/down/neutral)"
@@ -301,10 +301,10 @@
       "parameters": [
         {
           "name": "data",
-          "type": "SleepTrackingCardData",
+          "type": "VerticalCircularProgressCardData",
           "required": true,
           "description": "睡眠追踪数据模型（JSON字符串或Map）",
-          "note": "包含 sleepHours, sleepLabel, weeklyProgress, primaryColor, title, actionLabel 等字段"
+          "note": "包含 mainValue, statusLabel, weeklyProgress, primaryColor, title, actionLabel 等字段"
         },
         {
           "name": "size",
@@ -482,7 +482,7 @@
         },
         {
           "name": "trend",
-          "type": "SleepTrend",
+          "type": "BarChartTrend",
           "required": false,
           "defaultValue": "neutral",
           "description": "趋势（枚举：up、down、neutral）"
@@ -748,7 +748,7 @@
       "parameters": [
         {
           "name": "weekMoods",
-          "type": "List<MoodEntry>",
+          "type": "List<BarIconEntry>",
           "required": true,
           "description": "周心情数据列表",
           "subParameters": [

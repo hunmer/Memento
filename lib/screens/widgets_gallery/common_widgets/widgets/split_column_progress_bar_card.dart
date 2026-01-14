@@ -2,21 +2,21 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
-/// 卡路里数据模型
-class NutritionData {
+/// 列进度数据模型
+class ColumnProgressData {
   final double current;
   final double total;
   final String unit;
 
-  const NutritionData({
+  const ColumnProgressData({
     required this.current,
     required this.total,
     required this.unit,
   });
 
   /// 从 JSON 创建
-  factory NutritionData.fromJson(Map<String, dynamic> json) {
-    return NutritionData(
+  factory ColumnProgressData.fromJson(Map<String, dynamic> json) {
+    return ColumnProgressData(
       current: (json['current'] as num?)?.toDouble() ?? 0.0,
       total: (json['total'] as num?)?.toDouble() ?? 0.0,
       unit: json['unit'] as String? ?? '',
@@ -33,15 +33,15 @@ class NutritionData {
   }
 }
 
-/// 营养素数据模型
-class NutrientData {
+/// 进度项数据模型
+class ProgressItemData {
   final String icon;
   final String name;
   final double current;
   final double total;
   final Color color;
 
-  const NutrientData({
+  const ProgressItemData({
     required this.icon,
     required this.name,
     required this.current,
@@ -50,8 +50,8 @@ class NutrientData {
   });
 
   /// 从 JSON 创建
-  factory NutrientData.fromJson(Map<String, dynamic> json) {
-    return NutrientData(
+  factory ProgressItemData.fromJson(Map<String, dynamic> json) {
+    return ProgressItemData(
       icon: json['icon'] as String? ?? '',
       name: json['name'] as String? ?? '',
       current: (json['current'] as num?)?.toDouble() ?? 0.0,
@@ -74,8 +74,8 @@ class NutrientData {
 
 /// 左右分栏进度条卡片小组件
 class SplitColumnProgressBarCard extends StatefulWidget {
-  final NutritionData calories;
-  final List<NutrientData> nutrients;
+  final ColumnProgressData calories;
+  final List<ProgressItemData> nutrients;
 
   const SplitColumnProgressBarCard({
     super.key,
@@ -89,11 +89,11 @@ class SplitColumnProgressBarCard extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     final caloriesData = props['calories'] != null
-        ? NutritionData.fromJson(props['calories'] as Map<String, dynamic>)
-        : const NutritionData(current: 0, total: 100, unit: '');
+        ? ColumnProgressData.fromJson(props['calories'] as Map<String, dynamic>)
+        : const ColumnProgressData(current: 0, total: 100, unit: '');
 
     final nutrientsList = (props['nutrients'] as List<dynamic>?)
-            ?.map((e) => NutrientData.fromJson(e as Map<String, dynamic>))
+            ?.map((e) => ProgressItemData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
 
@@ -192,7 +192,7 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
 }
 
 class _CaloriesSection extends StatelessWidget {
-  final NutritionData data;
+  final ColumnProgressData data;
   final Animation<double> animation;
 
   const _CaloriesSection({required this.data, required this.animation});
@@ -298,7 +298,7 @@ class _CaloriesSection extends StatelessWidget {
 }
 
 class _NutrientsSection extends StatelessWidget {
-  final List<NutrientData> nutrients;
+  final List<ProgressItemData> nutrients;
   final Animation<double> animation;
 
   const _NutrientsSection({required this.nutrients, required this.animation});
@@ -319,7 +319,7 @@ class _NutrientsSection extends StatelessWidget {
 }
 
 class _NutrientItem extends StatelessWidget {
-  final NutrientData data;
+  final ProgressItemData data;
   final Animation<double> animation;
   final int index;
 

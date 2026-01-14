@@ -2,8 +2,8 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
-/// 睡眠趋势枚举
-enum SleepTrend { up, down, neutral }
+/// 柱状图趋势枚举
+enum BarChartTrend { up, down, neutral }
 
 /// 睡眠时长统计卡片小组件
 ///
@@ -13,12 +13,12 @@ class DarkBarChartCard extends StatefulWidget {
   final int durationInMinutes;
 
   /// 趋势（上升、下降、中性）
-  final SleepTrend trend;
+  final BarChartTrend trend;
 
   const DarkBarChartCard({
     super.key,
     required this.durationInMinutes,
-    this.trend = SleepTrend.neutral,
+    this.trend = BarChartTrend.neutral,
   });
 
   /// 从 props 创建实例
@@ -27,20 +27,20 @@ class DarkBarChartCard extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     // 将字符串趋势转换为枚举
-    SleepTrend parseTrend(dynamic trendValue) {
-      if (trendValue == null) return SleepTrend.neutral;
-      if (trendValue is SleepTrend) return trendValue;
+    BarChartTrend parseTrend(dynamic trendValue) {
+      if (trendValue == null) return BarChartTrend.neutral;
+      if (trendValue is BarChartTrend) return trendValue;
       if (trendValue is String) {
         switch (trendValue.toLowerCase()) {
           case 'up':
-            return SleepTrend.up;
+            return BarChartTrend.up;
           case 'down':
-            return SleepTrend.down;
+            return BarChartTrend.down;
           default:
-            return SleepTrend.neutral;
+            return BarChartTrend.neutral;
         }
       }
-      return SleepTrend.neutral;
+      return BarChartTrend.neutral;
     }
 
     return DarkBarChartCard(
@@ -232,13 +232,13 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                             ),
                             const SizedBox(width: 8),
                             // 趋势图标
-                            if (widget.trend != SleepTrend.neutral)
+                            if (widget.trend != BarChartTrend.neutral)
                               Transform.rotate(
-                                angle: widget.trend == SleepTrend.up
+                                angle: widget.trend == BarChartTrend.up
                                     ? 0.78
                                     : -0.78, // 45度旋转
                                 child: Icon(
-                                  widget.trend == SleepTrend.up
+                                  widget.trend == BarChartTrend.up
                                       ? Icons.arrow_upward
                                       : Icons.arrow_downward,
                                   color: const Color(0xFFD8B4FE),

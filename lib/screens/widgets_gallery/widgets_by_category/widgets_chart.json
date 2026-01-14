@@ -1456,11 +1456,11 @@
       ]
     },
     {
-      "name": "MoodChartCardWidget",
+      "name": "ChartIconDisplayCard",
       "displayName": "心情图表卡片",
       "description": "显示心情数据的柱状图，支持emoji或颜色显示",
       "category": "chart",
-      "file": "mood_chart_card.dart",
+      "file": "chart_icon_display_card.dart",
       "parameters": [
         {
           "name": "title",
@@ -1476,7 +1476,7 @@
         },
         {
           "name": "moods",
-          "type": "List<MoodEntry>",
+          "type": "List<BarIconEntry>",
           "required": true,
           "description": "心情数据列表",
           "subParameters": [
@@ -1499,7 +1499,7 @@
         },
         {
           "name": "displayType",
-          "type": "MoodType",
+          "type": "BarIconType",
           "required": false,
           "defaultValue": "emoji",
           "description": "显示类型（枚举：emoji、color）"

@@ -92,7 +92,7 @@ import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/task_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rounded_task_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/chart_icon_display_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_mood_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_spending_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/hydration_tracker_widget_example.dart';
@@ -623,7 +623,7 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
     RouteDefinition(
           path: '/widgets_gallery/mood_chart_card',
-          handler: (settings) => RouteHelpers.createRoute(const MoodChartCardExample(), settings: settings),
+          handler: (settings) => RouteHelpers.createRoute(const ChartIconDisplayCardExample(), settings: settings),
           description: '心情图表卡片',
         ),
         RouteDefinition(

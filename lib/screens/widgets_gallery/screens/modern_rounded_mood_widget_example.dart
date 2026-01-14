@@ -19,13 +19,13 @@ class ModernRoundedBarIconCardExample extends StatelessWidget {
         child: const Center(
           child: ModernRoundedBarIconCard(
             weekMoods: [
-              MoodEntry(dayLabel: 'M', positiveValue: 0.15, negativeValue: 0.0, moodType: MoodType.positive),
-              MoodEntry(dayLabel: 'T', positiveValue: 0.25, negativeValue: 0.0, moodType: MoodType.positive),
-              MoodEntry(dayLabel: 'W', positiveValue: 0.40, negativeValue: 0.0, moodType: MoodType.positive),
-              MoodEntry(dayLabel: 'T', positiveValue: 0.65, negativeValue: 0.0, moodType: MoodType.positive),
-              MoodEntry(dayLabel: 'F', positiveValue: 0.85, negativeValue: 0.0, moodType: MoodType.positive, isToday: true),
-              MoodEntry(dayLabel: 'S', positiveValue: 0.0, negativeValue: 0.15, moodType: MoodType.negative),
-              MoodEntry(dayLabel: 'S', positiveValue: 0.0, negativeValue: 0.55, moodType: MoodType.negative),
+              BarIconEntry(dayLabel: 'M', positiveValue: 0.15, negativeValue: 0.0, moodType: BarIconType.positive),
+              BarIconEntry(dayLabel: 'T', positiveValue: 0.25, negativeValue: 0.0, moodType: BarIconType.positive),
+              BarIconEntry(dayLabel: 'W', positiveValue: 0.40, negativeValue: 0.0, moodType: BarIconType.positive),
+              BarIconEntry(dayLabel: 'T', positiveValue: 0.65, negativeValue: 0.0, moodType: BarIconType.positive),
+              BarIconEntry(dayLabel: 'F', positiveValue: 0.85, negativeValue: 0.0, moodType: BarIconType.positive, isToday: true),
+              BarIconEntry(dayLabel: 'S', positiveValue: 0.0, negativeValue: 0.15, moodType: BarIconType.negative),
+              BarIconEntry(dayLabel: 'S', positiveValue: 0.0, negativeValue: 0.55, moodType: BarIconType.negative),
             ],
           ),
         ),

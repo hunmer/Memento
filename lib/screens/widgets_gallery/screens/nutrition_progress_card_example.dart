@@ -15,23 +15,23 @@ class SplitColumnProgressBarCardExample extends StatelessWidget {
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: SplitColumnProgressBarCard(
-            calories: NutritionData(current: 470, total: 1830, unit: 'Cal'),
+            calories: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
             nutrients: [
-              NutrientData(
+              ProgressItemData(
                 icon: '🍔',
                 name: 'Protein',
                 current: 66,
                 total: 94,
                 color: Color(0xFF34D399),
               ),
-              NutrientData(
+              ProgressItemData(
                 icon: '🍉',
                 name: 'Carbs',
                 current: 35,
                 total: 64,
                 color: Color(0xFFFED7AA),
               ),
-              NutrientData(
+              ProgressItemData(
                 icon: '🥛',
                 name: 'Fats',
                 current: 21,
