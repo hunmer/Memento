@@ -480,19 +480,13 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
 
                 if (startIndex >= dayCount) return const SizedBox.shrink();
 
-                // 判断是否为最后一行且不满
-                final isLastRow = rowIndex == rowCount - 1;
-                final isNotFull = rowDays < maxDaysInRow;
-
                 return Padding(
                   padding: EdgeInsets.only(
                     bottom: rowIndex < rowCount - 1 ? rowSpacing : 0,
                   ),
                   child: Row(
-                    // 最后一行不满时左对齐，否则均匀分布
-                    mainAxisAlignment: (isLastRow && isNotFull)
-                        ? MainAxisAlignment.start
-                        : MainAxisAlignment.spaceEvenly,
+                    // 所有行都左对齐
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children:
                         List.generate(rowDays, (colIndex) {
                           final index = startIndex + colIndex;
@@ -504,10 +498,8 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
                               curve: Curves.easeOutCubic,
                             ),
                           );
-                          // 只有非最后一行或最后一行满的时候才加右边距
-                          final needRightPadding = !(isLastRow && isNotFull) && colIndex < rowDays - 1;
                           return Padding(
-                            padding: EdgeInsets.only(right: needRightPadding ? spacing : 0),
+                            padding: EdgeInsets.only(right: colIndex < rowDays - 1 ? spacing : 0),
                             child: _DayDotColumn(
                               day: widget.weekDays[index],
                               dotStates: widget.dotStates[index],
