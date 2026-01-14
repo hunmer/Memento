@@ -247,13 +247,9 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                 // 左侧垂直 TabBar
                 SizedBox(
                   width: 120,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // 预留一些空间给 indicator 和 padding
-                      final availableHeight = constraints.maxHeight - 20;
-                      final tabHeight =
-                          availableHeight / _availableCommonWidgets.length;
-                      return ExtendedTabBar(
+                  child: SingleChildScrollView(
+                    child: IntrinsicHeight(
+                      child: ExtendedTabBar(
                         controller: _tabController,
                         scrollDirection: Axis.vertical,
                         isScrollable: true,
@@ -268,22 +264,22 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                         unselectedLabelStyle: const TextStyle(fontSize: 14),
                         tabs:
                             _availableCommonWidgets.keys.map((widgetId) {
-                              final metadata =
-                                  CommonWidgetsRegistry.getMetadata(
-                                    CommonWidgetId.values.firstWhere(
-                                      (e) => e.name == widgetId,
-                                    ),
-                                  );
-                              return SizedBox(
-                                height: tabHeight,
-                                child: ExtendedTab(
-                                  text: metadata.name,
-                                  scrollDirection: Axis.vertical,
+                          final metadata =
+                              CommonWidgetsRegistry.getMetadata(
+                                CommonWidgetId.values.firstWhere(
+                                  (e) => e.name == widgetId,
                                 ),
                               );
-                            }).toList(),
-                      );
-                    },
+                          return SizedBox(
+                            height: 48,
+                            child: ExtendedTab(
+                              text: metadata.name,
+                              scrollDirection: Axis.vertical,
+                            ),
+                            );
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

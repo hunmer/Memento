@@ -279,6 +279,14 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+              spreadRadius: 0,
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -321,14 +329,11 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
       children: [
         Row(
           children: [
-            Transform.rotate(
-              angle: -0.78, // -45 degrees
-              child: Icon(
+            Icon(
                 widget.icon,
                 color: primaryColor,
                 size: 28,
               ),
-            ),
             const SizedBox(width: 10),
             Text(
               widget.title,
