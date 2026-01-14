@@ -4,15 +4,15 @@ import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:flutter/material.dart';
 
 /// 体重趋势图表示例
-class WeightTrendChartExample extends StatefulWidget {
-  const WeightTrendChartExample({super.key});
+class CardTrendLineChartExample extends StatefulWidget {
+  const CardTrendLineChartExample({super.key});
 
   @override
-  State<WeightTrendChartExample> createState() =>
-      _WeightTrendChartExampleState();
+  State<CardTrendLineChartExample> createState() =>
+      _CardTrendLineChartExampleState();
 }
 
-class _WeightTrendChartExampleState extends State<WeightTrendChartExample> {
+class _CardTrendLineChartExampleState extends State<CardTrendLineChartExample> {
   // 基础示例数据
   final List<TrendDataPoint> _weightData = const [
     TrendDataPoint(label: '12', value: 68.2),

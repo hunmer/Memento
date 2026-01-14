@@ -347,7 +347,7 @@
       ]
     },
     {
-      "name": "ActivityProgressCardWidget",
+      "name": "CardDotProgressDisplay",
       "displayName": "活动进度卡片",
       "description": "显示数值、单位、活动数和进度点",
       "category": "progress",
@@ -615,7 +615,7 @@
       ]
     },
     {
-      "name": "NutritionProgressCardWidget",
+      "name": "SplitColumnProgressBarCard",
       "displayName": "营养进度卡片",
       "description": "显示卡路里和营养素（蛋白质、碳水、脂肪等）的进度",
       "category": "progress",

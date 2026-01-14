@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/card_dot_progress_display.dart';
 
 /// 活动进度卡片示例
-class ActivityProgressCardExample extends StatelessWidget {
-  const ActivityProgressCardExample({super.key});
+class CardDotProgressDisplayExample extends StatelessWidget {
+  const CardDotProgressDisplayExample({super.key});
 
   @override
   Widget build(BuildContext context) {
