@@ -49,6 +49,8 @@ class SegmentedProgressCardWidget extends StatefulWidget {
 
   /// 数值单位
   final String unit;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SegmentedProgressCardWidget({
     super.key,
@@ -57,6 +59,7 @@ class SegmentedProgressCardWidget extends StatefulWidget {
     required this.targetValue,
     required this.segments,
     this.unit = '',
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -75,6 +78,7 @@ class SegmentedProgressCardWidget extends StatefulWidget {
       targetValue: (props['targetValue'] as num?)?.toDouble() ?? 0.0,
       segments: segmentsList,
       unit: props['unit'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -124,7 +128,7 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
         );
       },
       child: Container(
-        width: 340,
+        width: widget.inline ? double.maxFinite : 340,
         decoration: BoxDecoration(
           color: isDark ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(40),

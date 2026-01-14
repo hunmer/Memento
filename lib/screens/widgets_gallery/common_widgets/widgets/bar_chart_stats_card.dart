@@ -30,6 +30,9 @@ class BarChartStatsCardWidget extends StatefulWidget {
   /// Y轴最大值
   final double maxValue;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const BarChartStatsCardWidget({
     super.key,
     required this.title,
@@ -41,6 +44,7 @@ class BarChartStatsCardWidget extends StatefulWidget {
     required this.data,
     required this.labels,
     required this.maxValue,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -86,6 +90,7 @@ class BarChartStatsCardWidget extends StatefulWidget {
               .toList() ??
           [],
       maxValue: (props['maxValue'] as num?)?.toDouble() ?? 10.0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -168,7 +173,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
+              width: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),

@@ -24,6 +24,9 @@ class ProfileCardWidget extends StatefulWidget {
   /// 关注数
   final int followingCount;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ProfileCardWidget({
     super.key,
     required this.imageUrl,
@@ -32,6 +35,7 @@ class ProfileCardWidget extends StatefulWidget {
     required this.bio,
     required this.followersCount,
     required this.followingCount,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -46,6 +50,7 @@ class ProfileCardWidget extends StatefulWidget {
       bio: props['bio'] as String? ?? '',
       followersCount: (props['followersCount'] as num?)?.toInt() ?? 0,
       followingCount: (props['followingCount'] as num?)?.toInt() ?? 0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -97,8 +102,8 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: double.infinity,
-              height: double.infinity,
+              width: widget.inline ? double.maxFinite : double.infinity,
+              height: widget.inline ? double.maxFinite : double.infinity,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [

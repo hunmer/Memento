@@ -35,6 +35,9 @@ class ExpenseDonutChartWidget extends StatefulWidget {
   final String totalUnit;
   final List<ExpenseCategoryData> categories;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ExpenseDonutChartWidget({
     super.key,
     required this.badgeLabel,
@@ -42,6 +45,7 @@ class ExpenseDonutChartWidget extends StatefulWidget {
     required this.totalAmount,
     required this.totalUnit,
     required this.categories,
+    this.inline = false,
   });
 
   factory ExpenseDonutChartWidget.fromProps(Map<String, dynamic> props, HomeWidgetSize size) {
@@ -52,6 +56,7 @@ class ExpenseDonutChartWidget extends StatefulWidget {
       totalAmount: (props['totalAmount'] as num?)?.toDouble() ?? 0.0,
       totalUnit: props['totalUnit'] as String? ?? '',
       categories: categoriesList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -90,8 +95,8 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with 
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
-              height: 500,
+              width: widget.inline ? double.maxFinite : 340,
+              height: widget.inline ? double.maxFinite : 500,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(color: isDark ? const Color(0xFF1C1C1E) : Colors.white, borderRadius: BorderRadius.circular(40), boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.08), blurRadius: 30, offset: const Offset(0, 10))]),
               child: Column(

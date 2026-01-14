@@ -18,12 +18,16 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
   /// 消费分类列表
   final List<SpendingCategory> categories;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ModernRoundedSpendingWidget({
     super.key,
     required this.title,
     required this.currentSpending,
     required this.budget,
     required this.categories,
+    this.inline = false,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -39,6 +43,7 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
               ?.map((e) => SpendingCategory.fromMap(e as Map<String, dynamic>))
               .toList() ??
           [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -88,7 +93,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
+              width: widget.inline ? double.maxFinite : 340,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(40),

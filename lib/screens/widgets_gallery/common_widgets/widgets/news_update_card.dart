@@ -23,6 +23,9 @@ class NewsUpdateCardWidget extends StatefulWidget {
   /// 点击回调
   final VoidCallback? onTap;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const NewsUpdateCardWidget({
     super.key,
     required this.icon,
@@ -31,6 +34,7 @@ class NewsUpdateCardWidget extends StatefulWidget {
     this.currentIndex = 0,
     this.totalItems = 4,
     this.onTap,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -44,6 +48,7 @@ class NewsUpdateCardWidget extends StatefulWidget {
       timestamp: props['timestamp'] as String? ?? '',
       currentIndex: props['currentIndex'] as int? ?? 0,
       totalItems: props['totalItems'] as int? ?? 4,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -129,7 +134,7 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
             child: GestureDetector(
               onTap: widget.onTap,
               child: Container(
-                width: 340,
+                width: widget.inline ? double.maxFinite : 340,
                 constraints: const BoxConstraints(
                   minHeight: 170,
                 ),

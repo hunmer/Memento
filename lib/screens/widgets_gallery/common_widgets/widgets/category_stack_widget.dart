@@ -45,6 +45,9 @@ class CategoryStackWidget extends StatefulWidget {
   final String currency;
   final List<CategoryData> categories;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CategoryStackWidget({
     super.key,
     required this.title,
@@ -52,6 +55,7 @@ class CategoryStackWidget extends StatefulWidget {
     required this.targetAmount,
     this.currency = '\$',
     required this.categories,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -70,6 +74,7 @@ class CategoryStackWidget extends StatefulWidget {
       targetAmount: (props['targetAmount'] as num?)?.toDouble() ?? 0.0,
       currency: props['currency'] as String? ?? '\$',
       categories: categoriesList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -114,8 +119,8 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 220,
-              height: 220,
+              width: widget.inline ? double.maxFinite : 220,
+              height: widget.inline ? double.maxFinite : 220,
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : Colors.white,
                 borderRadius: BorderRadius.circular(32),

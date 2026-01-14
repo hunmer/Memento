@@ -28,6 +28,9 @@ class CurveProgressCardWidget extends StatefulWidget {
   /// 更新时间文本
   final String lastUpdated;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CurveProgressCardWidget({
     super.key,
     required this.value,
@@ -38,6 +41,7 @@ class CurveProgressCardWidget extends StatefulWidget {
     this.icon = Icons.schedule,
     this.categoryLabel = 'Progress',
     this.lastUpdated = '',
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -56,6 +60,7 @@ class CurveProgressCardWidget extends StatefulWidget {
           : Icons.schedule,
       categoryLabel: props['categoryLabel'] as String? ?? 'Progress',
       lastUpdated: props['lastUpdated'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -123,7 +128,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
           child: Transform.translate(
             offset: Offset(0, _slideAnimation.value),
             child: Container(
-              width: 360,
+              width: widget.inline ? double.maxFinite : 360,
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: backgroundColor,

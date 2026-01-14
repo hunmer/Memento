@@ -69,9 +69,10 @@ class DotTrackerCardData {
       unit: json['unit'] as String,
       status: json['status'] as String,
       weekDays: List<String>.from(json['weekDays'] as List),
-      dotStates: (json['dotStates'] as List)
-          .map((day) => List<bool>.from(day as List))
-          .toList(),
+      dotStates:
+          (json['dotStates'] as List)
+              .map((day) => List<bool>.from(day as List))
+              .toList(),
     );
   }
 
@@ -160,6 +161,9 @@ class DotTrackerCardWidget extends StatefulWidget {
   /// 是否启用动画
   final bool enableAnimation;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   /// 点击回调
   final VoidCallback? onTap;
 
@@ -175,6 +179,7 @@ class DotTrackerCardWidget extends StatefulWidget {
     this.width,
     this.height,
     this.enableAnimation = true,
+    this.inline = false,
     this.onTap,
   });
 
@@ -185,6 +190,7 @@ class DotTrackerCardWidget extends StatefulWidget {
     double? width,
     double? height,
     bool enableAnimation = true,
+    bool inline = false,
     VoidCallback? onTap,
   }) {
     return DotTrackerCardWidget(
@@ -199,6 +205,7 @@ class DotTrackerCardWidget extends StatefulWidget {
       width: width,
       height: height,
       enableAnimation: enableAnimation,
+      inline: inline,
       onTap: onTap,
     );
   }
@@ -267,8 +274,10 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1F2937) : Colors.white;
-    final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
-    final mutedColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final textColor =
+        isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
+    final mutedColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
 
     final primaryColor = Theme.of(context).colorScheme.secondary;
     final primaryLight =
@@ -288,7 +297,9 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
           opacity: widget.enableAnimation ? _animation.value : 1.0,
           child: Transform.translate(
             offset: Offset(
-                0, widget.enableAnimation ? 20 * (1 - _animation.value) : 0),
+              0,
+              widget.enableAnimation ? 20 * (1 - _animation.value) : 0,
+            ),
             child: child,
           ),
         );
@@ -297,8 +308,8 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         clipBehavior: Clip.none,
         children: [
           Container(
-            height: widget.height ?? double.infinity,
-            width: widget.width ?? double.infinity,
+            height: widget.inline ? double.maxFinite : (widget.height ?? double.maxFinite),
+            width: widget.inline ? double.maxFinite : (widget.width ?? double.maxFinite),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: backgroundColor,
@@ -317,7 +328,13 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 标题栏（包含 status 作为副标题）
-                _buildHeader(context, isDark, primaryColor, textColor, mutedColor),
+                _buildHeader(
+                  context,
+                  isDark,
+                  primaryColor,
+                  textColor,
+                  mutedColor,
+                ),
                 const SizedBox(height: 16),
                 // 点阵进度（占满宽度）
                 _buildDotsGrid(primaryColor, primaryLight),
@@ -341,16 +358,17 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     return animatedChild;
   }
 
-  Widget _buildHeader(BuildContext context, bool isDark, Color primaryColor,
-      Color textColor, Color mutedColor) {
+  Widget _buildHeader(
+    BuildContext context,
+    bool isDark,
+    Color primaryColor,
+    Color textColor,
+    Color mutedColor,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          widget.icon,
-          color: primaryColor,
-          size: 28,
-        ),
+        Icon(widget.icon, color: primaryColor, size: 28),
         const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,7 +431,8 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
 
   Widget _buildDotsGrid(Color primaryColor, Color primaryLight) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final emptyDotColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
+    final emptyDotColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
 
     final dayCount = widget.weekDays.length;
 
@@ -496,8 +515,7 @@ class _DayDotColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(
-        dotStates.length, (index) {
+      children: List.generate(dotStates.length, (index) {
         final isEnabled = dotStates[index];
         return AnimatedBuilder(
           animation: animation,

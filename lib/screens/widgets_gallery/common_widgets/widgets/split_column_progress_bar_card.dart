@@ -76,11 +76,14 @@ class ProgressItemData {
 class SplitColumnProgressBarCard extends StatefulWidget {
   final ColumnProgressData calories;
   final List<ProgressItemData> nutrients;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SplitColumnProgressBarCard({
     super.key,
     required this.calories,
     required this.nutrients,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -100,6 +103,7 @@ class SplitColumnProgressBarCard extends StatefulWidget {
     return SplitColumnProgressBarCard(
       calories: caloriesData,
       nutrients: nutrientsList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -145,8 +149,8 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
-              height: 180,
+              width: widget.inline ? double.maxFinite : 360,
+              height: widget.inline ? double.maxFinite : 180,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF374151) : Colors.white,

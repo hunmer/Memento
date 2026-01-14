@@ -12,6 +12,9 @@ class CardDotProgressDisplay extends StatefulWidget {
   final int totalProgress;
   final int completedProgress;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CardDotProgressDisplay({
     super.key,
     required this.title,
@@ -21,6 +24,7 @@ class CardDotProgressDisplay extends StatefulWidget {
     required this.activities,
     required this.totalProgress,
     required this.completedProgress,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -36,6 +40,7 @@ class CardDotProgressDisplay extends StatefulWidget {
       activities: props['activities'] as int? ?? 0,
       totalProgress: props['totalProgress'] as int? ?? 0,
       completedProgress: props['completedProgress'] as int? ?? 0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -80,7 +85,7 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
         return Opacity(
           opacity: _animation.value,
           child: Container(
-            width: 300,
+            width: widget.inline ? double.maxFinite : 300,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,

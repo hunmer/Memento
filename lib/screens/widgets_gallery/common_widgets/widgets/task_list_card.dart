@@ -24,6 +24,9 @@ class TaskListCardWidget extends StatefulWidget {
   /// 更多任务数量
   final int moreCount;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TaskListCardWidget({
     super.key,
     required this.icon,
@@ -32,6 +35,7 @@ class TaskListCardWidget extends StatefulWidget {
     required this.countLabel,
     required this.items,
     required this.moreCount,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -56,6 +60,7 @@ class TaskListCardWidget extends StatefulWidget {
       countLabel: props['countLabel'] as String? ?? 'Tasks',
       items: items,
       moreCount: props['moreCount'] as int? ?? 0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -68,6 +73,7 @@ class TaskListCardWidget extends StatefulWidget {
       'countLabel': countLabel,
       'items': items,
       'moreCount': moreCount,
+      'inline': inline,
     };
   }
 
@@ -117,7 +123,7 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 380,
+              width: widget.inline ? double.maxFinite : 380,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),

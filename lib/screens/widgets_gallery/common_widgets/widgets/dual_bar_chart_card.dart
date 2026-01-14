@@ -55,6 +55,9 @@ class DualBarChartCardWidget extends StatefulWidget {
   /// 图表数据列表
   final List<DualBarData> chartData;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DualBarChartCardWidget({
     super.key,
     required this.title,
@@ -65,6 +68,7 @@ class DualBarChartCardWidget extends StatefulWidget {
     required this.secondaryLabel,
     this.warningStage,
     required this.chartData,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -96,6 +100,7 @@ class DualBarChartCardWidget extends StatefulWidget {
       secondaryLabel: props['secondaryLabel'] as String? ?? '',
       warningStage: props['warningStage'] as String?,
       chartData: parseChartData(props['chartData']),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -141,7 +146,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
+              width: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(32),

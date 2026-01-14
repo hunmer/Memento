@@ -41,6 +41,9 @@ class TaskListStatCardWidget extends StatefulWidget {
   /// 主色调
   final Color? primaryColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TaskListStatCardWidget({
     super.key,
     required this.icon,
@@ -49,6 +52,7 @@ class TaskListStatCardWidget extends StatefulWidget {
     required this.tasks,
     required this.remainingCount,
     this.primaryColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -65,6 +69,7 @@ class TaskListStatCardWidget extends StatefulWidget {
       primaryColor: props['primaryColor'] != null
           ? Color(props['primaryColor'] as int)
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -137,7 +142,7 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
         );
       },
       child: Container(
-        width: 380,
+        width: widget.inline ? double.maxFinite : 380,
         constraints: const BoxConstraints(minHeight: 180),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,

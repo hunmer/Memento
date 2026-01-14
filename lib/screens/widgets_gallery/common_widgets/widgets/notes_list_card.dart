@@ -40,9 +40,13 @@ class NoteItem {
 class NotesListCardWidget extends StatefulWidget {
   final List<NoteItem> notes;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const NotesListCardWidget({
     super.key,
     required this.notes,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -57,6 +61,7 @@ class NotesListCardWidget extends StatefulWidget {
               ?.map((e) => NoteItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -101,7 +106,7 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
+              width: widget.inline ? double.maxFinite : 360,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(28),

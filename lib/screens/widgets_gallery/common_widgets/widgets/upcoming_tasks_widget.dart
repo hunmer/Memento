@@ -34,12 +34,15 @@ class UpcomingTasksWidget extends StatefulWidget {
   final int taskCount;
   final List<TaskItem> tasks;
   final int moreCount;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const UpcomingTasksWidget({
     super.key,
     required this.taskCount,
     required this.tasks,
     this.moreCount = 0,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -56,6 +59,7 @@ class UpcomingTasksWidget extends StatefulWidget {
       taskCount: props['taskCount'] as int? ?? 0,
       tasks: tasksList,
       moreCount: props['moreCount'] as int? ?? 0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -100,7 +104,7 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: 400,
+              width: widget.inline ? double.maxFinite : 400,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(32),

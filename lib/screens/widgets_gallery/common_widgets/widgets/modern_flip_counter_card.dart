@@ -73,6 +73,9 @@ class ModernFlipCounterCard extends StatefulWidget {
   /// 状态指示颜色
   final Color? statusColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ModernFlipCounterCard({
     super.key,
     required this.title,
@@ -83,6 +86,7 @@ class ModernFlipCounterCard extends StatefulWidget {
     this.icon = Icons.science,
     this.primaryColor,
     this.statusColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -118,6 +122,7 @@ class ModernFlipCounterCard extends StatefulWidget {
                   : int.parse(props['statusColor'].toString()),
             )
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -166,7 +171,7 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 360,
+              width: widget.inline ? double.maxFinite : 360,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),

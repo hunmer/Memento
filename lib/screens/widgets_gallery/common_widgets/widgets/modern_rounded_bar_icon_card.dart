@@ -71,9 +71,13 @@ enum MoodIconType {
 class ModernRoundedBarIconCard extends StatelessWidget {
   final List<BarIconEntry> weekMoods;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ModernRoundedBarIconCard({
     super.key,
     required this.weekMoods,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -130,7 +134,10 @@ class ModernRoundedBarIconCard extends StatelessWidget {
           ),
         ];
 
-    return ModernRoundedBarIconCard(weekMoods: moodsList);
+    return ModernRoundedBarIconCard(
+      weekMoods: moodsList,
+      inline: props['inline'] as bool? ?? false,
+    );
   }
 
   @override
@@ -138,7 +145,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      width: 380,
+      width: inline ? double.maxFinite : 380,
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1F2937) : Colors.white,
         borderRadius: BorderRadius.circular(40),

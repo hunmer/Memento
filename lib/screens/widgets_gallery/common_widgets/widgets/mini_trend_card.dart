@@ -27,6 +27,9 @@ class MiniTrendCardWidget extends StatefulWidget {
   /// 趋势数据（0-100之间）
   final List<double> trendData;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const MiniTrendCardWidget({
     super.key,
     required this.title,
@@ -36,6 +39,7 @@ class MiniTrendCardWidget extends StatefulWidget {
     required this.subtitle,
     required this.weekDays,
     required this.trendData,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -57,6 +61,7 @@ class MiniTrendCardWidget extends StatefulWidget {
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -117,7 +122,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 380,
+              width: widget.inline ? double.maxFinite : 380,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: backgroundColor,

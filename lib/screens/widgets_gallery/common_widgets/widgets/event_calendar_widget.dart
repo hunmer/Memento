@@ -61,6 +61,9 @@ class EventCalendarWidget extends StatefulWidget {
   final String reminderEmoji;
   final List<EventData> events;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const EventCalendarWidget({
     super.key,
     required this.day,
@@ -72,6 +75,7 @@ class EventCalendarWidget extends StatefulWidget {
     required this.reminder,
     required this.reminderEmoji,
     required this.events,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -98,6 +102,7 @@ class EventCalendarWidget extends StatefulWidget {
       reminder: props['reminder'] as String? ?? '',
       reminderEmoji: props['reminderEmoji'] as String? ?? '',
       events: eventsList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -143,8 +148,8 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 420,
-              height: 260,
+              width: widget.inline ? double.maxFinite : 420,
+              height: widget.inline ? double.maxFinite : 260,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(32),

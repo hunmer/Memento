@@ -38,6 +38,9 @@ class BudgetTrendCardWidget extends StatefulWidget {
   /// 更新时间
   final String updateTime;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const BudgetTrendCardWidget({
     super.key,
     required this.label,
@@ -49,6 +52,7 @@ class BudgetTrendCardWidget extends StatefulWidget {
     required this.changeValue,
     required this.changePercent,
     required this.updateTime,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -69,6 +73,7 @@ class BudgetTrendCardWidget extends StatefulWidget {
       changeValue: (props['changeValue'] as num?)?.toDouble() ?? 0,
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0,
       updateTime: props['updateTime'] as String? ?? '',
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -125,7 +130,7 @@ class _BudgetTrendCardWidgetState extends State<BudgetTrendCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
-              width: 400,
+              width: widget.inline ? double.maxFinite : 400,
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: backgroundColor,

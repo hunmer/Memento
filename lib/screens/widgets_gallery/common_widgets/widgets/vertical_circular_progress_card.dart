@@ -52,6 +52,9 @@ class VerticalCircularProgressCard extends StatefulWidget {
   /// 点击右侧操作的回调
   final VoidCallback? onActionTap;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const VerticalCircularProgressCard({
     super.key,
     required this.data,
@@ -63,6 +66,7 @@ class VerticalCircularProgressCard extends StatefulWidget {
     this.showShadow,
     this.animationDuration,
     this.onActionTap,
+    this.inline = false,
   });
 
   /// 从属性映射创建组件（用于动态渲染）
@@ -121,6 +125,7 @@ class VerticalCircularProgressCard extends StatefulWidget {
               )
               : null,
       onActionTap: props['onActionTap'] as VoidCallback?,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -176,7 +181,7 @@ class _VerticalCircularProgressCardState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.width ?? double.maxFinite,
+              width: widget.inline ? double.maxFinite : (widget.width ?? double.maxFinite),
               padding: widget.padding ?? const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,

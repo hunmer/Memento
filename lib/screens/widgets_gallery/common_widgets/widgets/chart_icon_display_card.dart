@@ -78,6 +78,9 @@ class ChartIconDisplayCard extends StatefulWidget {
   /// 主题颜色
   final Color primaryColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ChartIconDisplayCard({
     super.key,
     required this.title,
@@ -85,6 +88,7 @@ class ChartIconDisplayCard extends StatefulWidget {
     required this.moods,
     this.displayType = ChartIconType.emoji,
     this.primaryColor = const Color(0xFF6366F1),
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -107,6 +111,7 @@ class ChartIconDisplayCard extends StatefulWidget {
       primaryColor: props.containsKey('primaryColor')
           ? Color(props['primaryColor'] as int)
           : const Color(0xFF6366F1),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -151,7 +156,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 320,
+              width: widget.inline ? double.maxFinite : 320,
               constraints: const BoxConstraints(minWidth: 280),
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : Colors.white,

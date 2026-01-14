@@ -9,9 +9,13 @@ class ColorTagTaskCardWidget extends StatefulWidget {
   /// 卡片数据
   final ColorTagTaskCardData data;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ColorTagTaskCardWidget({
     super.key,
     required this.data,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -21,6 +25,7 @@ class ColorTagTaskCardWidget extends StatefulWidget {
   ) {
     return ColorTagTaskCardWidget(
       data: ColorTagTaskCardData.fromJson(props),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

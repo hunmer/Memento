@@ -54,6 +54,9 @@ class CategoryDonutChartCardWidget extends StatefulWidget {
   /// 主色调（用于徽章背景）
   final Color? primaryColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const CategoryDonutChartCardWidget({
     super.key,
     required this.badgeLabel,
@@ -62,6 +65,7 @@ class CategoryDonutChartCardWidget extends StatefulWidget {
     required this.totalUnit,
     required this.categories,
     this.primaryColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -82,6 +86,7 @@ class CategoryDonutChartCardWidget extends StatefulWidget {
       totalUnit: props['totalUnit'] as String? ?? '',
       categories: categories,
       primaryColor: primaryColor != null ? Color(primaryColor) : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -128,8 +133,8 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
-              height: 500,
+              width: widget.inline ? double.maxFinite : 340,
+              height: widget.inline ? double.maxFinite : 500,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,

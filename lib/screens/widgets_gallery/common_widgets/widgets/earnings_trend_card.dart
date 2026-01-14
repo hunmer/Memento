@@ -25,6 +25,9 @@ class EarningsTrendCardWidget extends StatefulWidget {
   /// 图表数据点（Y坐标值，0-120范围）
   final List<double> chartData;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const EarningsTrendCardWidget({
     super.key,
     required this.title,
@@ -32,6 +35,7 @@ class EarningsTrendCardWidget extends StatefulWidget {
     required this.currency,
     required this.percentage,
     required this.chartData,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -48,6 +52,7 @@ class EarningsTrendCardWidget extends StatefulWidget {
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [0, 0, 0, 0, 0],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -97,8 +102,8 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
-              height: 280,
+              width: widget.inline ? double.maxFinite : 340,
+              height: widget.inline ? double.maxFinite : 280,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),

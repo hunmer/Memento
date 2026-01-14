@@ -46,12 +46,16 @@ class ActivityRingsCardWidget extends StatefulWidget {
   final String status;
   final List<RingData> rings;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const ActivityRingsCardWidget({
     super.key,
     required this.date,
     required this.steps,
     required this.status,
     required this.rings,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -69,6 +73,7 @@ class ActivityRingsCardWidget extends StatefulWidget {
       steps: props['steps'] as int? ?? 0,
       status: props['status'] as String? ?? '',
       rings: ringsList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -114,7 +119,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 400,
+              width: widget.inline ? double.maxFinite : 400,
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,

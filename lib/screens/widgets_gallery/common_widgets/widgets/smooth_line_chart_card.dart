@@ -40,6 +40,8 @@ class SmoothLineChartCardWidget extends StatefulWidget {
   final Color primaryColor;
   final double totalDistance;
   final String distanceUnit;
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
 
   const SmoothLineChartCardWidget({
     super.key,
@@ -52,6 +54,7 @@ class SmoothLineChartCardWidget extends StatefulWidget {
     required this.primaryColor,
     this.totalDistance = 0,
     this.distanceUnit = '',
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -78,6 +81,7 @@ class SmoothLineChartCardWidget extends StatefulWidget {
       primaryColor: props.containsKey('primaryColor')
           ? Color(props['primaryColor'] as int)
           : const Color(0xFFFF7F56),
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -124,7 +128,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
+              width: widget.inline ? double.maxFinite : 340,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(28),

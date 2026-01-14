@@ -69,6 +69,9 @@ class PortfolioStackedChartWidget extends StatefulWidget {
   final List<MonthlyData> monthlyData;
   final List<String> monthLabels;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const PortfolioStackedChartWidget({
     super.key,
     required this.title,
@@ -77,6 +80,7 @@ class PortfolioStackedChartWidget extends StatefulWidget {
     required this.assetTypes,
     required this.monthlyData,
     required this.monthLabels,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -101,6 +105,7 @@ class PortfolioStackedChartWidget extends StatefulWidget {
       assetTypes: assetTypesList,
       monthlyData: monthlyDataList,
       monthLabels: monthLabelsList,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -146,8 +151,8 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 250,
-              height: 250,
+              width: widget.inline ? double.maxFinite : 250,
+              height: widget.inline ? double.maxFinite : 250,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF0A0A0A) : Colors.white,

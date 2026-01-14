@@ -27,6 +27,9 @@ class WeeklyBarsCardWidget extends StatefulWidget {
   /// 主色调
   final Color? primaryColor;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const WeeklyBarsCardWidget({
     super.key,
     required this.title,
@@ -36,6 +39,7 @@ class WeeklyBarsCardWidget extends StatefulWidget {
     required this.status,
     required this.dailyValues,
     this.primaryColor,
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -58,6 +62,7 @@ class WeeklyBarsCardWidget extends StatefulWidget {
       primaryColor: props['primaryColor'] != null
           ? Color(props['primaryColor'] as int)
           : null,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

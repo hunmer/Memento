@@ -10,6 +10,9 @@ class TaskProgressCardWidget extends StatefulWidget {
   final int totalTasks;
   final List<String> pendingTasks;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const TaskProgressCardWidget({
     super.key,
     required this.title,
@@ -17,6 +20,7 @@ class TaskProgressCardWidget extends StatefulWidget {
     required this.completedTasks,
     required this.totalTasks,
     this.pendingTasks = const [],
+    this.inline = false,
   });
 
   /// 从 props 创建实例
@@ -33,6 +37,7 @@ class TaskProgressCardWidget extends StatefulWidget {
               ?.map((e) => e.toString())
               .toList() ??
           [],
+      inline: props['inline'] as bool? ?? false,
     );
   }
 

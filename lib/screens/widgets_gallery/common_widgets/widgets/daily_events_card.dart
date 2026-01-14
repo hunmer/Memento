@@ -16,11 +16,15 @@ class DailyEventsCardWidget extends StatefulWidget {
   /// 事件数据列表
   final List<DailyEventData> events;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const DailyEventsCardWidget({
     super.key,
     required this.weekday,
     required this.day,
     required this.events,
+    this.inline = false,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -35,6 +39,7 @@ class DailyEventsCardWidget extends StatefulWidget {
       weekday: props['weekday'] as String? ?? 'Monday',
       day: props['day'] as int? ?? 1,
       events: events,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -80,8 +85,8 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 200,
-              height: 200,
+              width: widget.inline ? double.maxFinite : 200,
+              height: widget.inline ? double.maxFinite : 200,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(32),

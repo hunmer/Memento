@@ -25,6 +25,9 @@ class RevenueTrendCardWidget extends StatefulWidget {
   /// 高亮点的索引
   final int highlightIndex;
 
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const RevenueTrendCardWidget({
     super.key,
     required this.value,
@@ -34,6 +37,7 @@ class RevenueTrendCardWidget extends StatefulWidget {
     required this.chartData,
     required this.dates,
     required this.highlightIndex,
+    this.inline = false,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -55,6 +59,7 @@ class RevenueTrendCardWidget extends StatefulWidget {
               .toList() ??
           [1, 2, 3, 4, 5],
       highlightIndex: props['highlightIndex'] as int? ?? 0,
+      inline: props['inline'] as bool? ?? false,
     );
   }
 
@@ -104,8 +109,8 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
-              height: 400,
+              width: widget.inline ? double.maxFinite : 340,
+              height: widget.inline ? double.maxFinite : 400,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),
