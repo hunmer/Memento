@@ -308,8 +308,8 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         clipBehavior: Clip.none,
         children: [
           Container(
-            height: widget.inline ? double.maxFinite : (widget.height ?? double.maxFinite),
-            width: widget.inline ? double.maxFinite : (widget.width ?? double.maxFinite),
+            height: widget.inline ? double.maxFinite : (widget.height ?? 250),
+            width: widget.inline ? double.maxFinite : (widget.width ?? 250),
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: backgroundColor,
