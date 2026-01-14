@@ -218,26 +218,14 @@ class CheckinHomeWidgets {
         'weekProgress': weeklyCheckins,
       },
 
-      // 周度点追踪卡片：显示本周签到状态点
-      'weeklyDotTrackerCard': {
+      // 月度点追踪卡片：显示当月签到状态点
+      'monthlyDotTrackerCard': {
         'title': name,
         'subtitle': group.isNotEmpty ? group : '签到',
-        'weekData': List.generate(7, (index) {
-          final i = 6 - index;
-          final date = DateTime.now().subtract(Duration(days: i));
-          final dateStr =
-              '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-          final hasRecord = item?.checkInRecords.containsKey(dateStr) == true &&
-              (item?.checkInRecords[dateStr]?.isEmpty == false);
-          return {
-            'day': '周${['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1]}',
-            'date': date.day,
-            'isChecked': hasRecord,
-            'isToday': i == 0,
-          };
-        }),
-        'checkedDays': weeklyCheckins,
-        'totalDays': 7,
+        'iconCodePoint': iconCode,
+        'currentValue': _getMonthlyCheckinCount(item),
+        'totalDays': DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
+        'daysData': _generateMonthlyDotsData(item),
       },
 
       // 签到项目卡片：显示项目图标、名称、今日状态和热力图

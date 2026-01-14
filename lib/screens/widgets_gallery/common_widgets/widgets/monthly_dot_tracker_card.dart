@@ -2,26 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/dot_tracker_card.dart';
 
-/// 周度点追踪卡片适配器
+/// 月度点追踪卡片适配器
 ///
 /// 包装 lib/widgets/common/dot_tracker_card.dart 中的 DotTrackerCardWidget
 /// 使其符合公共小组件系统的接口规范
-class WeeklyDotTrackerCardWidget extends StatelessWidget {
+class MonthlyDotTrackerCardWidget extends StatelessWidget {
   final Map<String, dynamic> props;
   final HomeWidgetSize size;
 
-  const WeeklyDotTrackerCardWidget({
+  const MonthlyDotTrackerCardWidget({
     super.key,
     required this.props,
     required this.size,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
-  factory WeeklyDotTrackerCardWidget.fromProps(
+  factory MonthlyDotTrackerCardWidget.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    return WeeklyDotTrackerCardWidget(
+    return MonthlyDotTrackerCardWidget(
       props: props,
       size: size,
     );
@@ -29,39 +29,39 @@ class WeeklyDotTrackerCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = props['title'] as String? ?? '周度追踪';
-    final checkedDays = props['checkedDays'] as int? ?? 0;
-    final weekData = (props['weekData'] as List<dynamic>?)
+    final title = props['title'] as String? ?? '月度追踪';
+    final currentValue = props['currentValue'] as int? ?? 0;
+    final totalDays = props['totalDays'] as int? ?? 30;
+    final iconCodePoint = props['iconCodePoint'] as int? ?? Icons.checklist.codePoint;
+    final daysData = (props['daysData'] as List<dynamic>?)
             ?.cast<Map<String, dynamic>>() ??
         [];
 
-    // 从 weekData 提取数据
+    // 从 daysData 提取数据
     final weekDays = <String>[];
     final dotStates = <List<bool>>[];
 
-    for (final dayData in weekData) {
-      final day = dayData['day'] as String? ?? '';
+    for (final dayData in daysData) {
+      final day = dayData['day'] as int? ?? 1;
       final isChecked = dayData['isChecked'] as bool? ?? false;
 
-      // 提取星期标签（周一、周二...）
-      if (day.isNotEmpty) {
-        weekDays.add(day.replaceAll('周', ''));
-      }
+      // 使用日期标签
+      weekDays.add('$day');
 
       // 每天使用单个点状态
       dotStates.add([isChecked]);
     }
 
-    // 如果 weekData 为空，使用默认7天
+    // 如果 daysData 为空，使用默认当月天数
     if (weekDays.isEmpty) {
-      weekDays.addAll(['一', '二', '三', '四', '五', '六', '日']);
-      for (int i = 0; i < 7; i++) {
+      for (int i = 1; i <= totalDays; i++) {
+        weekDays.add('$i');
         dotStates.add([false]);
       }
     }
 
     // 计算状态文本
-    final percentage = checkedDays / 7;
+    final percentage = totalDays > 0 ? currentValue / totalDays : 0;
     String status;
     if (percentage >= 1.0) {
       status = '已完成';
@@ -73,14 +73,14 @@ class WeeklyDotTrackerCardWidget extends StatelessWidget {
       status = '未开始';
     }
 
-    // 使用图标
-    final icon = Icons.calendar_today;
+    // 使用传入的图标
+    final icon = IconData(iconCodePoint, fontFamily: 'MaterialIcons');
 
     return DotTrackerCardWidget(
       title: title,
       icon: icon,
-      currentValue: checkedDays,
-      unit: '/7 天',
+      currentValue: currentValue,
+      unit: '/$totalDays 天',
       status: status,
       weekDays: weekDays,
       dotStates: dotStates,
