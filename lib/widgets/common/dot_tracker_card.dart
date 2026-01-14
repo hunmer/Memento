@@ -297,8 +297,9 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         clipBehavior: Clip.none,
         children: [
           Container(
+            height: widget.height ?? double.infinity,
             width: widget.width ?? double.infinity,
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(28),

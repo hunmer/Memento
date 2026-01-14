@@ -68,7 +68,7 @@ class CheckinHomeWidgets {
         icon: Icons.access_time,
         color: Colors.teal,
         defaultSize: HomeWidgetSize.medium,
-        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.custom],
         category: 'home_categoryRecord'.tr,
         selectorId: 'checkin.item',
         navigationHandler: _navigateToCheckinItem,
