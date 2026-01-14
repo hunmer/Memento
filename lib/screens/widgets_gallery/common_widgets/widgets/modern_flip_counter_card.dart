@@ -48,7 +48,7 @@ class EgfrHealthData {
 /// - 数值和单位显示（带翻转动画）
 /// - 日期标签
 /// - 状态指示器（带进度条）
-class ModernEgfrHealthWidget extends StatefulWidget {
+class ModernFlipCounterCard extends StatefulWidget {
   /// 标题
   final String title;
 
@@ -73,7 +73,7 @@ class ModernEgfrHealthWidget extends StatefulWidget {
   /// 状态指示颜色
   final Color? statusColor;
 
-  const ModernEgfrHealthWidget({
+  const ModernFlipCounterCard({
     super.key,
     required this.title,
     required this.value,
@@ -86,11 +86,11 @@ class ModernEgfrHealthWidget extends StatefulWidget {
   });
 
   /// 从 props 创建实例
-  factory ModernEgfrHealthWidget.fromProps(
+  factory ModernFlipCounterCard.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    return ModernEgfrHealthWidget(
+    return ModernFlipCounterCard(
       title: props['title'] as String? ?? 'eGFR',
       value: (props['value'] as num?)?.toDouble() ?? 0.0,
       unit: props['unit'] as String? ?? 'mL/min',
@@ -122,10 +122,10 @@ class ModernEgfrHealthWidget extends StatefulWidget {
   }
 
   @override
-  State<ModernEgfrHealthWidget> createState() => _ModernEgfrHealthWidgetState();
+  State<ModernFlipCounterCard> createState() => _ModernFlipCounterCardState();
 }
 
-class _ModernEgfrHealthWidgetState extends State<ModernEgfrHealthWidget>
+class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

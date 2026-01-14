@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/sleep_tracking_card_widget.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/vertical_circular_progress_card.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_tracking_card_data.dart';
 
 /// 睡眠追踪卡片示例
 ///
-/// 展示如何使用 SleepTrackingCardWidget 公共小组件
+/// 展示如何使用 VerticalCircularProgressCard 公共小组件
 class SleepTrackingCardExample extends StatelessWidget {
   const SleepTrackingCardExample({super.key});
 
@@ -18,7 +18,7 @@ class SleepTrackingCardExample extends StatelessWidget {
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: Center(
-          child: SleepTrackingCardWidget(
+          child: VerticalCircularProgressCard(
             data: SleepTrackingCardData(
               sleepHours: 3.57,
               sleepLabel: 'Insomniac',

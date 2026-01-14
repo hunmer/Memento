@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'widgets/circular_progress_card.dart';
-import 'widgets/activity_progress_card.dart';
+import 'widgets/card_dot_progress_display.dart';
 import 'widgets/half_gauge_card.dart';
 import 'widgets/task_progress_card.dart';
 import 'widgets/audio_waveform_card.dart';
 import 'widgets/line_chart_trend_card.dart';
 import 'widgets/earnings_trend_card.dart';
 import 'widgets/watch_progress_card.dart';
-import 'widgets/sleep_tracking_card_widget.dart';
-import 'widgets/stress_level_monitor_card.dart';
-import 'widgets/sleep_stage_chart_card.dart';
-import 'widgets/weight_trend_chart.dart';
+import 'widgets/vertical_circular_progress_card.dart';
+import 'widgets/card_bar_chart_monitor.dart';
+import 'widgets/card_bubble_chart_display.dart';
+import 'widgets/card_trend_line_chart.dart';
 import 'widgets/image_display_card.dart';
 import 'widgets/split_image_card.dart';
 import 'widgets/segmented_progress_card.dart';
@@ -37,7 +37,7 @@ import 'widgets/music_player_card.dart';
 import 'widgets/score_card_widget.dart';
 import 'widgets/trend_value_card.dart';
 import 'widgets/trend_list_card.dart';
-import 'widgets/modern_egfr_health_widget.dart';
+import 'widgets/modern_flip_counter_card.dart';
 import 'widgets/mood_chart_card.dart';
 import 'widgets/news_update_card.dart';
 import 'widgets/news_card.dart';
@@ -52,14 +52,14 @@ import 'widgets/color_tag_task_card.dart';
 import 'widgets/weather_forecast_card.dart';
 import 'widgets/timeline_status_card.dart';
 import 'widgets/spending_trend_chart.dart';
-import 'widgets/modern_rounded_mood_widget.dart';
+import 'widgets/modern_rounded_bar_icon_card.dart';
 import 'widgets/daily_schedule_card.dart';
 import 'widgets/article_list_card.dart';
 import 'widgets/event_calendar_widget.dart';
 import 'widgets/rounded_task_progress_widget.dart';
 import 'widgets/dual_range_chart_card.dart';
 import 'widgets/daily_bar_chart_card.dart';
-import 'widgets/nutrition_progress_card.dart';
+import 'widgets/split_column_progress_bar_card.dart';
 import 'widgets/portfolio_stacked_chart.dart';
 import 'widgets/activity_rings_card.dart';
 import 'widgets/category_stack_widget.dart';
@@ -71,9 +71,9 @@ import 'widgets/rounded_property_card.dart';
 import 'widgets/task_list_stat_card.dart';
 import 'widgets/vertical_property_card.dart';
 import 'widgets/task_progress_list.dart';
-import 'widgets/medication_tracker_widget.dart';
-import 'widgets/sleep_duration_card.dart';
-import 'widgets/mood_tracker_card.dart';
+import 'widgets/square_pill_progress_card.dart';
+import 'widgets/dark_bar_chart_card.dart';
+import 'widgets/card_emoji_icon_display.dart';
 import 'widgets/habit_streak_tracker_card.dart';
 import 'widgets/weekly_dot_tracker_card.dart';
 
@@ -808,7 +808,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.colorTagTaskCard:
         return ColorTagTaskCardWidget.fromProps(props, size);
       case CommonWidgetId.activityProgressCard:
-        return ActivityProgressCardWidget.fromProps(props, size);
+        return CardDotProgressDisplay.fromProps(props, size);
       case CommonWidgetId.halfGaugeCard:
         return HalfGaugeCardWidget.fromProps(props, size);
       case CommonWidgetId.taskProgressCard:
@@ -842,9 +842,9 @@ class CommonWidgetBuilder {
       case CommonWidgetId.watchProgressCard:
         return WatchProgressCardWidget.fromProps(props, size);
       case CommonWidgetId.sleepTrackingCard:
-        return SleepTrackingCardWidget.fromProps(props, size);
+        return VerticalCircularProgressCard.fromProps(props, size);
       case CommonWidgetId.stressLevelMonitor:
-        return StressLevelMonitorWidget.fromProps(props, size);
+        return CardBarChartMonitor.fromProps(props, size);
       case CommonWidgetId.dailyTodoListCard:
         return DailyTodoListWidget.fromProps(props, size);
       case CommonWidgetId.upcomingTasksWidget:
@@ -854,11 +854,11 @@ class CommonWidgetBuilder {
       case CommonWidgetId.profileCardCard:
         return ProfileCardWidget.fromProps(props, size);
       case CommonWidgetId.sleepStageChartCard:
-        return SleepStageChartCardWidget.fromProps(props, size);
+        return CardBubbleChartDisplay.fromProps(props, size);
       case CommonWidgetId.imageDisplayCard:
         return ImageDisplayCardWidget.fromProps(props, size);
       case CommonWidgetId.weightTrendChart:
-        return WeightTrendChartWidget.fromProps(props, size);
+        return CardTrendLineChart.fromProps(props, size);
       case CommonWidgetId.socialProfileCard:
         return SocialProfileCardWidget.fromProps(props, size);
       case CommonWidgetId.miniTrendCard:
@@ -884,7 +884,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.newsCard:
         return NewsCardWidget.fromProps(props, size);
       case CommonWidgetId.modernEgfrHealthWidget:
-        return ModernEgfrHealthWidget.fromProps(props, size);
+        return ModernFlipCounterCard.fromProps(props, size);
       case CommonWidgetId.moodChartCard:
         return MoodChartCardWidget.fromProps(props, size);
       case CommonWidgetId.dailyEventsCard:
@@ -906,7 +906,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.spendingTrendChart:
         return SpendingTrendChartWidget.fromProps(props, size);
       case CommonWidgetId.modernRoundedMoodWidget:
-        return ModernRoundedMoodWidget.fromProps(props, size);
+        return ModernRoundedBarIconCard.fromProps(props, size);
       case CommonWidgetId.dailyScheduleCard:
         return DailyScheduleCardWidget.fromProps(props, size);
       case CommonWidgetId.articleListCard:
@@ -920,7 +920,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.dailyBarChartCard:
         return DailyBarChartCardWidget.fromProps(props, size);
       case CommonWidgetId.nutritionProgressCard:
-        return NutritionProgressCardWidget.fromProps(props, size);
+        return SplitColumnProgressBarCard.fromProps(props, size);
       case CommonWidgetId.portfolioStackedChart:
         return PortfolioStackedChartWidget.fromProps(props, size);
       case CommonWidgetId.activityRingsCard:
@@ -944,11 +944,11 @@ class CommonWidgetBuilder {
       case CommonWidgetId.taskProgressList:
         return TaskProgressListWidget.fromProps(props, size);
       case CommonWidgetId.medicationTrackerWidget:
-        return MedicationTrackerWidget.fromProps(props, size);
+        return SquarePillProgressCard.fromProps(props, size);
       case CommonWidgetId.sleepDurationCard:
-        return SleepDurationCardWidget.fromProps(props, size);
+        return DarkBarChartCard.fromProps(props, size);
       case CommonWidgetId.moodTrackerCard:
-        return MoodTrackerCardWidget.fromProps(props, size);
+        return CardEmojiIconDisplay.fromProps(props, size);
       case CommonWidgetId.habitStreakTrackerCard:
         return HabitStreakTrackerCardWidget.fromProps(props, size);
       case CommonWidgetId.weeklyDotTrackerCard:

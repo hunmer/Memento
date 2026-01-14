@@ -68,16 +68,16 @@ enum MoodIconType {
 }
 
 /// 现代化圆角心情追踪小组件
-class ModernRoundedMoodWidget extends StatelessWidget {
+class ModernRoundedBarIconCard extends StatelessWidget {
   final List<MoodEntry> weekMoods;
 
-  const ModernRoundedMoodWidget({
+  const ModernRoundedBarIconCard({
     super.key,
     required this.weekMoods,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
-  factory ModernRoundedMoodWidget.fromProps(
+  factory ModernRoundedBarIconCard.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -130,7 +130,7 @@ class ModernRoundedMoodWidget extends StatelessWidget {
           ),
         ];
 
-    return ModernRoundedMoodWidget(weekMoods: moodsList);
+    return ModernRoundedBarIconCard(weekMoods: moodsList);
   }
 
   @override

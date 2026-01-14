@@ -1,5 +1,5 @@
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/weight_trend_chart.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/card_trend_line_chart.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:flutter/material.dart';
 
@@ -89,7 +89,7 @@ class _WeightTrendChartExampleState extends State<WeightTrendChartExample> {
               // 温度趋势示例（自定义颜色）
               SizedBox(
                 height: 400,
-                child: WeightTrendChartWidget(
+                child: CardTrendLineChart(
                   icon: Icons.thermostat,
                   currentValue: 37.2,
                   statusText: '体温正常',
@@ -104,7 +104,7 @@ class _WeightTrendChartExampleState extends State<WeightTrendChartExample> {
               // 价格趋势示例（不带图标）
               SizedBox(
                 height: 400,
-                child: WeightTrendChartWidget(
+                child: CardTrendLineChart(
                   currentValue: 128.5,
                   statusText: '本月累计支出',
                   valueUnit: '元',

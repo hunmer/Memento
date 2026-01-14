@@ -8,21 +8,21 @@ enum SleepTrend { up, down, neutral }
 /// 睡眠时长统计卡片小组件
 ///
 /// 显示睡眠时长、趋势和睡眠周期可视化
-class SleepDurationCardWidget extends StatefulWidget {
+class DarkBarChartCard extends StatefulWidget {
   /// 睡眠时长（分钟）
   final int durationInMinutes;
 
   /// 趋势（上升、下降、中性）
   final SleepTrend trend;
 
-  const SleepDurationCardWidget({
+  const DarkBarChartCard({
     super.key,
     required this.durationInMinutes,
     this.trend = SleepTrend.neutral,
   });
 
   /// 从 props 创建实例
-  factory SleepDurationCardWidget.fromProps(
+  factory DarkBarChartCard.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -43,18 +43,18 @@ class SleepDurationCardWidget extends StatefulWidget {
       return SleepTrend.neutral;
     }
 
-    return SleepDurationCardWidget(
+    return DarkBarChartCard(
       durationInMinutes: props['durationInMinutes'] as int? ?? 0,
       trend: parseTrend(props['trend']),
     );
   }
 
   @override
-  State<SleepDurationCardWidget> createState() =>
-      _SleepDurationCardWidgetState();
+  State<DarkBarChartCard> createState() =>
+      _DarkBarChartCardState();
 }
 
-class _SleepDurationCardWidgetState extends State<SleepDurationCardWidget>
+class _DarkBarChartCardState extends State<DarkBarChartCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

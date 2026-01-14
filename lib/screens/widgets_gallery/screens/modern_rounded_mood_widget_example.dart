@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/modern_rounded_mood_widget.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/modern_rounded_bar_icon_card.dart';
 
 /// 现代化圆角心情追踪小组件示例
-class ModernRoundedMoodWidgetExample extends StatelessWidget {
-  const ModernRoundedMoodWidgetExample({super.key});
+class ModernRoundedBarIconCardExample extends StatelessWidget {
+  const ModernRoundedBarIconCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ModernRoundedMoodWidgetExample extends StatelessWidget {
       body: Container(
         color: isDark ? const Color(0xFF111827) : const Color(0xFFDBE6D1),
         child: const Center(
-          child: ModernRoundedMoodWidget(
+          child: ModernRoundedBarIconCard(
             weekMoods: [
               MoodEntry(dayLabel: 'M', positiveValue: 0.15, negativeValue: 0.0, moodType: MoodType.positive),
               MoodEntry(dayLabel: 'T', positiveValue: 0.25, negativeValue: 0.0, moodType: MoodType.positive),

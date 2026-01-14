@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/nutrition_progress_card.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/split_column_progress_bar_card.dart';
 
 /// 营养进度卡片示例
 class NutritionProgressCardExample extends StatelessWidget {
@@ -14,7 +14,7 @@ class NutritionProgressCardExample extends StatelessWidget {
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
-          child: NutritionProgressCardWidget(
+          child: SplitColumnProgressBarCard(
             calories: NutritionData(current: 470, total: 1830, unit: 'Cal'),
             nutrients: [
               NutrientData(

@@ -3,16 +3,16 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_tracking_card_data.dart';
 
-/// 睡眠追踪卡片公共小组件
+/// 上下布局圆环进度卡片公共小组件
 ///
-/// 用于展示每日睡眠时长和周进度追踪的卡片组件，支持动画效果和主题适配。
-/// 适用于健康追踪、睡眠管理等场景。
+/// 用于展示每日数值和周进度追踪的卡片组件，支持动画效果和主题适配。
+/// 适用于健康追踪、进度管理等场景。
 ///
 /// 支持序列化的数据模型，可从 JSON 字符串配置。
 ///
 /// 使用示例：
 /// ```dart
-/// SleepTrackingCardWidget(
+/// VerticalCircularProgressCard(
 ///   data: SleepTrackingCardData(
 ///     sleepHours: 7.5,
 ///     sleepLabel: 'Good Sleep',
@@ -24,7 +24,7 @@ import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_trac
 ///   size: HomeWidgetSize.large,
 /// )
 /// ```
-class SleepTrackingCardWidget extends StatefulWidget {
+class VerticalCircularProgressCard extends StatefulWidget {
   /// 数据模型
   final SleepTrackingCardData data;
 
@@ -52,7 +52,7 @@ class SleepTrackingCardWidget extends StatefulWidget {
   /// 点击右侧操作的回调
   final VoidCallback? onActionTap;
 
-  const SleepTrackingCardWidget({
+  const VerticalCircularProgressCard({
     super.key,
     required this.data,
     required this.size,
@@ -66,7 +66,7 @@ class SleepTrackingCardWidget extends StatefulWidget {
   });
 
   /// 从属性映射创建组件（用于动态渲染）
-  static SleepTrackingCardWidget fromProps(
+  static VerticalCircularProgressCard fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -90,7 +90,7 @@ class SleepTrackingCardWidget extends StatefulWidget {
     // 如果解析失败，使用默认值
     data ??= SleepTrackingCardData.createDefault();
 
-    return SleepTrackingCardWidget(
+    return VerticalCircularProgressCard(
       data: data,
       size: size,
       icon: props['icon'] as IconData?,
@@ -118,11 +118,11 @@ class SleepTrackingCardWidget extends StatefulWidget {
   }
 
   @override
-  State<SleepTrackingCardWidget> createState() =>
-      _SleepTrackingCardWidgetState();
+  State<VerticalCircularProgressCard> createState() =>
+      _VerticalCircularProgressCardState();
 }
 
-class _SleepTrackingCardWidgetState extends State<SleepTrackingCardWidget>
+class _VerticalCircularProgressCardState extends State<VerticalCircularProgressCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

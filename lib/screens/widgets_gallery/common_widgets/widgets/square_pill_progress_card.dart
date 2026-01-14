@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 药物追踪器小组件
-class MedicationTrackerWidget extends StatefulWidget {
+class SquarePillProgressCard extends StatefulWidget {
   /// 药物数量
   final int medicationCount;
 
@@ -13,7 +13,7 @@ class MedicationTrackerWidget extends StatefulWidget {
   /// 进度值 (0.0 - 1.0)
   final double progress;
 
-  const MedicationTrackerWidget({
+  const SquarePillProgressCard({
     super.key,
     required this.medicationCount,
     this.unit = 'meds',
@@ -21,11 +21,11 @@ class MedicationTrackerWidget extends StatefulWidget {
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
-  factory MedicationTrackerWidget.fromProps(
+  factory SquarePillProgressCard.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    return MedicationTrackerWidget(
+    return SquarePillProgressCard(
       medicationCount: props['medicationCount'] as int? ?? 0,
       unit: props['unit'] as String? ?? 'meds',
       progress: (props['progress'] as num?)?.toDouble() ?? 0.0,
@@ -33,10 +33,10 @@ class MedicationTrackerWidget extends StatefulWidget {
   }
 
   @override
-  State<MedicationTrackerWidget> createState() => _MedicationTrackerWidgetState();
+  State<SquarePillProgressCard> createState() => _SquarePillProgressCardState();
 }
 
-class _MedicationTrackerWidgetState extends State<MedicationTrackerWidget>
+class _SquarePillProgressCardState extends State<SquarePillProgressCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

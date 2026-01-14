@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/activity_progress_card.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/card_dot_progress_display.dart';
 
 /// 活动进度卡片示例
 class ActivityProgressCardExample extends StatelessWidget {
@@ -14,7 +14,7 @@ class ActivityProgressCardExample extends StatelessWidget {
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
-          child: ActivityProgressCardWidget(
+          child: CardDotProgressDisplay(
             title: 'Mileage',
             subtitle: 'January 2025',
             value: 153.20,
