@@ -466,7 +466,8 @@ class _HomeCardState extends State<HomeCard> {
       // 已配置：执行导航处理器
       SelectorResult result = selectorConfig.toSelectorResult()!;
 
-      // 如果有 dataSelector，需要转换数据
+      // 如果有 dataSelector 且 data 是 List，需要转换数据
+      // 注意：如果使用公共小组件，data 可能已经被 dataSelector 转换过了
       if (widgetDef.dataSelector != null && result.data is List) {
         final dataArray = result.data as List<dynamic>;
         final transformedData = widgetDef.dataSelector!(dataArray);
@@ -481,7 +482,13 @@ class _HomeCardState extends State<HomeCard> {
 
       debugPrint('[HomeCard] result: $result');
       debugPrint('[HomeCard] result.data: ${result.data}');
-      if (result.data != null && widgetDef.navigationHandler != null) {
+      debugPrint('[HomeCard] result.data type: ${result.data.runtimeType}');
+
+      // 检查是否可以执行导航
+      final canNavigate = result.data != null && widgetDef.navigationHandler != null;
+      debugPrint('[HomeCard] canNavigate: $canNavigate (data != null: ${result.data != null}, navigationHandler != null: ${widgetDef.navigationHandler != null})');
+
+      if (canNavigate) {
         try {
           debugPrint('[HomeCard] 调用 navigationHandler...');
           widgetDef.navigationHandler!(context, result);
@@ -489,6 +496,12 @@ class _HomeCardState extends State<HomeCard> {
         } catch (e) {
           debugPrint('[HomeCard] 导航处理器执行失败: $e');
           Toast.error('打开失败: $e');
+        }
+      } else {
+        // 如果没有导航处理器，给出提示
+        debugPrint('[HomeCard] 无法导航：data=${result.data}, navigationHandler=${widgetDef.navigationHandler}');
+        if (result.data == null) {
+          Toast.error('数据为空，无法打开');
         }
       }
     }
