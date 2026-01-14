@@ -397,7 +397,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/activity_progress_card',
-          handler: (settings) => RouteHelpers.createRoute(const ActivityProgressCardExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            CardDotProgressDisplayExample(),
+            settings: settings,
+          ),
           description: '活动进度卡片',
         ),
         RouteDefinition(
@@ -547,12 +551,20 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/medication_tracker_widget',
-          handler: (settings) => RouteHelpers.createRoute(const MedicationTrackerWidgetExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            const SquarePillProgressCardExample(),
+            settings: settings,
+          ),
           description: '药物追踪器卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/modern_egfr_health_widget',
-          handler: (settings) => RouteHelpers.createRoute(const ModernEgfrHealthWidgetExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            const ModernFlipCounterCardExample(),
+            settings: settings,
+          ),
           description: 'eGFR 健康指标卡片',
         ),
         RouteDefinition(
@@ -602,7 +614,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/sleep_tracking_card',
-          handler: (settings) => RouteHelpers.createRoute(const SleepTrackingCardExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            VerticalCircularProgressCardExample(),
+            settings: settings,
+          ),
           description: '睡眠追踪卡片',
         ),
     RouteDefinition(
@@ -617,7 +633,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/modern_rounded_mood_widget',
-          handler: (settings) => RouteHelpers.createRoute(const ModernRoundedMoodWidgetExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            const ModernRoundedBarIconCardExample(),
+            settings: settings,
+          ),
           description: '现代化圆角心情追踪小组件',
         ),
         RouteDefinition(
@@ -642,7 +662,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/weight_trend_chart',
-          handler: (settings) => RouteHelpers.createRoute(const WeightTrendChartExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            CardTrendLineChartExample(),
+            settings: settings,
+          ),
           description: '体重趋势图表',
         ),
         RouteDefinition(
@@ -737,7 +761,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/nutrition_progress_card',
-          handler: (settings) => RouteHelpers.createRoute(const NutritionProgressCardExample(), settings: settings),
+      handler:
+          (settings) => RouteHelpers.createRoute(
+            SplitColumnProgressBarCardExample(),
+            settings: settings,
+          ),
           description: '营养进度追踪卡片',
         ),
         RouteDefinition(

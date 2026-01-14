@@ -389,7 +389,7 @@ class _WidgetRegistry {
     '/widgets_gallery/icon_circular_progress_card':
         () => const IconCircularProgressCardExample(),
     '/widgets_gallery/nutrition_progress_card':
-        () => const NutritionProgressCardExample(),
+        () => SplitColumnProgressBarCardExample(),
     '/widgets_gallery/task_progress_list_card':
         () => const TaskProgressListCardExample(),
     '/widgets_gallery/rounded_task_progress_widget':
@@ -404,13 +404,13 @@ class _WidgetRegistry {
     '/widgets_gallery/stress_level_monitor':
         () => const StressLevelMonitorExample(),
     '/widgets_gallery/sleep_tracking_card':
-        () => const SleepTrackingCardExample(),
+        () => VerticalCircularProgressCardExample(),
     '/widgets_gallery/sleep_duration_card':
         () => const SleepDurationCardExample(),
     '/widgets_gallery/modern_egfr_health_widget':
-        () => const ModernEgfrHealthWidgetExample(),
+        () => const ModernFlipCounterCardExample(),
     '/widgets_gallery/medication_tracker_widget':
-        () => const MedicationTrackerWidgetExample(),
+        () => const SquarePillProgressCardExample(),
     '/widgets_gallery/hydration_tracker_widget':
         () => const HydrationTrackerWidgetExample(),
     '/widgets_gallery/weight_tracking_widget':
@@ -418,7 +418,7 @@ class _WidgetRegistry {
     '/widgets_gallery/blood_pressure_tracker':
         () => const BloodPressureTrackerExample(),
     '/widgets_gallery/activity_progress_card':
-        () => const ActivityProgressCardExample(),
+        () => CardDotProgressDisplayExample(),
     '/widgets_gallery/habit_streak_tracker':
         () => const HabitStreakTrackerExample(),
     '/widgets_gallery/weekly_steps_progress_card':
@@ -473,7 +473,7 @@ class _WidgetRegistry {
     '/widgets_gallery/trend_value_card': () => const TrendValueCardExample(),
     '/widgets_gallery/trend_list_card': () => const TrendListCardExample(),
     '/widgets_gallery/weight_trend_chart':
-        () => const WeightTrendChartExample(),
+        () => CardTrendLineChartExample(),
     '/widgets_gallery/dual_bar_chart_card':
         () => const DualBarChartCardExample(),
     '/widgets_gallery/weekly_bars_card': () => const WeeklyBarsCardExample(),

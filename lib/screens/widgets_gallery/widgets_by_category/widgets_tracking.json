@@ -61,7 +61,7 @@
       ]
     },
     {
-      "name": "ActivityProgressCardWidget",
+      "name": "CardDotProgressDisplay",
       "displayName": "活动进度卡片",
       "description": "活动里程进度与点状进度卡片",
       "category": "tracking",
@@ -169,7 +169,7 @@
       ]
     },
     {
-      "name": "SleepDurationCardWidget",
+      "name": "DarkBarChartCard",
       "displayName": "睡眠时长统计卡片",
       "description": "睡眠时长与趋势展示，含睡眠周期可视化",
       "category": "tracking",
@@ -191,7 +191,7 @@
       ]
     },
     {
-      "name": "MoodTrackerCardWidget",
+      "name": "CardEmojiIconDisplay",
       "displayName": "心情追踪卡片",
       "description": "心情追踪卡片，显示周情绪数据和记录统计",
       "category": "tracking",
@@ -246,7 +246,7 @@
       ]
     },
     {
-      "name": "StressLevelMonitorWidget",
+      "name": "CardBarChartMonitor",
       "displayName": "压力水平监测卡片",
       "description": "压力水平监测，显示分数、状态和周数据柱状图",
       "category": "tracking",
@@ -293,7 +293,7 @@
       ]
     },
     {
-      "name": "SleepTrackingCardWidget",
+      "name": "VerticalCircularProgressCard",
       "displayName": "睡眠追踪卡片",
       "description": "每日睡眠时长和周进度追踪卡片，支持动画效果和主题适配",
       "category": "tracking",
@@ -351,7 +351,7 @@
       ]
     },
     {
-      "name": "ModernEgfrHealthWidget",
+      "name": "ModernFlipCounterCard",
       "displayName": "现代 eGFR 健康指标卡片",
       "description": "通用健康指标展示卡片，支持数值、单位和状态指示器",
       "category": "tracking",
@@ -468,7 +468,7 @@
       ]
     },
     {
-      "name": "SleepDurationCardWidget",
+      "name": "DarkBarChartCard",
       "displayName": "睡眠时长统计卡片",
       "description": "显示睡眠时长、趋势和睡眠周期可视化",
       "category": "tracking",
@@ -490,7 +490,7 @@
       ]
     },
     {
-      "name": "MoodTrackerCardWidget",
+      "name": "CardEmojiIconDisplay",
       "displayName": "心情追踪卡片",
       "description": "显示情绪记录和每周情绪数据",
       "category": "tracking",
@@ -545,7 +545,7 @@
       ]
     },
     {
-      "name": "StressLevelMonitorWidget",
+      "name": "CardBarChartMonitor",
       "displayName": "压力水平监测卡片",
       "description": "显示当前分数、状态描述和每周7天的柱状图数据",
       "category": "tracking",
@@ -602,7 +602,7 @@
       ]
     },
     {
-      "name": "ModernEgfrHealthWidget",
+      "name": "ModernFlipCounterCard",
       "displayName": "eGFR健康指标卡片",
       "description": "显示健康指标数值、单位、日期和状态指示器",
       "category": "tracking",
@@ -712,7 +712,7 @@
       ]
     },
     {
-      "name": "MedicationTrackerWidget",
+      "name": "SquarePillProgressCard",
       "displayName": "药物追踪器",
       "description": "显示药物数量和胶囊形状进度条",
       "category": "tracking",
@@ -740,7 +740,7 @@
       ]
     },
     {
-      "name": "ModernRoundedMoodWidget",
+      "name": "ModernRoundedBarIconCard",
       "displayName": "现代圆角心情追踪",
       "description": "显示每周心情柱状图和心情历史图标",
       "category": "tracking",

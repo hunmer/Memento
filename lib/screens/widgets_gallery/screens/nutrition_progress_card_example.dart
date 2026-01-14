@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/split_column_progress_bar_card.dart';
 
 /// 营养进度卡片示例
-class NutritionProgressCardExample extends StatelessWidget {
-  const NutritionProgressCardExample({super.key});
+class SplitColumnProgressBarCardExample extends StatelessWidget {
+  const SplitColumnProgressBarCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {

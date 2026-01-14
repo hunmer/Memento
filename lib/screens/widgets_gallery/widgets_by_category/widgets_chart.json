@@ -672,7 +672,7 @@
       ]
     },
     {
-      "name": "WeightTrendChartWidget",
+      "name": "CardTrendLineChart",
       "displayName": "体重趋势图表",
       "description": "带动画的趋势折线图，支持时间范围筛选和交互式工具提示",
       "category": "chart",
@@ -1359,7 +1359,7 @@
       ]
     },
     {
-      "name": "WeightTrendChartWidget",
+      "name": "CardTrendLineChart",
       "displayName": "体重趋势图表",
       "description": "显示带动画的趋势折线图，支持时间范围筛选和交互式工具提示",
       "category": "chart",
@@ -1641,7 +1641,7 @@
       ]
     },
     {
-      "name": "SleepStageChartCardWidget",
+      "name": "CardBubbleChartDisplay",
       "displayName": "睡眠阶段图表卡片",
       "description": "显示睡眠阶段气泡图，支持时间范围切换",
       "category": "chart",

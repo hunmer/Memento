@@ -6,8 +6,8 @@ import 'package:Memento/screens/widgets_gallery/common_widgets/models/sleep_trac
 /// 睡眠追踪卡片示例
 ///
 /// 展示如何使用 VerticalCircularProgressCard 公共小组件
-class SleepTrackingCardExample extends StatelessWidget {
-  const SleepTrackingCardExample({super.key});
+class VerticalCircularProgressCardExample extends StatelessWidget {
+  const VerticalCircularProgressCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {
