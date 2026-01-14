@@ -76,6 +76,7 @@ import 'widgets/dark_bar_chart_card.dart';
 import 'widgets/card_emoji_icon_display.dart';
 import 'widgets/habit_streak_tracker_card.dart';
 import 'widgets/weekly_dot_tracker_card.dart';
+import 'widgets/checkin_item_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -155,6 +156,7 @@ enum CommonWidgetId {
   moodTrackerCard,
   habitStreakTrackerCard,
   weeklyDotTrackerCard,
+  checkinItemCard,
 }
 
 /// 公共小组件元数据
@@ -772,6 +774,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.checkinItemCard: CommonWidgetMetadata(
+      id: CommonWidgetId.checkinItemCard,
+      name: '签到项目卡片',
+      description: '显示签到项目的图标、名称、今日打卡状态和热力图',
+      icon: Icons.checklist,
+      defaultSize: HomeWidgetSize.medium,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -953,6 +963,8 @@ class CommonWidgetBuilder {
         return HabitStreakTrackerCardWidget.fromProps(props, size);
       case CommonWidgetId.weeklyDotTrackerCard:
         return WeeklyDotTrackerCardWidget.fromProps(props, size);
+      case CommonWidgetId.checkinItemCard:
+        return CheckinItemCardWidget.fromProps(props, size);
     }
   }
 }
