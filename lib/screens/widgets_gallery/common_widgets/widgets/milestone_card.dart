@@ -118,6 +118,13 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(36),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
               ),
               padding: const EdgeInsets.all(24),
               child: Column(
