@@ -400,127 +400,55 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final emptyDotColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
 
-    // 根据实际天数动态计算
     final dayCount = widget.weekDays.length;
 
-    // 小于等于14天用单行，否则用多行网格布局
-    if (dayCount <= 14) {
-      final step = dayCount > 1 ? 0.35 / (dayCount - 1) : 0.0;
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          // 优先保证间距
-          final spacing = 4.0;
-          final totalSpacing = spacing * (dayCount - 1);
-          final availableWidth = constraints.maxWidth - totalSpacing;
-          var dotSize = availableWidth / dayCount;
-          dotSize = dotSize.clamp(4.0, 20.0);
-
-          return Row(
-            children:
-                List.generate(dayCount, (index) {
-                  final itemAnimation = CurvedAnimation(
-                    parent: _animationController,
-                    curve: Interval(
-                      index * step,
-                      0.65 + index * step,
-                      curve: Curves.easeOutCubic,
-                    ),
-                  );
-                  return Padding(
-                    padding: EdgeInsets.only(right: index < dayCount - 1 ? spacing : 0),
-                    child: _DayDotColumn(
-                      day: widget.weekDays[index],
-                      dotStates: widget.dotStates[index],
-                      primaryColor: primaryColor,
-                      primaryLight: primaryLight,
-                      emptyDotColor: emptyDotColor,
-                      animation:
-                          widget.enableAnimation
-                              ? itemAnimation
-                              : AlwaysStoppedAnimation(1.0),
-                      totalDays: dayCount,
-                      dotSize: dotSize,
-                      dotSpacing: spacing,
-                    ),
-                  );
-                }).toList(),
-          );
-        },
-      );
-    }
-
-    // 多行网格布局：计算行数和每行天数
-    final rowCount = dayCount > 30 ? 5 : 3;
-    final daysPerRow = (dayCount / rowCount).ceil();
+    // 计算列数：根据天数决定
+    final crossAxisCount = dayCount <= 14 ? dayCount : (dayCount > 30 ? 7 : 7);
 
     // 计算动画步长
     final step = dayCount > 1 ? 0.35 / (dayCount - 1) : 0.0;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 优先保证间距
-        final spacing = 4.0;
-        final rowSpacing = 8.0;
-        final maxDaysInRow = dayCount - (rowCount - 1) * daysPerRow;
-        final totalSpacing = spacing * (maxDaysInRow - 1);
-        final availableWidth = constraints.maxWidth - totalSpacing;
-        // 根据高度限制圆点大小：(总高度 - 行间距) / 行数
-        final maxDotSizeByHeight =
-            (constraints.maxHeight - rowSpacing * (rowCount - 1)) / rowCount;
-        var dotSize = availableWidth / maxDaysInRow;
-        dotSize = dotSize.clamp(4.0, maxDotSizeByHeight.clamp(4.0, 16.0));
+    return SizedBox(
+      height: dayCount <= 14 ? 40 : (dayCount <= 30 ? 80 : 120),
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: 8.0,
+          crossAxisSpacing: 4.0,
+          childAspectRatio: 1,
+        ),
+        itemCount: dayCount,
+        itemBuilder: (context, index) {
+          final itemAnimation = CurvedAnimation(
+            parent: _animationController,
+            curve: Interval(
+              index * step,
+              0.65 + index * step,
+              curve: Curves.easeOutCubic,
+            ),
+          );
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children:
-              List.generate(rowCount, (rowIndex) {
-                final startIndex = rowIndex * daysPerRow;
-                final endIndex = (startIndex + daysPerRow).clamp(0, dayCount);
-                final rowDays = endIndex - startIndex;
+          // 计算圆点大小
+          final dotSize = dayCount <= 14 ? 20.0 : 12.0;
 
-                if (startIndex >= dayCount) return const SizedBox.shrink();
-
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: rowIndex < rowCount - 1 ? rowSpacing : 0,
-                  ),
-                  child: Row(
-                    // 所有行都左对齐
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children:
-                        List.generate(rowDays, (colIndex) {
-                          final index = startIndex + colIndex;
-                          final itemAnimation = CurvedAnimation(
-                            parent: _animationController,
-                            curve: Interval(
-                              index * step,
-                              0.65 + index * step,
-                              curve: Curves.easeOutCubic,
-                            ),
-                          );
-                          return Padding(
-                            padding: EdgeInsets.only(right: colIndex < rowDays - 1 ? spacing : 0),
-                            child: _DayDotColumn(
-                              day: widget.weekDays[index],
-                              dotStates: widget.dotStates[index],
-                              primaryColor: primaryColor,
-                              primaryLight: primaryLight,
-                              emptyDotColor: emptyDotColor,
-                              animation:
-                                  widget.enableAnimation
-                                      ? itemAnimation
-                                      : AlwaysStoppedAnimation(1.0),
-                              totalDays: dayCount,
-                              dotSize: dotSize,
-                              dotSpacing: spacing,
-                            ),
-                          );
-                        }).toList(),
-                  ),
-                );
-              }).toList(),
-        );
-      },
+          return _DayDotColumn(
+            day: widget.weekDays[index],
+            dotStates: widget.dotStates[index],
+            primaryColor: primaryColor,
+            primaryLight: primaryLight,
+            emptyDotColor: emptyDotColor,
+            animation:
+                widget.enableAnimation
+                    ? itemAnimation
+                    : AlwaysStoppedAnimation(1.0),
+            totalDays: dayCount,
+            dotSize: dotSize,
+            dotSpacing: 4.0,
+          );
+        },
+      ),
     );
   }
 }
