@@ -250,7 +250,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                   child: LayoutBuilder(
                     builder: (context, constraints) {
                       // 预留一些空间给 indicator 和 padding
-                      final availableHeight = constraints.maxHeight - 8;
+                      final availableHeight = constraints.maxHeight - 20;
                       final tabHeight =
                           availableHeight / _availableCommonWidgets.length;
                       return ExtendedTabBar(
