@@ -93,6 +93,9 @@ class VerticalCircularProgressCardData {
   /// 主色调（十六进制颜色字符串），默认使用主题色
   final String? primaryColor;
 
+  /// 单位标签（如 'hr', '次', 'kg'），默认为 'hr'
+  final String unit;
+
   const VerticalCircularProgressCardData({
     required this.mainValue,
     required this.statusLabel,
@@ -100,6 +103,7 @@ class VerticalCircularProgressCardData {
     this.title = 'Progress',
     this.actionLabel = 'Today',
     this.primaryColor,
+    this.unit = 'hr',
   });
 
   /// 从 JSON 创建
@@ -108,11 +112,12 @@ class VerticalCircularProgressCardData {
       mainValue: (json['mainValue'] as num?)?.toDouble() ?? (json['sleepHours'] as num?)?.toDouble() ?? 0.0,
       statusLabel: json['statusLabel'] as String? ?? json['sleepLabel'] as String? ?? '',
       weeklyProgress: CircularProgressItemData.listFromJson(
-        json['weeklyProgress'] as List<dynamic>,
+        json['weeklyProgress'] as List<dynamic>? ?? [],
       ),
       title: json['title'] as String? ?? 'Progress',
       actionLabel: json['actionLabel'] as String? ?? 'Today',
       primaryColor: json['primaryColor'] as String?,
+      unit: json['unit'] as String? ?? 'hr',
     );
   }
 
@@ -125,6 +130,7 @@ class VerticalCircularProgressCardData {
       'title': title,
       'actionLabel': actionLabel,
       if (primaryColor != null) 'primaryColor': primaryColor,
+      'unit': unit,
     };
   }
 
@@ -148,6 +154,7 @@ class VerticalCircularProgressCardData {
     String? title,
     String? actionLabel,
     String? primaryColor,
+    String? unit,
   }) {
     return VerticalCircularProgressCardData(
       mainValue: mainValue ?? this.mainValue,
@@ -156,6 +163,7 @@ class VerticalCircularProgressCardData {
       title: title ?? this.title,
       actionLabel: actionLabel ?? this.actionLabel,
       primaryColor: primaryColor ?? this.primaryColor,
+      unit: unit ?? this.unit,
     );
   }
 
