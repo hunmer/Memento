@@ -8,7 +8,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper/filter_models.dart';
-import 'package:Memento/screens/home_screen/widgets/common_widget_selector_dialog.dart';
+import 'package:Memento/screens/home_screen/widgets/common_widget_selector_page.dart';
 
 /// 添加小组件对话框 - 使用 SuperCupertinoNavigationWrapper 重构版本
 class AddWidgetDialog extends StatefulWidget {
@@ -283,13 +283,15 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
   /// 处理小组件点击
   void _handleWidgetTap(HomeWidget widget) async {
     if (widget.supportsCommonWidgets) {
-      // 打开公共小组件选择对话框
-      await showDialog(
-        context: context,
-        builder: (context) => CommonWidgetSelectorDialog(
-          pluginWidget: widget,
-          folderId: this.widget.folderId,
-          replaceWidgetItemId: this.widget.replaceWidgetItemId,
+      // 打开公共小组件选择页面
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CommonWidgetSelectorPage(
+            pluginWidget: widget,
+            folderId: this.widget.folderId,
+            replaceWidgetItemId: this.widget.replaceWidgetItemId,
+          ),
         ),
       );
     } else {

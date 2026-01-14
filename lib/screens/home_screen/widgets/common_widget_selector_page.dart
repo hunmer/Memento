@@ -1,5 +1,5 @@
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
-import 'package:infinite_carousel/infinite_carousel.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
@@ -9,10 +9,10 @@ import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 
-/// 公共小组件选择对话框
+/// 公共小组件选择页面
 ///
 /// 用于让用户选择插件数据，然后选择一个公共小组件样式
-class CommonWidgetSelectorDialog extends StatefulWidget {
+class CommonWidgetSelectorPage extends StatefulWidget {
   /// 插件小组件定义
   final HomeWidget pluginWidget;
 
@@ -22,7 +22,7 @@ class CommonWidgetSelectorDialog extends StatefulWidget {
   /// 可选的要替换的小组件ID，如果提供则为替换模式
   final String? replaceWidgetItemId;
 
-  const CommonWidgetSelectorDialog({
+  const CommonWidgetSelectorPage({
     super.key,
     required this.pluginWidget,
     this.folderId,
@@ -30,70 +30,57 @@ class CommonWidgetSelectorDialog extends StatefulWidget {
   });
 
   @override
-  State<CommonWidgetSelectorDialog> createState() =>
-      _CommonWidgetSelectorDialogState();
+  State<CommonWidgetSelectorPage> createState() =>
+      _CommonWidgetSelectorPageState();
 }
 
-class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog> {
+class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
+    with TickerProviderStateMixin {
+  /// Tab控制器
+  late TabController _tabController;
+
   /// 当前选择的数据
   Map<String, dynamic>? _selectedData;
-
-  /// 当前选中的公共小组件
-  String? _selectedCommonWidgetId;
 
   /// 可用的公共小组件列表
   Map<String, Map<String, dynamic>> _availableCommonWidgets = {};
 
   @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      child: SizedBox(
-        width: 500,
-        height: 650,
-        child: Column(
-          children: [
-            // 顶部标题
-            _buildHeader(),
-
-            // 数据选择器区域
-            Expanded(
-              flex: 1,
-              child: _buildDataSelectorSection(),
-            ),
-
-            const Divider(height: 1),
-
-            // 公共小组件预览区域
-            Expanded(
-              flex: 2,
-              child: _buildCommonWidgetsSection(),
-            ),
-
-            // 底部操作按钮
-            _buildActions(),
-          ],
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 0, vsync: this);
   }
 
-  /// 构建顶部标题
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('选择公共组件样式'),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
         children: [
-          Text(
-            '选择公共组件样式',
-            style: Theme.of(context).textTheme.titleLarge,
+          // 数据选择器区域
+          _buildDataSelectorSection(),
+
+          const Divider(height: 1),
+
+          // 公共小组件预览区域 - 占据剩余空间
+          Expanded(
+            child: _buildCommonWidgetsSection(),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '先选择数据，然后选择一个公共组件样式',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
+
+          // 底部操作按钮
+          _buildActions(),
         ],
       ),
     );
@@ -107,6 +94,7 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
@@ -135,24 +123,22 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
             ],
           ),
           const SizedBox(height: 12),
-          Expanded(
-            child: Center(
-              child: ElevatedButton.icon(
-                onPressed: _selectedData == null ? _openDataSelector : null,
-                icon: const Icon(Icons.touch_app),
-                label: const Text('点击选择数据'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
+          Center(
+            child: ElevatedButton.icon(
+              onPressed: _selectedData == null ? _openDataSelector : null,
+              icon: const Icon(Icons.touch_app),
+              label: const Text('点击选择数据'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
                 ),
               ),
             ),
           ),
-          if (_selectedData != null)
+          if (_selectedData != null) ...[
+            const SizedBox(height: 12),
             Container(
-              margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.green.withOpacity(0.1),
@@ -176,7 +162,6 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
                     onPressed: () {
                       setState(() {
                         _selectedData = null;
-                        _selectedCommonWidgetId = null;
                         _availableCommonWidgets = {};
                       });
                     },
@@ -184,6 +169,7 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
                 ],
               ),
             ),
+          ],
         ],
       ),
     );
@@ -233,12 +219,12 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
               Container(
                 width: 24,
                 height: 24,
-                decoration: BoxDecoration(
-                  color: _selectedCommonWidgetId != null ? Colors.green : Colors.grey,
+                decoration: const BoxDecoration(
+                  color: Colors.green,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: Text(
+                child: const Text(
                   '2',
                   style: TextStyle(
                     color: Colors.white,
@@ -256,22 +242,56 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: InfiniteCarousel.builder(
-              loop: false,
-              itemCount: _availableCommonWidgets.length,
-              itemExtent: 200,
-              itemBuilder: (context, index, realIndex) {
-                final widgetId = _availableCommonWidgets.keys.elementAt(index);
-                final metadata = CommonWidgetsRegistry.getMetadata(
-                  CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
-                );
-                final isSelected = _selectedCommonWidgetId == widgetId;
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _buildCommonWidgetCard(metadata, widgetId, isSelected),
-                );
-              },
+            child: Row(
+              children: [
+                // 左侧垂直 TabBar
+                SizedBox(
+                  width: 120,
+                  child: ExtendedTabBar(
+                    controller: _tabController,
+                    scrollDirection: Axis.vertical,
+                    isScrollable: true,
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Theme.of(context).colorScheme.primary,
+                    unselectedLabelColor:
+                        Theme.of(context).colorScheme.onSurfaceVariant,
+                    labelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    unselectedLabelStyle: const TextStyle(fontSize: 14),
+                    tabs:
+                        _availableCommonWidgets.keys.map((widgetId) {
+                          final metadata = CommonWidgetsRegistry.getMetadata(
+                            CommonWidgetId.values.firstWhere(
+                              (e) => e.name == widgetId,
+                            ),
+                          );
+                          return ExtendedTab(
+                            text: metadata.name,
+                            scrollDirection: Axis.vertical,
+                          );
+                        }).toList(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // 右侧 TabBarView 展示预览
+                Expanded(
+                  child: ExtendedTabBarView(
+                    controller: _tabController,
+                    scrollDirection: Axis.vertical,
+                    children:
+                        _availableCommonWidgets.keys.map((widgetId) {
+                          final metadata = CommonWidgetsRegistry.getMetadata(
+                            CommonWidgetId.values.firstWhere(
+                              (e) => e.name == widgetId,
+                            ),
+                          );
+                          return _buildCommonWidgetPreview(metadata, widgetId);
+                        }).toList(),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -279,63 +299,30 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
     );
   }
 
-  /// 构建公共小组件卡片
-  Widget _buildCommonWidgetCard(
+  /// 构建公共小组件预览
+  Widget _buildCommonWidgetPreview(
     CommonWidgetMetadata metadata,
     String widgetId,
-    bool isSelected,
   ) {
     final props = _availableCommonWidgets[widgetId]!;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedCommonWidgetId = widgetId;
-        });
-      },
-      child: Container(
-        width: 200,
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
-            width: 3,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // 预览小组件
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CommonWidgetBuilder.build(
+                context,
+                CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
+                props,
+                metadata.defaultSize,
+              ),
+            ),
           ),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            // 预览小组件
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
-                ),
-                child: CommonWidgetBuilder.build(
-                  context,
-                  CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
-                  props,
-                  metadata.defaultSize,
-                ),
-              ),
-            ),
-            // 名称
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                metadata.name,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -353,7 +340,7 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: _selectedCommonWidgetId != null ? _confirmSelection : null,
+            onPressed: _availableCommonWidgets.isNotEmpty ? _confirmSelection : null,
             child: const Text('确认'),
           ),
         ],
@@ -375,14 +362,27 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
       data = {'data': result.data};
     }
 
+    // 调用 commonWidgetsProvider 获取可用组件
+    Map<String, Map<String, dynamic>> availableWidgets = {};
+    if (widget.pluginWidget.commonWidgetsProvider != null) {
+      availableWidgets = widget.pluginWidget.commonWidgetsProvider!(data);
+    }
+
+    // 更新 TabController 长度
+    if (_tabController.length != availableWidgets.length) {
+      _tabController.dispose();
+      _tabController = TabController(
+        length: availableWidgets.length,
+        vsync: this,
+      );
+    }
+
     setState(() {
       _selectedData = data;
-      _selectedCommonWidgetId = null;
-
-      // 调用 commonWidgetsProvider 获取可用组件
-      if (widget.pluginWidget.commonWidgetsProvider != null) {
-        _availableCommonWidgets =
-            widget.pluginWidget.commonWidgetsProvider!(data);
+      _availableCommonWidgets = availableWidgets;
+      // 自动选中第一个组件
+      if (availableWidgets.isNotEmpty) {
+        _tabController.animateTo(0);
       }
     });
   }
@@ -399,13 +399,17 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
       );
       _onDataSelected(result);
     } catch (e) {
-      debugPrint('[CommonWidgetSelectorDialog] 数据选择失败: $e');
+      debugPrint('[CommonWidgetSelectorPage] 数据选择失败: $e');
     }
   }
 
   /// 确认选择
   void _confirmSelection() {
-    if (_selectedCommonWidgetId == null || _selectedData == null) return;
+    if (_selectedData == null || _availableCommonWidgets.isEmpty) return;
+
+    // 从当前激活的 tab 获取选中的 widgetId
+    final index = _tabController.index;
+    final widgetId = _availableCommonWidgets.keys.elementAt(index);
 
     final layoutManager = HomeLayoutManager();
 
@@ -413,8 +417,8 @@ class _CommonWidgetSelectorDialogState extends State<CommonWidgetSelectorDialog>
     final selectorConfig = SelectorWidgetConfig(
       selectedData: {'data': _selectedData},
       lastUpdated: DateTime.now(),
-      commonWidgetId: _selectedCommonWidgetId,
-      commonWidgetProps: _availableCommonWidgets[_selectedCommonWidgetId],
+      commonWidgetId: widgetId,
+      commonWidgetProps: _availableCommonWidgets[widgetId],
     );
 
     // 创建小组件实例
