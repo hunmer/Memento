@@ -255,14 +255,18 @@ class _ModernEgfrHealthWidgetState extends State<ModernEgfrHealthWidget>
               SizedBox(
                 width: 100,
                 height: 52,
-                child: AnimatedFlipCounter(
-                  value: widget.value * _animation.value,
-                  fractionDigits: 1,
-                  textStyle: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : const Color(0xFF111827),
-                    height: 1.0,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  alignment: Alignment.centerLeft,
+                  child: AnimatedFlipCounter(
+                    value: widget.value * _animation.value,
+                    fractionDigits: 1,
+                    textStyle: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : const Color(0xFF111827),
+                      height: 1.0,
+                    ),
                   ),
                 ),
               ),

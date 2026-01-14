@@ -225,34 +225,15 @@ class _HalfGaugeCardWidgetState extends State<HalfGaugeCardWidget>
           // 底部金额显示
           Padding(
             padding: const EdgeInsets.only(top: 8, bottom: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '${widget.currency} ',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.grey.shade900,
-                  ),
+            child: Center(
+              child: Text(
+                '${_formatAmount(widget.remaining)}.${_getDecimalPart(widget.remaining)} / ${_formatAmount(widget.totalBudget)}.${_getDecimalPart(widget.totalBudget)} (${widget.currency})',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.grey.shade900,
                 ),
-                Text(
-                  _formatAmount(widget.remaining),
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.grey.shade900,
-                  ),
-                ),
-                Text(
-                  '.${_getDecimalPart(widget.remaining)}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
