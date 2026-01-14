@@ -91,7 +91,6 @@ import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rounded_task_list_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weekly_sleep_tracker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_mood_widget_example.dart';
@@ -606,12 +605,7 @@ class WidgetGalleryRoutes implements RouteRegistry {
           handler: (settings) => RouteHelpers.createRoute(const SleepTrackingCardExample(), settings: settings),
           description: '睡眠追踪卡片',
         ),
-        RouteDefinition(
-          path: '/widgets_gallery/weekly_sleep_tracker',
-          handler: (settings) => RouteHelpers.createRoute(const WeeklySleepTrackerExample(), settings: settings),
-          description: '周睡眠追踪小组件',
-        ),
-        RouteDefinition(
+    RouteDefinition(
           path: '/widgets_gallery/mood_chart_card',
           handler: (settings) => RouteHelpers.createRoute(const MoodChartCardExample(), settings: settings),
           description: '心情图表卡片',

@@ -23,7 +23,6 @@ import 'package:Memento/screens/widgets_gallery/screens/mood_chart_card_example.
 import 'package:Memento/screens/widgets_gallery/screens/stress_level_monitor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weekly_sleep_tracker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/medication_tracker_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/hydration_tracker_widget_example.dart';
@@ -408,8 +407,6 @@ class _WidgetRegistry {
         () => const SleepTrackingCardExample(),
     '/widgets_gallery/sleep_duration_card':
         () => const SleepDurationCardExample(),
-    '/widgets_gallery/weekly_sleep_tracker':
-        () => const WeeklySleepTrackerExample(),
     '/widgets_gallery/modern_egfr_health_widget':
         () => const ModernEgfrHealthWidgetExample(),
     '/widgets_gallery/medication_tracker_widget':
