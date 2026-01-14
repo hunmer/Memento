@@ -249,6 +249,45 @@ class CheckinListController {
     EventManager.instance.broadcast('checkin_$action', eventArgs);
   }
 
+  /// 切换打卡状态（打卡或取消今日最新记录）
+  Future<void> toggleCheckin(CheckinItem item) async {
+    try {
+      if (item.isCheckedToday()) {
+        // 取消今天的最新打卡记录
+        final todayRecords = item.getTodayRecords();
+        if (todayRecords.isNotEmpty) {
+          await item.cancelCheckinRecord(todayRecords.first.checkinTime);
+          notifyEvent('cancelled', item);
+        }
+      } else {
+        // 执行打卡
+        final now = DateTime.now();
+        final record = CheckinRecord(
+          startTime: now,
+          endTime: now,
+          checkinTime: now,
+          note: '快速打卡',
+        );
+        await item.addCheckinRecord(record);
+        notifyEvent('completed', item);
+      }
+      onStateChanged();
+    } catch (e) {
+      ToastService.instance.showToast('操作失败: $e');
+    }
+  }
+
+  /// 取消指定的打卡记录
+  Future<void> cancelCheckinRecord(CheckinItem item, DateTime recordTime) async {
+    try {
+      await item.cancelCheckinRecord(recordTime);
+      notifyEvent('cancelled', item);
+      onStateChanged();
+    } catch (e) {
+      ToastService.instance.showToast('取消打卡失败: $e');
+    }
+  }
+
   // 显示编辑打卡项页面
   void showEditItemDialog(CheckinItem item) {
     NavigationHelper.push<CheckinItem>(
@@ -438,6 +477,8 @@ class CheckinListController {
                 onPressed: () async {
                   Navigator.pop(context);
                   await item.resetRecords();
+                  // 广播重置记录事件
+                  notifyEvent('reset', item);
                   onStateChanged();
                   ToastService.instance.showToast(
                     'checkin_resetSuccessMessage'.trParams({'name': item.name}),

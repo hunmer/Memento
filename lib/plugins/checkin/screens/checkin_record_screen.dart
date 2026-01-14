@@ -208,7 +208,8 @@ class _CheckinRecordScreenState extends State<CheckinRecordScreen> {
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  await widget.checkinItem.cancelCheckinRecord(recordTime);
+                  // 使用 controller 处理取消打卡记录
+                  await widget.controller.cancelCheckinRecord(widget.checkinItem, recordTime);
                   if (mounted) {
                     setState(() {});
                   }
