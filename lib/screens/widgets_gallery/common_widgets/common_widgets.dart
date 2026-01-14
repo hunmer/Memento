@@ -75,6 +75,8 @@ import 'widgets/task_progress_list.dart';
 import 'widgets/medication_tracker_widget.dart';
 import 'widgets/sleep_duration_card.dart';
 import 'widgets/mood_tracker_card.dart';
+import 'widgets/habit_streak_tracker_card.dart';
+import 'widgets/weekly_dot_tracker_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -153,6 +155,8 @@ enum CommonWidgetId {
   medicationTrackerWidget,
   sleepDurationCard,
   moodTrackerCard,
+  habitStreakTrackerCard,
+  weeklyDotTrackerCard,
 }
 
 /// 公共小组件元数据
@@ -762,6 +766,22 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.habitStreakTrackerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.habitStreakTrackerCard,
+      name: '习惯连续追踪卡片',
+      description: '显示习惯打卡连续天数、最佳记录、里程碑和日期网格',
+      icon: Icons.local_fire_department,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
+    CommonWidgetId.weeklyDotTrackerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.weeklyDotTrackerCard,
+      name: '周度点追踪卡片',
+      description: '显示本周7天的签到状态点阵、进度统计和状态标签',
+      icon: Icons.calendar_view_week,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -941,6 +961,10 @@ class CommonWidgetBuilder {
         return SleepDurationCardWidget.fromProps(props, size);
       case CommonWidgetId.moodTrackerCard:
         return MoodTrackerCardWidget.fromProps(props, size);
+      case CommonWidgetId.habitStreakTrackerCard:
+        return HabitStreakTrackerCardWidget.fromProps(props, size);
+      case CommonWidgetId.weeklyDotTrackerCard:
+        return WeeklyDotTrackerCardWidget.fromProps(props, size);
     }
   }
 }
