@@ -75,7 +75,7 @@ import 'widgets/square_pill_progress_card.dart';
 import 'widgets/dark_bar_chart_card.dart';
 import 'widgets/card_emoji_icon_display.dart';
 import 'widgets/habit_streak_tracker_card.dart';
-import 'widgets/weekly_dot_tracker_card.dart';
+import 'widgets/monthly_dot_tracker_card.dart';
 import 'widgets/checkin_item_card.dart';
 
 /// 公共小组件 ID 枚举
@@ -155,7 +155,7 @@ enum CommonWidgetId {
   sleepDurationCard,
   moodTrackerCard,
   habitStreakTrackerCard,
-  weeklyDotTrackerCard,
+  monthlyDotTrackerCard,
   checkinItemCard,
 }
 
@@ -766,11 +766,11 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
-    CommonWidgetId.weeklyDotTrackerCard: CommonWidgetMetadata(
-      id: CommonWidgetId.weeklyDotTrackerCard,
-      name: '周度点追踪卡片',
-      description: '显示本周7天的签到状态点阵、进度统计和状态标签',
-      icon: Icons.calendar_view_week,
+    CommonWidgetId.monthlyDotTrackerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.monthlyDotTrackerCard,
+      name: '月度点追踪卡片',
+      description: '显示当月的签到状态点阵、进度统计和状态标签',
+      icon: Icons.calendar_month,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
@@ -961,8 +961,8 @@ class CommonWidgetBuilder {
         return CardEmojiIconDisplay.fromProps(props, size);
       case CommonWidgetId.habitStreakTrackerCard:
         return HabitStreakTrackerCardWidget.fromProps(props, size);
-      case CommonWidgetId.weeklyDotTrackerCard:
-        return WeeklyDotTrackerCardWidget.fromProps(props, size);
+      case CommonWidgetId.monthlyDotTrackerCard:
+        return MonthlyDotTrackerCardWidget.fromProps(props, size);
       case CommonWidgetId.checkinItemCard:
         return CheckinItemCardWidget.fromProps(props, size);
     }
