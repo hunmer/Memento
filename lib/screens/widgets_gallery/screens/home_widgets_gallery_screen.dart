@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 
 /// 桌面小组件展示列表页
-class HomeWidgetsGalleryScreen extends StatelessWidget {
+class HomeWidgetsGalleryScreen extends StatefulWidget {
   const HomeWidgetsGalleryScreen({super.key});
 
+  @override
+  State<HomeWidgetsGalleryScreen> createState() =>
+      _HomeWidgetsGalleryScreenState();
+}
+
+class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
+    with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('桌面小组件示例')),
       body: ListView(
         children: [
+          // 预览所有小组件入口
+          _buildAllWidgetsPreviewItem(context),
+          const Divider(),
           // 进度类
           ..._buildProgressSection(context),
           // 追踪类
@@ -27,6 +37,47 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
           // 工具类
           ..._buildUtilitySection(context),
         ],
+      ),
+    );
+  }
+
+  /// 构建预览所有小组件的入口项
+  Widget _buildAllWidgetsPreviewItem(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+        border: Border(
+          left: BorderSide(
+            color: Theme.of(context).colorScheme.primary,
+            width: 4,
+          ),
+        ),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Icon(
+          Icons.dashboard_customize,
+          color: Theme.of(context).colorScheme.primary,
+          size: 32,
+        ),
+        title: Text(
+          '预览所有小组件',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        subtitle: Text(
+          '使用垂直标签页浏览所有组件示例',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        onTap: () {
+          Navigator.pushNamed(context, '/widgets_gallery/all_widgets_preview');
+        },
       ),
     );
   }
@@ -807,9 +858,9 @@ class HomeWidgetsGalleryScreen extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
-        ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
