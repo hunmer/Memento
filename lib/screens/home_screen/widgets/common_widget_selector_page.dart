@@ -247,31 +247,43 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                 // 左侧垂直 TabBar
                 SizedBox(
                   width: 120,
-                  child: ExtendedTabBar(
-                    controller: _tabController,
-                    scrollDirection: Axis.vertical,
-                    isScrollable: true,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
-                    labelStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    unselectedLabelStyle: const TextStyle(fontSize: 14),
-                    tabs:
-                        _availableCommonWidgets.keys.map((widgetId) {
-                          final metadata = CommonWidgetsRegistry.getMetadata(
-                            CommonWidgetId.values.firstWhere(
-                              (e) => e.name == widgetId,
-                            ),
-                          );
-                          return ExtendedTab(
-                            text: metadata.name,
-                            scrollDirection: Axis.vertical,
-                          );
-                        }).toList(),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // 预留一些空间给 indicator 和 padding
+                      final availableHeight = constraints.maxHeight - 8;
+                      final tabHeight =
+                          availableHeight / _availableCommonWidgets.length;
+                      return ExtendedTabBar(
+                        controller: _tabController,
+                        scrollDirection: Axis.vertical,
+                        isScrollable: true,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        labelColor: Theme.of(context).colorScheme.primary,
+                        unselectedLabelColor:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                        labelStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        unselectedLabelStyle: const TextStyle(fontSize: 14),
+                        tabs:
+                            _availableCommonWidgets.keys.map((widgetId) {
+                              final metadata =
+                                  CommonWidgetsRegistry.getMetadata(
+                                    CommonWidgetId.values.firstWhere(
+                                      (e) => e.name == widgetId,
+                                    ),
+                                  );
+                              return SizedBox(
+                                height: tabHeight,
+                                child: ExtendedTab(
+                                  text: metadata.name,
+                                  scrollDirection: Axis.vertical,
+                                ),
+                              );
+                            }).toList(),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -308,21 +320,13 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // 预览小组件
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CommonWidgetBuilder.build(
-                context,
-                CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
-                props,
-                metadata.defaultSize,
-              ),
-            ),
-          ),
-        ],
+      child: Center(
+        child: CommonWidgetBuilder.build(
+          context,
+          CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
+          props,
+          metadata.defaultSize,
+        ),
       ),
     );
   }
@@ -355,7 +359,12 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     // 转换数据格式
     Map<String, dynamic> data;
     if (result.data is Map) {
-      data = (result.data as Map).cast<String, dynamic>();
+      // 安全地转换 Map，确保键为 String 类型
+      final rawMap = result.data as Map;
+      data = {};
+      rawMap.forEach((key, value) {
+        data[key.toString()] = value;
+      });
     } else if (widget.pluginWidget.dataSelector != null && result.data is List) {
       data = widget.pluginWidget.dataSelector!(result.data as List<dynamic>);
     } else {

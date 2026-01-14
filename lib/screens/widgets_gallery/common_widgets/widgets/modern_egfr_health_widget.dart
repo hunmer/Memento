@@ -97,13 +97,26 @@ class ModernEgfrHealthWidget extends StatefulWidget {
       date: props['date'] as String? ?? '',
       status: props['status'] as String? ?? 'Unknown',
       icon: props['icon'] != null
-          ? IconData(int.parse(props['icon'] as String), fontFamily: 'MaterialIcons')
+          ? IconData(
+              props['icon'] is int
+                  ? props['icon'] as int
+                  : int.parse(props['icon'].toString()),
+              fontFamily: 'MaterialIcons',
+            )
           : Icons.science,
       primaryColor: props['primaryColor'] != null
-          ? Color(int.parse(props['primaryColor'] as String))
+          ? Color(
+              props['primaryColor'] is int
+                  ? props['primaryColor'] as int
+                  : int.parse(props['primaryColor'].toString()),
+            )
           : null,
       statusColor: props['statusColor'] != null
-          ? Color(int.parse(props['statusColor'] as String))
+          ? Color(
+              props['statusColor'] is int
+                  ? props['statusColor'] as int
+                  : int.parse(props['statusColor'].toString()),
+            )
           : null,
     );
   }
