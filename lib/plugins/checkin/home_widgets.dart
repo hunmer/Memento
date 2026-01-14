@@ -134,14 +134,7 @@ class CheckinHomeWidgets {
     }
 
     return {
-      // 圆形进度卡片：显示本周签到进度
-      'circularProgressCard': {
-        'title': name,
-        'subtitle': group.isNotEmpty ? group : '签到',
-        'percentage': (weeklyCheckins / 7 * 100).clamp(0, 100).toDouble(),
-        'progress': (weeklyCheckins / 7).clamp(0.0, 1.0),
-      },
-
+  
       // 活动进度卡片：显示连续签到天数
       'activityProgressCard': {
         'title': name,
@@ -151,78 +144,6 @@ class CheckinHomeWidgets {
         'activities': weeklyCheckins,
         'totalProgress': 7,
         'completedProgress': weeklyCheckins,
-      },
-
-      // 任务进度卡片：显示今日签到状态
-      'taskProgressCard': {
-        'title': name,
-        'subtitle': isCheckedToday ? '今日已签' : '今日未签',
-        'completedTasks': isCheckedToday ? 1 : 0,
-        'totalTasks': 1,
-        'pendingTasks': isCheckedToday ? <String>[] : <String>['点击签到'],
-      },
-
-      // 里程碑卡片：显示连续签到里程碑
-      'milestoneCard': {
-        'imageUrl': null,
-        'title': name,
-        'date': DateTime.now().toString().substring(0, 10),
-        'daysCount': consecutiveDays,
-        'value': '$consecutiveDays',
-        'unit': '天',
-        'suffix': consecutiveDays > 0 ? '连续签到' : '开始签到',
-      },
-
-      // 观看进度卡片（复用）：显示本周签到详情
-      'watchProgressCard': {
-        'userName': name,
-        'lastWatched': isCheckedToday ? '今日已签到' : '今日未签到',
-        'currentCount': weeklyCheckins,
-        'totalCount': 7,
-        'items': List.generate(
-          weeklyCheckins,
-          (index) => {'title': '第${weeklyCheckins - index}次签到', 'thumbnailUrl': null},
-        ),
-      },
-
-      // 每日事件卡片（复用）：显示本周签到状态
-      'dailyEventsCard': {
-        'events': List.generate(
-          weeklyCheckins,
-          (index) => {'title': '签到记录', 'time': '已完成'},
-        ),
-      },
-
-      // 现代 eGFR 健康指标卡片（复用）：显示连续天数
-      'modernEgfrHealthWidget': {
-        'title': name,
-        'value': consecutiveDays.toDouble(),
-        'unit': '天',
-        'date': DateTime.now().toString().substring(0, 10),
-        'status': consecutiveDays >= 30
-            ? '习惯养成'
-            : consecutiveDays >= 7
-                ? '坚持中'
-                : consecutiveDays > 0 ? '刚开始' : '未开始',
-        'icon': iconCode,
-        'primaryColor': colorValue,
-        'statusColor': consecutiveDays >= 30 ? 0xFF34C759 : consecutiveDays >= 7 ? 0xFFFFCC00 : 0xFF8E8E93,
-      },
-
-      // 图标圆形进度卡片：显示签到进度
-      'iconCircularProgressCard': {
-        'icon': iconCode,
-        'title': name,
-        'subtitle': group.isNotEmpty ? group : '签到',
-        'percentage': (weeklyCheckins / 7 * 100).clamp(0, 100).toDouble(),
-        'progress': (weeklyCheckins / 7).clamp(0.0, 1.0),
-        'showNotification': !isCheckedToday,
-      },
-
-      // 睡眠时长卡片（复用）：显示今日签到次数作为时长
-      'sleepDurationCard': {
-        'durationInMinutes': todayCheckins * 60,
-        'trend': isCheckedToday ? 'up' : 'neutral',
       },
 
       // 心情追踪卡片（复用）：显示本周签到状态

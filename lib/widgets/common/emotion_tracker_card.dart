@@ -426,10 +426,7 @@ class _AnimatedEmotionTextState extends State<AnimatedEmotionText>
       scale: _scaleAnimation,
       child: Text(
         widget.emotionText,
-        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.5,
-            ),
+        style: Theme.of(context).textTheme.titleMedium
       ),
     );
   }
