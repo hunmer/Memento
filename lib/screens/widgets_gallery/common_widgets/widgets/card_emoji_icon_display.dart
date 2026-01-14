@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/emotion_tracker_card.dart';
 
-/// 心情追踪卡片小组件
+/// 卡片表情图标展示小组件
 ///
 /// 用于 widgets_gallery 的包装器组件，支持 fromProps 工厂方法。
-class MoodTrackerCardWidget extends StatelessWidget {
+class CardEmojiIconDisplay extends StatelessWidget {
   /// 当前情绪文本
   final String currentEmotionText;
 
@@ -24,7 +24,7 @@ class MoodTrackerCardWidget extends StatelessWidget {
   /// 历史记录点击回调
   final VoidCallback? onHistoryTap;
 
-  const MoodTrackerCardWidget({
+  const CardEmojiIconDisplay({
     super.key,
     required this.currentEmotionText,
     required this.loggedCount,
@@ -35,7 +35,7 @@ class MoodTrackerCardWidget extends StatelessWidget {
   });
 
   /// 从 props 创建实例
-  factory MoodTrackerCardWidget.fromProps(
+  factory CardEmojiIconDisplay.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -58,7 +58,7 @@ class MoodTrackerCardWidget extends StatelessWidget {
         }).toList() ??
         [];
 
-    return MoodTrackerCardWidget(
+    return CardEmojiIconDisplay(
       currentEmotionText: props['currentEmotionText'] as String? ?? 'Happy',
       loggedCount: props['loggedCount'] as int? ?? 0,
       totalCount: props['totalCount'] as int? ?? 7,

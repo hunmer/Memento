@@ -47,7 +47,7 @@ class SleepStageData {
 }
 
 /// 睡眠阶段图表小组件
-class SleepStageChartCardWidget extends StatefulWidget {
+class CardBubbleChartDisplay extends StatefulWidget {
   /// 睡眠阶段数据列表
   final List<SleepStageData> sleepStages;
 
@@ -60,7 +60,7 @@ class SleepStageChartCardWidget extends StatefulWidget {
   /// 时间标签列表
   final List<String> timeLabels;
 
-  const SleepStageChartCardWidget({
+  const CardBubbleChartDisplay({
     super.key,
     required this.sleepStages,
     this.selectedTab = 1,
@@ -69,7 +69,7 @@ class SleepStageChartCardWidget extends StatefulWidget {
   });
 
   /// 从 props 创建实例
-  factory SleepStageChartCardWidget.fromProps(
+  factory CardBubbleChartDisplay.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -85,7 +85,7 @@ class SleepStageChartCardWidget extends StatefulWidget {
             .toList() ??
         const ['11:00', '12:00', '13:00', '14:00', '15:00'];
 
-    return SleepStageChartCardWidget(
+    return CardBubbleChartDisplay(
       sleepStages: sleepStages,
       selectedTab: props['selectedTab'] as int? ?? 1,
       showTooltip: props['showTooltip'] as bool? ?? true,
@@ -94,11 +94,11 @@ class SleepStageChartCardWidget extends StatefulWidget {
   }
 
   @override
-  State<SleepStageChartCardWidget> createState() =>
-      _SleepStageChartCardWidgetState();
+  State<CardBubbleChartDisplay> createState() =>
+      _CardBubbleChartDisplayState();
 }
 
-class _SleepStageChartCardWidgetState extends State<SleepStageChartCardWidget>
+class _CardBubbleChartDisplayState extends State<CardBubbleChartDisplay>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

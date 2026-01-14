@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 活动进度小组件
-class ActivityProgressCardWidget extends StatefulWidget {
+class CardDotProgressDisplay extends StatefulWidget {
   final String title;
   final String subtitle;
   final double value;
@@ -12,7 +12,7 @@ class ActivityProgressCardWidget extends StatefulWidget {
   final int totalProgress;
   final int completedProgress;
 
-  const ActivityProgressCardWidget({
+  const CardDotProgressDisplay({
     super.key,
     required this.title,
     required this.subtitle,
@@ -24,11 +24,11 @@ class ActivityProgressCardWidget extends StatefulWidget {
   });
 
   /// 从 props 创建实例
-  factory ActivityProgressCardWidget.fromProps(
+  factory CardDotProgressDisplay.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    return ActivityProgressCardWidget(
+    return CardDotProgressDisplay(
       title: props['title'] as String? ?? '',
       subtitle: props['subtitle'] as String? ?? '',
       value: (props['value'] as num?)?.toDouble() ?? 0.0,
@@ -40,11 +40,11 @@ class ActivityProgressCardWidget extends StatefulWidget {
   }
 
   @override
-  State<ActivityProgressCardWidget> createState() =>
-      _ActivityProgressCardWidgetState();
+  State<CardDotProgressDisplay> createState() =>
+      _CardDotProgressDisplayState();
 }
 
-class _ActivityProgressCardWidgetState extends State<ActivityProgressCardWidget>
+class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

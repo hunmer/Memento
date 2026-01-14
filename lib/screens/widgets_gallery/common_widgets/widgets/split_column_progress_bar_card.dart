@@ -72,19 +72,19 @@ class NutrientData {
   }
 }
 
-/// 营养进度卡片小组件
-class NutritionProgressCardWidget extends StatefulWidget {
+/// 左右分栏进度条卡片小组件
+class SplitColumnProgressBarCard extends StatefulWidget {
   final NutritionData calories;
   final List<NutrientData> nutrients;
 
-  const NutritionProgressCardWidget({
+  const SplitColumnProgressBarCard({
     super.key,
     required this.calories,
     required this.nutrients,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
-  factory NutritionProgressCardWidget.fromProps(
+  factory SplitColumnProgressBarCard.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -97,18 +97,18 @@ class NutritionProgressCardWidget extends StatefulWidget {
             .toList() ??
         const [];
 
-    return NutritionProgressCardWidget(
+    return SplitColumnProgressBarCard(
       calories: caloriesData,
       nutrients: nutrientsList,
     );
   }
 
   @override
-  State<NutritionProgressCardWidget> createState() =>
-      _NutritionProgressCardWidgetState();
+  State<SplitColumnProgressBarCard> createState() =>
+      _SplitColumnProgressBarCardState();
 }
 
-class _NutritionProgressCardWidgetState extends State<NutritionProgressCardWidget>
+class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

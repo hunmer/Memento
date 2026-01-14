@@ -14,7 +14,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 /// - 交互式图表工具提示
 /// - 深色模式适配
 /// - 可配置颜色和尺寸
-class WeightTrendChartWidget extends StatefulWidget {
+class CardTrendLineChart extends StatefulWidget {
   /// 卡片标题
   final String? title;
 
@@ -54,7 +54,7 @@ class WeightTrendChartWidget extends StatefulWidget {
   /// 是否显示渐变填充
   final bool showGradient;
 
-  const WeightTrendChartWidget({
+  const CardTrendLineChart({
     super.key,
     this.title,
     this.icon,
@@ -72,11 +72,11 @@ class WeightTrendChartWidget extends StatefulWidget {
   });
 
   /// 从 props 创建实例
-  factory WeightTrendChartWidget.fromProps(
+  factory CardTrendLineChart.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    return WeightTrendChartWidget(
+    return CardTrendLineChart(
       title: props['title'] as String?,
       icon: props['icon'] as IconData?,
       currentValue: (props['currentValue'] as num?)?.toDouble() ?? 0.0,
@@ -101,10 +101,10 @@ class WeightTrendChartWidget extends StatefulWidget {
   }
 
   @override
-  State<WeightTrendChartWidget> createState() => _WeightTrendChartWidgetState();
+  State<CardTrendLineChart> createState() => _CardTrendLineChartState();
 }
 
-class _WeightTrendChartWidgetState extends State<WeightTrendChartWidget>
+class _CardTrendLineChartState extends State<CardTrendLineChart>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;

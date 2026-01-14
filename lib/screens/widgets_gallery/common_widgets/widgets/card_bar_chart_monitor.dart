@@ -9,7 +9,7 @@ import 'package:Memento/widgets/common/index.dart';
 ///
 /// 显示当前分数、状态描述和每周7天的柱状图数据，支持动画效果。
 @Deprecated('使用 lib/widgets/common 中的 LevelMonitorCard 代替')
-class StressLevelMonitorWidget extends StatelessWidget {
+class CardBarChartMonitor extends StatelessWidget {
   /// 标题
   final String title;
 
@@ -34,7 +34,7 @@ class StressLevelMonitorWidget extends StatelessWidget {
   /// 柱状图点击回调
   final Function(int index, WeeklyLevelData data)? onBarTap;
 
-  const StressLevelMonitorWidget({
+  const CardBarChartMonitor({
     super.key,
     required this.title,
     required this.icon,
@@ -47,7 +47,7 @@ class StressLevelMonitorWidget extends StatelessWidget {
   });
 
   /// 从 props 创建实例
-  factory StressLevelMonitorWidget.fromProps(
+  factory CardBarChartMonitor.fromProps(
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
@@ -56,7 +56,7 @@ class StressLevelMonitorWidget extends StatelessWidget {
       return WeeklyLevelData.fromJson(item as Map<String, dynamic>);
     }).toList() ?? <WeeklyLevelData>[];
 
-    return StressLevelMonitorWidget(
+    return CardBarChartMonitor(
       title: props['title'] as String? ?? 'Stress Level',
       icon: _getIcon(props['icon'] as String? ?? 'error_outline'),
       currentScore: (props['currentScore'] as num?)?.toDouble() ?? 0.0,
