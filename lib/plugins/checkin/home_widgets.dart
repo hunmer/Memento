@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import 'checkin_plugin.dart';
 import 'models/checkin_item.dart';
 
@@ -73,11 +75,27 @@ class CheckinHomeWidgets {
         dataSelector: _extractCheckinItemData,
         // 公共小组件提供者
         commonWidgetsProvider: _provideCommonWidgets,
-        builder:
-            (context, config) => GenericSelectorWidget(
-              widgetDefinition: registry.getWidget('checkin_item_selector')!,
-              config: config,
-            ),
+        builder: (context, config) {
+          // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return EventListenerContainer(
+                events: const [
+                  'checkin_completed',  // 打卡完成
+                  'checkin_cancelled',  // 取消打卡
+                  'checkin_reset',      // 重置记录
+                  'checkin_deleted',    // 删除项目
+                ],
+                onEvent: () => setState(() {}),
+                child: _buildDynamicSelectorWidget(
+                  context,
+                  config,
+                  registry.getWidget('checkin_item_selector')!,
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -495,5 +513,210 @@ class CheckinHomeWidgets {
         arguments: {'itemId': itemId},
       );
     }
+  }
+
+  /// 构建动态选择器小组件（支持事件触发时重新获取数据）
+  static Widget _buildDynamicSelectorWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+    HomeWidget widgetDefinition,
+  ) {
+    // 解析选择器配置
+    SelectorWidgetConfig? selectorConfig;
+    try {
+      if (config.containsKey('selectorWidgetConfig')) {
+        selectorConfig = SelectorWidgetConfig.fromJson(
+          config['selectorWidgetConfig'] as Map<String, dynamic>,
+        );
+      }
+    } catch (e) {
+      debugPrint('[CheckinHomeWidgets] 解析配置失败: $e');
+    }
+
+    // 判断是否已配置
+    if (selectorConfig == null || !selectorConfig.isConfigured) {
+      return _buildUnconfiguredWidget(context);
+    }
+
+    // 检查是否使用了公共小组件
+    if (selectorConfig.usesCommonWidget) {
+      return _buildDynamicCommonWidget(
+        context,
+        selectorConfig,
+        widgetDefinition,
+        config,
+      );
+    }
+
+    // 恢复 SelectorResult 并显示默认视图
+    final originalResult = selectorConfig.toSelectorResult();
+    if (originalResult == null) {
+      return _buildErrorWidget(context, '无法解析选择的数据');
+    }
+
+    return _buildDefaultConfiguredWidget(
+      context,
+      originalResult,
+      widgetDefinition,
+    );
+  }
+
+  /// 构建动态公共小组件（每次渲染都重新获取最新数据）
+  static Widget _buildDynamicCommonWidget(
+    BuildContext context,
+    SelectorWidgetConfig selectorConfig,
+    HomeWidget widgetDefinition,
+    Map<String, dynamic> config,
+  ) {
+    try {
+      final widgetId = selectorConfig.commonWidgetId!;
+      final size =
+          config['widgetSize'] as HomeWidgetSize? ??
+          widgetDefinition.defaultSize;
+
+      // 将字符串 ID 转换为枚举值
+      final commonWidgetId = CommonWidgetsRegistry.fromString(widgetId);
+      if (commonWidgetId == null) {
+        return _buildErrorWidget(context, '未知的公共组件: $widgetId');
+      }
+
+      // 获取原始数据（从 selectorConfig.selectedData）
+      final selectedData = selectorConfig.selectedData;
+      if (selectedData == null) {
+        return _buildErrorWidget(context, '无法获取选择的数据');
+      }
+
+      // 从 selectedData 中提取实际的数据数组
+      Map<String, dynamic> data = {};
+      if (selectedData.containsKey('data')) {
+        final dataArray = selectedData['data'];
+        if (dataArray is List && dataArray.isNotEmpty) {
+          final rawData = dataArray[0];
+          if (rawData is Map<String, dynamic>) {
+            data = rawData;
+          } else if (rawData != null && rawData is Map) {
+            data = Map<String, dynamic>.from(rawData);
+          }
+        }
+      }
+
+      // 动态调用 commonWidgetsProvider 获取最新数据
+      if (widgetDefinition.commonWidgetsProvider != null) {
+        final availableWidgets = widgetDefinition.commonWidgetsProvider!(data);
+        final latestProps = availableWidgets[widgetId];
+
+        if (latestProps != null) {
+          return CommonWidgetBuilder.build(
+            context,
+            commonWidgetId,
+            latestProps,
+            size,
+          );
+        }
+      }
+
+      return _buildErrorWidget(context, '无法获取最新数据');
+    } catch (e) {
+      debugPrint('[CheckinHomeWidgets] 构建公共组件失败: $e');
+      return _buildErrorWidget(context, '渲染公共组件失败');
+    }
+  }
+
+  /// 构建未配置状态的占位小组件
+  static Widget _buildUnconfiguredWidget(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '点击配置',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建默认的已配置视图（当未使用公共小组件时）
+  static Widget _buildDefaultConfiguredWidget(
+    BuildContext context,
+    SelectorResult result,
+    HomeWidget widgetDefinition,
+  ) {
+    final theme = Theme.of(context);
+    final color = widgetDefinition.color ?? theme.colorScheme.primary;
+
+    // 尝试从 result.data 获取标题
+    String title = '已配置';
+    String? subtitle;
+
+    if (result.data is Map) {
+      final dataMap = result.data as Map;
+      title = dataMap['title']?.toString() ?? title;
+      subtitle = dataMap['subtitle']?.toString() ?? dataMap['url']?.toString();
+    } else if (result.path.isNotEmpty) {
+      title = result.path.last.selectedItem.title;
+      subtitle = result.path.last.selectedItem.subtitle;
+    }
+
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(widgetDefinition.icon, size: 24, color: color),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widgetDefinition.name,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

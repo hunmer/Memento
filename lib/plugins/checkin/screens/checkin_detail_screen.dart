@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/plugins/checkin/models/checkin_item.dart';
+import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:Memento/utils/audio_service.dart';
 
 class CheckinDetailScreen extends StatelessWidget {
   final CheckinItem checkinItem;
+  final CheckinListController? controller;
 
-  const CheckinDetailScreen({super.key, required this.checkinItem});
+  const CheckinDetailScreen({super.key, required this.checkinItem, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -26,25 +28,29 @@ class CheckinDetailScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          if (!checkinItem.isCheckedToday()) {
-            await AudioService().playCheckInSound();
-
-            // 创建一个默认的打卡记录
-            final now = DateTime.now();
-            final record = CheckinRecord(
-              startTime: now,
-              endTime: now,
-              checkinTime: now,
-              note: '快速打卡',
-            );
-
-            await checkinItem.addCheckinRecord(record);
+          if (controller != null) {
+            if (!checkinItem.isCheckedToday()) {
+              await AudioService().playCheckInSound();
+            }
+            // 使用 controller 处理打卡/取消打卡
+            await controller!.toggleCheckin(checkinItem);
           } else {
-            // 获取今天的所有打卡记录并取消最新的一个
-            final todayRecords = checkinItem.getTodayRecords();
-            if (todayRecords.isNotEmpty) {
-              // 取消最新的打卡记录
-              await checkinItem.cancelCheckinRecord(todayRecords.first.checkinTime);
+            // 没有 controller 时的回退逻辑（直接操作，不广播事件）
+            if (!checkinItem.isCheckedToday()) {
+              await AudioService().playCheckInSound();
+              final now = DateTime.now();
+              final record = CheckinRecord(
+                startTime: now,
+                endTime: now,
+                checkinTime: now,
+                note: '快速打卡',
+              );
+              await checkinItem.addCheckinRecord(record);
+            } else {
+              final todayRecords = checkinItem.getTodayRecords();
+              if (todayRecords.isNotEmpty) {
+                await checkinItem.cancelCheckinRecord(todayRecords.first.checkinTime);
+              }
             }
           }
 

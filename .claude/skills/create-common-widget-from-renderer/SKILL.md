@@ -676,6 +676,281 @@ registry.register(
 - [ ] 测试数据更新
 - [ ] 运行 `flutter analyze`
 
+## Event-Driven Data Updates
+
+### 问题背景
+
+公共小组件使用静态 props 渲染，当插件数据更新时（如用户完成打卡、删除项目等），小组件不会自动刷新显示最新数据。
+
+### 解决方案
+
+使用 `StatefulBuilder` + `EventListenerContainer` 监听插件事件，在事件触发时动态调用 `commonWidgetsProvider` 获取最新数据。
+
+### 完整实现步骤
+
+#### 1. 添加必要的导入
+
+```dart
+// lib/plugins/checkin/home_widgets.dart
+
+import 'package:Memento/widgets/event_listener_container.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
+```
+
+#### 2. 修改小组件 builder
+
+使用 `StatefulBuilder` 和 `EventListenerContainer` 包裹渲染逻辑：
+
+```dart
+registry.register(
+  HomeWidget(
+    id: 'checkin_item_selector',
+    pluginId: 'checkin',
+    name: 'checkin_quickAccess'.tr,
+    // ...
+    commonWidgetsProvider: _provideCommonWidgets,
+    builder: (context, config) {
+      // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return EventListenerContainer(
+            events: const [
+              'checkin_completed',  // 打卡完成
+              'checkin_deleted',    // 删除项目
+              // 添加更多需要监听的事件
+            ],
+            onEvent: () => setState(() {}),
+            child: _buildDynamicSelectorWidget(
+              context,
+              config,
+              registry.getWidget('checkin_item_selector')!,
+            ),
+          );
+        },
+      );
+    },
+  ),
+);
+```
+
+#### 3. 创建动态渲染方法
+
+```dart
+/// 构建动态选择器小组件（支持事件触发时重新获取数据）
+static Widget _buildDynamicSelectorWidget(
+  BuildContext context,
+  Map<String, dynamic> config,
+  HomeWidget widgetDefinition,
+) {
+  // 解析选择器配置
+  SelectorWidgetConfig? selectorConfig;
+  try {
+    if (config.containsKey('selectorWidgetConfig')) {
+      selectorConfig = SelectorWidgetConfig.fromJson(
+        config['selectorWidgetConfig'] as Map<String, dynamic>,
+      );
+    }
+  } catch (e) {
+    debugPrint('[CheckinHomeWidgets] 解析配置失败: $e');
+  }
+
+  // 判断是否已配置
+  if (selectorConfig == null || !selectorConfig.isConfigured) {
+    return _buildUnconfiguredWidget(context);
+  }
+
+  // 检查是否使用了公共小组件
+  if (selectorConfig.usesCommonWidget) {
+    return _buildDynamicCommonWidget(
+      context,
+      selectorConfig,
+      widgetDefinition,
+      config,
+    );
+  }
+
+  // 默认视图
+  final originalResult = selectorConfig.toSelectorResult();
+  if (originalResult == null) {
+    return _buildErrorWidget(context, '无法解析选择的数据');
+  }
+
+  return _buildDefaultConfiguredWidget(
+    context,
+    originalResult,
+    widgetDefinition,
+  );
+}
+
+/// 构建动态公共小组件（每次渲染都重新获取最新数据）
+static Widget _buildDynamicCommonWidget(
+  BuildContext context,
+  SelectorWidgetConfig selectorConfig,
+  HomeWidget widgetDefinition,
+  Map<String, dynamic> config,
+) {
+  try {
+    final widgetId = selectorConfig.commonWidgetId!;
+    final size = config['widgetSize'] as HomeWidgetSize? ??
+        widgetDefinition.defaultSize;
+
+    // 将字符串 ID 转换为枚举值
+    final commonWidgetId = CommonWidgetsRegistry.fromString(widgetId);
+    if (commonWidgetId == null) {
+      return _buildErrorWidget(context, '未知的公共组件: $widgetId');
+    }
+
+    // 获取原始数据（从 selectorConfig.selectedData）
+    final selectedData = selectorConfig.selectedData;
+    if (selectedData == null) {
+      return _buildErrorWidget(context, '无法获取选择的数据');
+    }
+
+    // 从 selectedData 中提取实际的数据数组
+    Map<String, dynamic> data = {};
+    if (selectedData.containsKey('data')) {
+      final dataArray = selectedData['data'];
+      if (dataArray is List && dataArray.isNotEmpty) {
+        final rawData = dataArray[0];
+        if (rawData is Map<String, dynamic>) {
+          data = rawData;
+        } else if (rawData != null && rawData is Map) {
+          data = Map<String, dynamic>.from(rawData);
+        }
+      }
+    }
+
+    // 动态调用 commonWidgetsProvider 获取最新数据
+    if (widgetDefinition.commonWidgetsProvider != null) {
+      final availableWidgets = widgetDefinition.commonWidgetsProvider!(data);
+      final latestProps = availableWidgets[widgetId];
+
+      if (latestProps != null) {
+        return CommonWidgetBuilder.build(
+          context,
+          commonWidgetId,
+          latestProps,
+          size,
+        );
+      }
+    }
+
+    return _buildErrorWidget(context, '无法获取最新数据');
+  } catch (e) {
+    debugPrint('[CheckinHomeWidgets] 构建公共组件失败: $e');
+    return _buildErrorWidget(context, '渲染公共组件失败');
+  }
+}
+
+/// 辅助方法：未配置状态
+static Widget _buildUnconfiguredWidget(BuildContext context) {
+  final theme = Theme.of(context);
+  return SizedBox.expand(
+    child: Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '点击配置',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+/// 辅助方法：错误状态
+static Widget _buildErrorWidget(BuildContext context, String message) {
+  final theme = Theme.of(context);
+  return SizedBox.expand(
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 32, color: theme.colorScheme.error),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onErrorContainer,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+```
+
+### 工作原理
+
+```
+用户操作（如完成打卡）
+  ↓
+插件广播事件（EventManager.broadcast('checkin_completed')）
+  ↓
+EventListenerContainer 捕获事件
+  ↓
+onEvent: () => setState(() {}) 触发重建
+  ↓
+_buildDynamicSelectorWidget 重新执行
+  ↓
+_buildDynamicCommonWidget 重新执行
+  ↓
+commonWidgetsProvider(data) 被调用，从插件获取最新数据
+  ↓
+CommonWidgetBuilder.build 渲染最新数据
+```
+
+### 常见插件事件列表
+
+| 插件 | 事件名 | 触发时机 |
+|-----|-------|---------|
+| **checkin** | `checkin_completed` | 打卡完成时 |
+| **checkin** | `checkin_deleted` | 删除打卡项目时 |
+| **todo** | `todo_added` | 添加任务时 |
+| **todo** | `todo_updated` | 更新任务时 |
+| **todo** | `todo_deleted` | 删除任务时 |
+| **diary** | `diary_entry_added` | 添加日记时 |
+| **diary** | `diary_entry_updated` | 更新日记时 |
+| **diary** | `diary_entry_deleted` | 删除日记时 |
+| **habit** | `habit_completed` | 完成习惯时 |
+| **tracker** | `tracker_record_added` | 添加追踪记录时 |
+
+### 关键要点
+
+1. **绕过静态 props 缓存**：不使用 `GenericSelectorWidget` 的静态 `commonWidgetProps`，而是每次渲染时动态调用 `commonWidgetsProvider`
+
+2. **事件驱动更新**：通过监听插件广播的事件，在数据变化时自动触发 UI 刷新
+
+3. **保持数据源一致性**：从 `selectorConfig.selectedData` 提取原始数据（如 `id`），然后通过 `commonWidgetsProvider` 获取完整的最新数据
+
+4. **错误处理**：提供友好的错误状态显示，避免组件崩溃
+
+### 与原有方案的区别
+
+| 方面 | 原有方案（静态 props） | 新方案（动态更新） |
+|-----|---------------------|------------------|
+| 数据来源 | `selectorConfig.commonWidgetProps`（静态） | `commonWidgetsProvider(data)`（动态） |
+| 更新机制 | 无自动更新 | 监听事件自动刷新 |
+| 使用的 Widget | `GenericSelectorWidget` | 自定义 `_buildDynamicSelectorWidget` |
+| 数据新鲜度 | 配置时的快照 | 每次渲染都是最新数据 |
+
 ## Notes
 
 - 公共组件应该是纯展示组件，不处理业务逻辑
@@ -684,3 +959,4 @@ registry.register(
 - 保留 `navigationHandler` 用于点击导航
 - 保留 `dataSelector` 用于数据转换
 - 公共组件可被其他插件复用
+- **需要动态更新时使用 `EventListenerContainer` 监听插件事件**
