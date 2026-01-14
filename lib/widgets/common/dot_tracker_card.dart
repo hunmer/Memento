@@ -211,10 +211,12 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late int _displayValue;
 
   @override
   void initState() {
     super.initState();
+    _displayValue = 0;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -226,9 +228,14 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     if (widget.enableAnimation) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
+          setState(() {
+            _displayValue = widget.currentValue;
+          });
           _animationController.forward();
         }
       });
+    } else {
+      _displayValue = widget.currentValue;
     }
   }
 
@@ -238,8 +245,15 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     if (widget.enableAnimation &&
         (oldWidget.currentValue != widget.currentValue ||
             oldWidget.dotStates != widget.dotStates)) {
+      setState(() {
+        _displayValue = widget.currentValue;
+      });
       _animationController.reset();
       _animationController.forward();
+    } else if (!widget.enableAnimation) {
+      setState(() {
+        _displayValue = widget.currentValue;
+      });
     }
   }
 
@@ -371,9 +385,9 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
       mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedFlipCounter(
-          value: widget.enableAnimation
-              ? widget.currentValue * _animation.value
-              : widget.currentValue.toDouble(),
+          value: _displayValue.toDouble(),
+          duration: const Duration(milliseconds: 1200),
+          curve: Curves.easeOutCubic,
           textStyle: TextStyle(
             fontSize: 44,
             fontWeight: FontWeight.w800,
@@ -415,8 +429,8 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 8.0,
-          crossAxisSpacing: 4.0,
+          mainAxisSpacing: 4.0,
+          crossAxisSpacing: 2.0,
           childAspectRatio: 1,
         ),
         itemCount: dayCount,
