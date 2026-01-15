@@ -633,22 +633,45 @@ class HomeScreenView extends StatelessWidget {
       return;
     }
 
-    // 保存原有的公共小组件配置（如果存在）
-    String? savedCommonWidgetId;
-    Map<String, dynamic>? savedCommonWidgetProps;
+    // 检查是否为公共小组件
+    String? currentCommonWidgetId;
     if (item.config.containsKey('selectorWidgetConfig')) {
       try {
         final oldSelectorConfig = SelectorWidgetConfig.fromJson(
           item.config['selectorWidgetConfig'] as Map<String, dynamic>,
         );
-        savedCommonWidgetId = oldSelectorConfig.commonWidgetId;
-        savedCommonWidgetProps = oldSelectorConfig.commonWidgetProps;
+        currentCommonWidgetId = oldSelectorConfig.commonWidgetId;
       } catch (_) {
         // 忽略解析错误
       }
     }
 
-    // 直接弹出选择器,不先清空配置
+    // 如果是公共小组件，打开公共小组件选择页面
+    if (currentCommonWidgetId != null) {
+      // 获取完整的选择器配置
+      SelectorWidgetConfig? initialSelectorConfig;
+      try {
+        initialSelectorConfig = SelectorWidgetConfig.fromJson(
+          item.config['selectorWidgetConfig'] as Map<String, dynamic>,
+        );
+      } catch (_) {
+        // 忽略解析错误
+      }
+
+      final result = await Navigator.pushNamed(
+        context,
+        '/common_widget_selector',
+        arguments: {
+          'pluginWidget': widget,
+          'replaceWidgetItemId': item.id,
+          'initialCommonWidgetId': currentCommonWidgetId,
+          'initialSelectorConfig': initialSelectorConfig,
+        },
+      );
+      return;
+    }
+
+    // 非公共小组件，使用原有的选择器逻辑
     final result = await pluginDataSelectorService.showSelector(context, widget.selectorId!);
 
     if (result == null || result.cancelled) {
@@ -665,25 +688,9 @@ class HomeScreenView extends StatelessWidget {
 
     // 添加新的选择器配置
     final newConfig = _processSelectorResult(widget, result);
-    final finalConfig = updatedConfig..addAll(newConfig);
+    updatedConfig.addAll(newConfig);
 
-    // 恢复公共小组件配置（如果有）
-    if (savedCommonWidgetId != null && finalConfig.containsKey('selectorWidgetConfig')) {
-      try {
-        final selectorConfigJson = Map<String, dynamic>.from(
-          finalConfig['selectorWidgetConfig'] as Map<String, dynamic>,
-        );
-        // 更新公共小组件字段
-        selectorConfigJson['commonWidgetId'] = savedCommonWidgetId;
-        selectorConfigJson['commonWidgetProps'] = savedCommonWidgetProps;
-        // 显式重新赋值以确保修改生效
-        finalConfig['selectorWidgetConfig'] = selectorConfigJson;
-      } catch (_) {
-        // 忽略恢复错误
-      }
-    }
-
-    final finalItem = item.copyWith(config: finalConfig);
+    final finalItem = item.copyWith(config: updatedConfig);
 
     // 一次性更新并强制刷新
     controller.layoutManager.updateItem(item.id, finalItem);

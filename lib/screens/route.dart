@@ -223,6 +223,9 @@ class AppRoutes extends NavigatorObserver {
   // WebView 浏览器路由
   static const String webviewBrowser = '/webview/browser';
 
+  // 公共小组件选择器路由
+  static const String commonWidgetSelector = '/common_widget_selector';
+
   // ==================== 路由生成器 ====================
   static Route<dynamic> generateRoute(RouteSettings settings) {
     // 确保路由已初始化
