@@ -100,19 +100,24 @@ class _AccountBalanceCardWidgetState extends State<AccountBalanceCardWidget>
       child: Container(
         constraints: widget.size.getHeightConstraints(),
         padding: widget.size.getPadding(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < widget.accounts.length; i++) ...[
-              if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
-              _AccountItemWidget(
-                data: widget.accounts[i],
-                animation: _animation,
-                index: i,
-                size: widget.size,
-              ),
-            ],
-          ],
+        child: Flexible(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 0; i < widget.accounts.length; i++) ...[
+                  if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
+                  _AccountItemWidget(
+                    data: widget.accounts[i],
+                    animation: _animation,
+                    index: i,
+                    size: widget.size,
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -189,49 +189,59 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                     ),
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
-                  ...List.generate(widget.todayEvents.length, (index) {
-                    final itemAnimation = CurvedAnimation(
-                      parent: _animationController,
-                      curve: Interval(
-                        index * 0.06,
-                        0.4 + index * 0.06,
-                        curve: Curves.easeOutCubic,
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...List.generate(widget.todayEvents.length, (index) {
+                            final itemAnimation = CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                index * 0.06,
+                                0.4 + index * 0.06,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            );
+                            return _EventItemWidget(
+                              event: widget.todayEvents[index],
+                              animation: itemAnimation,
+                              isDark: isDark,
+                              size: widget.size,
+                            );
+                          }),
+                          SizedBox(height: widget.size.getTitleSpacing()),
+                          Text(
+                            'Tomorrow',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
+                            ),
+                          ),
+                          SizedBox(height: widget.size.getTitleSpacing()),
+                          ...List.generate(widget.tomorrowEvents.length, (index) {
+                            final itemAnimation = CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                0.25 + index * 0.06,
+                                0.65 + index * 0.06,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            );
+                            return _EventItemWidget(
+                              event: widget.tomorrowEvents[index],
+                              animation: itemAnimation,
+                              isDark: isDark,
+                              size: widget.size,
+                            );
+                          }),
+                        ],
                       ),
-                    );
-                    return _EventItemWidget(
-                      event: widget.todayEvents[index],
-                      animation: itemAnimation,
-                      isDark: isDark,
-                      size: widget.size,
-                    );
-                  }),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  Text(
-                    'Tomorrow',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                      color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
                     ),
                   ),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  ...List.generate(widget.tomorrowEvents.length, (index) {
-                    final itemAnimation = CurvedAnimation(
-                      parent: _animationController,
-                      curve: Interval(
-                        0.25 + index * 0.06,
-                        0.65 + index * 0.06,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    );
-                    return _EventItemWidget(
-                      event: widget.tomorrowEvents[index],
-                      animation: itemAnimation,
-                      isDark: isDark,
-                      size: widget.size,
-                    );
-                  }),
                 ],
               ),
             ),

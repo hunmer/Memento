@@ -265,29 +265,40 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 任务列表
-        for (int i = 0; i < widget.items.length; i++) ...[
-          if (i > 0)
-            Container(
-              height: 1,
-              margin: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing()),
-              color: borderColor,
+        Flexible(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < widget.items.length; i++) ...[
+                  if (i > 0)
+                    Container(
+                      height: 1,
+                      margin: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing()),
+                      color: borderColor,
+                    ),
+                  _TaskItemWidget(
+                    title: widget.items[i],
+                    animation: _animation,
+                    index: i,
+                    textColor: textColor,
+                    size: widget.size,
+                  ),
+                ],
+                SizedBox(height: widget.size.getItemSpacing()),
+                // 更多任务链接
+                _MoreLinkWidget(
+                  count: widget.moreCount,
+                  animation: _animation,
+                  index: widget.items.length,
+                  color: widget.iconBackgroundColor,
+                  size: widget.size,
+                ),
+              ],
             ),
-          _TaskItemWidget(
-            title: widget.items[i],
-            animation: _animation,
-            index: i,
-            textColor: textColor,
-            size: widget.size,
           ),
-        ],
-        SizedBox(height: widget.size.getItemSpacing()),
-        // 更多任务链接
-        _MoreLinkWidget(
-          count: widget.moreCount,
-          animation: _animation,
-          index: widget.items.length,
-          color: widget.iconBackgroundColor,
-          size: widget.size,
         ),
       ],
     );

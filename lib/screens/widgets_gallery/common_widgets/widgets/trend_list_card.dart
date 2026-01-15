@@ -97,7 +97,15 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
                 children: [
                   _buildHeader(context, isDark),
                   SizedBox(height: widget.size.getTitleSpacing()),
-                  ..._buildItems(context, isDark),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: _buildItems(context, isDark),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

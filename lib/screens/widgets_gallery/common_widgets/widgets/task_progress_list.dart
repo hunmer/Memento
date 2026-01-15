@@ -147,36 +147,45 @@ class _TaskProgressListWidgetState extends State<TaskProgressListWidget>
                     ],
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
-                  // 任务列表
-                  ...List.generate(
-                    widget.tasks.length,
-                    (index) => _TaskProgressItem(
-                      task: widget.tasks[index],
-                      animation: _animation,
-                      index: index,
-                      isLast: index == widget.tasks.length - 1,
-                      textMainColor: textMainColor,
-                      textSubColor: textSubColor,
-                      borderColor: borderColor,
-                      progressBgColor: progressBgColor,
-                      size: widget.size,
-                    ),
-                  ),
-                  // 更多链接
-                  if (widget.moreCount > 0) ...[
-                    const SizedBox(height: 8),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        '+${widget.moreCount} more',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
+                  // 任务列表 - 添加滚动支持
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...List.generate(
+                            widget.tasks.length,
+                            (index) => _TaskProgressItem(
+                              task: widget.tasks[index],
+                              animation: _animation,
+                              index: index,
+                              isLast: index == widget.tasks.length - 1,
+                              textMainColor: textMainColor,
+                              textSubColor: textSubColor,
+                              borderColor: borderColor,
+                              progressBgColor: progressBgColor,
+                              size: widget.size,
+                            ),
+                          ),
+                          // 更多链接
+                          if (widget.moreCount > 0) ...[
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                '+${widget.moreCount} more',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),

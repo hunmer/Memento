@@ -347,12 +347,15 @@ class ActivityHomeWidgets {
       'segmentedProgressCard': {
         'title': '今日活动',
         'subtitle': '${todayActivityCount}个活动',
+        'currentValue': todayDurationMinutes.toDouble(),
+        'targetValue': (12 * 60).toDouble(), // 12小时目标
+        'unit': '分钟',
         'segments': tagStats.entries.map((e) => {
           'label': e.key,
           'value': e.value.toDouble(),
+          'display': _formatDurationForDisplay(e.value),
           'color': _getColorFromTagForWidgets(e.key).value,
         }).toList(),
-        'total': todayDurationMinutes.toDouble(),
       },
 
       // 任务进度卡片：显示今日活动进度
@@ -1767,4 +1770,18 @@ List<Map<String, dynamic>> _getUnrecordedTimeSlotsStatic(
   }
 
   return slots;
+}
+
+/// 格式化时长为显示文本（如果超过60分钟转小时，带小数点）
+String _formatDurationForDisplay(int minutes) {
+  if (minutes >= 60) {
+    final hours = minutes / 60;
+    // 如果是整数小时，不显示小数
+    if (hours == hours.truncateToDouble()) {
+      return '${hours.toInt()}小时';
+    }
+    // 否则显示一位小数
+    return '${hours.toStringAsFixed(1)}小时';
+  }
+  return '$minutes分钟';
 }

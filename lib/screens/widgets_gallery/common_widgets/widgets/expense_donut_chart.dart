@@ -118,13 +118,17 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with 
                   SizedBox(height: widget.size.getTitleSpacing()),
                   Center(child: SizedBox(width: 220, height: 220, child: _DonutChart(categories: widget.categories, animation: _animation))),
                   SizedBox(height: widget.size.getTitleSpacing()),
-                  Column(
-                    children: List.generate(widget.categories.length, (index) {
-                      final category = widget.categories[index];
-                      final itemAnimation = CurvedAnimation(parent: _animationController, curve: Interval(0.3 + index * 0.1, 0.8 + index * 0.05, curve: Curves.easeOutCubic));
-                      return Padding(padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()), child: _CategoryItem(label: category.label, percentage: category.percentage, color: category.color, animation: itemAnimation, size: widget.size));
-                    }),
-                  ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: List.generate(widget.categories.length, (index) {
+                          final category = widget.categories[index];
+                          final itemAnimation = CurvedAnimation(parent: _animationController, curve: Interval(0.3 + index * 0.1, 0.8 + index * 0.05, curve: Curves.easeOutCubic));
+                          return Padding(padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()), child: _CategoryItem(label: category.label, percentage: category.percentage, color: category.color, animation: itemAnimation, size: widget.size));
+                        }),
+                      ),
+                    ),
+                    ),
                 ],
               ),
             ),

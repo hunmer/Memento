@@ -8,10 +8,14 @@ class SegmentData {
   final double value;
   final Color color;
 
+  /// 格式化显示文本（用于显示小时/分钟等格式）
+  final String display;
+
   const SegmentData({
     required this.label,
     required this.value,
     required this.color,
+    this.display = '',
   });
 
   /// 从 JSON 创建
@@ -20,6 +24,7 @@ class SegmentData {
       label: json['label'] as String? ?? '',
       value: (json['value'] as num?)?.toDouble() ?? 0.0,
       color: Color(json['color'] as int? ?? 0xFF000000),
+      display: json['display'] as String? ?? '',
     );
   }
 
@@ -29,6 +34,7 @@ class SegmentData {
       'label': label,
       'value': value,
       'color': color.value,
+      'display': display,
     };
   }
 }
@@ -49,6 +55,7 @@ class SegmentedProgressCardWidget extends StatefulWidget {
 
   /// 数值单位
   final String unit;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -71,7 +78,8 @@ class SegmentedProgressCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final segmentsList = (props['segments'] as List<dynamic>?)
+    final segmentsList =
+        (props['segments'] as List<dynamic>?)
             ?.map((e) => SegmentData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -92,7 +100,8 @@ class SegmentedProgressCardWidget extends StatefulWidget {
       _SegmentedProgressCardWidgetState();
 }
 
-class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidget>
+class _SegmentedProgressCardWidgetState
+    extends State<SegmentedProgressCardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -145,7 +154,8 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
                 offset: const Offset(0, 12),
               ),
           ],
-          border: isDark ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
+          border:
+              isDark ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
         ),
         padding: widget.size.getPadding(),
         child: Column(
@@ -158,8 +168,17 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
             // 分段进度条
             _buildProgressBar(context, isDark),
             SizedBox(height: widget.size.getTitleSpacing()),
-            // 分段列表
-            ..._buildSegmentList(context, isDark),
+            // 分段列表（支持滚动）
+            Flexible(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _buildSegmentList(context, isDark),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -185,33 +204,27 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
         SizedBox(
           height: 48,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 180,
-                height: 40,
-                child: AnimatedFlipCounter(
-                  value: widget.currentValue * _animation.value,
-                  fractionDigits: 0,
-                  textStyle: TextStyle(
-                    color: isDark ? Colors.white : Colors.grey.shade900,
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    height: 1.0,
-                  ),
+              AnimatedFlipCounter(
+                value: widget.currentValue * _animation.value,
+                fractionDigits: 0,
+                textStyle: TextStyle(
+                  color: isDark ? Colors.white : Colors.grey.shade900,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  height: 1.0,
                 ),
               ),
               const SizedBox(width: 10),
-              SizedBox(
-                height: 20,
-                child: Text(
-                  '/ ${widget.targetValue.toInt()}',
-                  style: TextStyle(
-                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                    height: 1.0,
-                  ),
+              Text(
+                '/ ${widget.targetValue.toInt()}',
+                style: TextStyle(
+                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  height: 1.0,
                 ),
               ),
             ],
@@ -223,7 +236,10 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
 
   /// 构建分段进度条
   Widget _buildProgressBar(BuildContext context, bool isDark) {
-    final totalValue = widget.segments.fold<double>(0, (sum, seg) => sum + seg.value);
+    final totalValue = widget.segments.fold<double>(
+      0,
+      (sum, seg) => sum + seg.value,
+    );
 
     return Container(
       height: 10,
@@ -234,15 +250,15 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: Row(
-          children: widget.segments.map((segment) {
-            final percentage = totalValue > 0 ? segment.value / totalValue : 0;
-            return Expanded(
-              flex: (percentage * 100).toInt(),
-              child: Container(
-                color: segment.color,
-              ),
-            );
-          }).toList(),
+          children:
+              widget.segments.map((segment) {
+                final percentage =
+                    totalValue > 0 ? segment.value / totalValue : 0;
+                return Expanded(
+                  flex: (percentage * 100).toInt(),
+                  child: Container(color: segment.color),
+                );
+              }).toList(),
         ),
       ),
     );
@@ -256,13 +272,11 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
       final segment = widget.segments[i];
 
       // 为每个列表项创建延迟动画
+      // 确保 Interval 的 end 值不超过 1.0
+      final end = (0.5 + i * 0.08).clamp(0.0, 1.0);
       final itemAnimation = CurvedAnimation(
         parent: _animationController,
-        curve: Interval(
-          i * 0.08,
-          0.5 + i * 0.08,
-          curve: Curves.easeOutCubic,
-        ),
+        curve: Interval(i * 0.08, end, curve: Curves.easeOutCubic),
       );
 
       if (i > 0) {
@@ -339,11 +353,15 @@ class _SegmentItem extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        // 数值
+        // 数值 - 优先使用 display 字段
         SizedBox(
           height: 20,
           child: Text(
-            unit == '' ? '${segment.value.toInt()}' : '$unit${segment.value.toInt()}',
+            segment.display.isNotEmpty
+                ? segment.display
+                : (unit == ''
+                    ? '${segment.value.toInt()}'
+                    : '$unit${segment.value.toInt()}'),
             style: TextStyle(
               color: isDark ? Colors.white : Colors.grey.shade900,
               fontSize: 16,

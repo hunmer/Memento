@@ -331,9 +331,17 @@ class _ArticleListSection extends StatelessWidget {
           },
         ),
         SizedBox(height: size.getItemSpacing()),
-        ...List.generate(articles.length, (index) {
-          return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
-        }),
+        Flexible(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(articles.length, (index) {
+                return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
+              }),
+            ),
+          ),
+        ),
       ],
     );
   }

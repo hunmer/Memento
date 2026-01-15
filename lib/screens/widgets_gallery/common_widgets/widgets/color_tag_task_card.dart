@@ -103,7 +103,7 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
               _buildHeader(textColor, secondaryTextColor, primaryColor),
               SizedBox(height: widget.size.getTitleSpacing()),
               // 任务列表
-              Expanded(
+              Flexible(
                 child: _buildTaskList(),
               ),
               // 底部更多按钮

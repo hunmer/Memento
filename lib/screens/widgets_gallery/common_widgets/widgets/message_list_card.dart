@@ -416,14 +416,22 @@ class _MessageListSection extends StatelessWidget {
           },
         ),
         SizedBox(height: size.getItemSpacing()),
-        ...List.generate(messages.length, (index) {
-          return _MessageListItem(
-            data: messages[index],
-            animation: animation,
-            index: index,
-            size: size,
-          );
-        }),
+        Flexible(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(messages.length, (index) {
+                return _MessageListItem(
+                  data: messages[index],
+                  animation: animation,
+                  index: index,
+                  size: size,
+                );
+              }),
+            ),
+          ),
+        ),
       ],
     );
   }

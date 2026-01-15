@@ -202,19 +202,21 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                       Expanded(
                         child: Stack(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (int i = 0; i < widget.events.length; i++) ...[
-                                  if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
-                                  _EventCard(
-                                    event: widget.events[i],
-                                    animation: _animation,
-                                    index: i,
-                                    size: widget.size,
-                                  ),
+                            SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (int i = 0; i < widget.events.length; i++) ...[
+                                    if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
+                                    _EventCard(
+                                      event: widget.events[i],
+                                      animation: _animation,
+                                      index: i,
+                                      size: widget.size,
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
                           ],
                         ),
