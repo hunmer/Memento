@@ -52,11 +52,15 @@ class CircularMetricsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const CircularMetricsCardWidget({
     super.key,
     required this.title,
     required this.metrics,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -73,6 +77,7 @@ class CircularMetricsCardWidget extends StatefulWidget {
       title: props['title'] as String? ?? 'Overview',
       metrics: metrics,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -122,10 +127,8 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
             child: Container(
               width: widget.inline ? double.maxFinite : 380,
               constraints:
-                  widget.inline
-                      ? null
-                      : const BoxConstraints(minHeight: 200, maxHeight: 400),
-              padding: const EdgeInsets.all(8),
+                  widget.inline ? null : widget.size.getHeightConstraints(),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(8),
@@ -153,7 +156,7 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
                       letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 指标列表（支持滚动）
                   Expanded(child: _buildMetricsList(context, isDark)),
                 ],
@@ -164,6 +167,7 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
       },
     );
   }
+
   /// 构建可滚动的指标列表
   Widget _buildMetricsList(BuildContext context, bool isDark) {
     final metrics = widget.metrics;
@@ -180,7 +184,7 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
       itemCount: metrics.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+          padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
           child: _MetricItemWidget(
             data: metrics[index],
             animation: _animation,
