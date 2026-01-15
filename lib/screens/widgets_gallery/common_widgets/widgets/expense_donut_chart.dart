@@ -8,11 +8,13 @@ class ExpenseCategoryData {
   final String label;
   final double percentage;
   final Color color;
+  final String? subtitle;
 
   const ExpenseCategoryData({
     required this.label,
     required this.percentage,
     required this.color,
+    this.subtitle,
   });
 
   factory ExpenseCategoryData.fromJson(Map<String, dynamic> json) {
@@ -20,11 +22,17 @@ class ExpenseCategoryData {
       label: json['label'] as String? ?? '',
       percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
       color: Color(json['color'] as int? ?? 0xFF000000),
+      subtitle: json['subtitle'] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'label': label, 'percentage': percentage, 'color': color.value};
+    return {
+      'label': label,
+      'percentage': percentage,
+      'color': color.value,
+      if (subtitle != null) 'subtitle': subtitle,
+    };
   }
 }
 
@@ -52,8 +60,17 @@ class ExpenseDonutChartWidget extends StatefulWidget {
     this.size = HomeWidgetSize.medium,
   });
 
-  factory ExpenseDonutChartWidget.fromProps(Map<String, dynamic> props, HomeWidgetSize size) {
-    final categoriesList = (props['categories'] as List<dynamic>?)?.map((e) => ExpenseCategoryData.fromJson(e as Map<String, dynamic>)).toList() ?? const [];
+  factory ExpenseDonutChartWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final categoriesList =
+        (props['categories'] as List<dynamic>?)
+            ?.map(
+              (e) => ExpenseCategoryData.fromJson(e as Map<String, dynamic>),
+            )
+            .toList() ??
+        const [];
     return ExpenseDonutChartWidget(
       badgeLabel: props['badgeLabel'] as String? ?? '',
       timePeriod: props['timePeriod'] as String? ?? '',
@@ -66,18 +83,26 @@ class ExpenseDonutChartWidget extends StatefulWidget {
   }
 
   @override
-  State<ExpenseDonutChartWidget> createState() => _ExpenseDonutChartWidgetState();
+  State<ExpenseDonutChartWidget> createState() =>
+      _ExpenseDonutChartWidgetState();
 }
 
-class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with SingleTickerProviderStateMixin {
+class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
-    _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic);
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    );
     _animationController.forward();
   }
 
@@ -103,32 +128,99 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with 
               width: widget.inline ? double.maxFinite : 340,
               height: widget.inline ? double.maxFinite : 500,
               padding: widget.size.getPadding(),
-              decoration: BoxDecoration(color: isDark ? const Color(0xFF1C1C1E) : Colors.white, borderRadius: BorderRadius.circular(40), boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.08), blurRadius: 30, offset: const Offset(0, 10))]),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(20)), child: Text(widget.badgeLabel, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: Colors.black))),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          widget.badgeLabel,
+                          style: const TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1.2,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
                       SizedBox(height: widget.size.getTitleSpacing() / 2),
-                      Text(widget.timePeriod, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
+                      Text(
+                        widget.timePeriod,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
                     ],
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
-                  Center(child: SizedBox(width: 220, height: 220, child: _DonutChart(categories: widget.categories, animation: _animation))),
+                  Center(
+                    child: SizedBox(
+                      width: 150,
+                      height: 150,
+                      child: _DonutChart(
+                        categories: widget.categories,
+                        totalAmount: widget.totalAmount,
+                        totalUnit: widget.totalUnit,
+                        animation: _animation,
+                      ),
+                    ),
+                  ),
                   SizedBox(height: widget.size.getTitleSpacing()),
                   Flexible(
                     child: SingleChildScrollView(
                       child: Column(
-                        children: List.generate(widget.categories.length, (index) {
+                        children: List.generate(widget.categories.length, (
+                          index,
+                        ) {
                           final category = widget.categories[index];
-                          final itemAnimation = CurvedAnimation(parent: _animationController, curve: Interval(0.3 + index * 0.1, 0.8 + index * 0.05, curve: Curves.easeOutCubic));
-                          return Padding(padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()), child: _CategoryItem(label: category.label, percentage: category.percentage, color: category.color, animation: itemAnimation, size: widget.size));
+                          final itemAnimation = CurvedAnimation(
+                            parent: _animationController,
+                            curve: Interval(
+                              0.3 + index * 0.1,
+                              0.8 + index * 0.05,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          );
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: widget.size.getItemSpacing(),
+                            ),
+                            child: _CategoryItem(
+                              label: category.label,
+                              subtitle: category.subtitle,
+                              percentage: category.percentage,
+                              color: category.color,
+                              animation: itemAnimation,
+                              size: widget.size,
+                            ),
+                          );
                         }),
                       ),
                     ),
-                    ),
+                  ),
                 ],
               ),
             ),
@@ -141,9 +233,16 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with 
 
 class _DonutChart extends StatelessWidget {
   final List<ExpenseCategoryData> categories;
+  final double totalAmount;
+  final String totalUnit;
   final Animation<double> animation;
 
-  const _DonutChart({required this.categories, required this.animation});
+  const _DonutChart({
+    required this.categories,
+    required this.totalAmount,
+    required this.totalUnit,
+    required this.animation,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -153,15 +252,24 @@ class _DonutChart extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return CustomPaint(
-          size: const Size(220, 220),
-          painter: _DonutChartPainter(categories: categories, animation: animation.value, isDark: isDark),
+          size: const Size(150, 150),
+          painter: _DonutChartPainter(
+            categories: categories,
+            animation: animation.value,
+            isDark: isDark,
+          ),
           child: Center(
             child: AnimatedFlipCounter(
-              value: 32 * animation.value,
-              fractionDigits: 0,
-              suffix: 'K',
+              value: totalAmount * animation.value,
+              fractionDigits: totalAmount >= 100 ? 0 : 1,
+              suffix: totalUnit,
               duration: const Duration(milliseconds: 800),
-              textStyle: TextStyle(fontSize: 36, fontWeight: FontWeight.w700, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.0),
+              textStyle: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.grey.shade900,
+                height: 1.0,
+              ),
             ),
           ),
         );
@@ -175,7 +283,11 @@ class _DonutChartPainter extends CustomPainter {
   final double animation;
   final bool isDark;
 
-  _DonutChartPainter({required this.categories, required this.animation, required this.isDark});
+  _DonutChartPainter({
+    required this.categories,
+    required this.animation,
+    required this.isDark,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -188,24 +300,38 @@ class _DonutChartPainter extends CustomPainter {
     for (final category in categories) {
       final sweepAngle = (category.percentage / 100) * 2 * math.pi * animation;
       final rect = Rect.fromCircle(center: center, radius: radius);
-      final paint = Paint()..color = category.color..style = PaintingStyle.stroke..strokeWidth = strokeWidth..strokeCap = StrokeCap.round;
+      final paint =
+          Paint()
+            ..color = category.color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = StrokeCap.round;
       canvas.drawArc(rect, startAngle, sweepAngle, false, paint);
       startAngle += sweepAngle;
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DonutChartPainter oldDelegate) => oldDelegate.animation != animation;
+  bool shouldRepaint(covariant _DonutChartPainter oldDelegate) =>
+      oldDelegate.animation != animation;
 }
 
 class _CategoryItem extends StatelessWidget {
   final String label;
+  final String? subtitle;
   final double percentage;
   final Color color;
   final Animation<double> animation;
   final HomeWidgetSize size;
 
-  const _CategoryItem({required this.label, required this.percentage, required this.color, required this.animation, required this.size});
+  const _CategoryItem({
+    required this.label,
+    this.subtitle,
+    required this.percentage,
+    required this.color,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -221,8 +347,81 @@ class _CategoryItem extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(children: [Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)), SizedBox(width: size.getItemSpacing() * 1.5), Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700))]),
-                AnimatedFlipCounter(value: percentage * animation.value, fractionDigits: 0, suffix: '%', duration: const Duration(milliseconds: 600), textStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.0)),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      SizedBox(width: size.getItemSpacing() * 1.5),
+                      Expanded(
+                        child:
+                            subtitle != null && subtitle!.isNotEmpty
+                                ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      label,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isDark
+                                                ? Colors.grey.shade300
+                                                : Colors.grey.shade700,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      subtitle!,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color:
+                                            isDark
+                                                ? Colors.grey.shade500
+                                                : Colors.grey.shade500,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                )
+                                : Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? Colors.grey.shade300
+                                            : Colors.grey.shade700,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
+                AnimatedFlipCounter(
+                  value: percentage * animation.value,
+                  fractionDigits: 0,
+                  suffix: '%',
+                  duration: const Duration(milliseconds: 600),
+                  textStyle: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.grey.shade900,
+                    height: 1.0,
+                  ),
+                ),
               ],
             ),
           ),
