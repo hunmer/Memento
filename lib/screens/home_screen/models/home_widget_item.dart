@@ -24,24 +24,39 @@ class HomeWidgetItem extends HomeItem {
   }) : super(type: HomeItemType.widget);
 
   @override
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'type': type.name,
-    'widgetId': widgetId,
-    'size': size.toJson(),
-    'config': config,
-  };
+  Map<String, dynamic> toJson() {
+    // 如果是 custom 尺寸，从 config 中获取实际宽高
+    if (size == HomeWidgetSize.custom) {
+      final actualWidth = config['customWidth'] as int?;
+      final actualHeight = config['customHeight'] as int?;
+      return {
+        'id': id,
+        'type': type.name,
+        'widgetId': widgetId,
+        'size': size.toJson(
+          actualWidth: actualWidth,
+          actualHeight: actualHeight,
+        ),
+        'config': config,
+      };
+    }
+    return {
+      'id': id,
+      'type': type.name,
+      'widgetId': widgetId,
+      'size': size.toJson(),
+      'config': config,
+    };
+  }
 
   /// 从 JSON 加载
   factory HomeWidgetItem.fromJson(Map<String, dynamic> json) {
-    // 调试：打印原始 JSON 中的 config
     final widgetId = json['widgetId'] as String;
 
     // 更安全的 config 处理
     Map<String, dynamic> configMap = {};
     if (json['config'] != null) {
       try {
-        // 尝试直接转换
         if (json['config'] is Map) {
           configMap = Map<String, dynamic>.from(json['config'] as Map);
         }
@@ -52,10 +67,28 @@ class HomeWidgetItem extends HomeItem {
       }
     }
 
+    // 使用 fromJsonWithData 来正确处理 custom 尺寸
+    final sizeData = HomeWidgetSize.fromJsonWithData(
+      json['size'] as Map<String, dynamic>,
+    );
+    final size = sizeData['size'] as HomeWidgetSize;
+
+    // 如果是 custom 尺寸，将实际宽高保存到 config 中
+    if (size == HomeWidgetSize.custom) {
+      final actualWidth = sizeData['actualWidth'] as int?;
+      final actualHeight = sizeData['actualHeight'] as int?;
+      if (actualWidth != null) {
+        configMap['customWidth'] = actualWidth;
+      }
+      if (actualHeight != null) {
+        configMap['customHeight'] = actualHeight;
+      }
+    }
+
     final item = HomeWidgetItem(
       id: json['id'] as String,
       widgetId: widgetId,
-      size: HomeWidgetSize.fromJson(json['size'] as Map<String, dynamic>),
+      size: size,
       config: configMap,
     );
 
