@@ -55,6 +55,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   int _cachedTodayActivityDuration = 0;
   DateTime? _cacheDate;
 
+  // 缓存今日活动列表（用于同步访问）
+  List<ActivityRecord> _cachedTodayActivities = [];
+  bool _todayActivitiesCacheValid = false;
+
   // 获取活动服务实例
   ActivityService get activityService {
     if (!_isInitialized) {
@@ -225,12 +229,61 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     if (cachedDay == null || !cachedDay.isAtSameMomentAs(today)) {
       _cachedTodayActivityCount = 0;
       _cachedTodayActivityDuration = 0;
+      _cachedTodayActivities = [];
+      _todayActivitiesCacheValid = false;
       _cacheDate = today;
     }
 
     // 更新缓存值
     if (count != null) _cachedTodayActivityCount = count;
     if (duration != null) _cachedTodayActivityDuration = duration;
+  }
+
+  /// 异步刷新今日活动缓存
+  Future<void> refreshTodayActivitiesCache() async {
+    if (!_isInitialized) return;
+
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      final activities = await _activityService.getActivitiesForDate(now);
+      _cachedTodayActivities = activities;
+      _todayActivitiesCacheValid = true;
+      _cacheDate = today;
+
+      // 同时更新统计数据缓存
+      _cachedTodayActivityCount = activities.length;
+      _cachedTodayActivityDuration =
+          activities.fold<int>(0, (sum, a) => sum + a.durationInMinutes);
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 刷新今日活动缓存失败: $e');
+    }
+  }
+
+  /// 同步获取今日活动列表（用于小组件渲染）
+  List<ActivityRecord> getTodayActivitiesSync() {
+    // 如果缓存无效，尝试异步刷新并返回空列表
+    if (!_todayActivitiesCacheValid) {
+      // 异步刷新缓存，不阻塞当前调用
+      refreshTodayActivitiesCache();
+      return [];
+    }
+
+    // 检查日期是否匹配
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final cachedDay = _cacheDate != null
+        ? DateTime(_cacheDate!.year, _cacheDate!.month, _cacheDate!.day)
+        : null;
+
+    if (cachedDay == null || !cachedDay.isAtSameMomentAs(today)) {
+      // 日期不匹配，异步刷新并返回空列表
+      refreshTodayActivitiesCache();
+      return [];
+    }
+
+    return _cachedTodayActivities;
   }
 
   // ==================== 通知便捷方法 ====================

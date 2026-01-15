@@ -1,3 +1,4 @@
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
@@ -71,10 +72,94 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     super.initState();
     _tabController = TabController(length: 0, vsync: this);
 
+    // 如果小组件不需要选择数据，直接加载公共小组件
+    if (widget.pluginWidget.selectorId == null) {
+      _loadCommonWidgetsDirectly();
+    }
     // 如果有初始选择器配置，自动恢复数据
-    if (widget.initialSelectorConfig != null) {
+    else if (widget.initialSelectorConfig != null) {
       _restoreFromInitialConfig();
     }
+  }
+
+  /// 直接加载公共小组件（不需要选择数据的情况）
+  void _loadCommonWidgetsDirectly() {
+    // 先尝试刷新缓存，然后加载组件
+    _refreshAndLoadWidgets();
+  }
+
+  /// 刷新缓存并加载组件
+  Future<void> _refreshAndLoadWidgets() async {
+    // 不需要选择数据，直接传入空数据
+    final data = <String, dynamic>{};
+
+    // 如果是 activity 插件，先刷新缓存
+    final activityPlugin =
+        widget.pluginWidget.pluginId == 'activity'
+            ? PluginManager.instance.getPlugin('activity')
+            : null;
+
+    if (activityPlugin != null) {
+      try {
+        // 调用 ActivityPlugin 的刷新缓存方法
+        await (activityPlugin as dynamic).refreshTodayActivitiesCache();
+      } catch (e) {
+        debugPrint('[CommonWidgetSelectorPage] 刷新缓存失败: $e');
+      }
+    }
+
+    // 调用 commonWidgetsProvider 获取可用组件
+    Map<String, Map<String, dynamic>> availableWidgets = {};
+    if (widget.pluginWidget.commonWidgetsProvider != null) {
+      try {
+        final result = widget.pluginWidget.commonWidgetsProvider!(data);
+        // 验证返回值类型并过滤无效配置
+        if (result is Map<String, Map<String, dynamic>>) {
+          availableWidgets = result;
+        } else if (result is Map) {
+          // 如果返回的是普通 Map，尝试安全转换
+          debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回了非标准 Map 类型');
+          for (final entry in result.entries) {
+            final key = entry.key.toString();
+            final value = entry.value;
+            if (value is Map<String, dynamic>) {
+              availableWidgets[key] = value;
+            } else if (value is Map) {
+              availableWidgets[key] = Map<String, dynamic>.from(value);
+            } else {
+              debugPrint('[CommonWidgetSelectorPage] 跳过无效配置: $key = $value (${value.runtimeType})');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[CommonWidgetSelectorPage] 加载组件失败: $e');
+        availableWidgets = {};
+      }
+    }
+
+    // 更新 TabController 长度
+    _tabController.dispose();
+    _tabController = TabController(
+      length: availableWidgets.length,
+      vsync: this,
+    );
+
+    // 计算初始选中索引
+    int initialIndex = 0;
+    if (widget.initialCommonWidgetId != null) {
+      final widgetIds = availableWidgets.keys.toList();
+      initialIndex = widgetIds.indexOf(widget.initialCommonWidgetId!);
+      if (initialIndex < 0) initialIndex = 0;
+    }
+
+    setState(() {
+      _selectedData = data;
+      _availableCommonWidgets = availableWidgets;
+      // 自动选中指定的组件或第一个组件
+      if (availableWidgets.isNotEmpty) {
+        _tabController.animateTo(initialIndex);
+      }
+    });
   }
 
   /// 从初始配置恢复数据
@@ -134,7 +219,30 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     // 调用 commonWidgetsProvider 获取可用组件
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
-      availableWidgets = widget.pluginWidget.commonWidgetsProvider!(data);
+      try {
+        final result = widget.pluginWidget.commonWidgetsProvider!(data);
+        // 验证返回值类型并过滤无效配置
+        if (result is Map<String, Map<String, dynamic>>) {
+          availableWidgets = result;
+        } else if (result is Map) {
+          // 如果返回的是普通 Map，尝试安全转换
+          debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回了非标准 Map 类型');
+          for (final entry in result.entries) {
+            final key = entry.key.toString();
+            final value = entry.value;
+            if (value is Map<String, dynamic>) {
+              availableWidgets[key] = value;
+            } else if (value is Map) {
+              availableWidgets[key] = Map<String, dynamic>.from(value);
+            } else {
+              debugPrint('[CommonWidgetSelectorPage] 跳过无效配置: $key = $value (${value.runtimeType})');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[CommonWidgetSelectorPage] 加载组件失败: $e');
+        availableWidgets = {};
+      }
     }
 
     // 更新 TabController 长度
@@ -199,6 +307,11 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
   /// 构建数据选择器区域
   Widget _buildDataSelectorSection() {
+    // 如果不需要选择数据，隐藏此区域
+    if (widget.pluginWidget.selectorId == null) {
+      return const SizedBox.shrink();
+    }
+
     final theme = Theme.of(context);
 
     return Container(
@@ -289,7 +402,8 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
   /// 构建公共小组件区域
   Widget _buildCommonWidgetsSection() {
-    if (_selectedData == null) {
+    // 如果需要选择数据但还没有选择，显示提示
+    if (_selectedData == null && widget.pluginWidget.selectorId != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -371,11 +485,15 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                   ),
                   unselectedLabelStyle: const TextStyle(fontSize: 14),
                   tabs: _availableCommonWidgets.keys.map((widgetId) {
-                    final metadata = CommonWidgetsRegistry.getMetadata(
-                      CommonWidgetId.values.firstWhere(
-                        (e) => e.name == widgetId,
-                      ),
+                    // 安全地查找匹配的 CommonWidgetId
+                    final matchingWidget = CommonWidgetId.values.firstWhere(
+                      (e) => e.name == widgetId,
+                      orElse: () {
+                        debugPrint('[CommonWidgetSelectorPage] 未找到匹配的 CommonWidgetId: $widgetId');
+                        return CommonWidgetId.circularProgressCard; // 使用默认值
+                      },
                     );
+                    final metadata = CommonWidgetsRegistry.getMetadata(matchingWidget);
                     return Tab(
                       text: metadata.name,
                     );
@@ -388,11 +506,15 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                     controller: _tabController,
                     scrollDirection: Axis.horizontal,
                     children: _availableCommonWidgets.keys.map((widgetId) {
-                      final metadata = CommonWidgetsRegistry.getMetadata(
-                        CommonWidgetId.values.firstWhere(
-                          (e) => e.name == widgetId,
-                        ),
+                      // 安全地查找匹配的 CommonWidgetId
+                      final matchingWidget = CommonWidgetId.values.firstWhere(
+                        (e) => e.name == widgetId,
+                        orElse: () {
+                          debugPrint('[CommonWidgetSelectorPage] 未找到匹配的 CommonWidgetId: $widgetId');
+                          return CommonWidgetId.circularProgressCard; // 使用默认值
+                        },
                       );
+                      final metadata = CommonWidgetsRegistry.getMetadata(matchingWidget);
                       return _buildCommonWidgetPreview(metadata, widgetId);
                     }).toList(),
                   ),
@@ -410,14 +532,38 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     CommonWidgetMetadata metadata,
     String widgetId,
   ) {
-    final props = _availableCommonWidgets[widgetId]!;
+    final props = _availableCommonWidgets[widgetId];
+
+    // 验证 props 是否为有效的 Map
+    if (props == null) {
+      debugPrint('[CommonWidgetSelectorPage] 未找到组件配置: $widgetId');
+      return const Center(
+        child: Text('组件配置错误'),
+      );
+    }
+
+    if (props is! Map<String, dynamic>) {
+      debugPrint('[CommonWidgetSelectorPage] 组件配置类型错误: $widgetId, expected Map<String, dynamic> but got ${props.runtimeType}');
+      return Center(
+        child: Text('配置类型错误: ${props.runtimeType}'),
+      );
+    }
+
+    // 安全地查找匹配的 CommonWidgetId
+    final matchingWidget = CommonWidgetId.values.firstWhere(
+      (e) => e.name == widgetId,
+      orElse: () {
+        debugPrint('[CommonWidgetSelectorPage] 未找到匹配的 CommonWidgetId: $widgetId');
+        return CommonWidgetId.circularProgressCard; // 使用默认值
+      },
+    );
 
     return Container(
       padding: const EdgeInsets.all(16),
       child: Center(
         child: CommonWidgetBuilder.build(
           context,
-          CommonWidgetId.values.firstWhere((e) => e.name == widgetId),
+          matchingWidget,
           props,
           metadata.defaultSize,
         ),
@@ -471,7 +617,30 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     // 调用 commonWidgetsProvider 获取可用组件
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
-      availableWidgets = widget.pluginWidget.commonWidgetsProvider!(data);
+      try {
+        final result = widget.pluginWidget.commonWidgetsProvider!(data);
+        // 验证返回值类型并过滤无效配置
+        if (result is Map<String, Map<String, dynamic>>) {
+          availableWidgets = result;
+        } else if (result is Map) {
+          // 如果返回的是普通 Map，尝试安全转换
+          debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回了非标准 Map 类型');
+          for (final entry in result.entries) {
+            final key = entry.key.toString();
+            final value = entry.value;
+            if (value is Map<String, dynamic>) {
+              availableWidgets[key] = value;
+            } else if (value is Map) {
+              availableWidgets[key] = Map<String, dynamic>.from(value);
+            } else {
+              debugPrint('[CommonWidgetSelectorPage] 跳过无效配置: $key = $value (${value.runtimeType})');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('[CommonWidgetSelectorPage] 加载组件失败: $e');
+        availableWidgets = {};
+      }
     }
 
     // 更新 TabController 长度
@@ -519,7 +688,14 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
   /// 确认选择
   Future<void> _confirmSelection() async {
-    if (_selectedData == null || _availableCommonWidgets.isEmpty || _originalSelectorResult == null) return;
+    // 验证条件
+    if (_availableCommonWidgets.isEmpty) {
+      return;
+    }
+    if (widget.pluginWidget.selectorId != null &&
+        (_selectedData == null || _originalSelectorResult == null)) {
+      return;
+    }
 
     // 从当前激活的 tab 获取选中的 widgetId
     final index = _tabController.index;
@@ -527,19 +703,28 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
     final layoutManager = HomeLayoutManager();
 
-    // 使用原始 SelectorResult 的 toMap() 来保存完整的配置信息
-    // 这样可以保留 plugin、selector、path 等信息，确保导航功能正常
-    final selectorConfig = SelectorWidgetConfig(
-      selectedData: _originalSelectorResult!.toMap(),
-      lastUpdated: DateTime.now(),
-      commonWidgetId: widgetId,
-      commonWidgetProps: _availableCommonWidgets[widgetId],
-    );
-
     // 创建基础配置
-    final config = <String, dynamic>{
-      'selectorWidgetConfig': selectorConfig.toJson(),
-    };
+    final config = <String, dynamic>{};
+
+    // 如果需要选择数据，保存 selectorConfig
+    if (widget.pluginWidget.selectorId != null &&
+        _originalSelectorResult != null) {
+      // 使用原始 SelectorResult 的 toMap() 来保存完整的配置信息
+      final selectorConfig = SelectorWidgetConfig(
+        selectedData: _originalSelectorResult!.toMap(),
+        lastUpdated: DateTime.now(),
+        commonWidgetId: widgetId,
+        commonWidgetProps: _availableCommonWidgets[widgetId],
+      );
+      config['selectorWidgetConfig'] = selectorConfig.toJson();
+    } else {
+      // 不需要选择数据，只保存公共小组件配置
+      config['selectorWidgetConfig'] = {
+        'commonWidgetId': widgetId,
+        'commonWidgetProps': _availableCommonWidgets[widgetId],
+        'lastUpdated': DateTime.now().toIso8601String(),
+      };
+    }
 
     // 如果有原有配置，合并自定义尺寸等信息
     if (widget.originalConfig != null) {

@@ -14,6 +14,8 @@ class ActivityTranslationsZh {
     'activity_createActivityShortcutDesc': '快速创建新活动记录',
     'activity_createActivity': '创建活动',
     'activity_quickCreateActivityDesc': '点击快速创建新活动',
+    'activity_commonWidgetsName': '活动小组件',
+    'activity_commonWidgetsDesc': '支持多种公共小组件样式展示今日活动',
 
     // 导航和标题
     'activity_timeline': '时间线',
