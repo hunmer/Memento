@@ -370,10 +370,16 @@ class HomeWidget {
       // 只有当 props 不存在时才动态调用 commonWidgetsProvider 获取最新数据
       if (selectorConfig.commonWidgetProps != null) {
         // 使用用户在【公共组件样式】对话框中选择并保存的数据
+        // 添加 custom 尺寸的实际宽高到 props 中
+        final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
+        if (size == HomeWidgetSize.custom) {
+          props['customWidth'] = config['customWidth'] as int?;
+          props['customHeight'] = config['customHeight'] as int?;
+        }
         return CommonWidgetBuilder.build(
           context,
           commonWidgetId,
-          selectorConfig.commonWidgetProps!,
+          props,
           size,
         );
       }
@@ -384,10 +390,16 @@ class HomeWidget {
         final latestProps = availableWidgets[widgetId];
 
         if (latestProps != null) {
+          // 添加 custom 尺寸的实际宽高到 props 中
+          final props = Map<String, dynamic>.from(latestProps);
+          if (size == HomeWidgetSize.custom) {
+            props['customWidth'] = config['customWidth'] as int?;
+            props['customHeight'] = config['customHeight'] as int?;
+          }
           return CommonWidgetBuilder.build(
             context,
             commonWidgetId,
-            latestProps,
+            props,
             size,
           );
         }

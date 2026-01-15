@@ -140,7 +140,6 @@ class GenericSelectorWidget extends StatelessWidget {
   ) {
     try {
       final widgetId = selectorConfig.commonWidgetId!;
-      final props = selectorConfig.commonWidgetProps!;
       final size = config['widgetSize'] as HomeWidgetSize? ??
           widgetDefinition.defaultSize;
 
@@ -151,6 +150,13 @@ class GenericSelectorWidget extends StatelessWidget {
       final commonWidgetId = CommonWidgetsRegistry.fromString(widgetId);
       if (commonWidgetId == null) {
         return _buildErrorWidget(context, '未知的公共组件: $widgetId');
+      }
+
+      // 添加 custom 尺寸的实际宽高到 props 中
+      final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
+      if (size == HomeWidgetSize.custom) {
+        props['customWidth'] = config['customWidth'] as int?;
+        props['customHeight'] = config['customHeight'] as int?;
       }
 
       final child = CommonWidgetBuilder.build(
