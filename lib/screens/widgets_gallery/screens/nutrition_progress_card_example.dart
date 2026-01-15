@@ -15,14 +15,19 @@ class SplitColumnProgressBarCardExample extends StatelessWidget {
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: SplitColumnProgressBarCard(
-            calories: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
-            nutrients: [
+            leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
+            leftConfig: LeftSectionConfig(
+              icon: '🔥',
+              label: 'Calories',
+            ),
+            rightItems: [
               ProgressItemData(
                 icon: '🍔',
                 name: 'Protein',
                 current: 66,
                 total: 94,
                 color: Color(0xFF34D399),
+                subtitle: '早餐 / 午餐',
               ),
               ProgressItemData(
                 icon: '🍉',
@@ -30,6 +35,7 @@ class SplitColumnProgressBarCardExample extends StatelessWidget {
                 current: 35,
                 total: 64,
                 color: Color(0xFFFED7AA),
+                subtitle: '全麦面包',
               ),
               ProgressItemData(
                 icon: '🥛',
@@ -37,6 +43,7 @@ class SplitColumnProgressBarCardExample extends StatelessWidget {
                 current: 21,
                 total: 32,
                 color: Color(0xFF3B82F6),
+                subtitle: '坚果 / 鳄梨',
               ),
             ],
           ),

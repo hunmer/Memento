@@ -59,6 +59,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   List<ActivityRecord> _cachedTodayActivities = [];
   bool _todayActivitiesCacheValid = false;
 
+  // 缓存昨日活动列表（用于同步访问）
+  List<ActivityRecord> _cachedYesterdayActivities = [];
+  DateTime? _yesterdayCacheDate;
+  bool _yesterdayActivitiesCacheValid = false;
+
   // 获取活动服务实例
   ActivityService get activityService {
     if (!_isInitialized) {
@@ -284,6 +289,53 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     return _cachedTodayActivities;
+  }
+
+  /// 刷新昨日活动缓存
+  Future<void> _refreshYesterdayActivitiesCache() async {
+    if (!_isInitialized) return;
+
+    try {
+      final now = DateTime.now();
+      final yesterday = DateTime(now.year, now.month, now.day).subtract(
+        const Duration(days: 1),
+      );
+
+      final activities = await _activityService.getActivitiesForDate(yesterday);
+
+      _yesterdayCacheDate = yesterday;
+      _cachedYesterdayActivities = activities;
+      _yesterdayActivitiesCacheValid = true;
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 刷新昨日活动缓存失败: $e');
+    }
+  }
+
+  /// 同步获取昨日活动列表（用于小组件渲染）
+  List<ActivityRecord> getYesterdayActivitiesSync() {
+    // 如果缓存无效，尝试异步刷新并返回空列表
+    if (!_yesterdayActivitiesCacheValid) {
+      // 异步刷新缓存，不阻塞当前调用
+      _refreshYesterdayActivitiesCache();
+      return [];
+    }
+
+    // 检查日期是否匹配
+    final now = DateTime.now();
+    final expectedYesterday = DateTime(now.year, now.month, now.day).subtract(
+      const Duration(days: 1),
+    );
+    final cachedDay = _yesterdayCacheDate != null
+        ? DateTime(_yesterdayCacheDate!.year, _yesterdayCacheDate!.month, _yesterdayCacheDate!.day)
+        : null;
+
+    if (cachedDay == null || !cachedDay.isAtSameMomentAs(expectedYesterday)) {
+      // 日期不匹配，异步刷新并返回空列表
+      _refreshYesterdayActivitiesCache();
+      return [];
+    }
+
+    return _cachedYesterdayActivities;
   }
 
   // ==================== 通知便捷方法 ====================

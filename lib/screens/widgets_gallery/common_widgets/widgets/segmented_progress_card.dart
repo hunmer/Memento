@@ -117,7 +117,10 @@ class _SegmentedProgressCardWidgetState
       parent: _animationController,
       curve: Curves.easeOutCubic,
     );
-    _animationController.forward();
+    // 立即启动动画，确保 AnimatedFlipCounter 能接收到从 0 到目标值的变化
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animationController.forward();
+    });
   }
 
   @override
@@ -203,31 +206,37 @@ class _SegmentedProgressCardWidgetState
         const SizedBox(height: 6),
         SizedBox(
           height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              AnimatedFlipCounter(
-                value: widget.currentValue * _animation.value,
-                fractionDigits: 0,
-                textStyle: TextStyle(
-                  color: isDark ? Colors.white : Colors.grey.shade900,
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  height: 1.0,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '/ ${widget.targetValue.toInt()}',
-                style: TextStyle(
-                  color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                  height: 1.0,
-                ),
-              ),
-            ],
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AnimatedFlipCounter(
+                    value: widget.currentValue * _animation.value,
+                    fractionDigits: 0,
+                    textStyle: TextStyle(
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '/ ${widget.targetValue.toInt()}',
+                    style: TextStyle(
+                      color:
+                          isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      height: 1.0,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ],

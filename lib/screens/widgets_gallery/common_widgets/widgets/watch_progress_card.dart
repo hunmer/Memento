@@ -4,10 +4,12 @@ import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 /// 观看项目数据模型
 class WatchProgressItem {
   final String title;
+  final String? subtitle;
   final String? thumbnailUrl;
 
   const WatchProgressItem({
     required this.title,
+    this.subtitle,
     this.thumbnailUrl,
   });
 
@@ -15,16 +17,14 @@ class WatchProgressItem {
   factory WatchProgressItem.fromJson(Map<String, dynamic> json) {
     return WatchProgressItem(
       title: json['title'] as String,
+      subtitle: json['subtitle'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
     );
   }
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'thumbnailUrl': thumbnailUrl,
-    };
+    return {'title': title, 'subtitle': subtitle, 'thumbnailUrl': thumbnailUrl};
   }
 }
 
@@ -59,6 +59,9 @@ class WatchProgressCardWidget extends StatefulWidget {
   /// 是否启用头部
   final bool enableHeader;
 
+  /// 进度描述文本（如 "Watched Items"）
+  final String progressLabel;
+
   const WatchProgressCardWidget({
     super.key,
     required this.userName,
@@ -70,6 +73,7 @@ class WatchProgressCardWidget extends StatefulWidget {
     this.inline = false,
     this.size = HomeWidgetSize.medium,
     this.enableHeader = true,
+    this.progressLabel = 'Watched Items',
   });
 
   /// 从 props 创建实例
@@ -78,11 +82,14 @@ class WatchProgressCardWidget extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     final itemsList = props['items'] as List<dynamic>?;
-    final items = itemsList
-            ?.map((item) =>
-                item is Map<String, dynamic>
-                    ? WatchProgressItem.fromJson(item)
-                    : null)
+    final items =
+        itemsList
+            ?.map(
+              (item) =>
+                  item is Map<String, dynamic>
+                      ? WatchProgressItem.fromJson(item)
+                      : null,
+            )
             .whereType<WatchProgressItem>()
             .toList() ??
         [];
@@ -93,12 +100,14 @@ class WatchProgressCardWidget extends StatefulWidget {
       currentCount: props['currentCount'] as int? ?? 0,
       totalCount: props['totalCount'] as int? ?? 0,
       items: items,
-      progressColor: props['progressColor'] != null
-          ? Color(props['progressColor'] as int)
-          : null,
+      progressColor:
+          props['progressColor'] != null
+              ? Color(props['progressColor'] as int)
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
       enableHeader: props['enableHeader'] as bool? ?? true,
+      progressLabel: props['progressLabel'] as String? ?? 'Watched Items',
     );
   }
 
@@ -112,6 +121,7 @@ class WatchProgressCardWidget extends StatefulWidget {
       'items': items.map((item) => item.toJson()).toList(),
       'progressColor': progressColor?.value,
       'enableHeader': enableHeader,
+      'progressLabel': progressLabel,
     };
   }
 
@@ -168,15 +178,23 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.grey.shade200.withOpacity(0.5),
-                          blurRadius: 20,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                boxShadow:
+                    isDark
+                        ? null
+                        : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 32,
+                            offset: const Offset(0, 8),
+                            spreadRadius: 0,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                            spreadRadius: 0,
+                          ),
+                        ],
               ),
               padding: widget.size.getPadding(),
               child: Column(
@@ -293,9 +311,10 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
       ),
     );
 
-    final progress = widget.currentCount / widget.totalCount;
+    final progress = (widget.currentCount / widget.totalCount).clamp(0.0, 1.0);
     final effectiveProgressColor =
-        widget.progressColor ?? (isDark ? Colors.white : const Color(0xFF111827));
+        widget.progressColor ??
+        (isDark ? Colors.white : const Color(0xFF111827));
 
     return Opacity(
       opacity: itemAnimation.value,
@@ -330,7 +349,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
             ),
             SizedBox(height: widget.size.getItemSpacing() * 0.25),
             Text(
-              'Watched Items',
+              widget.progressLabel,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -378,7 +397,10 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
 
     // 计算每个 item 的近似高度，设置固定高度（最多显示 3 个 item）
     final itemHeight = widget.size.getItemSpacing() * 3;
-    final listHeight = (itemHeight * widget.items.length).clamp(itemHeight * 2, itemHeight * 3);
+    final listHeight = (itemHeight * widget.items.length).clamp(
+      itemHeight * 2,
+      itemHeight * 3,
+    );
 
     return SizedBox(
       height: listHeight,
@@ -396,7 +418,12 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
     );
   }
 
-  Widget _buildItem(WatchProgressItem item, bool isDark, int index, double step) {
+  Widget _buildItem(
+    WatchProgressItem item,
+    bool isDark,
+    int index,
+    double step,
+  ) {
     final itemAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Interval(
@@ -422,12 +449,38 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
               child: const Icon(Icons.movie, size: 20),
             ),
             SizedBox(width: widget.size.getItemSpacing()),
-            Text(
-              item.title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : Colors.grey.shade900,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    item.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (item.subtitle != null) ...[
+                    SizedBox(height: widget.size.getItemSpacing() * 0.2),
+                    Text(
+                      item.subtitle!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

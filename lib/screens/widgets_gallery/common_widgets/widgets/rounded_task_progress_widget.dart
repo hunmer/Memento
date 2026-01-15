@@ -79,7 +79,7 @@ class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final progress = widget.completedTasks / widget.totalTasks;
+    final progress = (widget.completedTasks / widget.totalTasks).clamp(0.0, 1.0);
 
     return AnimatedBuilder(
       animation: _progressAnimation,

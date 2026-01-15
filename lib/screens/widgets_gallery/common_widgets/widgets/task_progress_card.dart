@@ -10,6 +10,15 @@ class TaskProgressCardWidget extends StatefulWidget {
   final int totalTasks;
   final List<String> pendingTasks;
 
+  /// 进度标签（默认"进度"）
+  final String progressLabel;
+
+  /// 待办列表标签（默认"待办"）
+  final String pendingLabel;
+
+  /// 最大显示待办数量（null表示显示全部）
+  final int? maxPendingTasks;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -20,6 +29,9 @@ class TaskProgressCardWidget extends StatefulWidget {
     required this.completedTasks,
     required this.totalTasks,
     this.pendingTasks = const [],
+    this.progressLabel = '进度',
+    this.pendingLabel = '待办',
+    this.maxPendingTasks,
     this.inline = false,
   });
 
@@ -37,6 +49,9 @@ class TaskProgressCardWidget extends StatefulWidget {
               ?.map((e) => e.toString())
               .toList() ??
           [],
+      progressLabel: props['progressLabel'] as String? ?? '进度',
+      pendingLabel: props['pendingLabel'] as String? ?? '待办',
+      maxPendingTasks: props['maxPendingTasks'] as int?,
       inline: props['inline'] as bool? ?? false,
     );
   }
@@ -174,7 +189,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '进度',
+                  widget.progressLabel,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -192,7 +207,8 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                   width: 24,
                   height: 16,
                   child: AnimatedFlipCounter(
-                    value: widget.completedTasks * _animation.value,
+                    value: widget.completedTasks.toDouble() * _animation.value,
+                    fractionDigits: 0,
                     textStyle: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -209,6 +225,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                   height: 16,
                   child: AnimatedFlipCounter(
                     value: widget.totalTasks.toDouble(),
+                    fractionDigits: 0,
                     textStyle: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -254,7 +271,9 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
     Color secondaryTextColor,
     Color dividerColor,
   ) {
-    final tasks = widget.pendingTasks.take(3).toList();
+    final tasks = widget.maxPendingTasks == null
+        ? widget.pendingTasks
+        : widget.pendingTasks.take(widget.maxPendingTasks!).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,7 +281,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
         Padding(
           padding: const EdgeInsets.only(bottom: 6),
           child: Text(
-            '待办',
+            widget.pendingLabel,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,

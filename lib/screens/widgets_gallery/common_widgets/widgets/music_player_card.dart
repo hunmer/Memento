@@ -387,7 +387,7 @@ class _ProgressBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = currentPosition / totalDuration;
+    final progress = (currentPosition / totalDuration).clamp(0.0, 1.0);
 
     return AnimatedBuilder(
       animation: animation,

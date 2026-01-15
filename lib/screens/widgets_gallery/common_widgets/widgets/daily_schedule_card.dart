@@ -103,11 +103,13 @@ class DailyScheduleCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final todayEventsList = (props['todayEvents'] as List<dynamic>?)
+    final todayEventsList =
+        (props['todayEvents'] as List<dynamic>?)
             ?.map((e) => EventData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
-    final tomorrowEventsList = (props['tomorrowEvents'] as List<dynamic>?)
+    final tomorrowEventsList =
+        (props['tomorrowEvents'] as List<dynamic>?)
             ?.map((e) => EventData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -167,7 +169,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF171717) : Colors.white,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -195,49 +197,94 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ...List.generate(widget.todayEvents.length, (index) {
-                            final itemAnimation = CurvedAnimation(
-                              parent: _animationController,
-                              curve: Interval(
-                                index * 0.06,
-                                0.4 + index * 0.06,
-                                curve: Curves.easeOutCubic,
+                          // 今日活动列表或占位提示
+                          if (widget.todayEvents.isEmpty) ...[
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: widget.size.getPadding().top * 2,
                               ),
-                            );
-                            return _EventItemWidget(
-                              event: widget.todayEvents[index],
-                              animation: itemAnimation,
-                              isDark: isDark,
-                              size: widget.size,
-                            );
-                          }),
+                              child: Text(
+                                '今日暂无活动',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color:
+                                      isDark
+                                          ? const Color(0xFF71717A)
+                                          : const Color(0xFFA1A1AA),
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            ...List.generate(widget.todayEvents.length, (
+                              index,
+                            ) {
+                              final itemAnimation = CurvedAnimation(
+                                parent: _animationController,
+                                curve: Interval(
+                                  index * 0.06,
+                                  0.4 + index * 0.06,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                              );
+                              return _EventItemWidget(
+                                event: widget.todayEvents[index],
+                                animation: itemAnimation,
+                                isDark: isDark,
+                                size: widget.size,
+                              );
+                            }),
+                          ],
                           SizedBox(height: widget.size.getTitleSpacing()),
                           Text(
-                            'Tomorrow',
+                            'Yesterday',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
-                              color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
+                              color:
+                                  isDark
+                                      ? const Color(0xFF52525B)
+                                      : const Color(0xFFA1A1AA),
                             ),
                           ),
                           SizedBox(height: widget.size.getTitleSpacing()),
-                          ...List.generate(widget.tomorrowEvents.length, (index) {
-                            final itemAnimation = CurvedAnimation(
-                              parent: _animationController,
-                              curve: Interval(
-                                0.25 + index * 0.06,
-                                0.65 + index * 0.06,
-                                curve: Curves.easeOutCubic,
+                          // 昨日活动列表或占位提示
+                          if (widget.tomorrowEvents.isEmpty) ...[
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: widget.size.getPadding().top * 2,
                               ),
-                            );
-                            return _EventItemWidget(
-                              event: widget.tomorrowEvents[index],
-                              animation: itemAnimation,
-                              isDark: isDark,
-                              size: widget.size,
-                            );
-                          }),
+                              child: Text(
+                                '昨日暂无活动',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color:
+                                      isDark
+                                          ? const Color(0xFF71717A)
+                                          : const Color(0xFFA1A1AA),
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            ...List.generate(widget.tomorrowEvents.length, (
+                              index,
+                            ) {
+                              final itemAnimation = CurvedAnimation(
+                                parent: _animationController,
+                                curve: Interval(
+                                  0.25 + index * 0.06,
+                                  0.65 + index * 0.06,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                              );
+                              return _EventItemWidget(
+                                event: widget.tomorrowEvents[index],
+                                animation: itemAnimation,
+                                isDark: isDark,
+                                size: widget.size,
+                              );
+                            }),
+                          ],
                         ],
                       ),
                     ),
@@ -335,16 +382,41 @@ class _EventItemWidget extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.all(size.getPadding().left / 3),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0x3364748B) : const Color(0x9964748B),
+                            color:
+                                isDark
+                                    ? const Color(0x3364748B)
+                                    : const Color(0x9964748B),
                             borderRadius: BorderRadius.circular(99),
                           ),
-                          child: Icon(event.icon, size: 16, color: isDark ? Colors.white : const Color(0xFFE2E8F0)),
+                          child: Icon(
+                            event.icon,
+                            size: 16,
+                            color:
+                                isDark ? Colors.white : const Color(0xFFE2E8F0),
+                          ),
                         ),
                         SizedBox(width: size.getPadding().left),
-                        Text(event.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _getTextColor(event.color))),
+                        Text(
+                          event.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _getTextColor(event.color),
+                          ),
+                        ),
                       ],
                     ),
-                    Text('all-day', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF78716C) : const Color(0xFF64748B))),
+                    Text(
+                      'all-day',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color:
+                            isDark
+                                ? const Color(0xFF78716C)
+                                : const Color(0xFF64748B),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -372,18 +444,39 @@ class _EventItemWidget extends StatelessWidget {
                 children: [
                   Container(
                     width: 4,
-                    margin: EdgeInsets.symmetric(horizontal: size.getPadding().left / 1.5, vertical: size.getPadding().left / 1.5),
-                    decoration: BoxDecoration(color: _getIndicatorColor(event.color), borderRadius: BorderRadius.circular(99)),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: size.getPadding().left / 1.5,
+                      vertical: size.getPadding().left / 1.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getIndicatorColor(event.color),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
                   ),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(event.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _getTextColor(event.color))),
+                        Text(
+                          event.title,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: _getTextColor(event.color),
+                          ),
+                        ),
                         if (event.location != null) ...[
                           SizedBox(height: size.getPadding().top / 6),
-                          Text(event.location!, style: TextStyle(fontSize: 12, color: _getTextColor(event.color).withOpacity(0.7))),
+                          Text(
+                            event.location!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _getTextColor(
+                                event.color,
+                              ).withOpacity(0.7),
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -397,15 +490,51 @@ class _EventItemWidget extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(event.startTime, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: _getTextColor(event.color).withOpacity(0.6))),
-                            Text(event.startPeriod, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: _getTextColor(event.color).withOpacity(0.6))),
+                            Text(
+                              event.startTime,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: _getTextColor(
+                                  event.color,
+                                ).withOpacity(0.6),
+                              ),
+                            ),
+                            Text(
+                              event.startPeriod,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: _getTextColor(
+                                  event.color,
+                                ).withOpacity(0.6),
+                              ),
+                            ),
                           ],
                         ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(event.endTime, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: _getTextColor(event.color).withOpacity(0.6))),
-                            Text(event.endPeriod, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: _getTextColor(event.color).withOpacity(0.6))),
+                            Text(
+                              event.endTime,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: _getTextColor(
+                                  event.color,
+                                ).withOpacity(0.6),
+                              ),
+                            ),
+                            Text(
+                              event.endPeriod,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: _getTextColor(
+                                  event.color,
+                                ).withOpacity(0.6),
+                              ),
+                            ),
                           ],
                         ),
                       ],
