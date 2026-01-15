@@ -740,14 +740,6 @@ class CheckinHomeWidgets {
     }
 
     return {
-      // 多项目签到卡片：显示多个项目的打卡状态
-      'checkinItemsCard': {
-        'items': checkinItemCards,
-        'totalConsecutiveDays': totalConsecutiveDays,
-        'todayCheckedCount': todayCheckedCount,
-        'totalCount': itemsList.length,
-      },
-
       // MultiMetricProgressCard - 多指标进度卡片
       'multiMetricProgressCard': {
         'trackers': checkinItemCards.map((card) {
@@ -833,7 +825,7 @@ class CheckinHomeWidgets {
 
       // TaskListCard - 任务列表卡片
       'taskListCard': {
-        'icon': 0xe24f, // Icons.checklist
+        'icon': '0xe24f', // Icons.checklist - 需要字符串格式
         'iconBackgroundColor': 0xFF14B8A6,
         'count': todayCheckedCount,
         'countLabel': '今日已完成',
@@ -900,8 +892,8 @@ class CheckinHomeWidgets {
         'headerText': '打卡项目',
       },
 
-      // DailyTodoListWidget - 每日待办事项卡片
-      'dailyTodoListWidget': {
+      // DailyTodoListWidget - 每日待办事项卡片（枚举名是 dailyTodoListCard）
+      'dailyTodoListCard': {
         'date': '${_getWeekdayName(today.weekday)}, ${today.day} ${_getMonthName(today.month)} ${today.year}',
         'time': '${today.hour.toString().padLeft(2, '0')}:${today.minute.toString().padLeft(2, '0')}',
         'tasks': checkinItemCards.map((card) {
@@ -924,6 +916,7 @@ class CheckinHomeWidgets {
           final status = card['isCheckedToday'] ? '✅ ' : '⏰ ';
           return {
             'text': '$status${card['title']}',
+            'isCompleted': card['isCheckedToday'],
           };
         }).toList(),
       },

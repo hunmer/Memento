@@ -313,7 +313,7 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
