@@ -14,6 +14,8 @@ class ActivityTranslationsEn {
     'activity_createActivityShortcutDesc': 'Quickly create new activity record',
     'activity_createActivity': 'Create Activity',
     'activity_quickCreateActivityDesc': 'Tap to create new activity',
+    'activity_commonWidgetsName': 'Activity Widgets',
+    'activity_commonWidgetsDesc': 'Display today\'s activities with various widget styles',
 
     // Navigation and titles
     'activity_timeline': 'Timeline',

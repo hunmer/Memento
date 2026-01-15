@@ -6,6 +6,7 @@ import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -13,6 +14,7 @@ import 'package:Memento/widgets/event_listener_container.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import 'activity_plugin.dart';
 import 'screens/activity_edit_screen.dart';
 import 'models/activity_record.dart';
@@ -132,6 +134,37 @@ class ActivityHomeWidgets {
         },
       ),
     );
+
+    // 活动小组件 - 支持公共小组件样式（不需要选择数据）
+    registry.register(
+      HomeWidget(
+        id: 'activity_common_widgets',
+        pluginId: 'activity',
+        name: 'activity_commonWidgetsName'.tr,
+        description: 'activity_commonWidgetsDesc'.tr,
+        icon: Icons.dashboard,
+        color: Colors.pink,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+        category: 'home_categoryRecord'.tr,
+        commonWidgetsProvider: _provideCommonWidgets,
+        builder: (context, config) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return EventListenerContainer(
+                events: const [
+                  'activity_added',
+                  'activity_updated',
+                  'activity_deleted',
+                ],
+                onEvent: () => setState(() {}),
+                child: _buildCommonWidgetsWidget(context, config),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   /// 获取可用的统计项
@@ -228,6 +261,273 @@ class ActivityHomeWidgets {
       availableItems: availableItems,
       config: widgetConfig,
     );
+  }
+
+  /// 构建公共小组件显示
+  static Widget _buildCommonWidgetsWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
+    final selectorConfig = config['selectorWidgetConfig'] as Map<String, dynamic>?;
+    if (selectorConfig == null) {
+      return HomeWidget.buildErrorWidget(
+        context,
+        '配置错误：缺少 selectorWidgetConfig',
+      );
+    }
+
+    final commonWidgetId = selectorConfig['commonWidgetId'] as String?;
+    final commonWidgetProps = selectorConfig['commonWidgetProps'] as Map<String, dynamic>?;
+
+    if (commonWidgetId == null || commonWidgetProps == null) {
+      return HomeWidget.buildErrorWidget(
+        context,
+        '配置错误：缺少 commonWidgetId 或 commonWidgetProps',
+      );
+    }
+
+    // 查找对应的 CommonWidgetId 枚举
+    final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
+    if (widgetIdEnum == null) {
+      return HomeWidget.buildErrorWidget(
+        context,
+        '未知的公共小组件类型: $commonWidgetId',
+      );
+    }
+
+    // 获取元数据以确定默认尺寸
+    final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
+
+    return CommonWidgetBuilder.build(
+      context,
+      widgetIdEnum,
+      commonWidgetProps,
+      metadata.defaultSize,
+    );
+  }
+
+  /// 公共小组件提供者函数（同步版本）
+  static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+    Map<String, dynamic> data,
+  ) {
+    // 获取今日活动数据
+    final plugin =
+        PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+    if (plugin == null) return {};
+
+    final now = DateTime.now();
+
+    // 同步获取今日活动（使用缓存）
+    final todayActivities = plugin.getTodayActivitiesSync();
+
+    // 计算今日统计数据
+    final todayActivityCount = todayActivities.length;
+    final todayDurationMinutes =
+        todayActivities.fold<int>(0, (sum, a) => sum + a.durationInMinutes);
+    final remainingMinutes = plugin.getTodayRemainingTime();
+
+    // 按标签统计
+    final tagStats = <String, int>{};
+    for (final activity in todayActivities) {
+      for (final tag in activity.tags) {
+        tagStats[tag] = (tagStats[tag] ?? 0) + activity.durationInMinutes;
+      }
+    }
+
+    // 按标签分类活动
+    final activitiesByTag = <String, List<ActivityRecord>>{};
+    for (final activity in todayActivities) {
+      for (final tag in activity.tags) {
+        activitiesByTag.putIfAbsent(tag, () => []).add(activity);
+      }
+    }
+
+    return {
+      // 分段进度卡片：按标签统计时长
+      'segmentedProgressCard': {
+        'title': '今日活动',
+        'subtitle': '${todayActivityCount}个活动',
+        'segments': tagStats.entries.map((e) => {
+          'label': e.key,
+          'value': e.value.toDouble(),
+          'color': _getColorFromTagForWidgets(e.key).value,
+        }).toList(),
+        'total': todayDurationMinutes.toDouble(),
+      },
+
+      // 任务进度卡片：显示今日活动进度
+      'taskProgressCard': {
+        'title': '今日活动',
+        'subtitle': '${todayActivityCount}个记录',
+        'value': todayActivityCount.toDouble(),
+        'totalValue': 10.0,
+        'unit': '个',
+        'tasks': todayActivities.take(5).map((a) => {
+          'title': a.title.isEmpty ? '未命名活动' : a.title,
+          'subtitle': _formatTimeRangeStatic(a.startTime, a.endTime),
+          'isCompleted': true,
+        }).toList(),
+      },
+
+      // 营养进度卡片：左侧今日剩余时间，右侧活动列表
+      'nutritionProgressCard': {
+        'calories': {
+          'current': (24 * 60 - remainingMinutes).toDouble(),
+          'total': (24 * 60).toDouble(),
+          'unit': '分钟',
+        },
+        'protein': {
+          'current': todayDurationMinutes.toDouble(),
+          'total': (12 * 60).toDouble(),
+          'unit': '分钟',
+        },
+        'carbs': {
+          'current': remainingMinutes.toDouble(),
+          'total': (12 * 60).toDouble(),
+          'unit': '分钟',
+        },
+        'fat': {
+          'current': 0.0,
+          'total': 100.0,
+          'unit': '分钟',
+        },
+        'leftLabel': '今日剩余',
+        'leftValue': '${(remainingMinutes / 60).toStringAsFixed(1)}小时',
+        'rightItems': todayActivities.take(4).map((a) => {
+          'title': a.title.isEmpty ? '未命名活动' : a.title,
+          'subtitle': '${_formatTimeStatic(a.startTime)} · ${a.tags.join(", ")}',
+          'value': a.durationInMinutes.toDouble(),
+          'valueText': '${a.durationInMinutes}分钟',
+        }).toList(),
+      },
+
+      // 观看进度卡片：显示活动列表
+      'watchProgressCard': {
+        'title': '今日活动',
+        'current': todayActivityCount,
+        'total': 20,
+        'items': todayActivities.map((a) => {
+          'title': a.title.isEmpty ? '未命名活动' : a.title,
+          'subtitle': '${_formatTimeStatic(a.startTime)} - ${_formatTimeStatic(a.endTime)}',
+          'duration': a.durationInMinutes.toString(),
+        }).toList(),
+      },
+
+      // 每日日程卡片：今日活动和未记录列表
+      'dailyScheduleCard': {
+        'date': '${now.month}月${now.day}日',
+        'todayItems': todayActivities.map((a) => {
+          'title': a.title.isEmpty ? '未命名活动' : a.title,
+          'time': '${_formatTimeStatic(a.startTime)} - ${_formatTimeStatic(a.endTime)}',
+          'isAllDay': false,
+        }).toList(),
+        'tomorrowLabel': '未记录时间段',
+        'tomorrowItems': _getUnrecordedTimeSlotsStatic(todayActivities),
+      },
+
+      // 支出分类环形图：按标签统计活动时长
+      'expenseDonutChart': {
+        'title': '今日活动分布',
+        'total': '${(todayDurationMinutes / 60).toStringAsFixed(1)}小时',
+        'categories': tagStats.entries.map((e) => {
+          'name': e.key,
+          'value': e.value.toDouble(),
+          'color': _getColorFromTagForWidgets(e.key).value,
+        }).toList(),
+      },
+
+      // 任务列表卡片
+      'taskListCard': {
+        'title': '今日活动',
+        'count': todayActivityCount,
+        'countLabel': '个活动',
+        'items': todayActivities.map((a) =>
+          a.title.isEmpty ? '未命名活动' : a.title
+        ).toList(),
+        'moreCount': 0,
+      },
+
+      // 彩色标签任务列表卡片
+      'colorTagTaskCard': {
+        'title': '今日活动',
+        'count': todayActivityCount,
+        'items': todayActivities.map((a) {
+          final primaryTag = a.tags.isNotEmpty ? a.tags.first : '默认';
+          return {
+            'title': a.title.isEmpty ? '未命名活动' : a.title,
+            'subtitle': '${_formatTimeRangeStatic(a.startTime, a.endTime)}',
+            'tag': primaryTag,
+            'color': _getColorFromTagForWidgets(primaryTag).value,
+            'time': _formatTimeStatic(a.startTime),
+          };
+        }).toList(),
+      },
+
+      // 即将到来的任务小组件：显示接下来的活动
+      'upcomingTasksWidget': {
+        'title': '活动记录',
+        'count': todayActivityCount,
+        'moreCount': 0,
+        'items': todayActivities.take(4).map((a) => {
+          'title': a.title.isEmpty ? '未命名活动' : a.title,
+          'subtitle': '${_formatTimeRangeStatic(a.startTime, a.endTime)}',
+          'time': _formatTimeStatic(a.startTime),
+          'tag': a.tags.isNotEmpty ? a.tags.first : '',
+        }).toList(),
+      },
+
+      // 圆角任务列表卡片
+      'roundedTaskListCard': {
+        'date': '${now.month}月${now.day}日',
+        'items': todayActivities.map((a) => {
+          'title': a.title.isEmpty ? '未命名活动' : a.title,
+          'time': '${_formatTimeStatic(a.startTime)}',
+          'isCompleted': true,
+        }).toList(),
+      },
+
+      // 圆角提醒事项列表
+      'roundedRemindersList': {
+        'title': '今日活动',
+        'count': todayActivityCount,
+        'items': todayActivities.map((a) => {
+          'text': a.title.isEmpty ? '未命名活动' : a.title,
+          'isCompleted': true,
+        }).toList(),
+      },
+
+      // 现代圆角消费卡片：显示活动时长
+      'modernRoundedSpendingWidget': {
+        'title': '今日活动',
+        'currentAmount': todayDurationMinutes.toDouble(),
+        'budgetAmount': (12 * 60).toDouble(), // 12小时目标
+        'categories': tagStats.entries.take(4).map((e) => {
+          'name': e.key,
+          'amount': e.value.toDouble(),
+          'color': _getColorFromTagForWidgets(e.key).value,
+          'progress': e.value / (12 * 60),
+        }).toList(),
+        'categoryItems': activitiesByTag.entries.take(3).map((e) => {
+          'categoryName': e.key,
+          'items': e.value.take(3).map((a) => {
+            'title': a.title.isEmpty ? '未命名活动' : a.title,
+            'subtitle': '${a.durationInMinutes}分钟',
+          }).toList(),
+        }).toList(),
+      },
+
+      // 分类堆叠消费卡片
+      'categoryStackWidget': {
+        'title': '今日活动分布',
+        'currentAmount': todayDurationMinutes.toDouble(),
+        'targetAmount': (12 * 60).toDouble(),
+        'categories': tagStats.entries.map((e) => {
+          'name': e.key,
+          'amount': e.value.toDouble(),
+          'color': _getColorFromTagForWidgets(e.key).value,
+        }).toList(),
+      },
+    };
   }
 
   /// 从选择器数据提取热力图配置
@@ -1386,4 +1686,85 @@ class TimeSlotData {
         .reduce((a, b) => a.value > b.value ? a : b)
         .key;
   }
+}
+
+/// 格式化时间范围（静态版本）
+String _formatTimeRangeStatic(DateTime start, DateTime end) {
+  return '${_formatTimeStatic(start)} - ${_formatTimeStatic(end)}';
+}
+
+/// 格式化时间（HH:mm）（静态版本）
+String _formatTimeStatic(DateTime time) {
+  return DateFormat('HH:mm').format(time);
+}
+
+/// 从标签生成颜色（与 ActivityGridView 保持一致）
+Color _getColorFromTagForWidgets(String tag) {
+  final baseHue = (tag.hashCode % 360).abs().toDouble();
+  return HSLColor.fromAHSL(1.0, baseHue, 0.6, 0.5).toColor();
+}
+
+/// 获取未记录的时间段（静态版本）
+List<Map<String, dynamic>> _getUnrecordedTimeSlotsStatic(
+  List<ActivityRecord> activities,
+) {
+  if (activities.isEmpty) {
+    // 如果没有活动，返回整个未记录的 0-24 小时
+    return [
+      {
+        'title': '全天未记录',
+        'time': '00:00 - 24:00',
+        'isAllDay': true,
+      },
+    ];
+  }
+
+  // 按开始时间排序
+  final sortedActivities = List<ActivityRecord>.from(activities);
+  sortedActivities.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+  final slots = <Map<String, dynamic>>[];
+  DateTime? lastEndTime;
+
+  // 添加开始之前的未记录时间段
+  final firstStart = sortedActivities.first.startTime;
+  if (firstStart.hour > 0 || firstStart.minute > 0) {
+    slots.add({
+      'title': '未记录',
+      'time': '00:00 - ${_formatTimeStatic(firstStart)}',
+      'isAllDay': false,
+    });
+  }
+
+  // 添加活动之间的未记录时间段
+  for (final activity in sortedActivities) {
+    if (lastEndTime != null && activity.startTime.isAfter(lastEndTime)) {
+      slots.add({
+        'title': '未记录',
+        'time': '${_formatTimeStatic(lastEndTime!)} - ${_formatTimeStatic(activity.startTime)}',
+        'isAllDay': false,
+      });
+    }
+    lastEndTime = activity.endTime;
+  }
+
+  // 添加最后一个活动之后的未记录时间段
+  if (lastEndTime != null) {
+    final endOfDay = DateTime(
+      lastEndTime.year,
+      lastEndTime.month,
+      lastEndTime.day,
+      23,
+      59,
+    );
+    if (lastEndTime.isBefore(endOfDay)) {
+      slots.add({
+        'title': '未记录',
+        'time': '${_formatTimeStatic(lastEndTime)} - 23:59',
+        'isAllDay': false,
+      });
+    }
+  }
+
+  return slots;
 }
