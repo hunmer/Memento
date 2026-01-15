@@ -13,6 +13,9 @@ import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/database/database_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/screens/home_screen/widgets/common_widget_selector_page.dart';
+import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 
 /// 常见插件路由注册表
 /// 包含：Activity, Checkin, TTS, Nodes, OpenAI, ScriptsCenter, Timer
@@ -166,6 +169,52 @@ class PluginCommonRoutes implements RouteRegistry {
           path: 'goods',
           handler: (settings) => RouteHelpers.createRoute(const GoodsMainView()),
           description: '物品管理主页面（别名）',
+        ),
+
+        // 公共小组件选择器页面
+        RouteDefinition(
+          path: '/common_widget_selector',
+          handler: (settings) {
+            final arguments = settings.arguments as Map<String, dynamic>?;
+            final pluginWidget = arguments?['pluginWidget'] as HomeWidget;
+            final folderId = arguments?['folderId'] as String?;
+            final replaceWidgetItemId = arguments?['replaceWidgetItemId'] as String?;
+            final initialCommonWidgetId = arguments?['initialCommonWidgetId'] as String?;
+            final initialSelectorConfig = arguments?['initialSelectorConfig'] as SelectorWidgetConfig?;
+            if (pluginWidget != null) {
+              return RouteHelpers.createRoute(CommonWidgetSelectorPage(
+                pluginWidget: pluginWidget,
+                folderId: folderId,
+                replaceWidgetItemId: replaceWidgetItemId,
+                initialCommonWidgetId: initialCommonWidgetId,
+                initialSelectorConfig: initialSelectorConfig,
+              ));
+            }
+            return RouteHelpers.createRoute(const SizedBox.shrink());
+          },
+          description: '公共小组件选择页面',
+        ),
+        RouteDefinition(
+          path: 'common_widget_selector',
+          handler: (settings) {
+            final arguments = settings.arguments as Map<String, dynamic>?;
+            final pluginWidget = arguments?['pluginWidget'] as HomeWidget;
+            final folderId = arguments?['folderId'] as String?;
+            final replaceWidgetItemId = arguments?['replaceWidgetItemId'] as String?;
+            final initialCommonWidgetId = arguments?['initialCommonWidgetId'] as String?;
+            final initialSelectorConfig = arguments?['initialSelectorConfig'] as SelectorWidgetConfig?;
+            if (pluginWidget != null) {
+              return RouteHelpers.createRoute(CommonWidgetSelectorPage(
+                pluginWidget: pluginWidget,
+                folderId: folderId,
+                replaceWidgetItemId: replaceWidgetItemId,
+                initialCommonWidgetId: initialCommonWidgetId,
+                initialSelectorConfig: initialSelectorConfig,
+              ));
+            }
+            return RouteHelpers.createRoute(const SizedBox.shrink());
+          },
+          description: '公共小组件选择页面（别名）',
         ),
       ];
 }

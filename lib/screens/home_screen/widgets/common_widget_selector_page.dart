@@ -22,11 +22,19 @@ class CommonWidgetSelectorPage extends StatefulWidget {
   /// 可选的要替换的小组件ID，如果提供则为替换模式
   final String? replaceWidgetItemId;
 
+  /// 可选的初始选中的公共小组件ID
+  final String? initialCommonWidgetId;
+
+  /// 可选的初始选择器配置（用于恢复之前选择的数据）
+  final SelectorWidgetConfig? initialSelectorConfig;
+
   const CommonWidgetSelectorPage({
     super.key,
     required this.pluginWidget,
     this.folderId,
     this.replaceWidgetItemId,
+    this.initialCommonWidgetId,
+    this.initialSelectorConfig,
   });
 
   @override
@@ -52,6 +60,67 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 0, vsync: this);
+
+    // 如果有初始选择器配置，自动恢复数据
+    if (widget.initialSelectorConfig != null) {
+      _restoreFromInitialConfig();
+    }
+  }
+
+  /// 从初始配置恢复数据
+  void _restoreFromInitialConfig() {
+    final config = widget.initialSelectorConfig!;
+    final selectedDataMap = config.selectedData;
+
+    if (selectedDataMap == null) return;
+
+    // 手动从 Map 恢复 SelectorResult 的关键数据
+    // 直接使用保存的 data，不需要重新构建 SelectorResult
+    final resultData = selectedDataMap['data'];
+
+    // 转换数据格式
+    Map<String, dynamic> data;
+    if (resultData is Map) {
+      final rawMap = resultData as Map;
+      data = {};
+      rawMap.forEach((key, value) {
+        data[key.toString()] = value;
+      });
+    } else if (widget.pluginWidget.dataSelector != null && resultData is List) {
+      data = widget.pluginWidget.dataSelector!(resultData as List<dynamic>);
+    } else {
+      data = {'data': resultData};
+    }
+
+    // 调用 commonWidgetsProvider 获取可用组件
+    Map<String, Map<String, dynamic>> availableWidgets = {};
+    if (widget.pluginWidget.commonWidgetsProvider != null) {
+      availableWidgets = widget.pluginWidget.commonWidgetsProvider!(data);
+    }
+
+    // 更新 TabController 长度
+    _tabController.dispose();
+    _tabController = TabController(
+      length: availableWidgets.length,
+      vsync: this,
+    );
+
+    // 计算初始选中索引
+    int initialIndex = 0;
+    if (widget.initialCommonWidgetId != null) {
+      final widgetIds = availableWidgets.keys.toList();
+      initialIndex = widgetIds.indexOf(widget.initialCommonWidgetId!);
+      if (initialIndex < 0) initialIndex = 0;
+    }
+
+    setState(() {
+      _selectedData = data;
+      _availableCommonWidgets = availableWidgets;
+      // 自动选中指定的组件或第一个组件
+      if (availableWidgets.isNotEmpty) {
+        _tabController.animateTo(initialIndex);
+      }
+    });
   }
 
   @override
@@ -375,12 +444,20 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
       );
     }
 
+    // 计算初始选中索引
+    int initialIndex = 0;
+    if (widget.initialCommonWidgetId != null) {
+      final widgetIds = availableWidgets.keys.toList();
+      initialIndex = widgetIds.indexOf(widget.initialCommonWidgetId!);
+      if (initialIndex < 0) initialIndex = 0;
+    }
+
     setState(() {
       _selectedData = data;
       _availableCommonWidgets = availableWidgets;
-      // 自动选中第一个组件
+      // 自动选中指定的组件或第一个组件
       if (availableWidgets.isNotEmpty) {
-        _tabController.animateTo(0);
+        _tabController.animateTo(initialIndex);
       }
     });
   }
