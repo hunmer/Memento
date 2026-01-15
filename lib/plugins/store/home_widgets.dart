@@ -240,25 +240,8 @@ class StoreHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
-  }
-
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
   }
 
   // ===== 选择器小组件相关方法 =====
@@ -272,12 +255,12 @@ class StoreHomeWidgets {
     // 从 result.data 获取保存的商品 ID
     final savedData = result.data as Map<String, dynamic>?;
     if (savedData == null) {
-      return _buildErrorWidget(context, '数据不存在');
+      return HomeWidget.buildErrorWidget(context, '数据不存在');
     }
 
     final productId = savedData['id'] as String? ?? '';
     if (productId.isEmpty) {
-      return _buildErrorWidget(context, '商品ID不存在');
+      return HomeWidget.buildErrorWidget(context, '商品ID不存在');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -304,7 +287,7 @@ class StoreHomeWidgets {
     // 从 PluginManager 获取最新的商品数据
     final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
     }
 
     // 查找对应商品
@@ -320,7 +303,7 @@ class StoreHomeWidgets {
         );
 
     if (finalProduct == null) {
-      return _buildErrorWidget(context, 'store_productNotFound'.tr);
+      return HomeWidget.buildErrorWidget(context, 'store_productNotFound'.tr);
     }
 
     final name = finalProduct.name;
@@ -487,12 +470,12 @@ class StoreHomeWidgets {
     // 从 result.data 获取保存的物品 ID
     final savedData = result.data as Map<String, dynamic>?;
     if (savedData == null) {
-      return _buildErrorWidget(context, '数据不存在');
+      return HomeWidget.buildErrorWidget(context, '数据不存在');
     }
 
     final itemId = savedData['id'] as String? ?? '';
     if (itemId.isEmpty) {
-      return _buildErrorWidget(context, '物品ID不存在');
+      return HomeWidget.buildErrorWidget(context, '物品ID不存在');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -519,7 +502,7 @@ class StoreHomeWidgets {
     // 从 PluginManager 获取最新的用户物品数据
     final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
     }
 
     // 查找对应的用户物品
@@ -528,7 +511,7 @@ class StoreHomeWidgets {
     );
 
     if (item == null) {
-      return _buildErrorWidget(context, 'store_itemNotFound'.tr);
+      return HomeWidget.buildErrorWidget(context, 'store_itemNotFound'.tr);
     }
 
     final productName = item.productName;
@@ -707,14 +690,14 @@ class StoreHomeWidgets {
     final data = result.data;
 
     if (data is! Map<String, dynamic>) {
-      return _buildErrorWidget(context, '数据格式错误');
+      return HomeWidget.buildErrorWidget(context, '数据格式错误');
     }
 
     final dataMap = data;
     final goal = dataMap['goal'] as int?;
 
     if (goal == null || goal <= 0) {
-      return _buildErrorWidget(context, '目标值无效');
+      return HomeWidget.buildErrorWidget(context, '目标值无效');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -736,7 +719,7 @@ class StoreHomeWidgets {
     // 从 PluginManager 获取最新的积分数据
     final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
     }
 
     final todayPoints = plugin.controller.getTodayPoints();

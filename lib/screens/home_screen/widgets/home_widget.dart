@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
+import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 
 /// 小组件构建器函数类型
 typedef HomeWidgetBuilder = Widget Function(BuildContext context, Map<String, dynamic> config);
@@ -205,4 +209,240 @@ class HomeWidget {
 
   /// 是否支持公共小组件
   bool get supportsCommonWidgets => commonWidgetsProvider != null;
+
+  // ===== 通用构建方法 =====
+
+  /// 构建错误提示组件
+  static Widget buildErrorWidget(BuildContext context, String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 32, color: Colors.red),
+          const SizedBox(height: 8),
+          Text(
+            'home_loadFailed'.tr,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建未配置状态的占位小组件
+  static Widget buildUnconfiguredWidget(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '点击配置',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建默认的已配置视图（当未使用公共小组件时）
+  static Widget buildDefaultConfiguredWidget(
+    BuildContext context,
+    SelectorResult result,
+    HomeWidget widgetDefinition,
+  ) {
+    final theme = Theme.of(context);
+    final color = widgetDefinition.color ?? theme.colorScheme.primary;
+
+    // 尝试从 result.data 获取标题
+    String title = '已配置';
+    String? subtitle;
+
+    if (result.data is Map) {
+      final dataMap = result.data as Map;
+      title = dataMap['title']?.toString() ?? title;
+      subtitle = dataMap['subtitle']?.toString() ?? dataMap['url']?.toString();
+    } else if (result.path.isNotEmpty) {
+      title = result.path.last.selectedItem.title;
+      subtitle = result.path.last.selectedItem.subtitle;
+    }
+
+    return SizedBox.expand(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(widgetDefinition.icon, size: 24, color: color),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widgetDefinition.name,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.outline,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建动态公共小组件（每次渲染都重新获取最新数据）
+  static Widget buildDynamicCommonWidget(
+    BuildContext context,
+    SelectorWidgetConfig selectorConfig,
+    HomeWidget widgetDefinition,
+    Map<String, dynamic> config,
+  ) {
+    try {
+      final widgetId = selectorConfig.commonWidgetId!;
+      final size =
+          config['widgetSize'] as HomeWidgetSize? ??
+          widgetDefinition.defaultSize;
+
+      // 将字符串 ID 转换为枚举值
+      final commonWidgetId = CommonWidgetsRegistry.fromString(widgetId);
+      if (commonWidgetId == null) {
+        return buildErrorWidget(context, '未知的公共组件: $widgetId');
+      }
+
+      // 获取原始数据（从 selectorConfig.selectedData）
+      final selectedData = selectorConfig.selectedData;
+      if (selectedData == null) {
+        return buildErrorWidget(context, '无法获取选择的数据');
+      }
+
+      // 从 selectedData 中提取实际的数据数组
+      Map<String, dynamic> data = {};
+      if (selectedData.containsKey('data')) {
+        final dataArray = selectedData['data'];
+        if (dataArray is List && dataArray.isNotEmpty) {
+          final rawData = dataArray[0];
+          if (rawData is Map<String, dynamic>) {
+            data = rawData;
+          } else if (rawData != null && rawData is Map) {
+            data = Map<String, dynamic>.from(rawData);
+          }
+        }
+      }
+
+      // 优先使用已保存的 commonWidgetProps（用户在对话框中选择的数据）
+      // 只有当 props 不存在时才动态调用 commonWidgetsProvider 获取最新数据
+      if (selectorConfig.commonWidgetProps != null) {
+        // 使用用户在【公共组件样式】对话框中选择并保存的数据
+        return CommonWidgetBuilder.build(
+          context,
+          commonWidgetId,
+          selectorConfig.commonWidgetProps!,
+          size,
+        );
+      }
+
+      // 兼容旧数据：如果没有保存的 props，才动态获取
+      if (widgetDefinition.commonWidgetsProvider != null) {
+        final availableWidgets = widgetDefinition.commonWidgetsProvider!(data);
+        final latestProps = availableWidgets[widgetId];
+
+        if (latestProps != null) {
+          return CommonWidgetBuilder.build(
+            context,
+            commonWidgetId,
+            latestProps,
+            size,
+          );
+        }
+      }
+
+      return buildErrorWidget(context, '无法获取最新数据');
+    } catch (e) {
+      debugPrint('[HomeWidget] 构建公共组件失败: $e');
+      return buildErrorWidget(context, '渲染公共组件失败');
+    }
+  }
+
+  /// 构建动态选择器小组件（支持事件触发时重新获取数据）
+  static Widget buildDynamicSelectorWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+    HomeWidget widgetDefinition,
+  ) {
+    // 解析选择器配置
+    SelectorWidgetConfig? selectorConfig;
+    try {
+      if (config.containsKey('selectorWidgetConfig')) {
+        selectorConfig = SelectorWidgetConfig.fromJson(
+          config['selectorWidgetConfig'] as Map<String, dynamic>,
+        );
+      }
+    } catch (e) {
+      debugPrint('[HomeWidget] 解析配置失败: $e');
+    }
+
+    // 判断是否已配置
+    if (selectorConfig == null || !selectorConfig.isConfigured) {
+      return buildUnconfiguredWidget(context);
+    }
+
+    // 检查是否使用了公共小组件
+    if (selectorConfig.usesCommonWidget) {
+      return buildDynamicCommonWidget(
+        context,
+        selectorConfig,
+        widgetDefinition,
+        config,
+      );
+    }
+
+    // 恢复 SelectorResult 并显示默认视图
+    final originalResult = selectorConfig.toSelectorResult();
+    if (originalResult == null) {
+      return buildErrorWidget(context, '无法解析选择的数据');
+    }
+
+    return buildDefaultConfiguredWidget(
+      context,
+      originalResult,
+      widgetDefinition,
+    );
+  }
 }

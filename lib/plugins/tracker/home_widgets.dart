@@ -328,25 +328,8 @@ class TrackerHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
-  }
-
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
   }
 
   // ===== 目标选择器小组件相关方法 =====
@@ -362,7 +345,7 @@ class TrackerHomeWidgets {
     final goalId = goalData['id'] as String?;
 
     if (goalId == null) {
-      return _buildErrorWidget(context, 'tracker_goalNotFound'.tr);
+      return HomeWidget.buildErrorWidget(context, 'tracker_goalNotFound'.tr);
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -384,7 +367,7 @@ class TrackerHomeWidgets {
     // 从 PluginManager 获取最新的目标数据
     final plugin = PluginManager.instance.getPlugin('tracker') as TrackerPlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, 'tracker_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(context, 'tracker_pluginNotAvailable'.tr);
     }
 
     // 查找对应目标

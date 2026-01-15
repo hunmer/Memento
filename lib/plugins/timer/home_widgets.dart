@@ -295,26 +295,10 @@ class TimerHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
   }
 
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
 
   // ===== 计时器选择器小组件相关方法 =====
 
@@ -343,7 +327,7 @@ class TimerHomeWidgets {
     final taskId = _getTaskId(result);
 
     if (taskId == null) {
-      return _buildErrorWidget(context, '计时器ID不存在');
+      return HomeWidget.buildErrorWidget(context, '计时器ID不存在');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -369,7 +353,7 @@ class TimerHomeWidgets {
     // 从 PluginManager 获取最新的计时器数据
     final plugin = PluginManager.instance.getPlugin('timer') as TimerPlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, '计时器插件未加载');
+      return HomeWidget.buildErrorWidget(context, '计时器插件未加载');
     }
 
     final tasks = plugin.getTasks();
@@ -379,7 +363,7 @@ class TimerHomeWidgets {
     );
 
     if (task == null) {
-      return _buildErrorWidget(context, '计时器不存在');
+      return HomeWidget.buildErrorWidget(context, '计时器不存在');
     }
 
     final taskColor = task.color;
