@@ -109,6 +109,8 @@ class CheckinTranslationsZh {
     'checkin_statsTitle': '打卡统计',
     'checkin_quickAccess': '快速访问',
     'checkin_quickAccessDesc': '点击跳转到指定签到项目',
+    'checkin_multiQuickAccess': '多项目打卡',
+    'checkin_multiQuickAccessDesc': '显示多个签到项目的打卡状态',
     'tapToCheckin': '点击打卡',
 };
 }

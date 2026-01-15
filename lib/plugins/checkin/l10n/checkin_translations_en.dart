@@ -109,6 +109,8 @@ class CheckinTranslationsEn {
     'checkin_statsTitle': 'Check-in Statistics',
     'checkin_quickAccess': 'Quick Access',
     'checkin_quickAccessDesc': 'Tap to go to check-in item',
+    'checkin_multiQuickAccess': 'Multi-Item Check-in',
+    'checkin_multiQuickAccessDesc': 'Display check-in status for multiple items',
     'tapToCheckin': 'Tap to check in',
   };
 }

@@ -165,82 +165,50 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: Column(
         children: [
-          // 左侧垂直 TabBar - 固定高度，可滚动
-          SizedBox(
-            width: 160,
-            child: SingleChildScrollView(
-              child: IntrinsicWidth(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: ExtendedTabBar(
-                        controller: _tabController,
-                        scrollDirection: Axis.vertical,
-                        isScrollable: true,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        labelPadding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        labelColor: Theme.of(context).colorScheme.primary,
-                        unselectedLabelColor:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                        labelStyle: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        unselectedLabelStyle: const TextStyle(fontSize: 11),
-                        tabs:
-                            widget.widgetItems.map((item) {
-                              return SizedBox(
-                                height: 60,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(item.icon, size: 14),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        item.title,
-                                        style: const TextStyle(fontSize: 11),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                      ),
-                    ),
-                  ],
+          // 顶部水平 TabBar - 可滚动
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  width: 1,
                 ),
               ),
             ),
+            child: ExtendedTabBar(
+              controller: _tabController,
+              isScrollable: true,
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 8,
+              ),
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor:
+                  Theme.of(context).colorScheme.onSurfaceVariant,
+              labelStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedLabelStyle: const TextStyle(fontSize: 12),
+              tabs: widget.widgetItems.map((item) {
+                return Tab(
+                  icon: Icon(item.icon, size: 18),
+                  text: item.title,
+                );
+              }).toList(),
+            ),
           ),
-          // 右侧 TabBarView 展示预览
+          // 下方 TabBarView 展示预览
           Expanded(
             child: ExtendedTabBarView(
               controller: _tabController,
-              scrollDirection: Axis.vertical,
-              children:
-                  widget.widgetItems.map((item) {
-                    return _buildWidgetPreviewContent(item);
-                  }).toList(),
+              children: widget.widgetItems.map((item) {
+                return _buildWidgetPreviewContent(item);
+              }).toList(),
             ),
           ),
         ],

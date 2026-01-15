@@ -96,6 +96,47 @@ class CheckinHomeWidgets {
         },
       ),
     );
+
+    // 多选签到项目小组件 - 显示多个签到项目的打卡状态
+    registry.register(
+      HomeWidget(
+        id: 'checkin_items_selector',
+        pluginId: 'checkin',
+        name: 'checkin_multiQuickAccess'.tr,
+        description: 'checkin_multiQuickAccessDesc'.tr,
+        icon: Icons.dashboard,
+        color: Colors.teal,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+        category: 'home_categoryRecord'.tr,
+        selectorId: 'checkin.items',
+        navigationHandler: _navigateToCheckinItems,
+        dataSelector: _extractCheckinItemsData,
+        // 公共小组件提供者
+        commonWidgetsProvider: _provideCommonWidgetsForMultiple,
+        builder: (context, config) {
+          // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return EventListenerContainer(
+                events: const [
+                  'checkin_completed', // 打卡完成
+                  'checkin_cancelled', // 取消打卡
+                  'checkin_reset', // 重置记录
+                  'checkin_deleted', // 删除项目
+                ],
+                onEvent: () => setState(() {}),
+                child: HomeWidget.buildDynamicSelectorWidget(
+                  context,
+                  config,
+                  registry.getWidget('checkin_items_selector')!,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   /// 公共小组件提供者函数
@@ -506,5 +547,401 @@ class CheckinHomeWidgets {
         arguments: {'itemId': itemId},
       );
     }
+  }
+
+  /// 导航到签到项目列表（多选模式）
+  static void _navigateToCheckinItems(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    // 多选模式默认导航到签到主列表
+    NavigationHelper.pushNamed(context, '/checkin');
+  }
+
+  /// 从选择器数据数组中提取多个签到项目的数据
+  static Map<String, dynamic> _extractCheckinItemsData(List<dynamic> dataArray) {
+    // 将多个项目数据转换为列表格式
+    final items = <Map<String, dynamic>>[];
+
+    for (final rawData in dataArray) {
+      Map<String, dynamic> itemData = {};
+
+      if (rawData is Map<String, dynamic>) {
+        itemData = rawData;
+      } else if (rawData is dynamic && rawData.toJson != null) {
+        // CheckinItem 等对象通过 toJson() 转换
+        final jsonResult = rawData.toJson();
+        if (jsonResult is Map<String, dynamic>) {
+          itemData = jsonResult;
+        }
+      }
+
+      items.add({
+        'id': itemData['id'] as String?,
+        'name': itemData['name'] as String?,
+        'group': itemData['group'] as String?,
+        'icon': itemData['icon'] as int?,
+        'color': itemData['color'] as int?,
+      });
+    }
+
+    return {'items': items};
+  }
+
+  /// 为多个签到项目提供公共小组件数据
+  static Map<String, Map<String, dynamic>> _provideCommonWidgetsForMultiple(
+    Map<String, dynamic> data,
+  ) {
+    // data 格式: {'items': [{'id': ..., 'name': ..., 'group': ..., 'icon': ..., 'color': ...}, ...]}
+    final itemsList = data['items'] as List<dynamic>?;
+    if (itemsList == null || itemsList.isEmpty) {
+      return {};
+    }
+
+    // 获取插件实例以获取实时数据
+    final plugin =
+        PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+
+    // 构建每个项目的数据
+    final List<Map<String, dynamic>> checkinItemCards = [];
+
+    int totalConsecutiveDays = 0;
+    int todayCheckedCount = 0;
+
+    for (final itemData in itemsList) {
+      if (itemData is! Map<String, dynamic>) continue;
+
+      final itemId = itemData['id'] as String?;
+      final name = (itemData['name'] as String?) ?? '签到项目';
+      final group = (itemData['group'] as String?) ?? '';
+      final colorValue = (itemData['color'] as int?) ?? 0xFF007AFF;
+      final iconCode = (itemData['icon'] as int?) ?? Icons.checklist.codePoint;
+
+      CheckinItem? item;
+      int consecutiveDays = 0;
+      bool isCheckedToday = false;
+
+      if (plugin != null && itemId != null) {
+        try {
+          item = plugin.checkinItems.firstWhere(
+            (i) => i.id == itemId,
+            orElse: () => throw Exception('项目不存在'),
+          );
+          consecutiveDays = item.getConsecutiveDays();
+          isCheckedToday = item.isCheckedToday();
+        } catch (_) {
+          // 项目不存在，使用默认值
+        }
+      }
+
+      totalConsecutiveDays += consecutiveDays;
+      if (isCheckedToday) todayCheckedCount++;
+
+      // 生成周数据
+      final weekData = List.generate(7, (index) {
+        final i = 6 - index;
+        final date = DateTime.now().subtract(Duration(days: i));
+        final dateStr =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+        final hasRecord =
+            item?.checkInRecords.containsKey(dateStr) == true &&
+            (item?.checkInRecords[dateStr]?.isEmpty == false);
+        return {
+          'day': '周${['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1]}',
+          'isChecked': hasRecord,
+        };
+      });
+
+      checkinItemCards.add({
+        'id': itemId,
+        'title': name,
+        'subtitle': group.isNotEmpty ? group : '签到',
+        'iconCodePoint': iconCode,
+        'color': colorValue,
+        'isCheckedToday': isCheckedToday,
+        'weekData': weekData,
+      });
+    }
+
+    // 计算月度签到数据
+    final today = DateTime.now();
+    final daysInMonth = DateTime(today.year, today.month + 1, 0).day;
+    int monthlyCheckinCount = 0;
+
+    for (int day = 1; day <= daysInMonth; day++) {
+      final dateStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+      for (final itemData in itemsList) {
+        if (itemData is! Map<String, dynamic>) continue;
+        final itemId = itemData['id'] as String?;
+        if (plugin != null && itemId != null) {
+          try {
+            final item = plugin.checkinItems.firstWhere(
+              (i) => i.id == itemId,
+              orElse: () => throw Exception('项目不存在'),
+            );
+            if (item.checkInRecords.containsKey(dateStr) &&
+                item.checkInRecords[dateStr]!.isNotEmpty) {
+              monthlyCheckinCount++;
+              break; // 只要有一个项目打卡就算
+            }
+          } catch (_) {}
+        }
+      }
+    }
+
+    final monthlyProgress = (monthlyCheckinCount / daysInMonth * 100).clamp(0, 100);
+
+    // 获取所有项目的本月签到记录
+    final allMonthlyRecords = <String>[];
+    for (int day = 1; day <= daysInMonth; day++) {
+      final dateStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+      bool hasAnyCheckin = false;
+      for (final itemData in itemsList) {
+        if (itemData is! Map<String, dynamic>) continue;
+        final itemId = itemData['id'] as String?;
+        if (plugin != null && itemId != null) {
+          try {
+            final item = plugin.checkinItems.firstWhere(
+              (i) => i.id == itemId,
+              orElse: () => throw Exception('项目不存在'),
+            );
+            if (item.checkInRecords.containsKey(dateStr) &&
+                item.checkInRecords[dateStr]!.isNotEmpty) {
+              hasAnyCheckin = true;
+              break;
+            }
+          } catch (_) {}
+        }
+      }
+      if (hasAnyCheckin) {
+        allMonthlyRecords.add(dateStr);
+      }
+    }
+
+    // 计算每个项目的最佳连续天数
+    int bestConsecutiveDays = 0;
+    for (final itemData in itemsList) {
+      if (itemData is! Map<String, dynamic>) continue;
+      final itemId = itemData['id'] as String?;
+      if (plugin != null && itemId != null) {
+        try {
+          final item = plugin.checkinItems.firstWhere(
+            (i) => i.id == itemId,
+            orElse: () => throw Exception('项目不存在'),
+          );
+          final itemBest = _getBestStreak(item);
+          if (itemBest > bestConsecutiveDays) {
+            bestConsecutiveDays = itemBest;
+          }
+        } catch (_) {}
+      }
+    }
+
+    return {
+      // 多项目签到卡片：显示多个项目的打卡状态
+      'checkinItemsCard': {
+        'items': checkinItemCards,
+        'totalConsecutiveDays': totalConsecutiveDays,
+        'todayCheckedCount': todayCheckedCount,
+        'totalCount': itemsList.length,
+      },
+
+      // MultiMetricProgressCard - 多指标进度卡片
+      'multiMetricProgressCard': {
+        'trackers': checkinItemCards.map((card) {
+          final consecutiveDays = card['isCheckedToday']
+              ? (plugin?.checkinItems.firstWhere(
+                    (i) => i.id == card['id'],
+                    orElse: () => throw Exception(''),
+                  ).getConsecutiveDays() ?? 0)
+              : 0;
+          return {
+            'emoji': String.fromCharCode(card['iconCodePoint'] as int),
+            'progress': (consecutiveDays / 30 * 100).clamp(0, 100).toDouble(),
+            'progressColor': card['color'],
+            'title': card['title'],
+            'subtitle': card['subtitle'],
+            'value': consecutiveDays.toDouble(),
+            'unit': '天',
+          };
+        }).toList(),
+        'backgroundColor': 0xFF007AFF,
+      },
+
+      // TaskProgressCard - 任务进度卡片
+      'taskProgressCard': {
+        'title': '打卡进度',
+        'subtitle': '本月完成度',
+        'completedTasks': todayCheckedCount,
+        'totalTasks': itemsList.length,
+        'pendingTasks': checkinItemCards
+            .where((card) => !(card['isCheckedToday'] as bool))
+            .map((card) => card['title'] as String)
+            .toList(),
+      },
+
+      // CircularMetricsCard - 环形指标卡片
+      'circularMetricsCard': {
+        'title': '打卡概览',
+        'metrics': [
+          {
+            'icon': 0xe156, // Icons.check_circle
+            'value': '$todayCheckedCount/${itemsList.length}',
+            'label': '今日完成',
+            'progress': todayCheckedCount / itemsList.length,
+            'color': 0xFF34D399,
+          },
+          {
+            'icon': 0xe85f, // Icons.calendar_today
+            'value': '$monthlyCheckinCount/$daysInMonth',
+            'label': '本月天数',
+            'progress': monthlyCheckinCount / daysInMonth,
+            'color': 0xFFFBBF24,
+          },
+          {
+            'icon': 0xe3d1, // Icons.trending_up
+            'value': '$totalConsecutiveDays',
+            'label': '连续打卡',
+            'progress': (totalConsecutiveDays / 100).clamp(0, 1),
+            'color': 0xFF6366F1,
+          },
+          {
+            'icon': 0xe8d5, // Icons.emoji_events
+            'value': '$bestConsecutiveDays',
+            'label': '最佳记录',
+            'progress': (bestConsecutiveDays / 100).clamp(0, 1),
+            'color': 0xFFFB7185,
+          },
+        ],
+      },
+
+      // WatchProgressCard - 观看进度卡片（复用为打卡进度）
+      'watchProgressCard': {
+        'userName': '我',
+        'lastWatched': '$daysInMonth天',
+        'currentCount': monthlyCheckinCount,
+        'totalCount': daysInMonth,
+        'items': checkinItemCards.map((card) {
+          return {
+            'title': card['title'],
+            'thumbnailUrl': null, // 签到项目没有缩略图
+          };
+        }).toList(),
+      },
+
+      // TaskListCard - 任务列表卡片
+      'taskListCard': {
+        'icon': 0xe24f, // Icons.checklist
+        'iconBackgroundColor': 0xFF14B8A6,
+        'count': todayCheckedCount,
+        'countLabel': '今日已完成',
+        'items': checkinItemCards
+            .where((card) => card['isCheckedToday'] as bool)
+            .map((card) => card['title'] as String)
+            .take(4)
+            .toList(),
+        'moreCount': checkinItemCards
+            .where((card) => !(card['isCheckedToday'] as bool))
+            .length,
+      },
+
+      // ColorTagTaskCard - 彩色标签任务卡片
+      'colorTagTaskCard': {
+        'taskCount': itemsList.length,
+        'label': '打卡项目',
+        'tasks': checkinItemCards.map((card) {
+          return {
+            'title': card['title'],
+            'color': card['color'],
+            'isCheckedToday': card['isCheckedToday'],
+          };
+        }).toList(),
+        'moreCount': 0,
+      },
+
+      // InboxMessageCard - 收件箱消息卡片（复用为最近打卡记录）
+      'inboxMessageCard': {
+        'messages': allMonthlyRecords.reversed.take(5).map((dateStr) {
+          final parts = dateStr.split('-');
+          final date = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+          final weekday = ['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1];
+          return {
+            'name': '周$weekday',
+            'avatarUrl': null,
+            'preview': '$dateStr 打卡记录',
+            'timeAgo': '${DateTime.now().difference(date).inDays}天前',
+          };
+        }).toList(),
+        'totalCount': allMonthlyRecords.length,
+        'remainingCount': 0,
+      },
+
+      // RoundedTaskListCard - 圆角任务列表卡片
+      'roundedTaskListCard': {
+        'tasks': checkinItemCards.map((card) {
+          final consecutiveDays = card['isCheckedToday']
+              ? (plugin?.checkinItems.firstWhere(
+                    (i) => i.id == card['id'],
+                    orElse: () => throw Exception(''),
+                  ).getConsecutiveDays() ?? 0)
+              : 0;
+          return {
+            'title': card['title'],
+            'subtitle': card['subtitle'],
+            'date': '连续$consecutiveDays天',
+          };
+        }).toList(),
+        'headerText': '打卡项目',
+      },
+
+      // DailyTodoListWidget - 每日待办事项卡片
+      'dailyTodoListWidget': {
+        'date': '${_getWeekdayName(today.weekday)}, ${today.day} ${_getMonthName(today.month)} ${today.year}',
+        'time': '${today.hour.toString().padLeft(2, '0')}:${today.minute.toString().padLeft(2, '0')}',
+        'tasks': checkinItemCards.map((card) {
+          return {
+            'title': card['title'],
+            'isCompleted': card['isCheckedToday'],
+          };
+        }).toList(),
+        'reminder': {
+          'text': '今日打卡目标',
+          'hashtag': '#习惯养成',
+          'hashtagEmoji': '💪',
+        },
+      },
+
+      // RoundedRemindersList - 圆角提醒事项列表
+      'roundedRemindersList': {
+        'itemCount': itemsList.length,
+        'items': checkinItemCards.map((card) {
+          final status = card['isCheckedToday'] ? '✅ ' : '⏰ ';
+          return {
+            'text': '$status${card['title']}',
+          };
+        }).toList(),
+      },
+    };
+  }
+
+  /// 获取星期名称
+  static String _getWeekdayName(int weekday) {
+    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return names[weekday - 1];
+  }
+
+  /// 获取月份名称
+  static String _getMonthName(int month) {
+    const names = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return names[month - 1];
   }
 }
