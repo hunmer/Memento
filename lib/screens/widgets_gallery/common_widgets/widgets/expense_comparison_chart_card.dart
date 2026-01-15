@@ -25,6 +25,9 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const ExpenseComparisonChartCardWidget({
     super.key,
     required this.title,
@@ -32,6 +35,7 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
     required this.changePercent,
     required this.dailyData,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -54,6 +58,7 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0.0,
       dailyData: dailyData,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -102,7 +107,7 @@ class _ExpenseComparisonChartCardWidgetState
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 400,
-              padding: const EdgeInsets.all(32),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(32),
@@ -135,7 +140,7 @@ class _ExpenseComparisonChartCardWidgetState
                                   : const Color(0xFF1F2937),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: widget.size.getItemSpacing()),
                           SizedBox(
                             height: 48,
                             child: Row(
@@ -187,7 +192,7 @@ class _ExpenseComparisonChartCardWidgetState
                                   ),
                                 ],
                               ),
-                              const SizedBox(width: 16),
+                              SizedBox(width: widget.size.getItemSpacing() * 2),
                               Row(
                                 children: [
                                   Container(
@@ -213,7 +218,7 @@ class _ExpenseComparisonChartCardWidgetState
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: widget.size.getItemSpacing()),
                           // 变化百分比
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -236,7 +241,7 @@ class _ExpenseComparisonChartCardWidgetState
                                         : const Color(0xFFEF4444),
                                   ),
                                 ),
-                                const SizedBox(width: 2),
+                                SizedBox(width: widget.size.getItemSpacing() / 4),
                                 Text(
                                   '+${widget.changePercent}%',
                                   style: TextStyle(
@@ -254,7 +259,7 @@ class _ExpenseComparisonChartCardWidgetState
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 柱状图
                   _BarChartWidget(
                     data: widget.dailyData,

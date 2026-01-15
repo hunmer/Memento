@@ -58,6 +58,8 @@ class RoundedPropertyCardWidget extends StatefulWidget {
   final IconData actionIcon;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const RoundedPropertyCardWidget({
     super.key,
@@ -70,6 +72,7 @@ class RoundedPropertyCardWidget extends StatefulWidget {
     required this.actionLabel,
     required this.actionIcon,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -87,6 +90,7 @@ class RoundedPropertyCardWidget extends StatefulWidget {
       actionLabel: props['actionLabel'] as String? ?? '',
       actionIcon: PropertyMetadataItem._iconFromString(props['actionIcon'] as String? ?? 'Icons.my_location'),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -227,7 +231,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
     Color secondaryTextColor,
   ) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: widget.size.getPadding(),
       color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -243,11 +247,11 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 元数据行
           _buildMetadataRow(isDark, secondaryTextColor),
-          const SizedBox(height: 16),
+          SizedBox(height: widget.size.getItemSpacing()),
 
           // 描述文本
           Text(
@@ -261,7 +265,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 操作按钮
           _buildActionButton(primaryColor),
@@ -278,8 +282,8 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
     ];
 
     return Wrap(
-      spacing: 16,
-      runSpacing: 8,
+      spacing: widget.size.getItemSpacing() * 2,
+      runSpacing: widget.size.getItemSpacing(),
       children: metadataItems.map((item) {
         return _MetadataItemWidget(
           icon: item.icon,
@@ -287,6 +291,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
           isDark: isDark,
           textColor: secondaryTextColor,
           animation: _animationController,
+          size: widget.size,
         );
       }).toList(),
     );
@@ -306,7 +311,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
             size: 20,
             color: primaryColor,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: widget.size.getItemSpacing()),
           Text(
             widget.actionLabel,
             style: TextStyle(
@@ -328,6 +333,7 @@ class _MetadataItemWidget extends StatelessWidget {
   final bool isDark;
   final Color textColor;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _MetadataItemWidget({
     required this.icon,
@@ -335,6 +341,7 @@ class _MetadataItemWidget extends StatelessWidget {
     required this.isDark,
     required this.textColor,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -347,7 +354,7 @@ class _MetadataItemWidget extends StatelessWidget {
           size: 16,
           color: textColor,
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: size.getItemSpacing() - 2),
         Text(
           label,
           style: TextStyle(

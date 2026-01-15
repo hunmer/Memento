@@ -81,6 +81,9 @@ class ChartIconDisplayCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ChartIconDisplayCard({
     super.key,
     required this.title,
@@ -89,6 +92,7 @@ class ChartIconDisplayCard extends StatefulWidget {
     this.displayType = ChartIconType.emoji,
     this.primaryColor = const Color(0xFF6366F1),
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -112,6 +116,7 @@ class ChartIconDisplayCard extends StatefulWidget {
           ? Color(props['primaryColor'] as int)
           : const Color(0xFF6366F1),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -171,14 +176,14 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
                 ],
                 border: isDark ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
               ),
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 标题和副标题
                   _buildHeader(isDark),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 心情图表
                   _buildMoodChart(isDark),
                 ],
@@ -205,7 +210,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getItemSpacing() / 2),
         Text(
           widget.subtitle,
           style: TextStyle(
@@ -235,7 +240,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
               final value = maxValue * (4 - index) ~/ 4;
               return Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: widget.size.getItemSpacing() / 2),
                   child: Text(
                     value.toString(),
                     style: TextStyle(
@@ -247,7 +252,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
                 ),
               );
             }),
-            const SizedBox(width: 8),
+            SizedBox(width: widget.size.getItemSpacing() / 2),
           ],
         ),
         // 柱状图
@@ -279,7 +284,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
           ),
         ),
         // X轴标签
-        const SizedBox(height: 8),
+        SizedBox(height: widget.size.getItemSpacing()),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: widget.moods.map((mood) {

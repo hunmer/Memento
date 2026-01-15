@@ -15,10 +15,14 @@ class MonthlyBillCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MonthlyBillCardWidget({
     super.key,
     required this.data,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -34,6 +38,7 @@ class MonthlyBillCardWidget extends StatefulWidget {
     return MonthlyBillCardWidget(
       data: data,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -89,8 +94,8 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : null,
-              constraints: widget.inline ? null : const BoxConstraints(maxWidth: 400),
-              padding: const EdgeInsets.all(24),
+              constraints: widget.inline ? null : widget.size.getHeightConstraints(),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),
@@ -116,7 +121,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                       letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 收入
                   _BillItemWidget(
@@ -127,7 +132,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                     animation: _fadeInAnimation,
                     index: 0,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getItemSpacing()),
 
                   // 支出
                   _BillItemWidget(
@@ -138,14 +143,14 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                     animation: _fadeInAnimation,
                     index: 1,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: widget.size.getItemSpacing()),
 
                   // 分隔线
                   Container(
                     height: 1,
                     color: dividerColor,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 结余
                   _BillItemWidget(

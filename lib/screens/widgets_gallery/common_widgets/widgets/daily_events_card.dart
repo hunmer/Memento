@@ -19,12 +19,16 @@ class DailyEventsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const DailyEventsCardWidget({
     super.key,
     required this.weekday,
     required this.day,
     required this.events,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -40,6 +44,7 @@ class DailyEventsCardWidget extends StatefulWidget {
       day: props['day'] as int? ?? 1,
       events: events,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -98,13 +103,13 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(16),
+              padding: widget.size.getPadding(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 星期和日期
                   Container(
-                    margin: const EdgeInsets.only(bottom: 8),
+                    margin: EdgeInsets.only(bottom: widget.size.getTitleSpacing()),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -117,7 +122,7 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                             letterSpacing: 0.5,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: widget.size.getItemSpacing() / 4),
                         AnimatedFlipCounter(
                           value: widget.day.toDouble() * _animation.value,
                           wholeDigits: 1,
@@ -150,6 +155,8 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                       event: event,
                       animation: itemAnimation,
                       isDark: isDark,
+                      size: widget.size,
+                      events: widget.events,
                     );
                   }),
                 ],
@@ -167,11 +174,15 @@ class _EventItem extends StatelessWidget {
   final DailyEventData event;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
+  final List<DailyEventData> events;
 
   const _EventItem({
     required this.event,
     required this.animation,
     required this.isDark,
+    required this.size,
+    required this.events,
   });
 
   @override
@@ -184,7 +195,7 @@ class _EventItem extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - animation.value)),
             child: Container(
-              margin: EdgeInsets.only(bottom: _events.length > 1 ? 8 : 0),
+              margin: EdgeInsets.only(bottom: events.length > 1 ? size.getItemSpacing() : 0),
               height: 42,
               decoration: BoxDecoration(
                 color: Color(isDark
@@ -224,7 +235,7 @@ class _EventItem extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: size.getItemSpacing() / 4),
                           Text(
                             event.time,
                             style: TextStyle(
@@ -250,7 +261,4 @@ class _EventItem extends StatelessWidget {
       },
     );
   }
-
-  // 用于获取父组件的事件列表（这里只是占位，实际使用时通过参数传递）
-  List<DailyEventData> get _events => [event];
 }

@@ -12,10 +12,14 @@ class TrendListCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const TrendListCardWidget({
     super.key,
     required this.data,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -26,6 +30,7 @@ class TrendListCardWidget extends StatefulWidget {
     return TrendListCardWidget(
       data: TrendListCardData.fromJson(props),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -72,7 +77,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 340,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),
@@ -91,7 +96,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildHeader(context, isDark),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   ..._buildItems(context, isDark),
                 ],
               ),
@@ -160,7 +165,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
 
     for (int i = 0; i < widget.data.items.length; i++) {
       if (i > 0) {
-        widgets.add(const SizedBox(height: 20));
+        widgets.add(SizedBox(height: widget.size.getItemSpacing()));
       }
       widgets.add(
         _TrendItemWidget(

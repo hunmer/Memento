@@ -49,8 +49,12 @@ class SpendingTrendChartWidget extends StatefulWidget {
 
   /// 最大金额（用于Y轴缩放）
   final double maxAmount;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const SpendingTrendChartWidget({
     super.key,
@@ -68,6 +72,7 @@ class SpendingTrendChartWidget extends StatefulWidget {
     required this.currentPoint,
     required this.maxAmount,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -96,6 +101,7 @@ class SpendingTrendChartWidget extends StatefulWidget {
       currentPoint: (props['currentPoint'] as num?)?.toDouble() ?? 1600,
       maxAmount: (props['maxAmount'] as num?)?.toDouble() ?? 4000,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -184,7 +190,9 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                 children: [
                   // 顶部标题栏
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+                    padding: widget.size.getPadding().copyWith(
+                      bottom: (widget.size.getPadding().bottom * 0.75).roundToDouble(),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -216,7 +224,7 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                           bottomRight: Radius.circular(36),
                         ),
                       ),
-                      padding: const EdgeInsets.all(24),
+                      padding: widget.size.getPadding(),
                       child: Column(
                         children: [
                           // 标题和图例
@@ -239,18 +247,20 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                                     color: primaryColor,
                                     label: widget.currentMonthLabel,
                                     isDashed: false,
+                                    size: widget.size,
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: widget.size.getItemSpacing()),
                                   _LegendItem(
                                     color: mutedColor,
                                     label: widget.previousMonthLabel,
                                     isDashed: true,
+                                    size: widget.size,
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: widget.size.getTitleSpacing()),
                           // 图表区域
                           Expanded(
                             child: _TrendLineChart(
@@ -268,6 +278,7 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                               startLabel: widget.startLabel,
                               middleLabel: widget.middleLabel,
                               endLabel: widget.endLabel,
+                              size: widget.size,
                             ),
                           ),
                         ],
@@ -289,11 +300,13 @@ class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
   final bool isDashed;
+  final HomeWidgetSize size;
 
   const _LegendItem({
     required this.color,
     required this.label,
     required this.isDashed,
+    this.size = HomeWidgetSize.medium,
   });
 
   @override
@@ -315,7 +328,7 @@ class _LegendItem extends StatelessWidget {
                 )
               : null,
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: size.getItemSpacing()),
         Text(
           label,
           style: TextStyle(
@@ -379,6 +392,7 @@ class _TrendLineChart extends StatelessWidget {
   final String startLabel;
   final String middleLabel;
   final String endLabel;
+  final HomeWidgetSize size;
 
   const _TrendLineChart({
     required this.currentMonthData,
@@ -395,6 +409,7 @@ class _TrendLineChart extends StatelessWidget {
     required this.startLabel,
     required this.middleLabel,
     required this.endLabel,
+    this.size = HomeWidgetSize.medium,
   });
 
   @override
@@ -413,7 +428,7 @@ class _TrendLineChart extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: ['4k', '3k', '2k', '1k'].map((label) {
               return Padding(
-                padding: const EdgeInsets.only(bottom: 2),
+                padding: EdgeInsets.only(bottom: size.getItemSpacing() / 2),
                 child: Text(
                   label,
                   style: TextStyle(
@@ -428,12 +443,15 @@ class _TrendLineChart extends StatelessWidget {
         ),
         // 预算线标签
         Positioned(
-          left: 24,
+          left: size.getPadding().left,
           top: 30 * (1 - budgetAmount / maxAmount),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.getItemSpacing(),
+                  vertical: size.getItemSpacing() / 4,
+                ),
                 decoration: BoxDecoration(
                   color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(10),
@@ -452,7 +470,7 @@ class _TrendLineChart extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: size.getItemSpacing()),
               Container(
                 width: 200,
                 height: 1,
@@ -463,7 +481,7 @@ class _TrendLineChart extends StatelessWidget {
         ),
         // 图表
         Positioned.fill(
-          left: 24,
+          left: size.getPadding().left,
           bottom: 30,
           child: _LineChartPainterWidget(
             currentMonthData: currentMonthData,
@@ -475,6 +493,7 @@ class _TrendLineChart extends StatelessWidget {
             mutedColor: mutedColor,
             animation: animation,
             pointAnimation: pointAnimation,
+            size: size,
           ),
         ),
         // X轴标签
@@ -483,7 +502,7 @@ class _TrendLineChart extends StatelessWidget {
           right: 0,
           bottom: 0,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: size.getPadding().left),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -516,6 +535,7 @@ class _LineChartPainterWidget extends StatelessWidget {
   final Color mutedColor;
   final Animation<double> animation;
   final Animation<double> pointAnimation;
+  final HomeWidgetSize size;
 
   const _LineChartPainterWidget({
     required this.currentMonthData,
@@ -527,6 +547,7 @@ class _LineChartPainterWidget extends StatelessWidget {
     required this.mutedColor,
     required this.animation,
     required this.pointAnimation,
+    required this.size,
   });
 
   @override
@@ -548,6 +569,7 @@ class _LineChartPainterWidget extends StatelessWidget {
                 mutedColor: mutedColor,
                 animation: animation.value,
                 pointAnimation: pointAnimation.value,
+                size: size,
               ),
             );
           },
@@ -568,6 +590,7 @@ class _LineChartPainter extends CustomPainter {
   final Color mutedColor;
   final double animation;
   final double pointAnimation;
+  final HomeWidgetSize size;
 
   _LineChartPainter({
     required this.currentMonthData,
@@ -579,13 +602,14 @@ class _LineChartPainter extends CustomPainter {
     required this.mutedColor,
     required this.animation,
     required this.pointAnimation,
+    required this.size,
   });
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final padding = 16.0;
-    final chartWidth = size.width - padding * 2;
-    final chartHeight = size.height - 20;
+  void paint(Canvas canvas, Size canvasSize) {
+    final padding = size.getPadding().left.toDouble();
+    final chartWidth = canvasSize.width - padding * 2;
+    final chartHeight = canvasSize.height - size.getPadding().bottom;
 
     // 绘制上个月虚线
     _drawDashedLine(
@@ -595,7 +619,7 @@ class _LineChartPainter extends CustomPainter {
       chartHeight,
       padding,
       mutedColor,
-      size,
+      canvasSize,
     );
 
     // 绘制当前月份渐变填充
@@ -606,7 +630,7 @@ class _LineChartPainter extends CustomPainter {
       chartHeight,
       padding,
       primaryColor,
-      size,
+      canvasSize,
     );
 
     // 绘制当前月份实线
@@ -617,7 +641,7 @@ class _LineChartPainter extends CustomPainter {
       chartHeight,
       padding,
       primaryColor,
-      size,
+      canvasSize,
     );
 
     // 绘制当前点
@@ -628,7 +652,7 @@ class _LineChartPainter extends CustomPainter {
       chartHeight,
       padding,
       primaryColor,
-      size,
+      canvasSize,
     );
 
     // 绘制底线
@@ -639,8 +663,8 @@ class _LineChartPainter extends CustomPainter {
     final isDark = primaryColor == const Color(0xFFf06431);
     if (!isDark) {
       canvas.drawLine(
-        Offset(padding, size.height - 8),
-        Offset(size.width - padding, size.height - 8),
+        Offset(padding, canvasSize.height - 8),
+        Offset(canvasSize.width - padding, canvasSize.height - 8),
         linePaint,
       );
     }
@@ -653,14 +677,14 @@ class _LineChartPainter extends CustomPainter {
     double height,
     double padding,
     Color color,
-    Size size,
+    Size canvasSize,
   ) {
     final paint = Paint()
       ..color = color
       ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
 
-    final path = _createPath(data, width, height, padding, size);
+    final path = _createPath(data, width, height, padding, canvasSize);
     final dashPath = _createDashedPath(path);
 
     canvas.drawPath(dashPath, paint);
@@ -673,9 +697,9 @@ class _LineChartPainter extends CustomPainter {
     double height,
     double padding,
     Color color,
-    Size size,
+    Size canvasSize,
   ) {
-    final path = _createPath(data, width, height, padding, size);
+    final path = _createPath(data, width, height, padding, canvasSize);
 
     // 创建闭合路径用于填充
     final fillPath = Path();
@@ -686,18 +710,18 @@ class _LineChartPainter extends CustomPainter {
     fillPath.addPath(extractPath, Offset.zero);
 
     // 添加底部闭合
-    final firstPoint = _getPointAtIndex(data, 0, width, height, padding, size);
+    final firstPoint = _getPointAtIndex(data, 0, width, height, padding, canvasSize);
     final lastPoint = _getPointAtIndex(
       data,
       (data.length - 1 * animation).floor().clamp(0, data.length - 1),
       width,
       height,
       padding,
-      size,
+      canvasSize,
     );
 
-    fillPath.lineTo(lastPoint.dx, size.height - 8);
-    fillPath.lineTo(firstPoint.dx, size.height - 8);
+    fillPath.lineTo(lastPoint.dx, canvasSize.height - 8);
+    fillPath.lineTo(firstPoint.dx, canvasSize.height - 8);
     fillPath.close();
 
     final gradient = LinearGradient(
@@ -710,7 +734,7 @@ class _LineChartPainter extends CustomPainter {
     );
 
     final paint = Paint()
-      ..shader = gradient.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+      ..shader = gradient.createShader(Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height));
 
     canvas.drawPath(fillPath, paint);
   }
@@ -722,7 +746,7 @@ class _LineChartPainter extends CustomPainter {
     double height,
     double padding,
     Color color,
-    Size size,
+    Size canvasSize,
   ) {
     final paint = Paint()
       ..color = color
@@ -730,7 +754,7 @@ class _LineChartPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final path = _createPath(data, width, height, padding, size);
+    final path = _createPath(data, width, height, padding, canvasSize);
     final pathMetrics = path.computeMetrics();
     final metric = pathMetrics.first;
 
@@ -745,13 +769,13 @@ class _LineChartPainter extends CustomPainter {
     double height,
     double padding,
     Color color,
-    Size size,
+    Size canvasSize,
   ) {
     // 只在主动画接近完成时才开始绘制当前点
     if (animation < 0.9) return;
 
     final pointIndex = data.length - 1;
-    final point = _getPointAtIndex(data, pointIndex, width, height, padding, size);
+    final point = _getPointAtIndex(data, pointIndex, width, height, padding, canvasSize);
 
     // 计算缩放比例：基于点动画值
     final scale = pointAnimation.clamp(0.0, 1.0);
@@ -769,17 +793,17 @@ class _LineChartPainter extends CustomPainter {
     canvas.drawCircle(point, 5 * scale, dotPaint);
   }
 
-  Path _createPath(List<double> data, double width, double height, double padding, Size size) {
+  Path _createPath(List<double> data, double width, double height, double padding, Size canvasSize) {
     final path = Path();
     if (data.isEmpty) return path;
 
-    final firstPoint = _getPointAtIndex(data, 0, width, height, padding, size);
+    final firstPoint = _getPointAtIndex(data, 0, width, height, padding, canvasSize);
     path.moveTo(firstPoint.dx, firstPoint.dy);
 
     for (int i = 1; i < data.length; i++) {
-      final point = _getPointAtIndex(data, i, width, height, padding, size);
+      final point = _getPointAtIndex(data, i, width, height, padding, canvasSize);
       // 使用二次贝塞尔曲线平滑连接
-      final previousPoint = _getPointAtIndex(data, i - 1, width, height, padding, size);
+      final previousPoint = _getPointAtIndex(data, i - 1, width, height, padding, canvasSize);
       final controlPoint1 = Offset(
         previousPoint.dx + (point.dx - previousPoint.dx) / 2,
         previousPoint.dy,
@@ -807,13 +831,13 @@ class _LineChartPainter extends CustomPainter {
     double width,
     double height,
     double padding,
-    Size size,
+    Size canvasSize,
   ) {
     if (index >= data.length) index = data.length - 1;
     if (index < 0) index = 0;
 
     final x = padding + (width / (data.length - 1)) * index;
-    final y = (size.height - 8) - (data[index] / maxAmount) * height;
+    final y = (canvasSize.height - 8) - (data[index] / maxAmount) * height;
     return Offset(x, y);
   }
 

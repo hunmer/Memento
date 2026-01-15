@@ -12,10 +12,14 @@ class ColorTagTaskCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ColorTagTaskCardWidget({
     super.key,
     required this.data,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -26,6 +30,7 @@ class ColorTagTaskCardWidget extends StatefulWidget {
     return ColorTagTaskCardWidget(
       data: ColorTagTaskCardData.fromJson(props),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -90,13 +95,13 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: widget.size.getPadding(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 标题区域
               _buildHeader(textColor, secondaryTextColor, primaryColor),
-              const SizedBox(height: 16),
+              SizedBox(height: widget.size.getTitleSpacing()),
               // 任务列表
               Expanded(
                 child: _buildTaskList(),
@@ -162,7 +167,7 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (int i = 0; i < widget.data.tasks.length; i++) ...[
-            if (i > 0) const SizedBox(height: 14),
+            if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
             _ColorTagTaskItemWidget(
               task: widget.data.tasks[i],
               animation: _animation,

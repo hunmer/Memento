@@ -76,6 +76,9 @@ class ArticleListCardWidget extends StatefulWidget {
   final FeaturedArticleData featuredArticle;
   final List<ArticleData> articles;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -83,6 +86,7 @@ class ArticleListCardWidget extends StatefulWidget {
     super.key,
     required this.featuredArticle,
     required this.articles,
+    this.size = HomeWidgetSize.medium,
     this.inline = false,
   });
 
@@ -108,6 +112,7 @@ class ArticleListCardWidget extends StatefulWidget {
     return ArticleListCardWidget(
       featuredArticle: featured,
       articles: articlesList,
+      size: size,
       inline: props['inline'] as bool? ?? false,
     );
   }
@@ -173,23 +178,25 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            SizedBox(height: widget.size.getTitleSpacing()),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: widget.size.getPadding(),
               child: _FeaturedSection(
                 data: widget.featuredArticle,
                 animation: _animation,
+                size: widget.size,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: widget.size.getTitleSpacing()),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: widget.size.getPadding(),
               child: _ArticleListSection(
                 articles: widget.articles,
                 animation: _animation,
+                size: widget.size,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: widget.size.getTitleSpacing()),
           ],
         ),
       ),
@@ -200,8 +207,9 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
 class _FeaturedSection extends StatelessWidget {
   final FeaturedArticleData data;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _FeaturedSection({required this.data, required this.animation});
+  const _FeaturedSection({required this.data, required this.animation, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +242,7 @@ class _FeaturedSection extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: size.getItemSpacing()),
         AnimatedBuilder(
           animation: sectionAnimation,
           builder: (context, child) {
@@ -289,8 +297,9 @@ class _FeaturedSection extends StatelessWidget {
 class _ArticleListSection extends StatelessWidget {
   final List<ArticleData> articles;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _ArticleListSection({required this.articles, required this.animation});
+  const _ArticleListSection({required this.articles, required this.animation, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -321,9 +330,9 @@ class _ArticleListSection extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: size.getItemSpacing()),
         ...List.generate(articles.length, (index) {
-          return _ArticleListItem(data: articles[index], animation: animation, index: index);
+          return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
         }),
       ],
     );
@@ -334,11 +343,13 @@ class _ArticleListItem extends StatelessWidget {
   final ArticleData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _ArticleListItem({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -358,7 +369,7 @@ class _ArticleListItem extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - itemAnimation.value)),
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
+              padding: EdgeInsets.only(bottom: size.getItemSpacing()),
               child: Row(
                 children: [
                   ClipRRect(

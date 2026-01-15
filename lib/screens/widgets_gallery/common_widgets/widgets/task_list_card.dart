@@ -27,6 +27,9 @@ class TaskListCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const TaskListCardWidget({
     super.key,
     required this.icon,
@@ -36,6 +39,7 @@ class TaskListCardWidget extends StatefulWidget {
     required this.items,
     required this.moreCount,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -49,6 +53,13 @@ class TaskListCardWidget extends StatefulWidget {
             .toList() ??
         [];
 
+    // 从 props 中读取 size，如果不存在则使用传入的 size 参数
+    HomeWidgetSize widgetSize = size;
+    if (props['size'] != null) {
+      final sizeData = HomeWidgetSize.fromJsonWithData(props['size'] as Map<String, dynamic>);
+      widgetSize = sizeData['size'] as HomeWidgetSize;
+    }
+
     return TaskListCardWidget(
       icon: props['icon'] is String
           ? IconData(int.parse(props['icon'] as String), fontFamily: 'MaterialIcons')
@@ -61,6 +72,7 @@ class TaskListCardWidget extends StatefulWidget {
       items: items,
       moreCount: props['moreCount'] as int? ?? 0,
       inline: props['inline'] as bool? ?? false,
+      size: widgetSize,
     );
   }
 
@@ -74,6 +86,7 @@ class TaskListCardWidget extends StatefulWidget {
       'items': items,
       'moreCount': moreCount,
       'inline': inline,
+      'size': size.toJson(),
     };
   }
 
@@ -136,7 +149,7 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: widget.size.getPadding(),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -147,7 +160,7 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
                       textColor,
                       subtitleColor,
                     ),
-                    const SizedBox(width: 24),
+                    SizedBox(width: widget.size.getTitleSpacing()),
                     // 右侧：任务列表
                     Expanded(
                       child: _buildRightSection(
@@ -197,10 +210,10 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
             child: Icon(
               widget.icon,
               color: Colors.white,
-              size: 24,
+              size: widget.size.getIconSize(),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getItemSpacing()),
           // 计数
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,14 +223,14 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
                 child: AnimatedFlipCounter(
                   value: widget.count.toDouble() * _animation.value,
                   textStyle: TextStyle(
-                    fontSize: 48,
+                    fontSize: widget.size.getLargeFontSize(),
                     fontWeight: FontWeight.w500,
                     color: textColor,
                     height: 1.0,
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: widget.size.getItemSpacing()),
               SizedBox(
                 height: 18,
                 child: Text(
@@ -251,7 +264,7 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
           if (i > 0)
             Container(
               height: 1,
-              margin: const EdgeInsets.symmetric(vertical: 12),
+              margin: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing()),
               color: borderColor,
             ),
           _TaskItemWidget(
@@ -259,15 +272,17 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
             animation: _animation,
             index: i,
             textColor: textColor,
+            size: widget.size,
           ),
         ],
-        const SizedBox(height: 8),
+        SizedBox(height: widget.size.getItemSpacing()),
         // 更多任务链接
         _MoreLinkWidget(
           count: widget.moreCount,
           animation: _animation,
           index: widget.items.length,
           color: widget.iconBackgroundColor,
+          size: widget.size,
         ),
       ],
     );
@@ -280,12 +295,14 @@ class _TaskItemWidget extends StatelessWidget {
   final Animation<double> animation;
   final int index;
   final Color textColor;
+  final HomeWidgetSize size;
 
   const _TaskItemWidget({
     required this.title,
     required this.animation,
     required this.index,
     required this.textColor,
+    required this.size,
   });
 
   @override
@@ -307,7 +324,7 @@ class _TaskItemWidget extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - itemAnimation.value)),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: size.getItemSpacing()),
               child: Text(
                 title,
                 style: TextStyle(
@@ -333,12 +350,14 @@ class _MoreLinkWidget extends StatelessWidget {
   final Animation<double> animation;
   final int index;
   final Color color;
+  final HomeWidgetSize size;
 
   const _MoreLinkWidget({
     required this.count,
     required this.animation,
     required this.index,
     required this.color,
+    required this.size,
   });
 
   @override
@@ -360,7 +379,7 @@ class _MoreLinkWidget extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - linkAnimation.value)),
             child: Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: EdgeInsets.only(top: size.getItemSpacing()),
               child: Text(
                 '+$count more',
                 style: TextStyle(

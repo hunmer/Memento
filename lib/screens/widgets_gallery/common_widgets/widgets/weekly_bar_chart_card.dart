@@ -41,6 +41,8 @@ class CommonWeeklyBarChartCardWidget extends StatefulWidget {
   final List<CommonWeeklyBarData> weeklyData;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 组件尺寸
+  final HomeWidgetSize size;
 
   const CommonWeeklyBarChartCardWidget({
     super.key,
@@ -49,6 +51,7 @@ class CommonWeeklyBarChartCardWidget extends StatefulWidget {
     required this.percentage,
     required this.weeklyData,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -67,6 +70,7 @@ class CommonWeeklyBarChartCardWidget extends StatefulWidget {
       percentage: props['percentage'] as int? ?? 0,
       weeklyData: weeklyData,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -114,8 +118,8 @@ class _CommonWeeklyBarChartCardWidgetState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height: widget.inline ? double.maxFinite : 300,
-              width: widget.inline ? double.maxFinite : 300,
+              height: widget.inline ? double.maxFinite : widget.size.getHeightConstraints().maxHeight,
+              width: widget.inline ? double.maxFinite : widget.size.getHeightConstraints().maxWidth,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
@@ -128,19 +132,20 @@ class _CommonWeeklyBarChartCardWidgetState
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: widget.size.getPadding(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 条形图区域
                     SizedBox(
-                      height: 150,
+                      height: widget.size.getHeightConstraints().maxHeight * 0.5,
                       child: _WeeklyBars(
                         data: widget.weeklyData,
                         animation: _animation,
+                        size: widget.size,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: widget.size.getItemSpacing()),
                     // 底部信息
                     Row(
                       children: [
@@ -210,10 +215,12 @@ class _CommonWeeklyBarChartCardWidgetState
 class _WeeklyBars extends StatelessWidget {
   final List<CommonWeeklyBarData> data;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _WeeklyBars({
     required this.data,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -240,7 +247,7 @@ class _WeeklyBars extends StatelessWidget {
 
         return Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: index < data.length - 1 ? 8 : 0),
+            padding: EdgeInsets.only(right: index < data.length - 1 ? size.getItemSpacing() : 0),
             child: Column(
               children: [
                 // 条形图容器

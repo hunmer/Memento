@@ -22,6 +22,9 @@ class LineChartTrendCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const LineChartTrendCardWidget({
     super.key,
     required this.value,
@@ -30,6 +33,7 @@ class LineChartTrendCardWidget extends StatefulWidget {
     required this.dataPoints,
     this.unit = '',
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -47,6 +51,7 @@ class LineChartTrendCardWidget extends StatefulWidget {
           [],
       unit: props['unit'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -100,7 +105,7 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 320,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),
@@ -122,7 +127,7 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
                     primaryColor,
                     axisColor,
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 折线图区域
                   _buildChart(primaryColor, gridColor, axisColor),
                 ],

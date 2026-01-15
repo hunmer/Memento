@@ -28,6 +28,9 @@ class RevenueTrendCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const RevenueTrendCardWidget({
     super.key,
     required this.value,
@@ -38,6 +41,7 @@ class RevenueTrendCardWidget extends StatefulWidget {
     required this.dates,
     required this.highlightIndex,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -60,6 +64,7 @@ class RevenueTrendCardWidget extends StatefulWidget {
           [1, 2, 3, 4, 5],
       highlightIndex: props['highlightIndex'] as int? ?? 0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -123,7 +128,7 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -131,9 +136,10 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
                     _PeriodSelector(
                       period: widget.period,
                       animation: _animation,
+                      size: widget.size,
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
 
                     // 金额和百分比
                     _ValueSection(
@@ -143,9 +149,10 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
                       animation: _animation,
                       textColor: textColor,
                       subTextColor: subTextColor,
+                      size: widget.size,
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: widget.size.getTitleSpacing()),
 
                     // 曲线图
                     Expanded(
@@ -157,7 +164,7 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: widget.size.getItemSpacing()),
 
                     // 日期标签
                     _DateLabels(
@@ -166,6 +173,7 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
                       primaryColor: primaryColor,
                       textColor: textColor,
                       animation: _animation,
+                      size: widget.size,
                     ),
                   ],
                 ),
@@ -182,10 +190,12 @@ class _RevenueTrendCardWidgetState extends State<RevenueTrendCardWidget>
 class _PeriodSelector extends StatelessWidget {
   final String period;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _PeriodSelector({
     required this.period,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -210,7 +220,10 @@ class _PeriodSelector extends StatelessWidget {
                 onTap: () {},
                 borderRadius: BorderRadius.circular(8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.getItemSpacing(),
+                    vertical: size.getItemSpacing() / 2,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -222,7 +235,7 @@ class _PeriodSelector extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: size.getItemSpacing() / 2),
                       Icon(
                         Icons.expand_more,
                         color: textColor,
@@ -248,6 +261,7 @@ class _ValueSection extends StatelessWidget {
   final Animation<double> animation;
   final Color textColor;
   final Color subTextColor;
+  final HomeWidgetSize size;
 
   const _ValueSection({
     required this.currency,
@@ -256,6 +270,7 @@ class _ValueSection extends StatelessWidget {
     required this.animation,
     required this.textColor,
     required this.subTextColor,
+    required this.size,
   });
 
   @override
@@ -309,7 +324,7 @@ class _ValueSection extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 8),
+              SizedBox(height: size.getItemSpacing()),
 
               // 增长百分比
               Text(
@@ -507,6 +522,7 @@ class _DateLabels extends StatelessWidget {
   final Color primaryColor;
   final Color textColor;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DateLabels({
     required this.dates,
@@ -514,6 +530,7 @@ class _DateLabels extends StatelessWidget {
     required this.primaryColor,
     required this.textColor,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -529,7 +546,7 @@ class _DateLabels extends StatelessWidget {
         return Opacity(
           opacity: labelsAnimation.value,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: size.getItemSpacing()),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(dates.length, (index) {

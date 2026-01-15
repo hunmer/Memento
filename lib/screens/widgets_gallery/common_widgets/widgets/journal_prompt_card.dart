@@ -21,6 +21,9 @@ class JournalPromptCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const JournalPromptCardWidget({
     super.key,
     required this.weekday,
@@ -28,6 +31,7 @@ class JournalPromptCardWidget extends StatefulWidget {
     required this.onNewPressed,
     required this.onSyncPressed,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性创建（用于动态渲染）
@@ -42,6 +46,7 @@ class JournalPromptCardWidget extends StatefulWidget {
       onNewPressed: () {}, // 通用小组件中不执行实际操作
       onSyncPressed: () {}, // 通用小组件中不执行实际操作
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -137,7 +142,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
 
               // 主内容
               Padding(
-                padding: const EdgeInsets.all(28),
+                padding: widget.size.getPadding(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -157,7 +162,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                       ],
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: widget.size.getTitleSpacing()),
 
                     // 提示问题
                     Expanded(
@@ -178,7 +183,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: widget.size.getTitleSpacing()),
 
                     // 按钮组
                     Row(
@@ -189,12 +194,14 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                             label: 'New',
                             onPressed: widget.onNewPressed,
                             animation: _animationController,
+                            size: widget.size,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: widget.size.getItemSpacing()),
                         _SyncButton(
                           onPressed: widget.onSyncPressed,
                           animation: _animationController,
+                          size: widget.size,
                         ),
                       ],
                     ),
@@ -339,12 +346,14 @@ class _ActionButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _ActionButton({
     required this.icon,
     required this.label,
     required this.onPressed,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -379,7 +388,7 @@ class _ActionButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, color: Colors.white, size: 24),
-                const SizedBox(width: 8),
+                SizedBox(width: size.getItemSpacing()),
                 Text(
                   label,
                   style: const TextStyle(
@@ -401,8 +410,13 @@ class _ActionButton extends StatelessWidget {
 class _SyncButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _SyncButton({required this.onPressed, required this.animation});
+  const _SyncButton({
+    required this.onPressed,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {

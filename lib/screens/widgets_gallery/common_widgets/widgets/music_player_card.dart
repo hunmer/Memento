@@ -26,6 +26,9 @@ class MusicPlayerCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MusicPlayerCardWidget({
     super.key,
     required this.albumArtUrl,
@@ -35,6 +38,7 @@ class MusicPlayerCardWidget extends StatefulWidget {
     required this.totalDuration,
     this.isPlaying = true,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -50,6 +54,7 @@ class MusicPlayerCardWidget extends StatefulWidget {
       totalDuration: props['totalDuration'] as int? ?? 0,
       isPlaying: props['isPlaying'] as bool? ?? true,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -125,9 +130,8 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
         isDark ? const Color(0xFF71717A) : const Color(0xFFA1A1AA);
 
     return Container(
-      width: widget.inline ? double.maxFinite : 340,
-      height: widget.inline ? double.maxFinite : 306,
-      padding: const EdgeInsets.all(20),
+      constraints: widget.inline ? null : widget.size.getHeightConstraints(),
+      padding: widget.size.getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(36),
@@ -152,8 +156,9 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
                   albumArtUrl: widget.albumArtUrl,
                   animation: _animation,
                   isDark: isDark,
+                  size: widget.size,
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: widget.size.getItemSpacing()),
 
                 // 歌词
                 Expanded(
@@ -162,12 +167,13 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
                     animation: _animation,
                     textPrimaryColor: textPrimaryColor,
                     textSecondaryColor: textSecondaryColor,
+                    size: widget.size,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 进度条
           _ProgressBarWidget(
@@ -175,9 +181,10 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
             totalDuration: widget.totalDuration,
             animation: _progressAnimation,
             isDark: isDark,
+            size: widget.size,
           ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: widget.size.getItemSpacing() / 2),
 
           // 控制按钮和时间
           Row(
@@ -188,6 +195,7 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
                 animation: _animation,
                 textSecondaryColor: textSecondaryColor,
                 isDark: isDark,
+                size: widget.size,
                 onPlayPauseToggle: () {},
                 onPrevious: () {},
                 onNext: () {},
@@ -201,6 +209,7 @@ class _MusicPlayerCardWidgetState extends State<MusicPlayerCardWidget>
                 totalDuration: widget.totalDuration,
                 primaryColor: textPrimaryColor,
                 secondaryColor: textSecondaryColor,
+                size: widget.size,
               ),
             ],
           ),
@@ -215,11 +224,13 @@ class _AlbumArtWidget extends StatelessWidget {
   final String albumArtUrl;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _AlbumArtWidget({
     required this.albumArtUrl,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -240,15 +251,15 @@ class _AlbumArtWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
                   albumArtUrl,
-                  width: 115,
-                  height: 115,
+                  width: size.getPadding().left * 9.5,
+                  height: size.getPadding().left * 9.5,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      width: 115,
-                      height: 115,
+                      width: size.getPadding().left * 9.5,
+                      height: size.getPadding().left * 9.5,
                       color: Colors.grey.shade300,
-                      child: const Icon(Icons.album, size: 48),
+                      child: Icon(Icons.album, size: size.getIconSize() * 2),
                     );
                   },
                 ),
@@ -258,15 +269,15 @@ class _AlbumArtWidget extends StatelessWidget {
                 bottom: 4,
                 right: 4,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: EdgeInsets.all(size.getPadding().left / 4),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.8),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.music_note,
                     color: Colors.white,
-                    size: 16,
+                    size: size.getIconSize() / 3,
                   ),
                 ),
               ),
@@ -284,12 +295,14 @@ class _LyricsWidget extends StatelessWidget {
   final Animation<double> animation;
   final Color textPrimaryColor;
   final Color textSecondaryColor;
+  final HomeWidgetSize size;
 
   const _LyricsWidget({
     required this.lyrics,
     required this.animation,
     required this.textPrimaryColor,
     required this.textSecondaryColor,
+    required this.size,
   });
 
   @override
@@ -326,11 +339,11 @@ class _LyricsWidget extends StatelessWidget {
                     child: Transform.translate(
                       offset: Offset(0, 10 * (1 - itemAnimation.value)),
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 2),
+                        padding: EdgeInsets.only(bottom: size.getPadding().left / 10),
                         child: Text(
                           lyrics[index],
                           style: TextStyle(
-                            fontSize: isHighlight ? 16 : 14,
+                            fontSize: isHighlight ? size.getIconSize() - 2 : size.getIconSize() - 4,
                             fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal,
                             color: isHighlight ? textPrimaryColor : textSecondaryColor,
                             height: 1.2,
@@ -357,12 +370,14 @@ class _ProgressBarWidget extends StatelessWidget {
   final int totalDuration;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _ProgressBarWidget({
     required this.currentPosition,
     required this.totalDuration,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -373,7 +388,7 @@ class _ProgressBarWidget extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return Container(
-          height: 8,
+          height: size.getPadding().left / 2.5,
           decoration: BoxDecoration(
             color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
             borderRadius: BorderRadius.circular(4),
@@ -400,6 +415,7 @@ class _PlaybackControlsWidget extends StatelessWidget {
   final Animation<double> animation;
   final Color textSecondaryColor;
   final bool isDark;
+  final HomeWidgetSize size;
   final VoidCallback onPlayPauseToggle;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
@@ -409,6 +425,7 @@ class _PlaybackControlsWidget extends StatelessWidget {
     required this.animation,
     required this.textSecondaryColor,
     required this.isDark,
+    required this.size,
     required this.onPlayPauseToggle,
     required this.onPrevious,
     required this.onNext,
@@ -431,9 +448,9 @@ class _PlaybackControlsWidget extends StatelessWidget {
             child: Row(
               children: [
                 _buildControlButton(Icons.skip_previous, textSecondaryColor, onPrevious),
-                const SizedBox(width: 16),
+                SizedBox(width: size.getItemSpacing()),
                 _buildPlayPauseButton(isDark, onPlayPauseToggle),
-                const SizedBox(width: 16),
+                SizedBox(width: size.getItemSpacing()),
                 _buildControlButton(Icons.skip_next, textSecondaryColor, onNext),
               ],
             ),
@@ -445,7 +462,7 @@ class _PlaybackControlsWidget extends StatelessWidget {
 
   Widget _buildControlButton(IconData icon, Color color, VoidCallback onPressed) {
     return IconButton(
-      icon: Icon(icon, size: 30),
+      icon: Icon(icon, size: size.getIconSize()),
       color: color,
       onPressed: onPressed,
       padding: EdgeInsets.zero,
@@ -454,9 +471,10 @@ class _PlaybackControlsWidget extends StatelessWidget {
   }
 
   Widget _buildPlayPauseButton(bool isDark, VoidCallback onPressed) {
+    final buttonSize = size.getPadding().left * 2.4;
     return Container(
-      width: 48,
-      height: 48,
+      width: buttonSize,
+      height: buttonSize,
       decoration: BoxDecoration(
         color: isDark ? Colors.white : Colors.grey.shade900,
         shape: BoxShape.circle,
@@ -470,7 +488,7 @@ class _PlaybackControlsWidget extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           isPlaying ? Icons.pause : Icons.play_arrow,
-          size: 30,
+          size: size.getIconSize(),
         ),
         color: isDark ? Colors.black : Colors.white,
         onPressed: onPressed,
@@ -486,12 +504,14 @@ class _TimeDisplayWidget extends StatelessWidget {
   final int totalDuration;
   final Color primaryColor;
   final Color secondaryColor;
+  final HomeWidgetSize size;
 
   const _TimeDisplayWidget({
     required this.currentPosition,
     required this.totalDuration,
     required this.primaryColor,
     required this.secondaryColor,
+    required this.size,
   });
 
   @override
@@ -506,7 +526,7 @@ class _TimeDisplayWidget extends StatelessWidget {
         Text(
           '$currentMinutes:${currentSeconds.toString().padLeft(2, '0')}',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: size.getIconSize() - 4,
             fontWeight: FontWeight.w500,
             color: primaryColor,
           ),
@@ -514,7 +534,7 @@ class _TimeDisplayWidget extends StatelessWidget {
         Text(
           ' / ',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: size.getIconSize() - 6,
             fontWeight: FontWeight.normal,
             color: secondaryColor,
           ),
@@ -522,7 +542,7 @@ class _TimeDisplayWidget extends StatelessWidget {
         Text(
           '$totalMinutes:${totalSeconds.toString().padLeft(2, '0')}',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: size.getIconSize() - 4,
             fontWeight: FontWeight.w500,
             color: primaryColor,
           ),

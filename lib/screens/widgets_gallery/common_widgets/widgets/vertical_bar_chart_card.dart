@@ -39,6 +39,8 @@ class VerticalBarChartCardWidget extends StatefulWidget {
   final Color? secondaryColor;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const VerticalBarChartCardWidget({
     super.key,
@@ -50,6 +52,7 @@ class VerticalBarChartCardWidget extends StatefulWidget {
     this.primaryColor,
     this.secondaryColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -75,6 +78,7 @@ class VerticalBarChartCardWidget extends StatefulWidget {
           ? Color(props['secondaryColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -142,7 +146,7 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: widget.size.getPadding(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -159,18 +163,18 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
                           color: isDark
                               ? const Color(0xFFF3F4F6)
                               : const Color(0xFF111827),
-                          fontSize: 24,
+                          fontSize: widget.size.getTitleFontSize(),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: widget.size.getSmallSpacing()),
                       Text(
                         widget.subtitle,
                         style: TextStyle(
                           color: isDark
                               ? const Color(0xFF9CA3AF)
                               : const Color(0xFF6B7280),
-                          fontSize: 14,
+                          fontSize: widget.size.getSubtitleFontSize(),
                         ),
                       ),
                     ],
@@ -184,7 +188,7 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: widget.size.getTitleSpacing()),
 
               // 图例
               Row(
@@ -193,16 +197,18 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
                     color: primaryColor,
                     label: widget.dataLabel1,
                     isDark: isDark,
+                    size: widget.size,
                   ),
-                  const SizedBox(width: 24),
+                  SizedBox(width: widget.size.getItemSpacing()),
                   _LegendItem(
                     color: secondaryColor,
                     label: widget.dataLabel2,
                     isDark: isDark,
+                    size: widget.size,
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: widget.size.getItemSpacing()),
 
               // 柱状图
               Expanded(
@@ -212,6 +218,7 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
                   secondaryColor: secondaryColor,
                   isDark: isDark,
                   animation: _animation,
+                  size: widget.size,
                 ),
               ),
             ],
@@ -227,11 +234,13 @@ class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _LegendItem({
     required this.color,
     required this.label,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -239,19 +248,19 @@ class _LegendItem extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 32,
-          height: 12,
+          width: size.getLegendIndicatorWidth(),
+          height: size.getLegendIndicatorHeight(),
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(4),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: size.getSmallSpacing()),
         Text(
           label,
           style: TextStyle(
             color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827),
-            fontSize: 12,
+            fontSize: size.getLegendFontSize(),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -267,6 +276,7 @@ class _BarChart extends StatelessWidget {
   final Color secondaryColor;
   final bool isDark;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _BarChart({
     required this.bars,
@@ -274,6 +284,7 @@ class _BarChart extends StatelessWidget {
     required this.secondaryColor,
     required this.isDark,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -294,7 +305,7 @@ class _BarChart extends StatelessWidget {
         // 背景网格线
         Positioned.fill(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: EdgeInsets.symmetric(horizontal: size.getPadding().right),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(
@@ -338,6 +349,7 @@ class _BarChart extends StatelessWidget {
               maxHeight: maxHeight,
               animation: animation,
               index: index,
+              size: size,
             ),
           ),
         ),
@@ -357,6 +369,7 @@ class _Bar extends StatelessWidget {
   final double maxHeight;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _Bar({
     required this.data,
@@ -366,6 +379,7 @@ class _Bar extends StatelessWidget {
     required this.maxHeight,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -394,7 +408,7 @@ class _Bar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             Container(
-              width: 16,
+              width: size.getBarWidth(),
               height: currentHeight1,
               decoration: BoxDecoration(
                 color: primaryColor,
@@ -404,9 +418,9 @@ class _Bar extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 1),
+            SizedBox(height: size.getBarSpacing()),
             Container(
-              width: 16,
+              width: size.getBarWidth(),
               height: currentHeight2,
               decoration: BoxDecoration(
                 color: secondaryColor,

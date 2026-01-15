@@ -42,11 +42,15 @@ class TaskProgressListWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const TaskProgressListWidget({
     super.key,
     required this.tasks,
     this.moreCount = 0,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -62,6 +66,7 @@ class TaskProgressListWidget extends StatefulWidget {
       tasks: tasksList,
       moreCount: props['moreCount'] as int? ?? 0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -112,7 +117,7 @@ class _TaskProgressListWidgetState extends State<TaskProgressListWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(28),
@@ -141,7 +146,7 @@ class _TaskProgressListWidgetState extends State<TaskProgressListWidget>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 任务列表
                   ...List.generate(
                     widget.tasks.length,
@@ -154,6 +159,7 @@ class _TaskProgressListWidgetState extends State<TaskProgressListWidget>
                       textSubColor: textSubColor,
                       borderColor: borderColor,
                       progressBgColor: progressBgColor,
+                      size: widget.size,
                     ),
                   ),
                   // 更多链接
@@ -191,6 +197,7 @@ class _TaskProgressItem extends StatelessWidget {
   final Color textSubColor;
   final Color borderColor;
   final Color progressBgColor;
+  final HomeWidgetSize size;
 
   const _TaskProgressItem({
     required this.task,
@@ -201,6 +208,7 @@ class _TaskProgressItem extends StatelessWidget {
     required this.textSubColor,
     required this.borderColor,
     required this.progressBgColor,
+    required this.size,
   });
 
   @override
@@ -302,12 +310,12 @@ class _TaskProgressItem extends StatelessWidget {
           },
         ),
         if (!isLast) ...[
-          const SizedBox(height: 20),
+          SizedBox(height: size.getItemSpacing()),
           Container(
             height: 1,
             color: borderColor,
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: size.getItemSpacing()),
         ],
       ],
     );

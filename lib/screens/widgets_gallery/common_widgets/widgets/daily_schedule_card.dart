@@ -86,12 +86,16 @@ class DailyScheduleCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DailyScheduleCardWidget({
     super.key,
     required this.todayDate,
     required this.todayEvents,
     required this.tomorrowEvents,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -113,6 +117,7 @@ class DailyScheduleCardWidget extends StatefulWidget {
       todayEvents: todayEventsList,
       tomorrowEvents: tomorrowEventsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -159,7 +164,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF171717) : Colors.white,
                 borderRadius: BorderRadius.circular(28),
@@ -183,7 +188,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                       color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   ...List.generate(widget.todayEvents.length, (index) {
                     final itemAnimation = CurvedAnimation(
                       parent: _animationController,
@@ -197,9 +202,10 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                       event: widget.todayEvents[index],
                       animation: itemAnimation,
                       isDark: isDark,
+                      size: widget.size,
                     );
                   }),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   Text(
                     'Tomorrow',
                     style: TextStyle(
@@ -209,7 +215,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                       color: isDark ? const Color(0xFF52525B) : const Color(0xFFA1A1AA),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   ...List.generate(widget.tomorrowEvents.length, (index) {
                     final itemAnimation = CurvedAnimation(
                       parent: _animationController,
@@ -223,6 +229,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                       event: widget.tomorrowEvents[index],
                       animation: itemAnimation,
                       isDark: isDark,
+                      size: widget.size,
                     );
                   }),
                 ],
@@ -239,11 +246,13 @@ class _EventItemWidget extends StatelessWidget {
   final EventData event;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _EventItemWidget({
     required this.event,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   Color _getBackgroundColor(EventColor color) {
@@ -302,8 +311,8 @@ class _EventItemWidget extends StatelessWidget {
             child: Transform.translate(
               offset: Offset(0, 10 * (1 - animation.value)),
               child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
+                margin: EdgeInsets.only(bottom: size.getItemSpacing()),
+                padding: size.getPadding(),
                 decoration: BoxDecoration(
                   color: _getBackgroundColor(event.color),
                   borderRadius: BorderRadius.circular(12),
@@ -314,14 +323,14 @@ class _EventItemWidget extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(size.getPadding().left / 3),
                           decoration: BoxDecoration(
                             color: isDark ? const Color(0x3364748B) : const Color(0x9964748B),
                             borderRadius: BorderRadius.circular(99),
                           ),
                           child: Icon(event.icon, size: 16, color: isDark ? Colors.white : const Color(0xFFE2E8F0)),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: size.getPadding().left),
                         Text(event.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _getTextColor(event.color))),
                       ],
                     ),
@@ -343,7 +352,7 @@ class _EventItemWidget extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - animation.value)),
             child: Container(
-              margin: const EdgeInsets.only(bottom: 8),
+              margin: EdgeInsets.only(bottom: size.getItemSpacing()),
               height: 56,
               decoration: BoxDecoration(
                 color: _getBackgroundColor(event.color),
@@ -353,7 +362,7 @@ class _EventItemWidget extends StatelessWidget {
                 children: [
                   Container(
                     width: 4,
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    margin: EdgeInsets.symmetric(horizontal: size.getPadding().left / 1.5, vertical: size.getPadding().left / 1.5),
                     decoration: BoxDecoration(color: _getIndicatorColor(event.color), borderRadius: BorderRadius.circular(99)),
                   ),
                   Expanded(
@@ -363,14 +372,14 @@ class _EventItemWidget extends StatelessWidget {
                       children: [
                         Text(event.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: _getTextColor(event.color))),
                         if (event.location != null) ...[
-                          const SizedBox(height: 2),
+                          SizedBox(height: size.getPadding().top / 6),
                           Text(event.location!, style: TextStyle(fontSize: 12, color: _getTextColor(event.color).withOpacity(0.7))),
                         ],
                       ],
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(right: 12),
+                    padding: EdgeInsets.only(right: size.getPadding().right),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,

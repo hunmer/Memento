@@ -79,6 +79,9 @@ class DailyTodoListWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DailyTodoListWidget({
     super.key,
     required this.date,
@@ -86,6 +89,7 @@ class DailyTodoListWidget extends StatefulWidget {
     required this.tasks,
     required this.reminder,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -113,6 +117,7 @@ class DailyTodoListWidget extends StatefulWidget {
       tasks: tasksList,
       reminder: reminder,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -175,7 +180,7 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
               height: widget.inline ? double.maxFinite : 600,
-              constraints: const BoxConstraints(minHeight: 400),
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
@@ -202,6 +207,7 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
                     time: widget.time,
                     primaryColor: primaryColor,
                     isDark: isDark,
+                    size: widget.size,
                   ),
                   // 任务列表
                   _TasksSection(
@@ -209,12 +215,14 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
                     onToggle: _toggleTask,
                     animation: _fadeAnimation,
                     isDark: isDark,
+                    size: widget.size,
                   ),
                   // 底部提醒
                   _ReminderSection(
                     reminder: widget.reminder,
                     animation: _fadeAnimation,
                     isDark: isDark,
+                    size: widget.size,
                   ),
                 ],
               ),
@@ -232,18 +240,20 @@ class _HeaderSection extends StatelessWidget {
   final String time;
   final Color primaryColor;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _HeaderSection({
     required this.date,
     required this.time,
     required this.primaryColor,
     required this.isDark,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+      padding: size.getPadding(),
       decoration: BoxDecoration(
         color: primaryColor.withOpacity(0.9),
         borderRadius: const BorderRadius.only(
@@ -292,7 +302,7 @@ class _HeaderSection extends StatelessWidget {
                 color: isDark ? Colors.black87 : Colors.black87,
                 size: 24,
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: size.getTitleSpacing() / 2),
               Text(
                 'Done',
                 style: TextStyle(
@@ -315,19 +325,21 @@ class _TasksSection extends StatelessWidget {
   final Function(int) onToggle;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _TasksSection({
     required this.tasks,
     required this.onToggle,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        padding: size.getPadding(),
         decoration: BoxDecoration(
           // 点阵网格背景
           color: isDark ? const Color(0xFF18181B) : Colors.white,
@@ -352,14 +364,14 @@ class _TasksSection extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: size.getTitleSpacing()),
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: tasks.length,
                 separatorBuilder: (context, index) =>
-                    const SizedBox(height: 16),
+                    SizedBox(height: size.getItemSpacing()),
                 itemBuilder: (context, index) {
                   return _TaskItem(
                     task: tasks[index],
@@ -367,6 +379,7 @@ class _TasksSection extends StatelessWidget {
                     animation: animation,
                     index: index,
                     isDark: isDark,
+                    size: size,
                   );
                 },
               ),
@@ -385,6 +398,7 @@ class _TaskItem extends StatelessWidget {
   final Animation<double> animation;
   final int index;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _TaskItem({
     required this.task,
@@ -392,6 +406,7 @@ class _TaskItem extends StatelessWidget {
     required this.animation,
     required this.index,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -420,7 +435,7 @@ class _TaskItem extends StatelessWidget {
                     isChecked: task.isCompleted,
                     isDark: isDark,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: size.getItemSpacing()),
                   Expanded(
                     child: Text(
                       task.title,
@@ -495,11 +510,13 @@ class _ReminderSection extends StatelessWidget {
   final TodoReminder reminder;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _ReminderSection({
     required this.reminder,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -517,7 +534,7 @@ class _ReminderSection extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - reminderAnimation.value)),
             child: Container(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+              padding: size.getPadding(),
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
@@ -545,7 +562,7 @@ class _ReminderSection extends StatelessWidget {
                             height: 1.2,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: size.getItemSpacing() / 2),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 4,
@@ -568,7 +585,7 @@ class _ReminderSection extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: size.getItemSpacing() / 2),
                         Text(
                           reminder.hashtagEmoji,
                           style: TextStyle(

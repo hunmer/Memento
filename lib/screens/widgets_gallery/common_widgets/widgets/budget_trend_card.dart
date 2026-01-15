@@ -41,6 +41,9 @@ class BudgetTrendCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const BudgetTrendCardWidget({
     super.key,
     required this.label,
@@ -53,6 +56,7 @@ class BudgetTrendCardWidget extends StatefulWidget {
     required this.changePercent,
     required this.updateTime,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -74,6 +78,7 @@ class BudgetTrendCardWidget extends StatefulWidget {
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0,
       updateTime: props['updateTime'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -131,7 +136,7 @@ class _BudgetTrendCardWidgetState extends State<BudgetTrendCardWidget>
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 400,
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(36),
@@ -149,7 +154,7 @@ class _BudgetTrendCardWidgetState extends State<BudgetTrendCardWidget>
                 children: [
                   // 顶部标签
                   _buildLabel(context, subTextColor),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 数值和图表区域
                   Row(
@@ -256,13 +261,13 @@ class _BudgetTrendCardWidgetState extends State<BudgetTrendCardWidget>
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      SizedBox(width: widget.size.getItemSpacing()),
 
                       // 迷你曲线图
                       _buildMiniChart(primaryColor, borderColor),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 底部信息（变化百分比和更新时间）
                   Row(
@@ -312,7 +317,7 @@ class _BudgetTrendCardWidgetState extends State<BudgetTrendCardWidget>
     return Row(
       children: [
         Icon(Icons.schedule, color: subTextColor, size: 18),
-        const SizedBox(width: 8),
+        SizedBox(width: widget.size.getItemSpacing()),
         SizedBox(
           height: 16,
           child: Text(

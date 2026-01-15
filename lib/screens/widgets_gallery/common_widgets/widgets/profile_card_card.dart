@@ -27,6 +27,9 @@ class ProfileCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const ProfileCardWidget({
     super.key,
     required this.imageUrl,
@@ -36,6 +39,7 @@ class ProfileCardWidget extends StatefulWidget {
     required this.followersCount,
     required this.followingCount,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -51,6 +55,7 @@ class ProfileCardWidget extends StatefulWidget {
       followersCount: (props['followersCount'] as num?)?.toInt() ?? 0,
       followingCount: (props['followingCount'] as num?)?.toInt() ?? 0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -188,7 +193,7 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                     right: 0,
                     bottom: 0,
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: widget.size.getPadding(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -198,14 +203,16 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                             name: widget.name,
                             isVerified: widget.isVerified,
                             animation: _animation,
+                            size: widget.size,
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: widget.size.getTitleSpacing()),
                           // 简介
                           _BioSection(
                             bio: widget.bio,
                             animation: _animation,
+                            size: widget.size,
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: widget.size.getItemSpacing()),
                           // 统计和关注按钮
                           _StatsAndFollowSection(
                             followersCount: widget.followersCount,
@@ -213,6 +220,7 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                             isFollowing: _isFollowing,
                             onFollowPressed: _toggleFollow,
                             animation: _animation,
+                            size: widget.size,
                           ),
                         ],
                       ),
@@ -233,11 +241,13 @@ class _NameSection extends StatelessWidget {
   final String name;
   final bool isVerified;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _NameSection({
     required this.name,
     required this.isVerified,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -271,9 +281,9 @@ class _NameSection extends StatelessWidget {
                   ),
                 ),
                 if (isVerified) ...[
-                  const SizedBox(width: 6),
+                  SizedBox(width: size.getItemSpacing() * 0.375),
                   Container(
-                    padding: const EdgeInsets.all(2),
+                    padding: EdgeInsets.all(size.getPadding().right * 0.125),
                     decoration: BoxDecoration(
                       color: isDark
                           ? Colors.green.shade900
@@ -300,10 +310,12 @@ class _NameSection extends StatelessWidget {
 class _BioSection extends StatelessWidget {
   final String bio;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _BioSection({
     required this.bio,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -350,6 +362,7 @@ class _StatsAndFollowSection extends StatelessWidget {
   final bool isFollowing;
   final VoidCallback onFollowPressed;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _StatsAndFollowSection({
     required this.followersCount,
@@ -357,6 +370,7 @@ class _StatsAndFollowSection extends StatelessWidget {
     required this.isFollowing,
     required this.onFollowPressed,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -387,13 +401,15 @@ class _StatsAndFollowSection extends StatelessWidget {
                       count: followersCount,
                       animation: statsAnimation,
                       isDark: isDark,
+                      size: size,
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: size.getItemSpacing()),
                     _StatItem(
                       icon: Icons.check_box_outline_blank,
                       count: followingCount,
                       animation: statsAnimation,
                       isDark: isDark,
+                      size: size,
                     ),
                   ],
                 ),
@@ -402,7 +418,10 @@ class _StatsAndFollowSection extends StatelessWidget {
                   onTap: onFollowPressed,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: size.getPadding().right * 0.875,
+                      vertical: size.getPadding().bottom * 0.375,
+                    ),
                     decoration: BoxDecoration(
                       color: isFollowing
                           ? (isDark ? Colors.grey.shade800 : Colors.white)
@@ -429,7 +448,7 @@ class _StatsAndFollowSection extends StatelessWidget {
                           ),
                         ),
                         if (!isFollowing) ...[
-                          const SizedBox(width: 3),
+                          SizedBox(width: size.getPadding().right * 0.1875),
                           Icon(
                             Icons.add,
                             size: 14,
@@ -455,12 +474,14 @@ class _StatItem extends StatelessWidget {
   final int count;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _StatItem({
     required this.icon,
     required this.count,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -472,7 +493,7 @@ class _StatItem extends StatelessWidget {
           size: 16,
           color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: size.getPadding().right * 0.25),
         AnimatedFlipCounter(
           value: count.toDouble() * animation.value,
           fractionDigits: 0,

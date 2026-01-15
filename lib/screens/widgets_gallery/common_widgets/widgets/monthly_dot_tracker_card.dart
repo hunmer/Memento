@@ -81,16 +81,24 @@ class MonthlyDotTrackerCardWidget extends StatelessWidget {
     // 使用传入的图标
     final icon = IconData(iconCodePoint, fontFamily: 'MaterialIcons');
 
-    return DotTrackerCardWidget(
-      title: title,
-      icon: icon,
-      currentValue: currentValue,
-      unit: '/$totalDays 天',
-      status: status,
-      weekDays: weekDays,
-      dotStates: dotStates,
-      enableAnimation: true,
-      inline: inline,
+    // 根据尺寸计算高度
+    final constraints = size.getHeightConstraints();
+    final height = inline ? double.maxFinite : (constraints.maxHeight + constraints.minHeight) / 2;
+
+    return Padding(
+      padding: size.getPadding(),
+      child: DotTrackerCardWidget(
+        title: title,
+        icon: icon,
+        currentValue: currentValue,
+        unit: '/$totalDays 天',
+        status: status,
+        weekDays: weekDays,
+        dotStates: dotStates,
+        enableAnimation: true,
+        inline: inline,
+        height: height,
+      ),
     );
   }
 }

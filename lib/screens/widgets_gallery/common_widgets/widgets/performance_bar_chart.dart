@@ -40,6 +40,9 @@ class PerformanceBarChartWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const PerformanceBarChartWidget({
     super.key,
     required this.badgeLabel,
@@ -48,6 +51,7 @@ class PerformanceBarChartWidget extends StatefulWidget {
     required this.barData,
     required this.footerLabel,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -67,6 +71,7 @@ class PerformanceBarChartWidget extends StatefulWidget {
       barData: barDataList,
       footerLabel: props['footerLabel'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -117,7 +122,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
               height: widget.inline ? double.maxFinite : 420,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181b) : Colors.white,
                 borderRadius: BorderRadius.circular(28),
@@ -146,7 +151,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                           style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.5),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: widget.size.getTitleSpacing()),
                       AnimatedFlipCounter(
                         value: widget.growthPercentage * _animation.value,
                         fractionDigits: 0,
@@ -168,9 +173,9 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   SizedBox(
-                    height: 180,
+                    height: widget.size.getHeightConstraints().maxHeight - widget.size.getPadding().top - widget.size.getPadding().bottom - 100,
                     child: Stack(
                       children: [
                         Positioned.fill(
@@ -181,7 +186,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         ),
                         Positioned.fill(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing() / 2),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,15 +196,17 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                                   parent: _animationController,
                                   curve: Interval(index * 0.1, 0.6 + index * 0.08, curve: Curves.easeOutCubic),
                                 );
+                                final barHeight = widget.size.getHeightConstraints().maxHeight - widget.size.getPadding().top - widget.size.getPadding().bottom - 100;
                                 return Expanded(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                                    padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing() / 4),
                                     child: _AnimatedBar(
                                       value: bar.value,
                                       label: bar.label,
                                       primaryColor: primaryColor,
                                       accentLime: accentLime,
                                       animation: barAnimation,
+                                      barHeight: barHeight,
                                     ),
                                   ),
                                 );
@@ -210,13 +217,13 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   GestureDetector(
                     onTap: () {},
                     child: Row(
                       children: [
                         Container(width: 8, height: 8, decoration: BoxDecoration(color: primaryColor, shape: BoxShape.circle)),
-                        const SizedBox(width: 8),
+                        SizedBox(width: widget.size.getItemSpacing()),
                         Text(
                           widget.footerLabel.toUpperCase(),
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 1.5),
@@ -240,6 +247,7 @@ class _AnimatedBar extends StatelessWidget {
   final Color primaryColor;
   final Color accentLime;
   final Animation<double> animation;
+  final double barHeight;
 
   const _AnimatedBar({
     required this.value,
@@ -247,6 +255,7 @@ class _AnimatedBar extends StatelessWidget {
     required this.primaryColor,
     required this.accentLime,
     required this.animation,
+    required this.barHeight,
   });
 
   @override
@@ -261,13 +270,13 @@ class _AnimatedBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             SizedBox(
-              height: 180,
+              height: barHeight,
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: [
                   Container(
                     width: double.infinity,
-                    height: 180 * animatedValue / 100,
+                    height: barHeight * animatedValue / 100,
                     decoration: BoxDecoration(
                       color: primaryColor,
                       borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),

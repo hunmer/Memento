@@ -26,6 +26,9 @@ class NewsUpdateCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const NewsUpdateCardWidget({
     super.key,
     required this.icon,
@@ -35,6 +38,7 @@ class NewsUpdateCardWidget extends StatefulWidget {
     this.totalItems = 4,
     this.onTap,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -49,6 +53,7 @@ class NewsUpdateCardWidget extends StatefulWidget {
       currentIndex: props['currentIndex'] as int? ?? 0,
       totalItems: props['totalItems'] as int? ?? 4,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -135,9 +140,7 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
               onTap: widget.onTap,
               child: Container(
                 width: widget.inline ? double.maxFinite : 340,
-                constraints: const BoxConstraints(
-                  minHeight: 170,
-                ),
+                constraints: widget.size.getHeightConstraints(),
                 decoration: BoxDecoration(
                   color: backgroundColor,
                   borderRadius: BorderRadius.circular(24),
@@ -151,7 +154,7 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
                           ),
                         ],
                 ),
-                padding: const EdgeInsets.all(20),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,10 +188,10 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 标题
                     Padding(
-                      padding: const EdgeInsets.only(right: 24),
+                      padding: widget.size.getPadding(),
                       child: Text(
                         widget.title,
                         style: TextStyle(
@@ -201,7 +204,7 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: widget.size.getItemSpacing()),
                     // 时间戳
                     Text(
                       widget.timestamp,
@@ -235,7 +238,7 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(totalItems, (index) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 6),
+            padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
             child: Container(
               width: 6,
               height: 6,

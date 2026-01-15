@@ -23,6 +23,9 @@ class CircularProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const CircularProgressCardWidget({
     super.key,
     required this.title,
@@ -31,6 +34,7 @@ class CircularProgressCardWidget extends StatefulWidget {
     required this.progress,
     this.progressColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -47,6 +51,7 @@ class CircularProgressCardWidget extends StatefulWidget {
           ? Color(props['progressColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -107,7 +112,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
           opacity: _animation.value,
           child: Container(
             width: widget.inline ? double.maxFinite : 150,
-            padding: const EdgeInsets.all(16),
+            padding: widget.size.getPadding(),
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(16),
@@ -126,7 +131,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
                 // 圆形进度环
                 _buildCircularProgress(effectiveProgressColor, trackColor),
 
-                const SizedBox(height: 12),
+                SizedBox(height: widget.size.getTitleSpacing()),
 
                 // 标题和副标题
                 _buildTitleAndSubtitle(textColor, subtitleColor),
@@ -194,7 +199,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
                 overflow: TextOverflow.ellipsis,
               ),
               if (widget.subtitle.isNotEmpty) ...[
-                const SizedBox(height: 2),
+                SizedBox(height: widget.size.getItemSpacing()),
                 Text(
                   widget.subtitle,
                   style: TextStyle(

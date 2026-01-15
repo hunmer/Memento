@@ -33,6 +33,9 @@ class BarChartStatsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const BarChartStatsCardWidget({
     super.key,
     required this.title,
@@ -45,6 +48,7 @@ class BarChartStatsCardWidget extends StatefulWidget {
     required this.labels,
     required this.maxValue,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -91,6 +95,7 @@ class BarChartStatsCardWidget extends StatefulWidget {
           [],
       maxValue: (props['maxValue'] as num?)?.toDouble() ?? 10.0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -188,15 +193,15 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildHeader(isDark, textColor, 0, step),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   _buildAverageSection(isDark, 1, step),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   _buildChart(gridColor, textColor, step),
                 ],
               ),
@@ -235,7 +240,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                     color: isDark ? Colors.white : Colors.grey.shade900,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: widget.size.getItemSpacing()),
                 Text(
                   widget.dateRange,
                   style: TextStyle(
@@ -302,7 +307,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                     letterSpacing: -2,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: widget.size.getItemSpacing()),
                 Text(
                   widget.unit,
                   style: TextStyle(
@@ -313,7 +318,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: widget.size.getItemSpacing()),
             Text(
               'Daily average',
               style: TextStyle(
@@ -336,12 +341,12 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
           child: Row(
             children: [
               _buildYAxis(textColor, gridColor, step),
-              const SizedBox(width: 8),
+              SizedBox(width: widget.size.getItemSpacing()),
               Expanded(child: _buildBars(gridColor, step)),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: widget.size.getItemSpacing()),
         _buildXLabels(textColor, step),
       ],
     );
@@ -465,7 +470,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
     return Opacity(
       opacity: labelsAnimation.value,
       child: Padding(
-        padding: const EdgeInsets.only(left: 32),
+        padding: EdgeInsets.only(left: widget.size.getPadding().left + 8),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(

@@ -31,6 +31,8 @@ class SplitImageCardWidget extends StatefulWidget {
   final int? bottomIconCode;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const SplitImageCardWidget({
     super.key,
@@ -43,6 +45,7 @@ class SplitImageCardWidget extends StatefulWidget {
     this.topIconCode,
     this.bottomIconCode,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -64,6 +67,7 @@ class SplitImageCardWidget extends StatefulWidget {
       topIconCode: props['topIconCode'] as int?,
       bottomIconCode: props['bottomIconCode'] as int?,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -139,7 +143,7 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
               // 右侧信息
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: widget.size.getPadding(),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,12 +155,14 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
                           text: widget.topText,
                           animation: _animation,
                           index: 0,
+                          size: widget.size,
                         ),
                       // 中间标题
                       _TitleWidget(
                         title: widget.title,
                         animation: _animation,
                         index: widget.topIcon != null ? 1 : 0,
+                        size: widget.size,
                       ),
                       // 底部信息
                       if (widget.bottomIcon != null)
@@ -165,6 +171,7 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
                           text: widget.bottomText,
                           animation: _animation,
                           index: widget.bottomIcon != null ? 2 : 1,
+                          size: widget.size,
                         ),
                     ],
                   ),
@@ -234,12 +241,14 @@ class _InfoRowWidget extends StatelessWidget {
   final String text;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _InfoRowWidget({
     required this.icon,
     required this.text,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -266,14 +275,14 @@ class _InfoRowWidget extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 16,
+            size: size.getIconSize() * 0.67,
             color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: size.getItemSpacing() * 0.5),
           Text(
             text,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: size.getLargeFontSize() * 0.23,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.5,
               color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
@@ -290,11 +299,13 @@ class _TitleWidget extends StatelessWidget {
   final String title;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _TitleWidget({
     required this.title,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -322,7 +333,7 @@ class _TitleWidget extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: size.getLargeFontSize() * 0.375,
               fontWeight: FontWeight.w700,
               height: 1.3,
               color: isDark ? Colors.white : Colors.grey.shade900,

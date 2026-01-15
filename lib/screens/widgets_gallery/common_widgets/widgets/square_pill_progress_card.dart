@@ -16,12 +16,16 @@ class SquarePillProgressCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const SquarePillProgressCard({
     super.key,
     required this.medicationCount,
     this.unit = 'meds',
     required this.progress,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -34,6 +38,7 @@ class SquarePillProgressCard extends StatefulWidget {
       unit: props['unit'] as String? ?? 'meds',
       progress: (props['progress'] as num?)?.toDouble() ?? 0.0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -94,7 +99,7 @@ class _SquarePillProgressCardState extends State<SquarePillProgressCard>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [

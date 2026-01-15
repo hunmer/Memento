@@ -11,10 +11,14 @@ class TimelineStatusCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const TimelineStatusCardWidget({
     super.key,
     required this.data,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -25,6 +29,7 @@ class TimelineStatusCardWidget extends StatefulWidget {
     return TimelineStatusCardWidget(
       data: TimelineStatusCardData.fromJson(props),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -87,7 +92,7 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: widget.size.getPadding(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,7 +135,7 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
                 ),
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: widget.size.getItemSpacing() / 2),
             Transform.rotate(
               angle: 45 * 3.14159 / 180,
               child: Icon(
@@ -141,7 +146,7 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
             ),
           ],
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: widget.size.getItemSpacing() / 4),
         // 主标题
         SizedBox(
           height: 25,
@@ -159,7 +164,7 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getItemSpacing() / 2),
         // 描述文本
         SizedBox(
           height: 15,
@@ -236,7 +241,7 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
               ],
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: widget.size.getItemSpacing() / 2),
           // 时间标签
           SizedBox(
             height: 12,

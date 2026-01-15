@@ -30,6 +30,9 @@ class WeeklyBarsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const WeeklyBarsCardWidget({
     super.key,
     required this.title,
@@ -40,6 +43,7 @@ class WeeklyBarsCardWidget extends StatefulWidget {
     required this.dailyValues,
     this.primaryColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -63,6 +67,7 @@ class WeeklyBarsCardWidget extends StatefulWidget {
           ? Color(props['primaryColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -139,7 +144,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(16),
@@ -166,7 +171,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
                 children: [
                   // 标题栏
                   _buildHeader(context, primaryColor, textColor, subtextColor),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 数值显示 + 周柱状图
                   Row(
@@ -213,17 +218,17 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
         Row(
           children: [
             Container(
-              width: 18,
-              height: 18,
+              width: widget.size.getIconSize(),
+              height: widget.size.getIconSize(),
               alignment: Alignment.center,
-              child: Icon(widget.icon, color: primaryColor, size: 18),
+              child: Icon(widget.icon, color: primaryColor, size: widget.size.getIconSize()),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: widget.size.getSmallSpacing()),
             Text(
               widget.title,
               style: TextStyle(
                 color: textColor,
-                fontSize: 14,
+                fontSize: widget.size.getSubtitleFontSize(),
                 fontWeight: FontWeight.w600,
                 letterSpacing: -0.5,
               ),
@@ -234,7 +239,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
           'Today',
           style: TextStyle(
             color: subtextColor,
-            fontSize: 12,
+            fontSize: widget.size.getSubtitleFontSize() - 2,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -253,33 +258,33 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 36,
+          height: widget.size.getLargeFontSize() + 8,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 70,
-                height: 36,
+                width: widget.size.getLargeFontSize() * 2.5,
+                height: widget.size.getLargeFontSize() + 8,
                 child: AnimatedFlipCounter(
                   value: widget.currentValue * _animation.value,
                   fractionDigits: 0,
                   textStyle: TextStyle(
                     color: textColor,
-                    fontSize: 28,
+                    fontSize: widget.size.getLargeFontSize() - 8,
                     fontWeight: FontWeight.w700,
                     height: 1.0,
                     letterSpacing: -1,
                   ),
                 ),
               ),
-              const SizedBox(width: 2),
+              SizedBox(width: widget.size.getSmallSpacing()),
               SizedBox(
-                height: 16,
+                height: widget.size.getSubtitleFontSize() + 2,
                 child: Text(
                   widget.unit,
                   style: TextStyle(
                     color: subtextColor,
-                    fontSize: 14,
+                    fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -287,12 +292,12 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
             ],
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: widget.size.getSmallSpacing()),
         Text(
           widget.status,
           style: TextStyle(
             color: subtextColor,
-            fontSize: 11,
+            fontSize: widget.size.getSubtitleFontSize() - 1,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -309,7 +314,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
     Color labelColor,
   ) {
     return SizedBox(
-      height: 80,
+      height: widget.size.getLargeFontSize() * 1.5,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(7, (index) {
@@ -327,7 +332,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
           );
 
           return Padding(
-            padding: EdgeInsets.only(left: index == 0 ? 0 : 4),
+            padding: EdgeInsets.only(left: index == 0 ? 0 : widget.size.getSmallSpacing()),
             child: _DayBar(
               label: days[index],
               value: value,
@@ -335,6 +340,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
               primaryColor: primaryColor,
               backgroundColor: barBgColor,
               labelColor: labelColor,
+              size: widget.size,
             ),
           );
         }),
@@ -351,6 +357,7 @@ class _DayBar extends StatelessWidget {
   final Color primaryColor;
   final Color backgroundColor;
   final Color labelColor;
+  final HomeWidgetSize size;
 
   const _DayBar({
     required this.label,
@@ -359,6 +366,7 @@ class _DayBar extends StatelessWidget {
     required this.primaryColor,
     required this.backgroundColor,
     required this.labelColor,
+    required this.size,
   });
 
   @override
@@ -367,11 +375,11 @@ class _DayBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 54,
+          width: size.getBarWidth(),
+          height: size.getLargeFontSize(),
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(size.getBarWidth() / 2),
           ),
           alignment: Alignment.bottomCenter,
           clipBehavior: Clip.antiAlias,
@@ -392,19 +400,19 @@ class _DayBar extends StatelessWidget {
                         primaryColor.withOpacity(0.4),
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(size.getBarWidth() / 2),
                   ),
                 ),
               );
             },
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: size.getSmallSpacing()),
         Text(
           label,
           style: TextStyle(
             color: labelColor,
-            fontSize: 9,
+            fontSize: size.getLegendFontSize(),
             fontWeight: FontWeight.w500,
             letterSpacing: 1,
           ),

@@ -28,6 +28,9 @@ class EarningsTrendCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const EarningsTrendCardWidget({
     super.key,
     required this.title,
@@ -36,6 +39,7 @@ class EarningsTrendCardWidget extends StatefulWidget {
     required this.percentage,
     required this.chartData,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -53,6 +57,7 @@ class EarningsTrendCardWidget extends StatefulWidget {
               .toList() ??
           [0, 0, 0, 0, 0],
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -119,11 +124,11 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
               ),
               child: Column(
                 children: [
-                  const SizedBox(height: 12),
+                  SizedBox(height: widget.size.getTitleSpacing() * 0.6),
 
                   // Title and value section
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: widget.size.getPadding(),
                     child: Column(
                       children: [
                         Text(
@@ -135,7 +140,7 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
                             letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: widget.size.getItemSpacing() * 0.75),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,10 +166,11 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: widget.size.getItemSpacing() * 1.5),
                         _PercentageBadge(
                           percentage: widget.percentage,
                           animation: _animation,
+                          size: widget.size,
                         ),
                       ],
                     ),
@@ -196,10 +202,12 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
 class _PercentageBadge extends StatelessWidget {
   final double percentage;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _PercentageBadge({
     required this.percentage,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -220,7 +228,10 @@ class _PercentageBadge extends StatelessWidget {
           child: Opacity(
             opacity: badgeAnimation.value,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: size.getItemSpacing() * 1.5,
+                vertical: size.getItemSpacing() * 0.75,
+              ),
               decoration: BoxDecoration(
                 color: badgeColor,
                 borderRadius: BorderRadius.circular(20),
@@ -240,7 +251,7 @@ class _PercentageBadge extends StatelessWidget {
                     color: Colors.white,
                     size: 14,
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: size.getItemSpacing() * 0.5),
                   Text(
                     '+${percentage.toStringAsFixed(2)}%',
                     style: const TextStyle(

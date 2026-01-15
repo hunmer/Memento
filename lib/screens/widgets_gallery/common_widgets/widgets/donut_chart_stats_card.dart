@@ -20,6 +20,9 @@ class DonutChartStatsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const DonutChartStatsCardWidget({
     super.key,
     required this.totalValue,
@@ -27,6 +30,7 @@ class DonutChartStatsCardWidget extends StatefulWidget {
     this.totalLabel = 'Total',
     required this.categories,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -84,6 +88,7 @@ class DonutChartStatsCardWidget extends StatefulWidget {
       totalLabel: props['totalLabel'] as String? ?? 'Total',
       categories: parseCategories(props['categories']),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -155,7 +160,7 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
             Expanded(
               flex: 45,
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -171,7 +176,7 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 总金额
                     Column(
                       children: [
@@ -211,7 +216,7 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
             Expanded(
               flex: 55,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                padding: widget.size.getPadding(),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF334155).withOpacity(0.5) : const Color(0xFFF8FAFC),
                   borderRadius: const BorderRadius.only(
@@ -248,7 +253,7 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
       );
 
       if (i > 0) {
-        items.add(const SizedBox(height: 20));
+        items.add(SizedBox(height: widget.size.getItemSpacing() * 2.5));
       }
 
       items.add(

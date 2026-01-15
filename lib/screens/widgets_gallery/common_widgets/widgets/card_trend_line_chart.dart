@@ -57,6 +57,9 @@ class CardTrendLineChart extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const CardTrendLineChart({
     super.key,
     this.title,
@@ -73,6 +76,7 @@ class CardTrendLineChart extends StatefulWidget {
     this.showDots = true,
     this.showGradient = true,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -102,6 +106,7 @@ class CardTrendLineChart extends StatefulWidget {
       showDots: props['showDots'] as bool? ?? true,
       showGradient: props['showGradient'] as bool? ?? true,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -163,16 +168,16 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
                   child: Transform.translate(
                     offset: Offset(0, 20 * (1 - _animation.value)),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: widget.size.getPadding().copyWith(bottom: 0),
                       child: Column(
                         children: [
-                          const SizedBox(height: 16),
+                          SizedBox(height: widget.size.getTitleSpacing()),
 
                           // 数值显示区
                           _buildValueDisplay(
                               isDark, primaryColor, textColor, mutedColor),
 
-                          const SizedBox(height: 16),
+                          SizedBox(height: widget.size.getTitleSpacing()),
 
                           // 时间范围筛选标签
                           if (widget.timeFilters != null &&
@@ -182,7 +187,7 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
 
                           if (widget.timeFilters != null &&
                               widget.timeFilters!.isNotEmpty)
-                            const SizedBox(height: 16),
+                            SizedBox(height: widget.size.getTitleSpacing()),
 
                           // 图表区域
                           Expanded(
@@ -231,7 +236,7 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
                 ),
                 child: Icon(widget.icon, color: Colors.white, size: 20),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: widget.size.getItemSpacing()),
             ],
 
             // 数值
@@ -254,7 +259,7 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: widget.size.getItemSpacing() / 2),
                   SizedBox(
                     height: 18,
                     child: Text(
@@ -273,7 +278,7 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
           ],
         ),
 
-        const SizedBox(height: 8),
+        SizedBox(height: widget.size.getItemSpacing()),
 
         // 状态文本
         Text(
@@ -362,7 +367,7 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
         280.0 / (widget.dataPoints.length > 1 ? widget.dataPoints.length - 1 : 1);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
       child: CustomPaint(
         size: Size.infinite,
         painter: _TrendLineChartPainter(

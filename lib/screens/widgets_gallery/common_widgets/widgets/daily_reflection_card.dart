@@ -34,7 +34,7 @@ class DailyReflectionCardWidget extends StatefulWidget {
     required this.question,
     this.darkBackgroundColor,
     this.primaryColor,
-    this.size = HomeWidgetSize.large,
+    this.size = HomeWidgetSize.medium,
     this.inline = false,
   });
 
@@ -115,8 +115,8 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : 340,
-        height: widget.inline ? double.maxFinite : 340,
+        width: widget.inline ? double.maxFinite : widget.size.width * 80.0 + 100,
+        height: widget.inline ? double.maxFinite : widget.size.height * 80.0 + 100,
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(32),
@@ -151,7 +151,7 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
             ),
             // 主要内容
             Padding(
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -168,10 +168,10 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      _ButterflyIcon(animation: _animation, size: 32),
+                      _ButterflyIcon(animation: _animation, size: widget.size.width == 1 ? 24 : 32),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 中间：引导性问题
                   Expanded(
                     child: Center(
@@ -202,7 +202,7 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 底部：按钮组
                   _ButtonGroup(
                     animation: _animation,
@@ -333,7 +333,7 @@ class _ButtonGroup extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: widget.size.getItemSpacing()),
         // Sync 按钮
         _AnimatedButton(
           animation: animation,

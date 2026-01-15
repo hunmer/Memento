@@ -12,10 +12,14 @@ class ColorfulShortcutsGridWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ColorfulShortcutsGridWidget({
     super.key,
     required this.data,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -26,6 +30,7 @@ class ColorfulShortcutsGridWidget extends StatefulWidget {
     return ColorfulShortcutsGridWidget(
       data: ColorfulShortcutsGridData.fromJson(props),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -108,7 +113,7 @@ class _ColorfulShortcutsGridWidgetState
                   width: 1,
                 ),
               ),
-              padding: const EdgeInsets.all(16),
+              padding: widget.size.getPadding(),
               child: _buildGrid(context),
             ),
           ),
@@ -133,6 +138,7 @@ class _ColorfulShortcutsGridWidgetState
           shortcut: widget.data.shortcuts[index],
           index: index,
           animationController: _animationController,
+          size: widget.size,
         );
       },
     );
@@ -144,11 +150,13 @@ class _ShortcutItemWidget extends StatelessWidget {
   final ShortcutItemData shortcut;
   final int index;
   final AnimationController animationController;
+  final HomeWidgetSize size;
 
   const _ShortcutItemWidget({
     required this.shortcut,
     required this.index,
     required this.animationController,
+    required this.size,
   });
 
   @override
@@ -208,7 +216,7 @@ class _ShortcutItemWidget extends StatelessWidget {
             ],
           ),
           child: Container(
-            padding: const EdgeInsets.all(14),
+            padding: size.getPadding(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

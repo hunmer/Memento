@@ -17,12 +17,16 @@ class NewsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const NewsCardWidget({
     super.key,
     required this.featuredNews,
     required this.category,
     required this.newsItems,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性创建（用于动态渲染）
@@ -36,6 +40,7 @@ class NewsCardWidget extends StatefulWidget {
       category: data.category,
       newsItems: data.newsItems,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -189,8 +194,8 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
           ),
           // 右上角装饰按钮
           Positioned(
-            top: 16,
-            right: 16,
+            top: widget.size.getPadding().top,
+            right: widget.size.getPadding().right,
             child: _buildActionButton(primaryColor),
           ),
           // 标题
@@ -199,7 +204,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
             left: 0,
             right: 0,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: widget.size.getPadding().left * 2),
               child: Text(
                 widget.featuredNews.title,
                 style: TextStyle(
@@ -252,7 +257,12 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
     required Color textSubColor,
   }) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      padding: EdgeInsets.fromLTRB(
+        widget.size.getPadding().left,
+        widget.size.getPadding().top / 2,
+        widget.size.getPadding().right,
+        widget.size.getPadding().bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -268,7 +278,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
               height: 1.5,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: widget.size.getTitleSpacing()),
           // 新闻列表
           ...List.generate(widget.newsItems.length, (index) {
             final item = widget.newsItems[index];
@@ -320,7 +330,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+            padding: EdgeInsets.only(bottom: isLast ? 0 : widget.size.getItemSpacing()),
             child: Row(
               children: [
                 // 文本内容
@@ -340,7 +350,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: widget.size.getItemSpacing() / 2),
                       Text(
                         item.time,
                         style: TextStyle(
@@ -352,7 +362,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: widget.size.getItemSpacing() * 2),
                 // 缩略图
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),

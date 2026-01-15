@@ -38,6 +38,9 @@ class ExpenseDonutChartWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ExpenseDonutChartWidget({
     super.key,
     required this.badgeLabel,
@@ -46,6 +49,7 @@ class ExpenseDonutChartWidget extends StatefulWidget {
     required this.totalUnit,
     required this.categories,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   factory ExpenseDonutChartWidget.fromProps(Map<String, dynamic> props, HomeWidgetSize size) {
@@ -57,6 +61,7 @@ class ExpenseDonutChartWidget extends StatefulWidget {
       totalUnit: props['totalUnit'] as String? ?? '',
       categories: categoriesList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -97,7 +102,7 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with 
             child: Container(
               width: widget.inline ? double.maxFinite : 340,
               height: widget.inline ? double.maxFinite : 500,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(color: isDark ? const Color(0xFF1C1C1E) : Colors.white, borderRadius: BorderRadius.circular(40), boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.08), blurRadius: 30, offset: const Offset(0, 10))]),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,18 +111,18 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget> with 
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), decoration: BoxDecoration(color: primaryColor, borderRadius: BorderRadius.circular(20)), child: Text(widget.badgeLabel, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.2, color: Colors.black))),
-                      const SizedBox(height: 8),
+                      SizedBox(height: widget.size.getTitleSpacing() / 2),
                       Text(widget.timePeriod, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500)),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   Center(child: SizedBox(width: 220, height: 220, child: _DonutChart(categories: widget.categories, animation: _animation))),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   Column(
                     children: List.generate(widget.categories.length, (index) {
                       final category = widget.categories[index];
                       final itemAnimation = CurvedAnimation(parent: _animationController, curve: Interval(0.3 + index * 0.1, 0.8 + index * 0.05, curve: Curves.easeOutCubic));
-                      return Padding(padding: const EdgeInsets.only(bottom: 12), child: _CategoryItem(label: category.label, percentage: category.percentage, color: category.color, animation: itemAnimation));
+                      return Padding(padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()), child: _CategoryItem(label: category.label, percentage: category.percentage, color: category.color, animation: itemAnimation, size: widget.size));
                     }),
                   ),
                 ],
@@ -194,8 +199,9 @@ class _CategoryItem extends StatelessWidget {
   final double percentage;
   final Color color;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _CategoryItem({required this.label, required this.percentage, required this.color, required this.animation});
+  const _CategoryItem({required this.label, required this.percentage, required this.color, required this.animation, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +217,7 @@ class _CategoryItem extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(children: [Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)), const SizedBox(width: 12), Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700))]),
+                Row(children: [Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)), SizedBox(width: size.getItemSpacing() * 1.5), Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700))]),
                 AnimatedFlipCounter(value: percentage * animation.value, fractionDigits: 0, suffix: '%', duration: const Duration(milliseconds: 600), textStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.0)),
               ],
             ),

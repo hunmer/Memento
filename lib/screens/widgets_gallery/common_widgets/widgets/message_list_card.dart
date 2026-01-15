@@ -79,11 +79,15 @@ class MessageListCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MessageListCardWidget({
     super.key,
     required this.featuredMessage,
     required this.messages,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -108,6 +112,7 @@ class MessageListCardWidget extends StatefulWidget {
               .toList() ??
           const [],
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -172,23 +177,25 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            SizedBox(height: widget.size.getPadding().top),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: widget.size.getPadding().left),
               child: _FeaturedSection(
                 data: widget.featuredMessage,
                 animation: _animation,
+                size: widget.size,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: widget.size.getTitleSpacing()),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: widget.size.getPadding().left),
               child: _MessageListSection(
                 messages: widget.messages,
                 animation: _animation,
+                size: widget.size,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: widget.size.getPadding().bottom),
           ],
         ),
       ),
@@ -200,8 +207,13 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
 class _FeaturedSection extends StatelessWidget {
   final FeaturedMessageData data;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _FeaturedSection({required this.data, required this.animation});
+  const _FeaturedSection({
+    required this.data,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -348,8 +360,13 @@ class _FeaturedSection extends StatelessWidget {
 class _MessageListSection extends StatelessWidget {
   final List<MessageData> messages;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _MessageListSection({required this.messages, required this.animation});
+  const _MessageListSection({
+    required this.messages,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -398,12 +415,13 @@ class _MessageListSection extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: size.getItemSpacing()),
         ...List.generate(messages.length, (index) {
           return _MessageListItem(
             data: messages[index],
             animation: animation,
             index: index,
+            size: size,
           );
         }),
       ],
@@ -416,11 +434,13 @@ class _MessageListItem extends StatelessWidget {
   final MessageData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _MessageListItem({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -444,7 +464,7 @@ class _MessageListItem extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - itemAnimation.value)),
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 16),
+              padding: EdgeInsets.only(bottom: size.getItemSpacing()),
               child: Row(
                 children: [
                   ClipRRect(

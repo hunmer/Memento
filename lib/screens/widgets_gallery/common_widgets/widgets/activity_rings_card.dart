@@ -49,6 +49,9 @@ class ActivityRingsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ActivityRingsCardWidget({
     super.key,
     required this.date,
@@ -56,6 +59,7 @@ class ActivityRingsCardWidget extends StatefulWidget {
     required this.status,
     required this.rings,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -74,6 +78,7 @@ class ActivityRingsCardWidget extends StatefulWidget {
       status: props['status'] as String? ?? '',
       rings: ringsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -120,7 +125,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 400,
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(40),
@@ -171,7 +176,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -198,7 +203,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                                     height: 1.0,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: widget.size.getItemSpacing()),
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 6),
                                   child: Text(
@@ -215,7 +220,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: widget.size.getItemSpacing()),
                           Row(
                             children: [
                               Icon(
@@ -225,7 +230,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                                     : const Color(0xFFF97316),
                                 size: 24,
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: widget.size.getItemSpacing()),
                               Text(
                                 widget.status,
                                 style: TextStyle(
@@ -251,7 +256,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                             ),
                           );
                           return Padding(
-                            padding: const EdgeInsets.only(left: 12),
+                            padding: EdgeInsets.only(left: widget.size.getItemSpacing()),
                             child: _RingWidget(
                               data: widget.rings[index],
                               animation: ringAnimation,

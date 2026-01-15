@@ -27,6 +27,9 @@ class IconCircularProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const IconCircularProgressCardWidget({
     super.key,
     required this.progress,
@@ -36,6 +39,7 @@ class IconCircularProgressCardWidget extends StatefulWidget {
     this.showNotification = false,
     this.progressColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -55,6 +59,7 @@ class IconCircularProgressCardWidget extends StatefulWidget {
           ? Color(props['progressColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -136,7 +141,7 @@ class _IconCircularProgressCardWidgetState
                 ],
               ),
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -253,7 +258,7 @@ class _IconCircularProgressCardWidgetState
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: widget.size.getItemSpacing()),
         // 副标题
         Text(
           widget.subtitle,

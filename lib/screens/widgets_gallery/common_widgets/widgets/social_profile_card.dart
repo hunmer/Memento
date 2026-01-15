@@ -32,6 +32,8 @@ class SocialProfileCardWidget extends StatefulWidget {
   final int shares;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const SocialProfileCardWidget({
     super.key,
@@ -45,6 +47,7 @@ class SocialProfileCardWidget extends StatefulWidget {
     required this.comments,
     required this.shares,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -63,6 +66,7 @@ class SocialProfileCardWidget extends StatefulWidget {
       comments: (props['comments'] as num?)?.toInt() ?? 0,
       shares: (props['shares'] as num?)?.toInt() ?? 0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -125,19 +129,19 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(20),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // 顶部：头像和用户信息
                     _buildHeader(isDark, primaryColor),
-                    const SizedBox(height: 12),
+                    SizedBox(height: widget.size.getItemSpacing()),
                     // 标签
                     _buildTag(primaryColor),
-                    const SizedBox(height: 8),
+                    SizedBox(height: widget.size.getItemSpacing()),
                     // 内容
                     _buildContent(isDark),
-                    const SizedBox(height: 16),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 底部：四个统计信息
                     _buildStats(isDark),
                   ],
@@ -176,7 +180,7 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
             },
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: widget.size.getItemSpacing()),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,10 +290,10 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
       children: [
         Icon(
           icon,
-          size: 16,
+          size: widget.size.getIconSize(),
           color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getItemSpacing() / 2),
         AnimatedFlipCounter(
           value: (value >= 1000 ? value * 0.001 : value) * animation.value,
           fractionDigits: value >= 1000 ? 1 : 0,
@@ -302,7 +306,7 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
             color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827),
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: widget.size.getItemSpacing() / 4),
         Text(
           label,
           style: TextStyle(
