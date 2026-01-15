@@ -223,26 +223,10 @@ class GoodsHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
   }
 
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
 
   /// 渲染选中的仓库数据
   static Widget _renderWarehouseData(
@@ -253,13 +237,13 @@ class GoodsHomeWidgets {
     // 从 result.data 获取仓库 ID
     final data = result.data as Map<String, dynamic>?;
     if (data == null) {
-      return _buildErrorWidget(context, '请选择仓库');
+      return HomeWidget.buildErrorWidget(context, '请选择仓库');
     }
 
     final warehouseId = data['id'] as String?;
 
     if (warehouseId == null) {
-      return _buildErrorWidget(context, '仓库ID为空');
+      return HomeWidget.buildErrorWidget(context, '仓库ID为空');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -284,12 +268,12 @@ class GoodsHomeWidgets {
     // 从 PluginManager 获取最新的仓库数据
     final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, '插件不可用');
+      return HomeWidget.buildErrorWidget(context, '插件不可用');
     }
 
     final warehouse = plugin.getWarehouse(warehouseId);
     if (warehouse == null) {
-      return _buildErrorWidget(context, '仓库不存在');
+      return HomeWidget.buildErrorWidget(context, '仓库不存在');
     }
 
     final title = warehouse.title;
@@ -434,13 +418,13 @@ class GoodsHomeWidgets {
     // 从 result.data 获取物品 ID
     final data = result.data as Map<String, dynamic>?;
     if (data == null) {
-      return _buildErrorWidget(context, '请选择物品');
+      return HomeWidget.buildErrorWidget(context, '请选择物品');
     }
 
     final itemId = data['id'] as String?;
 
     if (itemId == null) {
-      return _buildErrorWidget(context, '物品ID为空');
+      return HomeWidget.buildErrorWidget(context, '物品ID为空');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -466,14 +450,14 @@ class GoodsHomeWidgets {
     // 从 PluginManager 获取最新的物品数据
     final plugin = PluginManager.instance.getPlugin('goods') as GoodsPlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, '插件不可用');
+      return HomeWidget.buildErrorWidget(context, '插件不可用');
     }
 
     final findResult = plugin.findGoodsItemById(itemId);
     final item = findResult?.item;
 
     if (item == null) {
-      return _buildErrorWidget(context, '物品不存在');
+      return HomeWidget.buildErrorWidget(context, '物品不存在');
     }
 
     final title = item.title;

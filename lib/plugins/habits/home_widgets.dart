@@ -159,26 +159,10 @@ class HabitsHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
   }
 
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
 
   // ===== 习惯热力图小组件相关方法 =====
 
@@ -225,7 +209,7 @@ class HabitsHomeWidgets {
     Map<String, dynamic> config,
   ) {
     if (result.data == null) {
-      return _buildErrorWidget(context, '数据不存在');
+      return HomeWidget.buildErrorWidget(context, '数据不存在');
     }
 
     final savedData =
@@ -236,7 +220,7 @@ class HabitsHomeWidgets {
     final habitId = savedData['id'] as String?;
 
     if (habitId == null) {
-      return _buildErrorWidget(context, '习惯ID不存在');
+      return HomeWidget.buildErrorWidget(context, '习惯ID不存在');
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新

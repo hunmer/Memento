@@ -186,7 +186,7 @@ class CalendarAlbumHomeWidgets {
         },
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
   }
 
@@ -209,22 +209,6 @@ class CalendarAlbumHomeWidgets {
     );
   }
 
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
 
   /// 构建本周相册小组件
   static Widget _buildWeeklyAlbumWidget(
@@ -249,7 +233,7 @@ class CalendarAlbumHomeWidgets {
         },
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
   }
 
@@ -258,11 +242,11 @@ class CalendarAlbumHomeWidgets {
     final plugin =
         PluginManager.instance.getPlugin('calendar_album')
             as CalendarAlbumPlugin?;
-    if (plugin == null) return _buildErrorWidget(context, 'Plugin not found');
+    if (plugin == null) return HomeWidget.buildErrorWidget(context, 'Plugin not found');
 
     final controller = plugin.calendarController;
     if (controller == null) {
-      return _buildErrorWidget(context, 'Controller not found');
+      return HomeWidget.buildErrorWidget(context, 'Controller not found');
     }
 
     final now = DateTime.now();
@@ -543,7 +527,7 @@ class CalendarAlbumHomeWidgets {
         },
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
   }
 
@@ -552,11 +536,11 @@ class CalendarAlbumHomeWidgets {
     final plugin =
         PluginManager.instance.getPlugin('calendar_album')
             as CalendarAlbumPlugin?;
-    if (plugin == null) return _buildErrorWidget(context, 'Plugin not found');
+    if (plugin == null) return HomeWidget.buildErrorWidget(context, 'Plugin not found');
 
     final controller = plugin.calendarController;
     if (controller == null) {
-      return _buildErrorWidget(context, 'Controller not found');
+      return HomeWidget.buildErrorWidget(context, 'Controller not found');
     }
 
     // 获取最近30天的图片

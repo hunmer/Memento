@@ -229,25 +229,8 @@ class ChatHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
-  }
-
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
   }
 
   /// 渲染选中的频道数据
@@ -261,7 +244,7 @@ class ChatHomeWidgets {
     final channelId = channelData['id'] as String?;
 
     if (channelId == null) {
-      return _buildErrorWidget(context, 'chat_channelNotFound'.tr);
+      return HomeWidget.buildErrorWidget(context, 'chat_channelNotFound'.tr);
     }
 
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -281,7 +264,7 @@ class ChatHomeWidgets {
     // 从 PluginManager 获取最新的频道数据
     final plugin = PluginManager.instance.getPlugin('chat') as ChatPlugin?;
     if (plugin == null) {
-      return _buildErrorWidget(context, 'chat_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(context, 'chat_pluginNotAvailable'.tr);
     }
 
     // 查找对应频道

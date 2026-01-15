@@ -179,25 +179,8 @@ class WebviewHomeWidgets {
         config: widgetConfig,
       );
     } catch (e) {
-      return _buildErrorWidget(context, e.toString());
+      return HomeWidget.buildErrorWidget(context, e.toString());
     }
-  }
-
-  /// 构建错误提示组件
-  static Widget _buildErrorWidget(BuildContext context, String error) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 32, color: Colors.red),
-          const SizedBox(height: 8),
-          Text(
-            'home_loadFailed'.tr,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
   }
 
   // ===== 选择器小组件相关方法 =====
@@ -228,7 +211,7 @@ class WebviewHomeWidgets {
 
     // dataSelector 已经将数据转换为 Map，直接使用
     if (result.data == null || result.data is! Map) {
-      return _buildErrorWidget(context, '数据不存在或格式错误');
+      return HomeWidget.buildErrorWidget(context, '数据不存在或格式错误');
     }
 
     final cardData = result.data as Map<String, dynamic>;
@@ -314,7 +297,7 @@ class WebviewHomeWidgets {
   ) {
     // dataSelector 已经将数据转换为 Map，直接使用
     if (result.data == null || result.data is! Map) {
-      return _buildErrorWidget(context, '数据不存在或格式错误');
+      return HomeWidget.buildErrorWidget(context, '数据不存在或格式错误');
     }
 
     final cardData = result.data as Map<String, dynamic>;
@@ -322,7 +305,7 @@ class WebviewHomeWidgets {
     final title = cardData['title'] as String? ?? '未知卡片';
 
     if (url.isEmpty) {
-      return _buildErrorWidget(context, 'URL 为空');
+      return HomeWidget.buildErrorWidget(context, 'URL 为空');
     }
 
     // 获取自定义尺寸
