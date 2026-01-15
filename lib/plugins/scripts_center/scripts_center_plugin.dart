@@ -316,11 +316,8 @@ class ScriptsCenterPlugin extends BasePlugin {
           enabledScripts.where((script) => script.hasTriggers).toList();
 
       if (scriptsWithTriggers.isEmpty) {
-        print('ℹ️ 没有配置触发器的脚本');
         return;
       }
-
-      print('🔧 设置脚本触发器...');
 
       for (var script in scriptsWithTriggers) {
         for (var trigger in script.triggers) {
@@ -359,13 +356,8 @@ class ScriptsCenterPlugin extends BasePlugin {
           );
 
           _subscriptionIds.add(subscriptionId);
-          print(
-            '   ✓ ${script.name}: ${trigger.event} (延迟${trigger.delay ?? 0}ms)',
-          );
         }
       }
-
-      print('✅ 触发器设置完成，共 ${_subscriptionIds.length} 个');
     } catch (e) {
       print('❌ 设置触发器失败: $e');
     }

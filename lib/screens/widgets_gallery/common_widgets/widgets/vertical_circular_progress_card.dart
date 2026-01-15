@@ -182,7 +182,9 @@ class _VerticalCircularProgressCardState
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : (widget.width ?? double.maxFinite),
-              padding: widget.padding ?? const EdgeInsets.all(24),
+              padding:
+                  widget.padding ??
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
                 borderRadius: BorderRadius.circular(widget.borderRadius ?? 28),

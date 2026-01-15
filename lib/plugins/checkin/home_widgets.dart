@@ -612,7 +612,19 @@ class CheckinHomeWidgets {
         }
       }
 
-      // 动态调用 commonWidgetsProvider 获取最新数据
+      // 优先使用已保存的 commonWidgetProps（用户在对话框中选择的数据）
+      // 只有当 props 不存在时才动态调用 commonWidgetsProvider 获取最新数据
+      if (selectorConfig.commonWidgetProps != null) {
+        // 使用用户在【公共组件样式】对话框中选择并保存的数据
+        return CommonWidgetBuilder.build(
+          context,
+          commonWidgetId,
+          selectorConfig.commonWidgetProps!,
+          size,
+        );
+      }
+
+      // 兼容旧数据：如果没有保存的 props，才动态获取
       if (widgetDefinition.commonWidgetsProvider != null) {
         final availableWidgets = widgetDefinition.commonWidgetsProvider!(data);
         final latestProps = availableWidgets[widgetId];

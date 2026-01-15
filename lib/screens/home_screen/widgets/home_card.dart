@@ -203,9 +203,16 @@ class _HomeCardState extends State<HomeCard> {
       final backgroundImagePath =
           widgetItem.config['backgroundImage'] as String?;
 
+      // 将 widgetItem.id 注入到 config 中，以便小组件可以使用它作为 key
+      // 这确保当小组件被添加或替换时，会创建新的组件实例并触发 initState
+      final configWithId = {
+        ...widgetItem.config,
+        '_widgetItemId': widgetItem.id,
+      };
+
       Widget content = widgetDef.build(
         context,
-        widgetItem.config,
+        configWithId,
         widgetItem.size,
       );
 

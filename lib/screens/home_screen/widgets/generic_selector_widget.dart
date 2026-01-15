@@ -144,18 +144,32 @@ class GenericSelectorWidget extends StatelessWidget {
       final size = config['widgetSize'] as HomeWidgetSize? ??
           widgetDefinition.defaultSize;
 
+      // 获取 widgetItem.id 作为 key，确保小组件被正确创建并触发 initState
+      final widgetItemId = config['_widgetItemId'] as String?;
+
       // 将字符串 ID 转换为枚举值
       final commonWidgetId = CommonWidgetsRegistry.fromString(widgetId);
       if (commonWidgetId == null) {
         return _buildErrorWidget(context, '未知的公共组件: $widgetId');
       }
 
-      return CommonWidgetBuilder.build(
+      final child = CommonWidgetBuilder.build(
         context,
         commonWidgetId,
         props,
         size,
       );
+
+      // 使用 widgetItemId 作为 key，确保每个小组件实例都是唯一的
+      // 这样当小组件被添加或替换时，Flutter 会创建新的组件实例并触发 initState
+      if (widgetItemId != null) {
+        return KeyedSubtree(
+          key: ValueKey(widgetItemId),
+          child: child,
+        );
+      }
+
+      return child;
     } catch (e) {
       debugPrint('[GenericSelectorWidget] 构建公共组件失败: $e');
       return _buildErrorWidget(context, '渲染公共组件失败');
