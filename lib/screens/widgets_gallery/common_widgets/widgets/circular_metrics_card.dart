@@ -121,11 +121,14 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 380,
-              height: widget.inline ? double.maxFinite : 280,
-              padding: const EdgeInsets.all(32),
+              constraints:
+                  widget.inline
+                      ? null
+                      : const BoxConstraints(minHeight: 200, maxHeight: 400),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -150,9 +153,9 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
                       letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  // 指标网格
-                  _buildMetricsGrid(context, isDark),
+                  const SizedBox(height: 24),
+                  // 指标列表（支持滚动）
+                  Expanded(child: _buildMetricsList(context, isDark)),
                 ],
               ),
             ),
@@ -161,68 +164,30 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
       },
     );
   }
-
-  Widget _buildMetricsGrid(BuildContext context, bool isDark) {
+  /// 构建可滚动的指标列表
+  Widget _buildMetricsList(BuildContext context, bool isDark) {
     final metrics = widget.metrics;
 
-    // 如果指标数量不足4个，使用默认值填充
-    final filledMetrics = List<MetricData>.filled(
-      4,
-      MetricData(
-        icon: Icons.help_outline,
-        value: '--',
-        label: 'N/A',
-        progress: 0.0,
-        color: Colors.grey,
-      ),
-    );
-
-    for (int i = 0; i < metrics.length && i < 4; i++) {
-      filledMetrics[i] = metrics[i];
+    if (metrics.isEmpty) {
+      return const Center(
+        child: Text('暂无数据', style: TextStyle(color: Colors.grey)),
+      );
     }
 
-    return Column(
-      children: [
-        // 第一行
-        Row(
-          children: [
-            Expanded(
-              child: _MetricItemWidget(
-                data: filledMetrics[0],
-                animation: _animation,
-                index: 0,
-              ),
-            ),
-            Expanded(
-              child: _MetricItemWidget(
-                data: filledMetrics[1],
-                animation: _animation,
-                index: 1,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 40),
-        // 第二行
-        Row(
-          children: [
-            Expanded(
-              child: _MetricItemWidget(
-                data: filledMetrics[2],
-                animation: _animation,
-                index: 2,
-              ),
-            ),
-            Expanded(
-              child: _MetricItemWidget(
-                data: filledMetrics[3],
-                animation: _animation,
-                index: 3,
-              ),
-            ),
-          ],
-        ),
-      ],
+    return ListView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      itemCount: metrics.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: _MetricItemWidget(
+            data: metrics[index],
+            animation: _animation,
+            index: index,
+          ),
+        );
+      },
     );
   }
 }
