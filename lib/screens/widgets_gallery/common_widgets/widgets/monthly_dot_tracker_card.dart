@@ -85,9 +85,7 @@ class MonthlyDotTrackerCardWidget extends StatelessWidget {
     final constraints = size.getHeightConstraints();
     final height = inline ? double.maxFinite : (constraints.maxHeight + constraints.minHeight) / 2;
 
-    return Padding(
-      padding: size.getPadding(),
-      child: DotTrackerCardWidget(
+    return DotTrackerCardWidget(
         title: title,
         icon: icon,
         currentValue: currentValue,
@@ -97,8 +95,7 @@ class MonthlyDotTrackerCardWidget extends StatelessWidget {
         dotStates: dotStates,
         enableAnimation: true,
         inline: inline,
-        height: height,
-      ),
+      height: height,
     );
   }
 }

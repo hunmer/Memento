@@ -253,7 +253,7 @@ class _ProgressDots extends StatelessWidget {
         );
 
         return Padding(
-          padding: EdgeInsets.only(right: widget.size.getItemSpacing() - 2),
+          padding: EdgeInsets.only(right: size.getItemSpacing() - 2),
           child: AnimatedBuilder(
             animation: dotAnimation,
             builder: (context, child) {
