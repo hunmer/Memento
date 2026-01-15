@@ -836,25 +836,45 @@ class CheckinHomeWidgets {
         'moreCount': 0,
       },
 
-      // InboxMessageCard - 收件箱消息卡片（复用为最近打卡记录）
+      // InboxMessageCard - 收件箱消息卡片（复用为最近打卡项目）
       'inboxMessageCard': {
-        'messages': allMonthlyRecords.reversed.take(5).map((dateStr) {
-          final parts = dateStr.split('-');
-          final date = DateTime(
-            int.parse(parts[0]),
-            int.parse(parts[1]),
-            int.parse(parts[2]),
-          );
-          final weekday = ['一', '二', '三', '四', '五', '六', '日'][date.weekday - 1];
+        'title': '签到习惯',  // 自定义小组件标题
+        'messages': checkinItemCards.take(5).map((card) {
+          // 获取最后打卡时间
+          final itemId = card['id'] as String?;
+          String timeAgo = '未打卡';
+          if (plugin != null && itemId != null) {
+            try {
+              final item = plugin.checkinItems.firstWhere(
+                (i) => i.id == itemId,
+                orElse: () => throw Exception(''),
+              );
+              final lastDate = item.lastCheckinDate;
+              if (lastDate != null) {
+                final daysAgo = DateTime.now().difference(lastDate).inDays;
+                if (daysAgo == 0) {
+                  timeAgo = '今天';
+                } else if (daysAgo == 1) {
+                  timeAgo = '昨天';
+                } else {
+                  timeAgo = '$daysAgo天前';
+                }
+              }
+            } catch (_) {}
+          }
+
           return {
-            'name': '周$weekday',
-            'avatarUrl': null,
-            'preview': '$dateStr 打卡记录',
-            'timeAgo': '${DateTime.now().difference(date).inDays}天前',
+            'name': card['title'] as String? ?? '签到项目',
+            'avatarUrl': '',  // 空字符串，使用图标代替
+            'iconCodePoint': card['iconCodePoint'] as int?,
+            'iconBackgroundColor': card['color'] as int?,
+            'preview': card['subtitle'] as String? ?? '签到',
+            'timeAgo': timeAgo,
           };
         }).toList(),
-        'totalCount': allMonthlyRecords.length,
-        'remainingCount': 0,
+        'totalCount': checkinItemCards.length,
+        'remainingCount': (checkinItemCards.length - 5).clamp(0, 999),
+        'primaryColor': 0xFF14B8A6,  // 标题栏背景色（青色）
       },
 
       // RoundedTaskListCard - 圆角任务列表卡片

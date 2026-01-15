@@ -295,24 +295,6 @@ class _HeaderSection extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            children: [
-              Icon(
-                Icons.more_horiz,
-                color: isDark ? Colors.black87 : Colors.black87,
-                size: 24,
-              ),
-              SizedBox(width: size.getTitleSpacing() / 2),
-              Text(
-                'Done',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.black87 : Colors.black87,
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -352,19 +334,6 @@ class _TasksSection extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Transform.translate(
-              offset: const Offset(0, -20),
-              child: Text(
-                'Things to do today',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                  height: 1.2,
-                ),
-              ),
-            ),
-            SizedBox(height: size.getTitleSpacing()),
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,

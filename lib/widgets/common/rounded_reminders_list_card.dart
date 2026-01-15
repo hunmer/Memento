@@ -195,7 +195,6 @@ class _ReminderListCardState extends State<ReminderListCard>
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   SizedBox(
-                                    width: 140,
                                     height: 56,
                                     child: AnimatedFlipCounter(
                                       value:
