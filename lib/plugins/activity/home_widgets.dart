@@ -461,15 +461,20 @@ class ActivityHomeWidgets {
 
       // 支出分类环形图：按标签统计活动时长
       'expenseDonutChart': {
-        'title': '今日活动分布',
-        'total': '${(todayDurationMinutes / 60).toStringAsFixed(1)}小时',
+        'badgeLabel': '活动',
+        'timePeriod': '${now.month}月${now.day}日',
+        'totalAmount': todayDurationMinutes.toDouble() / 60,
+        'totalUnit': '小时',
         'categories':
             tagStats.entries
                 .map(
                   (e) => {
-                    'name': e.key,
-                    'value': e.value.toDouble(),
+                    'label': e.key,
+                    'percentage': todayDurationMinutes > 0
+                        ? (e.value / todayDurationMinutes * 100)
+                        : 0.0,
                     'color': _getColorFromTagForWidgets(e.key).value,
+                    'subtitle': _formatActivitiesTimeRange(activitiesByTag[e.key] ?? []),
                   },
                 )
                 .toList(),
@@ -1785,6 +1790,27 @@ String _formatDurationForDisplay(int minutes) {
     return '${hours.toStringAsFixed(1)}小时';
   }
   return '$minutes分钟';
+}
+
+/// 格式化活动列表的时间段为字符串
+String _formatActivitiesTimeRange(List<ActivityRecord> activities) {
+  if (activities.isEmpty) return '';
+
+  // 按开始时间排序
+  final sortedActivities = List<ActivityRecord>.from(activities);
+  sortedActivities.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+  // 最多显示3个时间段
+  final timeRanges = sortedActivities
+      .take(3)
+      .map((a) => _formatTimeRangeStatic(a.startTime, a.endTime))
+      .toList();
+
+  if (sortedActivities.length > 3) {
+    return '${timeRanges.join('、')}...';
+  }
+
+  return timeRanges.join('、');
 }
 
 /// 将活动记录转换为 DailyScheduleCardWidget 的 EventData 格式

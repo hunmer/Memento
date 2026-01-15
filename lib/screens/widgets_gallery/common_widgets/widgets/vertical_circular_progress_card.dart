@@ -37,6 +37,9 @@ class VerticalCircularProgressCard extends StatefulWidget {
   /// 卡片宽度，默认根据尺寸自适应
   final double? width;
 
+  /// 卡片高度，默认根据尺寸自适应
+  final double? height;
+
   /// 卡片内边距，默认24
   final EdgeInsetsGeometry? padding;
 
@@ -61,6 +64,7 @@ class VerticalCircularProgressCard extends StatefulWidget {
     required this.size,
     this.icon,
     this.width,
+    this.height,
     this.padding,
     this.borderRadius,
     this.showShadow,
@@ -117,6 +121,7 @@ class VerticalCircularProgressCard extends StatefulWidget {
       size: size,
       icon: icon,
       width: props['width'] as double?,
+      height: props['height'] as double?,
       padding: props['padding'] as EdgeInsetsGeometry?,
       borderRadius: props['borderRadius'] as double?,
       showShadow: props['showShadow'] as bool?,
@@ -183,6 +188,10 @@ class _VerticalCircularProgressCardState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
+              height:
+                  widget.inline
+                      ? double.maxFinite
+                      : (widget.height ?? double.maxFinite),
               width:
                   widget.inline
                       ? double.maxFinite
