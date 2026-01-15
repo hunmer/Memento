@@ -68,6 +68,7 @@ class HabitStreakTrackerCardWidget extends StatelessWidget {
       completedDays: completedDays,
       titleText: title,
       longestStreakLabel: '最佳连续',
+      padding: size.getPadding(),
     );
   }
 }

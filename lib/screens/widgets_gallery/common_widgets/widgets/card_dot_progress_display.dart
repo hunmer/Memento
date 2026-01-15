@@ -15,6 +15,9 @@ class CardDotProgressDisplay extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const CardDotProgressDisplay({
     super.key,
     required this.title,
@@ -25,6 +28,7 @@ class CardDotProgressDisplay extends StatefulWidget {
     required this.totalProgress,
     required this.completedProgress,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -41,6 +45,7 @@ class CardDotProgressDisplay extends StatefulWidget {
       totalProgress: props['totalProgress'] as int? ?? 0,
       completedProgress: props['completedProgress'] as int? ?? 0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -86,7 +91,7 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
           opacity: _animation.value,
           child: Container(
             width: widget.inline ? double.maxFinite : 300,
-            padding: const EdgeInsets.all(16),
+            padding: widget.size.getPadding(),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
               borderRadius: BorderRadius.circular(16),
@@ -154,7 +159,7 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                   ],
                 ),
 
-                const SizedBox(height: 12),
+                SizedBox(height: widget.size.getTitleSpacing()),
 
                 // 数值和活动数
                 Row(
@@ -198,7 +203,7 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                   ],
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: widget.size.getItemSpacing()),
 
                 // 进度点
                 _ProgressDots(
@@ -206,6 +211,7 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                   completed: widget.completedProgress,
                   color: primaryColor,
                   animation: _animation,
+                  size: widget.size,
                 ),
               ],
             ),
@@ -222,12 +228,14 @@ class _ProgressDots extends StatelessWidget {
   final int completed;
   final Color color;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _ProgressDots({
     required this.total,
     required this.completed,
     required this.color,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -245,7 +253,7 @@ class _ProgressDots extends StatelessWidget {
         );
 
         return Padding(
-          padding: const EdgeInsets.only(right: 4),
+          padding: EdgeInsets.only(right: widget.size.getItemSpacing() - 2),
           child: AnimatedBuilder(
             animation: dotAnimation,
             builder: (context, child) {

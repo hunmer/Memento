@@ -53,6 +53,9 @@ class WatchProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const WatchProgressCardWidget({
     super.key,
     required this.userName,
@@ -62,6 +65,7 @@ class WatchProgressCardWidget extends StatefulWidget {
     required this.items,
     this.progressColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -89,6 +93,7 @@ class WatchProgressCardWidget extends StatefulWidget {
           ? Color(props['progressColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -165,15 +170,15 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                         ),
                       ],
               ),
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildHeader(isDark, 0, step),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   _buildProgressSection(isDark, 1, step),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   ..._buildItemsList(isDark, step),
                 ],
               ),
@@ -217,7 +222,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: widget.size.getItemSpacing()),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -229,7 +234,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                     color: isDark ? Colors.white : Colors.grey.shade900,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: widget.size.getItemSpacing() * 0.15),
                 Text(
                   'Last watched ${widget.lastWatched}',
                   style: TextStyle(
@@ -280,7 +285,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                     letterSpacing: -1,
                   ),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: widget.size.getItemSpacing() * 0.25),
                 Text(
                   '/${widget.totalCount}',
                   style: TextStyle(
@@ -291,7 +296,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: widget.size.getItemSpacing() * 0.25),
             Text(
               'Watched Items',
               style: TextStyle(
@@ -300,7 +305,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade400,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: widget.size.getItemSpacing()),
             Container(
               height: 6,
               decoration: BoxDecoration(
@@ -334,7 +339,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
 
     for (int i = 0; i < widget.items.length; i++) {
       if (i > 0) {
-        items.add(const SizedBox(height: 20));
+        items.add(SizedBox(height: widget.size.getItemSpacing() * 1.25));
       }
       items.add(_buildItem(widget.items[i], isDark, i + 2, step));
     }
@@ -367,7 +372,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
               ),
               child: const Icon(Icons.movie, size: 20),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: widget.size.getItemSpacing()),
             Text(
               item.title,
               style: TextStyle(

@@ -78,12 +78,15 @@ class SplitColumnProgressBarCard extends StatefulWidget {
   final List<ProgressItemData> nutrients;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 组件尺寸
+  final HomeWidgetSize size;
 
   const SplitColumnProgressBarCard({
     super.key,
     required this.calories,
     required this.nutrients,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -104,6 +107,7 @@ class SplitColumnProgressBarCard extends StatefulWidget {
       calories: caloriesData,
       nutrients: nutrientsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -151,7 +155,7 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
               height: widget.inline ? double.maxFinite : 180,
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF374151) : Colors.white,
                 borderRadius: BorderRadius.circular(24),
@@ -170,11 +174,14 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
                     child: _CaloriesSection(
                       data: widget.calories,
                       animation: _animation,
+                      size: widget.size,
                     ),
                   ),
                   Container(
                     width: 1,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: widget.size.getPadding().horizontal / 2,
+                    ),
                     color: isDark
                         ? Colors.white.withOpacity(0.1)
                         : const Color(0xFFE5E7EB),
@@ -183,6 +190,7 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
                     child: _NutrientsSection(
                       nutrients: widget.nutrients,
                       animation: _animation,
+                      size: widget.size,
                     ),
                   ),
                 ],
@@ -198,8 +206,13 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
 class _CaloriesSection extends StatelessWidget {
   final ColumnProgressData data;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _CaloriesSection({required this.data, required this.animation});
+  const _CaloriesSection({
+    required this.data,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +237,7 @@ class _CaloriesSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: size.getItemSpacing()),
         SizedBox(
           height: 40,
           child: Row(
@@ -260,7 +273,7 @@ class _CaloriesSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: size.getItemSpacing()),
         Container(
           height: 10,
           decoration: BoxDecoration(
@@ -283,7 +296,7 @@ class _CaloriesSection extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: size.getItemSpacing()),
         SizedBox(
           height: 16,
           child: Text(
@@ -304,8 +317,13 @@ class _CaloriesSection extends StatelessWidget {
 class _NutrientsSection extends StatelessWidget {
   final List<ProgressItemData> nutrients;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _NutrientsSection({required this.nutrients, required this.animation});
+  const _NutrientsSection({
+    required this.nutrients,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -314,8 +332,8 @@ class _NutrientsSection extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         for (int i = 0; i < nutrients.length; i++) ...[
-          if (i > 0) const SizedBox(height: 16),
-          _NutrientItem(data: nutrients[i], animation: animation, index: i),
+          if (i > 0) SizedBox(height: size.getItemSpacing()),
+          _NutrientItem(data: nutrients[i], animation: animation, index: i, size: size),
         ],
       ],
     );
@@ -326,11 +344,13 @@ class _NutrientItem extends StatelessWidget {
   final ProgressItemData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _NutrientItem({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -384,7 +404,7 @@ class _NutrientItem extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: size.getItemSpacing() / 2),
         Container(
           height: 6,
           decoration: BoxDecoration(

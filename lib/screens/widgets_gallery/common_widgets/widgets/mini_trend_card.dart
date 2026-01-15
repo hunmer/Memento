@@ -30,6 +30,9 @@ class MiniTrendCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MiniTrendCardWidget({
     super.key,
     required this.title,
@@ -40,6 +43,7 @@ class MiniTrendCardWidget extends StatefulWidget {
     required this.weekDays,
     required this.trendData,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -62,6 +66,7 @@ class MiniTrendCardWidget extends StatefulWidget {
               .toList() ??
           [],
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -123,7 +128,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 380,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),
@@ -141,7 +146,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
                 children: [
                   // 标题栏
                   _buildHeader(context, isDark, primaryColor, textColor, mutedColor),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 主要内容
                   Row(
@@ -244,7 +249,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
             ],
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getItemSpacing()),
         Text(
           widget.subtitle,
           style: TextStyle(
@@ -270,7 +275,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
               animation: _animation,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: widget.size.getItemSpacing()),
           // 星期标签
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

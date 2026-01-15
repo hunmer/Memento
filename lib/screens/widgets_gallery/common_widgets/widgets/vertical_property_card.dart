@@ -66,6 +66,9 @@ class VerticalPropertyCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const VerticalPropertyCardWidget({
     super.key,
     required this.imageUrl,
@@ -75,6 +78,7 @@ class VerticalPropertyCardWidget extends StatefulWidget {
     required this.actionLabel,
     required this.actionIcon,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -96,6 +100,7 @@ class VerticalPropertyCardWidget extends StatefulWidget {
       actionIcon: PropertyMetadata._iconFromString(
           props['actionIcon'] as String? ?? 'Icons.my_location'),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -229,20 +234,20 @@ class _VerticalPropertyCardWidgetState
   Widget _buildContentSection(
       BuildContext context, bool isDark, Color primaryColor) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: widget.size.getPadding(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 标题
           _buildTitle(isDark),
-          const SizedBox(height: 12),
+          SizedBox(height: widget.size.getTitleSpacing()),
           // 元数据行
           _buildMetadataRow(isDark),
-          const SizedBox(height: 16),
+          SizedBox(height: widget.size.getItemSpacing()),
           // 描述文本
           _buildDescription(isDark),
-          const SizedBox(height: 24),
+          SizedBox(height: widget.size.getTitleSpacing()),
           // 操作按钮
           _buildActionButton(primaryColor),
         ],
@@ -294,7 +299,7 @@ class _VerticalPropertyCardWidgetState
         );
       },
       child: Wrap(
-        spacing: 16,
+        spacing: widget.size.getItemSpacing(),
         children: widget.metadata.map((meta) {
           return _buildMetadataItem(meta, isDark);
         }).toList(),

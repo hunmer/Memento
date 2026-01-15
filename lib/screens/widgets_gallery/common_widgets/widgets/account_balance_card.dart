@@ -15,10 +15,14 @@ class AccountBalanceCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const AccountBalanceCardWidget({
     super.key,
     required this.accounts,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -34,6 +38,7 @@ class AccountBalanceCardWidget extends StatefulWidget {
     return AccountBalanceCardWidget(
       accounts: accounts,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -93,17 +98,18 @@ class _AccountBalanceCardWidgetState extends State<AccountBalanceCardWidget>
     return Container(
       color: isDark ? const Color(0xFF101622) : const Color(0xFFF6F6F8),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        constraints: widget.size.getHeightConstraints(),
+        padding: widget.size.getPadding(),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             for (int i = 0; i < widget.accounts.length; i++) ...[
-              if (i > 0) const SizedBox(height: 16),
+              if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
               _AccountItemWidget(
                 data: widget.accounts[i],
                 animation: _animation,
                 index: i,
+                size: widget.size,
               ),
             ],
           ],
@@ -118,11 +124,13 @@ class _AccountItemWidget extends StatelessWidget {
   final AccountBalanceCardData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _AccountItemWidget({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -150,7 +158,7 @@ class _AccountItemWidget extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - itemAnimation.value)),
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
@@ -171,7 +179,7 @@ class _AccountItemWidget extends StatelessWidget {
                       color: data.iconColorObject,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: size.getItemSpacing()),
                   // 账户信息
                   Expanded(
                     child: Column(

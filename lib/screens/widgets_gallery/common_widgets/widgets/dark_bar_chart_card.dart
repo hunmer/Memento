@@ -18,11 +18,15 @@ class DarkBarChartCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DarkBarChartCard({
     super.key,
     required this.durationInMinutes,
     this.trend = BarChartTrend.neutral,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -51,6 +55,7 @@ class DarkBarChartCard extends StatefulWidget {
       durationInMinutes: props['durationInMinutes'] as int? ?? 0,
       trend: parseTrend(props['trend']),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -121,8 +126,8 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                 children: [
                   // 左上角图标
                   Positioned(
-                    top: 24,
-                    left: 24,
+                    top: widget.size.getPadding().top,
+                    left: widget.size.getPadding().left,
                     child: Container(
                       width: 32,
                       height: 32,
@@ -148,8 +153,8 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
 
                   // 左下角睡眠时长显示
                   Positioned(
-                    bottom: 24,
-                    left: 24,
+                    bottom: widget.size.getPadding().bottom,
+                    left: widget.size.getPadding().left,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -164,7 +169,7 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                             color: const Color(0xFFD8B4FE).withOpacity(0.9),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: widget.size.getItemSpacing()),
 
                         // 时长显示 + 趋势图标
                         Row(
@@ -203,7 +208,7 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: widget.size.getItemSpacing()),
                                   // 分钟数
                                   SizedBox(
                                     width: 70,
@@ -235,7 +240,7 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: widget.size.getItemSpacing()),
                             // 趋势图标
                             if (widget.trend != BarChartTrend.neutral)
                               Transform.rotate(
@@ -304,13 +309,13 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
       animation: itemAnimation,
       builder: (context, child) {
         return Transform.translate(
-          offset: Offset(8 * (1 - itemAnimation.value), 0),
+          offset: Offset(widget.size.getItemSpacing() * (1 - itemAnimation.value), 0),
           child: Opacity(
             opacity: 0.9 * itemAnimation.value,
             child: Container(
               height: 16,
               width: 100 * widthRatio,
-              margin: const EdgeInsets.only(right: 8),
+              margin: EdgeInsets.only(right: widget.size.getItemSpacing()),
               decoration: BoxDecoration(
                 color: color,
                 borderRadius: const BorderRadius.only(

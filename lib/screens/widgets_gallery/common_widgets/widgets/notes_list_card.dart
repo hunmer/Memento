@@ -43,10 +43,14 @@ class NotesListCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const NotesListCardWidget({
     super.key,
     required this.notes,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -62,6 +66,7 @@ class NotesListCardWidget extends StatefulWidget {
               .toList() ??
           const [],
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -143,7 +148,10 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
 
   Widget _buildHeader(BuildContext context, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: widget.size.getPadding().copyWith(
+        top: widget.size == HomeWidgetSize.small ? 10 : 14,
+        bottom: widget.size == HomeWidgetSize.small ? 10 : 14,
+      ),
       decoration: const BoxDecoration(
         color: Color(0xFFFFC107),
         borderRadius: BorderRadius.only(
@@ -151,15 +159,15 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
           topRight: Radius.circular(28),
         ),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Icon(
             Icons.folder_open,
             color: Colors.white,
-            size: 24,
+            size: widget.size.getIconSize(),
           ),
-          SizedBox(width: 10),
-          Text(
+          SizedBox(width: widget.size.getItemSpacing()),
+          const Text(
             'Notes',
             style: TextStyle(
               color: Colors.white,
@@ -217,7 +225,10 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - itemAnimation.value)),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: widget.size.getPadding().copyWith(
+                top: widget.size == HomeWidgetSize.small ? 8 : 12,
+                bottom: widget.size == HomeWidgetSize.small ? 8 : 12,
+              ),
               decoration: BoxDecoration(
                 border: hasDivider
                     ? Border(
@@ -246,19 +257,19 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                             note.title,
                             style: TextStyle(
                               color: isDark ? Colors.grey.shade100 : Colors.grey.shade900,
-                              fontSize: 15,
+                              fontSize: widget.size == HomeWidgetSize.small ? 13 : 15,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: widget.size.getItemSpacing() / 2),
                           Text(
                             '${note.time} ${note.preview}',
                             style: TextStyle(
                               color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                              fontSize: 12,
+                              fontSize: widget.size == HomeWidgetSize.small ? 10 : 12,
                               height: 1.4,
                             ),
                             maxLines: 1,
@@ -268,25 +279,25 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                       ),
                     ),
                     if (note.imageUrl != null) ...[
-                      const SizedBox(width: 12),
+                      SizedBox(width: widget.size.getItemSpacing()),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
                           note.imageUrl!,
-                          width: 40,
-                          height: 40,
+                          width: widget.size == HomeWidgetSize.small ? 32 : 40,
+                          height: widget.size == HomeWidgetSize.small ? 32 : 40,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              width: 40,
-                              height: 40,
+                              width: widget.size == HomeWidgetSize.small ? 32 : 40,
+                              height: widget.size == HomeWidgetSize.small ? 32 : 40,
                               decoration: BoxDecoration(
                                 color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.image,
-                                size: 20,
+                                size: widget.size.getIconSize() - 4,
                                 color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
                               ),
                             );

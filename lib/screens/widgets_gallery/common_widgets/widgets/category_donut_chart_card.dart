@@ -57,6 +57,9 @@ class CategoryDonutChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const CategoryDonutChartCardWidget({
     super.key,
     required this.badgeLabel,
@@ -66,6 +69,7 @@ class CategoryDonutChartCardWidget extends StatefulWidget {
     required this.categories,
     this.primaryColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -87,6 +91,7 @@ class CategoryDonutChartCardWidget extends StatefulWidget {
       categories: categories,
       primaryColor: primaryColor != null ? Color(primaryColor) : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -135,7 +140,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
             child: Container(
               width: widget.inline ? double.maxFinite : 340,
               height: widget.inline ? double.maxFinite : 500,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(40),
@@ -152,7 +157,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
                 children: [
                   // 顶部标签
                   _buildHeaderSection(primaryColor, isDark),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 环形图
                   Center(
                     child: SizedBox(
@@ -166,7 +171,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 分类列表
                   _buildCategoryList(isDark),
                 ],
@@ -184,7 +189,10 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.size.getItemSpacing() * 1.5,
+            vertical: widget.size.getItemSpacing() * 0.5,
+          ),
           decoration: BoxDecoration(
             color: primaryColor,
             borderRadius: BorderRadius.circular(20),
@@ -199,7 +207,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: widget.size.getItemSpacing()),
         Text(
           widget.timePeriod,
           style: TextStyle(
@@ -229,12 +237,13 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
           );
 
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
             child: _CategoryItem(
               label: category.label,
               percentage: category.percentage,
               color: category.color,
               animation: itemAnimation,
+              size: widget.size,
             ),
           );
         },
@@ -346,12 +355,14 @@ class _CategoryItem extends StatelessWidget {
   final double percentage;
   final Color color;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _CategoryItem({
     required this.label,
     required this.percentage,
     required this.color,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -378,7 +389,7 @@ class _CategoryItem extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: size.getItemSpacing() * 1.5),
                     Text(
                       label,
                       style: TextStyle(

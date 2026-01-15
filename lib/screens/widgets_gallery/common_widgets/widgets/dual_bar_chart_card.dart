@@ -58,6 +58,9 @@ class DualBarChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const DualBarChartCardWidget({
     super.key,
     required this.title,
@@ -69,6 +72,7 @@ class DualBarChartCardWidget extends StatefulWidget {
     this.warningStage,
     required this.chartData,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -101,6 +105,7 @@ class DualBarChartCardWidget extends StatefulWidget {
       warningStage: props['warningStage'] as String?,
       chartData: parseChartData(props['chartData']),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -159,7 +164,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -168,7 +173,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
                       height: 128,
                       child: _buildChart(context, primaryColor),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 数值显示区域
                     _buildValues(context, primaryColor),
                     const SizedBox(height: 12),
@@ -192,7 +197,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
       scrollDirection: Axis.horizontal,
       padding: EdgeInsets.zero,
       itemCount: widget.chartData.length,
-      separatorBuilder: (_, __) => const SizedBox(width: 6),
+      separatorBuilder: (_, __) => SizedBox(width: widget.size.getItemSpacing()),
       itemBuilder: (context, index) {
         final data = widget.chartData[index];
         // 确保 Interval 的 end 值不超过 1.0
@@ -212,6 +217,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
               ? Colors.grey.shade600.withOpacity(0.3)
               : Colors.grey.shade400.withOpacity(0.4),
           animation: itemAnimation,
+          size: widget.size,
         );
       },
     );
@@ -273,7 +279,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
             ),
           ],
         ),
-        const SizedBox(width: 24),
+        SizedBox(width: widget.size.getTitleSpacing()),
         // Secondary value
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -331,7 +337,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
     final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF1F2937);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing()),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -413,6 +419,7 @@ class _DualBarColumn extends StatelessWidget {
   final Color primaryColor;
   final Color secondaryColor;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DualBarColumn({
     required this.primaryHeight,
@@ -420,6 +427,7 @@ class _DualBarColumn extends StatelessWidget {
     required this.primaryColor,
     required this.secondaryColor,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -441,7 +449,7 @@ class _DualBarColumn extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: size.getItemSpacing()),
               // Secondary bar (bottom)
               Container(
                 width: 8,

@@ -110,6 +110,9 @@ class DualRangeChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DualRangeChartCardWidget({
     super.key,
     required this.date,
@@ -118,6 +121,7 @@ class DualRangeChartCardWidget extends StatefulWidget {
     required this.primarySummary,
     required this.secondarySummary,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -135,6 +139,7 @@ class DualRangeChartCardWidget extends StatefulWidget {
       primarySummary: RangeSummary.fromJson(props['primarySummary'] as Map<String, dynamic>? ?? {}),
       secondarySummary: RangeSummary.fromJson(props['secondarySummary'] as Map<String, dynamic>? ?? {}),
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -188,13 +193,13 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 300,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(32)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildDateSelector(context, isDark, textColor),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   _buildChart(context, gridColor, primaryColor, primaryLight, secondaryColor, secondaryLight),
                   const SizedBox(height: 24),
                   const SizedBox(height: 24),
@@ -222,7 +227,12 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
   Widget _buildNavButton(BuildContext context, IconData icon, bool isDark, Color textColor) {
     return Container(
       decoration: BoxDecoration(color: isDark ? Colors.grey.shade700.withOpacity(0.3) : Colors.grey.shade100.withOpacity(0.5), shape: BoxShape.circle),
-      child: IconButton(icon: Icon(icon, color: textColor), onPressed: () {}, padding: const EdgeInsets.all(8), constraints: const BoxConstraints(minWidth: 40, minHeight: 40)),
+      child: IconButton(
+        icon: Icon(icon, color: textColor),
+        onPressed: () {},
+        padding: const EdgeInsets.all(8),
+        constraints: widget.size.getHeightConstraints(),
+      ),
     );
   }
 

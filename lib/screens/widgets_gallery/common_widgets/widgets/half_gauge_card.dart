@@ -9,6 +9,9 @@ class HalfGaugeCardWidget extends StatefulWidget {
   final double remaining;
   final String currency;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -18,6 +21,7 @@ class HalfGaugeCardWidget extends StatefulWidget {
     required this.totalBudget,
     required this.remaining,
     this.currency = 'AED',
+    this.size = HomeWidgetSize.medium,
     this.inline = false,
   });
 
@@ -31,6 +35,7 @@ class HalfGaugeCardWidget extends StatefulWidget {
       totalBudget: (props['totalBudget'] as num?)?.toDouble() ?? 0.0,
       remaining: (props['remaining'] as num?)?.toDouble() ?? 0.0,
       currency: props['currency'] as String? ?? 'AED',
+      size: size,
       inline: props['inline'] as bool? ?? false,
     );
   }
@@ -87,7 +92,7 @@ class _HalfGaugeCardWidgetState extends State<HalfGaugeCardWidget>
     final primaryColor = const Color(0xFF7C5CFF);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: widget.size.getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(16),
@@ -158,7 +163,7 @@ class _HalfGaugeCardWidgetState extends State<HalfGaugeCardWidget>
                                       : Colors.grey.shade400,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              SizedBox(height: widget.size.getItemSpacing() / 2),
                               const Text('🛍️', style: TextStyle(fontSize: 20)),
                             ],
                           ),
@@ -229,7 +234,10 @@ class _HalfGaugeCardWidgetState extends State<HalfGaugeCardWidget>
 
           // 底部金额显示
           Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 4),
+            padding: EdgeInsets.only(
+              top: widget.size.getItemSpacing(),
+              bottom: widget.size.getItemSpacing() / 2,
+            ),
             child: Center(
               child: Text(
                 '${_formatAmount(widget.remaining)}.${_getDecimalPart(widget.remaining)} / ${_formatAmount(widget.totalBudget)}.${_getDecimalPart(widget.totalBudget)} (${widget.currency})',

@@ -81,6 +81,9 @@ class DualSliderWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const DualSliderWidget({
     super.key,
     required this.label1,
@@ -92,6 +95,7 @@ class DualSliderWidget extends StatefulWidget {
     required this.badgeText,
     this.progress = 0.67,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -109,6 +113,7 @@ class DualSliderWidget extends StatefulWidget {
       badgeText: props['badgeText'] as String? ?? '',
       progress: (props['progress'] as num?)?.toDouble() ?? 0.67,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -168,7 +173,7 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -179,6 +184,7 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
                     label3: widget.label3,
                     animation: _animation,
                     isDark: isDark,
+                    size: widget.size,
                   ),
 
                   // 中间：滑块进度条
@@ -187,6 +193,7 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
                     primaryColor: primaryColor,
                     isDark: isDark,
                     animation: _animation,
+                    size: widget.size,
                   ),
 
                   // 底部：数值和徽章标签
@@ -199,10 +206,12 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
                         isPM: widget.isPM,
                         animation: _animation,
                         isDark: isDark,
+                        size: widget.size,
                       ),
                       _Badge(
                         badgeText: widget.badgeText,
                         animation: _animation,
+                        size: widget.size,
                       ),
                     ],
                   ),
@@ -223,6 +232,7 @@ class _LabelInfo extends StatelessWidget {
   final String label3;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _LabelInfo({
     required this.label1,
@@ -230,6 +240,7 @@ class _LabelInfo extends StatelessWidget {
     required this.label3,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -258,7 +269,7 @@ class _LabelInfo extends StatelessWidget {
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: size.getItemSpacing()),
                 Row(
                   children: [
                     Text(
@@ -269,7 +280,7 @@ class _LabelInfo extends StatelessWidget {
                         color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: size.getItemSpacing()),
                     Text(
                       label3,
                       style: TextStyle(
@@ -295,12 +306,14 @@ class _SliderTrack extends StatelessWidget {
   final Color primaryColor;
   final bool isDark;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _SliderTrack({
     required this.progress,
     required this.primaryColor,
     required this.isDark,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -316,7 +329,7 @@ class _SliderTrack extends StatelessWidget {
         return Opacity(
           opacity: itemAnimation.value,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: size.getTitleSpacing()),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final trackWidth = constraints.maxWidth;
@@ -417,6 +430,7 @@ class _ValueDisplay extends StatelessWidget {
   final bool isPM;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _ValueDisplay({
     required this.value1,
@@ -424,6 +438,7 @@ class _ValueDisplay extends StatelessWidget {
     required this.isPM,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -451,7 +466,7 @@ class _ValueDisplay extends StatelessWidget {
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: size.getItemSpacing()),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -466,7 +481,7 @@ class _ValueDisplay extends StatelessWidget {
                       ),
                       padding: EdgeInsets.zero,
                     ),
-                    const SizedBox(width: 2),
+                    SizedBox(width: size.getItemSpacing()),
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
@@ -479,7 +494,7 @@ class _ValueDisplay extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 2),
+                    SizedBox(width: size.getItemSpacing()),
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: AnimatedFlipCounter(
@@ -509,10 +524,12 @@ class _ValueDisplay extends StatelessWidget {
 class _Badge extends StatelessWidget {
   final String badgeText;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _Badge({
     required this.badgeText,
     required this.animation,
+    required this.size,
   });
 
   @override

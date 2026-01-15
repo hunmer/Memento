@@ -243,4 +243,204 @@ enum HomeWidgetSize {
         return 8;
     }
   }
+
+  /// 获取图标大小
+  double getIconSize() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 18;
+      case HomeWidgetSize.medium:
+        return 24;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 28;
+      case HomeWidgetSize.wide:
+        return 24;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 28;
+      case HomeWidgetSize.custom:
+        return 24;
+    }
+  }
+
+  /// 获取大字体大小
+  double getLargeFontSize() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 36;
+      case HomeWidgetSize.medium:
+        return 48;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 56;
+      case HomeWidgetSize.wide:
+        return 48;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 56;
+      case HomeWidgetSize.custom:
+        return 48;
+    }
+  }
+
+  /// 获取标题字体大小
+  double getTitleFontSize() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 18;
+      case HomeWidgetSize.medium:
+        return 24;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 28;
+      case HomeWidgetSize.wide:
+        return 24;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 28;
+      case HomeWidgetSize.custom:
+        return 24;
+    }
+  }
+
+  /// 获取副标题字体大小
+  double getSubtitleFontSize() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 12;
+      case HomeWidgetSize.medium:
+        return 14;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 16;
+      case HomeWidgetSize.wide:
+        return 14;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 16;
+      case HomeWidgetSize.custom:
+        return 14;
+    }
+  }
+
+  /// 获取小间距（用于紧密元素之间）
+  double getSmallSpacing() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 2;
+      case HomeWidgetSize.medium:
+        return 4;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 6;
+      case HomeWidgetSize.wide:
+        return 4;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 6;
+      case HomeWidgetSize.custom:
+        return 4;
+    }
+  }
+
+  /// 获取图例指示器宽度
+  double getLegendIndicatorWidth() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 24;
+      case HomeWidgetSize.medium:
+        return 32;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 40;
+      case HomeWidgetSize.wide:
+        return 32;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 40;
+      case HomeWidgetSize.custom:
+        return 32;
+    }
+  }
+
+  /// 获取图例指示器高度
+  double getLegendIndicatorHeight() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 8;
+      case HomeWidgetSize.medium:
+        return 12;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 16;
+      case HomeWidgetSize.wide:
+        return 12;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 16;
+      case HomeWidgetSize.custom:
+        return 12;
+    }
+  }
+
+  /// 获取图例字体大小
+  double getLegendFontSize() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 10;
+      case HomeWidgetSize.medium:
+        return 12;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 14;
+      case HomeWidgetSize.wide:
+        return 12;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 14;
+      case HomeWidgetSize.custom:
+        return 12;
+    }
+  }
+
+  /// 获取柱状图柱子宽度
+  double getBarWidth() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 12;
+      case HomeWidgetSize.medium:
+        return 16;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 20;
+      case HomeWidgetSize.wide:
+        return 16;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 20;
+      case HomeWidgetSize.custom:
+        return 16;
+    }
+  }
+
+  /// 获取柱子之间的间距
+  double getBarSpacing() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 0.5;
+      case HomeWidgetSize.medium:
+        return 1;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 1.5;
+      case HomeWidgetSize.wide:
+        return 1;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 1.5;
+      case HomeWidgetSize.custom:
+        return 1;
+    }
+  }
 }

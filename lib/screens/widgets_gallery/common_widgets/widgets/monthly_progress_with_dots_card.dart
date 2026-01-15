@@ -31,6 +31,9 @@ class MonthlyProgressWithDotsCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MonthlyProgressWithDotsCardWidget({
     super.key,
     required this.title,
@@ -42,6 +45,7 @@ class MonthlyProgressWithDotsCardWidget extends StatefulWidget {
     this.activeDotColor,
     this.inactiveDotColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -68,6 +72,7 @@ class MonthlyProgressWithDotsCardWidget extends StatefulWidget {
               ? Color(props['inactiveDotColor'] as int)
               : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -131,7 +136,7 @@ class _MonthlyProgressWithDotsCardWidgetState
                 color: widget.backgroundColor,
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,6 +147,7 @@ class _MonthlyProgressWithDotsCardWidgetState
                     activeDotColor: effectiveActiveDotColor,
                     inactiveDotColor: effectiveInactiveDotColor,
                     animation: _animation,
+                    size: widget.size,
                   ),
 
                   // 底部信息
@@ -174,25 +180,25 @@ class _MonthlyProgressWithDotsCardWidgetState
                 Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: widget.size.getLargeFontSize() * 0.5,
                     fontWeight: FontWeight.w600,
                     color: textColor,
                     height: 1.2,
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: widget.size.getItemSpacing() * 0.25),
                 Text(
                   widget.subtitle ??
                       '${widget.currentDay}d/${widget.totalDays}d',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: widget.size.getLargeFontSize() * 0.29,
                     fontWeight: FontWeight.w500,
                     color: subtitleColor,
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: widget.size.getItemSpacing()),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
@@ -202,7 +208,7 @@ class _MonthlyProgressWithDotsCardWidgetState
                       fractionDigits: 0,
                       suffix: '%',
                       textStyle: TextStyle(
-                        fontSize: 56,
+                        fontSize: widget.size.getLargeFontSize(),
                         fontWeight: FontWeight.w800,
                         color: textColor,
                         height: 1,
@@ -226,12 +232,14 @@ class _DotMatrixGrid extends StatelessWidget {
   final Color activeDotColor;
   final Color inactiveDotColor;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DotMatrixGrid({
     required this.currentDay,
     required this.activeDotColor,
     required this.inactiveDotColor,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -243,7 +251,7 @@ class _DotMatrixGrid extends StatelessWidget {
       children: [
         for (int row = 0; row < 3; row++)
           Padding(
-            padding: const EdgeInsets.only(bottom: 6),
+            padding: EdgeInsets.only(bottom: size.getItemSpacing() * 0.75),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -254,6 +262,7 @@ class _DotMatrixGrid extends StatelessWidget {
                     inactiveColor: inactiveDotColor,
                     animation: animation,
                     index: row * 11 + col,
+                    size: size,
                   ),
               ],
             ),
@@ -279,6 +288,7 @@ class _Dot extends StatelessWidget {
   final Color inactiveColor;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _Dot({
     required this.isActive,
@@ -286,6 +296,7 @@ class _Dot extends StatelessWidget {
     required this.inactiveColor,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -305,8 +316,8 @@ class _Dot extends StatelessWidget {
         return Transform.scale(
           scale: 0.3 + 0.7 * dotAnimation.value,
           child: Container(
-            width: 10,
-            height: 10,
+            width: size.getIconSize() * 0.42,
+            height: size.getIconSize() * 0.42,
             decoration: BoxDecoration(
               color: isActive ? activeColor : inactiveColor,
               shape: BoxShape.circle,

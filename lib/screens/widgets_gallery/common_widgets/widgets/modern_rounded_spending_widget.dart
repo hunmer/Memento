@@ -21,6 +21,9 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ModernRoundedSpendingWidget({
     super.key,
     required this.title,
@@ -28,6 +31,7 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
     required this.budget,
     required this.categories,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -44,6 +48,7 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
               .toList() ??
           [],
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -105,7 +110,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(32),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,7 +129,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                           letterSpacing: 0.5,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: widget.size.getItemSpacing()),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
@@ -157,7 +162,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                     ],
                   ),
 
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 分段进度条
                   SizedBox(
@@ -180,7 +185,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 分类列表
                   ...List.generate(widget.categories.length, (index) {
@@ -195,7 +200,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                     );
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 18),
+                      padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
                       child: _CategoryItem(
                         category: category,
                         animation: itemAnimation,

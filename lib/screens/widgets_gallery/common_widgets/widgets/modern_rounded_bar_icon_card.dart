@@ -74,10 +74,14 @@ class ModernRoundedBarIconCard extends StatelessWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const ModernRoundedBarIconCard({
     super.key,
     required this.weekMoods,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -137,6 +141,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
     return ModernRoundedBarIconCard(
       weekMoods: moodsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -157,21 +162,21 @@ class ModernRoundedBarIconCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(28),
+      padding: size.getPadding(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildHeader(context, isDark),
-          const SizedBox(height: 32),
+          SizedBox(height: size.getTitleSpacing()),
           _buildWeeklyChart(context, isDark),
           const SizedBox(height: 8),
           _buildDayLabels(context, isDark),
-          const SizedBox(height: 24),
+          SizedBox(height: size.getItemSpacing()),
           Container(
             height: 1,
             color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: size.getItemSpacing()),
           _buildMoodHistory(context, isDark),
         ],
       ),
@@ -185,7 +190,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
         Row(
           children: [
             _buildLegend(context, color: const Color(0xFF9DB36D), label: 'Positive', isDark: isDark),
-            const SizedBox(width: 16),
+            SizedBox(width: size.getItemSpacing()),
             _buildLegend(context, color: const Color(0xFFE88D3E), label: 'Negative', isDark: isDark),
           ],
         ),
@@ -213,7 +218,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
     return Row(
       children: [
         Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 8),
+        SizedBox(width: size.getItemSpacing()),
         Text(label, style: TextStyle(color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4A3B32), fontWeight: FontWeight.bold, fontSize: 14)),
       ],
     );
@@ -281,7 +286,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
             Icon(Icons.more_horiz, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: size.getTitleSpacing()),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -332,7 +337,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: size.getItemSpacing()),
         Text(dayLabel, style: TextStyle(color: isToday ? (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151)) : (isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)), fontWeight: isToday ? FontWeight.bold : FontWeight.normal, fontSize: 12)),
       ],
     );

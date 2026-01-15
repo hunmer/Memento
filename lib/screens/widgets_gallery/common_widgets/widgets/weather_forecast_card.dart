@@ -25,6 +25,9 @@ class WeatherForecastCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const WeatherForecastCard({
     super.key,
     required this.cityName,
@@ -33,6 +36,7 @@ class WeatherForecastCard extends StatefulWidget {
     required this.lowTemp,
     required this.temperatureHistory,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性数据创建组件
@@ -50,6 +54,7 @@ class WeatherForecastCard extends StatefulWidget {
               .toList() ??
           [],
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -101,7 +106,7 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
       },
       child: Container(
         width: widget.inline ? double.maxFinite : 340,
-        padding: const EdgeInsets.all(24),
+        padding: widget.size.getPadding(),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : Colors.white,
           borderRadius: BorderRadius.circular(24),
@@ -118,11 +123,11 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
           children: [
             // 顶部标题栏
             _buildHeader(context, isDark),
-            const SizedBox(height: 16),
+            SizedBox(height: widget.size.getTitleSpacing()),
 
             // 城市和天气信息
             _buildWeatherInfo(context, isDark),
-            const SizedBox(height: 32),
+            SizedBox(height: widget.size.getTitleSpacing() * 1.5),
 
             // 温度趋势图
             _buildTemperatureChart(context, isDark),
@@ -137,8 +142,8 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
     return Row(
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: widget.size.getIconSize(),
+          height: widget.size.getIconSize(),
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF064E3B) : const Color(0xFFD1FAE5),
             borderRadius: BorderRadius.circular(16),
@@ -146,21 +151,21 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
           child: Icon(
             Icons.wb_sunny,
             color: isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534),
-            size: 16,
+            size: widget.size.getIconSize() * 0.5,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: widget.size.getSmallSpacing() * 3),
         Text(
           'Weather',
           style: TextStyle(
             color: isDark ? Colors.white : Colors.grey.shade900,
-            fontSize: 16,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
           ),
         ),
         const Spacer(),
         _buildNavButton(context, isDark, Icons.chevron_left),
-        const SizedBox(width: 8),
+        SizedBox(width: widget.size.getSmallSpacing() * 2),
         _buildNavButton(context, isDark, Icons.chevron_right),
       ],
     );
@@ -169,8 +174,8 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
   /// 构建导航按钮
   Widget _buildNavButton(BuildContext context, bool isDark, IconData icon) {
     return Container(
-      width: 32,
-      height: 32,
+      width: widget.size.getIconSize(),
+      height: widget.size.getIconSize(),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
@@ -178,7 +183,7 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
       child: Icon(
         icon,
         color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-        size: 20,
+        size: widget.size.getIconSize() * 0.6,
       ),
     );
   }
@@ -192,72 +197,72 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
           widget.cityName,
           style: TextStyle(
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-            fontSize: 14,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getSmallSpacing()),
         Text(
           widget.weatherDescription,
           style: TextStyle(
             color: isDark ? Colors.white : Colors.grey.shade900,
-            fontSize: 24,
+            fontSize: widget.size.getTitleFontSize(),
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getSmallSpacing()),
         SizedBox(
-          height: 28,
+          height: widget.size.getIconSize(),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 80,
-                height: 28,
+                width: widget.size.getIconSize() * 2.5,
+                height: widget.size.getIconSize(),
                 child: AnimatedFlipCounter(
                   value: widget.currentTemp * _fadeInAnimation.value,
                   fractionDigits: 0,
                   textStyle: TextStyle(
                     color: isDark ? Colors.white : Colors.grey.shade900,
-                    fontSize: 20,
+                    fontSize: widget.size.getSubtitleFontSize() + 6,
                     fontWeight: FontWeight.w500,
                     height: 1.0,
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: widget.size.getSmallSpacing()),
               Text(
                 '°',
                 style: TextStyle(
                   color: isDark ? Colors.white : Colors.grey.shade900,
-                  fontSize: 20,
+                  fontSize: widget.size.getSubtitleFontSize() + 6,
                   fontWeight: FontWeight.w500,
                   height: 1.0,
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: widget.size.getSmallSpacing()),
               SizedBox(
-                width: 60,
-                height: 28,
+                width: widget.size.getIconSize() * 2,
+                height: widget.size.getIconSize(),
                 child: AnimatedFlipCounter(
                   value: widget.lowTemp * _fadeInAnimation.value,
                   fractionDigits: 0,
                   textStyle: TextStyle(
                     color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                    fontSize: 20,
+                    fontSize: widget.size.getSubtitleFontSize() + 6,
                     fontWeight: FontWeight.w500,
                     height: 1.0,
                   ),
                 ),
               ),
               SizedBox(
-                height: 28,
+                height: widget.size.getIconSize(),
                 child: Text(
                   '°',
                   style: TextStyle(
                     color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                    fontSize: 20,
+                    fontSize: widget.size.getSubtitleFontSize() + 6,
                     fontWeight: FontWeight.w500,
                     height: 1.0,
                   ),
@@ -275,7 +280,7 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
     final bars = <Widget>[];
     for (int i = 0; i < widget.temperatureHistory.length; i++) {
       if (i > 0) {
-        bars.add(const SizedBox(width: 6));
+        bars.add(SizedBox(width: widget.size.getBarSpacing()));
       }
       bars.add(_TemperatureBarWidget(
         height: widget.temperatureHistory[i],
@@ -283,11 +288,12 @@ class _WeatherForecastCardState extends State<WeatherForecastCard>
         isDark: isDark,
         animation: _fadeInAnimation,
         index: i,
+        size: widget.size,
       ));
     }
 
     return SizedBox(
-      height: 64,
+      height: widget.size.getIconSize() * 2,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: bars,
@@ -303,6 +309,7 @@ class _TemperatureBarWidget extends StatelessWidget {
   final bool isDark;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _TemperatureBarWidget({
     required this.height,
@@ -310,6 +317,7 @@ class _TemperatureBarWidget extends StatelessWidget {
     required this.isDark,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -325,22 +333,24 @@ class _TemperatureBarWidget extends StatelessWidget {
       ),
     );
 
+    final barHeight = size.getIconSize() * 2;
+
     return AnimatedBuilder(
       animation: barAnimation,
       builder: (context, child) {
         return SizedBox(
-          width: 12,
-          height: 64,
+          width: size.getBarWidth(),
+          height: barHeight,
           child: Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              width: 12,
-              height: 64 * height * barAnimation.value.clamp(0.0, 1.0),
+              width: size.getBarWidth(),
+              height: barHeight * height * barAnimation.value.clamp(0.0, 1.0),
               decoration: BoxDecoration(
                 color: isCurrent
                     ? (isDark ? const Color(0xFF475569) : const Color(0xFF64748B))
                     : (isDark ? const Color(0xFF1E40AF) : const Color(0xFFBAE6FD)),
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(size.getBarWidth() / 2),
               ),
             ),
           ),

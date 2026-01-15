@@ -57,6 +57,9 @@ class StackedRingChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const StackedRingChartCardWidget({
     super.key,
     required this.segments,
@@ -66,6 +69,7 @@ class StackedRingChartCardWidget extends StatefulWidget {
     this.unit = '',
     this.usedLabel,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -86,6 +90,7 @@ class StackedRingChartCardWidget extends StatefulWidget {
       unit: props['unit'] as String? ?? '',
       usedLabel: props['usedLabel'] as String?,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -140,7 +145,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 250,
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(20),
@@ -151,7 +156,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                 children: [
                   // 环形图和图例
                   _buildChartSection(isDark, percentage),
-                  const SizedBox(height: 20),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 标题
                   Text(
                     widget.title,
@@ -161,7 +166,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                       color: textColor,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getItemSpacing()),
                   // 底部信息
                   _buildBottomSection(textColor, secondaryTextColor, iconColor, buttonBgColor),
                 ],
@@ -200,7 +205,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: widget.size.getItemSpacing()),
         // 图例
         Expanded(
           child: Column(
@@ -251,7 +256,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                   color: secondaryTextColor,
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: widget.size.getItemSpacing() / 1.5),
               Row(
                 children: [
                   // 堆叠圆点
@@ -278,7 +283,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                       );
                     }).toList(),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: widget.size.getItemSpacing()),
                   // 使用量数字
                   AnimatedFlipCounter(
                     value: widget.usedValue * _animation.value,

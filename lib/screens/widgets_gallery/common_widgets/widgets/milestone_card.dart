@@ -28,6 +28,9 @@ class MilestoneCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MilestoneCardWidget({
     super.key,
     required this.imageUrl,
@@ -38,6 +41,7 @@ class MilestoneCardWidget extends StatefulWidget {
     required this.unit,
     this.suffix = '',
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -54,6 +58,7 @@ class MilestoneCardWidget extends StatefulWidget {
       unit: props['unit'] as String? ?? '',
       suffix: props['suffix'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -131,7 +136,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +232,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: widget.size.getItemSpacing()),
                 Row(
                   children: [
                     Text(
@@ -295,7 +300,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                     letterSpacing: -1.5,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: widget.size.getItemSpacing()),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Column(

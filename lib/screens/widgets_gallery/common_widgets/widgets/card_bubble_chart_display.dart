@@ -63,6 +63,9 @@ class CardBubbleChartDisplay extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const CardBubbleChartDisplay({
     super.key,
     required this.sleepStages,
@@ -70,6 +73,7 @@ class CardBubbleChartDisplay extends StatefulWidget {
     this.showTooltip = true,
     this.timeLabels = const ['11:00', '12:00', '13:00', '14:00', '15:00'],
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -95,6 +99,7 @@ class CardBubbleChartDisplay extends StatefulWidget {
       showTooltip: props['showTooltip'] as bool? ?? true,
       timeLabels: timeLabels,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -143,7 +148,7 @@ class _CardBubbleChartDisplayState extends State<CardBubbleChartDisplay>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : null,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -164,10 +169,10 @@ class _CardBubbleChartDisplayState extends State<CardBubbleChartDisplay>
                 children: [
                   // 时间范围选择器
                   _buildTabSelector(context),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 睡眠阶段图表
                   _buildChart(context),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 图例
                   _buildLegend(context),
                 ],

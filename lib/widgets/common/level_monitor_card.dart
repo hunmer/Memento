@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 每周水平数据模型
 ///
@@ -101,6 +102,9 @@ class LevelMonitorCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const LevelMonitorCard({
     super.key,
     required this.title,
@@ -112,6 +116,7 @@ class LevelMonitorCard extends StatefulWidget {
     this.onTodayTap,
     this.onBarTap,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   @override
@@ -199,7 +204,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
 
     return Container(
       width: widget.inline ? double.maxFinite : 380,
-      padding: const EdgeInsets.all(24),
+      padding: widget.size.getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(24),
@@ -217,7 +222,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
         children: [
           // 标题栏
           _buildHeader(isDark, primaryColor, surfaceColor),
-          const SizedBox(height: 32),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 分数和进度条在同一行
           Row(
@@ -254,7 +259,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                 size: 20,
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: widget.size.getItemSpacing()),
             Text(
               widget.title,
               style: TextStyle(
@@ -269,7 +274,10 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
           onTap: widget.onTodayTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.size.getItemSpacing(),
+              vertical: widget.size.getItemSpacing() / 2,
+            ),
             child: Row(
               children: [
                 Text(
@@ -280,7 +288,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                   ),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: widget.size.getItemSpacing()),
                 Icon(
                   Icons.chevron_right,
                   size: 20,
@@ -320,9 +328,9 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                     );
                   },
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: widget.size.getItemSpacing()),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
                   child: Text(
                     widget.scoreUnit,
                     style: TextStyle(
@@ -334,7 +342,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: widget.size.getItemSpacing()),
             Text(
               widget.status,
               style: TextStyle(
@@ -363,6 +371,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
           primaryColor: primaryColor,
           isDark: isDark,
           onTap: () => widget.onBarTap?.call(index, data),
+          size: widget.size,
         );
       }),
     );
@@ -378,6 +387,7 @@ class _WeeklyBar extends StatelessWidget {
   final Color primaryColor;
   final bool isDark;
   final VoidCallback? onTap;
+  final HomeWidgetSize size;
 
   const _WeeklyBar({
     required this.day,
@@ -387,6 +397,7 @@ class _WeeklyBar extends StatelessWidget {
     required this.primaryColor,
     required this.isDark,
     this.onTap,
+    required this.size,
   });
 
   @override
@@ -399,7 +410,7 @@ class _WeeklyBar extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3),
+          padding: EdgeInsets.symmetric(horizontal: size.getItemSpacing() / 2),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(12),
@@ -426,7 +437,7 @@ class _WeeklyBar extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: size.getItemSpacing()),
                 Text(
                   day,
                   style: TextStyle(

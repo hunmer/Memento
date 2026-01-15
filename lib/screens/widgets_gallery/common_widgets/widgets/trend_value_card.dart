@@ -69,6 +69,9 @@ class TrendValueCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const TrendValueCardWidget({
     super.key,
     required this.value,
@@ -81,6 +84,7 @@ class TrendValueCardWidget extends StatefulWidget {
     this.trendLabel = 'vs last week',
     this.primaryColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -107,6 +111,7 @@ class TrendValueCardWidget extends StatefulWidget {
           ? Color(int.parse(props['primaryColor'] as String))
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -159,7 +164,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 384,
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),
@@ -177,7 +182,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                 children: [
                   // 图表区域
                   _buildChart(context, primaryColor, _fadeInAnimation.value),
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getItemSpacing()),
 
                   // 数值显示区域
                   Row(
@@ -243,7 +248,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                     trendDownColor,
                     textColor,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 附加信息
                   _buildAdditionalInfo(
@@ -298,10 +303,10 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
           child: Icon(
             isTrendDown ? Icons.arrow_downward : Icons.arrow_upward,
             color: trendColor,
-            size: 20,
+            size: widget.size.getIconSize(),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: widget.size.getItemSpacing()),
         RichText(
           text: TextSpan(
             children: [
@@ -352,7 +357,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
         ),
         for (int i = 0; i < info.length; i++) ...[
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing()),
             child: SizedBox(
               height: 20,
               child: Text(

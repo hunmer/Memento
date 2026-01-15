@@ -27,6 +27,9 @@ class RentalPreviewCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const RentalPreviewCardWidget({
     super.key,
     required this.imageUrl,
@@ -37,6 +40,7 @@ class RentalPreviewCardWidget extends StatefulWidget {
     required this.date,
     required this.duration,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -53,6 +57,7 @@ class RentalPreviewCardWidget extends StatefulWidget {
       date: props['date'] as String? ?? '',
       duration: props['duration'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -124,7 +129,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildImageSection(context, isDark),
-              const SizedBox(height: 16),
+              SizedBox(height: widget.size.getItemSpacing()),
               _buildInfoSection(context, isDark),
             ],
           ),
@@ -164,10 +169,10 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
             ),
           ),
           Positioned(
-            top: 12,
-            right: 12,
+            top: widget.size.getItemSpacing(),
+            right: widget.size.getItemSpacing(),
             child: Container(
-              padding: const EdgeInsets.all(6),
+              padding: EdgeInsets.all(widget.size.getItemSpacing() * 0.75),
               decoration: BoxDecoration(
                 color:
                     isDark
@@ -195,7 +200,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
 
   Widget _buildInfoSection(BuildContext context, bool isDark) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: widget.size.getPadding(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -215,7 +220,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
-                  const SizedBox(width: 2),
+                  SizedBox(width: widget.size.getItemSpacing() * 0.25),
                   Text(
                     widget.rating.toStringAsFixed(1),
                     style: const TextStyle(
@@ -228,7 +233,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getItemSpacing()),
           Text(
             widget.title,
             style: TextStyle(
@@ -240,7 +245,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getItemSpacing()),
           Text(
             widget.description,
             style: TextStyle(
@@ -251,14 +256,14 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: widget.size.getTitleSpacing()),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.size.getItemSpacing() * 1.5,
+                  vertical: widget.size.getItemSpacing() * 0.75,
                 ),
                 decoration: BoxDecoration(
                   color:
@@ -287,7 +292,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                     color: Color(0xFF9CA3AF),
                     size: 14,
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: widget.size.getItemSpacing() * 0.75),
                   Text(
                     widget.duration,
                     style: const TextStyle(
@@ -300,7 +305,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: widget.size.getItemSpacing() / 2),
         ],
       ),
     );

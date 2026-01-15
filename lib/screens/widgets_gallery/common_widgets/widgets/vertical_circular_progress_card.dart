@@ -184,7 +184,7 @@ class _VerticalCircularProgressCardState
               width: widget.inline ? double.maxFinite : (widget.width ?? double.maxFinite),
               padding:
                   widget.padding ??
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
                 borderRadius: BorderRadius.circular(widget.borderRadius ?? 28),
@@ -204,7 +204,7 @@ class _VerticalCircularProgressCardState
                 children: [
                   // 标题栏
                   _buildHeader(context, isDark, primaryColor),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 主内容区
                   _buildContent(context, isDark, primaryColor),
                 ],
@@ -236,7 +236,7 @@ class _VerticalCircularProgressCardState
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
@@ -244,14 +244,14 @@ class _VerticalCircularProgressCardState
               child: Icon(
                 widget.icon ?? Icons.bedtime_rounded,
                 color: primaryColor,
-                size: 24,
+                size: widget.size.getIconSize(),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: widget.size.getItemSpacing()),
             Text(
               widget.data.title,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: widget.size.getTitleFontSize(),
                 fontWeight: FontWeight.w600,
                 color: isDark ? Colors.white : const Color(0xFF111827),
               ),
@@ -262,13 +262,13 @@ class _VerticalCircularProgressCardState
           onTap: widget.onActionTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: widget.size.getPadding(),
             child: Row(
               children: [
                 Text(
                   widget.data.actionLabel,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w500,
                     color:
                         isDark
@@ -276,10 +276,10 @@ class _VerticalCircularProgressCardState
                             : const Color(0xFF6B7280),
                   ),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: widget.size.getSmallSpacing()),
                 Icon(
                   Icons.chevron_right_rounded,
-                  size: 20,
+                  size: widget.size.getIconSize(),
                   color:
                       isDark
                           ? const Color(0xFF9CA3AF)
@@ -309,25 +309,25 @@ class _VerticalCircularProgressCardState
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: 48,
+                    height: widget.size.getLargeFontSize(),
                     child: AnimatedFlipCounter(
                       value: widget.data.mainValue * _animation.value,
                       fractionDigits: 0,
                       textStyle: TextStyle(
-                        fontSize: 40,
+                        fontSize: widget.size.getLargeFontSize(),
                         fontWeight: FontWeight.w700,
                         color: isDark ? Colors.white : const Color(0xFF111827),
                         height: 1.0,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: widget.size.getSmallSpacing()),
                   SizedBox(
-                    height: 20,
+                    height: widget.size.getLargeFontSize(),
                     child: Text(
                       widget.data.unit,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: widget.size.getSubtitleFontSize(),
                         fontWeight: FontWeight.w500,
                         color:
                             isDark
@@ -340,11 +340,11 @@ class _VerticalCircularProgressCardState
                 ],
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: widget.size.getSmallSpacing()),
             Text(
               widget.data.statusLabel,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: widget.size.getSubtitleFontSize(),
                 fontWeight: FontWeight.w500,
                 color:
                     isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
@@ -370,12 +370,13 @@ class _VerticalCircularProgressCardState
                 );
 
                 return Padding(
-                  padding: EdgeInsets.only(left: index == 0 ? 0 : 8),
+                  padding: EdgeInsets.only(left: index == 0 ? 0 : widget.size.getItemSpacing()),
                   child: _DaySleepIndicator(
                     dayData: data,
                     primaryColor: primaryColor,
                     isDark: isDark,
                     animation: itemAnimation,
+                    size: widget.size,
                   ),
                 );
               }).toList(),
@@ -391,12 +392,14 @@ class _DaySleepIndicator extends StatelessWidget {
   final Color primaryColor;
   final bool isDark;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DaySleepIndicator({
     required this.dayData,
     required this.primaryColor,
     required this.isDark,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -411,7 +414,7 @@ class _DaySleepIndicator extends StatelessWidget {
           children: [
             Icon(
               dayData.achieved ? Icons.check_rounded : Icons.close_rounded,
-              size: 16,
+              size: size.getIconSize(),
               color:
                   dayData.achieved
                       ? (isDark ? Colors.white : const Color(0xFF111827))
@@ -419,10 +422,10 @@ class _DaySleepIndicator extends StatelessWidget {
                           ? const Color(0xFF4B5563)
                           : const Color(0xFFD1D5DB)),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: size.getSmallSpacing()),
             SizedBox(
-              width: 24,
-              height: 24,
+              width: size.getLegendIndicatorWidth(),
+              height: size.getLegendIndicatorHeight(),
               child: CustomPaint(
                 painter: _CircleProgressPainter(
                   progress: animatedProgress,
@@ -434,11 +437,11 @@ class _DaySleepIndicator extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: size.getSmallSpacing()),
             Text(
               dayData.day,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: size.getLegendFontSize(),
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,
                 color:

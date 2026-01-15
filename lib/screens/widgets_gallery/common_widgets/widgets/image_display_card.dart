@@ -32,6 +32,9 @@ class ImageDisplayCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ImageDisplayCardWidget({
     super.key,
     required this.imageUrl,
@@ -43,6 +46,7 @@ class ImageDisplayCardWidget extends StatefulWidget {
     this.primaryColor,
     this.accentColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -66,6 +70,7 @@ class ImageDisplayCardWidget extends StatefulWidget {
           ? Color(props['accentColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -134,7 +139,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
             child: Container(
               width: widget.inline ? double.maxFinite : 380,
               height: widget.inline ? double.maxFinite : 200,
-              padding: const EdgeInsets.all(12),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: cardColor,
                 borderRadius: BorderRadius.circular(16),
@@ -151,7 +156,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
                 children: [
                   // 左侧图片区域
                   _buildImageArea(isDark: isDark),
-                  const SizedBox(width: 16),
+                  SizedBox(width: widget.size.getItemSpacing() * 2),
 
                   // 右侧信息区域
                   Expanded(
@@ -213,7 +218,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
           children: [
             // 标签
             Container(
-              margin: const EdgeInsets.only(top: 4),
+              margin: EdgeInsets.only(top: widget.size.getItemSpacing() / 2),
               child: Text(
                 widget.label.toUpperCase(),
                 style: TextStyle(
@@ -243,7 +248,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
           ],
         ),
 
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getItemSpacing() / 2),
 
         // 标题
         Text(
@@ -264,7 +269,10 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
           children: [
             // 日期标签
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.size.getItemSpacing() * 1.5,
+                vertical: widget.size.getItemSpacing() * 0.75,
+              ),
               decoration: BoxDecoration(
                 color: surfaceColor,
                 borderRadius: BorderRadius.circular(12),
@@ -284,7 +292,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
             Row(
               children: [
                 Icon(Icons.star, size: 18, color: primaryColor),
-                const SizedBox(width: 4),
+                SizedBox(width: widget.size.getItemSpacing() / 2),
                 SizedBox(
                   height: 18,
                   child: Center(

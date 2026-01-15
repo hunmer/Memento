@@ -37,6 +37,9 @@ class RankedBarChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const RankedBarChartCardWidget({
     super.key,
     required this.title,
@@ -45,6 +48,7 @@ class RankedBarChartCardWidget extends StatefulWidget {
     required this.items,
     required this.footer,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   factory RankedBarChartCardWidget.fromProps(Map<String, dynamic> props, HomeWidgetSize size) {
@@ -56,6 +60,7 @@ class RankedBarChartCardWidget extends StatefulWidget {
       items: itemsList,
       footer: props['footer'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -102,25 +107,25 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget> wit
                 child: Container(
                   decoration: BoxDecoration(border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), width: 1), borderRadius: BorderRadius.circular(32)),
                   child: Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: widget.size.getPadding(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(widget.title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A), height: 1.2)),
-                        const SizedBox(height: 12),
+                        SizedBox(height: widget.size.getItemSpacing()),
                         Text(widget.subtitle, style: TextStyle(fontSize: 14, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), height: 1.5)),
-                        const SizedBox(height: 24),
+                        SizedBox(height: widget.size.getTitleSpacing()),
                         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('List of countries', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A))), Text(widget.itemCount, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)))]),
-                        const SizedBox(height: 8),
+                        SizedBox(height: widget.size.getItemSpacing()),
                         ...widget.items.asMap().entries.map((entry) {
                           final index = entry.key;
                           final item = entry.value;
                           final step = 0.05;
                           final itemAnimation = CurvedAnimation(parent: _animationController, curve: Interval(index * step, 0.6 + index * step, curve: Curves.easeOutCubic));
-                          return _RankedBarWidget(item: item, animation: itemAnimation, isLast: index == widget.items.length - 1);
+                          return _RankedBarWidget(item: item, animation: itemAnimation, isLast: index == widget.items.length - 1, size: widget.size);
                         }),
-                        const SizedBox(height: 32),
+                        SizedBox(height: widget.size.getTitleSpacing()),
                         Text(widget.footer, style: TextStyle(fontSize: 14, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), height: 1.5)),
                       ],
                     ),
@@ -139,8 +144,9 @@ class _RankedBarWidget extends StatelessWidget {
   final RankedBarItem item;
   final Animation<double> animation;
   final bool isLast;
+  final HomeWidgetSize size;
 
-  const _RankedBarWidget({required this.item, required this.animation, required this.isLast});
+  const _RankedBarWidget({required this.item, required this.animation, required this.isLast, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -163,7 +169,7 @@ class _RankedBarWidget extends StatelessWidget {
                   decoration: BoxDecoration(color: item.color),
                   child: ClipRect(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: size.getPadding().left),
                       child: Row(
                         children: [
                           Flexible(child: Text(item.label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textColor, letterSpacing: 0.5), overflow: TextOverflow.fade, softWrap: false)),

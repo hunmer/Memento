@@ -48,6 +48,9 @@ class CategoryStackWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const CategoryStackWidget({
     super.key,
     required this.title,
@@ -56,6 +59,7 @@ class CategoryStackWidget extends StatefulWidget {
     this.currency = '\$',
     required this.categories,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -75,6 +79,7 @@ class CategoryStackWidget extends StatefulWidget {
       currency: props['currency'] as String? ?? '\$',
       categories: categoriesList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -132,7 +137,7 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -202,7 +207,7 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                         categories: widget.categories,
                         animation: _animation,
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: widget.size.getItemSpacing()),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +218,12 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                               parent: _animationController,
                               curve: Interval(0.2 + index * 0.08, 0.7 + index * 0.08, curve: Curves.easeOutCubic),
                             );
-                            return _CategoryItem(category: category, animation: itemAnimation, currency: widget.currency);
+                            return _CategoryItem(
+                              category: category,
+                              animation: itemAnimation,
+                              currency: widget.currency,
+                              size: widget.size,
+                            );
                           }),
                         ),
                       ),
@@ -264,11 +274,13 @@ class _CategoryItem extends StatelessWidget {
   final CategoryData category;
   final Animation<double> animation;
   final String currency;
+  final HomeWidgetSize size;
 
   const _CategoryItem({
     required this.category,
     required this.animation,
     required this.currency,
+    required this.size,
   });
 
   @override
@@ -277,7 +289,7 @@ class _CategoryItem extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return Padding(
-          padding: EdgeInsets.only(bottom: category != _lastCategory ? 6 : 0),
+          padding: EdgeInsets.only(bottom: category != _lastCategory ? size.getItemSpacing() : 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

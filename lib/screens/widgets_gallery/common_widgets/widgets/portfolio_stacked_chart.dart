@@ -72,6 +72,9 @@ class PortfolioStackedChartWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const PortfolioStackedChartWidget({
     super.key,
     required this.title,
@@ -81,6 +84,7 @@ class PortfolioStackedChartWidget extends StatefulWidget {
     required this.monthlyData,
     required this.monthLabels,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -106,6 +110,7 @@ class PortfolioStackedChartWidget extends StatefulWidget {
       monthlyData: monthlyDataList,
       monthLabels: monthLabelsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -153,7 +158,7 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
             child: Container(
               width: widget.inline ? double.maxFinite : 250,
               height: widget.inline ? double.maxFinite : 250,
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF0A0A0A) : Colors.white,
                 borderRadius: BorderRadius.circular(40),
@@ -179,7 +184,7 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                           color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: widget.size.getItemSpacing()),
                       Row(
                         children: [
                           Flexible(
@@ -196,9 +201,12 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: widget.size.getItemSpacing()),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: widget.size.getItemSpacing() - 2,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: isDark
                                   ? Colors.green.shade900.withOpacity(0.3)
@@ -212,7 +220,7 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                                   size: 12,
                                   color: isDark ? Colors.green.shade400 : Colors.green.shade600,
                                 ),
-                                const SizedBox(width: 2),
+                                SizedBox(width: widget.size.getItemSpacing() - 6),
                                 Text(
                                   '+${widget.growthPercentage.toInt()}%',
                                   style: TextStyle(
@@ -226,9 +234,9 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: widget.size.getItemSpacing()),
                       Wrap(
-                        spacing: 12,
+                        spacing: widget.size.getItemSpacing() * 1.5,
                         children: widget.assetTypes.map((type) {
                           final color = type.label == 'Bonds' && isDark
                               ? const Color(0xFFE5E7EB)
@@ -244,7 +252,7 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                                   shape: BoxShape.circle,
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: widget.size.getItemSpacing() - 2),
                               Text(
                                 type.label,
                                 style: TextStyle(
@@ -265,8 +273,9 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                     assetTypes: widget.assetTypes,
                     animation: _animation,
                     isDark: isDark,
+                    size: widget.size,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: widget.size.getItemSpacing()),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: widget.monthLabels.map((label) {
@@ -295,12 +304,14 @@ class _StackedBarChart extends StatelessWidget {
   final List<AssetType> assetTypes;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _StackedBarChart({
     required this.monthlyData,
     required this.assetTypes,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -309,8 +320,10 @@ class _StackedBarChart extends StatelessWidget {
         .map((d) => d.stocks + d.funds + d.bonds)
         .reduce((a, b) => a > b ? a : b);
 
+    final chartHeight = size == HomeWidgetSize.small ? 64.0 : 96.0;
+
     return SizedBox(
-      height: 96,
+      height: chartHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(monthlyData.length, (index) {
@@ -326,12 +339,13 @@ class _StackedBarChart extends StatelessWidget {
 
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 1.5),
+              padding: EdgeInsets.symmetric(horizontal: size == HomeWidgetSize.small ? 1.0 : 1.5),
               child: _StackedBar(
                 data: data,
                 animation: barAnimation,
                 isDark: isDark,
                 maxTotal: maxTotal,
+                chartHeight: chartHeight,
               ),
             ),
           );
@@ -346,12 +360,14 @@ class _StackedBar extends StatelessWidget {
   final Animation<double> animation;
   final bool isDark;
   final int maxTotal;
+  final double chartHeight;
 
   const _StackedBar({
     required this.data,
     required this.animation,
     required this.isDark,
     required this.maxTotal,
+    required this.chartHeight,
   });
 
   @override
@@ -359,9 +375,9 @@ class _StackedBar extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final stocksHeight = (data.stocks / maxTotal) * 96 * animation.value;
-        final fundsHeight = (data.funds / maxTotal) * 96 * animation.value;
-        final bondsHeight = (data.bonds / maxTotal) * 96 * animation.value;
+        final stocksHeight = (data.stocks / maxTotal) * chartHeight * animation.value;
+        final fundsHeight = (data.funds / maxTotal) * chartHeight * animation.value;
+        final bondsHeight = (data.bonds / maxTotal) * chartHeight * animation.value;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

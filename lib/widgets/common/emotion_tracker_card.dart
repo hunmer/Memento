@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 每日情绪数据模型
 class DailyEmotion {
@@ -100,6 +101,7 @@ enum EmotionType {
 ///   ],
 ///   onDayTapped: (index) => print('Day $index tapped'),
 ///   onHistoryTap: () => print('History tapped'),
+///   size: HomeWidgetSize.medium,
 /// )
 /// ```
 class EmotionTrackerCard extends StatefulWidget {
@@ -124,6 +126,9 @@ class EmotionTrackerCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const EmotionTrackerCard({
     super.key,
     required this.currentEmotionText,
@@ -133,6 +138,7 @@ class EmotionTrackerCard extends StatefulWidget {
     required this.onDayTapped,
     this.onHistoryTap,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   @override
@@ -167,10 +173,11 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
 
   @override
   Widget build(BuildContext context) {
+    final size = widget.size;
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24),
+        margin: EdgeInsets.symmetric(horizontal: size.getPadding().horizontal / 2),
         constraints: BoxConstraints(maxWidth: widget.inline ? double.maxFinite : 400),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
@@ -192,13 +199,13 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
                   : Colors.white,
               borderRadius: BorderRadius.circular(24),
             ),
-            padding: const EdgeInsets.all(24),
+            padding: size.getPadding(),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // 标题行
                 _buildHeader(context),
-                const SizedBox(height: 32),
+                SizedBox(height: size.getTitleSpacing()),
 
                 // 主要内容区
                 _buildMainContent(context),
@@ -274,6 +281,7 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
 
   /// 构建主要内容区
   Widget _buildMainContent(BuildContext context) {
+    final size = widget.size;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -283,7 +291,7 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedEmotionText(emotionText: widget.currentEmotionText),
-            const SizedBox(height: 4),
+            SizedBox(height: size.getItemSpacing() / 2),
             Text(
               'Logged ${widget.loggedCount}/${widget.totalCount}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -300,7 +308,7 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
           mainAxisSize: MainAxisSize.min,
           children: [
             for (int i = 0; i < widget.weekEmotions.length; i += 1) ...[
-              if (i > 0) const SizedBox(width: 8),
+              if (i > 0) SizedBox(width: size.getItemSpacing()),
               _buildDayButton(context, i),
             ],
           ],

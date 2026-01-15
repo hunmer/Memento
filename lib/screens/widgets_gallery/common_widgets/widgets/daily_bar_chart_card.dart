@@ -52,6 +52,9 @@ class DailyBarChartCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DailyBarChartCardWidget({
     super.key,
     required this.title,
@@ -60,6 +63,7 @@ class DailyBarChartCardWidget extends StatefulWidget {
     required this.unit,
     required this.bars,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -76,6 +80,7 @@ class DailyBarChartCardWidget extends StatefulWidget {
       unit: props['unit'] as String? ?? '',
       bars: barsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -164,7 +169,7 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(28),
+                      padding: widget.size.getPadding(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -175,7 +180,7 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(widget.title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900)),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: widget.size.getItemSpacing() / 2),
                                   Text(widget.subtitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
                                 ],
                               ),
@@ -197,7 +202,7 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: widget.size.getItemSpacing()),
                           SizedBox(
                             height: 56,
                             child: Row(
@@ -226,9 +231,9 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: widget.size.getTitleSpacing()),
                           Expanded(
-                            child: _DailyBars(bars: widget.bars, animation: _animation),
+                            child: _DailyBars(bars: widget.bars, animation: _animation, size: widget.size),
                           ),
                         ],
                       ),
@@ -247,8 +252,9 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
 class _DailyBars extends StatelessWidget {
   final List<DailyBarData> bars;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _DailyBars({required this.bars, required this.animation});
+  const _DailyBars({required this.bars, required this.animation, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +276,7 @@ class _DailyBars extends StatelessWidget {
         final barColor = baseColor.withOpacity(bar.color == DailyBarColor.teal ? 1.0 : (isDark ? 0.9 : 0.8));
 
         return Padding(
-          padding: const EdgeInsets.only(right: 3),
+          padding: EdgeInsets.only(right: size.getItemSpacing() / 3),
           child: AnimatedBuilder(
             animation: barAnimation,
             builder: (context, child) {

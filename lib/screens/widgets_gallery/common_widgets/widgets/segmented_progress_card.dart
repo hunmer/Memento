@@ -52,6 +52,9 @@ class SegmentedProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const SegmentedProgressCardWidget({
     super.key,
     required this.title,
@@ -60,6 +63,7 @@ class SegmentedProgressCardWidget extends StatefulWidget {
     required this.segments,
     this.unit = '',
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -79,6 +83,7 @@ class SegmentedProgressCardWidget extends StatefulWidget {
       segments: segmentsList,
       unit: props['unit'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -142,17 +147,17 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
           ],
           border: isDark ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
         ),
-        padding: const EdgeInsets.all(32),
+        padding: widget.size.getPadding(),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 标题和数值
             _buildHeader(context, isDark),
-            const SizedBox(height: 32),
+            SizedBox(height: widget.size.getTitleSpacing()),
             // 分段进度条
             _buildProgressBar(context, isDark),
-            const SizedBox(height: 32),
+            SizedBox(height: widget.size.getTitleSpacing()),
             // 分段列表
             ..._buildSegmentList(context, isDark),
           ],
@@ -261,7 +266,7 @@ class _SegmentedProgressCardWidgetState extends State<SegmentedProgressCardWidge
       );
 
       if (i > 0) {
-        items.add(const SizedBox(height: 18));
+        items.add(SizedBox(height: widget.size.getItemSpacing() * 2));
       }
 
       items.add(

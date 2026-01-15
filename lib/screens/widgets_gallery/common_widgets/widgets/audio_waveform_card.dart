@@ -21,6 +21,9 @@ class AudioWaveformCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const AudioWaveformCardWidget({
     super.key,
     required this.title,
@@ -28,6 +31,7 @@ class AudioWaveformCardWidget extends StatefulWidget {
     required this.duration,
     this.primaryColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于通用小组件系统）
@@ -47,6 +51,7 @@ class AudioWaveformCardWidget extends StatefulWidget {
           ? Color(props['primaryColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -106,7 +111,7 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -153,7 +158,7 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: widget.size.getItemSpacing()),
               Text(
                 widget.date,
                 style: TextStyle(

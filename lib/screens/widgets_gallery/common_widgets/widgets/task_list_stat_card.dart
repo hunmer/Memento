@@ -44,6 +44,9 @@ class TaskListStatCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const TaskListStatCardWidget({
     super.key,
     required this.icon,
@@ -53,6 +56,7 @@ class TaskListStatCardWidget extends StatefulWidget {
     required this.remainingCount,
     this.primaryColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -70,6 +74,7 @@ class TaskListStatCardWidget extends StatefulWidget {
           ? Color(props['primaryColor'] as int)
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -143,7 +148,7 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
       },
       child: Container(
         width: widget.inline ? double.maxFinite : 380,
-        constraints: const BoxConstraints(minHeight: 180),
+        constraints: widget.size.getHeightConstraints(),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(32),
@@ -155,13 +160,13 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
             ),
           ],
         ),
-        padding: const EdgeInsets.all(24),
+        padding: widget.size.getPadding(),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 左侧：图标和统计
             _buildLeftSection(context, isDark, primaryColor),
-            const SizedBox(width: 24),
+            SizedBox(width: widget.size.getTitleSpacing()),
             // 右侧：任务列表
             Expanded(
               child: _buildRightSection(context, isDark, primaryColor),
@@ -174,14 +179,18 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
 
   /// 左侧区域
   Widget _buildLeftSection(BuildContext context, bool isDark, Color primaryColor) {
+    final iconSize = widget.size.getIconSize();
+    final containerSize = iconSize * 2;
+    final fontSize = widget.size.getLargeFontSize();
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 图标
         Container(
-          width: 48,
-          height: 48,
+          width: containerSize,
+          height: containerSize,
           decoration: BoxDecoration(
             color: primaryColor,
             shape: BoxShape.circle,
@@ -196,21 +205,21 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
           child: Icon(
             widget.icon,
             color: Colors.white,
-            size: 24,
+            size: iconSize,
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: widget.size.getTitleSpacing()),
 
         // 数量和标签
         Column(
           children: [
             SizedBox(
-              height: 56,
+              height: fontSize + 8,
               child: AnimatedFlipCounter(
                 value: widget.count * _fadeAnimation.value,
                 textStyle: TextStyle(
-                  fontSize: 48,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w500,
                   color: isDark ? Colors.white : const Color(0xFF1F2937),
                   height: 1.0,
@@ -251,13 +260,14 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
             animation: _animationController,
             index: index,
             isDark: isDark,
+            size: widget.size,
           );
         }),
 
         // 更多链接
         if (widget.remainingCount > 0)
           Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: EdgeInsets.only(top: widget.size.getItemSpacing()),
             child: _MoreLinkWidget(
               count: widget.remainingCount,
               primaryColor: primaryColor,
@@ -277,6 +287,7 @@ class _TaskListItem extends StatelessWidget {
   final Animation<double> animation;
   final int index;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _TaskListItem({
     required this.task,
@@ -284,6 +295,7 @@ class _TaskListItem extends StatelessWidget {
     required this.animation,
     required this.index,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -296,6 +308,8 @@ class _TaskListItem extends StatelessWidget {
         curve: Curves.easeOutCubic,
       ),
     );
+
+    final itemSpacing = size.getItemSpacing();
 
     return AnimatedBuilder(
       animation: animation,
@@ -312,8 +326,8 @@ class _TaskListItem extends StatelessWidget {
         children: [
           Padding(
             padding: EdgeInsets.only(
-              top: index == 0 ? 4 : 12,
-              bottom: 12,
+              top: index == 0 ? 4 : itemSpacing,
+              bottom: itemSpacing,
             ),
             child: Text(
               task,

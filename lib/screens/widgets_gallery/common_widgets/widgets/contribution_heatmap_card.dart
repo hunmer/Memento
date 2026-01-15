@@ -15,6 +15,9 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ContributionHeatmapCardWidget({
     super.key,
     required this.title,
@@ -26,6 +29,7 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
     required this.description,
     required this.showMoreLabel,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -63,6 +67,7 @@ class ContributionHeatmapCardWidget extends StatefulWidget {
       description: props['description'] as String? ?? '',
       showMoreLabel: props['showMoreLabel'] as String? ?? 'Show more',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -124,7 +129,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: widget.size.getPadding(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -147,7 +152,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                         _SettingsButton(isDark: isDark),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: widget.size.getItemSpacing()),
                     // 贡献计数
                     Text(
                       widget.contributionCount,
@@ -157,7 +162,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 年份选择器
                     Wrap(
                       spacing: 8,
@@ -171,7 +176,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 描述
                     Text(
                       widget.description,
@@ -181,7 +186,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                         height: 1.5,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 热力图
                     _ContributionHeatmap(
                       months: widget.months,
@@ -190,13 +195,13 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                       isDark: isDark,
                       primaryColor: primaryColor,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 底部信息
                     _HeatmapFooter(
                       isDark: isDark,
                       primaryColor: primaryColor,
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 显示更多按钮
                     _ShowMoreButton(
                       label: widget.showMoreLabel,

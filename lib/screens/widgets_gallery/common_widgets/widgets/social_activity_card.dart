@@ -11,12 +11,15 @@ class SocialActivityCardWidget extends StatefulWidget {
   final List<SocialPost> posts;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const SocialActivityCardWidget({
     super.key,
     required this.user,
     required this.posts,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性映射创建组件
@@ -32,6 +35,7 @@ class SocialActivityCardWidget extends StatefulWidget {
       user: data.user,
       posts: data.posts,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -75,13 +79,13 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - _animation.value)),
+            offset: Offset(0, (widget.size == HomeWidgetSize.small ? 15 : 20) * (1 - _animation.value)),
             child: child,
           ),
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : 375,
+        width: widget.inline ? double.maxFinite : (widget.size == HomeWidgetSize.small ? 280 : 375),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(32),
@@ -100,21 +104,20 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
             children: [
               // 顶部背景区域
               Container(
-                height: 96,
+                height: widget.size == HomeWidgetSize.small ? 72 : 96,
                 width: double.infinity,
                 color: isDark ? const Color(0xFF334155) : const Color(0xFFF3F4F9),
               ),
               // 内容区域
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 头像（负边距上移）
                     Transform.translate(
-                      offset: const Offset(0, -48),
+                      offset: Offset(0, widget.size == HomeWidgetSize.small ? -36 : -48),
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -126,17 +129,18 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
                           ),
                         ),
                         child: CircleAvatar(
-                          radius: 48,
+                          radius: widget.size == HomeWidgetSize.small ? 36 : 48,
                           backgroundImage: NetworkImage(widget.user.avatarUrl),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: widget.size.getItemSpacing()),
                     // 用户信息
                     _UserHeader(
                       user: widget.user,
+                      size: widget.size,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 动态列表
                     ...widget.posts.asMap().entries.map((entry) {
                       final index = entry.key;
@@ -145,6 +149,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
                         post: post,
                         animation: _animation,
                         index: index + 1,
+                        size: widget.size,
                       );
                     }),
                   ],
@@ -161,9 +166,11 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
 /// 用户信息头部
 class _UserHeader extends StatelessWidget {
   final SocialUser user;
+  final HomeWidgetSize size;
 
   const _UserHeader({
     required this.user,
+    required this.size,
   });
 
   @override
@@ -180,17 +187,17 @@ class _UserHeader extends StatelessWidget {
               Text(
                 user.name,
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: size == HomeWidgetSize.small ? 18 : 20,
                   fontWeight: FontWeight.w700,
                   color: isDark ? Colors.white : const Color(0xFF111827),
                   height: 1.2,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: size.getItemSpacing() / 2),
               Text(
                 user.username,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: size == HomeWidgetSize.small ? 12 : 14,
                   fontWeight: FontWeight.w500,
                   color: primaryColor,
                   height: 1.0,
@@ -199,21 +206,21 @@ class _UserHeader extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: size.getItemSpacing()),
         Row(
           children: [
             Icon(
               Icons.group_outlined,
-              size: 18,
+              size: size.getIconSize(),
               color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: size.getItemSpacing() / 2),
             SizedBox(
-              height: 16,
+              height: size.getIconSize() - 2,
               child: Text(
                 _formatFollowerCount(user.followerCount),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: size == HomeWidgetSize.small ? 12 : 14,
                   color:
                       isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                   height: 1.0,
@@ -239,11 +246,13 @@ class _PostItem extends StatelessWidget {
   final SocialPost post;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _PostItem({
     required this.post,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -266,13 +275,13 @@ class _PostItem extends StatelessWidget {
         return Opacity(
           opacity: itemAnimation.value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - itemAnimation.value)),
+            offset: Offset(0, (size == HomeWidgetSize.small ? 15 : 20) * (1 - itemAnimation.value)),
             child: child,
           ),
         );
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 32),
+        padding: EdgeInsets.only(bottom: size.getTitleSpacing()),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -281,13 +290,13 @@ class _PostItem extends StatelessWidget {
             Text(
               post.hashtag,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: size == HomeWidgetSize.small ? 13 : 15,
                 fontWeight: FontWeight.w600,
                 color: primaryColor,
                 height: 1.0,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: size.getItemSpacing()),
             // 内容和图片
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,14 +308,14 @@ class _PostItem extends StatelessWidget {
                       Text(
                         post.content,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: size == HomeWidgetSize.small ? 13 : 15,
                           color: isDark
                               ? const Color(0xFFE5E7EB)
                               : const Color(0xFF1F2937),
                           height: 1.5,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: size.getItemSpacing() + 4),
                       // 互动数据
                       Row(
                         children: [
@@ -315,28 +324,30 @@ class _PostItem extends StatelessWidget {
                             count: post.commentCount,
                             color: primaryColor,
                             animation: itemAnimation,
+                            size: size,
                           ),
-                          const SizedBox(width: 20),
+                          SizedBox(width: size.getTitleSpacing()),
                           _InteractionItem(
                             icon: Icons.restart_alt,
                             count: post.repostCount,
                             color: const Color(0xFF10B981),
                             animation: itemAnimation,
                             iconTransform: 90,
+                            size: size,
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: size.getTitleSpacing()),
                 // 图片
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
                     post.imageUrl,
-                    width: 80,
-                    height: 80,
+                    width: size == HomeWidgetSize.small ? 60 : 80,
+                    height: size == HomeWidgetSize.small ? 60 : 80,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -356,6 +367,7 @@ class _InteractionItem extends StatelessWidget {
   final Color color;
   final Animation<double> animation;
   final double? iconTransform;
+  final HomeWidgetSize size;
 
   const _InteractionItem({
     required this.icon,
@@ -363,6 +375,7 @@ class _InteractionItem extends StatelessWidget {
     required this.color,
     required this.animation,
     this.iconTransform,
+    required this.size,
   });
 
   @override
@@ -377,18 +390,18 @@ class _InteractionItem extends StatelessWidget {
           angle: iconTransform != null ? iconTransform! * 3.14159 / 180 : 0,
           child: Icon(
             icon,
-            size: 18,
+            size: size.getIconSize(),
             color: baseColor,
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: size.getItemSpacing() / 1),
         SizedBox(
-          height: 12,
+          height: size.getIconSize() - 6,
           child: AnimatedFlipCounter(
             value: count * animation.value,
             fractionDigits: count >= 1000 ? 1 : 0,
             textStyle: TextStyle(
-              fontSize: 12,
+              fontSize: size == HomeWidgetSize.small ? 10 : 12,
               fontWeight: FontWeight.w500,
               color: baseColor,
               height: 1.0,

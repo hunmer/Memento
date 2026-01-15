@@ -27,6 +27,9 @@ class WalletBalanceCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const WalletBalanceCardWidget({
     super.key,
     required this.avatarUrl,
@@ -36,6 +39,7 @@ class WalletBalanceCardWidget extends StatefulWidget {
     required this.income,
     required this.expenses,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -51,6 +55,7 @@ class WalletBalanceCardWidget extends StatefulWidget {
       income: (props['income'] as num?)?.toDouble() ?? 0.0,
       expenses: (props['expenses'] as num?)?.toDouble() ?? 0.0,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -113,7 +118,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
 
     return Container(
       width: widget.inline ? double.maxFinite : 340,
-      padding: const EdgeInsets.all(24),
+      padding: widget.size.getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(24),
@@ -147,7 +152,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                   },
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: widget.size.getItemSpacing()),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +166,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                             : Colors.grey.shade600,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: widget.size.getItemSpacing() / 2),
                     Row(
                       children: [
                         AnimatedFlipCounter(
@@ -174,7 +179,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                             color: isDark ? Colors.white : Colors.grey.shade900,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: widget.size.getItemSpacing()),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -204,7 +209,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 进度条
           Column(
@@ -251,7 +256,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: widget.size.getItemSpacing()),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -261,7 +266,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 操作按钮
           Row(
@@ -274,7 +279,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                   Colors.white,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: widget.size.getItemSpacing()),
               Expanded(
                 child: _buildActionButton(
                   isDark,
@@ -283,7 +288,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                   isDark ? Colors.white : Colors.grey.shade900,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: widget.size.getItemSpacing()),
               _buildAddButton(isDark, btnSecondaryColor),
             ],
           ),
@@ -302,7 +307,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: widget.size.getItemSpacing() / 2),
         Text(
           value,
           style: TextStyle(

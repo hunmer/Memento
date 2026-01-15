@@ -16,6 +16,8 @@ class ScoreCardWidget extends StatefulWidget {
   final List<ActionData> actions;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+  /// 组件尺寸
+  final HomeWidgetSize size;
 
   const ScoreCardWidget({
     super.key,
@@ -23,6 +25,7 @@ class ScoreCardWidget extends StatefulWidget {
     required this.grade,
     required this.actions,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -46,6 +49,7 @@ class ScoreCardWidget extends StatefulWidget {
       grade: props['grade'] as String? ?? 'A',
       actions: actions,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -133,57 +137,62 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                   ),
                   // 内容
                   Padding(
-                    padding: const EdgeInsets.all(24),
+                    padding: widget.size.getPadding(),
                     child: Column(
                       children: [
                         // 分数显示
                         SizedBox(
-                          height: 48,
+                          height: widget.size.getHeightConstraints().maxHeight * 0.18,
                           child: Row(
                             children: [
-                              SizedBox(
-                                width: 160,
-                                height: 48,
-                                child: AnimatedFlipCounter(
-                                  value:
-                                      widget.score.toDouble() *
-                                      _animation.value,
-                                  wholeDigits: 3,
-                                  fractionDigits: 0,
-                                  textStyle: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.0,
+                              Flexible(
+                                flex: 3,
+                                child: SizedBox(
+                                  height: widget.size.getHeightConstraints().maxHeight * 0.18,
+                                  child: AnimatedFlipCounter(
+                                    value:
+                                        widget.score.toDouble() *
+                                        _animation.value,
+                                    wholeDigits: 3,
+                                    fractionDigits: 0,
+                                    textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: widget.size == HomeWidgetSize.large ? 56 : 48,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.0,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              SizedBox(
-                                height: 48,
-                                child: Text(
-                                  widget.grade,
-                                  style: TextStyle(
-                                    color: primaryColor,
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.0,
+                              SizedBox(width: widget.size.getItemSpacing() * 0.5),
+                              Flexible(
+                                flex: 1,
+                                child: SizedBox(
+                                  height: widget.size.getHeightConstraints().maxHeight * 0.18,
+                                  child: Text(
+                                    widget.grade,
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontSize: widget.size == HomeWidgetSize.large ? 56 : 48,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.0,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
+                        SizedBox(height: widget.size.getTitleSpacing() * 0.25),
+                        Text(
                           'Last Actions',
                           style: TextStyle(
-                            color: Color(0xFF71717A),
-                            fontSize: 18,
+                            color: const Color(0xFF71717A),
+                            fontSize: widget.size == HomeWidgetSize.large ? 20 : 18,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: widget.size.getItemSpacing()),
                         // 行为列表
                         Expanded(
                           child: Column(
@@ -204,6 +213,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                               return _ActionItem(
                                 action: action,
                                 animation: itemAnimation,
+                                size: widget.size,
                               );
                             }),
                           ),
@@ -225,8 +235,13 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
 class _ActionItem extends StatelessWidget {
   final ActionData action;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _ActionItem({required this.action, required this.animation});
+  const _ActionItem({
+    required this.action,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -236,16 +251,18 @@ class _ActionItem extends StatelessWidget {
         final displayValue = (action.value * animation.value).round();
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: size.getItemSpacing() * 0.75),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                action.label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w400,
+              Flexible(
+                child: Text(
+                  action.label,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: size == HomeWidgetSize.large ? 20 : 18,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
               Row(
@@ -257,15 +274,15 @@ class _ActionItem extends StatelessWidget {
                           action.isPositive
                               ? const Color(0xFF22C55E)
                               : const Color(0xFFEF4444),
-                      fontSize: 18,
+                      fontSize: size == HomeWidgetSize.large ? 20 : 18,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 1.0,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: size.getItemSpacing() * 0.25),
                   SizedBox(
                     width: 60,
-                    height: 24,
+                    height: size == HomeWidgetSize.large ? 28 : 24,
                     child: AnimatedFlipCounter(
                       value: displayValue.toDouble(),
                       wholeDigits: 2,
@@ -275,7 +292,7 @@ class _ActionItem extends StatelessWidget {
                             action.isPositive
                                 ? const Color(0xFF22C55E)
                                 : const Color(0xFFEF4444),
-                        fontSize: 18,
+                        fontSize: size == HomeWidgetSize.large ? 20 : 18,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                         height: 1.0,

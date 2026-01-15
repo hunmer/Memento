@@ -64,6 +64,9 @@ class EventCalendarWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const EventCalendarWidget({
     super.key,
     required this.day,
@@ -76,6 +79,7 @@ class EventCalendarWidget extends StatefulWidget {
     required this.reminderEmoji,
     required this.events,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -103,6 +107,7 @@ class EventCalendarWidget extends StatefulWidget {
       reminderEmoji: props['reminderEmoji'] as String? ?? '',
       events: eventsList,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -161,7 +166,7 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -179,19 +184,21 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                               eventCount: widget.eventCount,
                               primaryColor: primaryColor,
                               animation: _animation,
+                              size: widget.size,
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: widget.size.getTitleSpacing()),
                             _WeekCalendar(
                               weekDates: widget.weekDates,
                               currentDay: widget.day,
                               weekStartDay: widget.weekStartDay,
                               primaryColor: primaryColor,
                               isDark: isDark,
+                              size: widget.size,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: widget.size.getItemSpacing()),
                       Expanded(
                         child: Stack(
                           children: [
@@ -199,11 +206,12 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 for (int i = 0; i < widget.events.length; i++) ...[
-                                  if (i > 0) const SizedBox(height: 20),
+                                  if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
                                   _EventCard(
                                     event: widget.events[i],
                                     animation: _animation,
                                     index: i,
+                                    size: widget.size,
                                   ),
                                 ],
                               ],
@@ -213,11 +221,12 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: widget.size.getItemSpacing()),
                   _ReminderItem(
                     emoji: widget.reminderEmoji,
                     text: widget.reminder,
                     animation: _animation,
+                    size: widget.size,
                   ),
                 ],
               ),
@@ -236,6 +245,7 @@ class _DateSection extends StatelessWidget {
   final int eventCount;
   final Color primaryColor;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DateSection({
     required this.day,
@@ -244,6 +254,7 @@ class _DateSection extends StatelessWidget {
     required this.eventCount,
     required this.primaryColor,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -265,7 +276,7 @@ class _DateSection extends StatelessWidget {
             letterSpacing: -1,
           ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: size.getItemSpacing() / 4),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,6 +297,7 @@ class _WeekCalendar extends StatelessWidget {
   final int weekStartDay;
   final Color primaryColor;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _WeekCalendar({
     required this.weekDates,
@@ -293,6 +305,7 @@ class _WeekCalendar extends StatelessWidget {
     required this.weekStartDay,
     required this.primaryColor,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -315,7 +328,7 @@ class _WeekCalendar extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: size.getItemSpacing() / 4),
         ...List.generate(rowCount, (rowIndex) {
           final startIndex = rowIndex * daysPerRow;
           final endIndex = (startIndex + daysPerRow).clamp(0, weekDates.length);
@@ -370,11 +383,13 @@ class _ReminderItem extends StatelessWidget {
   final String emoji;
   final String text;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _ReminderItem({
     required this.emoji,
     required this.text,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -387,7 +402,7 @@ class _ReminderItem extends StatelessWidget {
           angle: -0.1,
           child: Text(emoji, style: const TextStyle(fontSize: 18)),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: size.getItemSpacing() / 2),
         Expanded(
           child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade200 : Colors.grey.shade800, height: 1.2)),
         ),
@@ -400,11 +415,13 @@ class _EventCard extends StatelessWidget {
   final EventData event;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _EventCard({
     required this.event,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -423,7 +440,7 @@ class _EventCard extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(10 * (1 - itemAnimation.value), 0),
             child: Container(
-              padding: const EdgeInsets.only(left: 12),
+              padding: EdgeInsets.only(left: size.getPadding().left),
               decoration: BoxDecoration(
                 border: Border(left: BorderSide(color: event.color, width: 3)),
               ),
@@ -431,16 +448,16 @@ class _EventCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(event.title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.3)),
-                  const SizedBox(height: 4),
+                  SizedBox(height: size.getItemSpacing() / 4),
                   Row(
                     children: [
                       Icon(Icons.calendar_today, size: 14, color: event.iconColor),
-                      const SizedBox(width: 6),
+                      SizedBox(width: size.getItemSpacing() / 3),
                       Text('${event.time} · ${event.duration}${event.location != null ? ' · ${event.location}' : ''}', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
                     ],
                   ),
                   if (event.buttonLabel != null) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: size.getItemSpacing() / 4),
                     GestureDetector(
                       onTap: () {},
                       child: Container(

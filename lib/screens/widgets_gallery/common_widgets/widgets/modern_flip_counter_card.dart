@@ -76,6 +76,9 @@ class ModernFlipCounterCard extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 组件尺寸
+  final HomeWidgetSize size;
+
   const ModernFlipCounterCard({
     super.key,
     required this.title,
@@ -87,6 +90,7 @@ class ModernFlipCounterCard extends StatefulWidget {
     this.primaryColor,
     this.statusColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -123,6 +127,7 @@ class ModernFlipCounterCard extends StatefulWidget {
             )
           : null,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -188,13 +193,13 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
                     ? Border.all(color: Colors.white.withOpacity(0.1))
                     : null,
               ),
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 标题行
                   _buildHeader(isDark, primaryColor),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 数值和状态行
                   _buildContent(isDark, primaryColor, accentColor),
                 ],
@@ -214,10 +219,10 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.only(right: 12),
+              padding: EdgeInsets.only(right: widget.size.getItemSpacing() / 2),
               child: Icon(
                 widget.icon,
-                size: 24,
+                size: widget.size.getIconSize(),
                 color: primaryColor,
               ),
             ),
@@ -267,7 +272,7 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
                     value: widget.value * _animation.value,
                     fractionDigits: 1,
                     textStyle: TextStyle(
-                      fontSize: 48,
+                      fontSize: widget.size.getLargeFontSize(),
                       fontWeight: FontWeight.w800,
                       color: isDark ? Colors.white : const Color(0xFF111827),
                       height: 1.0,
@@ -275,7 +280,7 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
                   ),
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: widget.size.getItemSpacing() / 3),
               SizedBox(
                 height: 22,
                 child: Text(
@@ -314,7 +319,7 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
             ),
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: widget.size.getItemSpacing() / 3),
         Container(
           width: 88,
           height: 8,

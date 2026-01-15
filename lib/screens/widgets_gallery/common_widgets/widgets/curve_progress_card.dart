@@ -31,6 +31,9 @@ class CurveProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const CurveProgressCardWidget({
     super.key,
     required this.value,
@@ -42,6 +45,7 @@ class CurveProgressCardWidget extends StatefulWidget {
     this.categoryLabel = 'Progress',
     this.lastUpdated = '',
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -61,6 +65,7 @@ class CurveProgressCardWidget extends StatefulWidget {
       categoryLabel: props['categoryLabel'] as String? ?? 'Progress',
       lastUpdated: props['lastUpdated'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -129,7 +134,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
             offset: Offset(0, _slideAnimation.value),
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
-              padding: const EdgeInsets.all(28),
+              padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(32),
@@ -151,7 +156,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                     label: widget.categoryLabel,
                     secondaryTextColor: secondaryTextColor,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 主内容区域：数值 + 曲线图
                   _buildMainContent(
@@ -159,7 +164,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                     textColor: textColor,
                     accentColor: accentColor,
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 底部信息行
                   _buildFooterRow(
@@ -184,7 +189,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
     return Row(
       children: [
         Icon(icon, size: 20, color: secondaryTextColor),
-        const SizedBox(width: 8),
+        SizedBox(width: widget.size.getItemSpacing()),
         Text(
           label.toUpperCase(),
           style: TextStyle(
@@ -235,7 +240,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                       ),
                     ),
                     if (widget.unit.isNotEmpty) ...[
-                      const SizedBox(width: 6),
+                      SizedBox(width: widget.size.getItemSpacing() - 2),
                       SizedBox(
                         height: 22,
                         child: Text(
@@ -249,7 +254,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                         ),
                       ),
                     ],
-                    const SizedBox(width: 4),
+                    SizedBox(width: widget.size.getItemSpacing() / 2),
                     Transform.translate(
                       offset: const Offset(0, 4),
                       child: Icon(
@@ -263,7 +268,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: widget.size.getItemSpacing()),
               // 标签
               Text(
                 widget.label,
