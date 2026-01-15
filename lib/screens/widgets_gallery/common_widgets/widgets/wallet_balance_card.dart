@@ -114,7 +114,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
         isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF3F4F6);
 
     // 计算进度比例
-    final progress = widget.availableBalance / widget.totalBalance;
+    final progress = (widget.availableBalance / widget.totalBalance).clamp(0.0, 1.0);
 
     return Container(
       width: widget.inline ? double.maxFinite : 340,

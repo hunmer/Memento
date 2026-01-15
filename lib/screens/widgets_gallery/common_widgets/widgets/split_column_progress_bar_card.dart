@@ -33,6 +33,37 @@ class ColumnProgressData {
   }
 }
 
+/// 左侧区域配置
+class LeftSectionConfig {
+  final String icon;
+  final String label;
+  final String? subtext; // 可选的副标题，显示在进度条下方
+
+  const LeftSectionConfig({
+    this.icon = '🔥',
+    this.label = 'Calories',
+    this.subtext,
+  });
+
+  /// 从 JSON 创建
+  factory LeftSectionConfig.fromJson(Map<String, dynamic> json) {
+    return LeftSectionConfig(
+      icon: json['icon'] as String? ?? '🔥',
+      label: json['label'] as String? ?? 'Calories',
+      subtext: json['subtext'] as String?,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'icon': icon,
+      'label': label,
+      if (subtext != null) 'subtext': subtext,
+    };
+  }
+}
+
 /// 进度项数据模型
 class ProgressItemData {
   final String icon;
@@ -40,6 +71,8 @@ class ProgressItemData {
   final double current;
   final double total;
   final Color color;
+  /// 可选的副标题（如时间范围）
+  final String? subtitle;
 
   const ProgressItemData({
     required this.icon,
@@ -47,6 +80,7 @@ class ProgressItemData {
     required this.current,
     required this.total,
     required this.color,
+    this.subtitle,
   });
 
   /// 从 JSON 创建
@@ -57,6 +91,7 @@ class ProgressItemData {
       current: (json['current'] as num?)?.toDouble() ?? 0.0,
       total: (json['total'] as num?)?.toDouble() ?? 0.0,
       color: Color(json['color'] as int? ?? 0xFF000000),
+      subtitle: json['subtitle'] as String?,
     );
   }
 
@@ -68,14 +103,19 @@ class ProgressItemData {
       'current': current,
       'total': total,
       'color': color.value,
+      if (subtitle != null) 'subtitle': subtitle,
     };
   }
 }
 
 /// 左右分栏进度条卡片小组件
 class SplitColumnProgressBarCard extends StatefulWidget {
-  final ColumnProgressData calories;
-  final List<ProgressItemData> nutrients;
+  /// 左侧数据（用于进度条）
+  final ColumnProgressData? leftData;
+  /// 左侧区域配置（图标、标签等）
+  final LeftSectionConfig? leftConfig;
+  /// 右侧进度项列表
+  final List<ProgressItemData>? rightItems;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
   /// 组件尺寸
@@ -83,8 +123,9 @@ class SplitColumnProgressBarCard extends StatefulWidget {
 
   const SplitColumnProgressBarCard({
     super.key,
-    required this.calories,
-    required this.nutrients,
+    this.leftData,
+    this.leftConfig,
+    this.rightItems,
     this.inline = false,
     this.size = HomeWidgetSize.medium,
   });
@@ -94,18 +135,28 @@ class SplitColumnProgressBarCard extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final caloriesData = props['calories'] != null
-        ? ColumnProgressData.fromJson(props['calories'] as Map<String, dynamic>)
-        : const ColumnProgressData(current: 0, total: 100, unit: '');
+    // 解析左侧数据
+    ColumnProgressData? leftData;
+    if (props['leftData'] != null) {
+      leftData = ColumnProgressData.fromJson(props['leftData'] as Map<String, dynamic>);
+    }
 
-    final nutrientsList = (props['nutrients'] as List<dynamic>?)
+    // 解析左侧配置
+    LeftSectionConfig? leftConfig;
+    if (props['leftConfig'] != null) {
+      leftConfig = LeftSectionConfig.fromJson(props['leftConfig'] as Map<String, dynamic>);
+    }
+
+    // 解析右侧数据
+    final rightItems = (props['rightItems'] as List<dynamic>?)
             ?.map((e) => ProgressItemData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
 
     return SplitColumnProgressBarCard(
-      calories: caloriesData,
-      nutrients: nutrientsList,
+      leftData: leftData,
+      leftConfig: leftConfig,
+      rightItems: rightItems,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -145,6 +196,11 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final leftData = widget.leftData ??
+        const ColumnProgressData(current: 0, total: 100, unit: '');
+    final leftConfig = widget.leftConfig ?? const LeftSectionConfig();
+    final rightItems = widget.rightItems ?? const [];
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -171,8 +227,9 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: _CaloriesSection(
-                      data: widget.calories,
+                    child: _LeftSection(
+                      data: leftData,
+                      config: leftConfig,
                       animation: _animation,
                       size: widget.size,
                     ),
@@ -187,8 +244,8 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
                         : const Color(0xFFE5E7EB),
                   ),
                   Expanded(
-                    child: _NutrientsSection(
-                      nutrients: widget.nutrients,
+                    child: _RightSection(
+                      items: rightItems,
                       animation: _animation,
                       size: widget.size,
                     ),
@@ -203,13 +260,15 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
   }
 }
 
-class _CaloriesSection extends StatelessWidget {
+class _LeftSection extends StatelessWidget {
   final ColumnProgressData data;
+  final LeftSectionConfig config;
   final Animation<double> animation;
   final HomeWidgetSize size;
 
-  const _CaloriesSection({
+  const _LeftSection({
     required this.data,
+    required this.config,
     required this.animation,
     required this.size,
   });
@@ -225,10 +284,10 @@ class _CaloriesSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text('🔥', style: TextStyle(fontSize: 18)),
+            Text(config.icon, style: const TextStyle(fontSize: 18)),
             const SizedBox(width: 6),
             Text(
-              'Calories',
+              config.label,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -285,7 +344,7 @@ class _CaloriesSection extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: (data.current / data.total) * animation.value,
+                widthFactor: (data.total > 0 ? data.current / data.total : 0) * animation.value,
                 child: Container(
                   decoration: BoxDecoration(
                     color: primaryColor,
@@ -296,57 +355,77 @@ class _CaloriesSection extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: size.getItemSpacing()),
-        SizedBox(
-          height: 16,
-          child: Text(
-            '${(data.total - data.current).toInt()} ${data.unit} remaining',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: primaryColor,
-              height: 1.0,
+        if (config.subtext != null) ...[
+          SizedBox(height: size.getItemSpacing()),
+          SizedBox(
+            height: 16,
+            child: Text(
+              config.subtext!,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+                height: 1.0,
+              ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-class _NutrientsSection extends StatelessWidget {
-  final List<ProgressItemData> nutrients;
-  final Animation<double> animation;
-  final HomeWidgetSize size;
-
-  const _NutrientsSection({
-    required this.nutrients,
-    required this.animation,
-    required this.size,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (int i = 0; i < nutrients.length; i++) ...[
-          if (i > 0) SizedBox(height: size.getItemSpacing()),
-          _NutrientItem(data: nutrients[i], animation: animation, index: i, size: size),
+        ] else ...[
+          SizedBox(height: size.getItemSpacing()),
+          SizedBox(
+            height: 16,
+            child: Text(
+              '${(data.total - data.current).toInt()} ${data.unit} remaining',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: primaryColor,
+                height: 1.0,
+              ),
+            ),
+          ),
         ],
       ],
     );
   }
 }
 
-class _NutrientItem extends StatelessWidget {
+class _RightSection extends StatelessWidget {
+  final List<ProgressItemData> items;
+  final Animation<double> animation;
+  final HomeWidgetSize size;
+
+  const _RightSection({
+    required this.items,
+    required this.animation,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (int i = 0; i < items.length; i++) ...[
+              if (i > 0) SizedBox(height: size.getItemSpacing()),
+              _ProgressItem(data: items[i], animation: animation, index: i, size: size),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressItem extends StatelessWidget {
   final ProgressItemData data;
   final Animation<double> animation;
   final int index;
   final HomeWidgetSize size;
 
-  const _NutrientItem({
+  const _ProgressItem({
     required this.data,
     required this.animation,
     required this.index,
@@ -366,7 +445,7 @@ class _NutrientItem extends StatelessWidget {
       ),
     );
 
-    final progress = data.current / data.total;
+    final progress = data.total > 0 ? data.current / data.total : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,19 +454,47 @@ class _NutrientItem extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Text(data.icon, style: const TextStyle(fontSize: 14)),
-                const SizedBox(width: 6),
-                Text(
-                  data.name,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.grey.shade100 : const Color(0xFF111827),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Text(data.icon, style: const TextStyle(fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          data.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.grey.shade100 : const Color(0xFF111827),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  if (data.subtitle != null) ...[
+                    SizedBox(height: size.getItemSpacing() / 4),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20), // Align with name (icon width + spacing)
+                      child: Text(
+                        data.subtitle!,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? Colors.grey.shade500 : const Color(0xFF6B7280),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
             SizedBox(
               height: 16,

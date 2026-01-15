@@ -49,15 +49,9 @@ enum HomeWidgetSize {
   Map<String, dynamic> toJson({int? actualWidth, int? actualHeight}) {
     // 如果是 custom 尺寸且提供了实际宽高，保存实际值
     if (this == HomeWidgetSize.custom) {
-      return {
-        'width': actualWidth ?? width,
-        'height': actualHeight ?? height,
-      };
+      return {'width': actualWidth ?? width, 'height': actualHeight ?? height};
     }
-    return {
-      'width': width,
-      'height': height,
-    };
+    return {'width': width, 'height': height};
   }
 
   /// 从 JSON 加载
@@ -128,13 +122,11 @@ enum HomeWidgetSize {
   ///   actualHeight: 2,
   /// ); // true (3 >= 2 && 2 >= 1)
   /// ```
-  bool isAtLeast(
-    HomeWidgetSize other, {
-    int? actualWidth,
-    int? actualHeight,
-  }) {
-    final thisWidth = this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
-    final thisHeight = this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
+  bool isAtLeast(HomeWidgetSize other, {int? actualWidth, int? actualHeight}) {
+    final thisWidth =
+        this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
+    final thisHeight =
+        this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
     return thisWidth >= other.width && thisHeight >= other.height;
   }
 
@@ -146,19 +138,19 @@ enum HomeWidgetSize {
     int? actualWidth,
     int? actualHeight,
   }) {
-    final thisWidth = this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
-    final thisHeight = this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
+    final thisWidth =
+        this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
+    final thisHeight =
+        this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
     return thisWidth > other.width || thisHeight > other.height;
   }
 
   /// 判断当前尺寸是否等于指定尺寸
-  bool isEqualTo(
-    HomeWidgetSize other, {
-    int? actualWidth,
-    int? actualHeight,
-  }) {
-    final thisWidth = this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
-    final thisHeight = this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
+  bool isEqualTo(HomeWidgetSize other, {int? actualWidth, int? actualHeight}) {
+    final thisWidth =
+        this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
+    final thisHeight =
+        this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
     return thisWidth == other.width && thisHeight == other.height;
   }
 
@@ -348,19 +340,19 @@ enum HomeWidgetSize {
   double getLegendIndicatorWidth() {
     switch (this) {
       case HomeWidgetSize.small:
-        return 24;
+        return 16;
       case HomeWidgetSize.medium:
-        return 32;
+        return 24;
       case HomeWidgetSize.large:
       case HomeWidgetSize.large3:
-        return 40;
-      case HomeWidgetSize.wide:
         return 32;
+      case HomeWidgetSize.wide:
+        return 24;
       case HomeWidgetSize.wide2:
       case HomeWidgetSize.wide3:
-        return 40;
-      case HomeWidgetSize.custom:
         return 32;
+      case HomeWidgetSize.custom:
+        return 24;
     }
   }
 

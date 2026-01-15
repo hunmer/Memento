@@ -94,7 +94,9 @@ class VerticalCircularProgressCard extends StatefulWidget {
       try {
         data = VerticalCircularProgressCardData.fromJson(props);
       } catch (e) {
-        debugPrint('Failed to parse VerticalCircularProgressCardData from props: $e');
+        debugPrint(
+          'Failed to parse VerticalCircularProgressCardData from props: $e',
+        );
       }
     }
 
@@ -181,10 +183,11 @@ class _VerticalCircularProgressCardState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : (widget.width ?? double.maxFinite),
-              padding:
-                  widget.padding ??
-                  widget.size.getPadding(),
+              width:
+                  widget.inline
+                      ? double.maxFinite
+                      : (widget.width ?? double.maxFinite),
+              padding: widget.padding ?? widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
                 borderRadius: BorderRadius.circular(widget.borderRadius ?? 28),
@@ -370,7 +373,9 @@ class _VerticalCircularProgressCardState
                 );
 
                 return Padding(
-                  padding: EdgeInsets.only(left: index == 0 ? 0 : widget.size.getItemSpacing()),
+                  padding: EdgeInsets.only(
+                    left: index == 0 ? 0 : widget.size.getItemSpacing(),
+                  ),
                   child: _DaySleepIndicator(
                     dayData: data,
                     primaryColor: primaryColor,
