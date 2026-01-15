@@ -4,6 +4,7 @@ import 'widgets/circular_progress_card.dart';
 import 'widgets/card_dot_progress_display.dart';
 import 'widgets/half_gauge_card.dart';
 import 'widgets/task_progress_card.dart';
+import 'widgets/task_list_card.dart';
 import 'widgets/audio_waveform_card.dart';
 import 'widgets/line_chart_trend_card.dart';
 import 'widgets/earnings_trend_card.dart';
@@ -17,8 +18,12 @@ import 'widgets/split_image_card.dart';
 import 'widgets/segmented_progress_card.dart';
 import 'widgets/profile_card_card.dart';
 import 'widgets/milestone_card.dart';
+import 'package:Memento/widgets/common/inbox_message_card.dart';
+import 'package:Memento/widgets/common/rounded_task_list_card.dart';
+import 'package:Memento/widgets/common/rounded_reminders_list_card.dart';
 import 'widgets/monthly_progress_with_dots_card.dart';
 import 'widgets/multi_metric_progress_card.dart';
+import 'widgets/circular_metrics_card.dart';
 import 'widgets/contribution_heatmap_card.dart';
 import 'widgets/smooth_line_chart_card.dart';
 import 'widgets/vertical_bar_chart_card.dart';
@@ -87,16 +92,21 @@ enum CommonWidgetId {
   activityProgressCard,
   halfGaugeCard,
   taskProgressCard,
+  taskListCard,
   audioWaveformCard,
   segmentedProgressCard,
   milestoneCard,
   monthlyProgressDotsCard,
   multiMetricProgressCard,
+  circularMetricsCard,
   contributionHeatmapCard,
   smoothLineChartCard,
   lineChartTrendCard,
   verticalBarChartCard,
   messageListCard,
+  inboxMessageCard,
+  roundedTaskListCard,
+  roundedRemindersList,
   dualSliderCard,
   earningsTrendCard,
   revenueTrendCard,
@@ -229,6 +239,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.taskListCard: CommonWidgetMetadata(
+      id: CommonWidgetId.taskListCard,
+      name: '任务列表卡片',
+      description: '显示任务列表和计数信息',
+      icon: Icons.format_list_bulleted,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
     CommonWidgetId.audioWaveformCard: CommonWidgetMetadata(
       id: CommonWidgetId.audioWaveformCard,
       name: '音频波形卡片',
@@ -269,6 +287,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.circularMetricsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.circularMetricsCard,
+      name: '环形指标卡片',
+      description: '显示多个环形指标，带进度环和图标',
+      icon: Icons.donut_large,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
     CommonWidgetId.contributionHeatmapCard: CommonWidgetMetadata(
       id: CommonWidgetId.contributionHeatmapCard,
       name: '贡献热力图卡片',
@@ -306,6 +332,30 @@ class CommonWidgetsRegistry {
       name: '消息列表卡片',
       description: '消息列表展示卡片，支持置顶消息和消息列表',
       icon: Icons.message,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.inboxMessageCard: CommonWidgetMetadata(
+      id: CommonWidgetId.inboxMessageCard,
+      name: '收件箱消息卡片',
+      description: '显示消息列表和计数信息',
+      icon: Icons.inbox,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.roundedTaskListCard: CommonWidgetMetadata(
+      id: CommonWidgetId.roundedTaskListCard,
+      name: '圆角任务列表卡片',
+      description: '显示任务列表和日期信息',
+      icon: Icons.list_alt,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.roundedRemindersList: CommonWidgetMetadata(
+      id: CommonWidgetId.roundedRemindersList,
+      name: '圆角提醒事项列表',
+      description: '显示提醒事项列表和计数',
+      icon: Icons.notification_important,
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
@@ -823,6 +873,8 @@ class CommonWidgetBuilder {
         return HalfGaugeCardWidget.fromProps(props, size);
       case CommonWidgetId.taskProgressCard:
         return TaskProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.taskListCard:
+        return TaskListCardWidget.fromProps(props, size);
       case CommonWidgetId.audioWaveformCard:
         return AudioWaveformCardWidget.fromProps(props, size);
       case CommonWidgetId.segmentedProgressCard:
@@ -833,6 +885,8 @@ class CommonWidgetBuilder {
         return MonthlyProgressWithDotsCardWidget.fromProps(props, size);
       case CommonWidgetId.multiMetricProgressCard:
         return MultiMetricProgressCardWidget.fromProps(props, size);
+      case CommonWidgetId.circularMetricsCard:
+        return CircularMetricsCardWidget.fromProps(props, size);
       case CommonWidgetId.contributionHeatmapCard:
         return ContributionHeatmapCardWidget.fromProps(props, size);
       case CommonWidgetId.smoothLineChartCard:
@@ -843,6 +897,12 @@ class CommonWidgetBuilder {
         return VerticalBarChartCardWidget.fromProps(props, size);
       case CommonWidgetId.messageListCard:
         return MessageListCardWidget.fromProps(props, size);
+      case CommonWidgetId.inboxMessageCard:
+        return InboxMessageCardWidget.fromProps(props, size);
+      case CommonWidgetId.roundedTaskListCard:
+        return RoundedTaskListCard.fromProps(props, size);
+      case CommonWidgetId.roundedRemindersList:
+        return ReminderListCard.fromProps(props, size);
       case CommonWidgetId.dualSliderCard:
         return DualSliderWidget.fromProps(props, size);
       case CommonWidgetId.earningsTrendCard:

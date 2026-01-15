@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 提醒事项数据模型
 class ReminderItem {
@@ -95,6 +96,23 @@ class ReminderListCard extends StatefulWidget {
     this.onItemTap,
     this.onActionTap,
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory ReminderListCard.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final itemsList = (props['items'] as List<dynamic>?)
+            ?.map((e) => ReminderItem.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return ReminderListCard(
+      itemCount: props['itemCount'] as int? ?? itemsList.length,
+      items: itemsList,
+      title: props['title'] as String?,
+    );
+  }
 
   @override
   State<ReminderListCard> createState() => _ReminderListCardState();

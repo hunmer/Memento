@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 任务列表项数据模型
 class TaskListItem {
@@ -85,6 +86,23 @@ class RoundedTaskListCard extends StatefulWidget {
     this.headerText = 'Upcoming',
   });
 
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory RoundedTaskListCard.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final tasksList =
+        (props['tasks'] as List<dynamic>?)
+            ?.map((e) => TaskListItem.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return RoundedTaskListCard(
+      tasks: tasksList,
+      headerText: props['headerText'] as String? ?? 'Upcoming',
+    );
+  }
+
   @override
   State<RoundedTaskListCard> createState() => _RoundedTaskListCardState();
 }
@@ -132,7 +150,7 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
               width: 344,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -141,7 +159,7 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -251,7 +269,7 @@ class _TaskListItem extends StatelessWidget {
           child: Opacity(
             opacity: animation.value,
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
