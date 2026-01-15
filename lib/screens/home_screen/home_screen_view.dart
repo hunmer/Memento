@@ -633,6 +633,21 @@ class HomeScreenView extends StatelessWidget {
       return;
     }
 
+    // 保存原有的公共小组件配置（如果存在）
+    String? savedCommonWidgetId;
+    Map<String, dynamic>? savedCommonWidgetProps;
+    if (item.config.containsKey('selectorWidgetConfig')) {
+      try {
+        final oldSelectorConfig = SelectorWidgetConfig.fromJson(
+          item.config['selectorWidgetConfig'] as Map<String, dynamic>,
+        );
+        savedCommonWidgetId = oldSelectorConfig.commonWidgetId;
+        savedCommonWidgetProps = oldSelectorConfig.commonWidgetProps;
+      } catch (_) {
+        // 忽略解析错误
+      }
+    }
+
     // 直接弹出选择器,不先清空配置
     final result = await pluginDataSelectorService.showSelector(context, widget.selectorId!);
 
@@ -651,6 +666,23 @@ class HomeScreenView extends StatelessWidget {
     // 添加新的选择器配置
     final newConfig = _processSelectorResult(widget, result);
     final finalConfig = updatedConfig..addAll(newConfig);
+
+    // 恢复公共小组件配置（如果有）
+    if (savedCommonWidgetId != null && finalConfig.containsKey('selectorWidgetConfig')) {
+      try {
+        final selectorConfigJson = Map<String, dynamic>.from(
+          finalConfig['selectorWidgetConfig'] as Map<String, dynamic>,
+        );
+        // 更新公共小组件字段
+        selectorConfigJson['commonWidgetId'] = savedCommonWidgetId;
+        selectorConfigJson['commonWidgetProps'] = savedCommonWidgetProps;
+        // 显式重新赋值以确保修改生效
+        finalConfig['selectorWidgetConfig'] = selectorConfigJson;
+      } catch (_) {
+        // 忽略恢复错误
+      }
+    }
+
     final finalItem = item.copyWith(config: finalConfig);
 
     // 一次性更新并强制刷新

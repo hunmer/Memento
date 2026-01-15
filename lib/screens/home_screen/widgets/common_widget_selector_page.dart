@@ -402,7 +402,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
   }
 
   /// 确认选择
-  void _confirmSelection() {
+  Future<void> _confirmSelection() async {
     if (_selectedData == null || _availableCommonWidgets.isEmpty || _originalSelectorResult == null) return;
 
     // 从当前激活的 tab 获取选中的 widgetId
@@ -439,7 +439,11 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
       layoutManager.addItem(widgetItem);
     }
 
-    layoutManager.saveLayout();
+    // 等待布局保存完成，确保配置正确写入后再刷新界面
+    await layoutManager.saveLayout();
+    // 强制通知监听器刷新，确保新创建的小组件能正确读取配置
+    layoutManager.notifyListeners();
+
     Navigator.of(context).pop();
 
     final action = widget.replaceWidgetItemId != null ? '替换' : '添加';
