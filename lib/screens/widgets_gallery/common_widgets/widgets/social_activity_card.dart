@@ -142,16 +142,24 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
                     ),
                     SizedBox(height: widget.size.getTitleSpacing()),
                     // 动态列表
-                    ...widget.posts.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final post = entry.value;
-                      return _PostItem(
-                        post: post,
-                        animation: _animation,
-                        index: index + 1,
-                        size: widget.size,
-                      );
-                    }),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: widget.posts.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final post = entry.value;
+                            return _PostItem(
+                              post: post,
+                              animation: _animation,
+                              index: index + 1,
+                              size: widget.size,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

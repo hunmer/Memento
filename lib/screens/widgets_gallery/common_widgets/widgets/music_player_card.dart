@@ -317,46 +317,51 @@ class _LyricsWidget extends StatelessWidget {
       builder: (context, child) {
         return Opacity(
           opacity: lyricsAnimation.value,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(lyrics.length, (index) {
-              final isHighlight = index == 2 || index == 3;
-              final step = 0.1;
-              final start = (index * step).clamp(0.0, 0.5);
-              final end = (0.4 + index * step).clamp(0.0, 1.0);
-              final itemAnimation = CurvedAnimation(
-                parent: animation,
-                curve: Interval(start, end, curve: Curves.easeOutCubic),
-              );
-
-              return AnimatedBuilder(
-                animation: itemAnimation,
-                builder: (context, child) {
-                  return Opacity(
-                    opacity: itemAnimation.value,
-                    child: Transform.translate(
-                      offset: Offset(0, 10 * (1 - itemAnimation.value)),
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: size.getPadding().left / 10),
-                        child: Text(
-                          lyrics[index],
-                          style: TextStyle(
-                            fontSize: isHighlight ? size.getIconSize() - 2 : size.getIconSize() - 4,
-                            fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal,
-                            color: isHighlight ? textPrimaryColor : textSecondaryColor,
-                            height: 1.2,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ),
+          child: Flexible(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(lyrics.length, (index) {
+                  final isHighlight = index == 2 || index == 3;
+                  final step = 0.1;
+                  final start = (index * step).clamp(0.0, 0.5);
+                  final end = (0.4 + index * step).clamp(0.0, 1.0);
+                  final itemAnimation = CurvedAnimation(
+                    parent: animation,
+                    curve: Interval(start, end, curve: Curves.easeOutCubic),
                   );
-                },
-              );
-            }),
+
+                  return AnimatedBuilder(
+                    animation: itemAnimation,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: itemAnimation.value,
+                        child: Transform.translate(
+                          offset: Offset(0, 10 * (1 - itemAnimation.value)),
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: size.getPadding().left / 10),
+                            child: Text(
+                              lyrics[index],
+                              style: TextStyle(
+                                fontSize: isHighlight ? size.getIconSize() - 2 : size.getIconSize() - 4,
+                                fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal,
+                                color: isHighlight ? textPrimaryColor : textSecondaryColor,
+                                height: 1.2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+            ),
           ),
         );
       },

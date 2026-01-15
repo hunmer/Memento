@@ -231,14 +231,20 @@ class _PendingTasksSection extends StatelessWidget {
       children: [
         Text('Pending', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
         const SizedBox(height: 8),
-        Column(
-          children: List.generate(
-            tasks.length,
-            (index) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Container(
-                decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), width: 1))),
-                child: Text(tasks[index], style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937), height: 1.3)),
+        Flexible(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                tasks.length,
+                (index) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Container(
+                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), width: 1))),
+                    child: Text(tasks[index], style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937), height: 1.3)),
+                  ),
+                ),
               ),
             ),
           ),

@@ -176,45 +176,50 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
 
   /// 构建任务列表
   Widget _buildTaskList(bool isDark) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...List.generate(widget.tasks.length, (index) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: index < widget.tasks.length - 1 ? widget.size.getItemSpacing() : 0),
-            child: _TaskItemWidget(
-              task: widget.tasks[index],
-              isDark: isDark,
-              animation: _animation,
-              index: index,
-              size: widget.size,
-            ),
-          );
-        }),
-        if (widget.moreCount > 0) ...[
-          SizedBox(height: widget.size.getItemSpacing()),
-          GestureDetector(
-            onTap: () {
-              // 处理"查看更多"点击
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('查看更多 ${widget.moreCount} 个任务'),
-                  duration: const Duration(seconds: 1),
+    return Flexible(
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...List.generate(widget.tasks.length, (index) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: index < widget.tasks.length - 1 ? widget.size.getItemSpacing() : 0),
+                child: _TaskItemWidget(
+                  task: widget.tasks[index],
+                  isDark: isDark,
+                  animation: _animation,
+                  index: index,
+                  size: widget.size,
                 ),
               );
-            },
-            child: Text(
-              '+${widget.moreCount} more',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF3B82F6),
+            }),
+            if (widget.moreCount > 0) ...[
+              SizedBox(height: widget.size.getItemSpacing()),
+              GestureDetector(
+                onTap: () {
+                  // 处理"查看更多"点击
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('查看更多 ${widget.moreCount} 个任务'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+                child: Text(
+                  '+${widget.moreCount} more',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF3B82F6),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ],
-      ],
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

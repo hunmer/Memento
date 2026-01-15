@@ -128,15 +128,23 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                 children: [
                   _buildHeader(context, isDark),
                   _buildDivider(isDark),
-                  ...List.generate(widget.notes.length, (index) {
-                    return _buildNoteItem(
-                      context,
-                      widget.notes[index],
-                      index,
-                      hasDivider: true,
-                      isDark: isDark,
-                    );
-                  }),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(widget.notes.length, (index) {
+                          return _buildNoteItem(
+                            context,
+                            widget.notes[index],
+                            index,
+                            hasDivider: true,
+                            isDark: isDark,
+                          );
+                        }),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

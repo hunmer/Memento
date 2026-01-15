@@ -187,27 +187,34 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
 
                   SizedBox(height: widget.size.getTitleSpacing()),
 
-                  // 分类列表
-                  ...List.generate(widget.categories.length, (index) {
-                    final category = widget.categories[index];
-                    final itemAnimation = CurvedAnimation(
-                      parent: _animationController,
-                      curve: Interval(
-                        0.3 + index * 0.1,
-                        0.8 + index * 0.05,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    );
+                  // 分类列表（添加滚动支持）
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(widget.categories.length, (index) {
+                          final category = widget.categories[index];
+                          final itemAnimation = CurvedAnimation(
+                            parent: _animationController,
+                            curve: Interval(
+                              0.3 + index * 0.1,
+                              0.8 + index * 0.05,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          );
 
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
-                      child: _CategoryItem(
-                        category: category,
-                        animation: itemAnimation,
-                        textColor: textColor,
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
+                            child: _CategoryItem(
+                              category: category,
+                              animation: itemAnimation,
+                              textColor: textColor,
+                            ),
+                          );
+                        }),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 ],
               ),
             ),
