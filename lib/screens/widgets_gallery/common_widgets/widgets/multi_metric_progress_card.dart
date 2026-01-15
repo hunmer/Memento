@@ -133,7 +133,7 @@ class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardW
       constraints: widget.inline ? null : const BoxConstraints(minWidth: 280),
       decoration: BoxDecoration(
         color: widget.backgroundColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: widget.backgroundColor.withOpacity(0.2),
@@ -161,18 +161,23 @@ class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardW
             // 追踪器列表
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < widget.trackers.length; i++) ...[
-                    if (i > 0) const SizedBox(height: 24),
-                    _MetricProgressItem(
-                      data: widget.trackers[i],
-                      animation: _animation,
-                      index: i,
-                    ),
-                  ],
-                ],
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 350),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (int i = 0; i < widget.trackers.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 24),
+                        _MetricProgressItem(
+                          data: widget.trackers[i],
+                          animation: _animation,
+                          index: i,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

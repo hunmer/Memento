@@ -270,22 +270,32 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
             ),
           ),
         ),
-        for (int i = 0; i < tasks.length; i++) ...[
-          if (i > 0) Divider(color: dividerColor, height: 1),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Text(
-              tasks[i],
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 80),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < tasks.length; i++) ...[
+                  if (i > 0) Divider(color: dividerColor, height: 1),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Text(
+                      tasks[i],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-        ],
+        ),
       ],
     );
   }

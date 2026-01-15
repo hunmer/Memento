@@ -758,8 +758,7 @@ class CheckinHomeWidgets {
             'value': consecutiveDays.toDouble(),
             'unit': '天',
           };
-        }).toList(),
-        'backgroundColor': 0xFF007AFF,
+            }).toList(),
       },
 
       // TaskProgressCard - 任务进度卡片
@@ -777,36 +776,21 @@ class CheckinHomeWidgets {
       // CircularMetricsCard - 环形指标卡片
       'circularMetricsCard': {
         'title': '打卡概览',
-        'metrics': [
-          {
-            'icon': 0xe156, // Icons.check_circle
-            'value': '$todayCheckedCount/${itemsList.length}',
-            'label': '今日完成',
-            'progress': todayCheckedCount / itemsList.length,
-            'color': 0xFF34D399,
-          },
-          {
-            'icon': 0xe85f, // Icons.calendar_today
-            'value': '$monthlyCheckinCount/$daysInMonth',
-            'label': '本月天数',
-            'progress': monthlyCheckinCount / daysInMonth,
-            'color': 0xFFFBBF24,
-          },
-          {
-            'icon': 0xe3d1, // Icons.trending_up
-            'value': '$totalConsecutiveDays',
-            'label': '连续打卡',
-            'progress': (totalConsecutiveDays / 100).clamp(0, 1),
-            'color': 0xFF6366F1,
-          },
-          {
-            'icon': 0xe8d5, // Icons.emoji_events
-            'value': '$bestConsecutiveDays',
-            'label': '最佳记录',
-            'progress': (bestConsecutiveDays / 100).clamp(0, 1),
-            'color': 0xFFFB7185,
-          },
-        ],
+        'metrics': checkinItemCards.map((card) {
+          final consecutiveDays = card['isCheckedToday']
+              ? (plugin?.checkinItems.firstWhere(
+                    (i) => i.id == card['id'],
+                    orElse: () => throw Exception(''),
+                  ).getConsecutiveDays() ?? 0)
+              : 0;
+          return {
+            'icon': card['iconCodePoint'],
+            'value': card['isCheckedToday'] ? '已打卡' : '未打卡',
+            'label': card['title'],
+            'progress': (consecutiveDays / 30).clamp(0, 1).toDouble(),
+            'color': card['color'],
+          };
+        }).toList(),
       },
 
       // WatchProgressCard - 观看进度卡片（复用为打卡进度）
