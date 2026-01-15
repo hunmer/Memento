@@ -208,6 +208,7 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
                     animation: _animation,
                     primaryColor: primaryColor,
                     hoverColor: hoverColor,
+                    size: widget.size,
                   ),
                 ],
               ),
@@ -308,11 +309,13 @@ class _ButtonGroup extends StatelessWidget {
   final Animation<double> animation;
   final Color primaryColor;
   final Color hoverColor;
+  final HomeWidgetSize size;
 
   const _ButtonGroup({
     required this.animation,
     required this.primaryColor,
     required this.hoverColor,
+    required this.size,
   });
 
   @override
@@ -333,7 +336,7 @@ class _ButtonGroup extends StatelessWidget {
             },
           ),
         ),
-        SizedBox(width: widget.size.getItemSpacing()),
+        SizedBox(width: size.getItemSpacing()),
         // Sync 按钮
         _AnimatedButton(
           animation: animation,
