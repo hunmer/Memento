@@ -56,6 +56,9 @@ class WatchProgressCardWidget extends StatefulWidget {
   /// 组件尺寸
   final HomeWidgetSize size;
 
+  /// 是否启用头部
+  final bool enableHeader;
+
   const WatchProgressCardWidget({
     super.key,
     required this.userName,
@@ -66,6 +69,7 @@ class WatchProgressCardWidget extends StatefulWidget {
     this.progressColor,
     this.inline = false,
     this.size = HomeWidgetSize.medium,
+    this.enableHeader = true,
   });
 
   /// 从 props 创建实例
@@ -94,6 +98,7 @@ class WatchProgressCardWidget extends StatefulWidget {
           : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
+      enableHeader: props['enableHeader'] as bool? ?? true,
     );
   }
 
@@ -106,6 +111,7 @@ class WatchProgressCardWidget extends StatefulWidget {
       'totalCount': totalCount,
       'items': items.map((item) => item.toJson()).toList(),
       'progressColor': progressColor?.value,
+      'enableHeader': enableHeader,
     };
   }
 
@@ -144,9 +150,11 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1F2937) : Colors.white;
-    final elementCount = widget.items.length + 2; // +2 for header and progress section
+    // 固定为3个元素：header(progress)、progressSection、itemsList
+    final elementCount = 3;
     final maxStep = (1.0 - _baseEnd) / (elementCount - 1);
     final step = maxStep * 0.9;
+    final headerOffset = widget.enableHeader ? 1 : 0;
 
     return AnimatedBuilder(
       animation: _animation,
@@ -174,19 +182,31 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildHeader(isDark, 0, step),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  _buildProgressSection(isDark, 1, step),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  ..._buildItemsList(isDark, step),
-                ],
+                children: _buildChildren(isDark, step, headerOffset),
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  List<Widget> _buildChildren(bool isDark, double step, int headerOffset) {
+    final List<Widget> children = [];
+    int index = 0;
+
+    if (widget.enableHeader) {
+      children.add(_buildHeader(isDark, index, step));
+      index++;
+      children.add(SizedBox(height: widget.size.getTitleSpacing()));
+    }
+
+    children.add(_buildProgressSection(isDark, index, step));
+    index++;
+    children.add(SizedBox(height: widget.size.getTitleSpacing()));
+    children.add(_buildItemsList(isDark, step, index));
+
+    return children;
   }
 
   Widget _buildHeader(bool isDark, int index, double step) {
@@ -198,6 +218,14 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
         curve: Curves.easeOutCubic,
       ),
     );
+
+    final hasTitle = widget.userName.isNotEmpty;
+    final hasSubtitle = widget.lastWatched.isNotEmpty;
+
+    // 如果标题和副标题都为空，返回空容器
+    if (!hasTitle && !hasSubtitle) {
+      return const SizedBox.shrink();
+    }
 
     return Opacity(
       opacity: itemAnimation.value,
@@ -226,23 +254,27 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Hello ${widget.userName}!',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : Colors.grey.shade900,
+                if (hasTitle)
+                  Text(
+                    widget.userName,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                    ),
                   ),
-                ),
-                SizedBox(height: widget.size.getItemSpacing() * 0.15),
-                Text(
-                  'Last watched ${widget.lastWatched}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.grey.shade400 : Colors.grey.shade400,
+                if (hasTitle && hasSubtitle)
+                  SizedBox(height: widget.size.getItemSpacing() * 0.15),
+                if (hasSubtitle)
+                  Text(
+                    widget.lastWatched,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade400,
+                    ),
                   ),
-                ),
               ],
             ),
           ],
@@ -334,17 +366,34 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
     );
   }
 
-  List<Widget> _buildItemsList(bool isDark, double step) {
-    final List<Widget> items = [];
+  Widget _buildItemsList(bool isDark, double step, int index) {
+    final items = <Widget>[];
 
     for (int i = 0; i < widget.items.length; i++) {
       if (i > 0) {
         items.add(SizedBox(height: widget.size.getItemSpacing() * 1.25));
       }
-      items.add(_buildItem(widget.items[i], isDark, i + 2, step));
+      items.add(_buildItem(widget.items[i], isDark, index, step));
     }
 
-    return items;
+    // 计算每个 item 的近似高度，设置固定高度（最多显示 3 个 item）
+    final itemHeight = widget.size.getItemSpacing() * 3;
+    final listHeight = (itemHeight * widget.items.length).clamp(itemHeight * 2, itemHeight * 3);
+
+    return SizedBox(
+      height: listHeight,
+      child: Scrollbar(
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: items,
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildItem(WatchProgressItem item, bool isDark, int index, double step) {
