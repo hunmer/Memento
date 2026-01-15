@@ -795,8 +795,7 @@ class CheckinHomeWidgets {
 
       // WatchProgressCard - 观看进度卡片（复用为打卡进度）
       'watchProgressCard': {
-        'userName': '我',
-        'lastWatched': '$daysInMonth天',
+        'enableHeader': false,
         'currentCount': monthlyCheckinCount,
         'totalCount': daysInMonth,
         'items': checkinItemCards.map((card) {
