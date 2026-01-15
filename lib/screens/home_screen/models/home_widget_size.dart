@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// 主页小组件尺寸枚举
 enum HomeWidgetSize {
   /// 1x1 小图标组件
@@ -158,5 +160,87 @@ enum HomeWidgetSize {
     final thisWidth = this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
     final thisHeight = this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
     return thisWidth == other.width && thisHeight == other.height;
+  }
+
+  /// 获取内边距
+  EdgeInsets getPadding() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return const EdgeInsets.all(8);
+      case HomeWidgetSize.medium:
+        return const EdgeInsets.all(12);
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return const EdgeInsets.all(16);
+      case HomeWidgetSize.wide:
+        return const EdgeInsets.all(12);
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return const EdgeInsets.all(16);
+      case HomeWidgetSize.custom:
+        return const EdgeInsets.all(12);
+    }
+  }
+
+  /// 获取标题和列表之间的间距
+  double getTitleSpacing() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 16;
+      case HomeWidgetSize.medium:
+        return 20;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 24;
+      case HomeWidgetSize.wide:
+        return 20;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 24;
+      case HomeWidgetSize.custom:
+        return 20;
+    }
+  }
+
+  /// 获取高度约束
+  BoxConstraints getHeightConstraints() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return const BoxConstraints(minHeight: 150, maxHeight: 250);
+      case HomeWidgetSize.medium:
+        return const BoxConstraints(minHeight: 200, maxHeight: 350);
+      case HomeWidgetSize.large:
+        return const BoxConstraints(minHeight: 250, maxHeight: 450);
+      case HomeWidgetSize.large3:
+        return const BoxConstraints(minHeight: 350, maxHeight: 600);
+      case HomeWidgetSize.wide:
+        return const BoxConstraints(minHeight: 200, maxHeight: 350);
+      case HomeWidgetSize.wide2:
+        return const BoxConstraints(minHeight: 250, maxHeight: 450);
+      case HomeWidgetSize.wide3:
+        return const BoxConstraints(minHeight: 350, maxHeight: 600);
+      case HomeWidgetSize.custom:
+        return const BoxConstraints(minHeight: 200, maxHeight: 350);
+    }
+  }
+
+  /// 获取列表项之间的间距
+  double getItemSpacing() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 6;
+      case HomeWidgetSize.medium:
+        return 8;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 12;
+      case HomeWidgetSize.wide:
+        return 8;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 12;
+      case HomeWidgetSize.custom:
+        return 8;
+    }
   }
 }
