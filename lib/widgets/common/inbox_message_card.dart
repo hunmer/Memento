@@ -7,12 +7,19 @@ class InboxMessage {
   final String avatarUrl;
   final String preview;
   final String timeAgo;
+  /// 图标 codePoint（可选，优先于 avatarUrl 使用）
+  final int? iconCodePoint;
+
+  /// 图标背景颜色（可选，配合 iconCodePoint 使用）
+  final int? iconBackgroundColor;
 
   const InboxMessage({
     required this.name,
     required this.avatarUrl,
     required this.preview,
     required this.timeAgo,
+    this.iconCodePoint,
+    this.iconBackgroundColor,
   });
 
   /// 从 JSON 创建（用于公共小组件系统）
@@ -22,6 +29,8 @@ class InboxMessage {
       avatarUrl: json['avatarUrl'] as String? ?? '',
       preview: json['preview'] as String? ?? '',
       timeAgo: json['timeAgo'] as String? ?? '',
+      iconCodePoint: json['iconCodePoint'] as int?,
+      iconBackgroundColor: json['iconBackgroundColor'] as int?,
     );
   }
 
@@ -32,6 +41,8 @@ class InboxMessage {
       'avatarUrl': avatarUrl,
       'preview': preview,
       'timeAgo': timeAgo,
+      'iconCodePoint': iconCodePoint,
+      'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }
@@ -129,7 +140,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
               width: 340,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -147,8 +158,8 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                     decoration: BoxDecoration(
                       color: primaryColor,
                       borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
+                        topLeft: Radius.circular(8),
+                        topRight: Radius.circular(8),
                       ),
                     ),
                     child: Row(
@@ -184,39 +195,44 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                       ],
                     ),
                   ),
-                  // 消息列表
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (int i = 0; i < widget.messages.length; i++) ...[
-                          if (i > 0) const SizedBox(height: 4),
-                          _MessageItem(
-                            message: widget.messages[i],
-                            textColor: textColor,
-                            subTextColor: subTextColor,
-                            dividerColor: dividerColor,
-                            isLast: i == widget.messages.length - 1,
-                            animation: _animation,
-                            index: i,
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-                        // 更多按钮
-                        GestureDetector(
-                          onTap: widget.onMoreTap,
-                          child: Text(
-                            '+${widget.remainingCount} more',
-                            style: TextStyle(
-                              color: primaryColor,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                  // 消息列表（支持滚动）
+                  SizedBox(
+                    height: 240,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (int i = 0; i < widget.messages.length; i++) ...[
+                              if (i > 0) const SizedBox(height: 4),
+                              _MessageItem(
+                                message: widget.messages[i],
+                                textColor: textColor,
+                                subTextColor: subTextColor,
+                                dividerColor: dividerColor,
+                                isLast: i == widget.messages.length - 1,
+                                animation: _animation,
+                                index: i,
+                              ),
+                            ],
+                            const SizedBox(height: 16),
+                            // 更多按钮
+                            GestureDetector(
+                              onTap: widget.onMoreTap,
+                              child: Text(
+                                '+${widget.remainingCount} more',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(height: 8),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                      ],
+                      ),
                     ),
                   ),
                 ],
@@ -248,6 +264,45 @@ class _MessageItem extends StatelessWidget {
     required this.animation,
     required this.index,
   });
+
+  /// 构建头像或图标
+  Widget _buildAvatarOrIcon(InboxMessage message) {
+    // 优先使用图标
+    if (message.iconCodePoint != null) {
+      final backgroundColor =
+          message.iconBackgroundColor != null
+              ? Color(message.iconBackgroundColor!)
+              : Colors.grey.shade300;
+      return Container(
+        color: backgroundColor,
+        child: Icon(
+          IconData(message.iconCodePoint!, fontFamily: 'MaterialIcons'),
+          color: Colors.white,
+          size: 24,
+        ),
+      );
+    }
+
+    // 如果有 avatarUrl，加载网络图片
+    if (message.avatarUrl.isNotEmpty) {
+      return Image.network(
+        message.avatarUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: Colors.grey.shade300,
+            child: Icon(Icons.person, color: Colors.grey.shade600),
+          );
+        },
+      );
+    }
+
+    // 默认图标
+    return Container(
+      color: Colors.grey.shade300,
+      child: const Icon(Icons.person, color: Colors.grey),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +343,7 @@ class _MessageItem extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 头像
+                    // 头像或图标
                     Container(
                       width: 40,
                       height: 40,
@@ -300,19 +355,7 @@ class _MessageItem extends StatelessWidget {
                         ),
                       ),
                       child: ClipOval(
-                        child: Image.network(
-                          message.avatarUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey.shade300,
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.grey.shade600,
-                              ),
-                            );
-                          },
-                        ),
+                        child: _buildAvatarOrIcon(message),
                       ),
                     ),
                     const SizedBox(width: 12),

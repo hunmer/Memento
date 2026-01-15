@@ -256,6 +256,11 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
     Color textColor,
     Color borderColor,
   ) {
+    // 空状态：当没有任务项时显示提示
+    if (widget.items.isEmpty) {
+      return _buildEmptyState(context, textColor);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -285,6 +290,50 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
           size: widget.size,
         ),
       ],
+    );
+  }
+
+  /// 构建空状态提示
+  Widget _buildEmptyState(BuildContext context, Color textColor) {
+    final emptyAnimation = CurvedAnimation(
+      parent: _animation,
+      curve: const Interval(0.3, 0.8, curve: Curves.easeOutCubic),
+    );
+
+    return AnimatedBuilder(
+      animation: emptyAnimation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: emptyAnimation.value,
+          child: Transform.translate(
+            offset: Offset(0, 10 * (1 - emptyAnimation.value)),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing() * 2),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      size: 32,
+                      color: textColor.withOpacity(0.3),
+                    ),
+                    SizedBox(height: widget.size.getItemSpacing()),
+                    Text(
+                      '暂无已完成项目',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: textColor.withOpacity(0.5),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
