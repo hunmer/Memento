@@ -666,6 +666,8 @@ class HomeScreenView extends StatelessWidget {
           'replaceWidgetItemId': item.id,
           'initialCommonWidgetId': currentCommonWidgetId,
           'initialSelectorConfig': initialSelectorConfig,
+          'originalSize': item.size,
+          'originalConfig': item.config,
         },
       );
       return;

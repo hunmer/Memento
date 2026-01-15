@@ -1,3 +1,4 @@
+import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -7,6 +8,7 @@ import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 
 /// 公共小组件选择页面
@@ -28,6 +30,12 @@ class CommonWidgetSelectorPage extends StatefulWidget {
   /// 可选的初始选择器配置（用于恢复之前选择的数据）
   final SelectorWidgetConfig? initialSelectorConfig;
 
+  /// 可选的原有小组件大小（用于替换时保留大小）
+  final HomeWidgetSize? originalSize;
+
+  /// 可选的原有小组件配置（用于保留自定义尺寸等信息）
+  final Map<String, dynamic>? originalConfig;
+
   const CommonWidgetSelectorPage({
     super.key,
     required this.pluginWidget,
@@ -35,6 +43,8 @@ class CommonWidgetSelectorPage extends StatefulWidget {
     this.replaceWidgetItemId,
     this.initialCommonWidgetId,
     this.initialSelectorConfig,
+    this.originalSize,
+    this.originalConfig,
   });
 
   @override
@@ -74,12 +84,41 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
     if (selectedDataMap == null) return;
 
-    // 手动从 Map 恢复 SelectorResult 的关键数据
-    // 直接使用保存的 data，不需要重新构建 SelectorResult
-    final resultData = selectedDataMap['data'];
+    // 手动从 Map 恢复 SelectorResult（用于后续保存）
+    final pluginId = selectedDataMap['plugin'] as String? ?? '';
+    final selectorId = selectedDataMap['selector'] as String? ?? '';
+    final pathData = selectedDataMap['path'] as List<dynamic>?;
+
+    // 重建 SelectionPathItem 列表
+    final List<SelectionPathItem> path = [];
+    if (pathData != null) {
+      for (final item in pathData) {
+        if (item is Map<String, dynamic>) {
+          path.add(
+            SelectionPathItem(
+              stepId: item['stepId'] as String? ?? '',
+              stepTitle: item['stepTitle'] as String? ?? '',
+              selectedItem: SelectableItem(
+                id: item['selectedItemId'] as String? ?? '',
+                title: item['selectedItemTitle'] as String? ?? '',
+              ),
+            ),
+          );
+        }
+      }
+    }
+
+    // 重建 SelectorResult
+    _originalSelectorResult = SelectorResult(
+      pluginId: pluginId,
+      selectorId: selectorId,
+      path: path,
+      data: selectedDataMap['data'],
+    );
 
     // 转换数据格式
     Map<String, dynamic> data;
+    final resultData = _originalSelectorResult!.data;
     if (resultData is Map) {
       final rawMap = resultData as Map;
       data = {};
@@ -497,14 +536,30 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
       commonWidgetProps: _availableCommonWidgets[widgetId],
     );
 
-    // 创建小组件实例
+    // 创建基础配置
+    final config = <String, dynamic>{
+      'selectorWidgetConfig': selectorConfig.toJson(),
+    };
+
+    // 如果有原有配置，合并自定义尺寸等信息
+    if (widget.originalConfig != null) {
+      // 保留 customWidth 和 customHeight（如果是自定义尺寸）
+      if (widget.originalSize == HomeWidgetSize.custom) {
+        if (widget.originalConfig!.containsKey('customWidth')) {
+          config['customWidth'] = widget.originalConfig!['customWidth'];
+        }
+        if (widget.originalConfig!.containsKey('customHeight')) {
+          config['customHeight'] = widget.originalConfig!['customHeight'];
+        }
+      }
+    }
+
+    // 创建小组件实例，使用原有大小或默认大小
     final widgetItem = HomeWidgetItem(
       id: widget.replaceWidgetItemId ?? layoutManager.generateId(),
       widgetId: widget.pluginWidget.id,
-      size: widget.pluginWidget.defaultSize,
-      config: {
-        'selectorWidgetConfig': selectorConfig.toJson(),
-      },
+      size: widget.originalSize ?? widget.pluginWidget.defaultSize,
+      config: config,
     );
 
     // 替换或添加

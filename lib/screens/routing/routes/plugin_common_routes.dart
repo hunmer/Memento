@@ -16,6 +16,7 @@ import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/screens/home_screen/widgets/common_widget_selector_page.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 常见插件路由注册表
 /// 包含：Activity, Checkin, TTS, Nodes, OpenAI, ScriptsCenter, Timer
@@ -181,6 +182,8 @@ class PluginCommonRoutes implements RouteRegistry {
             final replaceWidgetItemId = arguments?['replaceWidgetItemId'] as String?;
             final initialCommonWidgetId = arguments?['initialCommonWidgetId'] as String?;
             final initialSelectorConfig = arguments?['initialSelectorConfig'] as SelectorWidgetConfig?;
+            final originalSize = arguments?['originalSize'] as HomeWidgetSize?;
+            final originalConfig = arguments?['originalConfig'] as Map<String, dynamic>?;
             if (pluginWidget != null) {
               return RouteHelpers.createRoute(CommonWidgetSelectorPage(
                 pluginWidget: pluginWidget,
@@ -188,6 +191,8 @@ class PluginCommonRoutes implements RouteRegistry {
                 replaceWidgetItemId: replaceWidgetItemId,
                 initialCommonWidgetId: initialCommonWidgetId,
                 initialSelectorConfig: initialSelectorConfig,
+                originalSize: originalSize,
+                originalConfig: originalConfig,
               ));
             }
             return RouteHelpers.createRoute(const SizedBox.shrink());
@@ -203,6 +208,8 @@ class PluginCommonRoutes implements RouteRegistry {
             final replaceWidgetItemId = arguments?['replaceWidgetItemId'] as String?;
             final initialCommonWidgetId = arguments?['initialCommonWidgetId'] as String?;
             final initialSelectorConfig = arguments?['initialSelectorConfig'] as SelectorWidgetConfig?;
+            final originalSize = arguments?['originalSize'] as HomeWidgetSize?;
+            final originalConfig = arguments?['originalConfig'] as Map<String, dynamic>?;
             if (pluginWidget != null) {
               return RouteHelpers.createRoute(CommonWidgetSelectorPage(
                 pluginWidget: pluginWidget,
@@ -210,6 +217,8 @@ class PluginCommonRoutes implements RouteRegistry {
                 replaceWidgetItemId: replaceWidgetItemId,
                 initialCommonWidgetId: initialCommonWidgetId,
                 initialSelectorConfig: initialSelectorConfig,
+                originalSize: originalSize,
+                originalConfig: originalConfig,
               ));
             }
             return RouteHelpers.createRoute(const SizedBox.shrink());
