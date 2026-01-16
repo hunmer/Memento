@@ -28,6 +28,9 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
   /// Y轴最大值
   final double maxValue;
 
+  /// X轴标签列表（自定义图例）
+  final List<String> labels;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -42,6 +45,7 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
     required this.changePercent,
     required this.dailyData,
     this.maxValue = 24.0,
+    this.labels = const [],
     this.inline = false,
     this.size = HomeWidgetSize.medium,
   });
@@ -60,6 +64,11 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
       );
     }).toList() ?? [];
 
+    final labelsList = (props['labels'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        const [];
+
     return ExpenseComparisonChartCardWidget(
       title: props['title'] as String? ?? '本月支出',
       currentAmount: (props['currentAmount'] as num?)?.toDouble() ?? 0.0,
@@ -67,6 +76,7 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0.0,
       dailyData: dailyData,
       maxValue: (props['maxValue'] as num?)?.toDouble() ?? 24.0,
+      labels: labelsList,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -286,6 +296,7 @@ class _ExpenseComparisonChartCardWidgetState
                   _BarChartWidget(
                     data: widget.dailyData,
                     maxValue: widget.maxValue,
+                    labels: widget.labels,
                     animation: _animation,
                     isDark: isDark,
                     primaryColor: primaryColor,
@@ -331,6 +342,7 @@ class DailyExpenseDataModel {
 class _BarChartWidget extends StatelessWidget {
   final List<DailyExpenseDataModel> data;
   final double maxValue;
+  final List<String> labels;
   final Animation<double> animation;
   final bool isDark;
   final Color primaryColor;
@@ -338,6 +350,7 @@ class _BarChartWidget extends StatelessWidget {
   const _BarChartWidget({
     required this.data,
     required this.maxValue,
+    required this.labels,
     required this.animation,
     required this.isDark,
     required this.primaryColor,
@@ -377,20 +390,57 @@ class _BarChartWidget extends StatelessWidget {
         ),
         // X轴标签
         const SizedBox(height: 12),
-        SizedBox(
-          height: 24,
-          child: Stack(
-            children: [
-              Positioned(left: 0, top: 0, child: _buildLabel('01')),
-              Positioned(left: 0.16, top: 0, child: _buildLabel('05')),
-              Positioned(left: 0.33, top: 0, child: _buildLabel('10')),
-              Positioned(left: 0.5, top: 0, child: _buildLabel('15')),
-              Positioned(left: 0.66, top: 0, child: _buildLabel('20')),
-              Positioned(left: 0.83, top: 0, child: _buildLabel('25')),
-              Positioned(right: 0, top: 0, child: _buildLabel('30')),
-            ],
+        if (labels.isEmpty)
+          // 默认固定标签
+          SizedBox(
+            height: 24,
+            child: Stack(
+              children: [
+                Positioned(left: 0, top: 0, child: _buildLabel('01')),
+                Positioned(left: 0.16, top: 0, child: _buildLabel('05')),
+                Positioned(left: 0.33, top: 0, child: _buildLabel('10')),
+                Positioned(left: 0.5, top: 0, child: _buildLabel('15')),
+                Positioned(left: 0.66, top: 0, child: _buildLabel('20')),
+                Positioned(left: 0.83, top: 0, child: _buildLabel('25')),
+                Positioned(right: 0, top: 0, child: _buildLabel('30')),
+              ],
+            ),
+          )
+        else
+          // 自定义标签（均匀分布）
+          SizedBox(
+            height: 24,
+            child: Row(
+              children: List.generate(labels.length, (index) {
+                final alignment = index == 0
+                    ? CrossAxisAlignment.start
+                    : index == labels.length - 1
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.center;
+                return Expanded(
+                  child: SizedBox(
+                    width: 32,
+                    child: Text(
+                      labels[index],
+                      textAlign: alignment == CrossAxisAlignment.center
+                          ? TextAlign.center
+                          : alignment == CrossAxisAlignment.start
+                              ? TextAlign.left
+                              : TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? const Color(0xFF6B7280)
+                            : const Color(0xFF9CA3AF),
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
           ),
-        ),
       ],
     );
   }

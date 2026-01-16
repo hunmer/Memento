@@ -913,7 +913,8 @@ class ActivityHomeWidgets {
     final todayMinutes = sevenDaysData.last.totalMinutes.toDouble();
     final yesterdayMinutes = sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
     final changePercent = yesterdayMinutes > 0
-        ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100)
+            ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100)
+                .floor()
         : 0.0;
 
     return {
@@ -1009,6 +1010,10 @@ class ActivityHomeWidgets {
         'unit': '小时',
         'changePercent': changePercent,
         'maxValue': 24.0, // 24小时
+        'labels': List.generate(7, (index) {
+          final date = now.subtract(Duration(days: 6 - index));
+          return DateFormat('dd').format(date);
+        }),
         'dailyData': sevenDaysData.asMap().entries.map((entry) {
           return {
             'lastMonth': entry.key > 0
