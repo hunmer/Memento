@@ -17,6 +17,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
           child: ExpenseComparisonChartCardWidget(
             title: '本月支出',
             currentAmount: 2048.00,
+            unit: '元',
             changePercent: 3.5,
             dailyData: [
               DailyExpenseDataModel(lastMonth: 40, currentMonth: 25),
