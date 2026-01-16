@@ -151,16 +151,7 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.unit.isNotEmpty)
-              Text(
-                widget.unit,
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                  height: 1.2,
-                ),
-              ),
+         
             AnimatedFlipCounter(
               value: widget.value * _animation.value,
               fractionDigits: 0,
@@ -170,6 +161,17 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
                 color: textColor,
                 height: 1.2,
                 letterSpacing: -0.5,
+              ),
+            ),
+            if (widget.unit.isNotEmpty) const SizedBox(width: 4),
+
+            Text(
+              widget.unit,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+                height: 1.2,
               ),
             ),
           ],
