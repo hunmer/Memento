@@ -1027,10 +1027,10 @@ class ActivityHomeWidgets {
       // BloodPressureTracker (DualValueTrackerCardWrapper) - 双数值追踪卡片
       'bloodPressureTracker': {
         'title': '活动统计',
-        'primaryValue': todayMinutes.toInt(),
-        'secondaryValue': avgMinutes.toInt(),
+        'primaryValue': (todayMinutes / 60).toInt(),
+        'secondaryValue': (avgMinutes / 60).toInt(),
         'status': _getActivityStatus(avgMinutes),
-        'unit': '分钟',
+        'unit': '小时',
         'icon': 'timeline',
         'weekData': sevenDaysData.asMap().entries.map((entry) {
           final index = entry.key;
@@ -1048,7 +1048,7 @@ class ActivityHomeWidgets {
       'trendLineChartCard': {
         'title': '活动趋势',
         'icon': 'show_chart',
-        'value': avgMinutes,
+        'value': avgMinutes / 60, // 转为小时
         'dataPoints': sevenDaysData.asMap().entries.map((entry) {
           final value = entry.value.totalMinutes;
           final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
