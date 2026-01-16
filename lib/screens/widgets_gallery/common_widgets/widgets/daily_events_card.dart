@@ -91,10 +91,10 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 200,
-              height: widget.inline ? double.maxFinite : 200,
+              height: widget.inline ? double.maxFinite : 220,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.06),

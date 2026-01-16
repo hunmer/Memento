@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 时间线事件数据模型
 class TimelineEvent {
@@ -235,6 +236,44 @@ class TimelineScheduleCard extends StatefulWidget {
     this.tomorrowMoreEventsColors,
     this.inline = false,
   });
+
+  /// 从属性 Map 创建组件（用于公共小组件系统）
+  factory TimelineScheduleCard.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    // 解析今天的事件列表
+    final todayEventsList = <TimelineEvent>[];
+    if (props['todayEvents'] is List) {
+      final events = props['todayEvents'] as List;
+      for (final event in events) {
+        if (event is Map<String, dynamic>) {
+          todayEventsList.add(TimelineEvent.fromJson(event));
+        }
+      }
+    }
+
+    // 解析昨天（显示为明天）的事件列表
+    final tomorrowEventsList = <TimelineEvent>[];
+    if (props['tomorrowEvents'] is List) {
+      final events = props['tomorrowEvents'] as List;
+      for (final event in events) {
+        if (event is Map<String, dynamic>) {
+          tomorrowEventsList.add(TimelineEvent.fromJson(event));
+        }
+      }
+    }
+
+    return TimelineScheduleCard(
+      todayWeekday: props['todayWeekday'] as String? ?? '一',
+      todayDay: props['todayDay'] as int? ?? 1,
+      tomorrowWeekday: props['tomorrowWeekday'] as String? ?? '二',
+      tomorrowDay: props['tomorrowDay'] as int? ?? 2,
+      todayEvents: todayEventsList,
+      tomorrowEvents: tomorrowEventsList,
+      inline: true,
+    );
+  }
 
   @override
   State<TimelineScheduleCard> createState() => _TimelineScheduleCardState();

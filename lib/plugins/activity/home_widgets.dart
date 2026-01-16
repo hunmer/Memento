@@ -686,6 +686,13 @@ class ActivityHomeWidgets {
                 .toList(),
       },
 
+      // 时间线日程卡片：显示昨天和今天的活动
+      'timelineScheduleCard': _buildTimelineScheduleCardData(
+        todayActivities,
+        yesterdayActivities,
+        now,
+      ),
+
       // 活动热力图卡片
       'activityHeatmapCard': _buildHeatmapCardData(todayActivities, data),
 
@@ -1248,4 +1255,86 @@ class _TimeSlotDataWrapper {
     required this.durationMinutes,
     this.tagDurations = const {},
   });
+}
+
+/// 构建时间线日程卡片数据
+/// 显示今天和昨天的活动（ TimelineScheduleCard 组件使用）
+Map<String, dynamic> _buildTimelineScheduleCardData(
+  List<ActivityRecord> todayActivities,
+  List<ActivityRecord> yesterdayActivities,
+  DateTime now,
+) {
+  // 计算昨天的日期
+  final yesterday = now.subtract(const Duration(days: 1));
+
+  // 获取星期名称
+  final todayWeekday = _getWeekdayName(now.weekday);
+  final yesterdayWeekday = _getWeekdayName(yesterday.weekday);
+
+  // 转换今日活动为 TimelineEvent 格式
+  final todayEvents = todayActivities
+      .map((a) => _convertActivityToTimelineEvent(a))
+      .toList();
+
+  // 转换昨日活动为 TimelineEvent 格式
+  final yesterdayEvents = yesterdayActivities
+      .map((a) => _convertActivityToTimelineEvent(a))
+      .toList();
+
+  return {
+    'todayWeekday': todayWeekday,
+    'todayDay': now.day,
+    'tomorrowWeekday': yesterdayWeekday,
+    'tomorrowDay': yesterday.day,
+    'todayEvents': todayEvents,
+    'tomorrowEvents': yesterdayEvents,
+  };
+}
+
+/// 获取星期名称（中文）
+String _getWeekdayName(int weekday) {
+  const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+  return weekdays[(weekday - 1) % 7];
+}
+
+/// 将活动记录转换为 TimelineEvent 格式
+Map<String, dynamic> _convertActivityToTimelineEvent(
+  ActivityRecord activity,
+) {
+  // 获取主标签颜色
+  final tagColor = activity.tags.isNotEmpty
+      ? _getColorFromTagForWidgets(activity.tags.first)
+      : Colors.pink;
+
+  // 计算背景色和文本色
+  final backgroundColorLight = tagColor.withOpacity(0.15);
+  final backgroundColorDark = tagColor.withOpacity(0.25);
+  final textColorLight = tagColor;
+  final textColorDark = tagColor.withOpacity(0.9);
+
+  // 格式化时间显示（如 "9:45AM"）
+  final timeDisplay = _formatTimeToAMPM(activity.startTime);
+
+  return {
+    'hour': activity.startTime.hour,
+    'title': activity.title.isEmpty ? '未命名活动' : activity.title,
+    'time': timeDisplay,
+    'color': tagColor.value,
+    'backgroundColorLight': backgroundColorLight.value,
+    'backgroundColorDark': backgroundColorDark.value,
+    'textColorLight': textColorLight.value,
+    'textColorDark': textColorDark.value,
+    'subtextLight': const Color(0xFF8E8E93).value,
+    'subtextDark': const Color(0xFF98989D).value,
+  };
+}
+
+/// 格式化时间为 AM/PM 格式（如 "9:45AM"）
+String _formatTimeToAMPM(DateTime time) {
+  final hour = time.hour;
+  final minute = time.minute;
+  final period = hour >= 12 ? 'PM' : 'AM';
+  final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+  final minuteStr = minute.toString().padLeft(2, '0');
+  return '$hour12:$minuteStr$period';
 }

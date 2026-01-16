@@ -191,11 +191,11 @@ class _VerticalCircularProgressCardState
               height:
                   widget.inline
                       ? double.maxFinite
-                      : (widget.height ?? double.maxFinite),
+                      : (widget.height ?? 200),
               width:
                   widget.inline
                       ? double.maxFinite
-                      : (widget.width ?? double.maxFinite),
+                      : (widget.width ?? 450),
               padding: widget.padding ?? widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,

@@ -154,7 +154,7 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 420,
-              height: widget.inline ? double.maxFinite : 260,
+              height: widget.inline ? double.maxFinite : 220,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(32),

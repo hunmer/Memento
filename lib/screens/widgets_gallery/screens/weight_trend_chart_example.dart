@@ -71,7 +71,7 @@ class _CardTrendLineChartExampleState extends State<CardTrendLineChartExample> {
                   CommonWidgetId.weightTrendChart,
                   {
                     'title': '体重趋势',
-                    'icon': Icons.monitor_weight.codePoint,
+                    'icon': Icons.monitor_weight,
                     'currentValue': 67.8,
                     'statusText': 'You\'re on a normal weight range',
                     'valueUnit': 'kg',
