@@ -921,9 +921,9 @@ class ActivityHomeWidgets {
       'stressLevelMonitor': {
         'title': '活动时长',
         'icon': 'timeline',
-        'currentScore': avgMinutes,
+        'currentScore': avgMinutes / 60, // 转换为小时
         'status': _getActivityStatus(avgMinutes),
-        'scoreUnit': '分钟/天',
+        'scoreUnit': '小时/天',
         'weeklyData': sevenDaysData.asMap().entries.map((entry) {
           final index = entry.key;
           final data = entry.value;
@@ -942,13 +942,15 @@ class ActivityHomeWidgets {
         'date': DateFormat('yyyy-MM-dd').format(now),
         'totalValue': totalWeekMinutes,
         'changePercent': changePercent,
-        'dataPoints': sevenDaysData.asMap().entries.map((entry) {
-          final value = entry.value.totalMinutes;
-          final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
-          return {
-            'x': (entry.key * 50).toDouble(),
-            'y': 120 - (normalized * 100),
-          };
+        'value': avgMinutes / 60, // 平均值（小时）
+        'label': '日均活动',
+        'unit': '小时',
+        'inline': false,
+        'dataPoints':
+            sevenDaysData.map((d) {
+              final normalized =
+                  maxMinutes > 0 ? d.totalMinutes / maxMinutes : 0.0;
+              return normalized * 100; // 转换为0-100的百分比
         }).toList(),
       },
 

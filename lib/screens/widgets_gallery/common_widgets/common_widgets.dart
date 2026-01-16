@@ -86,6 +86,9 @@ import 'widgets/activity_heatmap_card.dart';
 import 'widgets/activity_today_pie_chart_card.dart';
 import 'widgets/timeline_schedule_card.dart';
 import 'widgets/trend_line_chart_card_wrapper.dart';
+import 'widgets/bar_chart_stats_card.dart';
+import 'widgets/weekly_bars_card.dart';
+import 'widgets/expense_comparison_chart_card.dart';
 import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
 
@@ -179,6 +182,9 @@ enum CommonWidgetId {
   bloodPressureTracker,
   trendLineChartCard,
   modernRoundedBalanceCard,
+  barChartStatsCard,
+  weeklyBarsCard,
+  expenseComparisonChart,
 }
 
 /// 公共小组件元数据
@@ -892,6 +898,30 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
+    CommonWidgetId.barChartStatsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.barChartStatsCard,
+      name: '柱状图统计卡片',
+      description: '显示统计数据和日期范围的柱状图，支持动画效果',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.weeklyBarsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.weeklyBarsCard,
+      name: '周柱状图卡片',
+      description: '显示一周7天的数据柱状图，支持渐变效果和动画',
+      icon: Icons.bar_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.expenseComparisonChart: CommonWidgetMetadata(
+      id: CommonWidgetId.expenseComparisonChart,
+      name: '支出对比图表',
+      description: '显示本月与上月对比，双数据系列柱状图',
+      icon: Icons.compare_arrows,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -1097,6 +1127,12 @@ class CommonWidgetBuilder {
         return TrendLineChartCardWrapper.fromProps(props, size);
       case CommonWidgetId.modernRoundedBalanceCard:
         return ModernRoundedBalanceCard.fromProps(props);
+      case CommonWidgetId.barChartStatsCard:
+        return BarChartStatsCardWidget.fromProps(props, size);
+      case CommonWidgetId.weeklyBarsCard:
+        return WeeklyBarsCardWidget.fromProps(props, size);
+      case CommonWidgetId.expenseComparisonChart:
+        return ExpenseComparisonChartCardWidget.fromProps(props, size);
     }
   }
 }
