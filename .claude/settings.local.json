@@ -34,7 +34,8 @@
       "Skill(refactor-form-to-builder)",
       "Skill(add-home-widget-selector)",
       "Bash(grep:*)",
-      "Skill(add-widget-from-prototype)"
+      "Skill(add-widget-from-prototype)",
+      "Skill(create-common-widget-from-renderer)"
     ],
     "deny": [],
     "ask": []

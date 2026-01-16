@@ -117,7 +117,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
               constraints: const BoxConstraints(maxHeight: 500),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -153,7 +153,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                           Text(
                             '${(widget.currentSpending * _animation.value).toInt()}${widget.unit}',
                             style: TextStyle(
-                              fontSize: 40,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: textColor,
                               height: 1.0,
