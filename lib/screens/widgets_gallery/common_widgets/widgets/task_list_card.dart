@@ -136,6 +136,7 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
+              height: widget.inline ? double.maxFinite : 380,
               width: widget.inline ? double.maxFinite : 380,
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -187,7 +188,7 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
     Color subtitleColor,
   ) {
     return SizedBox(
-      width: 100,
+      width: 50,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,18 +307,23 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
 
   /// 构建空状态提示
   Widget _buildEmptyState(BuildContext context, Color textColor) {
-    final emptyAnimation = CurvedAnimation(
-      parent: _animation,
-      curve: const Interval(0.3, 0.8, curve: Curves.easeOutCubic),
-    );
-
     return AnimatedBuilder(
-      animation: emptyAnimation,
+      animation: _animation,
       builder: (context, child) {
+        // 计算延迟动画值
+        const intervalStart = 0.3;
+        const intervalEnd = 0.8;
+        final value = _animation.value;
+        final delayedValue = value <= intervalStart
+            ? 0.0
+            : value >= intervalEnd
+                ? 1.0
+                : Curves.easeOutCubic.transform((value - intervalStart) / (intervalEnd - intervalStart));
+
         return Opacity(
-          opacity: emptyAnimation.value,
+          opacity: delayedValue,
           child: Transform.translate(
-            offset: Offset(0, 10 * (1 - emptyAnimation.value)),
+            offset: Offset(0, 10 * (1 - delayedValue)),
             child: Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing() * 2),
@@ -365,24 +371,28 @@ class _TaskItemWidget extends StatelessWidget {
     required this.size,
   });
 
+  // 计算延迟动画值
+  double _getDelayedAnimationValue(double value) {
+    final intervalStart = index * 0.1;
+    final intervalEnd = (0.4 + index * 0.1).clamp(0.0, 1.0);
+
+    if (value <= intervalStart) return 0.0;
+    if (value >= intervalEnd) return 1.0;
+
+    final t = (value - intervalStart) / (intervalEnd - intervalStart);
+    return Curves.easeOutCubic.transform(t);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final itemAnimation = CurvedAnimation(
-      parent: animation,
-      curve: Interval(
-        index * 0.1,
-        0.4 + index * 0.1,
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
     return AnimatedBuilder(
-      animation: itemAnimation,
+      animation: animation,
       builder: (context, child) {
+        final delayedValue = _getDelayedAnimationValue(animation.value);
         return Opacity(
-          opacity: itemAnimation.value,
+          opacity: delayedValue,
           child: Transform.translate(
-            offset: Offset(0, 10 * (1 - itemAnimation.value)),
+            offset: Offset(0, 10 * (1 - delayedValue)),
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: size.getItemSpacing()),
               child: Text(
@@ -420,24 +430,28 @@ class _MoreLinkWidget extends StatelessWidget {
     required this.size,
   });
 
+  // 计算延迟动画值
+  double _getDelayedAnimationValue(double value) {
+    final intervalStart = index * 0.1;
+    final intervalEnd = (0.4 + index * 0.1).clamp(0.0, 1.0);
+
+    if (value <= intervalStart) return 0.0;
+    if (value >= intervalEnd) return 1.0;
+
+    final t = (value - intervalStart) / (intervalEnd - intervalStart);
+    return Curves.easeOutCubic.transform(t);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final linkAnimation = CurvedAnimation(
-      parent: animation,
-      curve: Interval(
-        index * 0.1,
-        0.4 + index * 0.1,
-        curve: Curves.easeOutCubic,
-      ),
-    );
-
     return AnimatedBuilder(
-      animation: linkAnimation,
+      animation: animation,
       builder: (context, child) {
+        final delayedValue = _getDelayedAnimationValue(animation.value);
         return Opacity(
-          opacity: linkAnimation.value,
+          opacity: delayedValue,
           child: Transform.translate(
-            offset: Offset(0, 10 * (1 - linkAnimation.value)),
+            offset: Offset(0, 10 * (1 - delayedValue)),
             child: Padding(
               padding: EdgeInsets.only(top: size.getItemSpacing()),
               child: Text(

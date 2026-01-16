@@ -196,14 +196,6 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
                           index,
                         ) {
                           final category = widget.categories[index];
-                          final itemAnimation = CurvedAnimation(
-                            parent: _animationController,
-                            curve: Interval(
-                              0.3 + index * 0.1,
-                              0.8 + index * 0.05,
-                              curve: Curves.easeOutCubic,
-                            ),
-                          );
                           return Padding(
                             padding: EdgeInsets.only(
                               bottom: widget.size.getItemSpacing(),
@@ -213,7 +205,8 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
                               subtitle: category.subtitle,
                               percentage: category.percentage,
                               color: category.color,
-                              animation: itemAnimation,
+                              animation: _animation,
+                              index: index,
                               size: widget.size,
                             ),
                           );
@@ -322,6 +315,7 @@ class _CategoryItem extends StatelessWidget {
   final double percentage;
   final Color color;
   final Animation<double> animation;
+  final int index;
   final HomeWidgetSize size;
 
   const _CategoryItem({
@@ -330,8 +324,22 @@ class _CategoryItem extends StatelessWidget {
     required this.percentage,
     required this.color,
     required this.animation,
+    required this.index,
     required this.size,
   });
+
+  // 计算延迟动画值
+  double _getDelayedAnimationValue(double value) {
+    final curve = Curves.easeOutCubic;
+    final intervalStart = 0.3 + index * 0.1;
+    final intervalEnd = 0.8 + index * 0.05;
+
+    if (value <= intervalStart) return 0.0;
+    if (value >= intervalEnd) return 1.0;
+
+    final t = (value - intervalStart) / (intervalEnd - intervalStart);
+    return curve.transform(t);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -340,10 +348,11 @@ class _CategoryItem extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
+        final delayedValue = _getDelayedAnimationValue(animation.value);
         return Opacity(
-          opacity: animation.value,
+          opacity: delayedValue,
           child: Transform.translate(
-            offset: Offset(10 * (1 - animation.value), 0),
+            offset: Offset(10 * (1 - delayedValue), 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -411,7 +420,7 @@ class _CategoryItem extends StatelessWidget {
                   ),
                 ),
                 AnimatedFlipCounter(
-                  value: percentage * animation.value,
+                  value: percentage * delayedValue,
                   fractionDigits: 0,
                   suffix: '%',
                   duration: const Duration(milliseconds: 600),

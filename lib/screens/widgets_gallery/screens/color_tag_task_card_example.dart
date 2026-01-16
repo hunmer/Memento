@@ -23,34 +23,42 @@ class ColorTagTaskCardExample extends StatelessWidget {
                 ColorTagTaskItem(
                   title: 'Design mobile UI dashboard for iOS',
                   color: 0xFF3B82F6,
+                  tag: 'Design',
                 ),
                 ColorTagTaskItem(
                   title: 'Calculate budget and contract',
                   color: 0xFFFB7185,
+                  tag: 'Finance',
                 ),
                 ColorTagTaskItem(
                   title: 'Search for a UI kit',
                   color: 0xFFFBBF24,
+                  tag: 'Research',
                 ),
                 ColorTagTaskItem(
                   title: 'Create HTML & CSS for startup',
                   color: 0xFF3B82F6,
+                  tag: 'Dev',
                 ),
                 ColorTagTaskItem(
                   title: 'Design search page for website',
                   color: 0xFF34D399,
+                  tag: 'Design',
                 ),
                 ColorTagTaskItem(
                   title: 'Send an estimate budget for app',
                   color: 0xFFFB7185,
+                  tag: 'Finance',
                 ),
                 ColorTagTaskItem(
                   title: 'Search for a mobile UI kit',
                   color: 0xFFFBBF24,
+                  tag: 'Research',
                 ),
                 ColorTagTaskItem(
                   title: 'Export assets for HTML developer',
                   color: 0xFF3B82F6,
+                  tag: 'Dev',
                 ),
               ],
               moreCount: 10,

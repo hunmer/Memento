@@ -205,13 +205,13 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, dynamic> data;
     final resultData = _originalSelectorResult!.data;
     if (resultData is Map) {
-      final rawMap = resultData as Map;
+      final rawMap = resultData;
       data = {};
       rawMap.forEach((key, value) {
         data[key.toString()] = value;
       });
     } else if (widget.pluginWidget.dataSelector != null && resultData is List) {
-      data = widget.pluginWidget.dataSelector!(resultData as List<dynamic>);
+      data = widget.pluginWidget.dataSelector!(resultData);
     } else {
       data = {'data': resultData};
     }

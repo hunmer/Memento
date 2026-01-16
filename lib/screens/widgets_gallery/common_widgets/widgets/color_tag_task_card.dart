@@ -42,6 +42,7 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late Animation<double> _countAnimation;
 
   @override
   void initState() {
@@ -53,6 +54,10 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
     _animation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeOutCubic,
+    );
+    _countAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
     );
     _animationController.forward();
   }
@@ -115,12 +120,11 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
     );
   }
 
-  Widget _buildHeader(Color textColor, Color secondaryTextColor, Color primaryColor) {
-    final countAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
-    );
-
+  Widget _buildHeader(
+    Color textColor,
+    Color secondaryTextColor,
+    Color primaryColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -130,16 +134,22 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 100,
                 height: 52,
-                child: AnimatedFlipCounter(
-                  value: widget.data.taskCount * countAnimation.value,
-                  textStyle: TextStyle(
-                    color: textColor,
-                    fontSize: 48,
-                    fontWeight: FontWeight.w500,
-                    height: 1.0,
-                  ),
+                child: AnimatedBuilder(
+                  animation: _countAnimation,
+                  builder: (context, child) {
+                    return AnimatedFlipCounter(
+                      value:
+                          widget.data.taskCount.toDouble() *
+                          _countAnimation.value,
+                      textStyle: TextStyle(
+                        color: textColor,
+                        fontSize: 48,
+                        fontWeight: FontWeight.w500,
+                        height: 1.0,
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -250,7 +260,7 @@ class _ColorTagTaskItemWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // 任务标题
+            // 任务标题（时间）
             Expanded(
               child: Text(
                 task.title,
@@ -264,6 +274,19 @@ class _ColorTagTaskItemWidget extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+            // 右侧标签（活动名称）
+            if (task.tag.isNotEmpty)
+              Text(
+                task.tag,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  height: 1.2,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
           ],
         ),
       ),

@@ -361,7 +361,7 @@ class ActivityHomeWidgets {
       // 分段进度卡片：按标签统计时长
       'segmentedProgressCard': {
         'title': '今日活动',
-        'subtitle': '${todayActivityCount}个活动',
+        'subtitle': '$todayActivityCount个活动',
         'currentValue': todayDurationMinutes.toDouble(),
         'targetValue': (12 * 60).toDouble(), // 12小时目标
         'unit': '分钟',
@@ -494,19 +494,19 @@ class ActivityHomeWidgets {
 
       // 彩色标签任务列表卡片
       'colorTagTaskCard': {
-        'title': '今日活动',
-        'count': todayActivityCount,
-        'items':
+        'taskCount': todayActivityCount,
+        'label': '今日活动',
+        'tasks':
             todayActivities.map((a) {
               final primaryTag = a.tags.isNotEmpty ? a.tags.first : '默认';
+              final timeRange = _formatTimeRangeStatic(a.startTime, a.endTime);
               return {
-                'title': a.title.isEmpty ? '未命名活动' : a.title,
-                'subtitle': '${_formatTimeRangeStatic(a.startTime, a.endTime)}',
-                'tag': primaryTag,
+                'title': '($timeRange)',
                 'color': _getColorFromTagForWidgets(primaryTag).value,
-                'time': _formatTimeStatic(a.startTime),
+                'tag': a.title.isEmpty ? '未命名活动' : a.title,
               };
             }).toList(),
+        'moreCount': 0,
       },
 
       // 即将到来的任务小组件：显示接下来的活动
@@ -521,7 +521,7 @@ class ActivityHomeWidgets {
                   (a) => {
                     'title': a.title.isEmpty ? '未命名活动' : a.title,
                     'subtitle':
-                        '${_formatTimeRangeStatic(a.startTime, a.endTime)}',
+                        _formatTimeRangeStatic(a.startTime, a.endTime),
                     'time': _formatTimeStatic(a.startTime),
                     'tag': a.tags.isNotEmpty ? a.tags.first : '',
                   },
@@ -537,7 +537,7 @@ class ActivityHomeWidgets {
                 .map(
                   (a) => {
                     'title': a.title.isEmpty ? '未命名活动' : a.title,
-                    'time': '${_formatTimeStatic(a.startTime)}',
+                    'time': _formatTimeStatic(a.startTime),
                     'isCompleted': true,
                   },
                 )

@@ -52,9 +52,13 @@ class ColorTagTaskItem {
   /// 标签颜色（ARGB 格式，如 0xFF3B82F6）
   final int color;
 
+  /// 标签文本（显示在右侧）
+  final String tag;
+
   const ColorTagTaskItem({
     required this.title,
     required this.color,
+    required this.tag,
   });
 
   /// 从 JSON 创建
@@ -62,6 +66,7 @@ class ColorTagTaskItem {
     return ColorTagTaskItem(
       title: json['title'] as String? ?? '',
       color: json['color'] as int? ?? 0xFF000000,
+      tag: json['tag'] as String? ?? '',
     );
   }
 
@@ -70,6 +75,7 @@ class ColorTagTaskItem {
     return {
       'title': title,
       'color': color,
+      'tag': tag,
     };
   }
 }
