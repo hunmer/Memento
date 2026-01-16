@@ -224,16 +224,18 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
   /// 构建分类列表和详细项目
   List<Widget> _buildCategoryItems(Color textColor, Color secondaryTextColor) {
     final widgets = <Widget>[];
+    final categoryCount = widget.categories.length;
 
-    for (int i = 0; i < widget.categories.length; i++) {
+    for (int i = 0; i < categoryCount; i++) {
       final category = widget.categories[i];
+
+      // 计算动画区间，确保不超过 1.0
+      final begin = (0.3 + i * 0.15).clamp(0.0, 0.7);
+      final end = (begin + 0.2).clamp(0.0, 1.0);
+
       final itemAnimation = CurvedAnimation(
         parent: _animationController,
-        curve: Interval(
-          0.3 + i * 0.1,
-          0.8 + i * 0.05,
-          curve: Curves.easeOutCubic,
-        ),
+        curve: Interval(begin, end, curve: Curves.easeOutCubic),
       );
 
       // 查找该分类的详细项目
@@ -349,64 +351,6 @@ class _CategoryItem extends StatelessWidget {
                     color: textColor,
                     letterSpacing: -0.3,
                   ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// 分类详细项目（已弃用 - 详细信息现在显示在分类行右侧）
-class _CategoryDetailItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Animation<double> animation;
-  final Color textColor;
-  final Color secondaryTextColor;
-
-  const _CategoryDetailItem({
-    required this.title,
-    required this.subtitle,
-    required this.animation,
-    required this.textColor,
-    required this.secondaryTextColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: animation.value,
-          child: Transform.translate(
-            offset: Offset(5 * (1 - animation.value), 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: textColor.withOpacity(0.7),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: secondaryTextColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

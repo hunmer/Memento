@@ -17,12 +17,21 @@ class CategoryData {
   });
 
   /// 从 JSON 创建
-  factory CategoryData.fromJson(Map<String, dynamic> json) {
+  factory CategoryData.fromJson(
+    Map<String, dynamic> json, {
+    double totalAmount = 0.0,
+  }) {
+    final amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
+    final percentage =
+        (json['percentage'] as num?)?.toDouble() ??
+        (totalAmount > 0 ? (amount / totalAmount * 100) : 0.0);
+    // 支持 label 和 name 两种键名
+    final label = json['label'] as String? ?? json['name'] as String? ?? '';
     return CategoryData(
-      label: json['label'] as String? ?? '',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      label: label,
+      amount: amount,
       color: Color(json['color'] as int? ?? 0xFF000000),
-      percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
+      percentage: percentage,
     );
   }
 
@@ -67,14 +76,20 @@ class CategoryStackWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
+    final currentAmount = (props['currentAmount'] as num?)?.toDouble() ?? 0.0;
     final categoriesList = (props['categories'] as List<dynamic>?)
-            ?.map((e) => CategoryData.fromJson(e as Map<String, dynamic>))
+            ?.map(
+              (e) => CategoryData.fromJson(
+                e as Map<String, dynamic>,
+                totalAmount: currentAmount,
+              ),
+            )
             .toList() ??
         const [];
 
     return CategoryStackWidget(
       title: props['title'] as String? ?? '',
-      currentAmount: (props['currentAmount'] as num?)?.toDouble() ?? 0.0,
+      currentAmount: currentAmount,
       targetAmount: (props['targetAmount'] as num?)?.toDouble() ?? 0.0,
       currency: props['currency'] as String? ?? '\$',
       categories: categoriesList,
@@ -209,22 +224,40 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                       ),
                       SizedBox(width: widget.size.getItemSpacing()),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: List.generate(widget.categories.length, (index) {
-                            final category = widget.categories[index];
-                            final itemAnimation = CurvedAnimation(
-                              parent: _animationController,
-                              curve: Interval(0.2 + index * 0.08, 0.7 + index * 0.08, curve: Curves.easeOutCubic),
-                            );
-                            return _CategoryItem(
-                              category: category,
-                              animation: itemAnimation,
-                              currency: widget.currency,
-                              size: widget.size,
-                            );
-                          }),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 96),
+                          child: SingleChildScrollView(
+                            physics: const ClampingScrollPhysics(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                widget.categories.length,
+                                (index) {
+                                  final category = widget.categories[index];
+                                  // 均匀分配动画区间
+                                  final count = widget.categories.length;
+                                  final step = count > 0 ? 1.0 / count : 1.0;
+                                  final start = index * step;
+                                  final end = ((index + 1) * step).clamp(0.0, 1.0);
+                                  final itemAnimation = CurvedAnimation(
+                                    parent: _animationController,
+                                    curve: Interval(
+                                      start,
+                                      end,
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                                  );
+                                  return _CategoryItem(
+                                    category: category,
+                                    animation: itemAnimation,
+                                    currency: widget.currency,
+                                    size: widget.size,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -247,24 +280,41 @@ class _StackedBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // 计算所有类别的总金额，用于计算相对占比
+    final totalAmount = categories.isEmpty
+        ? 1.0
+        : categories.fold<double>(0.0, (sum, c) => sum + c.amount);
+
+    return SizedBox(
       width: 40,
       height: 96,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: categories.map((category) {
-          final height = category.percentage * 96;
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) {
-              return Container(height: height * animation.value, decoration: BoxDecoration(color: category.color));
-            },
-          );
-        }).toList(),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: categories.map((category) {
+            // 使用相对占比（金额占总金额的比例）
+            final ratio = totalAmount > 0 ? category.amount / totalAmount : 0.0;
+            return Expanded(
+              flex: (ratio * 1000).toInt(),
+              child: AnimatedBuilder(
+                animation: animation,
+                builder: (context, child) {
+                  return FractionallySizedBox(
+                    heightFactor: animation.value,
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      decoration: BoxDecoration(color: category.color),
+                    ),
+                  );
+                },
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
