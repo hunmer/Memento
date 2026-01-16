@@ -263,7 +263,6 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: widget.size.getLargeFontSize() * 2.5,
                 height: widget.size.getLargeFontSize() + 8,
                 child: AnimatedFlipCounter(
                   value: widget.currentValue * _animation.value,
@@ -279,7 +278,7 @@ class _WeeklyBarsCardWidgetState extends State<WeeklyBarsCardWidget>
               ),
               SizedBox(width: widget.size.getSmallSpacing()),
               SizedBox(
-                height: widget.size.getSubtitleFontSize() + 2,
+                height: widget.size.getSubtitleFontSize() + 5,
                 child: Text(
                   widget.unit,
                   style: TextStyle(

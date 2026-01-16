@@ -16,11 +16,17 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
   /// 本月金额
   final double currentAmount;
 
+  /// 单位
+  final String unit;
+
   /// 变化百分比
   final double changePercent;
 
   /// 日数据列表
   final List<DailyExpenseDataModel> dailyData;
+
+  /// Y轴最大值
+  final double maxValue;
 
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
@@ -32,8 +38,10 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
     super.key,
     required this.title,
     required this.currentAmount,
+    required this.unit,
     required this.changePercent,
     required this.dailyData,
+    this.maxValue = 24.0,
     this.inline = false,
     this.size = HomeWidgetSize.medium,
   });
@@ -55,8 +63,10 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
     return ExpenseComparisonChartCardWidget(
       title: props['title'] as String? ?? '本月支出',
       currentAmount: (props['currentAmount'] as num?)?.toDouble() ?? 0.0,
+      unit: props['unit'] as String? ?? '',
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0.0,
       dailyData: dailyData,
+      maxValue: (props['maxValue'] as num?)?.toDouble() ?? 24.0,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -154,6 +164,18 @@ class _ExpenseComparisonChartCardWidgetState
                                     fontWeight: FontWeight.w600,
                                     color: primaryColor,
                                     height: 1.0,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  widget.unit,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: isDark
+                                        ? const Color(0xFF9CA3AF)
+                                        : const Color(0xFF6B7280),
+                                    height: 1.2,
                                   ),
                                 ),
                               ],
@@ -263,6 +285,7 @@ class _ExpenseComparisonChartCardWidgetState
                   // 柱状图
                   _BarChartWidget(
                     data: widget.dailyData,
+                    maxValue: widget.maxValue,
                     animation: _animation,
                     isDark: isDark,
                     primaryColor: primaryColor,
@@ -307,12 +330,14 @@ class DailyExpenseDataModel {
 /// 柱状图组件
 class _BarChartWidget extends StatelessWidget {
   final List<DailyExpenseDataModel> data;
+  final double maxValue;
   final Animation<double> animation;
   final bool isDark;
   final Color primaryColor;
 
   const _BarChartWidget({
     required this.data,
+    required this.maxValue,
     required this.animation,
     required this.isDark,
     required this.primaryColor,
@@ -341,6 +366,7 @@ class _BarChartWidget extends StatelessWidget {
                 child: _BarItemWidget(
                   lastMonth: data[index].lastMonth,
                   currentMonth: data[index].currentMonth,
+                  maxValue: maxValue,
                   animation: barAnimation,
                   isDark: isDark,
                   primaryColor: primaryColor,
@@ -386,6 +412,7 @@ class _BarChartWidget extends StatelessWidget {
 class _BarItemWidget extends StatelessWidget {
   final double lastMonth;
   final double currentMonth;
+  final double maxValue;
   final Animation<double> animation;
   final bool isDark;
   final Color primaryColor;
@@ -393,6 +420,7 @@ class _BarItemWidget extends StatelessWidget {
   const _BarItemWidget({
     required this.lastMonth,
     required this.currentMonth,
+    required this.maxValue,
     required this.animation,
     required this.isDark,
     required this.primaryColor,
@@ -403,8 +431,12 @@ class _BarItemWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final lastMonthHeight = (lastMonth / 100 * 128) * animation.value;
-        final currentMonthHeight = (currentMonth / 100 * 128) * animation.value;
+        final lastMonthHeight = maxValue > 0
+            ? (lastMonth / maxValue * 128 * animation.value) as double
+            : 0.0;
+        final currentMonthHeight = maxValue > 0
+            ? (currentMonth / maxValue * 128 * animation.value) as double
+            : 0.0;
 
         return Container(
           height: 128,

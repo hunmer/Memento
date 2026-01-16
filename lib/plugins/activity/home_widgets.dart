@@ -962,6 +962,8 @@ class ActivityHomeWidgets {
         'currentValue': avgMinutes.toStringAsFixed(1),
         'targetValue': '${(12 * 60).toStringAsFixed(0)}', // 12小时目标
         'unit': '分钟',
+        'maxValue': 120.0, // 匹配 y 值范围 0-120
+        'timeLabels': weekDayLabels, // 星期标签
         'dataPoints': sevenDaysData.asMap().entries.map((entry) {
           final value = entry.value.totalMinutes;
           final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
@@ -976,38 +978,43 @@ class ActivityHomeWidgets {
       'barChartStatsCard': {
         'title': '活动统计',
         'dateRange': '$startDate - $endDate',
-        'averageValue': avgMinutes,
-        'dataPoints': sevenDaysData.asMap().entries.map((entry) {
-          return {
-            'label': weekDayLabels[(now.subtract(Duration(days: 6 - entry.key)).weekday - 1) % 7],
-            'value': entry.value.totalMinutes.toDouble(),
-          };
-        }).toList(),
-        'barColor': Colors.pink.value,
+        'averageValue': avgMinutes / 60, // 转换为小时
+        'unit': '小时',
+        'icon': 'timeline',
+        'iconColor': Colors.pink.value,
+        'data': sevenDaysData.map((d) => d.totalMinutes / 60).toList(),
+        'labels': List.generate(7, (index) {
+          final date = now.subtract(Duration(days: 6 - index));
+          return weekDayLabels[(date.weekday - 1) % 7];
+        }),
+        'maxValue': maxMinutes / 60, // 转换为小时
       },
 
       // WeeklyBarsCard - 周柱状图卡片
       'weeklyBarsCard': {
         'title': '周活动统计',
         'icon': 'bar_chart',
-        'currentValue': avgMinutes,
-        'targetValue': (12 * 60).toDouble(), // 12小时目标
-        'weeklyData': weeklyDurations,
+        'currentValue': avgMinutes / 60, // 转为小时
+        'unit': '小时',
+        'status': '日均',
+        'dailyValues': maxMinutes > 0
+            ? sevenDaysData.map((d) => d.totalMinutes / maxMinutes).toList()
+            : List.filled(7, 0.0),
       },
 
       // ExpenseComparisonChart - 支出对比图表
       'expenseComparisonChart': {
         'title': '活动对比',
-        'currentAmount': todayMinutes,
+        'currentAmount': todayMinutes / 60, // 转为小时
+        'unit': '小时',
         'changePercent': changePercent,
-        'categories': sevenDaysData.asMap().entries.map((entry) {
+        'maxValue': 24.0, // 24小时
+        'dailyData': sevenDaysData.asMap().entries.map((entry) {
           return {
-            'name': weekDayLabels[(now.subtract(Duration(days: 6 - entry.key)).weekday - 1) % 7],
-            'currentAmount': entry.value.totalMinutes.toDouble(),
-            'previousAmount': entry.key > 0
-                ? sevenDaysData[entry.key - 1].totalMinutes.toDouble()
+            'lastMonth': entry.key > 0
+                ? sevenDaysData[entry.key - 1].totalMinutes / 60
                 : 0.0,
-            'color': Colors.pink.value,
+            'currentMonth': entry.value.totalMinutes / 60,
           };
         }).toList(),
       },
