@@ -82,6 +82,8 @@ import 'widgets/card_emoji_icon_display.dart';
 import 'widgets/habit_streak_tracker_card.dart';
 import 'widgets/monthly_dot_tracker_card.dart';
 import 'widgets/checkin_item_card.dart';
+import 'widgets/activity_heatmap_card.dart';
+import 'widgets/activity_today_pie_chart_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -167,6 +169,8 @@ enum CommonWidgetId {
   habitStreakTrackerCard,
   monthlyDotTrackerCard,
   checkinItemCard,
+  activityHeatmapCard,
+  activityTodayPieChartCard,
 }
 
 /// 公共小组件元数据
@@ -832,6 +836,22 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.medium,
       supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
+    CommonWidgetId.activityHeatmapCard: CommonWidgetMetadata(
+      id: CommonWidgetId.activityHeatmapCard,
+      name: '活动热力图卡片',
+      description: '展示今日24小时的活动热力图，支持不同时间粒度（5/10/15/30/60分钟）',
+      icon: Icons.grid_on,
+      defaultSize: HomeWidgetSize.large3,
+      supportedSizes: [HomeWidgetSize.large3],
+    ),
+    CommonWidgetId.activityTodayPieChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.activityTodayPieChartCard,
+      name: '今日活动统计卡片',
+      description: '使用饼状图展示今日活动统计，按标签统计时长',
+      icon: Icons.pie_chart,
+      defaultSize: HomeWidgetSize.large3,
+      supportedSizes: [HomeWidgetSize.large3],
+    ),
   };
 
   /// 获取元数据
@@ -1025,6 +1045,10 @@ class CommonWidgetBuilder {
         return MonthlyDotTrackerCardWidget.fromProps(props, size);
       case CommonWidgetId.checkinItemCard:
         return CheckinItemCardWidget.fromProps(props, size);
+      case CommonWidgetId.activityHeatmapCard:
+        return ActivityHeatmapCardWidget.fromProps(props, size);
+      case CommonWidgetId.activityTodayPieChartCard:
+        return ActivityTodayPieChartCardWidget.fromProps(props, size);
     }
   }
 }

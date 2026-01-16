@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
@@ -13,7 +12,6 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'activity_plugin.dart';
 import 'screens/activity_edit_screen.dart';
@@ -94,47 +92,6 @@ class ActivityHomeWidgets {
         builder: (context, config) => const ActivityLastActivityWidget(),
       ),
     );
-
-    // 2x3 今日活动统计小组件 - 饼状图展示
-    registry.register(
-      HomeWidget(
-        id: 'activity_today_pie_chart',
-        pluginId: 'activity',
-        name: '今日活动统计',
-        description: '使用饼状图展示今日活动统计',
-        icon: Icons.pie_chart,
-        color: Colors.pink,
-        defaultSize: HomeWidgetSize.large3, // 2x3
-        supportedSizes: [HomeWidgetSize.large3],
-        category: 'home_categoryRecord'.tr,
-        builder: (context, config) => const ActivityTodayPieChartWidget(),
-      ),
-    );
-
-    // 2x3 活动热力图小组件 - 展示最近活动分布
-    registry.register(
-      HomeWidget(
-        id: 'activity_heatmap',
-        pluginId: 'activity',
-        name: '活动热力图',
-        description: '展示最近活动的热力图分布',
-        icon: Icons.grid_on,
-        color: Colors.pink,
-        defaultSize: HomeWidgetSize.large3, // 2x3
-        supportedSizes: [HomeWidgetSize.large3],
-        category: 'home_categoryRecord'.tr,
-        selectorId: 'activity.heatmap_granularity',
-        dataSelector: extractHeatmapConfig,
-        dataRenderer: renderHeatmapData,
-        builder: (context, config) {
-          return GenericSelectorWidget(
-            widgetDefinition: registry.getWidget('activity_heatmap')!,
-            config: config,
-          );
-        },
-      ),
-    );
-
     // 活动小组件 - 支持公共小组件样式（不需要选择数据）
     registry.register(
       HomeWidget(
@@ -304,6 +261,123 @@ class ActivityHomeWidgets {
       context,
       widgetIdEnum,
       commonWidgetProps,
+      metadata.defaultSize,
+    );
+  }
+
+  /// 构建动态热力图小组件（支持事件触发时重新获取数据）
+  static Widget _buildDynamicHeatmapWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
+    // 解析选择器配置
+    final selectorConfig =
+        config['selectorWidgetConfig'] as Map<String, dynamic>?;
+    if (selectorConfig == null) {
+      return HomeWidget.buildErrorWidget(
+        context,
+        '配置错误：缺少 selectorWidgetConfig',
+      );
+    }
+
+    // 检查是否使用了公共小组件
+    final commonWidgetId = selectorConfig['commonWidgetId'] as String?;
+    if (commonWidgetId == null || commonWidgetId != 'activityHeatmapCard') {
+      return HomeWidget.buildErrorWidget(context, '配置错误：未配置活动热力图组件');
+    }
+
+    // 获取选择器数据
+    final selectedData =
+        selectorConfig['selectedData'] as Map<String, dynamic>?;
+    if (selectedData == null) {
+      return HomeWidget.buildErrorWidget(context, '无法获取选择的数据');
+    }
+
+    // 获取小组件定义
+    final registry = HomeWidgetRegistry();
+    final widgetDef = registry.getWidget('activity_heatmap');
+    if (widgetDef == null || widgetDef.commonWidgetsProvider == null) {
+      return HomeWidget.buildErrorWidget(context, '小组件定义错误');
+    }
+
+    // 从 selectedData 中提取时间粒度配置
+    Map<String, dynamic> data = {};
+    if (selectedData.containsKey('data')) {
+      final dataArray = selectedData['data'];
+      if (dataArray is List && dataArray.isNotEmpty) {
+        final rawData = dataArray[0];
+        if (rawData is Map<String, dynamic>) {
+          data = rawData;
+        } else if (rawData != null && rawData is Map) {
+          data = Map<String, dynamic>.from(rawData);
+        }
+      }
+    }
+
+    // 动态调用 commonWidgetsProvider 获取最新数据
+    final availableWidgets = widgetDef.commonWidgetsProvider!(data);
+    final latestProps = availableWidgets['activityHeatmapCard'];
+
+    if (latestProps == null) {
+      return HomeWidget.buildErrorWidget(context, '无法获取最新数据');
+    }
+
+    // 使用公共组件构建器渲染
+    final commonWidgetIdEnum = CommonWidgetId.activityHeatmapCard;
+    final metadata = CommonWidgetsRegistry.getMetadata(commonWidgetIdEnum);
+
+    return CommonWidgetBuilder.build(
+      context,
+      commonWidgetIdEnum,
+      latestProps,
+      metadata.defaultSize,
+    );
+  }
+
+  /// 导航处理函数
+  static void _navigateToActivityMain(
+    BuildContext context,
+    SelectorResult result,
+  ) {
+    try {
+      Navigator.push(
+        context,
+        NavigationHelper.createRoute(const ActivityMainView()),
+      );
+    } catch (e) {
+      toastService.showToast('activity_operationFailed'.tr);
+      debugPrint('[ActivityHomeWidgets] 导航失败: $e');
+    }
+  }
+
+  /// 构建动态今日活动统计小组件（支持事件触发时重新获取数据）
+  static Widget _buildDynamicTodayPieChartWidget(
+    BuildContext context,
+    Map<String, dynamic> config,
+  ) {
+    // 获取小组件定义
+    final registry = HomeWidgetRegistry();
+    final widgetDef = registry.getWidget('activity_today_pie_chart');
+    if (widgetDef == null || widgetDef.commonWidgetsProvider == null) {
+      return HomeWidget.buildErrorWidget(context, '小组件定义错误');
+    }
+
+    // 动态调用 commonWidgetsProvider 获取最新数据
+    final availableWidgets = widgetDef.commonWidgetsProvider!({});
+    final latestProps = availableWidgets['activityTodayPieChartCard'];
+
+    if (latestProps == null) {
+      return HomeWidget.buildErrorWidget(context, '无法获取最新数据');
+    }
+
+    // 使用公共组件构建器渲染
+    final commonWidgetIdEnum = CommonWidgetId.activityTodayPieChartCard;
+    final metadata = CommonWidgetsRegistry.getMetadata(commonWidgetIdEnum);
+
+    return CommonWidgetBuilder.build(
+      context,
+      commonWidgetIdEnum,
+      latestProps,
       metadata.defaultSize,
     );
   }
@@ -611,7 +685,143 @@ class ActivityHomeWidgets {
                 )
                 .toList(),
       },
+
+      // 活动热力图卡片
+      'activityHeatmapCard': _buildHeatmapCardData(todayActivities, data),
+
+      // 今日活动统计卡片
+      'activityTodayPieChartCard': {
+        'tagStats': tagStats,
+        'totalDuration': todayDurationMinutes,
+      },
     };
+  }
+
+  /// 构建活动热力图卡片数据
+  static Map<String, dynamic> _buildHeatmapCardData(
+    List<ActivityRecord> activities,
+    Map<String, dynamic> selectorData,
+  ) {
+    // 获取时间粒度（从选择器数据或使用默认值60分钟）
+    int timeGranularity = 60;
+    if (selectorData.containsKey('timeGranularity')) {
+      timeGranularity = selectorData['timeGranularity'] as int? ?? 60;
+    }
+
+    // 计算时间槽数据
+    final timeSlots = _calculateTimeSlotDataForWidget(
+      activities,
+      timeGranularity,
+    );
+
+    // 计算总时长
+    final totalMinutes = activities.fold<int>(
+      0,
+      (sum, a) => sum + a.durationInMinutes,
+    );
+
+    // 计算活跃小时数
+    final activeHours = _calculateActiveHoursForWidget(activities);
+
+    // 转换时间槽数据为 Map 格式
+    final timeSlotsList =
+        timeSlots
+            .map(
+              (slot) => {
+                'hour': slot.hour,
+                'minute': slot.minute,
+                'durationMinutes': slot.durationMinutes,
+                'tagDurations': slot.tagDurations,
+              },
+            )
+            .toList();
+
+    return {
+      'timeGranularity': timeGranularity,
+      'timeSlots': timeSlotsList,
+      'totalMinutes': totalMinutes,
+      'activeHours': activeHours,
+    };
+  }
+
+  /// 计算指定时间粒度的数据（用于公共组件）
+  static List<_TimeSlotDataWrapper> _calculateTimeSlotDataForWidget(
+    List<ActivityRecord> activities,
+    int granularityMinutes,
+  ) {
+    final totalSlots = (24 * 60) ~/ granularityMinutes;
+    final slots = <_TimeSlotDataWrapper>[];
+    final now = DateTime.now();
+
+    for (int i = 0; i < totalSlots; i++) {
+      final hour = (i * granularityMinutes) ~/ 60;
+      final minute = (i * granularityMinutes) % 60;
+
+      final slotStart = DateTime(now.year, now.month, now.day, hour, minute);
+      final slotEnd = slotStart.add(Duration(minutes: granularityMinutes));
+
+      int totalMinutes = 0;
+      final Map<String, int> tagDurations = {};
+
+      for (final activity in activities) {
+        if (activity.startTime.isBefore(slotEnd) &&
+            activity.endTime.isAfter(slotStart)) {
+          final effectiveStart =
+              activity.startTime.isBefore(slotStart)
+                  ? slotStart
+                  : activity.startTime;
+          final effectiveEnd =
+              activity.endTime.isAfter(slotEnd) ? slotEnd : activity.endTime;
+
+          if (effectiveEnd.isAfter(effectiveStart)) {
+            final minutes = effectiveEnd.difference(effectiveStart).inMinutes;
+            totalMinutes += minutes;
+
+            // 收集每个标签的时长
+            for (final tag in activity.tags) {
+              tagDurations[tag] = (tagDurations[tag] ?? 0) + minutes;
+            }
+          }
+        }
+      }
+
+      slots.add(
+        _TimeSlotDataWrapper(
+          hour: hour,
+          minute: minute,
+          durationMinutes: totalMinutes,
+          tagDurations: tagDurations,
+        ),
+      );
+    }
+
+    return slots;
+  }
+
+  /// 计算活跃小时数（用于公共组件）
+  static int _calculateActiveHoursForWidget(List<ActivityRecord> activities) {
+    final activeHours = <int>{};
+    for (final activity in activities) {
+      final startHour = activity.startTime.hour;
+      final endHour = activity.endTime.hour;
+
+      for (int h = startHour; h <= endHour; h++) {
+        final hourStart = DateTime(
+          activity.startTime.year,
+          activity.startTime.month,
+          activity.startTime.day,
+          h,
+          0,
+        );
+        final hourEnd = hourStart.add(const Duration(hours: 1));
+
+        if (activity.startTime.isBefore(hourEnd) &&
+            activity.endTime.isAfter(hourStart)) {
+          activeHours.add(h);
+        }
+      }
+    }
+    return activeHours.length;
   }
 
   /// 从选择器数据提取热力图配置
@@ -627,15 +837,6 @@ class ActivityHomeWidgets {
     }
 
     return {'timeGranularity': granularity};
-  }
-
-  /// 渲染热力图数据
-  static Widget renderHeatmapData(
-    BuildContext context,
-    SelectorResult result,
-    Map<String, dynamic> config,
-  ) {
-    return ActivityHeatmapWidget(config: config);
   }
 }
 
@@ -917,826 +1118,6 @@ class _ActivityLastActivityWidgetState
   }
 }
 
-/// 今日活动统计饼状图小组件（2x3）
-/// 使用饼状图展示今日活动统计
-class ActivityTodayPieChartWidget extends StatefulWidget {
-  const ActivityTodayPieChartWidget({super.key});
-
-  @override
-  State<ActivityTodayPieChartWidget> createState() =>
-      _ActivityTodayPieChartWidgetState();
-}
-
-class _ActivityTodayPieChartWidgetState
-    extends State<ActivityTodayPieChartWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return EventListenerContainer(
-      events: const ['activity_added', 'activity_updated', 'activity_deleted'],
-      onEvent: () => setState(() {}),
-      child: FutureBuilder<Map<String, int>>(
-        future: _getTodayActivityStats(),
-        builder: (context, snapshot) {
-          final stats = snapshot.data ?? {};
-
-          if (stats.isEmpty) {
-            return _buildNoActivityWidget(context);
-          }
-
-          return _buildPieChartWidget(context, stats);
-        },
-      ),
-    );
-  }
-
-  Future<Map<String, int>> _getTodayActivityStats() async {
-    try {
-      final plugin =
-          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
-      if (plugin == null) return {};
-
-      final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
-
-      return await plugin.activityService.getActivityStatsByTag(
-        startOfDay,
-        endOfDay,
-      );
-    } catch (e) {
-      debugPrint('[ActivityTodayPieChart] 获取统计失败: $e');
-      return {};
-    }
-  }
-
-  Widget _buildNoActivityWidget(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 标题
-            Text(
-              '今日活动统计',
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.pink,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // 占位内容，保持2x3布局
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.pie_chart,
-                    color: Colors.pink.withAlpha(100),
-                    size: 64,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '今日暂无活动',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.textTheme.bodyMedium?.color?.withAlpha(150),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '添加活动后查看统计',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.textTheme.bodySmall?.color?.withAlpha(120),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // 底部占位文字
-            Text(
-              '总时长: 0分钟',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withAlpha(180),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPieChartWidget(BuildContext context, Map<String, int> stats) {
-    final theme = Theme.of(context);
-
-    // 按时长排序，只显示前5个
-    final sortedEntries =
-        stats.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-    final topEntries = sortedEntries.take(5).toList();
-
-    // 计算总时长
-    final totalDuration = topEntries.fold<int>(
-      0,
-      (sum, entry) => sum + entry.value,
-    );
-
-    // 为每个标签分配颜色
-    final colors = [
-      Colors.pink,
-      Colors.purple,
-      Colors.blue,
-      Colors.orange,
-      Colors.teal,
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 标题
-          Text(
-            '今日活动统计',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.pink,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // 饼状图（在上方）
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: PieChart(
-                PieChartData(
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 25,
-                  sections: _buildPieChartSections(
-                    topEntries,
-                    totalDuration,
-                    colors,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // 图例（在下方）
-          Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _buildLegendItems(topEntries, colors, totalDuration),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          // 总时长
-          Text(
-            '总时长: ${_formatDuration(totalDuration)}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.textTheme.bodySmall?.color?.withAlpha(180),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<PieChartSectionData> _buildPieChartSections(
-    List<MapEntry<String, int>> entries,
-    int totalDuration,
-    List<Color> colors,
-  ) {
-    return List.generate(entries.length, (index) {
-      final entry = entries[index];
-      final value = entry.value;
-      final percentage = (value / totalDuration * 100).toInt();
-
-      return PieChartSectionData(
-        color: colors[index % colors.length],
-        value: value.toDouble(),
-        title: '$percentage%',
-        radius: 40,
-        titleStyle: const TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      );
-    });
-  }
-
-  List<Widget> _buildLegendItems(
-    List<MapEntry<String, int>> entries,
-    List<Color> colors,
-    int totalDuration,
-  ) {
-    return List.generate(entries.length, (index) {
-      final entry = entries[index];
-      final tag = entry.key;
-      final duration = entry.value;
-      final percentage = (duration / totalDuration * 100).toInt();
-
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 6),
-        child: Row(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: colors[index % colors.length],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                tag,
-                style: const TextStyle(fontSize: 11),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Text(
-              '$percentage%',
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  String _formatDuration(int minutes) {
-    final hours = minutes ~/ 60;
-    final mins = minutes % 60;
-
-    if (hours > 0) {
-      return '$hours小时$mins分钟';
-    } else {
-      return '$mins分钟';
-    }
-  }
-}
-
-/// 活动热力图小组件（2x3）
-/// 展示今日24小时的活动热力图，颜色深浅表示活动密集程度
-class ActivityHeatmapWidget extends StatefulWidget {
-  final Map<String, dynamic> config;
-
-  const ActivityHeatmapWidget({super.key, this.config = const {}});
-
-  @override
-  State<ActivityHeatmapWidget> createState() => _ActivityHeatmapWidgetState();
-}
-
-class _ActivityHeatmapWidgetState extends State<ActivityHeatmapWidget> {
-  // 存储已使用的颜色，用于确保颜色有明显区别
-  final Map<String, Color> _tagColorCache = {};
-
-  // 获取时间粒度配置（默认60分钟）
-  int get _timeGranularity {
-    return widget.config['timeGranularity'] as int? ?? 60;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return EventListenerContainer(
-      events: const ['activity_added', 'activity_updated', 'activity_deleted'],
-      onEvent: () => setState(() {}),
-      child: FutureBuilder<List<ActivityRecord>>(
-        future: _getTodayActivities(),
-        builder: (context, snapshot) {
-          final activities = snapshot.data ?? [];
-
-          return Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(16),
-              onTap: () => _navigateToActivity(context),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 标题
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '今日活动热力图',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.pink,
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          size: 18,
-                          color: Colors.pink.withAlpha(150),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // 24小时热力图网格
-                    Expanded(child: _buildHeatmap(activities)),
-
-                    const SizedBox(height: 8),
-
-                    // 图例
-                    _buildLegend(activities),
-
-                    const SizedBox(height: 4),
-
-                    // 统计信息
-                    _buildStats(activities),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Future<List<ActivityRecord>> _getTodayActivities() async {
-    try {
-      final plugin =
-          PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
-      if (plugin == null) return [];
-
-      final now = DateTime.now();
-      return await plugin.activityService.getActivitiesForDate(now);
-    } catch (e) {
-      debugPrint('[ActivityHeatmap] 获取今日活动失败: $e');
-      return [];
-    }
-  }
-
-  Widget _buildHeatmap(List<ActivityRecord> activities) {
-    final granularity = _timeGranularity;
-
-    switch (granularity) {
-      case 5:
-        return _buildGranularHeatmap(activities, 5);
-      case 10:
-        return _buildGranularHeatmap(activities, 10);
-      case 15:
-        return _buildGranularHeatmap(activities, 15);
-      case 30:
-        return _buildGranularHeatmap(activities, 30);
-      case 60:
-      default:
-        return _build60MinHeatmap(activities);
-    }
-  }
-
-  // 通用的细粒度热力图构建方法（5/10/15/30分钟）
-  Widget _buildGranularHeatmap(
-    List<ActivityRecord> activities,
-    int granularity,
-  ) {
-    final slots = _calculateTimeSlotData(activities, granularity);
-    final columns = 12;
-    final rows = (slots.length / columns).ceil();
-
-    // 确保至少有1行
-    final actualRows = rows > 0 ? rows : 1;
-
-    // 使用 Column + Expanded 填满可用高度
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: List.generate(actualRows, (row) {
-        return Expanded(
-          flex: 1,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: List.generate(columns, (col) {
-              final index = row * columns + col;
-              if (index >= slots.length) {
-                return const Expanded(child: SizedBox());
-              }
-              final data = slots[index];
-              return Expanded(
-                flex: 1,
-                child: _buildHeatmapCell(
-                  hour: data.hour,
-                  durationMinutes: data.durationMinutes,
-                  label: '',
-                  showLabel: false,
-                  tagDurations: data.tagDurations,
-                ),
-              );
-            }),
-          ),
-        );
-      }),
-    );
-  }
-
-  // 60分钟粒度（24小时，4行6列）- 显示文本
-  Widget _build60MinHeatmap(List<ActivityRecord> activities) {
-    final hourlyData = _calculateHourlyData(activities);
-
-    return Column(
-      children: List.generate(4, (row) {
-        return Expanded(
-          child: Row(
-            children: List.generate(6, (col) {
-              final index = row * 6 + col;
-              final data = hourlyData[index];
-              return Expanded(
-                child: _buildHeatmapCell(
-                  hour: data.hour,
-                  durationMinutes: data.durationMinutes,
-                  label: '${data.hour}',
-                  showLabel: true,
-                  tagDurations: data.tagDurations,
-                ),
-              );
-            }),
-          ),
-        );
-      }),
-    );
-  }
-
-  // 计算每小时的数据
-  List<TimeSlotData> _calculateHourlyData(List<ActivityRecord> activities) {
-    return List.generate(24, (hour) {
-      int totalMinutes = 0;
-      final Map<String, int> tagDurations = {};
-
-      for (final activity in activities) {
-        if (_activityCoversHour(activity, hour)) {
-          final minutes = _calculateMinutesInHour(activity, hour);
-          totalMinutes += minutes;
-
-          // 收集每个标签的时长
-          for (final tag in activity.tags) {
-            tagDurations[tag] = (tagDurations[tag] ?? 0) + minutes;
-          }
-        }
-      }
-
-      return TimeSlotData(
-        hour: hour,
-        minute: 0,
-        durationMinutes: totalMinutes,
-        tagDurations: tagDurations,
-      );
-    });
-  }
-
-  // 计算指定时间粒度的数据
-  List<TimeSlotData> _calculateTimeSlotData(
-    List<ActivityRecord> activities,
-    int granularityMinutes,
-  ) {
-    final totalSlots = (24 * 60) ~/ granularityMinutes;
-    final slots = <TimeSlotData>[];
-
-    for (int i = 0; i < totalSlots; i++) {
-      final hour = (i * granularityMinutes) ~/ 60;
-      final minute = (i * granularityMinutes) % 60;
-
-      final slotStart = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        hour,
-        minute,
-      );
-      final slotEnd = slotStart.add(Duration(minutes: granularityMinutes));
-
-      int totalMinutes = 0;
-      final Map<String, int> tagDurations = {};
-
-      for (final activity in activities) {
-        if (activity.startTime.isBefore(slotEnd) &&
-            activity.endTime.isAfter(slotStart)) {
-          final effectiveStart =
-              activity.startTime.isBefore(slotStart)
-                  ? slotStart
-                  : activity.startTime;
-          final effectiveEnd =
-              activity.endTime.isAfter(slotEnd) ? slotEnd : activity.endTime;
-
-          if (effectiveEnd.isAfter(effectiveStart)) {
-            final minutes = effectiveEnd.difference(effectiveStart).inMinutes;
-            totalMinutes += minutes;
-
-            // 收集每个标签的时长
-            for (final tag in activity.tags) {
-              tagDurations[tag] = (tagDurations[tag] ?? 0) + minutes;
-            }
-          }
-        }
-      }
-
-      slots.add(
-        TimeSlotData(
-          hour: hour,
-          minute: minute,
-          durationMinutes: totalMinutes,
-          tagDurations: tagDurations,
-        ),
-      );
-    }
-
-    return slots;
-  }
-
-  Widget _buildHeatmapCell({
-    required int hour,
-    required int durationMinutes,
-    required String label,
-    bool showLabel = true,
-    Map<String, int> tagDurations = const {},
-  }) {
-    final color = _getSlotColor(
-      durationMinutes,
-      _timeGranularity,
-      tagDurations,
-    );
-    final isActive = durationMinutes > 0;
-
-    return Container(
-      margin: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(2),
-        border: Border.all(
-          color: Colors.grey.withValues(alpha: 0.2),
-          width: 0.5,
-        ),
-      ),
-      child:
-          showLabel
-              ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (label.isNotEmpty)
-                    Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        color: _getTextColor(color),
-                      ),
-                    ),
-                  if (isActive) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      _formatMinutes(durationMinutes),
-                      style: TextStyle(
-                        fontSize: 8,
-                        color: _getTextColor(color),
-                      ),
-                    ),
-                  ],
-                ],
-              )
-              : const SizedBox.shrink(),
-    );
-  }
-
-  Color _getSlotColor(
-    int minutes,
-    int granularity,
-    Map<String, int> tagDurations,
-  ) {
-    if (minutes == 0) {
-      return Colors.grey.withValues(alpha: 0.1);
-    }
-
-    // 如果有标签，使用主要标签的颜色
-    if (tagDurations.isNotEmpty) {
-      final primaryTag =
-          tagDurations.entries.reduce((a, b) => a.value > b.value ? a : b).key;
-      final tagColor = _getColorFromTag(primaryTag);
-
-      // 根据占时间槽的比例来调整颜色的透明度
-      final ratio = minutes / granularity;
-      final alpha = _getAlphaFromRatio(ratio);
-
-      // 使用标签颜色，根据填充比例调整透明度
-      return tagColor.withValues(alpha: alpha);
-    }
-
-    // 没有标签时，使用默认粉色
-    final ratio = minutes / granularity;
-    final alpha = _getAlphaFromRatio(ratio);
-    return Colors.pink.withValues(alpha: alpha);
-  }
-
-  /// 根据填充比例获取透明度
-  double _getAlphaFromRatio(double ratio) {
-    if (ratio < 0.25) {
-      return 0.3;
-    } else if (ratio < 0.5) {
-      return 0.5;
-    } else if (ratio < 0.75) {
-      return 0.7;
-    } else {
-      return 1.0;
-    }
-  }
-
-  Color _getTextColor(Color background) {
-    if (background == Colors.grey.withValues(alpha: 0.1)) {
-      return Colors.grey.withValues(alpha: 0.7);
-    }
-    return background.computeLuminance() > 0.5 ? Colors.black87 : Colors.white;
-  }
-
-  String _formatMinutes(int minutes) {
-    if (minutes < 60) {
-      return '${minutes}m';
-    } else {
-      final hours = minutes ~/ 60;
-      final mins = minutes % 60;
-      return mins > 0 ? '${hours}h${mins}m' : '${hours}h';
-    }
-  }
-
-  // 检查活动是否覆盖指定小时
-  bool _activityCoversHour(ActivityRecord activity, int hour) {
-    final hourStart = DateTime(
-      activity.startTime.year,
-      activity.startTime.month,
-      activity.startTime.day,
-      hour,
-      0,
-    );
-    final hourEnd = hourStart.add(const Duration(hours: 1));
-
-    return activity.startTime.isBefore(hourEnd) &&
-        activity.endTime.isAfter(hourStart);
-  }
-
-  // 计算活动在指定小时内的时长
-  int _calculateMinutesInHour(ActivityRecord activity, int hour) {
-    final hourStart = DateTime(
-      activity.startTime.year,
-      activity.startTime.month,
-      activity.startTime.day,
-      hour,
-      0,
-    );
-    final hourEnd = hourStart.add(const Duration(hours: 1));
-
-    final effectiveStart =
-        activity.startTime.isBefore(hourStart) ? hourStart : activity.startTime;
-    final effectiveEnd =
-        activity.endTime.isAfter(hourEnd) ? hourEnd : activity.endTime;
-
-    if (effectiveEnd.isBefore(effectiveStart)) {
-      return 0;
-    }
-
-    return effectiveEnd.difference(effectiveStart).inMinutes;
-  }
-
-  Widget _buildLegend(List<ActivityRecord> activities) {
-    // 统计标签使用情况
-    final tagStats = <String, int>{};
-    for (final activity in activities) {
-      for (final tag in activity.tags) {
-        tagStats[tag] = (tagStats[tag] ?? 0) + activity.durationInMinutes;
-      }
-    }
-
-    // 取前3个标签
-    final topTags =
-        tagStats.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-    final displayTags = topTags.take(3).toList();
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
-      children:
-          displayTags.map((entry) {
-            final color = _getColorFromTag(entry.key);
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text(entry.key, style: const TextStyle(fontSize: 9)),
-              ],
-            );
-          }).toList(),
-    );
-  }
-
-  // 从标签生成颜色（参考 activity_grid_view.dart）
-  Color _getColorFromTag(String tag) {
-    if (_tagColorCache.containsKey(tag)) {
-      return _tagColorCache[tag]!;
-    }
-
-    final baseHue = (tag.hashCode % 360).abs().toDouble();
-    final color = HSLColor.fromAHSL(1.0, baseHue, 0.6, 0.5).toColor();
-    _tagColorCache[tag] = color;
-    return color;
-  }
-
-  Widget _buildStats(List<ActivityRecord> activities) {
-    if (activities.isEmpty) {
-      return Text(
-        '今日暂无活动',
-        style: TextStyle(
-          fontSize: 10,
-          color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(180),
-        ),
-      );
-    }
-
-    final totalMinutes = activities.fold<int>(
-      0,
-      (sum, activity) => sum + activity.durationInMinutes,
-    );
-    final activeHours = _calculateActiveHours(activities);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          '总时长: ${_formatMinutes(totalMinutes)}',
-          style: TextStyle(
-            fontSize: 10,
-            color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(180),
-          ),
-        ),
-        Text(
-          '活跃: $activeHours小时',
-          style: TextStyle(
-            fontSize: 10,
-            color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(180),
-          ),
-        ),
-      ],
-    );
-  }
-
-  int _calculateActiveHours(List<ActivityRecord> activities) {
-    final activeHours = <int>{};
-    for (final activity in activities) {
-      final startHour = activity.startTime.hour;
-      final endHour = activity.endTime.hour;
-
-      for (int h = startHour; h <= endHour; h++) {
-        if (_activityCoversHour(activity, h)) {
-          activeHours.add(h);
-        }
-      }
-    }
-    return activeHours.length;
-  }
-
-  void _navigateToActivity(BuildContext context) {
-    try {
-      Navigator.push(
-        context,
-        NavigationHelper.createRoute(const ActivityMainView()),
-      );
-    } catch (e) {
-      toastService.showToast('activity_operationFailed'.tr);
-      debugPrint('[ActivityHeatmap] 导航失败: $e');
-    }
-  }
-}
-
 /// 时间槽数据
 class TimeSlotData {
   final int hour;
@@ -1852,4 +1233,19 @@ String _getColorNameFromTag(String tag) {
   if (colorValue == 0xFF60A5FA) return 'blue';
   if (colorValue == 0xFFF87171) return 'red';
   return 'gray';
+}
+
+/// 时间槽数据包装类（用于公共组件数据传递）
+class _TimeSlotDataWrapper {
+  final int hour;
+  final int minute;
+  final int durationMinutes;
+  final Map<String, int> tagDurations;
+
+  _TimeSlotDataWrapper({
+    required this.hour,
+    required this.minute,
+    required this.durationMinutes,
+    this.tagDurations = const {},
+  });
 }
