@@ -12,6 +12,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:intl/intl.dart';
 import 'screens/activity_timeline_screen/activity_timeline_screen.dart';
 import 'screens/activity_timeline_screen/controllers/activity_controller.dart';
 import 'screens/activity_statistics_screen.dart';
@@ -63,6 +64,10 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   List<ActivityRecord> _cachedYesterdayActivities = [];
   DateTime? _yesterdayCacheDate;
   bool _yesterdayActivitiesCacheValid = false;
+
+  // 缓存7天活动数据（用于小组件同步访问）
+  final Map<String, List<ActivityRecord>> _cachedWeeklyActivities = {};
+  bool _weeklyActivitiesCacheValid = false;
 
   // 获取活动服务实例
   ActivityService get activityService {
@@ -116,7 +121,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   Future<void> registerToApp(
-    
+
     PluginManager pluginManager,
     ConfigManager configManager,
   ) async {
@@ -129,6 +134,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       'activity_notification_tapped',
       _handleNotificationTapped,
     );
+
+    // 监听活动变化事件，刷新7天缓存
+    eventManager.subscribe('activity_added', (_) => _refreshWeeklyActivitiesCache());
+    eventManager.subscribe('activity_updated', (_) => _refreshWeeklyActivitiesCache());
+    eventManager.subscribe('activity_deleted', (_) => _refreshWeeklyActivitiesCache());
   }
 
   /// 处理通知点击事件
@@ -184,6 +194,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
 
     // 注册数据选择器
     _registerDataSelectors();
+
+    // 预加载7天活动数据缓存（用于小组件）
+    _refreshWeeklyActivitiesCache();
   }
 
   // 获取今日活动数
@@ -336,6 +349,56 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     }
 
     return _cachedYesterdayActivities;
+  }
+
+  /// 同步获取指定日期的活动列表（用于小组件渲染）
+  ///
+  /// 使用预加载的缓存数据，如果缓存未初始化则返回空列表并异步刷新缓存。
+  List<ActivityRecord> getActivitiesForDateSync(DateTime date) {
+    if (!_isInitialized) return [];
+
+    // 规范化日期到午夜
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    final dateKey = DateFormat('yyyy-MM-dd').format(normalizedDate);
+
+    // 如果缓存有效，直接返回
+    if (_weeklyActivitiesCacheValid && _cachedWeeklyActivities.containsKey(dateKey)) {
+      return _cachedWeeklyActivities[dateKey]!;
+    }
+
+    // 缓存未初始化或该日期不存在，异步刷新并返回空列表
+    _refreshWeeklyActivitiesCache();
+    return [];
+  }
+
+  /// 刷新7天活动数据缓存
+  Future<void> _refreshWeeklyActivitiesCache() async {
+    if (!_isInitialized) return;
+
+    try {
+      final now = DateTime.now();
+      _cachedWeeklyActivities.clear();
+
+      // 加载过去7天的数据
+      for (int i = 6; i >= 0; i--) {
+        final date = DateTime(now.year, now.month, now.day).subtract(Duration(days: i));
+        final dateKey = DateFormat('yyyy-MM-dd').format(date);
+
+        try {
+          final activities = await _activityService.getActivitiesForDate(date);
+          _cachedWeeklyActivities[dateKey] = activities;
+        } catch (e) {
+          // 某天的数据加载失败，记录但继续加载其他天
+          debugPrint('[ActivityPlugin] 加载 $dateKey 活动数据失败: $e');
+          _cachedWeeklyActivities[dateKey] = [];
+        }
+      }
+
+      _weeklyActivitiesCacheValid = true;
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 刷新7天活动缓存失败: $e');
+      _weeklyActivitiesCacheValid = false;
+    }
   }
 
   // ==================== 通知便捷方法 ====================

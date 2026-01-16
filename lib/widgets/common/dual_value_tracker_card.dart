@@ -495,4 +495,121 @@ class WeekData {
       elevatedPercent: 0.0,
     );
   }
+
+  /// 从 JSON 创建
+  factory WeekData.fromJson(Map<String, dynamic> json) {
+    return WeekData(
+      label: json['label'] as String,
+      normalPercent: (json['normalPercent'] as num?)?.toDouble() ?? 0.0,
+      elevatedPercent: (json['elevatedPercent'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'normalPercent': normalPercent,
+      'elevatedPercent': elevatedPercent,
+    };
+  }
+}
+
+/// 双数值追踪卡片包装器（用于 widgets_gallery 兼容性）
+///
+/// 提供从 props 创建实例的工厂方法，用于公共小组件系统。
+class DualValueTrackerCardWrapper extends StatelessWidget {
+  /// 卡片标题
+  final String title;
+
+  /// 主数值
+  final double primaryValue;
+
+  /// 次数值
+  final double secondaryValue;
+
+  /// 状态描述
+  final String? status;
+
+  /// 单位
+  final String unit;
+
+  /// 图标代码
+  final String icon;
+
+  /// 主色调
+  final Color? primaryColor;
+
+  /// 小数位数
+  final int decimalPlaces;
+
+  /// 周数据
+  final List<WeekData> weekData;
+
+  const DualValueTrackerCardWrapper({
+    super.key,
+    required this.title,
+    required this.primaryValue,
+    required this.secondaryValue,
+    this.status,
+    required this.unit,
+    required this.icon,
+    this.primaryColor,
+    this.decimalPlaces = 0,
+    required this.weekData,
+  });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory DualValueTrackerCardWrapper.fromProps(
+    Map<String, dynamic> props,
+  ) {
+    final weekDataList = props['weekData'] as List?;
+    final weekData = weekDataList?.map((item) {
+      return WeekData.fromJson(item as Map<String, dynamic>);
+    }).toList() ?? <WeekData>[];
+
+    return DualValueTrackerCardWrapper(
+      title: props['title'] as String? ?? '统计',
+      primaryValue: (props['primaryValue'] as num?)?.toDouble() ?? 0.0,
+      secondaryValue: (props['secondaryValue'] as num?)?.toDouble() ?? 0.0,
+      status: props['status'] as String?,
+      unit: props['unit'] as String? ?? '',
+      icon: props['icon'] as String? ?? 'info',
+      primaryColor: props['primaryColor'] != null
+          ? Color(props['primaryColor'] as int)
+          : null,
+      decimalPlaces: props['decimalPlaces'] as int? ?? 0,
+      weekData: weekData,
+    );
+  }
+
+  IconData _getIconData(String iconCode) {
+    // 简化的图标映射
+    switch (iconCode) {
+      case 'water_drop':
+        return Icons.water_drop;
+      case 'favorite':
+        return Icons.favorite;
+      case 'timeline':
+        return Icons.timeline;
+      default:
+        return Icons.info_outline;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DualValueTrackerCard(
+      title: title,
+      primaryValue: primaryValue,
+      secondaryValue: secondaryValue,
+      status: status,
+      unit: unit,
+      icon: _getIconData(icon),
+      primaryColor: primaryColor,
+      decimalPlaces: decimalPlaces,
+      weekData: weekData,
+      showActionButton: false,
+    );
+  }
 }

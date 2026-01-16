@@ -96,6 +96,21 @@ class ModernRoundedBalanceCard extends StatefulWidget {
     );
   }
 
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory ModernRoundedBalanceCard.fromProps(
+    Map<String, dynamic> props,
+  ) {
+    final weeklyDataList = props['weeklyData'] as List?;
+    final weeklyData = weeklyDataList?.map((e) => (e as num).toDouble()).toList() ?? <double>[];
+
+    return ModernRoundedBalanceCard(
+      title: props['title'] as String? ?? '余额',
+      balance: (props['balance'] as num?)?.toDouble() ?? 0.0,
+      available: (props['available'] as num?)?.toDouble() ?? 0.0,
+      weeklyData: weeklyData,
+    );
+  }
+
   @override
   State<ModernRoundedBalanceCard> createState() =>
       _ModernRoundedBalanceCardState();

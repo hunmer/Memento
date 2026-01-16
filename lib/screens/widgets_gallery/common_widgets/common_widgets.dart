@@ -85,6 +85,9 @@ import 'widgets/checkin_item_card.dart';
 import 'widgets/activity_heatmap_card.dart';
 import 'widgets/activity_today_pie_chart_card.dart';
 import 'widgets/timeline_schedule_card.dart';
+import 'widgets/trend_line_chart_card_wrapper.dart';
+import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
+import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -173,6 +176,9 @@ enum CommonWidgetId {
   activityHeatmapCard,
   activityTodayPieChartCard,
   timelineScheduleCard,
+  bloodPressureTracker,
+  trendLineChartCard,
+  modernRoundedBalanceCard,
 }
 
 /// 公共小组件元数据
@@ -862,6 +868,30 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large3,
       supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.large3],
     ),
+    CommonWidgetId.bloodPressureTracker: CommonWidgetMetadata(
+      id: CommonWidgetId.bloodPressureTracker,
+      name: '双数值追踪卡片',
+      description: '显示两个关联数值和周趋势柱状图，适用于血压、血糖等健康指标',
+      icon: Icons.water_drop,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.trendLineChartCard: CommonWidgetMetadata(
+      id: CommonWidgetId.trendLineChartCard,
+      name: '趋势折线图卡片',
+      description: '带动画效果的折线图组件，支持显示标题、图标、数值和时间轴标签',
+      icon: Icons.show_chart,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
+    CommonWidgetId.modernRoundedBalanceCard: CommonWidgetMetadata(
+      id: CommonWidgetId.modernRoundedBalanceCard,
+      name: '现代圆角余额卡片',
+      description: '展示余额和可用额度，带有每周数据柱状图',
+      icon: Icons.account_balance_wallet,
+      defaultSize: HomeWidgetSize.large,
+      supportedSizes: [HomeWidgetSize.large],
+    ),
   };
 
   /// 获取元数据
@@ -1061,6 +1091,12 @@ class CommonWidgetBuilder {
         return ActivityTodayPieChartCardWidget.fromProps(props, size);
       case CommonWidgetId.timelineScheduleCard:
         return TimelineScheduleCard.fromProps(props, size);
+      case CommonWidgetId.bloodPressureTracker:
+        return DualValueTrackerCardWrapper.fromProps(props);
+      case CommonWidgetId.trendLineChartCard:
+        return TrendLineChartCardWrapper.fromProps(props, size);
+      case CommonWidgetId.modernRoundedBalanceCard:
+        return ModernRoundedBalanceCard.fromProps(props);
     }
   }
 }
