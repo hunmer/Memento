@@ -18,6 +18,12 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
   /// 消费分类列表
   final List<SpendingCategory> categories;
 
+  /// 分类项目组（每个分类下的详细项目列表）
+  final List<CategoryItemGroup> categoryItems;
+
+  /// 单位（默认为空字符串，可设置为 "分钟"、"小时" 等）
+  final String unit;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -30,6 +36,8 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
     required this.currentSpending,
     required this.budget,
     required this.categories,
+    this.categoryItems = const [],
+    this.unit = '',
     this.inline = false,
     this.size = HomeWidgetSize.medium,
   });
@@ -41,12 +49,19 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
   ) {
     return ModernRoundedSpendingWidget(
       title: props['title'] as String? ?? 'Spending',
-      currentSpending: (props['currentSpending'] as num?)?.toDouble() ?? 0.0,
-      budget: (props['budget'] as num?)?.toDouble() ?? 100.0,
+      currentSpending: (props['currentAmount'] as num?)?.toDouble() ??
+          (props['currentSpending'] as num?)?.toDouble() ?? 0.0,
+      budget: (props['budgetAmount'] as num?)?.toDouble() ??
+          (props['budget'] as num?)?.toDouble() ?? 100.0,
       categories: (props['categories'] as List<dynamic>?)
               ?.map((e) => SpendingCategory.fromMap(e as Map<String, dynamic>))
               .toList() ??
           [],
+      categoryItems: (props['categoryItems'] as List<dynamic>?)
+              ?.map((e) => CategoryItemGroup.fromMap(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      unit: props['unit'] as String? ?? '',
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -99,6 +114,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 340,
+              constraints: const BoxConstraints(maxHeight: 500),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(40),
@@ -135,7 +151,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            '\$${(widget.currentSpending * _animation.value).toInt()}',
+                            '${(widget.currentSpending * _animation.value).toInt()}${widget.unit}',
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,
@@ -148,7 +164,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
-                              '/ ${widget.budget.toInt()}',
+                              '/ ${widget.budget.toInt()}${widget.unit}',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w500,
@@ -192,26 +208,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                     child: SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: List.generate(widget.categories.length, (index) {
-                          final category = widget.categories[index];
-                          final itemAnimation = CurvedAnimation(
-                            parent: _animationController,
-                            curve: Interval(
-                              0.3 + index * 0.1,
-                              0.8 + index * 0.05,
-                              curve: Curves.easeOutCubic,
-                            ),
-                          );
-
-                          return Padding(
-                            padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
-                            child: _CategoryItem(
-                              category: category,
-                              animation: itemAnimation,
-                              textColor: textColor,
-                            ),
-                          );
-                        }),
+                        children: _buildCategoryItems(textColor, secondaryTextColor),
                       ),
                     ),
                   ),
@@ -223,18 +220,64 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
       },
     );
   }
+
+  /// 构建分类列表和详细项目
+  List<Widget> _buildCategoryItems(Color textColor, Color secondaryTextColor) {
+    final widgets = <Widget>[];
+
+    for (int i = 0; i < widget.categories.length; i++) {
+      final category = widget.categories[i];
+      final itemAnimation = CurvedAnimation(
+        parent: _animationController,
+        curve: Interval(
+          0.3 + i * 0.1,
+          0.8 + i * 0.05,
+          curve: Curves.easeOutCubic,
+        ),
+      );
+
+      // 查找该分类的详细项目
+      final itemGroup = widget.categoryItems.firstWhere(
+        (g) => g.categoryName == category.name,
+        orElse: () => const CategoryItemGroup(categoryName: '', items: []),
+      );
+
+      // 分类项（包含详细项目在右侧）
+      widgets.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
+          child: _CategoryItem(
+            category: category,
+            detailItems: itemGroup.items,
+            animation: itemAnimation,
+            textColor: textColor,
+            secondaryTextColor: secondaryTextColor,
+            unit: widget.unit,
+          ),
+        ),
+      );
+    }
+
+    return widgets;
+  }
 }
 
 /// 分类列表项
 class _CategoryItem extends StatelessWidget {
   final SpendingCategory category;
+  final List<CategoryItem> detailItems;
   final Animation<double> animation;
   final Color textColor;
+  final Color secondaryTextColor;
+  final String unit;
 
   const _CategoryItem({
     required this.category,
+    required this.detailItems,
     required this.animation,
     required this.textColor,
+    required this.secondaryTextColor,
+    required this.unit,
   });
 
   @override
@@ -247,46 +290,123 @@ class _CategoryItem extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(10 * (1 - animation.value), 0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 颜色块和名称
-                Row(
-                  children: [
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: category.color,
-                        borderRadius: BorderRadius.circular(4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: category.color.withOpacity(0.3),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                // 左侧：颜色块、名称和详细信息
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: category.color,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: category.color.withOpacity(0.3),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      // 分类名称
+                      Text(
+                        category.name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: textColor.withOpacity(0.87),
+                        ),
+                      ),
+                      // 详细信息（副标题，显示在名称右侧）
+                      if (detailItems.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            detailItems.map((e) => e.title).join(' · '),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: secondaryTextColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Text(
-                      category.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: textColor.withOpacity(0.87),
-                      ),
-                    ),
-                  ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                // 金额
+                // 右侧：金额（单位在数值后方）
                 Text(
-                  '\$${category.amount.toInt()}',
+                  '${category.amount.toInt()}$unit',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: textColor,
                     letterSpacing: -0.3,
                   ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 分类详细项目（已弃用 - 详细信息现在显示在分类行右侧）
+class _CategoryDetailItem extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final Animation<double> animation;
+  final Color textColor;
+  final Color secondaryTextColor;
+
+  const _CategoryDetailItem({
+    required this.title,
+    required this.subtitle,
+    required this.animation,
+    required this.textColor,
+    required this.secondaryTextColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: animation.value,
+          child: Transform.translate(
+            offset: Offset(5 * (1 - animation.value), 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: textColor.withOpacity(0.7),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: secondaryTextColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

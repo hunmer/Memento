@@ -6,10 +6,12 @@ import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 class TaskItem {
   final String title;
   final Color color;
+  final String tag;
 
   const TaskItem({
     required this.title,
     required this.color,
+    this.tag = '',
   });
 
   /// 从 JSON 创建（用于公共小组件系统）
@@ -17,6 +19,7 @@ class TaskItem {
     return TaskItem(
       title: json['title'] as String? ?? '',
       color: Color(json['color'] as int? ?? 0xFF000000),
+      tag: json['tag'] as String? ?? '',
     );
   }
 
@@ -25,6 +28,7 @@ class TaskItem {
     return {
       'title': title,
       'color': color.value,
+      'tag': tag,
     };
   }
 }
@@ -34,6 +38,8 @@ class UpcomingTasksWidget extends StatefulWidget {
   final int taskCount;
   final List<TaskItem> tasks;
   final int moreCount;
+  /// 自定义标题（默认为 "Upcoming"）
+  final String title;
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
   /// 小组件尺寸
@@ -44,6 +50,7 @@ class UpcomingTasksWidget extends StatefulWidget {
     required this.taskCount,
     required this.tasks,
     this.moreCount = 0,
+    this.title = 'Upcoming',
     this.inline = false,
     this.size = HomeWidgetSize.medium,
   });
@@ -62,6 +69,7 @@ class UpcomingTasksWidget extends StatefulWidget {
       taskCount: props['taskCount'] as int? ?? 0,
       tasks: tasksList,
       moreCount: props['moreCount'] as int? ?? 0,
+      title: props['title'] as String? ?? 'Upcoming',
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -108,10 +116,11 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
+              height: widget.inline ? double.maxFinite : 300,
               width: widget.inline ? double.maxFinite : 400,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -159,9 +168,9 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
         ),
         SizedBox(height: widget.size.getItemSpacing()),
         SizedBox(
-          width: 64,
+          width: 50,
           child: Text(
-            'Upcoming tasks',
+            widget.title,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -294,6 +303,20 @@ class _TaskItemWidget extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    // 标签（显示在右侧）
+                    if (task.tag.isNotEmpty) ...[
+                      SizedBox(width: size.getItemSpacing()),
+                      Text(
+                        task.tag,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
               ),

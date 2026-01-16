@@ -148,6 +148,7 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
             opacity: _animation.value,
             child: Container(
               width: 344,
+              constraints: const BoxConstraints(maxHeight: 400),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(8),
@@ -167,8 +168,20 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
                   // 标题栏
                   _buildHeader(context, primaryColor, subtextColor),
                   const SizedBox(height: 24),
-                  // 任务列表
-                  ..._buildTaskList(context, primaryColor, subtextColor),
+                  // 任务列表 - 支持滚动
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: _buildTaskList(
+                          context,
+                          primaryColor,
+                          subtextColor,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
