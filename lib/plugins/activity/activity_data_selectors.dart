@@ -118,4 +118,84 @@ void _registerDataSelectors() {
       ],
     ),
   );
+
+  // 3. 活动标签选择器（用于小组件配置）
+  pluginDataSelectorService.registerSelector(
+    SelectorDefinition(
+      id: 'activity.tag',
+      pluginId: ActivityPlugin.instance.id,
+      name: '选择活动标签',
+      icon: Icons.tag,
+      color: ActivityPlugin.instance.color,
+      searchable: true,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'tag',
+          title: '选择标签',
+          viewType: SelectorViewType.list,
+          isFinalStep: true,
+          dataLoader: (_) async {
+            // 获取最近使用的标签
+            final recentTags = await ActivityPlugin.instance.activityService.getRecentTags();
+
+            // 获取标签分组
+            final tagGroups = await ActivityPlugin.instance.activityService.getTagGroups();
+
+            // 收集所有唯一标签
+            final allTags = <String>{};
+
+            // 添加最近使用的标签
+            allTags.addAll(recentTags);
+
+            // 从标签组收集标签
+            for (final group in tagGroups) {
+              allTags.addAll(group.tags.map((t) => t.name));
+            }
+
+            // 如果没有标签，返回提示
+            if (allTags.isEmpty) {
+              return [
+                SelectableItem(
+                  id: 'no_tags',
+                  title: '暂无标签',
+                  subtitle: '请先创建活动并添加标签',
+                  icon: Icons.info_outline,
+                  color: Colors.grey,
+                  rawData: null,
+                  selectable: false,
+                ),
+              ];
+            }
+
+            // 生成可选标签列表
+            return allTags.map((tag) {
+              final isRecent = recentTags.contains(tag);
+              return SelectableItem(
+                id: tag,
+                title: tag,
+                subtitle: isRecent ? '最近使用' : '标签',
+                icon: Icons.label,
+                color: _getColorFromTag(tag),
+                rawData: {'tag': tag},
+              );
+            }).toList();
+          },
+          searchFilter: (items, query) {
+            if (query.isEmpty) return items;
+            final lowerQuery = query.toLowerCase();
+            return items.where((item) {
+              return item.title.toLowerCase().contains(lowerQuery);
+            }).toList();
+          },
+        ),
+      ],
+    ),
+  );
+}
+
+/// 从标签生成颜色
+Color _getColorFromTag(String tag) {
+  final baseHue = (tag.hashCode % 360).abs().toDouble();
+  return HSLColor.fromAHSL(1.0, baseHue, 0.6, 0.5).toColor();
 }

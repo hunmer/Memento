@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
@@ -151,6 +152,808 @@ class ActivityHomeWidgets {
             },
           );
         },
+      ),
+    );
+
+    // 标签七天活动统计小组件 - 支持多种图表展示
+    registry.register(
+      HomeWidget(
+        id: 'activity_tag_weekly_chart',
+        pluginId: 'activity',
+        name: '标签七天统计',
+        description: '展示指定标签近七天的活动时长统计，支持多种图表样式',
+        icon: Icons.tag,
+        color: Colors.pink,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+        category: 'home_categoryRecord'.tr,
+        selectorId: 'activity.tag',
+        dataSelector: _extractTagWeeklyWidgetData,
+        dataRenderer: _renderTagWeeklyChartData,
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('activity_tag_weekly_chart')!,
+            config: config,
+          );
+        },
+      ),
+    );
+  }
+
+  /// 从选择器数据中提取标签统计数据
+  static Map<String, dynamic> _extractTagWeeklyWidgetData(
+    List<dynamic> dataArray,
+  ) {
+    if (dataArray.isEmpty || dataArray[0] == null) {
+      return {'tag': null};
+    }
+    final tagData = dataArray[0] as Map<String, dynamic>;
+    return {'tag': tagData['tag'] as String?};
+  }
+
+  /// 渲染标签周统计图表数据
+  static Widget _renderTagWeeklyChartData(
+    BuildContext context,
+    SelectorResult result,
+    Map<String, dynamic> config,
+  ) {
+    final data =
+        result.data is Map<String, dynamic>
+            ? result.data as Map<String, dynamic>
+            : {};
+    final tag = data['tag'] as String?;
+
+    if (tag == null) {
+      return _buildNoTagSelectedWidget(context);
+    }
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return EventListenerContainer(
+          events: const [
+            'activity_added',
+            'activity_updated',
+            'activity_deleted',
+          ],
+          onEvent: () => setState(() {}),
+          child: _buildTagWeeklyChartWidget(context, tag),
+        );
+      },
+    );
+  }
+
+  /// 构建未选择标签时的提示组件
+  static Widget _buildNoTagSelectedWidget(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.tag, size: 48, color: Colors.pink.withOpacity(0.5)),
+          const SizedBox(height: 16),
+          Text(
+            '请选择标签',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '长按卡片选择标签以查看统计',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建标签周统计图表组件
+  static Widget _buildTagWeeklyChartWidget(BuildContext context, String tag) {
+    final plugin =
+        PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+    if (plugin == null) {
+      return HomeWidget.buildErrorWidget(context, '插件未加载');
+    }
+
+    // 获取过去7天的数据并按标签过滤
+    final now = DateTime.now();
+    final tagColor = _getColorFromTagForWidgets(tag);
+    final weekDayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+
+    // 获取7天数据
+    final sevenDaysData = <_DayActivityData>[];
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final allActivities = plugin.getActivitiesForDateSync(date);
+      // 按标签过滤
+      final filteredActivities =
+          allActivities.where((a) => a.tags.contains(tag)).toList();
+      final totalMinutes = filteredActivities.fold<int>(
+        0,
+        (sum, a) => sum + a.durationInMinutes,
+      );
+      sevenDaysData.add(
+        _DayActivityData(
+          date: date,
+          totalMinutes: totalMinutes,
+          activityCount: filteredActivities.length,
+        ),
+      );
+    }
+
+    // 计算统计数据
+    final totalWeekMinutes = sevenDaysData.fold<int>(
+      0,
+      (sum, d) => sum + d.totalMinutes,
+    );
+    final avgMinutes = totalWeekMinutes / 7;
+    final maxMinutes = sevenDaysData
+        .map((d) => d.totalMinutes)
+        .reduce((a, b) => a > b ? a : b);
+
+    // 获取今天和昨天的数据用于对比
+    final todayMinutes = sevenDaysData.last.totalMinutes.toDouble();
+    final yesterdayMinutes =
+        sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
+    final changePercent =
+        yesterdayMinutes > 0
+            ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100)
+                .floor()
+            : 0;
+
+    // 格式化日期范围
+    final startDate = DateFormat('MM月dd日').format(sevenDaysData.first.date);
+    final endDate = DateFormat('MM月dd日').format(sevenDaysData.last.date);
+
+    // 准备图表数据
+    final weeklyDurations =
+        sevenDaysData.map((d) => d.totalMinutes.toDouble()).toList();
+    final weeklyNormalized =
+        maxMinutes > 0
+            ? weeklyDurations.map((d) => d / maxMinutes).toList()
+            : List.filled(7, 0.0);
+
+    final weekDayLabelsEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // MiniTrendCard - 迷你趋势图
+          _buildMiniTrendCard(
+            context,
+            tag,
+            tagColor,
+            avgMinutes,
+            weekDayLabels,
+            weeklyNormalized,
+          ),
+          const SizedBox(height: 12),
+          // TrendValueCard - 趋势数值卡片
+          _buildTrendValueCard(
+            context,
+            tag,
+            tagColor,
+            avgMinutes,
+            changePercent,
+            weeklyNormalized,
+            startDate,
+            endDate,
+          ),
+          const SizedBox(height: 12),
+          // WeeklyBarsCard - 周柱状图
+          _buildWeeklyBarsCard(
+            context,
+            tag,
+            tagColor,
+            avgMinutes,
+            weeklyNormalized,
+          ),
+          const SizedBox(height: 12),
+          // EarningsTrendCard - 收益趋势样式卡片
+          _buildEarningsTrendCard(
+            context,
+            tag,
+            totalWeekMinutes,
+            changePercent,
+            weeklyDurations,
+            maxMinutes,
+          ),
+          const SizedBox(height: 12),
+          // SpendingTrendChart - 支出趋势对比样式卡片
+          _buildSpendingTrendChart(
+            context,
+            tag,
+            startDate,
+            endDate,
+            weeklyDurations,
+            maxMinutes,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建 MiniTrendCard 组件
+  static Widget _buildMiniTrendCard(
+    BuildContext context,
+    String tag,
+    Color tagColor,
+    double avgMinutes,
+    List<String> weekDayLabels,
+    List<double> dailyValues,
+  ) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.error;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.label, size: 28, color: tagColor),
+              const SizedBox(width: 8),
+              Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.textTheme.bodyMedium?.color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 52,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          avgMinutes.toStringAsFixed(1),
+                          style: TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            color: theme.textTheme.bodyMedium?.color,
+                            height: 1.0,
+                            letterSpacing: -1,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            '分钟',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: theme.textTheme.bodySmall?.color,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '日均活动时长',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ),
+              // 迷你趋势图
+              SizedBox(
+                width: 140,
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      child: CustomPaint(
+                        size: const Size(140, 60),
+                        painter: _MiniTrendPainter(
+                          data: dailyValues,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children:
+                          weekDayLabels.map((day) {
+                            return Text(
+                              day,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF9CA3AF),
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建 TrendValueCard 组件
+  static Widget _buildTrendValueCard(
+    BuildContext context,
+    String tag,
+    Color tagColor,
+    double avgMinutes,
+    int changePercent,
+    List<double> dailyValues,
+    String startDate,
+    String endDate,
+  ) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.error;
+
+    final chartData = dailyValues.map((v) => v * 100).toList();
+    final trendUp = changePercent >= 0;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.trending_up, color: primaryColor, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$tag 活动趋势',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: theme.textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color:
+                      trendUp
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trendUp ? Icons.arrow_upward : Icons.arrow_downward,
+                      color: trendUp ? Colors.green : Colors.red,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${changePercent.abs()}%',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: trendUp ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    avgMinutes.toStringAsFixed(1),
+                    style: TextStyle(
+                      fontSize: 56,
+                      fontWeight: FontWeight.bold,
+                      color: theme.textTheme.bodyMedium?.color,
+                      height: 1.0,
+                      letterSpacing: -1.5,
+                    ),
+                  ),
+                  Text(
+                    '分钟/天',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                width: 140,
+                height: 80,
+                padding: const EdgeInsets.only(top: 8),
+                child: CustomPaint(
+                  size: const Size(140, 80),
+                  painter: _SmoothTrendPainter(
+                    data: chartData,
+                    color: primaryColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                startDate,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
+              Text(
+                endDate,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建 WeeklyBarsCard 组件
+  static Widget _buildWeeklyBarsCard(
+    BuildContext context,
+    String tag,
+    Color tagColor,
+    double avgMinutes,
+    List<double> dailyValues,
+  ) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.error;
+    final weekDayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.bar_chart, color: primaryColor, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                '$tag 周统计',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.textTheme.bodyMedium?.color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // 柱状图
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: List.generate(7, (index) {
+              final value = dailyValues[index];
+              return Column(
+                children: [
+                  // 柱子
+                  Container(
+                    width: 24,
+                    height: 100 * value.clamp(0.0, 1.0),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    weekDayLabels[index],
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '日均: ${avgMinutes.toStringAsFixed(1)} 分钟',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: theme.textTheme.bodySmall?.color,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建 EarningsTrendCard 样式组件
+  static Widget _buildEarningsTrendCard(
+    BuildContext context,
+    String tag,
+    int totalMinutes,
+    int changePercent,
+    List<double> weeklyDurations,
+    int maxMinutes,
+  ) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.error;
+    final trendUp = changePercent >= 0;
+
+    // 转换数据为图表格式
+    final chartData =
+        weeklyDurations.map((d) {
+          return maxMinutes > 0
+              ? (d / maxMinutes * 100).clamp(0.0, 100.0)
+              : 0.0;
+        }).toList();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [theme.cardColor, theme.cardColor.withOpacity(0.95)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.show_chart, color: primaryColor, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$tag 总时长',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: theme.textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
+                decoration: BoxDecoration(
+                  color: (trendUp ? Colors.green : Colors.red).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trendUp ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                      color: trendUp ? Colors.green : Colors.red,
+                      size: 20,
+                    ),
+                    Text(
+                      '${changePercent.abs()}%',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: trendUp ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                '${(totalMinutes / 60).toStringAsFixed(1)}',
+                style: TextStyle(
+                  fontSize: 52,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textTheme.bodyMedium?.color,
+                  height: 1.0,
+                  letterSpacing: -1,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  '小时',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // 折线图
+          SizedBox(
+            height: 100,
+            child: CustomPaint(
+              size: Size(MediaQuery.of(context).size.width - 120, 100),
+              painter: _EarningsLinePainter(
+                data: chartData,
+                color: primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建 SpendingTrendChart 样式组件
+  static Widget _buildSpendingTrendChart(
+    BuildContext context,
+    String tag,
+    String startDate,
+    String endDate,
+    List<double> weeklyDurations,
+    int maxMinutes,
+  ) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.error;
+
+    // 转换数据为对比格式
+    final currentMonthData =
+        weeklyDurations.map((d) {
+          return maxMinutes > 0 ? d : 0.0;
+        }).toList();
+    final previousMonthData = List.generate(7, (index) {
+      // 模拟上周数据（基于当前数据的80%）
+      return index > 0 ? currentMonthData[index - 1] * 0.8 : 0.0;
+    });
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(Icons.compare_arrows, color: primaryColor, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                '$tag 对比趋势',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.textTheme.bodyMedium?.color,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 标题
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '本周',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: primaryColor,
+                ),
+              ),
+              Text(
+                '上周',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // 趋势对比图
+          SizedBox(
+            height: 120,
+            child: CustomPaint(
+              size: Size(MediaQuery.of(context).size.width - 120, 120),
+              painter: _ComparisonTrendPainter(
+                currentData: currentMonthData,
+                previousData: previousMonthData,
+                currentColor: primaryColor,
+                previousColor:
+                    theme.textTheme.bodySmall?.color?.withOpacity(0.4) ??
+                    Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                startDate,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
+              Text(
+                endDate,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1604,4 +2407,357 @@ String _formatTimeToAMPM(DateTime time) {
   final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
   final minuteStr = minute.toString().padLeft(2, '0');
   return '$hour12:$minuteStr$period';
+}
+
+// ==================== 标签周统计图表画笔 ====================
+
+/// 迷你趋势图画笔
+class _MiniTrendPainter extends CustomPainter {
+  final List<double> data;
+  final Color color;
+
+  _MiniTrendPainter({required this.data, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final chartHeight = 60.0;
+    final chartWidth = 140.0;
+    final stepX = chartWidth / (data.length - 1);
+    final maxValue = data
+        .reduce((a, b) => a > b ? a : b)
+        .clamp(0.01, double.infinity);
+
+    // 绘制渐变填充
+    final gradientPath = Path();
+    gradientPath.moveTo(0, chartHeight);
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        gradientPath.lineTo(x, y);
+      } else {
+        gradientPath.lineTo(x, y);
+      }
+    }
+    gradientPath.lineTo(chartWidth, chartHeight);
+    gradientPath.close();
+
+    final fillPaint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [color.withOpacity(0.2), color.withOpacity(0.0)],
+          ).createShader(Rect.fromLTWH(0, 0, chartWidth, chartHeight));
+    canvas.drawPath(gradientPath, fillPaint);
+
+    // 绘制折线
+    final linePath = Path();
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        linePath.moveTo(x, y);
+      } else {
+        linePath.lineTo(x, y);
+      }
+    }
+
+    final linePaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0
+          ..strokeCap = StrokeCap.round;
+    canvas.drawPath(linePath, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _MiniTrendPainter oldDelegate) =>
+      oldDelegate.data != data || oldDelegate.color != color;
+}
+
+/// 平滑趋势图画笔
+class _SmoothTrendPainter extends CustomPainter {
+  final List<double> data;
+  final Color color;
+
+  _SmoothTrendPainter({required this.data, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final chartHeight = 80.0;
+    final chartWidth = 140.0;
+    final stepX = chartWidth / (data.length - 1);
+    final maxValue = 100.0;
+
+    // 绘制渐变填充
+    final gradientPath = Path();
+    gradientPath.moveTo(0, chartHeight);
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        gradientPath.lineTo(x, y);
+      } else {
+        gradientPath.lineTo(x, y);
+      }
+    }
+    gradientPath.lineTo(chartWidth, chartHeight);
+    gradientPath.close();
+
+    final fillPaint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [color.withOpacity(0.25), color.withOpacity(0.0)],
+          ).createShader(Rect.fromLTWH(0, 0, chartWidth, chartHeight));
+    canvas.drawPath(gradientPath, fillPaint);
+
+    // 绘制折线
+    final linePath = Path();
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        linePath.moveTo(x, y);
+      } else {
+        linePath.lineTo(x, y);
+      }
+    }
+
+    final linePaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.0
+          ..strokeCap = StrokeCap.round;
+    canvas.drawPath(linePath, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SmoothTrendPainter oldDelegate) =>
+      oldDelegate.data != data || oldDelegate.color != color;
+}
+
+/// 收益趋势折线图画笔
+class _EarningsLinePainter extends CustomPainter {
+  final List<double> data;
+  final Color color;
+
+  _EarningsLinePainter({required this.data, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (data.isEmpty) return;
+
+    final chartHeight = 100.0;
+    final stepX = size.width / (data.length - 1);
+    final maxValue = 100.0;
+
+    // 绘制渐变填充
+    final gradientPath = Path();
+    gradientPath.moveTo(0, chartHeight);
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        gradientPath.lineTo(x, y);
+      } else {
+        gradientPath.lineTo(x, y);
+      }
+    }
+    gradientPath.lineTo(size.width, chartHeight);
+    gradientPath.close();
+
+    final fillPaint =
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [color.withOpacity(0.3), color.withOpacity(0.0)],
+          ).createShader(Rect.fromLTWH(0, 0, size.width, chartHeight));
+    canvas.drawPath(gradientPath, fillPaint);
+
+    // 绘制折线
+    final linePath = Path();
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        linePath.moveTo(x, y);
+      } else {
+        linePath.lineTo(x, y);
+      }
+    }
+
+    final linePaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.0
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(linePath, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _EarningsLinePainter oldDelegate) =>
+      oldDelegate.data != data || oldDelegate.color != color;
+}
+
+/// 对比趋势图画笔（本周 vs 上周）
+class _ComparisonTrendPainter extends CustomPainter {
+  final List<double> currentData;
+  final List<double> previousData;
+  final Color currentColor;
+  final Color previousColor;
+
+  _ComparisonTrendPainter({
+    required this.currentData,
+    required this.previousData,
+    required this.currentColor,
+    required this.previousColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (currentData.isEmpty) return;
+
+    final chartHeight = 120.0;
+    final stepX = size.width / (currentData.length - 1);
+    final maxValue = _getMaxValue().clamp(0.01, double.infinity);
+
+    // 绘制上周数据（虚线）
+    _drawDashedLine(
+      canvas,
+      previousData,
+      stepX,
+      chartHeight,
+      maxValue,
+      previousColor,
+    );
+
+    // 绘制本周数据（实线）
+    _drawSolidLine(
+      canvas,
+      currentData,
+      stepX,
+      chartHeight,
+      maxValue,
+      currentColor,
+    );
+  }
+
+  double _getMaxValue() {
+    final currentMax =
+        currentData.isEmpty ? 0.0 : currentData.reduce((a, b) => a > b ? a : b);
+    final previousMax =
+        previousData.isEmpty
+            ? 0.0
+            : previousData.reduce((a, b) => a > b ? a : b);
+    return (currentMax > previousMax ? currentMax : previousMax) * 1.2;
+  }
+
+  void _drawDashedLine(
+    Canvas canvas,
+    List<double> data,
+    double stepX,
+    double chartHeight,
+    double maxValue,
+    Color color,
+  ) {
+    final path = Path();
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0
+          ..strokeCap = StrokeCap.round;
+
+    // 绘制虚线效果
+    _drawDashedPath(canvas, path, paint, 8, 4);
+  }
+
+  void _drawSolidLine(
+    Canvas canvas,
+    List<double> data,
+    double stepX,
+    double chartHeight,
+    double maxValue,
+    Color color,
+  ) {
+    final path = Path();
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3.0
+          ..strokeCap = StrokeCap.round;
+    canvas.drawPath(path, paint);
+
+    // 绘制数据点
+    for (int i = 0; i < data.length; i++) {
+      final x = i * stepX;
+      final y = chartHeight - (data[i] / maxValue) * chartHeight;
+      canvas.drawCircle(Offset(x, y), 4.0, Paint()..color = color);
+    }
+  }
+
+  void _drawDashedPath(
+    Canvas canvas,
+    Path path,
+    Paint paint,
+    int dashLength,
+    int gapLength,
+  ) {
+    final metrics = path.computeMetrics().first;
+    double distance = 0.0;
+    bool isDash = true;
+
+    while (distance < metrics.length) {
+      final tangent = metrics.getTangentForOffset(distance)!;
+      if (isDash) {
+        final dashEnd = (distance + dashLength).clamp(0.0, metrics.length);
+        final dashTangent = metrics.getTangentForOffset(dashEnd)!;
+        canvas.drawLine(tangent.position, dashTangent.position, paint);
+        distance = dashEnd;
+      } else {
+        distance = (distance + gapLength).clamp(0.0, metrics.length);
+      }
+      isDash = !isDash;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ComparisonTrendPainter oldDelegate) =>
+      oldDelegate.currentData != currentData ||
+      oldDelegate.previousData != previousData ||
+      oldDelegate.currentColor != currentColor ||
+      oldDelegate.previousColor != previousColor;
 }
