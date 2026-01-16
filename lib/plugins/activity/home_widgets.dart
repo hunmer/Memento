@@ -511,19 +511,19 @@ class ActivityHomeWidgets {
 
       // 即将到来的任务小组件：显示接下来的活动
       'upcomingTasksWidget': {
-        'title': '活动记录',
-        'count': todayActivityCount,
+        'title': '活动',
+        'taskCount': todayActivityCount,
         'moreCount': 0,
-        'items':
+        'tasks':
             todayActivities
                 .take(4)
                 .map(
                   (a) => {
                     'title': a.title.isEmpty ? '未命名活动' : a.title,
-                    'subtitle':
-                        _formatTimeRangeStatic(a.startTime, a.endTime),
-                    'time': _formatTimeStatic(a.startTime),
-                    'tag': a.tags.isNotEmpty ? a.tags.first : '',
+                    'color': a.tags.isNotEmpty
+                        ? _getColorFromTagForWidgets(a.tags.first).value
+                        : Colors.pink.value,
+                    'tag': _formatTimeRangeStatic(a.startTime, a.endTime),
                   },
                 )
                 .toList(),
@@ -531,14 +531,14 @@ class ActivityHomeWidgets {
 
       // 圆角任务列表卡片
       'roundedTaskListCard': {
-        'date': '${now.month}月${now.day}日',
-        'items':
+        'headerText': '今日活动',
+        'tasks':
             todayActivities
                 .map(
                   (a) => {
                     'title': a.title.isEmpty ? '未命名活动' : a.title,
-                    'time': _formatTimeStatic(a.startTime),
-                    'isCompleted': true,
+                    'subtitle': _formatTimeRangeStatic(a.startTime, a.endTime),
+                    'date': '${now.month}月${now.day}日',
                   },
                 )
                 .toList(),
@@ -564,27 +564,25 @@ class ActivityHomeWidgets {
         'title': '今日活动',
         'currentAmount': todayDurationMinutes.toDouble(),
         'budgetAmount': (12 * 60).toDouble(), // 12小时目标
+        'unit': '分钟',
         'categories':
             tagStats.entries
-                .take(4)
                 .map(
                   (e) => {
                     'name': e.key,
                     'amount': e.value.toDouble(),
                     'color': _getColorFromTagForWidgets(e.key).value,
-                    'progress': e.value / (12 * 60),
                   },
                 )
                 .toList(),
         'categoryItems':
             activitiesByTag.entries
-                .take(3)
                 .map(
                   (e) => {
                     'categoryName': e.key,
                     'items':
                         e.value
-                            .take(3)
+                            .take(5)
                             .map(
                               (a) => {
                                 'title': a.title.isEmpty ? '未命名活动' : a.title,

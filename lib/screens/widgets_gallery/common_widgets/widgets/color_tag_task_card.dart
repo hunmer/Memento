@@ -88,9 +88,11 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
         );
       },
       child: Container(
+        width: widget.inline ? double.maxFinite : 320,
+        height: widget.inline ? double.maxFinite : 320,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
