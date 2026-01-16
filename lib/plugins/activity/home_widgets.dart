@@ -122,6 +122,37 @@ class ActivityHomeWidgets {
         },
       ),
     );
+
+    // 七天活动统计小组件 - 支持多种图表展示
+    registry.register(
+      HomeWidget(
+        id: 'activity_weekly_chart',
+        pluginId: 'activity',
+        name: '七天活动统计',
+        description: '展示近七天的活动时长统计，支持多种图表样式',
+        icon: Icons.bar_chart,
+        color: Colors.pink,
+        defaultSize: HomeWidgetSize.large,
+        supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+        category: 'home_categoryRecord'.tr,
+        commonWidgetsProvider: _provideWeeklyChartWidgets,
+        builder: (context, config) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return EventListenerContainer(
+                events: const [
+                  'activity_added',
+                  'activity_updated',
+                  'activity_deleted',
+                ],
+                onEvent: () => setState(() {}),
+                child: _buildCommonWidgetsWidget(context, config),
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 
   /// 获取可用的统计项
@@ -831,6 +862,204 @@ class ActivityHomeWidgets {
     return activeHours.length;
   }
 
+  /// 七天活动统计图表小组件提供者
+  static Map<String, Map<String, dynamic>> _provideWeeklyChartWidgets(
+    Map<String, dynamic> data,
+  ) {
+    final plugin =
+        PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+    if (plugin == null) return {};
+
+    // 获取过去7天的活动数据
+    final now = DateTime.now();
+    final sevenDaysData = <_DayActivityData>[];
+    final weekDayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+    final weekDayLabelsEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    for (int i = 6; i >= 0; i--) {
+      final date = now.subtract(Duration(days: i));
+      final activities = plugin.getActivitiesForDateSync(date);
+      final totalMinutes = activities.fold<int>(
+        0,
+        (sum, a) => sum + a.durationInMinutes,
+      );
+      sevenDaysData.add(_DayActivityData(
+        date: date,
+        totalMinutes: totalMinutes,
+        activityCount: activities.length,
+      ));
+    }
+
+    // 计算统计数据
+    final totalWeekMinutes = sevenDaysData.fold<int>(
+      0,
+      (sum, d) => sum + d.totalMinutes,
+    );
+    final avgMinutes = totalWeekMinutes / 7;
+    final maxMinutes =
+        sevenDaysData.map((d) => d.totalMinutes).reduce((a, b) => a > b ? a : b);
+
+    // 为各种图表组件准备数据
+    final weeklyDurations = sevenDaysData.map((d) => d.totalMinutes.toDouble()).toList();
+    final weeklyNormalized = maxMinutes > 0
+        ? weeklyDurations.map((d) => d / maxMinutes).toList()
+        : List.filled(7, 0.0);
+
+    // 格式化日期范围
+    final startDate = DateFormat('MM月dd日').format(sevenDaysData.first.date);
+    final endDate = DateFormat('MM月dd日').format(sevenDaysData.last.date);
+
+    // 获取今天和昨天的数据用于对比
+    final todayMinutes = sevenDaysData.last.totalMinutes.toDouble();
+    final yesterdayMinutes = sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
+    final changePercent = yesterdayMinutes > 0
+        ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100)
+        : 0.0;
+
+    return {
+      // StressLevelMonitor (CardBarChartMonitor) - 压力水平监测样式
+      'stressLevelMonitor': {
+        'title': '活动时长',
+        'icon': 'timeline',
+        'currentScore': avgMinutes,
+        'status': _getActivityStatus(avgMinutes),
+        'scoreUnit': '分钟/天',
+        'weeklyData': sevenDaysData.asMap().entries.map((entry) {
+          final index = entry.key;
+          final data = entry.value;
+          return {
+            'day': weekDayLabelsEn[(now.subtract(Duration(days: 6 - index)).weekday - 1) % 7],
+            'value': maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0,
+            'isSelected': index == 6,
+          };
+        }).toList(),
+      },
+
+      // LineChartTrendCard - 折线图趋势卡片
+      'lineChartTrendCard': {
+        'title': '活动时长趋势',
+        'subtitle': '$startDate - $endDate',
+        'date': DateFormat('yyyy-MM-dd').format(now),
+        'totalValue': totalWeekMinutes,
+        'changePercent': changePercent,
+        'dataPoints': sevenDaysData.asMap().entries.map((entry) {
+          final value = entry.value.totalMinutes;
+          final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
+          return {
+            'x': (entry.key * 50).toDouble(),
+            'y': 120 - (normalized * 100),
+          };
+        }).toList(),
+      },
+
+      // SmoothLineChartCard - 平滑折线图卡片
+      'smoothLineChartCard': {
+        'title': '活动时长',
+        'subtitle': '近7天统计',
+        'date': DateFormat('MM月dd日').format(now),
+        'currentValue': avgMinutes.toStringAsFixed(1),
+        'targetValue': '${(12 * 60).toStringAsFixed(0)}', // 12小时目标
+        'unit': '分钟',
+        'dataPoints': sevenDaysData.asMap().entries.map((entry) {
+          final value = entry.value.totalMinutes;
+          final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
+          return {
+            'x': (entry.key * 53.33).clamp(0.0, 320.0),
+            'y': (120 - normalized * 100).clamp(0.0, 120.0),
+          };
+        }).toList(),
+      },
+
+      // BarChartStatsCard - 柱状图统计卡片
+      'barChartStatsCard': {
+        'title': '活动统计',
+        'dateRange': '$startDate - $endDate',
+        'averageValue': avgMinutes,
+        'dataPoints': sevenDaysData.asMap().entries.map((entry) {
+          return {
+            'label': weekDayLabels[(now.subtract(Duration(days: 6 - entry.key)).weekday - 1) % 7],
+            'value': entry.value.totalMinutes.toDouble(),
+          };
+        }).toList(),
+        'barColor': Colors.pink.value,
+      },
+
+      // WeeklyBarsCard - 周柱状图卡片
+      'weeklyBarsCard': {
+        'title': '周活动统计',
+        'icon': 'bar_chart',
+        'currentValue': avgMinutes,
+        'targetValue': (12 * 60).toDouble(), // 12小时目标
+        'weeklyData': weeklyDurations,
+      },
+
+      // ExpenseComparisonChart - 支出对比图表
+      'expenseComparisonChart': {
+        'title': '活动对比',
+        'currentAmount': todayMinutes,
+        'changePercent': changePercent,
+        'categories': sevenDaysData.asMap().entries.map((entry) {
+          return {
+            'name': weekDayLabels[(now.subtract(Duration(days: 6 - entry.key)).weekday - 1) % 7],
+            'currentAmount': entry.value.totalMinutes.toDouble(),
+            'previousAmount': entry.key > 0
+                ? sevenDaysData[entry.key - 1].totalMinutes.toDouble()
+                : 0.0,
+            'color': Colors.pink.value,
+          };
+        }).toList(),
+      },
+
+      // BloodPressureTracker (DualValueTrackerCardWrapper) - 双数值追踪卡片
+      'bloodPressureTracker': {
+        'title': '活动统计',
+        'primaryValue': todayMinutes.toInt(),
+        'secondaryValue': avgMinutes.toInt(),
+        'status': _getActivityStatus(avgMinutes),
+        'unit': '分钟',
+        'icon': 'timeline',
+        'weekData': sevenDaysData.asMap().entries.map((entry) {
+          final index = entry.key;
+          final data = entry.value;
+          final normalized = maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0;
+          return {
+            'label': weekDayLabelsEn[(now.subtract(Duration(days: 6 - index)).weekday - 1) % 7],
+            'normalPercent': normalized,
+            'elevatedPercent': 0.0,
+          };
+        }).toList(),
+      },
+
+      // TrendLineChartCard (TrendLineChartCardWrapper) - 趋势折线图卡片
+      'trendLineChartCard': {
+        'title': '活动趋势',
+        'icon': 'show_chart',
+        'value': avgMinutes,
+        'dataPoints': sevenDaysData.asMap().entries.map((entry) {
+          final value = entry.value.totalMinutes;
+          final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
+          return {
+            'x': (entry.key * 53.33).clamp(0.0, 320.0),
+            'y': (120 - normalized * 100).clamp(0.0, 120.0),
+          };
+        }).toList(),
+        'timeLabels': sevenDaysData.asMap().entries.map((entry) {
+          return weekDayLabelsEn[(now.subtract(Duration(days: 6 - entry.key)).weekday - 1) % 7];
+        }).toList(),
+        'primaryColor': Colors.pink.value,
+        'valueColor': Colors.pinkAccent.value,
+      },
+
+      // ModernRoundedBalanceCard - 现代圆角余额卡片
+      'modernRoundedBalanceCard': {
+        'title': '活动总时长',
+        'balance': totalWeekMinutes / 60, // 转换为小时
+        'available': avgMinutes / 60, // 平均时长
+        'weeklyData': weeklyNormalized,
+      },
+    };
+  }
+
   /// 从选择器数据提取热力图配置
   static Map<String, dynamic> extractHeatmapConfig(List<dynamic> dataArray) {
     int granularity = 60; // 默认值
@@ -1123,6 +1352,30 @@ class _ActivityLastActivityWidgetState
       debugPrint('[ActivityLastActivity] 打开创建界面失败: $e');
     }
   }
+}
+
+/// 一天活动数据（用于7天统计）
+class _DayActivityData {
+  final DateTime date;
+  final int totalMinutes;
+  final int activityCount;
+
+  const _DayActivityData({
+    required this.date,
+    required this.totalMinutes,
+    required this.activityCount,
+  });
+}
+
+/// 根据平均活动时长获取状态描述
+String _getActivityStatus(double avgMinutes) {
+  if (avgMinutes >= 720) return '非常活跃'; // 12小时以上
+  if (avgMinutes >= 480) return '很活跃'; // 8小时以上
+  if (avgMinutes >= 360) return '活跃'; // 6小时以上
+  if (avgMinutes >= 240) return '适度活动'; // 4小时以上
+  if (avgMinutes >= 120) return '轻度活动'; // 2小时以上
+  if (avgMinutes >= 60) return '少量活动'; // 1小时以上
+  return '需要更多活动';
 }
 
 /// 时间槽数据
