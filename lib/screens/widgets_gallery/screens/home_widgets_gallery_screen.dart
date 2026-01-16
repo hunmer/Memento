@@ -235,13 +235,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.bedtime_rounded,
-        title: '周睡眠追踪小组件',
-        subtitle: 'WeeklySleepTrackerWidget - 7天睡眠进度环与状态追踪卡片',
-        route: '/widgets_gallery/weekly_sleep_tracker',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.science,
         title: 'eGFR 健康指标卡片',
         subtitle: 'ModernEgfrHealthWidget - 肾功能指标健康监测卡片',

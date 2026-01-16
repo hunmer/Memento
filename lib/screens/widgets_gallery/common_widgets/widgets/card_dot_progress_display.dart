@@ -91,6 +91,7 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
           opacity: _animation.value,
           child: Container(
             width: widget.inline ? double.maxFinite : 300,
+            height: widget.inline ? double.maxFinite : 150,
             padding: widget.size.getPadding(),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,

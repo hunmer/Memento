@@ -84,6 +84,7 @@ import 'widgets/monthly_dot_tracker_card.dart';
 import 'widgets/checkin_item_card.dart';
 import 'widgets/activity_heatmap_card.dart';
 import 'widgets/activity_today_pie_chart_card.dart';
+import 'widgets/timeline_schedule_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -171,6 +172,7 @@ enum CommonWidgetId {
   checkinItemCard,
   activityHeatmapCard,
   activityTodayPieChartCard,
+  timelineScheduleCard,
 }
 
 /// 公共小组件元数据
@@ -852,6 +854,14 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large3,
       supportedSizes: [HomeWidgetSize.large3],
     ),
+    CommonWidgetId.timelineScheduleCard: CommonWidgetMetadata(
+      id: CommonWidgetId.timelineScheduleCard,
+      name: '时间线日程卡片',
+      description: '显示今天和昨天的活动日程，支持动画效果',
+      icon: Icons.timeline,
+      defaultSize: HomeWidgetSize.large3,
+      supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.large3],
+    ),
   };
 
   /// 获取元数据
@@ -1049,6 +1059,8 @@ class CommonWidgetBuilder {
         return ActivityHeatmapCardWidget.fromProps(props, size);
       case CommonWidgetId.activityTodayPieChartCard:
         return ActivityTodayPieChartCardWidget.fromProps(props, size);
+      case CommonWidgetId.timelineScheduleCard:
+        return TimelineScheduleCard.fromProps(props, size);
     }
   }
 }

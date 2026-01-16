@@ -967,13 +967,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
   ),
   WidgetPreviewItem(
     category: '追踪类',
-    icon: Icons.bedtime_rounded,
-    title: '周睡眠追踪小组件',
-    subtitle: 'WeeklySleepTrackerWidget',
-    route: '/widgets_gallery/weekly_sleep_tracker',
-  ),
-  WidgetPreviewItem(
-    category: '追踪类',
     icon: Icons.science,
     title: 'eGFR 健康指标卡片',
     subtitle: 'ModernEgfrHealthWidget',
