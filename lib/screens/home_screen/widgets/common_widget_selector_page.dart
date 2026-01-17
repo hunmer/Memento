@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:extended_tabs/extended_tabs.dart';
@@ -373,9 +374,39 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                   const Icon(Icons.check_circle, color: Colors.green, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      '已选择数据: ${_selectedData!['title'] ?? _selectedData!['id'] ?? '未知'}',
-                      style: const TextStyle(color: Colors.green),
+                    child: ExpansionTile(
+                      title: Text(
+                        '已选择数据: ${_selectedData!['title'] ?? _selectedData!['id'] ?? '未知'}',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 14,
+                        ),
+                      ),
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(8),
+                          width: double.infinity,
+
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: SelectableText(
+                              const JsonEncoder.withIndent(
+                                '  ',
+                              ).convert(_selectedData),
+                              style: const TextStyle(
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
