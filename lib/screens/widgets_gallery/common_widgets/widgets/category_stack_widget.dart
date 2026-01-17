@@ -143,7 +143,7 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
               height: widget.inline ? double.maxFinite : 220,
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : Colors.white,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),

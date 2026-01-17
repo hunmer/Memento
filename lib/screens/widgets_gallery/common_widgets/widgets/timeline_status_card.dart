@@ -82,7 +82,7 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
         height: widget.inline ? double.maxFinite : 170,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),

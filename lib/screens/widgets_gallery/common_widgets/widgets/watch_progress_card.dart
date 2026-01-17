@@ -177,7 +177,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
               width: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow:
                     isDark
                         ? null

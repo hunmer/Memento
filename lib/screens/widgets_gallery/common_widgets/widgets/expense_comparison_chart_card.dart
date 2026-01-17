@@ -130,7 +130,7 @@ class _ExpenseComparisonChartCardWidgetState
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),

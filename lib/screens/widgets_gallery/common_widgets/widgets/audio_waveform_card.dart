@@ -102,7 +102,7 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
             child: Container(
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),

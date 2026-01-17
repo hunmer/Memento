@@ -131,7 +131,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: borderColor, width: 1),
                 boxShadow: [
                   BoxShadow(

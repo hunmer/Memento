@@ -88,7 +88,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
         width: widget.inline ? double.maxFinite : (widget.size == HomeWidgetSize.small ? 280 : 375),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -98,7 +98,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

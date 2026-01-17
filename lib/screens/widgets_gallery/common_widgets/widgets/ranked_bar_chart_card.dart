@@ -101,9 +101,19 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget> wit
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
               constraints: widget.inline ? null : const BoxConstraints(maxWidth: 360),
-              decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(32), boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.1), blurRadius: 20, offset: const Offset(0, 4))]),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
                   decoration: BoxDecoration(border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), width: 1), borderRadius: BorderRadius.circular(32)),
                   child: Padding(

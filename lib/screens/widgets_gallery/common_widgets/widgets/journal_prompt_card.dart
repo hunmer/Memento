@@ -108,7 +108,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
         width: double.infinity,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.2),
@@ -118,7 +118,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           child: Stack(
             children: [
               // 背景装饰

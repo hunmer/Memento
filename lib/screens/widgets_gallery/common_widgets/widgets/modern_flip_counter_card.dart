@@ -179,7 +179,7 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
               width: widget.inline ? double.maxFinite : 360,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: isDark
                     ? null
                     : [

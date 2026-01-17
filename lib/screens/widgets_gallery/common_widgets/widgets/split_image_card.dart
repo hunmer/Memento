@@ -120,7 +120,7 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
         height: widget.inline ? double.maxFinite : 240,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF27272A) : Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -130,7 +130,7 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           child: Row(
             children: [
               // 左侧图片
