@@ -6,14 +6,15 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import '../diary_plugin.dart';
+import '../models/diary_entry.dart';
+import '../utils/diary_utils.dart';
 
 /// 公共小组件提供者函数 - 本月日记列表
 ///
-/// 注意：由于 commonWidgetsProvider 需要是同步函数，这里使用 DiaryPlugin 的缓存统计数据。
-/// 实际的日记详情数据会在小组件渲染时通过异步方式加载。
-Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
+/// 异步加载本月日记数据，返回可用的公共小组件配置
+Future<Map<String, Map<String, dynamic>>> provideMonthlyDiaryListWidgets(
   Map<String, dynamic> data,
-) {
+) async {
   final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
   if (plugin == null) return {};
 
@@ -22,19 +23,60 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
   final month = now.month;
   final totalDays = DateTime(year, month + 1, 0).day;
 
-  // 从缓存获取统计数据
-  final monthProgress = plugin.getMonthProgressSync();
-  final entryCount = monthProgress.$1;
-  final totalWordCount = plugin.getMonthWordCountSync();
+  // 异步加载所有日记条目
+  final allEntries = await DiaryUtils.loadDiaryEntries();
 
-  // 构建数据（基于缓存统计）
+  // 过滤本月的日记
+  final monthlyEntries = <DateTime, DiaryEntry>{};
+  for (final entry in allEntries.entries) {
+    if (entry.key.year == year && entry.key.month == month) {
+      monthlyEntries[entry.key] = entry.value;
+    }
+  }
+
+  final entryCount = monthlyEntries.length;
+
+  // 计算统计数据
+  final totalWordCount = monthlyEntries.values
+      .fold<int>(0, (sum, e) => sum + (e.content.length));
+
+  // 按心情统计
+  final moodStats = <String, int>{};
+  for (final entry in monthlyEntries.values) {
+    if (entry.mood != null && entry.mood!.isNotEmpty) {
+      moodStats[entry.mood!] = (moodStats[entry.mood!] ?? 0) + 1;
+    }
+  }
+
+  // 按日期排序（倒序）
+  final sortedEntries = monthlyEntries.entries.toList()
+    ..sort((a, b) => b.key.compareTo(a.key));
+
   return {
     // 任务进度列表卡片 - 显示本月日记进度
     'taskProgressList': {
       'title': '本月日记',
       'icon': Icons.book.codePoint,
-      'tasks': const [],
-      'moreCount': entryCount > 5 ? entryCount - 5 : 0,
+      'tasks': sortedEntries.take(5).map((e) {
+        final dateStr = DateFormat('MM月dd日').format(e.key);
+        final wordCount = e.value.content.length;
+        final progress = wordCount > 500 ? 1.0 : (wordCount / 500).clamp(0.0, 1.0);
+        String status;
+        if (wordCount >= 500) {
+          status = 'completed';
+        } else if (wordCount >= 200) {
+          status = 'inProgress';
+        } else {
+          status = 'started';
+        }
+        return {
+          'title': e.value.title.isNotEmpty ? e.value.title : '无标题日记',
+          'time': dateStr,
+          'progress': progress,
+          'status': status,
+        };
+      }).toList(),
+      'moreCount': (entryCount - 5).clamp(0, 999),
     },
 
     // 观看进度卡片 - 显示本月日记完成进度
@@ -45,7 +87,16 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
       'progressLabel': '已完成天数',
       'currentCount': entryCount,
       'totalCount': totalDays,
-      'items': const [],
+      'items': sortedEntries.take(4).map((e) {
+        final dateStr = DateFormat('MM月dd日').format(e.key);
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        final wordCount = e.value.content.length;
+        return {
+          'title': title,
+          'subtitle': '$dateStr · $wordCount 字',
+          'thumbnailUrl': null,
+        };
+      }).toList(),
     },
 
     // 每周点追踪卡片 - 显示本月每日打卡情况
@@ -55,9 +106,12 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
       'totalDays': totalDays,
       'iconCodePoint': Icons.edit_calendar.codePoint,
       'daysData': List.generate(totalDays, (index) {
+        final day = index + 1;
+        final date = DateTime(year, month, day);
+        final hasEntry = monthlyEntries.containsKey(date);
         return {
-          'day': index + 1,
-          'isChecked': false,
+          'day': day,
+          'isChecked': hasEntry,
         };
       }),
     },
@@ -67,8 +121,11 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
       'title': '本月日记',
       'count': entryCount,
       'countLabel': '篇日记',
-      'items': const [],
-      'moreCount': 0,
+      'items': sortedEntries.take(8).map((e) {
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        return '$title (${DateFormat('MM月dd日').format(e.key)})';
+      }).toList(),
+      'moreCount': (entryCount - 8).clamp(0, 999),
     },
 
     // 月度进度圆点卡片 - 与 monthlyDotTrackerCard 类似
@@ -78,9 +135,12 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
       'totalDays': totalDays,
       'iconCodePoint': Icons.edit_calendar.codePoint,
       'daysData': List.generate(totalDays, (index) {
+        final day = index + 1;
+        final date = DateTime(year, month, day);
+        final hasEntry = monthlyEntries.containsKey(date);
         return {
-          'day': index + 1,
-          'isChecked': false,
+          'day': day,
+          'isChecked': hasEntry,
         };
       }),
     },
@@ -89,25 +149,78 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
     'messageListCard': {
       'featuredMessage': {
         'sender': '我的日记',
-        'title': '本月日记',
-        'summary': '本月共写了 $entryCount 篇日记，总计 $totalWordCount 字',
+        'title': entryCount > 0
+            ? '本月已记录 ${sortedEntries.first.value.content.length} 字'
+            : '开始记录你的生活',
+        'summary': entryCount > 0
+            ? '本月共写了 $entryCount 篇日记，总计 $totalWordCount 字'
+            : '点击开始写第一篇日记',
         'avatarUrl': '',
       },
-      'messages': const [],
+      'messages': sortedEntries.take(5).map((e) {
+        final dateStr = DateFormat('MM月dd日 EEEE', 'zh_CN').format(e.key);
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        final mood = e.value.mood ?? '';
+        return {
+          'title': '$mood $title',
+          'sender': dateStr,
+          'channel': '${e.value.content.length} 字',
+          'avatarUrl': '',
+        };
+      }).toList(),
     },
 
     // 彩色标签任务卡片 - 按心情分类显示日记
     'colorTagTaskCard': {
       'taskCount': entryCount,
       'label': '本月日记',
-      'tasks': const [],
+      'tasks': sortedEntries.map((e) {
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        final dateStr = DateFormat('MM月dd日').format(e.key);
+        final mood = e.value.mood ?? '😊';
+        // 根据心情映射颜色
+        int colorValue;
+        switch (mood) {
+          case '😊':
+            colorValue = Colors.yellow.value;
+            break;
+          case '😢':
+            colorValue = Colors.blue.value;
+            break;
+          case '😡':
+            colorValue = Colors.red.value;
+            break;
+          default:
+            colorValue = Colors.indigo.value;
+        }
+        return {
+          'title': '($dateStr)',
+          'color': colorValue,
+          'tag': mood + ' ' + title,
+        };
+      }).toList(),
       'moreCount': 0,
     },
 
     // 收件箱消息卡片
     'inboxMessageCard': {
       'title': '日记列表',
-      'messages': const [],
+      'messages': sortedEntries.take(6).map((e) {
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        final dateStr = DateFormat('MM月dd日').format(e.key);
+        final mood = e.value.mood ?? '';
+        final preview = e.value.content.length > 50
+            ? '${e.value.content.substring(0, 50)}...'
+            : e.value.content;
+        return {
+          'title': title,
+          'subtitle': '$dateStr ${mood.isNotEmpty ? '· $mood' : ''}',
+          'content': preview,
+          'time': dateStr,
+          'isRead': true,
+          'avatarUrl': null,
+        };
+      }).toList(),
       'unreadCount': 0,
     },
 
@@ -116,14 +229,34 @@ Map<String, Map<String, dynamic>> provideMonthlyDiaryListWidgets(
       'title': '最近日记',
       'taskCount': entryCount.clamp(0, 4),
       'moreCount': (entryCount - 4).clamp(0, 999),
-      'tasks': const [],
+      'tasks': sortedEntries.take(4).map((e) {
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        final dateStr = DateFormat('MM月dd日').format(e.key);
+        final mood = e.value.mood ?? '😊';
+        int colorValue = Colors.indigo.value;
+        if (mood == '😊') colorValue = Colors.yellow.value;
+        else if (mood == '😢') colorValue = Colors.blue.value;
+        else if (mood == '😡') colorValue = Colors.red.value;
+        return {
+          'title': title,
+          'color': colorValue,
+          'tag': dateStr,
+        };
+      }).toList(),
     },
 
     // 圆角提醒事项列表 - 显示日记提醒
     'roundedRemindersList': {
       'title': '本月日记',
       'count': entryCount,
-      'items': const [],
+      'items': sortedEntries.take(5).map((e) {
+        final title = e.value.title.isNotEmpty ? e.value.title : '无标题日记';
+        final dateStr = DateFormat('MM月dd日').format(e.key);
+        return {
+          'text': '$dateStr - $title',
+          'isCompleted': true,
+        };
+      }).toList(),
     },
   };
 }

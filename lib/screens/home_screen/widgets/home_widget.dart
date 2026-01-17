@@ -84,7 +84,7 @@ typedef SelectorDataSelector = Map<String, dynamic> Function(List<dynamic> dataA
 ///   };
 /// }
 /// ```
-typedef CommonWidgetsProvider = Map<String, Map<String, dynamic>> Function(
+typedef CommonWidgetsProvider = Future<Map<String, Map<String, dynamic>>> Function(
   Map<String, dynamic> data,
 );
 
