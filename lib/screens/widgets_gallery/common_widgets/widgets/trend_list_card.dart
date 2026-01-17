@@ -80,7 +80,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: isDark

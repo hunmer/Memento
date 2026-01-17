@@ -145,7 +145,7 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
         height: widget.inline ? double.maxFinite : 200,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),

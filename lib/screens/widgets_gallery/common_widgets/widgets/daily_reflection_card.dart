@@ -119,7 +119,7 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
         height: widget.inline ? double.maxFinite : widget.size.height * 80.0 + 100,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),

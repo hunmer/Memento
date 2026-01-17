@@ -99,7 +99,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
               height: widget.inline ? double.maxFinite : 288,
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : const Color(0xFF1C1C1E),
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color:
                       isDark
@@ -121,7 +121,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(32),
+                        borderRadius: BorderRadius.circular(12),
                         gradient: RadialGradient(
                           center: const Alignment(0, -1.2),
                           radius: 1.5,

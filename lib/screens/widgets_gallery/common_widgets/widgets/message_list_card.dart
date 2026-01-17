@@ -165,7 +165,7 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
         height: widget.inline ? double.maxFinite : 600,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : Colors.white,
-          borderRadius: BorderRadius.circular(32),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),

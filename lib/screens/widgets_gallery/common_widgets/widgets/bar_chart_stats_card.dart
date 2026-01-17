@@ -181,7 +181,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
               width: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(32),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
                 ),
