@@ -20,12 +20,16 @@ class MetricData {
 
   /// 从 JSON 创建
   factory MetricData.fromJson(Map<String, dynamic> json) {
+    final iconValue = json['icon'] as int?;
+    // 处理 value 可能是 int 或 String 的情况
+    final valueStr = json['value'];
+    final value = valueStr is int ? '$valueStr' : (valueStr as String? ?? '');
     return MetricData(
-      icon: IconData(json['icon'] as int, fontFamily: 'MaterialIcons'),
-      value: json['value'] as String,
-      label: json['label'] as String,
-      progress: (json['progress'] as num).toDouble(),
-      color: Color(json['color'] as int),
+      icon: IconData(iconValue ?? Icons.info.codePoint, fontFamily: 'MaterialIcons'),
+      value: value,
+      label: json['label'] as String? ?? '',
+      progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
+      color: Color((json['color'] as int?) ?? 0xFF2196F3),
     );
   }
 
