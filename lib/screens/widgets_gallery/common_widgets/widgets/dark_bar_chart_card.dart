@@ -93,7 +93,6 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = const Color(0xFF4B006E); // 深紫色背景（保持原型设计）
     final barColor = const Color(0xFFC084FC); // 浅紫色柱状条
     final iconBgColor = const Color(0xFFA855F7); // 图标背景色

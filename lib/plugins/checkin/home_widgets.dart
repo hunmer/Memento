@@ -578,7 +578,6 @@ class CheckinHomeWidgets {
     // 构建每个项目的数据
     final List<Map<String, dynamic>> checkinItemCards = [];
 
-    int totalConsecutiveDays = 0;
     int todayCheckedCount = 0;
 
     for (final itemData in itemsList) {
@@ -591,7 +590,6 @@ class CheckinHomeWidgets {
       final iconCode = (itemData['icon'] as int?) ?? Icons.checklist.codePoint;
 
       CheckinItem? item;
-      int consecutiveDays = 0;
       bool isCheckedToday = false;
 
       if (plugin != null && itemId != null) {
@@ -600,14 +598,12 @@ class CheckinHomeWidgets {
             (i) => i.id == itemId,
             orElse: () => throw Exception('项目不存在'),
           );
-          consecutiveDays = item.getConsecutiveDays();
           isCheckedToday = item.isCheckedToday();
         } catch (_) {
           // 项目不存在，使用默认值
         }
       }
 
-      totalConsecutiveDays += consecutiveDays;
       if (isCheckedToday) todayCheckedCount++;
 
       // 生成周数据
@@ -663,7 +659,7 @@ class CheckinHomeWidgets {
       }
     }
 
-    final monthlyProgress = (monthlyCheckinCount / daysInMonth * 100).clamp(0, 100);
+    (monthlyCheckinCount / daysInMonth * 100).clamp(0, 100);
 
     // 获取所有项目的本月签到记录
     final allMonthlyRecords = <String>[];

@@ -1032,7 +1032,7 @@ class ActivityHomeWidgets {
         'subtitle': '近7天统计',
         'date': DateFormat('MM月dd日').format(now),
         'currentValue': avgMinutes.toStringAsFixed(1),
-        'targetValue': '${(12 * 60).toStringAsFixed(0)}', // 12小时目标
+        'targetValue': (12 * 60).toStringAsFixed(0), // 12小时目标
         'unit': '分钟',
         'maxValue': 120.0, // 匹配 y 值范围 0-120
         'timeLabels': weekDayLabels, // 星期标签

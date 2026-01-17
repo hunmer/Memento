@@ -531,11 +531,4 @@ class _WidgetRegistry {
     return builder?.call();
   }
 
-  /// 获取 widget 的类名
-  static String? getWidgetClassName(String route) {
-    final builder = _widgets[route];
-    if (builder == null) return null;
-    final widget = builder();
-    return widget.runtimeType.toString();
-  }
 }
