@@ -196,7 +196,6 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SizedBox(
-                              width: 140,
                               height: 48,
                               child: AnimatedFlipCounter(
                                 value: widget.value * _fadeInAnimation.value,

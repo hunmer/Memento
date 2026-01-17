@@ -17,19 +17,19 @@ class TagController {
   Future<void> initialize() async {
     // 初始化标签组（使用新格式）
     tagGroups = [
-      TagGroupWithTags(name: '最近使用', tags: []),
-      TagGroupWithTags.fromStringList(
-        name: '工作',
-        tags: ['会议', '编程', '写作', '阅读', '学习'],
-      ),
-      TagGroupWithTags.fromStringList(
-        name: '生活',
-        tags: ['运动', '购物', '休息', '娱乐', '社交'],
-      ),
-      TagGroupWithTags.fromStringList(
-        name: '健康',
-        tags: ['锻炼', '冥想', '饮食', '睡眠'],
-      ),
+      // TagGroupWithTags(name: '最近使用', tags: []),
+      // TagGroupWithTags.fromStringList(
+      //   name: '工作',
+      //   tags: ['会议', '编程', '写作', '阅读', '学习'],
+      // ),
+      // TagGroupWithTags.fromStringList(
+      //   name: '生活',
+      //   tags: ['运动', '购物', '休息', '娱乐', '社交'],
+      // ),
+      // TagGroupWithTags.fromStringList(
+      //   name: '健康',
+      //   tags: ['锻炼', '冥想', '饮食', '睡眠'],
+      // ),
     ];
 
     await _loadTagGroups();

@@ -145,21 +145,22 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.currency,
-                              style: TextStyle(
-                                color: valueColor,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -1,
-                              ),
-                            ),
+                           
                             AnimatedFlipCounter(
                               value: widget.value * _animation.value,
                               fractionDigits: 1,
                               textStyle: TextStyle(
                                 color: valueColor,
                                 fontSize: 36,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -1,
+                              ),
+                            ),
+                            Text(
+                              widget.currency,
+                              style: TextStyle(
+                                color: valueColor,
+                                fontSize: 32,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -1,
                               ),

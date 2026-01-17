@@ -154,7 +154,6 @@ class CheckinHomeWidgets {
         PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
     CheckinItem? item;
     int consecutiveDays = 0;
-    int todayCheckins = 0;
     bool isCheckedToday = false;
 
     if (plugin != null) {
@@ -167,7 +166,6 @@ class CheckinHomeWidgets {
           );
           consecutiveDays = item.getConsecutiveDays();
           isCheckedToday = item.isCheckedToday();
-          todayCheckins = item.getTodayRecords().length;
         } catch (_) {
           // 项目不存在，使用默认值
         }
@@ -379,31 +377,6 @@ class CheckinHomeWidgets {
     return result;
   }
 
-  /// 生成周情绪数据（复用心情追踪卡片的数据结构）
-  static List<Map<String, dynamic>> _generateWeekEmotions(CheckinItem? item) {
-    final today = DateTime.now();
-    final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
-    final result = <Map<String, dynamic>>[];
-
-    for (int i = 6; i >= 0; i--) {
-      final date = today.subtract(Duration(days: i));
-      final dateStr =
-          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      final isChecked =
-          item?.checkInRecords.containsKey(dateStr) == true &&
-          (item?.checkInRecords[dateStr]?.isEmpty == false);
-
-      result.add({
-        'day': weekDays[date.weekday - 1],
-        'iconCodePoint':
-            isChecked ? 0xe5ca : 0xe5c8, // check_circle / circle_outlined
-        'emotionType': isChecked ? 'positive' : 'neutral',
-        'isLogged': isChecked,
-      });
-    }
-
-    return result;
-  }
 
   /// 生成从周一开始的周进度数据（用于 sleepTrackingCard）
   static List<Map<String, dynamic>> _generateWeekProgressFromMonday(
