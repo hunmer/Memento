@@ -264,8 +264,8 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                     width: 16,
                     height: 16,
                     offset: -6.0,
-                    children: widget.segments.asMap().entries.map((entry) {
-                      final index = entry.key;
+                    children:
+                        widget.segments.asMap().entries.map((entry) {
                       final segment = entry.value;
                       return Container(
                         width: 16,

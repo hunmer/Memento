@@ -658,7 +658,7 @@ class HomeScreenView extends StatelessWidget {
         // 忽略解析错误
       }
 
-      final result = await Navigator.pushNamed(
+      final _ = await Navigator.pushNamed(
         context,
         '/common_widget_selector',
         arguments: {

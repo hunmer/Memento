@@ -156,61 +156,7 @@ class TrackerHomeWidgets {
     };
   }
 
-  /// 生成分段数据
-  static List<Map<String, dynamic>> _generateSegments(
-    double current,
-    double target,
-  ) {
-    final segmentValue = (target / 5).ceilToDouble(); // 分成5段
 
-    return List.generate(5, (index) {
-      final segmentTarget = (index + 1) * segmentValue;
-      final segmentProgress = ((current / segmentTarget).clamp(0.0, 1.0) * 100).toInt();
-      return {
-        'label': '${index + 1}级',
-        'progress': segmentProgress,
-        'color': 0xFF4CAF50, // 绿色
-      };
-    });
-  }
-
-  /// 生成多指标数据
-  static List<Map<String, dynamic>> _generateMetrics(
-    double current,
-    double target,
-    String unit,
-    int percentage,
-  ) {
-    return [
-      {
-        'emoji': '🎯',
-        'progress': percentage.toDouble() / 100,
-        'progressColor': 0xFF4CAF50,
-        'title': '当前进度',
-        'subtitle': '$current / $target',
-        'value': current,
-        'unit': unit,
-      },
-      {
-        'emoji': '📊',
-        'progress': (percentage / 100).clamp(0.0, 1.0),
-        'progressColor': 0xFF2196F3,
-        'title': '完成率',
-        'subtitle': '已完成',
-        'value': percentage.toDouble(),
-        'unit': '%',
-      },
-      {
-        'emoji': '⏳',
-        'progress': ((target - current).clamp(0, double.infinity) / target).clamp(0.0, 1.0),
-        'progressColor': 0xFFFF9800,
-        'title': '剩余',
-        'subtitle': '还需努力',
-        'value': (target - current).clamp(0, double.infinity),
-        'unit': unit,
-      },
-    ];
-  }
 
   /// 获取当月天数
   static int _daysInMonth(DateTime date) {
@@ -219,20 +165,6 @@ class TrackerHomeWidgets {
     return lastDayOfCurrentMonth.day;
   }
 
-  /// 获取待完成的里程碑列表
-  static List<String> _getPendingMilestones(
-    double current,
-    double target,
-    String unit,
-  ) {
-    final remaining = (target - current).clamp(0, double.infinity);
-    if (remaining <= 0) return ['🎉 已达成目标'];
-
-    return [
-      '还需 $remaining ${unit.isNotEmpty ? unit : "单位"}',
-      '进度: ${((current / target) * 100).toStringAsFixed(0)}%',
-    ];
-  }
 
   /// 格式化日期
   static String _formatDate(DateTime date) {

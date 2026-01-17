@@ -482,10 +482,10 @@ class _BarItemWidget extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         final lastMonthHeight = maxValue > 0
-            ? (lastMonth / maxValue * 128 * animation.value) as double
+            ? (lastMonth / maxValue * 128 * animation.value)
             : 0.0;
         final currentMonthHeight = maxValue > 0
-            ? (currentMonth / maxValue * 128 * animation.value) as double
+                ? (currentMonth / maxValue * 128 * animation.value)
             : 0.0;
 
         return Container(

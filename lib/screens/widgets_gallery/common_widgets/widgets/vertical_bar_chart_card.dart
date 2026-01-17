@@ -393,14 +393,12 @@ class _Bar extends StatelessWidget {
       ),
     );
 
-    final totalHeight = (data.value1 + data.value2) / maxValue * maxHeight;
     final height1 = data.value1 / maxValue * maxHeight;
     final height2 = data.value2 / maxValue * maxHeight;
 
     return AnimatedBuilder(
       animation: barAnimation,
       builder: (context, child) {
-        final currentHeight = totalHeight * barAnimation.value;
         final currentHeight1 = height1 * barAnimation.value;
         final currentHeight2 = height2 * barAnimation.value;
 

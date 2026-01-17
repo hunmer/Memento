@@ -150,7 +150,6 @@ class _RankedBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = item.value >= 0.64 ? Colors.white : const Color(0xFF0F172A);
 
     return AnimatedBuilder(
