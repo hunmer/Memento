@@ -12,6 +12,7 @@ import 'diary_plugin.dart';
 import 'models/diary_entry.dart';
 import 'utils/diary_utils.dart';
 import 'screens/diary_editor_screen.dart';
+import 'home_widgets/register_monthly_diary_list.dart';
 
 /// 日记插件的主页小组件注册
 class DiaryHomeWidgets {
@@ -93,6 +94,9 @@ class DiaryHomeWidgets {
         builder: (context, config) => _buildWeeklyWidget(context, config),
       ),
     );
+
+    // 本月日记列表展示入口（支持多种通用小组件）
+    registerMonthlyDiaryListWidget(registry);
   }
 
   /// 获取可用的统计项
