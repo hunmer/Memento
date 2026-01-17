@@ -4,9 +4,9 @@ part of 'home_widgets.dart';
 /// 提供单个签到项目和多个签到项目的公共小组件数据
 
 /// 公共小组件提供者函数 - 单个签到项目
-Map<String, Map<String, dynamic>> _provideCommonWidgets(
+Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
   Map<String, dynamic> data,
-) {
+) async {
   // data 包含：id, name, group, icon, color
   final name = (data['name'] as String?) ?? '签到项目';
   final group = (data['group'] as String?) ?? '';
@@ -142,9 +142,9 @@ Map<String, Map<String, dynamic>> _provideCommonWidgets(
 }
 
 /// 为多个签到项目提供公共小组件数据
-Map<String, Map<String, dynamic>> _provideCommonWidgetsForMultiple(
+Future<Map<String, Map<String, dynamic>>> _provideCommonWidgetsForMultiple(
   Map<String, dynamic> data,
-) {
+) async {
   // data 格式: {'items': [{'id': ..., 'name': ..., 'group': ..., 'icon': ..., 'color': ...}, ...]}
   final itemsList = data['items'] as List<dynamic>?;
   if (itemsList == null || itemsList.isEmpty) {

@@ -88,9 +88,9 @@ class ChatHomeWidgets {
   }
 
   /// 公共小组件提供者函数
-  static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+  static Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
     Map<String, dynamic> data,
-  ) {
+  ) async {
     // data 包含：id, title, lastMessage, lastMessageTime, messageCount
     final messageCount = (data['messageCount'] as int?) ?? 0;
     final title = (data['title'] as String?) ?? '频道';
