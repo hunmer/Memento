@@ -156,9 +156,9 @@ Widget buildCommonWidgetsWidget(
 }
 
 /// 公共小组件提供者函数（同步版本）
-Map<String, Map<String, dynamic>> provideCommonWidgets(
+Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
   Map<String, dynamic> data,
-) {
+) async {
   // 获取今日活动数据
   final plugin =
       PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
@@ -605,9 +605,9 @@ int calculateActiveHours(List<ActivityRecord> activities) {
 }
 
 /// 七天活动统计图表小组件提供者
-Map<String, Map<String, dynamic>> provideWeeklyChartWidgets(
+Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
   Map<String, dynamic> data,
-) {
+) async {
   final plugin =
       PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
   if (plugin == null) return {};
@@ -816,10 +816,10 @@ Map<String, Map<String, dynamic>> provideWeeklyChartWidgets(
   };
 }
 
-/// 提供标签周统计小组件数据（供选择器页面使用）
-Map<String, Map<String, dynamic>> provideTagWeeklyChartWidgets(
+/// 提供标签周统计小组件数据（供选择器页面使用）（异步版本）
+Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
   Map<String, dynamic> config,
-) {
+) async {
   // 从 config['data'] 数组中提取 tag
   final dataArray = config['data'] as List<dynamic>?;
   String? tag;

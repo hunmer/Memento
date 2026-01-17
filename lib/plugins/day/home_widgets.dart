@@ -217,9 +217,9 @@ class DayHomeWidgets {
   }
 
   /// 公共小组件提供者函数 - 为纪念日提供可用的公共小组件
-  static Map<String, Map<String, dynamic>> _provideMemorialDayCommonWidgets(
+  static Future<Map<String, Map<String, dynamic>>> _provideMemorialDayCommonWidgets(
     Map<String, dynamic> data,
-  ) {
+  ) async {
     // data 包含：id, title, targetDate, backgroundImageUrl, backgroundColor, daysRemaining, daysPassed, isToday, isExpired
     final title = data['title'] as String? ?? '纪念日';
     final targetDateStr = data['targetDate'] as String?;
@@ -299,9 +299,9 @@ class DayHomeWidgets {
   }
 
   /// 公共小组件提供者函数 - 为日期范围列表提供可用的公共小组件
-  static Map<String, Map<String, dynamic>> _provideDateRangeCommonWidgets(
+  static Future<Map<String, Map<String, dynamic>>> _provideDateRangeCommonWidgets(
     Map<String, dynamic> data,
-  ) {
+  ) async {
     // data 包含：startDay, endDay, dateRangeLabel, daysList, totalCount, todayCount, upcomingCount, expiredCount
     final dateRangeLabel = data['dateRangeLabel'] as String? ?? '未来7天';
     final daysList = data['daysList'] as List<dynamic>? ?? [];

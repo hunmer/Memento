@@ -79,7 +79,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     }
     // 如果有初始选择器配置，自动恢复数据
     else if (widget.initialSelectorConfig != null) {
-      _restoreFromInitialConfig();
+      Future.microtask(() => _restoreFromInitialConfig());
     }
   }
 
@@ -164,7 +164,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
   }
 
   /// 从初始配置恢复数据
-  void _restoreFromInitialConfig() {
+  Future<void> _restoreFromInitialConfig() async {
     final config = widget.initialSelectorConfig!;
     final selectedDataMap = config.selectedData;
 
@@ -624,7 +624,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
   }
 
   /// 数据选择完成回调
-  void _onDataSelected(SelectorResult? result) {
+  Future<void> _onDataSelected(SelectorResult? result) async {
     if (result == null) return;
 
     // 保存原始的 SelectorResult

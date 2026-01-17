@@ -385,23 +385,41 @@ class HomeWidget {
 
       // 兼容旧数据：如果没有保存的 props，才动态获取
       if (widgetDefinition.commonWidgetsProvider != null) {
-        final availableWidgets = widgetDefinition.commonWidgetsProvider!(data);
-        final latestProps = availableWidgets[widgetId];
+        // 使用 FutureBuilder 处理异步调用
+        return FutureBuilder<Map<String, Map<String, dynamic>>>(
+          future: widgetDefinition.commonWidgetsProvider!(data),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
 
-        if (latestProps != null) {
-          // 添加 custom 尺寸的实际宽高到 props 中
-          final props = Map<String, dynamic>.from(latestProps);
-          if (size == HomeWidgetSize.custom) {
-            props['customWidth'] = config['customWidth'] as int?;
-            props['customHeight'] = config['customHeight'] as int?;
-          }
-          return CommonWidgetBuilder.build(
-            context,
-            commonWidgetId,
-            props,
-            size,
-          );
-        }
+            if (snapshot.hasError) {
+              return buildErrorWidget(context, '加载组件数据失败');
+            }
+
+            final availableWidgets = snapshot.data ?? {};
+            final latestProps = availableWidgets[widgetId];
+
+            if (latestProps != null) {
+              // 添加 custom 尺寸的实际宽高到 props 中
+              final props = Map<String, dynamic>.from(latestProps);
+              if (size == HomeWidgetSize.custom) {
+                props['customWidth'] = config['customWidth'] as int?;
+                props['customHeight'] = config['customHeight'] as int?;
+              }
+              return CommonWidgetBuilder.build(
+                context,
+                commonWidgetId,
+                props,
+                size,
+              );
+            }
+
+            return buildErrorWidget(context, '无法获取最新数据');
+          },
+        );
       }
 
       return buildErrorWidget(context, '无法获取最新数据');

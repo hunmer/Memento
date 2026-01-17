@@ -87,9 +87,9 @@ class TrackerHomeWidgets {
   }
 
   /// 公共小组件提供者函数
-  static Map<String, Map<String, dynamic>> _provideCommonWidgets(
+  static Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
     Map<String, dynamic> data,
-  ) {
+  ) async {
     // data 包含：id, name, icon, iconColor, currentValue, targetValue, unitType
     final name = (data['name'] as String?) ?? '目标';
     final currentValue = (data['currentValue'] as double?) ?? 0.0;
