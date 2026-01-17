@@ -247,15 +247,16 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                     trendDownColor,
                     textColor,
                   ),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-
-                  // 附加信息
+                  if (widget.additionalInfo.isNotEmpty) ...[
+                    SizedBox(height: widget.size.getTitleSpacing()),
+                    // 附加信息
                   _buildAdditionalInfo(
                     widget.date,
                     widget.additionalInfo,
                     textColor,
                     subTextColor,
                   ),
+                  ]
                 ],
               ),
             ),
