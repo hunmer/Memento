@@ -11,8 +11,6 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selectable_item.dart';
 import 'package:Memento/core/app_initializer.dart' show navigatorKey;
-import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/widgets/event_listener_container.dart';
 import 'day_plugin.dart';
 import 'models/memorial_day.dart';
 
@@ -69,13 +67,15 @@ class DayHomeWidgets {
         category: 'home_categoryRecord'.tr,
         selectorId: 'day.memorial',
         dataSelector: _extractMemorialDayData,
-        dataRenderer: _renderMemorialDayData,
         navigationHandler: _navigateToMemorialDay,
-        builder:
-            (context, config) => GenericSelectorWidget(
-              widgetDefinition: registry.getWidget('day_memorial_selector')!,
-              config: config,
-            ),
+        // 使用公共小组件提供者
+        commonWidgetsProvider: _provideMemorialDayCommonWidgets,
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('day_memorial_selector')!,
+            config: config,
+          );
+        },
       ),
     );
 
@@ -94,13 +94,15 @@ class DayHomeWidgets {
         // 使用日期范围选择器
         selectorId: 'day.dateRange',
         dataSelector: _extractDateRangeData,
-        dataRenderer: _renderDateRangeList,
         navigationHandler: _navigateToDayPage,
-        builder:
-            (context, config) => GenericSelectorWidget(
-              widgetDefinition: registry.getWidget('day_date_range_list')!,
-              config: config,
-            ),
+        // 使用公共小组件提供者
+        commonWidgetsProvider: _provideDateRangeCommonWidgets,
+        builder: (context, config) {
+          return GenericSelectorWidget(
+            widgetDefinition: registry.getWidget('day_date_range_list')!,
+            config: config,
+          );
+        },
       ),
     );
   }
@@ -122,43 +124,57 @@ class DayHomeWidgets {
     final endDay = rangeData?['endDay'] as int? ?? 7;
     final title = rangeData?['title'] as String? ?? '未来7天';
 
+    // 获取纪念日列表数据
+    final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
+    final allDays = plugin?.getAllMemorialDays() ?? [];
+    final filteredDays = _filterMemorialDaysByDaysRange(
+      allDays,
+      startDay,
+      endDay,
+    );
+
+    // 将纪念日列表转换为 Map 数组
+    final daysList =
+        filteredDays.map((day) {
+          String statusText;
+          if (day.isToday) {
+            statusText = '就是今天！';
+          } else if (day.isExpired) {
+            statusText = '已过 ${day.daysPassed} 天';
+          } else {
+            statusText = '剩余 ${day.daysRemaining} 天';
+          }
+
+          return {
+            'id': day.id,
+            'title': day.title,
+            'date': '${day.targetDate.month}/${day.targetDate.day}',
+            'statusText': statusText,
+            'statusColor':
+                day.isExpired
+                    ? 'grey'
+                    : (day.isToday
+                        ? 'red'
+                        : (day.daysRemaining <= 7 ? 'orange' : 'primary')),
+            'backgroundColor': day.backgroundColor.value,
+            'daysRemaining': day.daysRemaining,
+            'daysPassed': day.daysPassed,
+            'isToday': day.isToday,
+            'isExpired': day.isExpired,
+          };
+        }).toList();
+
     return {
       'startDay': startDay,
       'endDay': endDay,
       'dateRangeLabel': title,
+      'daysList': daysList,
+      'totalCount': filteredDays.length,
+      'todayCount': filteredDays.where((d) => d.isToday).length,
+      'upcomingCount':
+          filteredDays.where((d) => !d.isExpired && !d.isToday).length,
+      'expiredCount': filteredDays.where((d) => d.isExpired).length,
     };
-  }
-
-  /// 渲染日期范围列表数据
-  static Widget _renderDateRangeList(
-    BuildContext context,
-    SelectorResult result,
-    Map<String, dynamic> config,
-  ) {
-    final savedData = result.data as Map<String, dynamic>;
-    final startDay = savedData['startDay'] as int? ?? 0;
-    final endDay = savedData['endDay'] as int? ?? 7;
-
-    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return EventListenerContainer(
-          events: const [
-            'memorial_day_added',
-            'memorial_day_updated',
-            'memorial_day_deleted',
-          ],
-          onEvent: () => setState(() {}),
-          child: _buildDateRangeListContent(
-            context,
-            startDay,
-            endDay,
-            savedData['dateRangeLabel'] as String? ?? '未来7天',
-            config,
-          ),
-        );
-      },
-    );
   }
 
   /// 导航到纪念日主页面
@@ -177,6 +193,11 @@ class DayHomeWidgets {
         'title': dayData.title,
         'targetDate': dayData.targetDate.toIso8601String(),
         'backgroundImageUrl': dayData.backgroundImageUrl,
+        'backgroundColor': dayData.backgroundColor.value,
+        'daysRemaining': dayData.daysRemaining,
+        'daysPassed': dayData.daysPassed,
+        'isToday': dayData.isToday,
+        'isExpired': dayData.isExpired,
       };
     } else if (dayData is Map<String, dynamic>) {
       return {
@@ -184,242 +205,315 @@ class DayHomeWidgets {
         'title': dayData['title'] as String?,
         'targetDate': dayData['targetDate'] as String?,
         'backgroundImageUrl': dayData['backgroundImageUrl'] as String?,
+        'backgroundColor': dayData['backgroundColor'] as int?,
+        'daysRemaining': dayData['daysRemaining'] as int?,
+        'daysPassed': dayData['daysPassed'] as int?,
+        'isToday': dayData['isToday'] as bool?,
+        'isExpired': dayData['isExpired'] as bool?,
       };
     }
 
     return {};
   }
 
-  /// 渲染纪念日小组件数据 - 显示倒计时信息
-  static Widget _renderMemorialDayData(
-    BuildContext context,
-    SelectorResult result,
-    Map<String, dynamic> config,
+  /// 公共小组件提供者函数 - 为纪念日提供可用的公共小组件
+  static Map<String, Map<String, dynamic>> _provideMemorialDayCommonWidgets(
+    Map<String, dynamic> data,
   ) {
-    // 从 result.data 获取已保存的数据
-    final savedData =
-        result.data is Map
-            ? Map<String, dynamic>.from(result.data as Map)
-            : <String, dynamic>{};
-    final dayId = savedData['id'] as String? ?? '';
-
-    if (dayId.isEmpty) {
-      return HomeWidget.buildErrorWidget(context, '未选择纪念日');
-    }
-
-    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return EventListenerContainer(
-          events: const [
-            'memorial_day_added',
-            'memorial_day_updated',
-            'memorial_day_deleted',
-          ],
-          onEvent: () => setState(() {}),
-          child: _buildMemorialDayWidget(context, dayId, savedData),
-        );
-      },
-    );
-  }
-
-  /// 构建纪念日小组件内容（获取最新数据）
-  static Widget _buildMemorialDayWidget(
-    BuildContext context,
-    String dayId,
-    Map<String, dynamic> savedData,
-  ) {
-    // 从 PluginManager 获取最新的纪念日数据
-    final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
-    if (plugin == null) {
-      return HomeWidget.buildErrorWidget(context, '纪念日插件不可用');
-    }
-
-    // 获取最新数据
-    final day = plugin.getMemorialDayById(dayId);
-    final title = day?.title ?? savedData['title'] as String? ?? '未知纪念日';
-    final targetDateStr =
-        day?.targetDate.toIso8601String() ?? savedData['targetDate'] as String?;
+    // data 包含：id, title, targetDate, backgroundImageUrl, backgroundColor, daysRemaining, daysPassed, isToday, isExpired
+    final title = data['title'] as String? ?? '纪念日';
+    final targetDateStr = data['targetDate'] as String?;
     final targetDate =
         targetDateStr != null ? DateTime.tryParse(targetDateStr) : null;
-    final daysRemaining = day?.daysRemaining ?? 0;
-    final isToday = day?.isToday ?? false;
-    final isExpired = day?.isExpired ?? false;
-    // 获取背景图片URL（优先使用最新的）
-    final backgroundImageUrl =
-        day?.backgroundImageUrl ?? savedData['backgroundImageUrl'] as String?;
-    // 获取背景色（如果没有图片，使用背景色）
-    final backgroundColor = day?.backgroundColor;
+    final backgroundColor = data['backgroundColor'] as int?;
+    final daysRemaining = data['daysRemaining'] as int? ?? 0;
+    final daysPassed = data['daysPassed'] as int? ?? 0;
+    final isToday = data['isToday'] as bool? ?? false;
+    final isExpired = data['isExpired'] as bool? ?? false;
 
-    // 计算倒计时文本和颜色
-    String countdownText;
-    Color countdownColor;
-    if (isToday) {
-      countdownText = '就是今天！';
-      countdownColor = Colors.red;
-    } else if (isExpired) {
-      countdownText = '已过 ${day?.daysPassed ?? 0} 天';
-      countdownColor = Colors.grey;
-    } else {
-      countdownText = '剩余 $daysRemaining 天';
-      countdownColor = Colors.orange;
-    }
+    // 计算进度（基于一年365天，取反数作为进度）
+    int effectiveDays = isExpired ? daysPassed : daysRemaining;
+    final percentage =
+        ((365 - effectiveDays) / 365 * 100).clamp(0, 100).toDouble();
+    final progress = ((365 - effectiveDays) / 365).clamp(0.0, 1.0);
 
-    return _buildMemorialDayCard(
-      context: context,
-      title: title,
-      countdownText: countdownText,
-      countdownColor: countdownColor,
-      targetDate: targetDate,
-      backgroundImageUrl: backgroundImageUrl,
-      backgroundColor: backgroundColor,
-    );
-  }
-
-  /// 构建纪念日卡片 UI
-  static Widget _buildMemorialDayCard({
-    required BuildContext context,
-    required String title,
-    required String countdownText,
-    required Color countdownColor,
-    required DateTime? targetDate,
-    required String? backgroundImageUrl,
-    required Color? backgroundColor,
-  }) {
-    final theme = Theme.of(context);
+    // 格式化日期
     final formattedDate =
         targetDate != null ? '${targetDate.month}月${targetDate.day}日' : '';
 
-    // 获取背景图片路径
-    final imagePath =
-        backgroundImageUrl != null && backgroundImageUrl.isNotEmpty
-            ? ImageUtils.getLocalPath(backgroundImageUrl)
-            : null;
+    // 状态文本
+    String statusText;
+    Color statusColor;
+    if (isToday) {
+      statusText = '就是今天！';
+      statusColor = Colors.red;
+    } else if (isExpired) {
+      statusText = '已过 $daysPassed 天';
+      statusColor = Colors.grey;
+    } else {
+      statusText = '剩余 $daysRemaining 天';
+      statusColor = Colors.orange;
+    }
 
-    // 决定是否使用图片背景
-    final useImageBackground = imagePath != null && imagePath.isNotEmpty;
+    return {
+      // 圆形进度卡片：显示纪念日进度
+      'circularProgressCard': {
+        'title': title,
+        'subtitle': statusText,
+        'percentage': percentage,
+        'progress': progress,
+        'progressColor': backgroundColor,
+      },
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            // 使用背景图片或渐变背景
-            image:
-                useImageBackground
-                    ? DecorationImage(
-                      image: ImageUtils.createImageProvider(backgroundImageUrl),
-                      fit: BoxFit.cover,
-                    )
-                    : null,
-          ),
-          // 根据是否有背景图片添加不同的叠加层
-          child: Container(
-            decoration: BoxDecoration(
-              color: useImageBackground ? Colors.black.withOpacity(0.4) : null,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 顶部：图标和标题
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color:
-                            useImageBackground
-                                ? Colors.white.withOpacity(0.25)
-                                : theme.colorScheme.primary.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.celebration,
-                        size: 20,
-                        color:
-                            useImageBackground
-                                ? Colors.white
-                                : theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 标题
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  useImageBackground
-                                      ? Colors.white
-                                      : theme.colorScheme.onSurface,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          // 日期（副标题）
-                          if (formattedDate.isNotEmpty)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 12,
-                                  color:
-                                      useImageBackground
-                                          ? Colors.white70
-                                          : theme.colorScheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  formattedDate,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color:
-                                        useImageBackground
-                                            ? Colors.white70
-                                            : theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                // 底部：倒计时
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(
-                      countdownText,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color:
-                            useImageBackground ? Colors.white : countdownColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+      // 月度进度圆点卡片：显示日期进度
+      'monthlyProgressDotsCard': {
+        'title': title,
+        'subtitle': formattedDate,
+        'currentDay': (isExpired ? daysPassed : 365 - daysRemaining) + 1,
+        'totalDays': 365,
+        'percentage': percentage.toInt(),
+        'backgroundColor': backgroundColor ?? const Color(0xFF148690).value,
+      },
+
+      // 图标圆形进度卡片：显示倒计时
+      'iconCircularProgressCard': {
+        'progress': progress,
+        'icon': Icons.celebration,
+        'title': title,
+        'subtitle': statusText,
+        'showNotification': isToday,
+        'progressColor': backgroundColor,
+      },
+
+      // 里程碑卡片：显示纪念日详情
+      'milestoneCard': {
+        'imageUrl': data['backgroundImageUrl'] as String?,
+        'title': title,
+        'date': formattedDate,
+        'daysCount': isExpired ? daysPassed : daysRemaining,
+        'value': isExpired ? '$daysPassed' : '$daysRemaining',
+        'unit': isExpired ? '天已过' : '天',
+        'suffix': isToday ? '今天' : '',
+      },
+    };
+  }
+
+  /// 公共小组件提供者函数 - 为日期范围列表提供可用的公共小组件
+  static Map<String, Map<String, dynamic>> _provideDateRangeCommonWidgets(
+    Map<String, dynamic> data,
+  ) {
+    // data 包含：startDay, endDay, dateRangeLabel, daysList, totalCount, todayCount, upcomingCount, expiredCount
+    final dateRangeLabel = data['dateRangeLabel'] as String? ?? '未来7天';
+    final daysList = data['daysList'] as List<dynamic>? ?? [];
+    final totalCount = data['totalCount'] as int? ?? 0;
+    final todayCount = data['todayCount'] as int? ?? 0;
+    final upcomingCount = data['upcomingCount'] as int? ?? 0;
+    final expiredCount = data['expiredCount'] as int? ?? 0;
+
+    // 获取前5个纪念日用于列表展示
+    final displayDays = daysList.toList();
+
+    // 生成任务列表格式数据（用于任务类小组件）
+    final tasks =
+        displayDays.map((day) {
+          final dayMap = day as Map<String, dynamic>;
+          return {
+            'title': dayMap['title'] as String? ?? '',
+            'subtitle': dayMap['date'] as String? ?? '',
+            'status': dayMap['statusText'] as String? ?? '',
+            'isCompleted': dayMap['isToday'] as bool? ?? false,
+            'color': dayMap['backgroundColor'] as int?,
+          };
+        }).toList();
+
+    // 生成事件列表格式数据（用于日历/日程类小组件）
+    final events =
+        displayDays.map((day) {
+          final dayMap = day as Map<String, dynamic>;
+          return {
+            'title': dayMap['title'] as String? ?? '',
+            'time': dayMap['date'] as String? ?? '',
+            'description': dayMap['statusText'] as String? ?? '',
+            'isUrgent': dayMap['isToday'] as bool? ?? false,
+          };
+        }).toList();
+
+    return {
+      // 任务列表卡片：显示纪念日列表
+      'taskListCard': {
+        'icon': Icons.celebration,
+        'iconBackgroundColor': 0xFF148690,
+        'count': totalCount,
+        'countLabel': 'day_memorialDays'.tr,
+        'items': tasks.map((t) => '${t['title']} (${t['status']})').toList(),
+        'moreCount': totalCount > 5 ? totalCount - 5 : 0,
+      },
+
+      // 任务进度卡片：显示纪念日进度
+      'taskProgressCard': {
+        'title': dateRangeLabel,
+        'subtitle': 'day_memorialDays'.tr,
+        'completedTasks': todayCount,
+        'totalTasks': totalCount,
+        'pendingTasks': tasks.map((t) => t['title'] as String).toList(),
+      },
+
+      // 环形指标卡片：显示纪念日列表
+      'circularMetricsCard': {
+        'title': dateRangeLabel,
+        'metrics':
+            displayDays.map((day) {
+              final dayMap = day as Map<String, dynamic>;
+              final colorValue =
+                  dayMap['backgroundColor'] as int? ?? 0xFF148690;
+              return {
+                'icon': Icons.celebration.codePoint,
+                'value': dayMap['title'] as String? ?? '',
+                'label': dayMap['date'] as String? ?? '',
+                'progress': 1.0,
+                'color': colorValue,
+              };
+            }).toList(),
+      },
+
+      // 日历事件小组件：显示纪念日日历
+      'eventCalendarWidget': {
+        'day': DateTime.now().day,
+        'weekday': _getWeekday(DateTime.now().weekday),
+        'month': _getMonth(DateTime.now().month),
+        'eventCount': totalCount,
+        'weekDates': _getWeekDates(),
+        'weekStartDay': 1,
+        'reminder': dateRangeLabel,
+        'reminderEmoji': '📅',
+        'events':
+            events.map((e) {
+              return {
+                'title': e['title'] as String? ?? '',
+                'time': e['time'] as String? ?? '',
+                'duration': '',
+                'color': 0xFF525EAF,
+                'iconColor': 0xFF6264A7,
+              };
+            }).toList(),
+      },
+
+      // 每日事件卡片：显示纪念日事件列表
+      'dailyEventsCard': {
+        'weekday': _getWeekday(DateTime.now().weekday),
+        'day': DateTime.now().day,
+        'events':
+            events.map((e) {
+              return {
+                'title': e['title'] as String? ?? '',
+                'time': e['time'] as String? ?? '',
+                'colorValue': 0xFFE8A546,
+                'backgroundColorLightValue': 0xFFFFF9F0,
+                'backgroundColorDarkValue': 0xFF3d342b,
+                'textColorLightValue': 0xFF5D4037,
+                'textColorDarkValue': 0xFFFFE0B2,
+                'subtextLightValue': 0xFF8D6E63,
+                'subtextDarkValue': 0xFFD7CCC8,
+              };
+            }).toList(),
+      },
+
+      // 每日日程卡片：显示纪念日日程
+      'dailyScheduleCard': {
+        'todayDate': dateRangeLabel,
+        'todayEvents': events,
+        'tomorrowEvents': [],
+      },
+
+      // 彩色标签任务卡片：显示彩色标签的纪念日列表
+      'colorTagTaskCard': {
+        'taskCount': totalCount,
+        'label': dateRangeLabel,
+        'tasks':
+            tasks.map((t) {
+              return {
+                'title': t['title'] as String? ?? '',
+                'color': t['color'] as int? ?? 0xFF3B82F6,
+                'tag': t['status'] as String? ?? '',
+              };
+            }).toList(),
+        'moreCount': totalCount > 3 ? totalCount - 3 : 0,
+      },
+
+      // 即将到来任务小组件：显示即将到来的纪念日
+      'upcomingTasksWidget': {
+        'taskCount': upcomingCount,
+        'tasks':
+            tasks.map((t) {
+              return {
+                'title': t['title'] as String? ?? '',
+                'subtitle': t['subtitle'] as String? ?? '',
+                'status': t['status'] as String? ?? '',
+                'isCompleted': t['isCompleted'] as bool? ?? false,
+              };
+            }).toList(),
+        'moreCount': totalCount > 3 ? totalCount - 3 : 0,
+      },
+
+      // 圆角任务列表卡片：显示圆角样式的纪念日列表
+      'roundedTaskListCard': {
+        'title': dateRangeLabel,
+        'date': dateRangeLabel,
+        'tasks':
+            tasks.map((t) {
+              return {
+                'title': t['title'] as String? ?? '',
+                'subtitle': t['subtitle'] as String? ?? '',
+                'date': t['date'] as String? ?? '',
+              };
+            }).toList(),
+        'totalCount': totalCount,
+      },
+
+      // 圆角提醒事项列表：显示纪念日提醒列表
+      'roundedRemindersList': {
+        'title': dateRangeLabel,
+        'items': displayDays.map((day) {
+          final dayMap = day as Map<String, dynamic>;
+          return {
+            'text': '${dayMap['title']} (${dayMap['statusText']})',
+            'isCompleted': dayMap['isToday'] as bool? ?? false,
+          };
+        }).toList(),
+      },
+    };
+  }
+
+  /// 获取星期几名称
+  static String _getWeekday(int weekday) {
+    const weekdays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    return weekdays[weekday - 1];
+  }
+
+  /// 获取月份名称
+  static String _getMonth(int month) {
+    const months = [
+      '1月',
+      '2月',
+      '3月',
+      '4月',
+      '5月',
+      '6月',
+      '7月',
+      '8月',
+      '9月',
+      '10月',
+      '11月',
+      '12月',
+    ];
+    return months[month - 1];
+  }
+
+  /// 获取本周日期列表
+  static List<int> _getWeekDates() {
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    return List.generate(7, (index) => monday.add(Duration(days: index)).day);
   }
 
   /// 导航到纪念日详情页
@@ -516,201 +610,6 @@ class DayHomeWidgets {
     } catch (e) {
       return HomeWidget.buildErrorWidget(context, e.toString());
     }
-  }
-
-
-  // ===== 日期范围列表小组件 =====
-
-  /// 构建日期范围列表内容
-  static Widget _buildDateRangeListContent(
-    BuildContext context,
-    int startDay,
-    int endDay,
-    String dateRangeLabel,
-    Map<String, dynamic> config,
-  ) {
-    final theme = Theme.of(context);
-    final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
-    if (plugin == null) {
-      return HomeWidget.buildErrorWidget(context, '纪念日插件不可用');
-    }
-
-    // 获取所有纪念日并过滤
-    final allDays = plugin.getAllMemorialDays();
-    final filteredDays = _filterMemorialDaysByDaysRange(allDays, startDay, endDay);
-
-    // 获取小组件尺寸
-    final widgetSize = config['widgetSize'] as HomeWidgetSize?;
-    final isMediumSize = widgetSize == HomeWidgetSize.medium;
-
-    // 限制显示数量
-    final displayDays = filteredDays.take(isMediumSize ? 3 : 5).toList();
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          // 点击跳转到纪念日主页面
-          NavigationHelper.pushNamed(context, '/day');
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 顶部标题和筛选器标签
-              Row(
-                children: [
-                  const Icon(Icons.calendar_month, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'day_listWidgetName'.tr,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onPrimaryContainer.withOpacity(0.7),
-                          ),
-                        ),
-                        Text(
-                          dateRangeLabel,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // 纪念日数量徽章
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${filteredDays.length}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 12),
-
-              // 纪念日列表（使用滚动容器防止溢出）
-              Flexible(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (displayDays.isNotEmpty) ...[
-                        ...displayDays.map((day) => _buildMemorialDayListItem(context, day)),
-                        if (filteredDays.length > displayDays.length)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              'day_andMore'.trParams({'count': '${filteredDays.length - displayDays.length}'}),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
-                              ),
-                            ),
-                          ),
-                      ] else
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Center(
-                            child: Text(
-                              'day_noMemorialDaysInRange'.tr,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// 构建单个纪念日列表项
-  static Widget _buildMemorialDayListItem(BuildContext context, MemorialDay day) {
-    final theme = Theme.of(context);
-
-    // 计算状态文本和颜色
-    String statusText;
-    Color statusColor;
-
-    if (day.isToday) {
-      statusText = 'day_daysRemaining_zero'.tr;
-      statusColor = Colors.red;
-    } else if (day.isExpired) {
-      statusText = 'day_daysPassed'.trParams({'count': '${day.daysPassed}'});
-      statusColor = Colors.grey;
-    } else {
-      statusText = 'day_daysRemaining'.trParams({'count': '${day.daysRemaining}'});
-      statusColor = day.daysRemaining <= 7 ? Colors.orange : theme.colorScheme.primary;
-    }
-
-    // 格式化日期
-    final formattedDate = '${day.targetDate.month}/${day.targetDate.day}';
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(
-            Icons.celebration,
-            size: 16,
-            color: day.backgroundColor,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  day.title,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  formattedDate,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer.withOpacity(0.6),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            statusText,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: statusColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   /// 根据天数范围过滤纪念日

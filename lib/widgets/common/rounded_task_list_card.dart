@@ -34,9 +34,9 @@ class TaskListItem {
   /// 从 JSON 创建
   factory TaskListItem.fromJson(Map<String, dynamic> json) {
     return TaskListItem(
-      title: json['title'] as String,
-      subtitle: json['subtitle'] as String,
-      date: json['date'] as String,
+      title: json['title'] as String? ?? '',
+      subtitle: json['subtitle'] as String? ?? '',
+      date: json['date'] as String? ?? '',
     );
   }
 
@@ -321,7 +321,8 @@ class _TaskListItem extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  if (task.date != null && task.date.isNotEmpty) ...[
+                    const SizedBox(width: 12),
                   Text(
                     task.date,
                     style: TextStyle(
@@ -331,6 +332,8 @@ class _TaskListItem extends StatelessWidget {
                       height: 1.2,
                     ),
                   ),
+                  ]
+                 
                 ],
               ),
             ),

@@ -29,15 +29,15 @@ class DailyEventData {
   /// 从 JSON 创建
   factory DailyEventData.fromJson(Map<String, dynamic> json) {
     return DailyEventData(
-      title: json['title'] as String,
-      time: json['time'] as String,
-      colorValue: json['colorValue'] as int,
-      backgroundColorLightValue: json['backgroundColorLightValue'] as int,
-      backgroundColorDarkValue: json['backgroundColorDarkValue'] as int,
-      textColorLightValue: json['textColorLightValue'] as int,
-      textColorDarkValue: json['textColorDarkValue'] as int,
-      subtextLightValue: json['subtextLightValue'] as int,
-      subtextDarkValue: json['subtextDarkValue'] as int,
+      title: json['title'] as String? ?? '',
+      time: json['time'] as String? ?? '',
+      colorValue: json['colorValue'] as int? ?? 0xFFE8A546,
+      backgroundColorLightValue: json['backgroundColorLightValue'] as int? ?? 0xFFFFF9F0,
+      backgroundColorDarkValue: json['backgroundColorDarkValue'] as int? ?? 0xFF3d342b,
+      textColorLightValue: json['textColorLightValue'] as int? ?? 0xFF5D4037,
+      textColorDarkValue: json['textColorDarkValue'] as int? ?? 0xFFFFE0B2,
+      subtextLightValue: json['subtextLightValue'] as int? ?? 0xFF8D6E63,
+      subtextDarkValue: json['subtextDarkValue'] as int? ?? 0xFFD7CCC8,
     );
   }
 
@@ -218,9 +218,11 @@ class DailyEventsCardData {
   /// 从 JSON 创建
   factory DailyEventsCardData.fromJson(Map<String, dynamic> json) {
     return DailyEventsCardData(
-      weekday: json['weekday'] as String,
-      day: json['day'] as int,
-      events: DailyEventData.listFromJson(json['events'] as List<dynamic>),
+      weekday: json['weekday'] as String? ?? '',
+      day: json['day'] as int? ?? 1,
+      events: json['events'] != null
+          ? DailyEventData.listFromJson(json['events'] as List<dynamic>)
+          : [],
     );
   }
 
