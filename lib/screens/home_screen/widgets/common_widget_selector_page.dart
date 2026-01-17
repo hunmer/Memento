@@ -113,7 +113,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
-        final result = widget.pluginWidget.commonWidgetsProvider!(data);
+        final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
           availableWidgets = result;
@@ -221,7 +221,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
-        final result = widget.pluginWidget.commonWidgetsProvider!(data);
+        final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
           availableWidgets = result;
@@ -649,7 +649,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
-        final result = widget.pluginWidget.commonWidgetsProvider!(data);
+        final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
           availableWidgets = result;
