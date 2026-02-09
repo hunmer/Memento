@@ -211,8 +211,7 @@ Future<Map<String, Map<String, dynamic>>> provideGoodsListWidgets(
     }
   }
 
-  // 最多显示 5 条物品
-  final displayItems = filteredItems.take(5).toList();
+  final displayItems = filteredItems.toList();
   final moreCount =
       itemsCount > displayItems.length ? itemsCount - displayItems.length : 0;
 
@@ -229,11 +228,11 @@ Future<Map<String, Map<String, dynamic>>> provideGoodsListWidgets(
           'avatarUrl': imageUrl ?? '',
           'preview': _getItemPreview(item),
           'timeAgo': _formatTimeAgo(item.purchaseDate ?? now, now),
-          'iconCodePoint':
-              imageUrl != null && imageUrl.isNotEmpty
-                  ? null
-                  : Icons.inventory_2_outlined.codePoint,
-          'iconBackgroundColor': tagColor?.value ?? goodsColor.value,
+          // 优先使用物品自带的图标，如果没有图片且有图标则使用图标
+          'iconCodePoint': (imageUrl == null || imageUrl.isEmpty) && item.icon != null
+              ? item.icon!.codePoint
+              : null,
+          'iconBackgroundColor': item.iconColor?.value ?? tagColor?.value ?? goodsColor.value,
         };
       }),
     ),
@@ -243,7 +242,7 @@ Future<Map<String, Map<String, dynamic>>> provideGoodsListWidgets(
     'primaryColor': goodsColor.value,
   };
 
-  // 构建 NewsCard 数据（重点展示物品图片）
+  // 构建 NewsCard 数据（重点展示物品图片，无图片时显示图标）
   final featuredItem = displayItems.isNotEmpty ? displayItems.first : null;
   final imageUrl = featuredItem != null ? await featuredItem.getImageUrl() : '';
   final newsCardData =
@@ -252,15 +251,27 @@ Future<Map<String, Map<String, dynamic>>> provideGoodsListWidgets(
             'featuredNews': {
               'imageUrl': imageUrl ?? '',
               'title': featuredItem.title,
+              // 无图片时使用图标
+              'iconCodePoint': (imageUrl == null || imageUrl.isEmpty) && featuredItem.icon != null
+                  ? featuredItem.icon!.codePoint
+                  : null,
+              'iconBackgroundColor': featuredItem.iconColor?.value ?? goodsColor.value,
             },
             'category': warehouseName,
             'newsItems': await Future.wait(
-              displayItems.skip(1).take(3).map((item) async {
+              displayItems.skip(1).map((item) async {
                 final itemImageUrl = await item.getImageUrl();
+                final primaryTag = item.tags.isNotEmpty ? item.tags.first : '';
+                final tagColor = primaryTag.isNotEmpty ? tagColors[primaryTag] : goodsColor;
                 return {
                   'title': item.title,
                   'time': _formatTimeAgo(item.purchaseDate ?? now, now),
                   'imageUrl': itemImageUrl ?? '',
+                  // 无图片时使用图标
+                  'iconCodePoint': (itemImageUrl == null || itemImageUrl.isEmpty) && item.icon != null
+                      ? item.icon!.codePoint
+                      : null,
+                  'iconBackgroundColor': item.iconColor?.value ?? tagColor?.value ?? goodsColor.value,
                 };
               }),
             ),
@@ -271,38 +282,52 @@ Future<Map<String, Map<String, dynamic>>> provideGoodsListWidgets(
             'newsItems': [],
           };
 
-  // 构建 ArticleListCard 数据（重点展示物品图片，替代 notesListCard）
+  // 构建 ArticleListCard 数据（重点展示物品图片，无图片时显示图标）
   final featuredArticle = displayItems.isNotEmpty ? displayItems.first : null;
-  final articleImageUrl = featuredArticle != null ? await featuredArticle.getImageUrl() : '';
-  final articleListCardData = featuredArticle != null
-      ? {
-          'featuredArticle': {
-            'author': warehouseName,
-            'title': featuredArticle.title,
-            'summary': _getItemPreview(featuredArticle),
-            'imageUrl': articleImageUrl ?? '',
-          },
-          'articles': await Future.wait(
-            displayItems.skip(1).take(3).map((item) async {
-              final itemImageUrl = await item.getImageUrl();
-              return {
-                'title': item.title,
-                'author': warehouseName,
-                'publication': _formatTimeAgo(item.purchaseDate ?? now, now),
-                'imageUrl': itemImageUrl ?? '',
-              };
-            }),
-          ),
-        }
-      : {
-          'featuredArticle': {
-            'author': '',
-            'title': 'goods_noItems'.tr,
-            'summary': '',
-            'imageUrl': '',
-          },
-          'articles': [],
-        };
+  final articleImageUrl =
+      featuredArticle != null ? await featuredArticle.getImageUrl() : '';
+  final articleListCardData =
+      featuredArticle != null
+          ? {
+            'featuredArticle': {
+              'author': warehouseName,
+              'title': featuredArticle.title,
+              'summary': _getItemPreview(featuredArticle),
+              'imageUrl': articleImageUrl ?? '',
+              // 无图片时使用图标
+              'iconCodePoint': (articleImageUrl == null || articleImageUrl.isEmpty) && featuredArticle.icon != null
+                  ? featuredArticle.icon!.codePoint
+                  : null,
+              'iconBackgroundColor': featuredArticle.iconColor?.value ?? goodsColor.value,
+            },
+            'articles': await Future.wait(
+              displayItems.skip(1).map((item) async {
+                final itemImageUrl = await item.getImageUrl();
+                final primaryTag = item.tags.isNotEmpty ? item.tags.first : '';
+                final tagColor = primaryTag.isNotEmpty ? tagColors[primaryTag] : goodsColor;
+                return {
+                  'title': item.title,
+                  'author': warehouseName,
+                  'publication': _formatTimeAgo(item.purchaseDate ?? now, now),
+                  'imageUrl': itemImageUrl ?? '',
+                  // 无图片时使用图标
+                  'iconCodePoint': (itemImageUrl == null || itemImageUrl.isEmpty) && item.icon != null
+                      ? item.icon!.codePoint
+                      : null,
+                  'iconBackgroundColor': item.iconColor?.value ?? tagColor?.value ?? goodsColor.value,
+                };
+              }),
+            ),
+          }
+          : {
+            'featuredArticle': {
+              'author': '',
+              'title': 'goods_noItems'.tr,
+              'summary': '',
+              'imageUrl': '',
+            },
+            'articles': [],
+          };
 
   return {
     'inboxMessageCard': inboxMessageCardData,

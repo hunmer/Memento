@@ -16,6 +16,7 @@ class NewsCardExample extends StatelessWidget {
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: NewsCardWidget(
+            inline: true,
             featuredNews: FeaturedNewsData(
               imageUrl:
                   'https://lh3.googleusercontent.com/aida-public/AB6AXuDv5gxvSgmJi-EJnx1jpWIpatry-RBKJyPObZyjHGF4-dpstaoze49i8tJFHbm3FOGPd2LNfrxsIt6W5g4qO1YfXAYs6ZVYy2GA78hSeLg1pAm2khF7Z5hO5NCICS2kSwHjgA5diQ8bCI6-IdSKXJxszm4VL2Fq4uCx3rbOzM_OYO_AO6sFN2ew-KJaE3U3xyYbqX-7Z5P7ippdNtDWdpZDfWXETGhR087NeReVoMb6Xf8_Zf-uQ2kXVzCAKZ4wkiflAg-3sYRMbQ',

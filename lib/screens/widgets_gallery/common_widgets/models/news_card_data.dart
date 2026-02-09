@@ -48,9 +48,17 @@ class FeaturedNewsData {
   /// 标题
   final String title;
 
+  /// 图标 codePoint（可选，当没有图片时使用）
+  final int? iconCodePoint;
+
+  /// 图标背景颜色（可选，配合 iconCodePoint 使用）
+  final int? iconBackgroundColor;
+
   const FeaturedNewsData({
     required this.imageUrl,
     required this.title,
+    this.iconCodePoint,
+    this.iconBackgroundColor,
   });
 
   /// 从 JSON 创建
@@ -58,6 +66,8 @@ class FeaturedNewsData {
     return FeaturedNewsData(
       imageUrl: json['imageUrl'] as String? ?? '',
       title: json['title'] as String? ?? '',
+      iconCodePoint: json['iconCodePoint'] as int?,
+      iconBackgroundColor: json['iconBackgroundColor'] as int?,
     );
   }
 
@@ -66,6 +76,8 @@ class FeaturedNewsData {
     return {
       'imageUrl': imageUrl,
       'title': title,
+      if (iconCodePoint != null) 'iconCodePoint': iconCodePoint,
+      if (iconBackgroundColor != null) 'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }
@@ -81,10 +93,18 @@ class NewsItemData {
   /// 缩略图 URL
   final String imageUrl;
 
+  /// 图标 codePoint（可选，当没有图片时使用）
+  final int? iconCodePoint;
+
+  /// 图标背景颜色（可选，配合 iconCodePoint 使用）
+  final int? iconBackgroundColor;
+
   const NewsItemData({
     required this.title,
     required this.time,
     required this.imageUrl,
+    this.iconCodePoint,
+    this.iconBackgroundColor,
   });
 
   /// 从 JSON 创建
@@ -93,6 +113,8 @@ class NewsItemData {
       title: json['title'] as String? ?? '',
       time: json['time'] as String? ?? '',
       imageUrl: json['imageUrl'] as String? ?? '',
+      iconCodePoint: json['iconCodePoint'] as int?,
+      iconBackgroundColor: json['iconBackgroundColor'] as int?,
     );
   }
 
@@ -102,6 +124,8 @@ class NewsItemData {
       'title': title,
       'time': time,
       'imageUrl': imageUrl,
+      if (iconCodePoint != null) 'iconCodePoint': iconCodePoint,
+      if (iconBackgroundColor != null) 'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }

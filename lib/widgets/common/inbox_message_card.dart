@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/utils/image_helper.dart';
 
 /// 收件箱消息数据模型
 class InboxMessage {
@@ -267,40 +268,11 @@ class _MessageItem extends StatelessWidget {
 
   /// 构建头像或图标
   Widget _buildAvatarOrIcon(InboxMessage message) {
-    // 优先使用图标
-    if (message.iconCodePoint != null) {
-      final backgroundColor =
-          message.iconBackgroundColor != null
-              ? Color(message.iconBackgroundColor!)
-              : Colors.grey.shade300;
-      return Container(
-        color: backgroundColor,
-        child: Icon(
-          IconData(message.iconCodePoint!, fontFamily: 'MaterialIcons'),
-          color: Colors.white,
-          size: 24,
-        ),
-      );
-    }
-
-    // 如果有 avatarUrl，加载网络图片
-    if (message.avatarUrl.isNotEmpty) {
-      return Image.network(
-        message.avatarUrl,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: Colors.grey.shade300,
-            child: Icon(Icons.person, color: Colors.grey.shade600),
-          );
-        },
-      );
-    }
-
-    // 默认图标
-    return Container(
-      color: Colors.grey.shade300,
-      child: const Icon(Icons.person, color: Colors.grey),
+    return CommonImageBuilder.buildAvatarOrIcon(
+      imageUrl: message.avatarUrl,
+      iconCodePoint: message.iconCodePoint,
+      iconBackgroundColor: message.iconBackgroundColor,
+      size: 40,
     );
   }
 

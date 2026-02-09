@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import '../utils/image_helper.dart';
+
+const Color _defaultGoodsColor = Color.fromARGB(255, 207, 77, 116);
 
 /// 特色文章数据模型
 class FeaturedArticleData {
@@ -7,12 +10,18 @@ class FeaturedArticleData {
   final String title;
   final String summary;
   final String imageUrl;
+  /// 图标 codePoint（可选，当没有图片时使用）
+  final int? iconCodePoint;
+  /// 图标背景颜色（可选，配合 iconCodePoint 使用）
+  final int? iconBackgroundColor;
 
   const FeaturedArticleData({
     required this.author,
     required this.title,
     required this.summary,
     required this.imageUrl,
+    this.iconCodePoint,
+    this.iconBackgroundColor,
   });
 
   /// 从 JSON 创建
@@ -22,6 +31,8 @@ class FeaturedArticleData {
       title: json['title'] as String? ?? '',
       summary: json['summary'] as String? ?? '',
       imageUrl: json['imageUrl'] as String? ?? '',
+      iconCodePoint: json['iconCodePoint'] as int?,
+      iconBackgroundColor: json['iconBackgroundColor'] as int?,
     );
   }
 
@@ -32,6 +43,8 @@ class FeaturedArticleData {
       'title': title,
       'summary': summary,
       'imageUrl': imageUrl,
+      if (iconCodePoint != null) 'iconCodePoint': iconCodePoint,
+      if (iconBackgroundColor != null) 'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }
@@ -42,12 +55,18 @@ class ArticleData {
   final String author;
   final String publication;
   final String imageUrl;
+  /// 图标 codePoint（可选，当没有图片时使用）
+  final int? iconCodePoint;
+  /// 图标背景颜色（可选，配合 iconCodePoint 使用）
+  final int? iconBackgroundColor;
 
   const ArticleData({
     required this.title,
     required this.author,
     required this.publication,
     required this.imageUrl,
+    this.iconCodePoint,
+    this.iconBackgroundColor,
   });
 
   /// 从 JSON 创建
@@ -57,6 +76,8 @@ class ArticleData {
       author: json['author'] as String? ?? '',
       publication: json['publication'] as String? ?? '',
       imageUrl: json['imageUrl'] as String? ?? '',
+      iconCodePoint: json['iconCodePoint'] as int?,
+      iconBackgroundColor: json['iconBackgroundColor'] as int?,
     );
   }
 
@@ -67,6 +88,8 @@ class ArticleData {
       'author': author,
       'publication': publication,
       'imageUrl': imageUrl,
+      if (iconCodePoint != null) 'iconCodePoint': iconCodePoint,
+      if (iconBackgroundColor != null) 'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }
@@ -177,6 +200,7 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(height: widget.size.getTitleSpacing()),
             Padding(
@@ -194,6 +218,7 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
                 articles: widget.articles,
                 animation: _animation,
                 size: widget.size,
+                isInline: widget.inline,
               ),
             ),
             SizedBox(height: widget.size.getTitleSpacing()),
@@ -253,23 +278,7 @@ class _FeaturedSection extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        data.imageUrl,
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200, borderRadius: BorderRadius.circular(12)),
-                            child: Icon(Icons.article, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                          );
-                        },
-                      ),
-                    ),
+                    _buildFeaturedImageOrIcon(data, isDark),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -292,14 +301,66 @@ class _FeaturedSection extends StatelessWidget {
       ],
     );
   }
+
+  /// 构建特色文章的图片或图标
+  Widget _buildFeaturedImageOrIcon(FeaturedArticleData data, bool isDark) {
+    final hasImage = data.imageUrl.isNotEmpty;
+    final hasIcon = data.iconCodePoint != null;
+
+    if (hasImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CommonImageBuilder.buildImage(
+          imageUrl: data.imageUrl,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+          defaultIcon: Icons.article,
+          isDark: isDark,
+        ),
+      );
+    }
+
+    if (hasIcon) {
+      return Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Color(data.iconBackgroundColor ?? _defaultGoodsColor.value),
+        ),
+        child: Icon(
+          IconData(data.iconCodePoint!, fontFamily: 'MaterialIcons'),
+          color: Colors.white,
+          size: 40,
+        ),
+      );
+    }
+
+    // 默认占位符
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+      ),
+      child: Icon(
+        Icons.article,
+        color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+        size: 40,
+      ),
+    );
+  }
 }
 
 class _ArticleListSection extends StatelessWidget {
   final List<ArticleData> articles;
   final Animation<double> animation;
   final HomeWidgetSize size;
+  final bool isInline;
 
-  const _ArticleListSection({required this.articles, required this.animation, required this.size});
+  const _ArticleListSection({required this.articles, required this.animation, required this.size, this.isInline = false});
 
   @override
   Widget build(BuildContext context) {
@@ -307,6 +368,7 @@ class _ArticleListSection extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedBuilder(
           animation: animation,
@@ -331,16 +393,24 @@ class _ArticleListSection extends StatelessWidget {
           },
         ),
         SizedBox(height: size.getItemSpacing()),
-        Flexible(
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(articles.length, (index) {
-                return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
-              }),
-            ),
-          ),
+        SizedBox(
+          height: isInline ? null : 320,
+          child: isInline
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(articles.length, (index) {
+                    return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
+                  }),
+                )
+              : SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(articles.length, (index) {
+                      return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
+                    }),
+                  ),
+                ),
         ),
       ],
     );
@@ -380,23 +450,7 @@ class _ArticleListItem extends StatelessWidget {
               padding: EdgeInsets.only(bottom: size.getItemSpacing()),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      data.imageUrl,
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200, borderRadius: BorderRadius.circular(8)),
-                          child: Icon(Icons.article, size: 24, color: isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                        );
-                      },
-                    ),
-                  ),
+                  _buildArticleImageOrIcon(data, isDark),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -414,6 +468,57 @@ class _ArticleListItem extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// 构建文章列表项的图片或图标
+  Widget _buildArticleImageOrIcon(ArticleData data, bool isDark) {
+    final hasImage = data.imageUrl.isNotEmpty;
+    final hasIcon = data.iconCodePoint != null;
+
+    if (hasImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CommonImageBuilder.buildImage(
+          imageUrl: data.imageUrl,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+          defaultIcon: Icons.article,
+          isDark: isDark,
+        ),
+      );
+    }
+
+    if (hasIcon) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Color(data.iconBackgroundColor ?? _defaultGoodsColor.value),
+        ),
+        child: Icon(
+          IconData(data.iconCodePoint!, fontFamily: 'MaterialIcons'),
+          color: Colors.white,
+          size: 24,
+        ),
+      );
+    }
+
+    // 默认占位符
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+      ),
+      child: Icon(
+        Icons.article,
+        color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+        size: 24,
+      ),
     );
   }
 }
