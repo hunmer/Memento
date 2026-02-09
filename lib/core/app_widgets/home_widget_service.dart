@@ -9,10 +9,10 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:Memento/plugins/chat/home_widgets.dart';
 import 'package:Memento/plugins/diary/home_widgets.dart';
-import 'package:Memento/plugins/activity/home_widgets/home_widgets.dart';
 import 'package:Memento/plugins/agent_chat/home_widgets.dart';
 import 'package:Memento/plugins/openai/home_widgets.dart';
-import 'package:Memento/plugins/notes/home_widgets.dart';
+import 'package:Memento/plugins/notes/home_widgets/home_widgets.dart'
+    as NotesHomeWidgets;
 import 'package:Memento/plugins/goods/home_widgets.dart';
 import 'package:Memento/plugins/bill/home_widgets.dart';
 import 'package:Memento/plugins/todo/home_widgets.dart';
@@ -308,7 +308,8 @@ Future<void> _registerBroadcastReceiver() async {
               }
 
               // 同步数据
-              await PluginWidgetSyncHelper.instance.syncCalendarAlbumWeeklyWidget();
+              await PluginWidgetSyncHelper.instance
+                  .syncCalendarAlbumWeeklyWidget();
 
               // 通知 Android 小组件刷新
               await HomeWidget.updateWidget(
@@ -338,10 +339,15 @@ Future<void> _registerBroadcastReceiver() async {
             final widgetType = data?['widgetType'] as String?;
             final deletedWidgetIds = data?['deletedWidgetIds'] as List?;
 
-            debugPrint('小组件清理请求: widgetType=$widgetType, deletedWidgetIds=$deletedWidgetIds');
+            debugPrint(
+              '小组件清理请求: widgetType=$widgetType, deletedWidgetIds=$deletedWidgetIds',
+            );
 
             if (widgetType == 'activity_weekly' && deletedWidgetIds != null) {
-              await _cleanupWidgetIds('activity_weekly_widget_ids', deletedWidgetIds.cast<int>());
+              await _cleanupWidgetIds(
+                'activity_weekly_widget_ids',
+                deletedWidgetIds.cast<int>(),
+              );
             }
           }
         } catch (e) {
@@ -357,7 +363,10 @@ Future<void> _registerBroadcastReceiver() async {
 }
 
 /// 清理已删除的 widgetId
-Future<void> _cleanupWidgetIds(String listKey, List<int> deletedWidgetIds) async {
+Future<void> _cleanupWidgetIds(
+  String listKey,
+  List<int> deletedWidgetIds,
+) async {
   try {
     final existingIdsJson = await HomeWidget.getWidgetData<String>(listKey);
 
@@ -373,17 +382,16 @@ Future<void> _cleanupWidgetIds(String listKey, List<int> deletedWidgetIds) async
     widgetIds.removeWhere((id) => deletedWidgetIds.contains(id));
 
     final removedCount = originalCount - widgetIds.length;
-    debugPrint('Cleanup: Removed $removedCount widget IDs from $listKey (remaining: ${widgetIds.length})');
+    debugPrint(
+      'Cleanup: Removed $removedCount widget IDs from $listKey (remaining: ${widgetIds.length})',
+    );
 
     // 保存更新后的列表
     if (widgetIds.isEmpty) {
       // 如果列表为空，删除整个键
       await HomeWidget.saveWidgetData<String>(listKey, '');
     } else {
-      await HomeWidget.saveWidgetData<String>(
-        listKey,
-        jsonEncode(widgetIds),
-      );
+      await HomeWidget.saveWidgetData<String>(listKey, jsonEncode(widgetIds));
     }
 
     debugPrint('Cleanup: Updated $listKey with remaining IDs: $widgetIds');
