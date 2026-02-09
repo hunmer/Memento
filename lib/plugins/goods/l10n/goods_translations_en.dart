@@ -156,4 +156,21 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_categoryClothing': 'Clothing',
   'goods_categoryBooks': 'Books',
   'goods_categoryOther': 'Other',
+
+  // Goods List Widget
+  'goods_listWidgetName': 'Goods List',
+  'goods_listWidgetDescription': 'Display goods list with filters',
+  'goods_listConfigSelectorName': 'List Config',
+  'goods_listConfigSelectorDesc': 'Select filter conditions',
+  'goods_selectWarehouse': 'Select Warehouse',
+  'goods_selectTagsTitle': 'Select Tags',
+  'goods_selectDateTypeTitle': 'Date Type',
+  'goods_startDate': 'Start Date',
+  'goods_endDate': 'End Date',
+  'goods_clear': 'Clear',
+  'goods_widgetTitle': 'Widget Title',
+  'goods_widgetTitleHint': 'Enter custom title',
+  'goods_unknownWarehouse': 'Unknown Warehouse',
+  'goods_noTags': 'No tags',
+  'goods_optional': 'Optional',
 };
