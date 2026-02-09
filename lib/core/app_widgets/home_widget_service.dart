@@ -13,7 +13,8 @@ import 'package:Memento/plugins/agent_chat/home_widgets.dart';
 import 'package:Memento/plugins/openai/home_widgets.dart';
 import 'package:Memento/plugins/notes/home_widgets/home_widgets.dart'
     as NotesHomeWidgets;
-import 'package:Memento/plugins/goods/home_widgets.dart';
+import 'package:Memento/plugins/goods/home_widgets/home_widgets.dart'
+    as GoodsHomeWidgets;
 import 'package:Memento/plugins/bill/home_widgets.dart';
 import 'package:Memento/plugins/todo/home_widgets.dart';
 import 'package:Memento/plugins/checkin/home_widgets.dart';
