@@ -188,14 +188,8 @@ class _VerticalCircularProgressCardState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height:
-                  widget.inline
-                      ? double.maxFinite
-                      : (widget.height ?? 200),
-              width:
-                  widget.inline
-                      ? double.maxFinite
-                      : (widget.width ?? 450),
+              height: widget.inline ? (widget.height ?? 200) : double.maxFinite,
+              width: widget.inline ? (widget.width ?? 450) : double.maxFinite,
               padding: widget.padding ?? widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
