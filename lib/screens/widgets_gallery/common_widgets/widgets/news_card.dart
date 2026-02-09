@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import '../models/news_card_data.dart';
+import '../utils/image_helper.dart';
+
+const Color _defaultGoodsColor = Color.fromARGB(255, 207, 77, 116);
 
 /// 新闻卡片小组件
 /// 显示头条新闻、分类标签和新闻列表，支持动画效果
@@ -63,17 +66,11 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _slideAnimation = Tween<double>(begin: 20.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _animationController.forward();
@@ -90,8 +87,10 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1F2937) : Colors.white;
     final primaryColor = const Color(0xFFFBC05B);
-    final textMainColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
-    final textSubColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final textMainColor =
+        isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
+    final textSubColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -105,7 +104,8 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : double.infinity,
+        width: widget.inline ? 300 : double.maxFinite,
+        height: widget.inline ? 300 : double.maxFinite,
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(28),
@@ -149,49 +149,64 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
     required Color primaryColor,
     required Color textMainColor,
   }) {
+    final hasImage = widget.featuredNews.imageUrl.isNotEmpty;
+    final hasIcon = widget.featuredNews.iconCodePoint != null;
+
     return SizedBox(
       height: 256,
       child: Stack(
         children: [
-          // 背景图片
+          // 背景图片或图标
           Positioned.fill(
             child: ClipRRect(
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(28),
                 topRight: Radius.circular(28),
               ),
-              child: Image.network(
-                widget.featuredNews.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                  );
-                },
-              ),
+              child: hasImage
+                  ? CommonImageBuilder.buildImage(
+                      imageUrl: widget.featuredNews.imageUrl,
+                      fit: BoxFit.cover,
+                      isDark: isDark,
+                    )
+                  : hasIcon
+                      ? Container(
+                          color: Color(widget.featuredNews.iconBackgroundColor ?? _defaultGoodsColor.value),
+                          child: Center(
+                            child: Icon(
+                              IconData(widget.featuredNews.iconCodePoint!, fontFamily: 'MaterialIcons'),
+                              size: 80,
+                              color: Colors.white.withOpacity(0.3),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                        ),
             ),
           ),
-          // 渐变遮罩
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    isDark
-                        ? const Color(0xFF1F2937).withOpacity(0)
-                        : Colors.white.withOpacity(0),
-                    isDark
-                        ? const Color(0xFF1F2937).withOpacity(0.6)
-                        : Colors.white.withOpacity(0.6),
-                    isDark ? const Color(0xFF1F2937) : Colors.white,
-                  ],
-                  stops: const [0.0, 0.5, 1.0],
+          // 渐变遮罩（只在有图片或图标时显示）
+          if (hasImage || hasIcon)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      isDark
+                          ? const Color(0xFF1F2937).withOpacity(0)
+                          : Colors.white.withOpacity(0),
+                      isDark
+                          ? const Color(0xFF1F2937).withOpacity(0.6)
+                          : Colors.white.withOpacity(0.6),
+                      isDark ? const Color(0xFF1F2937) : Colors.white,
+                    ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
                 ),
               ),
             ),
-          ),
           // 右上角装饰按钮
           Positioned(
             top: widget.size.getPadding().top,
@@ -204,7 +219,9 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
             left: 0,
             right: 0,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: widget.size.getPadding().left * 2),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.size.getPadding().left * 2,
+              ),
               child: Text(
                 widget.featuredNews.title,
                 style: TextStyle(
@@ -219,6 +236,56 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 构建新闻项缩略图或图标
+  Widget _buildNewsItemThumbnail(NewsItemData item, bool isDark) {
+    final hasImage = item.imageUrl.isNotEmpty;
+    final hasIcon = item.iconCodePoint != null;
+
+    if (hasImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CommonImageBuilder.buildImage(
+          imageUrl: item.imageUrl,
+          width: 56,
+          height: 56,
+          fit: BoxFit.cover,
+          isDark: isDark,
+        ),
+      );
+    }
+
+    if (hasIcon) {
+      return Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: Color(item.iconBackgroundColor ?? _defaultGoodsColor.value),
+        ),
+        child: Icon(
+          IconData(item.iconCodePoint!, fontFamily: 'MaterialIcons'),
+          color: Colors.white,
+          size: 28,
+        ),
+      );
+    }
+
+    // 默认占位符
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+      ),
+      child: Icon(
+        Icons.article,
+        color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+        size: 28,
       ),
     );
   }
@@ -239,11 +306,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
       ),
       child: const Padding(
         padding: EdgeInsets.all(8.0),
-        child: Icon(
-          Icons.fingerprint_outlined,
-          color: Colors.white,
-          size: 20,
-        ),
+        child: Icon(Icons.fingerprint_outlined, color: Colors.white, size: 20),
       ),
     );
   }
@@ -330,7 +393,9 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.only(bottom: isLast ? 0 : widget.size.getItemSpacing()),
+            padding: EdgeInsets.only(
+              bottom: isLast ? 0 : widget.size.getItemSpacing(),
+            ),
             child: Row(
               children: [
                 // 文本内容
@@ -363,23 +428,8 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                   ),
                 ),
                 SizedBox(width: widget.size.getItemSpacing() * 2),
-                // 缩略图
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    item.imageUrl,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 56,
-                        height: 56,
-                        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                      );
-                    },
-                  ),
-                ),
+                // 缩略图或图标
+                _buildNewsItemThumbnail(item, isDark),
               ],
             ),
           ),
@@ -387,9 +437,10 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
             Divider(
               height: 1,
               thickness: 1,
-              color: isDark
-                  ? const Color(0xFF374151).withOpacity(0.5)
-                  : const Color(0xFFF3F4F6),
+              color:
+                  isDark
+                      ? const Color(0xFF374151).withOpacity(0.5)
+                      : const Color(0xFFF3F4F6),
             ),
         ],
       ),

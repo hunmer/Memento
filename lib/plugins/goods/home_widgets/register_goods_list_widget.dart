@@ -24,7 +24,7 @@ void registerGoodsListWidget(HomeWidgetRegistry registry) {
       icon: Icons.view_list,
       color: goodsColor,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      supportedSizes: [HomeWidgetSize.custom, HomeWidgetSize.large],
       category: 'home_categoryRecord'.tr,
 
       // 选择器配置
@@ -37,10 +37,7 @@ void registerGoodsListWidget(HomeWidgetRegistry registry) {
         return StatefulBuilder(
           builder: (context, setState) {
             return EventListenerContainer(
-              events: const [
-                'goods_item_added',
-                'goods_item_deleted',
-              ],
+              events: const ['goods_item_added', 'goods_item_deleted'],
               onEvent: () => setState(() {}),
               child: GenericSelectorWidget(
                 widgetDefinition: registry.getWidget('goods_list_widget')!,
