@@ -9,6 +9,7 @@ import 'register_icon_widget.dart' show registerIconWidget;
 import 'register_quick_create_widget.dart' show registerQuickCreateWidget;
 import 'register_overview_widget.dart' show registerOverviewWidget;
 import 'register_folder_selector_widget.dart' show registerFolderSelectorWidget;
+import 'register_notes_list_widget.dart' show registerNotesListWidget;
 
 /// 笔记插件的主页小组件注册
 void register() {
@@ -17,4 +18,5 @@ void register() {
   registerQuickCreateWidget(registry);
   registerOverviewWidget(registry);
   registerFolderSelectorWidget(registry);
+  registerNotesListWidget(registry);
 }
