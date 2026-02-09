@@ -156,4 +156,21 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_categoryClothing': '服饰',
   'goods_categoryBooks': '书籍',
   'goods_categoryOther': '其他',
+
+  // 物品列表小组件
+  'goods_listWidgetName': '物品列表',
+  'goods_listWidgetDescription': '显示物品列表，支持过滤',
+  'goods_listConfigSelectorName': '列表配置',
+  'goods_listConfigSelectorDesc': '选择过滤条件',
+  'goods_selectWarehouse': '选择仓库',
+  'goods_selectTagsTitle': '选择标签',
+  'goods_selectDateTypeTitle': '日期类型',
+  'goods_startDate': '开始日期',
+  'goods_endDate': '结束日期',
+  'goods_clear': '清除',
+  'goods_widgetTitle': '小组件标题',
+  'goods_widgetTitleHint': '输入自定义标题',
+  'goods_unknownWarehouse': '未知仓库',
+  'goods_noTags': '暂无标签',
+  'goods_optional': '可选',
 };

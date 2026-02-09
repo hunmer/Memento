@@ -1,7 +1,11 @@
 /// 物品管理插件主页小组件工具函数
 library;
 
+import 'package:flutter/material.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
+
+/// 物品管理插件主题色
+const Color goodsColor = Color.fromARGB(255, 207, 77, 116);
 
 /// 从选择器数据数组中提取仓库数据
 Map<String, dynamic> extractWarehouseData(List<dynamic> dataArray) {
