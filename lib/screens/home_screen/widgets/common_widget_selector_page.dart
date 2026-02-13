@@ -597,6 +597,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
           matchingWidget,
           props,
           metadata.defaultSize,
+          inline: true,
         ),
       ),
     );
