@@ -113,6 +113,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
+        debugPrint('[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data');
         final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
@@ -225,6 +226,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
+        debugPrint('[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data');
         final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
@@ -374,42 +376,21 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: Colors.green, size: 16),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: ExpansionTile(
-                      title: Text(
-                        '已选择数据: ${_selectedData!['title'] ?? _selectedData!['id'] ?? '未知'}',
-                        style: const TextStyle(
-                          color: Colors.green,
-                          fontSize: 14,
+                    child: SizedBox(
+                      height: 100,
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          const JsonEncoder.withIndent(
+                            '  ',
+                          ).convert(_selectedData),
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(8),
-                          padding: const EdgeInsets.all(8),
-                          width: double.infinity,
-
-                          decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: SelectableText(
-                              const JsonEncoder.withIndent(
-                                '  ',
-                              ).convert(_selectedData),
-                              style: const TextStyle(
-                                fontFamily: 'monospace',
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                   IconButton(
@@ -588,15 +569,21 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     }
 
     // 安全地查找匹配的 CommonWidgetId
-    final matchingWidget = CommonWidgetId.values.firstWhere(
-      (e) => e.name == widgetId,
-      orElse: () {
-        debugPrint(
-          '[CommonWidgetSelectorPage] 未找到匹配的 CommonWidgetId: $widgetId',
-        );
-        return CommonWidgetId.circularProgressCard; // 使用默认值
-      },
-    );
+    CommonWidgetId matchingWidget;
+    try {
+      matchingWidget = CommonWidgetId.values.firstWhere(
+        (e) => e.name == widgetId,
+        orElse: () {
+          debugPrint(
+            '[CommonWidgetSelectorPage] 未找到匹配的 CommonWidgetId: $widgetId',
+          );
+          return CommonWidgetId.circularProgressCard; // 使用默认值
+        },
+      );
+    } catch (e) {
+      debugPrint('[CommonWidgetSelectorPage] 查找 CommonWidgetId 失败: $e');
+      matchingWidget = CommonWidgetId.circularProgressCard;
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -650,9 +637,26 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
       rawMap.forEach((key, value) {
         data[key.toString()] = value;
       });
-    } else if (widget.pluginWidget.dataSelector != null &&
-        result.data is List) {
-      data = widget.pluginWidget.dataSelector!(result.data as List<dynamic>);
+    } else if (result.data is List) {
+      final dataList = result.data as List<dynamic>;
+      if (widget.pluginWidget.dataSelector != null) {
+        // 使用自定义数据选择器
+        data = widget.pluginWidget.dataSelector!(dataList);
+      } else if (dataList.isNotEmpty) {
+        // 对于列表数据（如 customForm 的结果），提取第一个元素
+        final firstItem = dataList.first;
+        if (firstItem is Map) {
+          data = {};
+          (firstItem as Map).forEach((key, value) {
+            data[key.toString()] = value;
+          });
+        } else {
+          data = {'data': firstItem};
+        }
+      } else {
+        // 空列表
+        data = {};
+      }
     } else {
       data = {'data': result.data};
     }
@@ -661,7 +665,10 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
+        debugPrint('[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data');
         final result = await widget.pluginWidget.commonWidgetsProvider!(data);
+        debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回的类型: ${result.runtimeType}');
+        debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回的键: ${result.keys.toList()}');
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
           availableWidgets = result;
@@ -673,6 +680,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
           for (final entry in result.entries) {
             final key = entry.key.toString();
             final value = entry.value;
+            debugPrint('[CommonWidgetSelectorPage] 处理键值对: $key = $value (${value.runtimeType})');
             if (value is Map<String, dynamic>) {
               availableWidgets[key] = value;
             } else if (value is Map) {

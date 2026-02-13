@@ -421,29 +421,6 @@ Future<List<int>> _getDailyMinutesForHabit(
   return dailyMinutes;
 }
 
-/// 获取单个习惯在一段时间内的每月数据
-Future<List<int>> _getMonthlyMinutesForHabit(
-  String habitId,
-  int months,
-  dynamic recordController,
-) async {
-  final records =
-      (await recordController.getHabitCompletionRecords(habitId) as List)
-          .cast<CompletionRecord>();
-  final now = DateTime.now();
-  final monthlyMinutes = List<int>.filled(months, 0);
-
-  for (final record in records) {
-    final monthsAgo =
-        (now.year - record.date.year) * 12 + now.month - record.date.month;
-    if (monthsAgo >= 0 && monthsAgo < months) {
-      monthlyMinutes[months - 1 - monthsAgo] += record.duration.inMinutes;
-    }
-  }
-
-  return monthlyMinutes;
-}
-
 /// 习惯统计公共小组件数据提供者
 Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   Map<String, dynamic> config,
@@ -451,8 +428,27 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   final dynamic plugin = PluginManager.instance.getPlugin('habits');
   if (plugin == null) return {};
 
-  final habitId = config['habitId'] as String?;
-  if (habitId == null) return {};
+  // 尝试从多种格式中提取 habitId
+  String? habitId;
+
+  // 格式1: 直接包含 habitId（来自自定义表单）
+  if (config.containsKey('habitId')) {
+    habitId = config['habitId'] as String?;
+  }
+  // 格式2: 包含 id 字段（直接从 Habit 对象或 Map 转换来的）
+  else if (config.containsKey('id')) {
+    habitId = config['id'] as String?;
+  }
+  // 格式3: 从 rawData 中提取（有些选择器会把原始数据放在 rawData 中）
+  else if (config.containsKey('rawData') && config['rawData'] is Map) {
+    final rawData = config['rawData'] as Map;
+    habitId = rawData['id']?.toString() ?? rawData['habitId']?.toString();
+  }
+
+  if (habitId == null || habitId.isEmpty) {
+    debugPrint('[provideHabitStatsWidgets] 无法从配置中提取 habitId: $config');
+    return {};
+  }
 
   // 使用动态类型避免循环导入
   final habitController = plugin.getHabitController();
@@ -468,11 +464,6 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   final weeklyMinutes = await _getDailyMinutesForHabit(
     habitId,
     7,
-    recordController,
-  );
-  final monthlyMinutes = await _getMonthlyMinutesForHabit(
-    habitId,
-    12,
     recordController,
   );
   final totalMinutes = await recordController.getTotalDuration(habitId) as int;
@@ -499,6 +490,11 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
           .map((m) => maxWeeklyMinutes > 0 ? m / maxWeeklyMinutes : 0.0)
           .toList();
 
+  // 计算平均时长
+  final avgMinutes = weeklyMinutes.isEmpty
+      ? 0.0
+      : weeklyMinutes.reduce((a, b) => a + b) / weeklyMinutes.length;
+
   // 星期标签
   final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
 
@@ -515,34 +511,45 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     // StressLevelMonitor (复用为习惯强度监测)
     'stressLevelMonitor': {
       'title': habit.title,
-      'currentScore': weeklyMinutes.last.toDouble(),
-      'statusLabel':
-          weeklyMinutes.last > 30
+      'currentScore': weeklyMinutes.isEmpty
+          ? 0.0
+          : weeklyMinutes.reduce((a, b) => a + b) / weeklyMinutes.length,
+      'status':
+          avgMinutes > 30
               ? '完成良好'
-              : (weeklyMinutes.last > 0 ? '继续加油' : '记得打卡'),
-      'weeklyData': weeklyMinutes.map((m) => m.toDouble()).toList(),
+              : (avgMinutes > 0 ? '继续加油' : '记得打卡'),
+      'scoreUnit': '分钟',
+      'weeklyData': weekDays.asMap().entries.map((entry) {
+        return {
+          'day': weekDays[entry.key],
+          'value': weeklyValues[entry.key],
+          'isSelected': entry.key == 6, // 选中最后一天（今天）
+        };
+      }).toList(),
     },
 
     // SleepTrackingCard (复用为习惯追踪卡片)
     'sleepTrackingCard': {
       'title': habit.title,
-      'mainValue': weeklyMinutes.last.toDouble(),
+      'mainValue': avgMinutes.toDouble() / 60, // 转换为小时
       'statusLabel': skillName ?? habit.group ?? '习惯',
-      'unit': '分钟',
-      'icon':
-          habit.icon != null
-              ? int.parse(habit.icon!)
-              : Icons.auto_awesome.codePoint,
-      'weeklyProgress': weeklyMinutes,
+      'unit': 'hr',
+      'weeklyProgress': weekDays.asMap().entries.map((entry) {
+        final minutes = weeklyMinutes[entry.key];
+        return {
+          'day': weekDays[entry.key],
+          'achieved': minutes > 0,
+          'progress': maxWeeklyMinutes > 0 ? minutes / maxWeeklyMinutes : 0.0,
+        };
+      }).toList(),
     },
 
     // SleepDurationCard (复用为习惯时长卡片)
     'sleepDurationCard': {
-      'title': habit.title,
-      'totalDuration': totalMinutes.toDouble(),
-      'avgDuration': completionCount > 0 ? totalMinutes / completionCount : 0,
-      'unit': '分钟',
-      'trendData': monthlyMinutes.take(7).map((m) => m.toDouble()).toList(),
+      'durationInMinutes': totalMinutes.toInt(),
+      'trend': weeklyMinutes.isNotEmpty && weeklyMinutes.last > weeklyMinutes[weeklyMinutes.length - 2]
+          ? 'up'
+          : 'down',
     },
 
     // BarChartStatsCard - 柱状图统计卡片
@@ -564,8 +571,8 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     // MiniTrendCard - 迷你趋势卡片
     'miniTrendCard': {
       'title': habit.title,
-      'icon': habit.icon ?? Icons.auto_awesome.codePoint.toString(),
-      'currentValue': weeklyMinutes.last,
+      'icon': 'monitor_heart',
+      'currentValue': avgMinutes,
       'unit': '分钟',
       'subtitle': skillName ?? '本周趋势',
       'weekDays': ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
@@ -574,24 +581,15 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
 
     // TrendValueCard - 趋势数值卡片
     'trendValueCard': {
-      'title': habit.title,
-      'icon': habit.icon ?? Icons.auto_awesome.codePoint.toString(),
       'value': totalMinutes.toDouble(),
       'unit': '分钟',
-      'trend':
-          weeklyMinutes.last > weeklyMinutes[weeklyMinutes.length - 2]
-              ? 'up'
-              : 'down',
-      'changePercentage':
-          weeklyMinutes[weeklyMinutes.length - 2] > 0
-              ? ((weeklyMinutes.last -
-                          weeklyMinutes[weeklyMinutes.length - 2]) /
-                      weeklyMinutes[weeklyMinutes.length - 2] *
-                      100)
-                  .abs()
-              : 0,
+      'trendValue': weeklyMinutes.isNotEmpty && weeklyMinutes[weeklyMinutes.length - 2] > 0
+          ? (weeklyMinutes.last - weeklyMinutes[weeklyMinutes.length - 2]).toDouble()
+          : 0,
+      'trendUnit': '分钟',
       'chartData': weeklyMinutes.map((m) => m.toDouble()).toList(),
-      'dateLabel': '累计$totalMinutes分钟',
+      'date': '累计$totalMinutes分钟',
+      'trendLabel': 'vs 昨天',
     },
 
     // WeeklyBarsCard - 周柱状图卡片
@@ -601,7 +599,7 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
           habit.icon != null
               ? int.parse(habit.icon!)
               : Icons.auto_awesome.codePoint,
-      'currentValue': weeklyMinutes.last.toDouble(),
+      'currentValue': avgMinutes.toDouble(),
       'unit': '分钟',
       'status': skillName ?? '本周完成',
       'dailyValues': weeklyValues,
