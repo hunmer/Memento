@@ -25,11 +25,7 @@ class ColumnProgressData {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'current': current,
-      'total': total,
-      'unit': unit,
-    };
+    return {'current': current, 'total': total, 'unit': unit};
   }
 }
 
@@ -71,6 +67,7 @@ class ProgressItemData {
   final double current;
   final double total;
   final Color color;
+
   /// 可选的副标题（如时间范围）
   final String? subtitle;
 
@@ -112,12 +109,16 @@ class ProgressItemData {
 class SplitColumnProgressBarCard extends StatefulWidget {
   /// 左侧数据（用于进度条）
   final ColumnProgressData? leftData;
+
   /// 左侧区域配置（图标、标签等）
   final LeftSectionConfig? leftConfig;
+
   /// 右侧进度项列表
   final List<ProgressItemData>? rightItems;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
   /// 组件尺寸
   final HomeWidgetSize size;
 
@@ -138,17 +139,22 @@ class SplitColumnProgressBarCard extends StatefulWidget {
     // 解析左侧数据
     ColumnProgressData? leftData;
     if (props['leftData'] != null) {
-      leftData = ColumnProgressData.fromJson(props['leftData'] as Map<String, dynamic>);
+      leftData = ColumnProgressData.fromJson(
+        props['leftData'] as Map<String, dynamic>,
+      );
     }
 
     // 解析左侧配置
     LeftSectionConfig? leftConfig;
     if (props['leftConfig'] != null) {
-      leftConfig = LeftSectionConfig.fromJson(props['leftConfig'] as Map<String, dynamic>);
+      leftConfig = LeftSectionConfig.fromJson(
+        props['leftConfig'] as Map<String, dynamic>,
+      );
     }
 
     // 解析右侧数据
-    final rightItems = (props['rightItems'] as List<dynamic>?)
+    final rightItems =
+        (props['rightItems'] as List<dynamic>?)
             ?.map((e) => ProgressItemData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -196,7 +202,8 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final leftData = widget.leftData ??
+    final leftData =
+        widget.leftData ??
         const ColumnProgressData(current: 0, total: 100, unit: '');
     final leftConfig = widget.leftConfig ?? const LeftSectionConfig();
     final rightItems = widget.rightItems ?? const [];
@@ -239,9 +246,10 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
                     margin: EdgeInsets.symmetric(
                       horizontal: widget.size.getPadding().horizontal / 2,
                     ),
-                    color: isDark
-                        ? Colors.white.withOpacity(0.1)
-                        : const Color(0xFFE5E7EB),
+                    color:
+                        isDark
+                            ? Colors.white.withOpacity(0.1)
+                            : const Color(0xFFE5E7EB),
                   ),
                   Expanded(
                     child: _RightSection(
@@ -344,7 +352,9 @@ class _LeftSection extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
-                widthFactor: (data.total > 0 ? data.current / data.total : 0) * animation.value,
+                widthFactor:
+                    (data.total > 0 ? data.current / data.total : 0) *
+                    animation.value,
                 child: Container(
                   decoration: BoxDecoration(
                     color: primaryColor,
@@ -410,7 +420,12 @@ class _RightSection extends StatelessWidget {
           children: [
             for (int i = 0; i < items.length; i++) ...[
               if (i > 0) SizedBox(height: size.getItemSpacing()),
-              _ProgressItem(data: items[i], animation: animation, index: i, size: size),
+              _ProgressItem(
+                data: items[i],
+                animation: animation,
+                index: i,
+                size: size,
+              ),
             ],
           ],
         ),
@@ -469,7 +484,10 @@ class _ProgressItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.grey.shade100 : const Color(0xFF111827),
+                            color:
+                                isDark
+                                    ? Colors.grey.shade100
+                                    : const Color(0xFF111827),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -480,13 +498,18 @@ class _ProgressItem extends StatelessWidget {
                   if (data.subtitle != null) ...[
                     SizedBox(height: size.getItemSpacing() / 4),
                     Padding(
-                      padding: const EdgeInsets.only(left: 20), // Align with name (icon width + spacing)
+                      padding: const EdgeInsets.only(
+                        left: 20,
+                      ), // Align with name (icon width + spacing)
                       child: Text(
                         data.subtitle!,
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w400,
-                          color: isDark ? Colors.grey.shade500 : const Color(0xFF6B7280),
+                          color:
+                              isDark
+                                  ? Colors.grey.shade500
+                                  : const Color(0xFF6B7280),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
