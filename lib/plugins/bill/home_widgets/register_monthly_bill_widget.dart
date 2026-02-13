@@ -23,7 +23,11 @@ void registerMonthlyBillWidget(HomeWidgetRegistry registry) {
       icon: Icons.calendar_month,
       color: billColor,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      supportedSizes: [
+        HomeWidgetSize.medium,
+        HomeWidgetSize.large,
+        HomeWidgetSize.custom,
+      ],
       category: 'home_categoryRecord'.tr,
 
       // 选择器配置

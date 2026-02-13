@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'bill_colors.dart';
+import 'utils.dart' show getCategoryColor;
 
 /// 账单统计类型
 enum BillStatsType { income, expense, balance }
@@ -295,26 +296,4 @@ Future<Map<String, Map<String, dynamic>>> provideMonthlyBillWidgets(
       'moreCount': billRecords.length > 10 ? billRecords.length - 10 : 0,
     },
   };
-}
-
-/// 从类别名称获取颜色
-Color getCategoryColor(String category) {
-  // 预定义颜色映射 - 使用 Color() 确保返回正确的 Color 类型
-  final colorMap = <String, Color>{
-    '餐饮': const Color(0xFFFF9800), // orange
-    '交通': const Color(0xFF2196F3), // blue
-    '购物': const Color(0xFF9C27B0), // purple
-    '娱乐': const Color(0xFFE91E63), // pink
-    '住房': const Color(0xFF795548), // brown
-    '医疗': const Color(0xFFF44336), // red
-    '教育': const Color(0xFF3F51B5), // indigo
-    '通讯': const Color(0xFF00BCD4), // cyan
-    '工资': const Color(0xFF4CAF50), // green
-    '投资': const Color(0xFF009688), // teal
-    '兼职': const Color(0xFF8BC34A), // lightGreen
-    '礼金': const Color(0xFFFFC107), // amber
-    '其他': const Color(0xFF9E9E9E), // grey
-  };
-
-  return colorMap[category] ?? const Color(0xFF9E9E9E);
 }
