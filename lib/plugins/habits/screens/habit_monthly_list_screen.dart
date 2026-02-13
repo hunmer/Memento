@@ -6,6 +6,8 @@ import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/bill/widgets/month_selector.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/widgets/swipe_action/index.dart';
+import 'package:Memento/plugins/habits/models/completion_record.dart';
 
 /// 习惯月份列表视图
 ///
@@ -293,6 +295,239 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
     return '${minutes}m';
   }
 
+  /// 显示记录详情对话框
+  void _showRecordDetail(_CompletionRecordModel record) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.check_circle, color: _primaryColor),
+            const SizedBox(width: 8),
+            const Text('打卡记录详情'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildDetailRow('日期', DateFormat('yyyy年MM月dd日 HH:mm').format(record.date)),
+            _buildDetailRow('时长', _formatDuration(record.duration)),
+            if (record.notes != null && record.notes!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                '备注',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  record.notes!,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showEditDialog(record);
+            },
+            child: const Text('编辑'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示编辑对话框
+  void _showEditDialog(_CompletionRecordModel record) {
+    final notesController = TextEditingController(text: record.notes ?? '');
+    final durationController = TextEditingController(
+      text: record.duration.inMinutes.toString(),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('编辑打卡记录'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: durationController,
+              decoration: const InputDecoration(
+                labelText: '时长（分钟）',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: notesController,
+              decoration: const InputDecoration(
+                labelText: '备注',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newMinutes = int.tryParse(durationController.text);
+              if (newMinutes == null || newMinutes <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('请输入有效的时长')),
+                );
+                return;
+              }
+
+              Navigator.pop(context);
+              await _updateRecord(
+                record.id,
+                Duration(minutes: newMinutes),
+                notesController.text.trim(),
+              );
+            },
+            child: const Text('保存'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 删除记录
+  void _deleteRecord(String recordId) async {
+    try {
+      final recordController = _habitsPlugin.getRecordController();
+      await recordController.deleteCompletionRecord(recordId);
+
+      setState(() {
+        _allMonthRecords.removeWhere((r) => r.id == recordId);
+        _allRecords.removeWhere((r) => r.id == recordId);
+      });
+
+      // 更新每日统计
+      _updateDailyStats();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已删除打卡记录')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('删除失败: $e')),
+        );
+      }
+    }
+  }
+
+  /// 更新记录
+  Future<void> _updateRecord(String recordId, Duration newDuration, String newNotes) async {
+    try {
+      final recordController = _habitsPlugin.getRecordController();
+
+      // 先删除旧记录
+      final oldRecord = _allMonthRecords.firstWhere((r) => r.id == recordId);
+      await recordController.deleteCompletionRecord(recordId);
+
+      // 创建新记录
+      final newRecord = CompletionRecord(
+        id: recordId,
+        parentId: widget.habitId,
+        date: oldRecord.date,
+        duration: newDuration,
+        notes: newNotes.isEmpty ? '' : newNotes,
+      );
+      await recordController.saveCompletionRecord(widget.habitId, newRecord);
+
+      // 重新加载数据
+      await _loadMonthRecords();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('已更新打卡记录')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('更新失败: $e')),
+        );
+      }
+    }
+  }
+
+  /// 更新每日统计
+  void _updateDailyStats() {
+    final stats = <DateTime, _DailyStats>{};
+    for (var record in _allMonthRecords) {
+      final date = DateTime(
+        record.date.year,
+        record.date.month,
+        record.date.day,
+      );
+      if (!stats.containsKey(date)) {
+        stats[date] = _DailyStats();
+      }
+      stats[date]!.count++;
+      stats[date]!.totalMinutes += record.duration.inMinutes;
+    }
+    setState(() {
+      _dailyStats = stats;
+    });
+  }
+
+  /// 构建详情行
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 60,
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SuperCupertinoNavigationWrapper(
@@ -447,33 +682,54 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
                 itemCount: _selectedDayRecords.length,
                 itemBuilder: (context, index) {
                   final record = _selectedDayRecords[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: _primaryColor.withOpacity(0.2),
-                        child: Icon(Icons.check, color: _primaryColor),
+                  return SwipeActionWrapper(
+                    key: ValueKey(record.id),
+                    leadingActions: [
+                      SwipeActionOption(
+                        label: '编辑',
+                        icon: Icons.edit,
+                        backgroundColor: Colors.blue,
+                        onTap: () => _showEditDialog(record),
                       ),
-                      title: Text(
-                        _formatDuration(record.duration),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                    ],
+                    trailingActions: [
+                      SwipeActionOption(
+                        label: '删除',
+                        icon: Icons.delete,
+                        backgroundColor: Colors.red,
+                        onTap: () => _deleteRecord(record.id),
+                        isDestructive: true,
                       ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(DateFormat('HH:mm').format(record.date)),
-                          if (record.notes != null && record.notes!.isNotEmpty)
-                            Text(
-                              record.notes!,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
+                    ],
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      child: ListTile(
+                        onTap: () => _showRecordDetail(record),
+                        leading: CircleAvatar(
+                          backgroundColor: _primaryColor.withOpacity(0.2),
+                          child: Icon(Icons.check, color: _primaryColor),
+                        ),
+                        title: Text(
+                          _formatDuration(record.duration),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(DateFormat('HH:mm').format(record.date)),
+                            if (record.notes != null && record.notes!.isNotEmpty)
+                              Text(
+                                record.notes!,
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );
