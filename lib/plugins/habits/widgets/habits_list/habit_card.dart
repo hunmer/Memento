@@ -15,6 +15,7 @@ class HabitCard extends StatefulWidget {
   final Skill? skill;
   final HabitController controller;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   const HabitCard({
     super.key,
@@ -22,6 +23,7 @@ class HabitCard extends StatefulWidget {
     this.skill,
     required this.controller,
     this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -258,6 +260,7 @@ class _HabitCardState extends State<HabitCard> {
 
     return GestureDetector(
       onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: Container(
         decoration: BoxDecoration(
           color: bgColor,

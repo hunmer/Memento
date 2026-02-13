@@ -14,18 +14,22 @@ import 'package:Memento/plugins/habits/widgets/habits_list/habit_card.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:Memento/plugins/habits/widgets/habit_action_sheet.dart';
+import 'package:Memento/plugins/habits/screens/habit_monthly_list_screen.dart';
 
 /// 搜索结果Widget
 class HabitSearchResultsWidget extends StatelessWidget {
   final List<Habit> habits;
   final HabitController controller;
   final Function(Habit)? onHabitTap;
+  final Function(Habit)? onHabitLongPress;
 
   const HabitSearchResultsWidget({
     super.key,
     required this.habits,
     required this.controller,
     this.onHabitTap,
+    this.onHabitLongPress,
   });
 
   @override
@@ -53,6 +57,7 @@ class HabitSearchResultsWidget extends StatelessWidget {
           skill: skill,
           controller: controller,
           onTap: () => onHabitTap?.call(habit),
+          onLongPress: () => onHabitLongPress?.call(habit),
         );
       },
     );
@@ -63,7 +68,11 @@ class CombinedHabitsView extends StatefulWidget {
   final HabitController controller;
   final String? habitId;
 
-  const CombinedHabitsView({super.key, required this.controller, this.habitId});
+  const CombinedHabitsView({
+    super.key,
+    required this.controller,
+    this.habitId,
+  });
 
   @override
   State<CombinedHabitsView> createState() => _CombinedHabitsViewState();
@@ -279,6 +288,53 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     );
   }
 
+  /// 点击习惯卡片，进入习惯月份列表视图
+  void _onHabitTap(Habit habit) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HabitMonthlyListScreen(
+          habitId: habit.id,
+          habitTitle: habit.title,
+        ),
+      ),
+    );
+  }
+
+  /// 长按习惯卡片，显示操作抽屉
+  void _onHabitLongPress(Habit habit) async {
+    await HabitActionSheet.show(
+      context: context,
+      onEdit: () => _showHabitForm(context, habit),
+      onDelete: () async {
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('habits_confirmDelete'.tr),
+              content: Text('habits_confirmDeleteHabit'.tr),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('habits_cancel'.tr),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('habits_delete'.tr),
+                ),
+              ],
+            );
+          },
+        );
+
+        if (confirmed == true) {
+          await widget.controller.deleteHabit(habit.id);
+          _loadHabits();
+        }
+      },
+    );
+  }
+
   Widget _buildCardView(List<Habit> habits) {
     final habitsPlugin =
         PluginManager.instance.getPlugin('habits') as HabitsPlugin?;
@@ -302,7 +358,8 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
           habit: habit,
           skill: skill,
           controller: widget.controller,
-          onTap: () => _showHabitForm(context, habit),
+          onTap: () => _onHabitTap(habit),
+          onLongPress: () => _onHabitLongPress(habit),
         );
       },
     );
@@ -366,7 +423,8 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
       searchBody: HabitSearchResultsWidget(
         habits: _filteredHabits,
         controller: widget.controller,
-        onHabitTap: (habit) => _showHabitForm(context, habit),
+        onHabitTap: _onHabitTap,
+        onHabitLongPress: _onHabitLongPress,
       ), // 搜索结果页面
       // ========== 过滤栏配置 ==========
       enableFilterBar: true,

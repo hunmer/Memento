@@ -275,20 +275,35 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'fatGoal': maxCount,
     },
 
-    // DonutChartStatsCard
-    'donutChartStatsCard': {
-      'title': '$dateRangeLabel分布',
-      'totalMinutes': totalMinutes,
-      'totalCompletions': totalCompletions,
-      'items': categoryData.take(5).toList(),
+    // expenseDonutChart
+    'expenseDonutChart': {
+      'badgeLabel': '习惯',
+      'timePeriod': dateRangeLabel,
+      'totalAmount': totalMinutes.toDouble() / 60,
+      'totalUnit': '小时',
+      'categories': [
+        for (var item in categoryData.take(5))
+          {
+            'label': item['name'],
+            'percentage': totalMinutes > 0 ? (item['value'] / totalMinutes * 100) : 0.0,
+            'color': item['color'],
+            'subtitle': '${(item['value'] / 60).toStringAsFixed(1)}小时',
+          },
+      ],
     },
 
     // PerformanceBarChart
     'performanceBarChart': {
-      'title': '$dateRangeLabel表现',
-      'growthPercentage': topStats.isNotEmpty ? (topStats.first.totalMinutes / 60).toStringAsFixed(1) : '0',
+      'badgeLabel': '习惯',
+      'growthPercentage': topStats.isNotEmpty ? topStats.first.totalMinutes / 60 : 0.0,
       'timePeriod': dateRangeLabel,
-      'bars': rankedData.take(5).toList(),
+      'barData': rankedData.take(5).map((item) {
+        return {
+          'value': item['value'],
+          'label': item['title'],
+        };
+      }).toList(),
+      'footerLabel': '总时长',
     },
 
     // CategoryStackWidget
@@ -297,13 +312,6 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'currentAmount': totalMinutes.toDouble(),
       'targetAmount': (maxCount * 60).toDouble(),
       'categories': categoryData,
-    },
-
-    // ExpenseDonutChart
-    'expenseDonutChart': {
-      'title': '时间分布',
-      'totalAmount': totalMinutes.toDouble(),
-      'items': categoryData,
     },
 
     // RankedBarChartCard
