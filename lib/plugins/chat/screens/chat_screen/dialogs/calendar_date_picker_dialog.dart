@@ -117,10 +117,7 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
                   color: Colors.red,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 16,
-                  minHeight: 16,
-                ),
+                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                 alignment: Alignment.center,
                 child: Text(
                   '$count',
@@ -179,10 +176,7 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
               maxDate: widget.availableDates.first,
               headerStyle: const CalendarHeaderStyle(
                 textAlign: TextAlign.center,
-                textStyle: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
+                textStyle: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
               monthViewSettings: const MonthViewSettings(
                 showTrailingAndLeadingDates: false,
@@ -190,7 +184,6 @@ class _CalendarDatePickerDialogState extends State<CalendarDatePickerDialog> {
               ),
               cellBorderColor: Colors.transparent,
               selectionDecoration: const BoxDecoration(),
-              todayHighlightColor: Colors.transparent,
               monthCellBuilder: _monthCellBuilder,
               onTap: (CalendarTapDetails details) {
                 if (details.date != null && _isDateAvailable(details.date!)) {

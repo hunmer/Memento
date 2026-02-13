@@ -314,7 +314,6 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
       ),
       cellBorderColor: Colors.transparent,
       selectionDecoration: const BoxDecoration(),
-      todayHighlightColor: Colors.transparent,
       monthCellBuilder: _monthCellBuilder,
       onTap: (CalendarTapDetails details) {
         if (widget.config.enableDateSelection && details.date != null) {
@@ -332,8 +331,8 @@ class _EnhancedCalendarState extends State<EnhancedCalendar> {
       },
       onViewChanged: (ViewChangedDetails details) {
         if (details.visibleDates.isNotEmpty) {
-          final midDate = details
-              .visibleDates[details.visibleDates.length ~/ 2];
+          final midDate =
+              details.visibleDates[details.visibleDates.length ~/ 2];
           widget.config.onFormatChanged?.call(midDate);
         }
       },
@@ -390,7 +389,9 @@ class EnhancedCalendarWidget extends StatelessWidget {
     );
 
     return EnhancedCalendar(
-      key: ValueKey('calendar_state_${focusedMonth.year}_${focusedMonth.month}'),
+      key: ValueKey(
+        'calendar_state_${focusedMonth.year}_${focusedMonth.month}',
+      ),
       config: config,
     );
   }
