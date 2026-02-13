@@ -227,4 +227,62 @@ void _registerDataSelectors() {
       ],
     ),
   );
+
+  // 4. 支出统计配置（用于小组件）- 使用自定义表单
+  pluginDataSelectorService.registerSelector(
+    SelectorDefinition(
+      id: 'bill.stats.config',
+      pluginId: BillPlugin.instance.id,
+      name: '支出统计配置',
+      icon: Icons.pie_chart,
+      color: BillPlugin.instance.color,
+      searchable: false,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'config',
+          title: '支出统计配置',
+          viewType: SelectorViewType.customForm,
+          isFinalStep: true,
+          dataLoader: (_) async => [],
+          customFormBuilder: (context, previousSelections, onComplete) {
+            return _BillStatsConfigForm(
+              onComplete: (config) {
+                onComplete(config);
+              },
+            );
+          },
+        ),
+      ],
+    ),
+  );
+
+  // 5. 月份账单配置（用于小组件）- 使用自定义表单
+  pluginDataSelectorService.registerSelector(
+    SelectorDefinition(
+      id: 'bill.monthly.config',
+      pluginId: BillPlugin.instance.id,
+      name: '月份账单配置',
+      icon: Icons.calendar_month,
+      color: BillPlugin.instance.color,
+      searchable: false,
+      selectionMode: SelectionMode.single,
+      steps: [
+        SelectorStep(
+          id: 'config',
+          title: '月份账单配置',
+          viewType: SelectorViewType.customForm,
+          isFinalStep: true,
+          dataLoader: (_) async => [],
+          customFormBuilder: (context, previousSelections, onComplete) {
+            return _MonthlyBillConfigForm(
+              onComplete: (config) {
+                onComplete(config);
+              },
+            );
+          },
+        ),
+      ],
+    ),
+  );
 }

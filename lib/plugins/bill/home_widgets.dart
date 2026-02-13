@@ -13,12 +13,18 @@ import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import 'bill_plugin.dart';
 import 'screens/bill_edit_screen.dart';
+import 'home_widgets/register_bill_stats_widget.dart';
+import 'home_widgets/register_monthly_bill_widget.dart';
 
 /// 账单插件的主页小组件注册
 class BillHomeWidgets {
   /// 注册所有账单插件的小组件
   static void register() {
     final registry = HomeWidgetRegistry();
+
+    // 注册公共组件
+    registerBillStatsWidget(registry);
+    registerMonthlyBillWidget(registry);
 
     // 1x1 简单图标组件 - 快速访问
     registry.register(
