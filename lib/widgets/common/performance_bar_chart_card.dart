@@ -109,7 +109,7 @@ class _PerformanceBarChartCardState extends State<PerformanceBarChartCard>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: 360,
-              height: 420,
+              height: 450,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181b) : Colors.white,

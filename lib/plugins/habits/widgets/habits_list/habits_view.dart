@@ -68,11 +68,7 @@ class CombinedHabitsView extends StatefulWidget {
   final HabitController controller;
   final String? habitId;
 
-  const CombinedHabitsView({
-    super.key,
-    required this.controller,
-    this.habitId,
-  });
+  const CombinedHabitsView({super.key, required this.controller, this.habitId});
 
   @override
   State<CombinedHabitsView> createState() => _CombinedHabitsViewState();
@@ -293,10 +289,11 @@ class _CombinedHabitsViewState extends State<CombinedHabitsView>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HabitMonthlyListScreen(
-          habitId: habit.id,
-          habitTitle: habit.title,
-        ),
+        builder:
+            (context) => HabitMonthlyListScreen(
+              habitId: habit.id,
+              habitTitle: habit.title,
+            ),
       ),
     );
   }

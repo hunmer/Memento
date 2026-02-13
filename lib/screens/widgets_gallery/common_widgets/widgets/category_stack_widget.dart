@@ -21,16 +21,45 @@ class CategoryData {
     Map<String, dynamic> json, {
     double totalAmount = 0.0,
   }) {
-    final amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
-    final percentage =
-        (json['percentage'] as num?)?.toDouble() ??
-        (totalAmount > 0 ? (amount / totalAmount * 100) : 0.0);
+    // 安全获取 amount，支持多种类型
+    final amountValue = json['amount'];
+    double amount = 0.0;
+    if (amountValue is num) {
+      amount = amountValue.toDouble();
+    } else if (amountValue is String) {
+      amount = double.tryParse(amountValue) ?? 0.0;
+    }
+
+    // 确保 totalAmount 是有效的数字
+    final safeTotalAmount = totalAmount.isNaN || totalAmount.isInfinite
+        ? 0.0
+        : totalAmount;
+
+    // 安全获取 percentage
+    final percentageValue = json['percentage'];
+    double percentage = 0.0;
+    if (percentageValue is num) {
+      percentage = percentageValue.toDouble();
+    } else if (safeTotalAmount > 0) {
+      percentage = (amount / safeTotalAmount * 100).clamp(0.0, 100.0);
+    }
+
     // 支持 label 和 name 两种键名
     final label = json['label'] as String? ?? json['name'] as String? ?? '';
+
+    // 安全获取 color
+    final colorValue = json['color'];
+    int colorInt = 0xFF000000;
+    if (colorValue is int) {
+      colorInt = colorValue;
+    } else if (colorValue is String) {
+      colorInt = int.tryParse(colorValue) ?? 0xFF000000;
+    }
+
     return CategoryData(
       label: label,
       amount: amount,
-      color: Color(json['color'] as int? ?? 0xFF000000),
+      color: Color(colorInt),
       percentage: percentage,
     );
   }
@@ -76,7 +105,29 @@ class CategoryStackWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final currentAmount = (props['currentAmount'] as num?)?.toDouble() ?? 0.0;
+    // 安全获取 currentAmount，支持多种类型
+    final currentAmountValue = props['currentAmount'];
+    double currentAmount = 0.0;
+    if (currentAmountValue is num) {
+      currentAmount = currentAmountValue.toDouble();
+    } else if (currentAmountValue is String) {
+      currentAmount = double.tryParse(currentAmountValue) ?? 0.0;
+    }
+
+    // 安全获取 targetAmount
+    final targetAmountValue = props['targetAmount'];
+    double targetAmount = 0.0;
+    if (targetAmountValue is num) {
+      targetAmount = targetAmountValue.toDouble();
+    } else if (targetAmountValue is String) {
+      targetAmount = double.tryParse(targetAmountValue) ?? 0.0;
+    }
+
+    // 确保 currentAmount 不是 NaN 或 Infinite
+    if (currentAmount.isNaN || currentAmount.isInfinite) {
+      currentAmount = 0.0;
+    }
+
     final categoriesList = (props['categories'] as List<dynamic>?)
             ?.map(
               (e) => CategoryData.fromJson(
@@ -90,7 +141,7 @@ class CategoryStackWidget extends StatefulWidget {
     return CategoryStackWidget(
       title: props['title'] as String? ?? '',
       currentAmount: currentAmount,
-      targetAmount: (props['targetAmount'] as num?)?.toDouble() ?? 0.0,
+      targetAmount: targetAmount,
       currency: props['currency'] as String? ?? '\$',
       categories: categoriesList,
       inline: props['inline'] as bool? ?? false,

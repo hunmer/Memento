@@ -121,7 +121,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 360,
-              height: widget.inline ? double.maxFinite : 420,
+              height: widget.inline ? double.maxFinite : widget.size.getHeightConstraints().maxHeight,
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181b) : Colors.white,
@@ -174,8 +174,13 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                     ],
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
+                  // 计算柱状图区域高度：总高度 - 上下边距 - 顶部区域 - 底部区域
                   SizedBox(
-                    height: widget.size.getHeightConstraints().maxHeight - widget.size.getPadding().top - widget.size.getPadding().bottom - 100,
+                    height: widget.size.getHeightConstraints().maxHeight -
+                            widget.size.getPadding().top -
+                            widget.size.getPadding().bottom -
+                            widget.size.getTitleSpacing() * 2 -
+                            140, // 顶部区域(约120) + 底部区域(约20)
                     child: Stack(
                       children: [
                         Positioned.fill(
@@ -196,7 +201,11 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                                   parent: _animationController,
                                   curve: Interval(index * 0.1, 0.6 + index * 0.08, curve: Curves.easeOutCubic),
                                 );
-                                final barHeight = widget.size.getHeightConstraints().maxHeight - widget.size.getPadding().top - widget.size.getPadding().bottom - 100;
+                                final barHeight = widget.size.getHeightConstraints().maxHeight -
+                                                widget.size.getPadding().top -
+                                                widget.size.getPadding().bottom -
+                                                widget.size.getTitleSpacing() * 2 -
+                                                140;
                                 return Expanded(
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing() / 4),
