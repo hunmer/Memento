@@ -157,5 +157,24 @@ class HabitsTranslationsEn {
     'habits_heatmapWidgetDescription': 'Display completion record heatmap for a single habit',
     'habits_searchSkillPlaceholder': 'Search skill title, description or group',
     'habits_searchHabitPlaceholder': 'Search habit title',
+
+    // Activity Stats Widget Strings
+    'habits_activityStatsName': 'Activity Stats',
+    'habits_activityStatsDescription': 'Display habit activity statistics with date range and count filters',
+    'habits_activityStatsConfigTitle': 'Configure Activity Stats',
+    'habits_activityStatsDateRange': 'Date Range',
+    'habits_activityStatsMaxCount': 'Display Count',
+    'habits_activityStatsToday': 'Today',
+    'habits_activityStatsWeek': 'This Week',
+    'habits_activityStatsMonth': 'This Month',
+    'habits_activityStatsYear': 'This Year',
+
+    // Habit Stats Widget Strings
+    'habits_habitStatsName': 'Habit Stats',
+    'habits_habitStatsDescription': 'Display detailed statistics for a single habit',
+    'habits_habitStatsConfigTitle': 'Configure Habit Stats',
+    'habits_habitStatsSelectHabit': 'Select Habit',
+    'habits_habitStatsNoHabit': 'No habits available',
+    'habits_habitStatsPleaseSelect': 'Please select a habit',
   };
 }

@@ -151,5 +151,24 @@ class HabitsTranslationsZh {
     'habits_heatmapWidgetDescription': '显示单个习惯的完成记录热力图',
     'habits_searchSkillPlaceholder': '搜索技能标题、描述或分组',
     'habits_searchHabitPlaceholder': '搜索习惯标题',
+
+    // Activity Stats Widget Strings
+    'habits_activityStatsName': '活动统计',
+    'habits_activityStatsDescription': '显示习惯活动统计数据，支持日期范围和数量筛选',
+    'habits_activityStatsConfigTitle': '配置活动统计',
+    'habits_activityStatsDateRange': '日期范围',
+    'habits_activityStatsMaxCount': '显示数量',
+    'habits_activityStatsToday': '本日',
+    'habits_activityStatsWeek': '本周',
+    'habits_activityStatsMonth': '本月',
+    'habits_activityStatsYear': '本年',
+
+    // Habit Stats Widget Strings
+    'habits_habitStatsName': '习惯统计',
+    'habits_habitStatsDescription': '显示单个习惯的详细统计',
+    'habits_habitStatsConfigTitle': '配置习惯统计',
+    'habits_habitStatsSelectHabit': '选择习惯',
+    'habits_habitStatsNoHabit': '暂无习惯',
+    'habits_habitStatsPleaseSelect': '请选择一个习惯',
   };
 }

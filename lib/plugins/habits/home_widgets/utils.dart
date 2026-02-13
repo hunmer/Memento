@@ -1,7 +1,11 @@
 /// 习惯追踪插件主页小组件工具函数
 library;
 
+import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
+
+/// 插件主题色
+const Color pluginColor = Colors.amber;
 
 /// 获取指定日期的完成时长（分钟）
 int getMinutesForDate(List<CompletionRecord> records, DateTime date) {
