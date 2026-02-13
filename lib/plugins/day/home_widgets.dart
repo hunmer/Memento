@@ -217,9 +217,8 @@ class DayHomeWidgets {
   }
 
   /// 公共小组件提供者函数 - 为纪念日提供可用的公共小组件
-  static Future<Map<String, Map<String, dynamic>>> _provideMemorialDayCommonWidgets(
-    Map<String, dynamic> data,
-  ) async {
+  static Future<Map<String, Map<String, dynamic>>>
+  _provideMemorialDayCommonWidgets(Map<String, dynamic> data) async {
     // data 包含：id, title, targetDate, backgroundImageUrl, backgroundColor, daysRemaining, daysPassed, isToday, isExpired
     final title = data['title'] as String? ?? '纪念日';
     final targetDateStr = data['targetDate'] as String?;
@@ -243,16 +242,12 @@ class DayHomeWidgets {
 
     // 状态文本
     String statusText;
-    Color statusColor;
     if (isToday) {
       statusText = '就是今天！';
-      statusColor = Colors.red;
     } else if (isExpired) {
       statusText = '已过 $daysPassed 天';
-      statusColor = Colors.grey;
     } else {
       statusText = '剩余 $daysRemaining 天';
-      statusColor = Colors.orange;
     }
 
     return {
@@ -299,16 +294,14 @@ class DayHomeWidgets {
   }
 
   /// 公共小组件提供者函数 - 为日期范围列表提供可用的公共小组件
-  static Future<Map<String, Map<String, dynamic>>> _provideDateRangeCommonWidgets(
-    Map<String, dynamic> data,
-  ) async {
+  static Future<Map<String, Map<String, dynamic>>>
+  _provideDateRangeCommonWidgets(Map<String, dynamic> data) async {
     // data 包含：startDay, endDay, dateRangeLabel, daysList, totalCount, todayCount, upcomingCount, expiredCount
     final dateRangeLabel = data['dateRangeLabel'] as String? ?? '未来7天';
     final daysList = data['daysList'] as List<dynamic>? ?? [];
     final totalCount = data['totalCount'] as int? ?? 0;
     final todayCount = data['todayCount'] as int? ?? 0;
     final upcomingCount = data['upcomingCount'] as int? ?? 0;
-    final expiredCount = data['expiredCount'] as int? ?? 0;
 
     // 获取前5个纪念日用于列表展示
     final displayDays = daysList.toList();
@@ -473,13 +466,14 @@ class DayHomeWidgets {
       // 圆角提醒事项列表：显示纪念日提醒列表
       'roundedRemindersList': {
         'title': dateRangeLabel,
-        'items': displayDays.map((day) {
-          final dayMap = day as Map<String, dynamic>;
-          return {
-            'text': '${dayMap['title']} (${dayMap['statusText']})',
-            'isCompleted': dayMap['isToday'] as bool? ?? false,
-          };
-        }).toList(),
+        'items':
+            displayDays.map((day) {
+              final dayMap = day as Map<String, dynamic>;
+              return {
+                'text': '${dayMap['title']} (${dayMap['statusText']})',
+                'isCompleted': dayMap['isToday'] as bool? ?? false,
+              };
+            }).toList(),
       },
     };
   }
@@ -624,24 +618,25 @@ class DayHomeWidgets {
     final today = DateTime(now.year, now.month, now.day);
 
     return days.where((day) {
-      final targetDate = DateTime(
-        day.targetDate.year,
-        day.targetDate.month,
-        day.targetDate.day,
-      );
-      final daysDiff = targetDate.difference(today).inDays;
+        final targetDate = DateTime(
+          day.targetDate.year,
+          day.targetDate.month,
+          day.targetDate.day,
+        );
+        final daysDiff = targetDate.difference(today).inDays;
 
-      // 如果 startDay 和 endDay 都为 null，显示全部
-      if (startDay == null && endDay == null) {
-        return true;
-      }
+        // 如果 startDay 和 endDay 都为 null，显示全部
+        if (startDay == null && endDay == null) {
+          return true;
+        }
 
-      // 检查天数差是否在范围内
-      final inRange = (startDay == null || daysDiff >= startDay) &&
-          (endDay == null || daysDiff <= endDay);
+        // 检查天数差是否在范围内
+        final inRange =
+            (startDay == null || daysDiff >= startDay) &&
+            (endDay == null || daysDiff <= endDay);
 
-      return inRange;
-    }).toList()
+        return inRange;
+      }).toList()
       ..sort((a, b) => a.daysRemaining.compareTo(b.daysRemaining));
   }
 }

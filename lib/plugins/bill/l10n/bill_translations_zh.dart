@@ -115,6 +115,22 @@ class BillTranslationsZh {
     'bill_createShortcutDescription': '快速创建新账单',
     'bill_createBill': '创建账单',
 
+    // 支出统计组件
+    'bill_statsWidgetName': '支出统计',
+    'bill_statsWidgetDescription': '显示收入/支出统计，支持自定义目标金额',
+    'bill_statsSelectorTitle': '支出统计配置',
+    'bill_selectType': '统计类型',
+    'bill_selectPeriod': '时间范围',
+    'bill_targetAmount': '目标金额',
+
+    // 月份账单组件
+    'bill_monthlyBillsWidgetName': '月份账单',
+    'bill_monthlyBillsWidgetDescription': '显示指定月份的账单列表和统计',
+    'bill_monthlySelectorTitle': '月份账单配置',
+    'bill_selectMonth': '选择月份',
+    'bill_thisMonthWidget': '本月',
+    'bill_lastMonthWidget': '上月',
+
     // 界面搜索
     'bill_searchPlaceholder': '搜索账单名称/分类/笔记',
 

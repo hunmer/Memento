@@ -115,6 +115,22 @@ class BillTranslationsEn {
     'bill_createShortcutDescription': 'Quick create new bill',
     'bill_createBill': 'Create Bill',
 
+    // Stats Widget Strings
+    'bill_statsWidgetName': 'Expense Stats',
+    'bill_statsWidgetDescription': 'Display income/expense stats with custom target',
+    'bill_statsSelectorTitle': 'Stats Configuration',
+    'bill_selectType': 'Stats Type',
+    'bill_selectPeriod': 'Time Period',
+    'bill_targetAmount': 'Target Amount',
+
+    // Monthly Bill Widget Strings
+    'bill_monthlyBillsWidgetName': 'Monthly Bills',
+    'bill_monthlyBillsWidgetDescription': 'Display bills for a specific month',
+    'bill_monthlySelectorTitle': 'Monthly Configuration',
+    'bill_selectMonth': 'Select Month',
+    'bill_thisMonthWidget': 'This Month',
+    'bill_lastMonthWidget': 'Last Month',
+
     // Interface search
     'bill_searchPlaceholder': 'Search bills by name, category, or note',
 
