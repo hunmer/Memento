@@ -4,8 +4,10 @@ library;
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
+import 'package:Memento/utils/color_extensions.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
+import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 
 /// 获取可用的统计项
 List<StatItemData> getAvailableStats(BuildContext context) {
@@ -65,18 +67,23 @@ Map<String, dynamic> extractHabitHeatmapData(List<dynamic> dataArray) {
       'title': rawData.title,
       'group': rawData.group,
       'icon': rawData.icon,
-      'color': Colors.amber.value,
+      'color': HabitsUtils.generateColorForHabit(rawData).value,
     };
   }
 
   // 处理 Map 类型
   if (rawData is Map<String, dynamic>) {
+    final title = rawData['title']?.toString() ?? '';
+    final id = rawData['id']?.toString() ?? '';
+    final color = ColorGenerator.fromString(
+      title.isNotEmpty ? title : id,
+    );
     return {
-      'id': rawData['id']?.toString(),
-      'title': rawData['title']?.toString(),
+      'id': id,
+      'title': title,
       'group': rawData['group']?.toString(),
       'icon': rawData['icon']?.toString(),
-      'color': Colors.amber.value,
+      'color': color.value,
     };
   }
 
@@ -206,6 +213,12 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
     (sum, s) => sum + s.completionCount,
   );
 
+  // topStats 的总时长（用于 rankedBarChartCard 的比例计算）
+  final topTotalMinutes = topStats.fold<int>(
+    0,
+    (sum, s) => sum + s.totalMinutes,
+  );
+
   // 为小组件准备数据
   final trackersData = <Map<String, dynamic>>[];
   final metricsData = <Map<String, dynamic>>[];
@@ -216,7 +229,7 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
     final habit = habits.firstWhere((h) => h.id == stat.habitId);
     final skillId = habit.skillId;
     String? skillName;
-    Color skillColor = Colors.amber;
+    final habitColor = HabitsUtils.generateColorForHabit(habit);
 
     if (skillId != null) {
       try {
@@ -234,7 +247,7 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
     trackersData.add({
       'emoji': habit.icon ?? '58353', // 使用 MaterialIcons codePoint，默认为 star
       'progress': progress,
-      'progressColor': skillColor.value,
+      'progressColor': habitColor.value,
       'title': habit.title,
       'subtitle': skillName ?? habit.group ?? '习惯',
       'value': stat.totalMinutes.toDouble(),
@@ -250,22 +263,51 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'value': '${stat.completionCount}次',
       'label': habit.title,
       'progress': (stat.totalMinutes / 60 / 10).clamp(0, 1), // 假设10小时为100%
-      'color': skillColor.value,
+      'color': habitColor.value,
     });
 
     // CategoryStackWidget 数据
     categoryData.add({
-      'name': habit.title,
-      'value': stat.totalMinutes.toDouble(),
-      'color': skillColor.value,
+      'label': habit.title,
+      'amount': stat.totalMinutes.toDouble(),
+      'color': habitColor.value,
+      'percentage':
+          totalMinutes > 0 ? (stat.totalMinutes / totalMinutes * 100) : 0.0,
     });
 
     // RankedBarChartCard 数据
+    // value 在循环结束后设置（第一个为 100%，其他的相对第一个）
     rankedData.add({
-      'title': habit.title,
-      'value': stat.totalMinutes.toDouble(),
-      'color': skillColor.value,
+      'label': habit.title,
+      'value': 0.0, // 稍后设置
+      'color': habitColor.value,
     });
+  }
+
+  // 为 RankedBarChartCard 的每个项目设置 value 和颜色
+  if (rankedData.isNotEmpty) {
+    final rankColors = [
+      0xFFFF6B6B, // 红色
+      0xFF4ECDC4, // 青色
+      0xFFFFD93D, // 黄色
+      0xFF6BCB77, // 绿色
+      0xFF4D96FF, // 蓝色
+      0xFF9B59B6, // 紫色
+      0xFFFF8C42, // 橙色
+      0xFF00CED1, // 深青
+      0xFFDC143C, // 深红
+      0xFF2E8B57, // 海绿
+    ];
+
+    // 获取第一个习惯的时长作为基准（100%）
+    final baseMinutes = topStats.first.totalMinutes;
+
+    for (var i = 0; i < rankedData.length; i++) {
+      // 第一个为 100%，其他的相对于第一个
+      final ratio = baseMinutes > 0 ? (topStats[i].totalMinutes / baseMinutes).clamp(0.0, 1.0) : 0.0;
+      rankedData[i]['value'] = ratio;
+      rankedData[i]['color'] = rankColors[i % rankColors.length];
+    }
   }
 
   return {
@@ -311,11 +353,10 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'categories': [
         for (var item in categoryData.take(5))
           {
-            'label': item['name'],
-            'percentage':
-                totalMinutes > 0 ? (item['value'] / totalMinutes * 100) : 0.0,
+            'label': item['label'],
+            'percentage': item['percentage'],
             'color': item['color'],
-            'subtitle': '${(item['value'] / 60).toStringAsFixed(1)}小时',
+            'subtitle': '${(item['amount'] / 60).toStringAsFixed(1)}小时',
           },
       ],
     },
@@ -328,7 +369,8 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'timePeriod': dateRangeLabel,
       'barData':
           rankedData.take(5).map((item) {
-            return {'value': item['value'], 'label': item['title']};
+            // value 需要转换为 0-100 之间的百分比
+            return {'value': (item['value'] as double) * 100, 'label': item['label']};
           }).toList(),
       'footerLabel': '总时长',
     },
@@ -338,10 +380,12 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'title': '习惯分类',
       'currentAmount': totalMinutes.toDouble(),
       'targetAmount': (maxCount * 60).toDouble(),
+      'currency': '',
       'categories': categoryData,
     },
 
     // RankedBarChartCard
+    // 为每个项目分配平分百分比和不同颜色
     'rankedBarChartCard': {
       'title': '$dateRangeLabel排行',
       'items': rankedData,
@@ -444,6 +488,9 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     } catch (_) {}
   }
 
+  // 根据习惯生成颜色
+  final habitColor = HabitsUtils.generateColorForHabit(habit);
+
   // 计算周数据归一化 (0-1)
   final maxWeeklyMinutes =
       weeklyMinutes.reduce((a, b) => a > b ? a : b).toDouble();
@@ -505,7 +552,7 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
       'averageValue': weeklyMinutes.reduce((a, b) => a + b) / 7,
       'unit': '分钟',
       'icon': 'bar_chart',
-      'iconColor': Colors.amber.value,
+      'iconColor': habitColor.value,
       'data': weeklyMinutes.map((m) => m.toDouble()).toList(),
       'labels': weekDays,
       'maxValue':
@@ -558,7 +605,7 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
       'unit': '分钟',
       'status': skillName ?? '本周完成',
       'dailyValues': weeklyValues,
-      'primaryColor': Colors.amber.value,
+      'primaryColor': habitColor.value,
     },
 
     // ModernRoundedBalanceCard - 现代圆角余额卡片

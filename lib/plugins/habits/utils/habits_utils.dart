@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
+import 'package:Memento/utils/color_extensions.dart';
 import 'package:uuid/uuid.dart';
 
 class HabitsUtils {
@@ -34,5 +36,10 @@ class HabitsUtils {
       return '$hours h ${remainingMinutes > 0 ? '$remainingMinutes min' : ''}'
           .trim();
     }
+  }
+
+  /// 根据习惯生成颜色（优先使用习惯标题，其次使用ID）
+  static Color generateColorForHabit(Habit habit) {
+    return ColorGenerator.fromString(habit.title.isNotEmpty ? habit.title : habit.id);
   }
 }
