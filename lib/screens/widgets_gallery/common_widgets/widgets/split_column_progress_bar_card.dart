@@ -2,6 +2,17 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
+/// 渲染图标，支持 emoji 字符串和 MaterialIcons codePoint
+Widget _renderIcon(String icon, {double size = 18}) {
+  // 尝试解析为 MaterialIcons codePoint
+  final codePoint = int.tryParse(icon);
+  if (codePoint != null) {
+    return Icon(IconData(codePoint, fontFamily: 'MaterialIcons'), size: size);
+  }
+  // 否则作为普通 emoji 字符串处理
+  return Text(icon, style: TextStyle(fontSize: size));
+}
+
 /// 列进度数据模型
 class ColumnProgressData {
   final double current;
@@ -292,7 +303,7 @@ class _LeftSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(config.icon, style: const TextStyle(fontSize: 18)),
+            _renderIcon(config.icon, size: 18),
             const SizedBox(width: 6),
             Text(
               config.label,
@@ -451,11 +462,12 @@ class _ProgressItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final step = 0.08;
+    final end = (0.6 + index * step).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
         index * step,
-        0.6 + index * step,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );
@@ -476,7 +488,7 @@ class _ProgressItem extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Text(data.icon, style: const TextStyle(fontSize: 14)),
+                      _renderIcon(data.icon, size: 14),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
