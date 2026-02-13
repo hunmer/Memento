@@ -170,5 +170,10 @@ class HabitsTranslationsZh {
     'habits_habitStatsSelectHabit': '选择习惯',
     'habits_habitStatsNoHabit': '暂无习惯',
     'habits_habitStatsPleaseSelect': '请选择一个习惯',
+
+    // 习惯操作
+    'habits_habitActions': '习惯操作',
+    'habits_confirmDelete': '确认删除',
+    'habits_confirmDeleteHabit': '确定要删除此习惯吗？',
   };
 }

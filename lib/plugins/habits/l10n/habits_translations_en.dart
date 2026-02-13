@@ -176,5 +176,10 @@ class HabitsTranslationsEn {
     'habits_habitStatsSelectHabit': 'Select Habit',
     'habits_habitStatsNoHabit': 'No habits available',
     'habits_habitStatsPleaseSelect': 'Please select a habit',
+
+    // Habit Actions
+    'habits_habitActions': 'Habit Actions',
+    'habits_confirmDelete': 'Confirm Delete',
+    'habits_confirmDeleteHabit': 'Are you sure you want to delete this habit?',
   };
 }

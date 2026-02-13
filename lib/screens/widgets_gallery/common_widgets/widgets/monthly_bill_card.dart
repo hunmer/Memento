@@ -31,9 +31,10 @@ class MonthlyBillCardWidget extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     final dataString = props['data'] as String?;
-    final data = dataString != null && dataString.isNotEmpty
-        ? MonthlyBillCardData.fromJsonString(dataString)
-        : MonthlyBillCardData.defaults();
+    final data =
+        dataString != null && dataString.isNotEmpty
+            ? MonthlyBillCardData.fromJsonString(dataString)
+            : MonthlyBillCardData.defaults();
 
     return MonthlyBillCardWidget(
       data: data,
@@ -78,8 +79,10 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final backgroundColor = isDark ? const Color(0xFF27272A) : Colors.white;
-    final titleColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
-    final dividerColor = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
+    final titleColor =
+        isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
+    final dividerColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
 
     // 使用主题颜色
     final incomeColor = Theme.of(context).colorScheme.primary;
@@ -94,7 +97,9 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : null,
-              constraints: widget.inline ? null : widget.size.getHeightConstraints(),
+              height: widget.inline ? double.maxFinite : null,
+              constraints:
+                  widget.inline ? null : widget.size.getHeightConstraints(),
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -146,10 +151,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                   SizedBox(height: widget.size.getItemSpacing()),
 
                   // 分隔线
-                  Container(
-                    height: 1,
-                    color: dividerColor,
-                  ),
+                  Container(height: 1, color: dividerColor),
                   SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 结余
@@ -195,7 +197,8 @@ class _BillItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final labelColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final labelColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
 
     // 计算延迟动画
     final itemAnimation = CurvedAnimation(
