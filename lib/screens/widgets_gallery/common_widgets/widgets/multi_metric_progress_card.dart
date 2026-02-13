@@ -2,9 +2,21 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
+/// 渲染图标，支持 emoji 字符串和 MaterialIcons codePoint
+Widget _renderIcon(String icon, {double size = 28}) {
+  // 尝试解析为 MaterialIcons codePoint
+  final codePoint = int.tryParse(icon);
+  if (codePoint != null) {
+    return Icon(IconData(codePoint, fontFamily: 'MaterialIcons'), size: size);
+  }
+  // 否则作为普通 emoji 字符串处理
+  return Text(icon, style: TextStyle(fontSize: size));
+}
+
 /// 指标进度数据模型
 class MetricProgressData {
-  /// Emoji图标
+  /// 图标（支持 MaterialIcons codePoint 字符串或 emoji 字符串）
+  /// 例如：'58352'（MaterialIcons.codePoint）或 '🏃'（emoji）
   final String emoji;
 
   /// 进度值 0-100
@@ -205,11 +217,12 @@ class _MetricProgressItem extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         // 为每个项目添加延迟动画
+        final end = (0.6 + index * 0.15).clamp(0.0, 1.0);
         final itemAnimation = CurvedAnimation(
           parent: animation,
           curve: Interval(
             index * 0.15,
-            0.6 + index * 0.15,
+            end,
             curve: Curves.easeOutCubic,
           ),
         );
@@ -318,7 +331,7 @@ class _IconWithProgress extends StatelessWidget {
               backgroundColor: Colors.white.withOpacity(0.2),
             ),
             child: Center(
-              child: Text(emoji, style: const TextStyle(fontSize: 28)),
+              child: _renderIcon(emoji, size: 28),
             ),
           );
         },

@@ -117,12 +117,19 @@ Future<_HabitStatsResult> _getHabitStatsInRange(
   DateTimeRange range,
   dynamic recordController,
 ) async {
-  final records = (await recordController.getHabitCompletionRecords(habitId) as List).cast<CompletionRecord>();
-  final filteredRecords = records.where((r) {
-    return r.date.isAfter(range.start) && r.date.isBefore(range.end.add(const Duration(days: 1)));
-  }).toList();
+  final records =
+      (await recordController.getHabitCompletionRecords(habitId) as List)
+          .cast<CompletionRecord>();
+  final filteredRecords =
+      records.where((r) {
+        return r.date.isAfter(range.start) &&
+            r.date.isBefore(range.end.add(const Duration(days: 1)));
+      }).toList();
 
-  final totalMinutes = filteredRecords.fold<int>(0, (sum, r) => sum + r.duration.inMinutes);
+  final totalMinutes = filteredRecords.fold<int>(
+    0,
+    (sum, r) => sum + r.duration.inMinutes,
+  );
   final completionCount = filteredRecords.length;
 
   return _HabitStatsResult(
@@ -162,7 +169,9 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
   final habits = (habitController.getHabits() as List).cast<Habit>();
 
   // 获取所有习惯的统计数据
-  final statsFutures = habits.map((h) => _getHabitStatsInRange(h.id, dateRange, recordController));
+  final statsFutures = habits.map(
+    (h) => _getHabitStatsInRange(h.id, dateRange, recordController),
+  );
   final statsResults = await Future.wait(statsFutures);
 
   // 按总时长排序
@@ -188,8 +197,14 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
   }
 
   // 总计数据
-  final totalMinutes = statsResults.fold<int>(0, (sum, s) => sum + s.totalMinutes);
-  final totalCompletions = statsResults.fold<int>(0, (sum, s) => sum + s.completionCount);
+  final totalMinutes = statsResults.fold<int>(
+    0,
+    (sum, s) => sum + s.totalMinutes,
+  );
+  final totalCompletions = statsResults.fold<int>(
+    0,
+    (sum, s) => sum + s.completionCount,
+  );
 
   // 为小组件准备数据
   final trackersData = <Map<String, dynamic>>[];
@@ -210,13 +225,14 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       } catch (_) {}
     }
 
-    final progress = habit.durationMinutes > 0
-        ? (stat.totalMinutes / habit.durationMinutes * 100).clamp(0, 100)
-        : 0.0;
+    final progress =
+        habit.durationMinutes > 0
+            ? (stat.totalMinutes / habit.durationMinutes * 100).clamp(0, 100)
+            : 0.0;
 
     // MultiMetricProgressCard 数据
     trackersData.add({
-      'emoji': habit.icon != null ? String.fromCharCode(int.parse(habit.icon!)) : '⭐',
+      'emoji': habit.icon ?? '58353', // 使用 MaterialIcons codePoint，默认为 star
       'progress': progress,
       'progressColor': skillColor.value,
       'title': habit.title,
@@ -227,7 +243,10 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
 
     // CircularMetricsCard 数据
     metricsData.add({
-      'icon': habit.icon != null ? int.parse(habit.icon!) : Icons.auto_awesome.codePoint,
+      'icon':
+          habit.icon != null
+              ? int.parse(habit.icon!)
+              : Icons.auto_awesome.codePoint,
       'value': '${stat.completionCount}次',
       'label': habit.title,
       'progress': (stat.totalMinutes / 60 / 10).clamp(0, 1), // 假设10小时为100%
@@ -251,10 +270,7 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
 
   return {
     // MultiMetricProgressCard - 多指标进度卡片
-    'multiMetricProgressCard': {
-      'trackers': trackersData,
-      'backgroundColor': Colors.amber.value,
-    },
+    'multiMetricProgressCard': {'trackers': trackersData},
 
     // CircularMetricsCard - 环形指标卡片
     'circularMetricsCard': {
@@ -264,15 +280,26 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
 
     // NutritionProgressCard (复用为习惯进度)
     'nutritionProgressCard': {
-      'title': '$dateRangeLabel进度',
-      'calories': totalMinutes,
-      'caloriesGoal': maxCount * 60, // 假设每个习惯60分钟目标
-      'protein': totalCompletions,
-      'proteinGoal': maxCount * 7, // 假设每周7次
-      'carbs': habits.length,
-      'carbsGoal': maxCount * 2,
-      'fat': topStats.where((s) => s.totalMinutes > 30).length,
-      'fatGoal': maxCount,
+      'leftData': {
+        'current': totalMinutes.toDouble(),
+        'total': (maxCount * 60).toDouble(),
+        'unit': '分钟',
+      },
+      'leftConfig': {
+        'icon': '⏱️',
+        'label': '$dateRangeLabel总时长',
+        'subtext': '已完成$totalCompletions次',
+      },
+      'rightItems': trackersData.map((t) {
+        return {
+          'icon': t['emoji'],
+          'name': t['title'],
+          'current': t['value'],
+          'total': (maxCount * 60).toDouble(),
+          'color': t['progressColor'],
+          'subtitle': t['unit'],
+        };
+      }).toList(),
     },
 
     // expenseDonutChart
@@ -285,7 +312,8 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
         for (var item in categoryData.take(5))
           {
             'label': item['name'],
-            'percentage': totalMinutes > 0 ? (item['value'] / totalMinutes * 100) : 0.0,
+            'percentage':
+                totalMinutes > 0 ? (item['value'] / totalMinutes * 100) : 0.0,
             'color': item['color'],
             'subtitle': '${(item['value'] / 60).toStringAsFixed(1)}小时',
           },
@@ -295,14 +323,13 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
     // PerformanceBarChart
     'performanceBarChart': {
       'badgeLabel': '习惯',
-      'growthPercentage': topStats.isNotEmpty ? topStats.first.totalMinutes / 60 : 0.0,
+      'growthPercentage':
+          topStats.isNotEmpty ? topStats.first.totalMinutes / 60 : 0.0,
       'timePeriod': dateRangeLabel,
-      'barData': rankedData.take(5).map((item) {
-        return {
-          'value': item['value'],
-          'label': item['title'],
-        };
-      }).toList(),
+      'barData':
+          rankedData.take(5).map((item) {
+            return {'value': item['value'], 'label': item['title']};
+          }).toList(),
       'footerLabel': '总时长',
     },
 
@@ -334,7 +361,9 @@ Future<List<int>> _getDailyMinutesForHabit(
   int days,
   dynamic recordController,
 ) async {
-  final records = (await recordController.getHabitCompletionRecords(habitId) as List).cast<CompletionRecord>();
+  final records =
+      (await recordController.getHabitCompletionRecords(habitId) as List)
+          .cast<CompletionRecord>();
   final now = DateTime.now();
   final dailyMinutes = List<int>.filled(days, 0);
 
@@ -354,12 +383,15 @@ Future<List<int>> _getMonthlyMinutesForHabit(
   int months,
   dynamic recordController,
 ) async {
-  final records = (await recordController.getHabitCompletionRecords(habitId) as List).cast<CompletionRecord>();
+  final records =
+      (await recordController.getHabitCompletionRecords(habitId) as List)
+          .cast<CompletionRecord>();
   final now = DateTime.now();
   final monthlyMinutes = List<int>.filled(months, 0);
 
   for (final record in records) {
-    final monthsAgo = (now.year - record.date.year) * 12 + now.month - record.date.month;
+    final monthsAgo =
+        (now.year - record.date.year) * 12 + now.month - record.date.month;
     if (monthsAgo >= 0 && monthsAgo < months) {
       monthlyMinutes[months - 1 - monthsAgo] += record.duration.inMinutes;
     }
@@ -389,10 +421,19 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   );
 
   // 获取统计数据
-  final weeklyMinutes = await _getDailyMinutesForHabit(habitId, 7, recordController);
-  final monthlyMinutes = await _getMonthlyMinutesForHabit(habitId, 12, recordController);
+  final weeklyMinutes = await _getDailyMinutesForHabit(
+    habitId,
+    7,
+    recordController,
+  );
+  final monthlyMinutes = await _getMonthlyMinutesForHabit(
+    habitId,
+    12,
+    recordController,
+  );
   final totalMinutes = await recordController.getTotalDuration(habitId) as int;
-  final completionCount = await recordController.getCompletionCount(habitId) as int;
+  final completionCount =
+      await recordController.getCompletionCount(habitId) as int;
 
   // 获取技能名称
   String? skillName;
@@ -404,8 +445,12 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   }
 
   // 计算周数据归一化 (0-1)
-  final maxWeeklyMinutes = weeklyMinutes.reduce((a, b) => a > b ? a : b).toDouble();
-  final weeklyValues = weeklyMinutes.map((m) => maxWeeklyMinutes > 0 ? m / maxWeeklyMinutes : 0.0).toList();
+  final maxWeeklyMinutes =
+      weeklyMinutes.reduce((a, b) => a > b ? a : b).toDouble();
+  final weeklyValues =
+      weeklyMinutes
+          .map((m) => maxWeeklyMinutes > 0 ? m / maxWeeklyMinutes : 0.0)
+          .toList();
 
   // 星期标签
   final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
@@ -424,7 +469,10 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     'stressLevelMonitor': {
       'title': habit.title,
       'currentScore': weeklyMinutes.last.toDouble(),
-      'statusLabel': weeklyMinutes.last > 30 ? '完成良好' : (weeklyMinutes.last > 0 ? '继续加油' : '记得打卡'),
+      'statusLabel':
+          weeklyMinutes.last > 30
+              ? '完成良好'
+              : (weeklyMinutes.last > 0 ? '继续加油' : '记得打卡'),
       'weeklyData': weeklyMinutes.map((m) => m.toDouble()).toList(),
     },
 
@@ -434,7 +482,10 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
       'mainValue': weeklyMinutes.last.toDouble(),
       'statusLabel': skillName ?? habit.group ?? '习惯',
       'unit': '分钟',
-      'icon': habit.icon != null ? int.parse(habit.icon!) : Icons.auto_awesome.codePoint,
+      'icon':
+          habit.icon != null
+              ? int.parse(habit.icon!)
+              : Icons.auto_awesome.codePoint,
       'weeklyProgress': weeklyMinutes,
     },
 
@@ -457,7 +508,10 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
       'iconColor': Colors.amber.value,
       'data': weeklyMinutes.map((m) => m.toDouble()).toList(),
       'labels': weekDays,
-      'maxValue': (weeklyMinutes.reduce((a, b) => a > b ? a : b) * 1.2).clamp(10, 1000).toDouble(),
+      'maxValue':
+          (weeklyMinutes.reduce((a, b) => a > b ? a : b) * 1.2)
+              .clamp(10, 1000)
+              .toDouble(),
     },
 
     // MiniTrendCard - 迷你趋势卡片
@@ -477,10 +531,18 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
       'icon': habit.icon ?? Icons.auto_awesome.codePoint.toString(),
       'value': totalMinutes.toDouble(),
       'unit': '分钟',
-      'trend': weeklyMinutes.last > weeklyMinutes[weeklyMinutes.length - 2] ? 'up' : 'down',
-      'changePercentage': weeklyMinutes[weeklyMinutes.length - 2] > 0
-          ? ((weeklyMinutes.last - weeklyMinutes[weeklyMinutes.length - 2]) / weeklyMinutes[weeklyMinutes.length - 2] * 100).abs()
-          : 0,
+      'trend':
+          weeklyMinutes.last > weeklyMinutes[weeklyMinutes.length - 2]
+              ? 'up'
+              : 'down',
+      'changePercentage':
+          weeklyMinutes[weeklyMinutes.length - 2] > 0
+              ? ((weeklyMinutes.last -
+                          weeklyMinutes[weeklyMinutes.length - 2]) /
+                      weeklyMinutes[weeklyMinutes.length - 2] *
+                      100)
+                  .abs()
+              : 0,
       'chartData': weeklyMinutes.map((m) => m.toDouble()).toList(),
       'dateLabel': '累计$totalMinutes分钟',
     },
@@ -488,7 +550,10 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     // WeeklyBarsCard - 周柱状图卡片
     'weeklyBarsCard': {
       'title': habit.title,
-      'icon': habit.icon != null ? int.parse(habit.icon!) : Icons.auto_awesome.codePoint,
+      'icon':
+          habit.icon != null
+              ? int.parse(habit.icon!)
+              : Icons.auto_awesome.codePoint,
       'currentValue': weeklyMinutes.last.toDouble(),
       'unit': '分钟',
       'status': skillName ?? '本周完成',
@@ -500,7 +565,11 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     'modernRoundedBalanceCard': {
       'title': habit.title,
       'balance': totalMinutes.toDouble(),
-      'available': (habit.durationMinutes > 0 ? habit.durationMinutes - totalMinutes % habit.durationMinutes : 0).toDouble(),
+      'available':
+          (habit.durationMinutes > 0
+                  ? habit.durationMinutes - totalMinutes % habit.durationMinutes
+                  : 0)
+              .toDouble(),
       'weeklyData': weeklyMinutes.map((m) => m.toDouble()).toList(),
     },
   };
