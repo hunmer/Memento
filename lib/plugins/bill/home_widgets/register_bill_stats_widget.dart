@@ -10,7 +10,7 @@ import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import 'bill_colors.dart';
-import 'providers.dart';
+import 'providers.dart' show provideBillStatsWidgets;
 
 /// 注册支出统计组件
 void registerBillStatsWidget(HomeWidgetRegistry registry) {
@@ -23,14 +23,18 @@ void registerBillStatsWidget(HomeWidgetRegistry registry) {
       icon: Icons.pie_chart,
       color: billColor,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      supportedSizes: [
+        HomeWidgetSize.medium,
+        HomeWidgetSize.large,
+        HomeWidgetSize.custom,
+      ],
       category: 'home_categoryRecord'.tr,
 
       // 选择器配置
       selectorId: 'bill.stats.config',
 
       // 公共组件提供者
-      commonWidgetsProvider: provideBillCommonWidgets,
+      commonWidgetsProvider: provideBillStatsWidgets,
 
       builder: (context, config) {
         return StatefulBuilder(

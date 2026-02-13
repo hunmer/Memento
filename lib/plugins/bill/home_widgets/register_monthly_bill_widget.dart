@@ -10,7 +10,7 @@ import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import 'bill_colors.dart';
-import 'providers.dart';
+import 'providers.dart' show provideMonthlyBillWidgets;
 
 /// 注册月份账单组件
 void registerMonthlyBillWidget(HomeWidgetRegistry registry) {
@@ -30,7 +30,7 @@ void registerMonthlyBillWidget(HomeWidgetRegistry registry) {
       selectorId: 'bill.monthly.config',
 
       // 公共组件提供者
-      commonWidgetsProvider: provideBillCommonWidgets,
+      commonWidgetsProvider: provideMonthlyBillWidgets,
 
       builder: (context, config) {
         return StatefulBuilder(
