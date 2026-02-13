@@ -118,7 +118,6 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
           ],
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 头条新闻图片区域
@@ -129,12 +128,14 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
               textMainColor: textMainColor,
             ),
             // 新闻列表区域
-            _buildNewsListSection(
-              context,
-              isDark: isDark,
-              primaryColor: primaryColor,
-              textMainColor: textMainColor,
-              textSubColor: textSubColor,
+            Expanded(
+              child: _buildNewsListSection(
+                context,
+                isDark: isDark,
+                primaryColor: primaryColor,
+                textMainColor: textMainColor,
+                textSubColor: textSubColor,
+              ),
             ),
           ],
         ),
@@ -153,7 +154,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
     final hasIcon = widget.featuredNews.iconCodePoint != null;
 
     return SizedBox(
-      height: 256,
+      height: 150,
       child: Stack(
         children: [
           // 背景图片或图标
@@ -163,26 +164,36 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                 topLeft: Radius.circular(28),
                 topRight: Radius.circular(28),
               ),
-              child: hasImage
-                  ? CommonImageBuilder.buildImage(
-                      imageUrl: widget.featuredNews.imageUrl,
-                      fit: BoxFit.cover,
-                      isDark: isDark,
-                    )
-                  : hasIcon
+              child:
+                  hasImage
+                      ? CommonImageBuilder.buildImage(
+                        imageUrl: widget.featuredNews.imageUrl,
+                        fit: BoxFit.cover,
+                        isDark: isDark,
+                      )
+                      : hasIcon
                       ? Container(
-                          color: Color(widget.featuredNews.iconBackgroundColor ?? _defaultGoodsColor.value),
-                          child: Center(
-                            child: Icon(
-                              IconData(widget.featuredNews.iconCodePoint!, fontFamily: 'MaterialIcons'),
-                              size: 80,
-                              color: Colors.white.withOpacity(0.3),
-                            ),
-                          ),
-                        )
-                      : Container(
-                          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                        color: Color(
+                          widget.featuredNews.iconBackgroundColor ??
+                              _defaultGoodsColor.value,
                         ),
+                        child: Center(
+                          child: Icon(
+                            IconData(
+                              widget.featuredNews.iconCodePoint!,
+                              fontFamily: 'MaterialIcons',
+                            ),
+                            size: 80,
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                        ),
+                      )
+                      : Container(
+                        color:
+                            isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade200,
+                      ),
             ),
           ),
           // 渐变遮罩（只在有图片或图标时显示）
@@ -342,19 +353,28 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
             ),
           ),
           SizedBox(height: widget.size.getTitleSpacing()),
-          // 新闻列表
-          ...List.generate(widget.newsItems.length, (index) {
-            final item = widget.newsItems[index];
-            return _buildNewsItem(
-              context,
-              item: item,
-              isLast: index == widget.newsItems.length - 1,
-              isDark: isDark,
-              textMainColor: textMainColor,
-              textSubColor: textSubColor,
-              index: index,
-            );
-          }),
+          // 新闻列表（带滚动条）
+          Flexible(
+            child: Scrollbar(
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const ClampingScrollPhysics(),
+                itemCount: widget.newsItems.length,
+                itemBuilder: (context, index) {
+                  final item = widget.newsItems[index];
+                  return _buildNewsItem(
+                    context,
+                    item: item,
+                    isLast: index == widget.newsItems.length - 1,
+                    isDark: isDark,
+                    textMainColor: textMainColor,
+                    textSubColor: textSubColor,
+                    index: index,
+                  );
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
