@@ -440,7 +440,6 @@ class _BillListScreenSupercupertinoState
             ),
             cellBorderColor: Colors.transparent,
             selectionDecoration: const BoxDecoration(),
-            todayHighlightColor: Colors.transparent,
             monthCellBuilder: (BuildContext context, MonthCellDetails details) {
               final day = details.date;
               final isSelected =
@@ -539,7 +538,8 @@ class _BillListScreenSupercupertinoState
                             final billObject = Bill(
                               id: bill.id,
                               title: bill.title,
-                              amount: bill.isExpense ? -bill.amount : bill.amount,
+                              amount:
+                                  bill.isExpense ? -bill.amount : bill.amount,
                               accountId: widget.accountId,
                               category: bill.category,
                               date: bill.date,
@@ -576,16 +576,19 @@ class _BillListScreenSupercupertinoState
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: Text('bill_confirmDelete'.tr),
-                                  content: Text('bill_confirmDeleteThisBill'.tr),
+                                  content: Text(
+                                    'bill_confirmDeleteThisBill'.tr,
+                                  ),
                                   actions: <Widget>[
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(false),
+                                      onPressed:
+                                          () =>
+                                              Navigator.of(context).pop(false),
                                       child: Text('bill_cancel'.tr),
                                     ),
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(true),
+                                      onPressed:
+                                          () => Navigator.of(context).pop(true),
                                       child: Text('bill_delete'.tr),
                                     ),
                                   ],
@@ -595,9 +598,12 @@ class _BillListScreenSupercupertinoState
 
                             if (confirmed == true) {
                               try {
-                                final currentAccount = widget.billPlugin.accounts
+                                final currentAccount = widget
+                                    .billPlugin
+                                    .accounts
                                     .firstWhere(
-                                      (account) => account.id == widget.accountId,
+                                      (account) =>
+                                          account.id == widget.accountId,
                                     );
                                 await widget.billPlugin.controller.deleteBill(
                                   currentAccount.id,

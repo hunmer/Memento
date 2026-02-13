@@ -35,7 +35,7 @@ class _BillListScreenState extends State<BillListScreen> {
   List<BillModel> _allMonthBills = []; // All bills for the focused month
   Map<DateTime, _DailyStats> _dailyStats = {};
 
-    String _filterCategory =
+  String _filterCategory =
       'all'; // 'all', 'income', 'expense', or specific category name
 
   // Colors
@@ -335,10 +335,13 @@ class _BillListScreenState extends State<BillListScreen> {
               ),
               cellBorderColor: Colors.transparent,
               selectionDecoration: const BoxDecoration(),
-              todayHighlightColor: Colors.transparent,
-              monthCellBuilder: (BuildContext context, MonthCellDetails details) {
+              monthCellBuilder: (
+                BuildContext context,
+                MonthCellDetails details,
+              ) {
                 final day = details.date;
-                final isSelected = _selectedDay != null && _isSameDay(day, _selectedDay!);
+                final isSelected =
+                    _selectedDay != null && _isSameDay(day, _selectedDay!);
                 return _buildCalendarCell(day, isSelected);
               },
               onTap: (CalendarTapDetails details) {
@@ -352,7 +355,8 @@ class _BillListScreenState extends State<BillListScreen> {
               },
               onViewChanged: (ViewChangedDetails details) {
                 if (details.visibleDates.isNotEmpty) {
-                  final newFocusedDay = details.visibleDates[details.visibleDates.length ~/ 2];
+                  final newFocusedDay =
+                      details.visibleDates[details.visibleDates.length ~/ 2];
                   _focusedDay = newFocusedDay;
                   _loadMonthBills();
                 }
@@ -448,7 +452,6 @@ class _BillListScreenState extends State<BillListScreen> {
     );
   }
 
-  
   Widget _buildListView() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final filteredBills = _filteredBills;
@@ -491,27 +494,36 @@ class _BillListScreenState extends State<BillListScreen> {
 
         // Bill List
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100), // 增加底部padding为悬浮按钮留空间
-          child: filteredBills.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 50),
-                    child: Text(
-                      'bill_noBills'.tr,
-                      style: TextStyle(color: Colors.grey[500]),
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            100,
+          ), // 增加底部padding为悬浮按钮留空间
+          child:
+              filteredBills.isEmpty
+                  ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 50),
+                      child: Text(
+                        'bill_noBills'.tr,
+                        style: TextStyle(color: Colors.grey[500]),
+                      ),
                     ),
+                  )
+                  : Column(
+                    children:
+                        filteredBills.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final bill = entry.value;
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom: index < filteredBills.length - 1 ? 12 : 0,
+                            ),
+                            child: _buildBillCard(bill, isDark),
+                          );
+                        }).toList(),
                   ),
-                )
-              : Column(
-                  children: filteredBills.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final bill = entry.value;
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: index < filteredBills.length - 1 ? 12 : 0),
-                      child: _buildBillCard(bill, isDark),
-                    );
-                  }).toList(),
-                ),
         ),
       ],
     );
@@ -572,9 +584,7 @@ class _BillListScreenState extends State<BillListScreen> {
           builder:
               (BuildContext context) => AlertDialog(
                 title: Text('bill_confirmDelete'.tr),
-                content: Text(
-                  'bill_deleteBillConfirmation'.tr,
-                ),
+                content: Text('bill_deleteBillConfirmation'.tr),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),

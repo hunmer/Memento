@@ -21,8 +21,7 @@ class HabitMonthlyListScreen extends StatefulWidget {
   });
 
   @override
-  State<HabitMonthlyListScreen> createState() =>
-      _HabitMonthlyListScreenState();
+  State<HabitMonthlyListScreen> createState() => _HabitMonthlyListScreenState();
 }
 
 class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
@@ -33,6 +32,7 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
   // Data State
   List<_CompletionRecordModel> _allMonthRecords = [];
   Map<DateTime, _DailyStats> _dailyStats = {};
+  List<_CompletionRecordModel> _allRecords = []; // 存储所有历史记录
 
   // Colors
   static const Color _primaryColor = Color(0xFF607AFB);
@@ -68,7 +68,22 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
       widget.habitId,
     );
 
-    // Filter by month
+    debugPrint('HabitMonthlyListScreen: 获取到的总记录数: ${records.length}');
+
+    // 存储所有历史记录（用于 MonthSelector 统计）
+    final allModelRecords = <_CompletionRecordModel>[];
+    for (final record in records) {
+      allModelRecords.add(
+        _CompletionRecordModel(
+          id: record.id,
+          date: record.date,
+          duration: record.duration,
+          notes: record.notes,
+        ),
+      );
+    }
+
+    // Filter by month (当前选中月份)
     final monthStart = DateTime(_focusedDay.year, _focusedDay.month, 1);
     final monthEnd = DateTime(
       _focusedDay.year,
@@ -79,16 +94,29 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
       59,
     );
 
-    final filteredRecords = records.where(
-      (record) =>
-          record.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
-          record.date.isBefore(monthEnd.add(const Duration(seconds: 1))),
-    );
+    final filteredRecords =
+        records
+            .where(
+              (record) =>
+                  record.date.isAfter(
+                    monthStart.subtract(const Duration(seconds: 1)),
+                  ) &&
+                  record.date.isBefore(
+                    monthEnd.add(const Duration(seconds: 1)),
+                  ),
+            )
+            .toList();
 
-    // Calculate daily stats
+    debugPrint('过滤后的记录数: ${filteredRecords.length}');
+
+    // Calculate daily stats for current month
     final stats = <DateTime, _DailyStats>{};
     for (var record in filteredRecords) {
-      final date = DateTime(record.date.year, record.date.month, record.date.day);
+      final date = DateTime(
+        record.date.year,
+        record.date.month,
+        record.date.day,
+      );
       if (!stats.containsKey(date)) {
         stats[date] = _DailyStats();
       }
@@ -96,40 +124,51 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
       stats[date]!.totalMinutes += (record.duration.inMinutes as int);
     }
 
+    // Convert to model records for current month
+    final modelRecords = <_CompletionRecordModel>[];
+    for (final record in filteredRecords) {
+      modelRecords.add(
+        _CompletionRecordModel(
+          id: record.id,
+          date: record.date,
+          duration: record.duration,
+          notes: record.notes,
+        ),
+      );
+    }
+    modelRecords.sort((a, b) => b.date.compareTo(a.date));
+
     if (mounted) {
       setState(() {
-        _allMonthRecords = filteredRecords
-            .map(
-              (record) => _CompletionRecordModel(
-                id: record.id,
-                date: record.date,
-                duration: record.duration,
-                notes: record.notes,
-              ),
-            )
-            .toList()
-          ..sort((a, b) => b.date.compareTo(a.date));
+        _allRecords = allModelRecords; // 存储所有记录
+        _allMonthRecords = modelRecords; // 当前月份记录
         _dailyStats = stats;
       });
     }
   }
 
   Map<String, double> _getMonthStats(DateTime month) {
-    // 返回默认值，实际数据在 _loadMonthRecords 中异步加载
-    // 这里返回缓存值或默认值
-    final stats = _dailyStats.entries.fold(
-      {
-        'count': 0.0,
-        'totalMinutes': 0.0,
-      },
-      (acc, entry) {
-        acc['count'] = (acc['count']! + entry.value.count);
-        acc['totalMinutes'] =
-            (acc['totalMinutes']! + entry.value.totalMinutes);
-        return acc;
-      },
-    );
-    return stats;
+    // 从所有记录中统计指定月份的数据
+    final monthStart = DateTime(month.year, month.month, 1);
+    final monthEnd = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+
+    final filteredRecords = _allRecords.where((record) {
+      return record.date.isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
+             record.date.isBefore(monthEnd.add(const Duration(seconds: 1)));
+    });
+
+    double count = 0.0;
+    double totalMinutes = 0.0;
+
+    for (final record in filteredRecords) {
+      count++;
+      totalMinutes += record.duration.inMinutes;
+    }
+
+    return {
+      'count': count,
+      'totalMinutes': totalMinutes,
+    };
   }
 
   void _updateRouteContext(DateTime date, {DateTime? selectedDay}) {
@@ -163,9 +202,7 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
     final hasRecord = (stats?.count ?? 0) > 0;
 
     return ConstrainedBox(
-      constraints: BoxConstraints.tight(
-        const Size(48, 48),
-      ),
+      constraints: BoxConstraints.tight(const Size(48, 48)),
       child: Container(
         margin: const EdgeInsets.all(4),
         decoration: BoxDecoration(
@@ -191,8 +228,10 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
                 top: -6,
                 right: 8,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 3,
+                    vertical: 1,
+                  ),
                   decoration: BoxDecoration(
                     color: _primaryColor.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(3),
@@ -275,6 +314,7 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
             onMonthSelected: (month) async {
               setState(() {
                 _focusedDay = month;
+                _calendarController.displayDate = month;
                 _loadMonthRecords();
               });
               _updateRouteContext(month);
@@ -319,14 +359,12 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
             viewHeaderHeight: 40,
             showNavigationArrow: false,
             monthViewSettings: const MonthViewSettings(
-              showTrailingAndLeadingDates: false,
+              showTrailingAndLeadingDates: true,
               dayFormat: 'EEE',
             ),
             cellBorderColor: Colors.transparent,
             selectionDecoration: const BoxDecoration(),
-            todayHighlightColor: Colors.transparent,
-            monthCellBuilder:
-                (BuildContext context, MonthCellDetails details) {
+            monthCellBuilder: (BuildContext context, MonthCellDetails details) {
               final day = details.date;
               final isSelected =
                   _selectedDay != null && _isSameDay(day, _selectedDay!);
@@ -334,10 +372,18 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
             },
             onTap: (CalendarTapDetails details) {
               if (details.date != null) {
+                final newDate = details.date!;
+                final currentDisplayMonth = _calendarController.displayDate;
                 setState(() {
-                  _selectedDay = details.date;
-                  _focusedDay = details.date!;
-                  _calendarController.selectedDate = details.date;
+                  _selectedDay = newDate;
+                  _focusedDay = newDate;
+                  // 如果点击的日期不在当前显示的月份，更新 calendar controller
+                  if (currentDisplayMonth != null &&
+                      (newDate.month != currentDisplayMonth.month ||
+                          newDate.year != currentDisplayMonth.year)) {
+                    _calendarController.displayDate = newDate;
+                    _loadMonthRecords();
+                  }
                 });
                 _updateRouteContext(_focusedDay, selectedDay: _selectedDay);
               }
@@ -363,18 +409,14 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
                   const SizedBox(width: 8),
                   Text(
                     DateFormat('yyyy年MM月dd日').format(_selectedDay!),
-                    style:
-                        Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     '(${_selectedDayRecords.length}次打卡)',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
                   ),
                 ],
               ),
@@ -392,10 +434,7 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
                     const SizedBox(height: 16),
                     Text(
                       '这天没有打卡记录',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
                     ),
                   ],
                 ),
@@ -453,10 +492,7 @@ class _HabitMonthlyListScreenState extends State<HabitMonthlyListScreen> {
                   const SizedBox(height: 16),
                   Text(
                     '请选择一天查看记录',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
                   ),
                 ],
               ),

@@ -425,7 +425,6 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
                 ),
                 cellBorderColor: Colors.transparent,
                 selectionDecoration: const BoxDecoration(),
-                todayHighlightColor: Colors.transparent,
                 monthCellBuilder: (
                   BuildContext context,
                   MonthCellDetails details,
