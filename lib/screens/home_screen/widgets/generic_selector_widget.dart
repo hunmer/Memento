@@ -164,6 +164,7 @@ class GenericSelectorWidget extends StatelessWidget {
         commonWidgetId,
         props,
         size,
+        inline: true,
       );
 
       // 使用 widgetItemId 作为 key，确保每个小组件实例都是唯一的

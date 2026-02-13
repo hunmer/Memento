@@ -948,191 +948,195 @@ class CommonWidgetBuilder {
     BuildContext context,
     CommonWidgetId widgetId,
     Map<String, dynamic> props,
-    HomeWidgetSize size,
-  ) {
+    HomeWidgetSize size, {
+    bool inline = false,
+  }) {
+    // 将 inline 参数添加到 props 中，以便各个小组件可以读取
+    final finalProps = Map<String, dynamic>.from(props);
+    finalProps['inline'] = inline;
     switch (widgetId) {
       case CommonWidgetId.circularProgressCard:
-        return CircularProgressCardWidget.fromProps(props, size);
+        return CircularProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.iconCircularProgressCard:
-        return IconCircularProgressCardWidget.fromProps(props, size);
+        return IconCircularProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.colorTagTaskCard:
-        return ColorTagTaskCardWidget.fromProps(props, size);
+        return ColorTagTaskCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.activityProgressCard:
-        return CardDotProgressDisplay.fromProps(props, size);
+        return CardDotProgressDisplay.fromProps(finalProps, size);
       case CommonWidgetId.halfGaugeCard:
-        return HalfGaugeCardWidget.fromProps(props, size);
+        return HalfGaugeCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.taskProgressCard:
-        return TaskProgressCardWidget.fromProps(props, size);
+        return TaskProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.taskListCard:
-        return TaskListCardWidget.fromProps(props, size);
+        return TaskListCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.audioWaveformCard:
-        return AudioWaveformCardWidget.fromProps(props, size);
+        return AudioWaveformCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.segmentedProgressCard:
-        return SegmentedProgressCardWidget.fromProps(props, size);
+        return SegmentedProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.milestoneCard:
-        return MilestoneCardWidget.fromProps(props, size);
+        return MilestoneCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.monthlyProgressDotsCard:
-        return MonthlyProgressWithDotsCardWidget.fromProps(props, size);
+        return MonthlyProgressWithDotsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.multiMetricProgressCard:
-        return MultiMetricProgressCardWidget.fromProps(props, size);
+        return MultiMetricProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.circularMetricsCard:
-        return CircularMetricsCardWidget.fromProps(props, size);
+        return CircularMetricsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.contributionHeatmapCard:
-        return ContributionHeatmapCardWidget.fromProps(props, size);
+        return ContributionHeatmapCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.smoothLineChartCard:
-        return SmoothLineChartCardWidget.fromProps(props, size);
+        return SmoothLineChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.lineChartTrendCard:
-        return LineChartTrendCardWidget.fromProps(props, size);
+        return LineChartTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.verticalBarChartCard:
-        return VerticalBarChartCardWidget.fromProps(props, size);
+        return VerticalBarChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.messageListCard:
-        return MessageListCardWidget.fromProps(props, size);
+        return MessageListCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.inboxMessageCard:
-        return InboxMessageCardWidget.fromProps(props, size);
+        return InboxMessageCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.roundedTaskListCard:
-        return RoundedTaskListCard.fromProps(props, size);
+        return RoundedTaskListCard.fromProps(finalProps, size);
       case CommonWidgetId.roundedRemindersList:
-        return ReminderListCard.fromProps(props, size);
+        return ReminderListCard.fromProps(finalProps, size);
       case CommonWidgetId.dualSliderCard:
-        return DualSliderWidget.fromProps(props, size);
+        return DualSliderWidget.fromProps(finalProps, size);
       case CommonWidgetId.earningsTrendCard:
-        return EarningsTrendCardWidget.fromProps(props, size);
+        return EarningsTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.revenueTrendCard:
-        return RevenueTrendCardWidget.fromProps(props, size);
+        return RevenueTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.watchProgressCard:
-        return WatchProgressCardWidget.fromProps(props, size);
+        return WatchProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.sleepTrackingCard:
-        return VerticalCircularProgressCard.fromProps(props, size);
+        return VerticalCircularProgressCard.fromProps(finalProps, size);
       case CommonWidgetId.stressLevelMonitor:
-        return CardBarChartMonitor.fromProps(props, size);
+        return CardBarChartMonitor.fromProps(finalProps, size);
       case CommonWidgetId.dailyTodoListCard:
-        return DailyTodoListWidget.fromProps(props, size);
+        return DailyTodoListWidget.fromProps(finalProps, size);
       case CommonWidgetId.upcomingTasksWidget:
-        return UpcomingTasksWidget.fromProps(props, size);
+        return UpcomingTasksWidget.fromProps(finalProps, size);
       case CommonWidgetId.splitImageCard:
-        return SplitImageCardWidget.fromProps(props, size);
+        return SplitImageCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.profileCardCard:
-        return ProfileCardWidget.fromProps(props, size);
+        return ProfileCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.sleepStageChartCard:
-        return CardBubbleChartDisplay.fromProps(props, size);
+        return CardBubbleChartDisplay.fromProps(finalProps, size);
       case CommonWidgetId.imageDisplayCard:
-        return ImageDisplayCardWidget.fromProps(props, size);
+        return ImageDisplayCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.weightTrendChart:
-        return CardTrendLineChart.fromProps(props, size);
+        return CardTrendLineChart.fromProps(finalProps, size);
       case CommonWidgetId.socialProfileCard:
-        return SocialProfileCardWidget.fromProps(props, size);
+        return SocialProfileCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.miniTrendCard:
-        return MiniTrendCardWidget.fromProps(props, size);
+        return MiniTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.budgetTrendCard:
-        return BudgetTrendCardWidget.fromProps(props, size);
+        return BudgetTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.accountBalanceCard:
-        return AccountBalanceCardWidget.fromProps(props, size);
+        return AccountBalanceCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.modernRoundedSpendingWidget:
-        return ModernRoundedSpendingWidget.fromProps(props, size);
+        return ModernRoundedSpendingWidget.fromProps(finalProps, size);
       case CommonWidgetId.walletBalanceCard:
-        return WalletBalanceCardWidget.fromProps(props, size);
+        return WalletBalanceCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.musicPlayerCard:
-        return MusicPlayerCardWidget.fromProps(props, size);
+        return MusicPlayerCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.scoreCardWidget:
-        return ScoreCardWidget.fromProps(props, size);
+        return ScoreCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.trendValueCard:
-        return TrendValueCardWidget.fromProps(props, size);
+        return TrendValueCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.trendListCard:
-        return TrendListCardWidget.fromProps(props, size);
+        return TrendListCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.newsUpdateCard:
-        return NewsUpdateCardWidget.fromProps(props, size);
+        return NewsUpdateCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.newsCard:
-        return NewsCardWidget.fromProps(props, size);
+        return NewsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.modernEgfrHealthWidget:
-        return ModernFlipCounterCard.fromProps(props, size);
+        return ModernFlipCounterCard.fromProps(finalProps, size);
       case CommonWidgetId.moodChartCard:
-        return ChartIconDisplayCard.fromProps(props, size);
+        return ChartIconDisplayCard.fromProps(finalProps, size);
       case CommonWidgetId.dailyEventsCard:
-        return DailyEventsCardWidget.fromProps(props, size);
+        return DailyEventsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.dailyReflectionCard:
-        return DailyReflectionCardWidget.fromProps(props, size);
+        return DailyReflectionCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.colorfulShortcutsGrid:
-        return ColorfulShortcutsGridWidget.fromProps(props, size);
+        return ColorfulShortcutsGridWidget.fromProps(finalProps, size);
       case CommonWidgetId.journalPromptCard:
-        return JournalPromptCardWidget.fromProps(props, size);
+        return JournalPromptCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.socialActivityCard:
-        return SocialActivityCardWidget.fromProps(props, size);
+        return SocialActivityCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.monthlyBillCard:
-        return MonthlyBillCardWidget.fromProps(props, size);
+        return MonthlyBillCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.weatherForecastCard:
-        return WeatherForecastCard.fromProps(props, size);
+        return WeatherForecastCard.fromProps(finalProps, size);
       case CommonWidgetId.timelineStatusCard:
-        return TimelineStatusCardWidget.fromProps(props, size);
+        return TimelineStatusCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.spendingTrendChart:
-        return SpendingTrendChartWidget.fromProps(props, size);
+        return SpendingTrendChartWidget.fromProps(finalProps, size);
       case CommonWidgetId.modernRoundedMoodWidget:
-        return ModernRoundedBarIconCard.fromProps(props, size);
+        return ModernRoundedBarIconCard.fromProps(finalProps, size);
       case CommonWidgetId.dailyScheduleCard:
-        return DailyScheduleCardWidget.fromProps(props, size);
+        return DailyScheduleCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.articleListCard:
-        return ArticleListCardWidget.fromProps(props, size);
+        return ArticleListCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.eventCalendarWidget:
-        return EventCalendarWidget.fromProps(props, size);
+        return EventCalendarWidget.fromProps(finalProps, size);
       case CommonWidgetId.roundedTaskProgressWidget:
-        return RoundedTaskProgressWidget.fromProps(props, size);
+        return RoundedTaskProgressWidget.fromProps(finalProps, size);
       case CommonWidgetId.dualRangeChartCard:
-        return DualRangeChartCardWidget.fromProps(props, size);
+        return DualRangeChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.dailyBarChartCard:
-        return DailyBarChartCardWidget.fromProps(props, size);
+        return DailyBarChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.nutritionProgressCard:
-        return SplitColumnProgressBarCard.fromProps(props, size);
+        return SplitColumnProgressBarCard.fromProps(finalProps, size);
       case CommonWidgetId.portfolioStackedChart:
-        return PortfolioStackedChartWidget.fromProps(props, size);
+        return PortfolioStackedChartWidget.fromProps(finalProps, size);
       case CommonWidgetId.activityRingsCard:
-        return ActivityRingsCardWidget.fromProps(props, size);
+        return ActivityRingsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.categoryStackWidget:
-        return CategoryStackWidget.fromProps(props, size);
+        return CategoryStackWidget.fromProps(finalProps, size);
       case CommonWidgetId.performanceBarChart:
-        return PerformanceBarChartWidget.fromProps(props, size);
+        return PerformanceBarChartWidget.fromProps(finalProps, size);
       case CommonWidgetId.expenseDonutChart:
-        return ExpenseDonutChartWidget.fromProps(props, size);
+        return ExpenseDonutChartWidget.fromProps(finalProps, size);
       case CommonWidgetId.rankedBarChartCard:
-        return RankedBarChartCardWidget.fromProps(props, size);
+        return RankedBarChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.rentalPreviewCard:
-        return RentalPreviewCardWidget.fromProps(props, size);
+        return RentalPreviewCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.roundedPropertyCard:
-        return RoundedPropertyCardWidget.fromProps(props, size);
+        return RoundedPropertyCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.taskListStatCard:
-        return TaskListStatCardWidget.fromProps(props, size);
+        return TaskListStatCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.verticalPropertyCard:
-        return VerticalPropertyCardWidget.fromProps(props, size);
+        return VerticalPropertyCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.taskProgressList:
-        return TaskProgressListWidget.fromProps(props, size);
+        return TaskProgressListWidget.fromProps(finalProps, size);
       case CommonWidgetId.medicationTrackerWidget:
-        return SquarePillProgressCard.fromProps(props, size);
+        return SquarePillProgressCard.fromProps(finalProps, size);
       case CommonWidgetId.sleepDurationCard:
-        return DarkBarChartCard.fromProps(props, size);
+        return DarkBarChartCard.fromProps(finalProps, size);
       case CommonWidgetId.moodTrackerCard:
-        return CardEmojiIconDisplay.fromProps(props, size);
+        return CardEmojiIconDisplay.fromProps(finalProps, size);
       case CommonWidgetId.habitStreakTrackerCard:
-        return HabitStreakTrackerCardWidget.fromProps(props, size);
+        return HabitStreakTrackerCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.monthlyDotTrackerCard:
-        return MonthlyDotTrackerCardWidget.fromProps(props, size);
+        return MonthlyDotTrackerCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.checkinItemCard:
-        return CheckinItemCardWidget.fromProps(props, size);
+        return CheckinItemCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.activityHeatmapCard:
-        return ActivityHeatmapCardWidget.fromProps(props, size);
+        return ActivityHeatmapCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.activityTodayPieChartCard:
-        return ActivityTodayPieChartCardWidget.fromProps(props, size);
+        return ActivityTodayPieChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.timelineScheduleCard:
-        return TimelineScheduleCard.fromProps(props, size);
+        return TimelineScheduleCard.fromProps(finalProps, size);
       case CommonWidgetId.bloodPressureTracker:
-        return DualValueTrackerCardWrapper.fromProps(props);
+        return DualValueTrackerCardWrapper.fromProps(finalProps);
       case CommonWidgetId.trendLineChartCard:
-        return TrendLineChartCardWrapper.fromProps(props, size);
+        return TrendLineChartCardWrapper.fromProps(finalProps, size);
       case CommonWidgetId.modernRoundedBalanceCard:
-        return ModernRoundedBalanceCard.fromProps(props);
+        return ModernRoundedBalanceCard.fromProps(finalProps);
       case CommonWidgetId.barChartStatsCard:
-        return BarChartStatsCardWidget.fromProps(props, size);
+        return BarChartStatsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.weeklyBarsCard:
-        return WeeklyBarsCardWidget.fromProps(props, size);
+        return WeeklyBarsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.expenseComparisonChart:
-        return ExpenseComparisonChartCardWidget.fromProps(props, size);
+        return ExpenseComparisonChartCardWidget.fromProps(finalProps, size);
     }
   }
 }

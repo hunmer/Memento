@@ -303,5 +303,6 @@ Widget buildMonthlyDiaryListWidget(
     widgetIdEnum,
     commonWidgetProps,
     metadata.defaultSize,
+    inline: true,
   );
 }

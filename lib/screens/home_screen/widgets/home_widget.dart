@@ -380,6 +380,7 @@ class HomeWidget {
           commonWidgetId,
           props,
           size,
+          inline: true,
         );
       }
 
@@ -414,6 +415,7 @@ class HomeWidget {
                 commonWidgetId,
                 props,
                 size,
+                inline: true,
               );
             }
 

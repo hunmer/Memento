@@ -152,6 +152,7 @@ Widget buildCommonWidgetsWidget(
     widgetIdEnum,
     commonWidgetProps,
     metadata.defaultSize,
+    inline: true,
   );
 }
 
