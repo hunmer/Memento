@@ -5,8 +5,7 @@ import 'package:Memento/core/event/event_args.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
-import 'package:Memento/plugins/habits/models/skill.dart';
-import 'package:Memento/plugins/habits/utils/habits_utils.dart';
+import 'package:Memento/plugins/habits/sample_data.dart';
 
 typedef TimerModeListener = void Function(String habitId, bool isCountdown);
 
@@ -78,108 +77,10 @@ class HabitController {
   }
 
   Future<void> _createDefaultHabits() async {
-    // 获取已创建的技能
-    final skills = skillController.getSkills();
-
-    // 找到对应的技能ID
-    Skill? getSkillByTitle(String title) {
-      try {
-        return skills.firstWhere((s) => s.title == title);
-      } catch (e) {
-        return null;
-      }
-    }
-
-    final defaultHabits = [
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '晨跑',
-        notes: '每天早上跑步30分钟，保持身体健康',
-        group: '运动',
-        icon: '58352',
-        reminderDays: [1, 2, 3, 4, 5, 6],
-        durationMinutes: 30,
-        tags: ['运动', '晨练'],
-        skillId: getSkillByTitle('健康生活')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '阅读',
-        notes: '每天阅读30分钟，提升知识储备',
-        group: '学习',
-        icon: '59544',
-        reminderDays: [1, 2, 3, 4, 5, 6, 7],
-        durationMinutes: 30,
-        tags: ['阅读', '学习'],
-        skillId: getSkillByTitle('学习提升')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '冥想',
-        notes: '每天冥想10分钟，提升专注力和内心平静',
-        group: '健康',
-        icon: '59569',
-        reminderDays: [1, 2, 3, 4, 5, 6, 7],
-        durationMinutes: 10,
-        tags: ['冥想', '正念'],
-        skillId: getSkillByTitle('健康生活')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '写作',
-        notes: '每天写作，记录思考和感悟',
-        group: '创作',
-        icon: '57975',
-        reminderDays: [1, 2, 3, 4, 5, 6, 7],
-        durationMinutes: 20,
-        tags: ['写作', '创作'],
-        skillId: getSkillByTitle('创意艺术')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '英语学习',
-        notes: '学习英语，提升语言能力',
-        group: '学习',
-        icon: '58834',
-        reminderDays: [1, 2, 3, 4, 5],
-        durationMinutes: 25,
-        tags: ['英语', '语言'],
-        skillId: getSkillByTitle('学习提升')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '时间回顾',
-        notes: '每天晚上回顾当天的工作和生活',
-        group: '效率',
-        icon: '58845',
-        reminderDays: [1, 2, 3, 4, 5, 6, 7],
-        durationMinutes: 15,
-        tags: ['复盘', '总结'],
-        skillId: getSkillByTitle('工作效率')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '健身',
-        notes: '进行力量训练或身体锻炼',
-        group: '运动',
-        icon: '59642',
-        reminderDays: [1, 2, 3, 4, 5, 6],
-        durationMinutes: 45,
-        tags: ['健身', '力量训练'],
-        skillId: getSkillByTitle('健康生活')?.id,
-      ),
-      Habit(
-        id: HabitsUtils.generateId(),
-        title: '学习新技能',
-        notes: '每天学习一样新东西',
-        group: '学习',
-        icon: '58373',
-        reminderDays: [1, 2, 3, 4, 5],
-        durationMinutes: 30,
-        tags: ['技能', '成长'],
-        skillId: getSkillByTitle('学习提升')?.id,
-      ),
-    ];
+    // 使用示例数据创建默认习惯
+    final sampleData = HabitsSampleData.getSampleData();
+    final habitMaps = sampleData['habits'] as List<Map<String, dynamic>>;
+    final defaultHabits = habitMaps.map((m) => Habit.fromMap(m)).toList();
 
     _habits = defaultHabits;
     await storage.writeJson(
@@ -187,6 +88,26 @@ class HabitController {
       defaultHabits.map((h) => h.toMap()).toList(),
     );
     print('Created default habits: ${defaultHabits.length} items');
+
+    // 同时创建示例完成记录
+    await _createDefaultRecords();
+  }
+
+  /// 创建默认完成记录
+  Future<void> _createDefaultRecords() async {
+    final sampleData = HabitsSampleData.getSampleData();
+    final recordsMap = sampleData['records'] as Map<String, dynamic>;
+
+    for (final entry in recordsMap.entries) {
+      final habitId = entry.key;
+      final recordList = entry.value as List;
+
+      if (recordList.isNotEmpty) {
+        await storage.writeJson('habits/records/$habitId.json', recordList);
+      }
+    }
+
+    print('Created default completion records for ${recordsMap.length} habits');
   }
 
   List<Habit> getHabits() => _habits;
