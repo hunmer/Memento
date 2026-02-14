@@ -20,10 +20,12 @@ import 'screens/activity_edit_screen.dart';
 import 'screens/activity_settings_screen.dart';
 import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
+import 'services/activity_tts_announcement_service.dart';
 import 'models/activity_record.dart';
 import 'repositories/client_activity_repository.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:Memento/plugins/tts/tts_plugin.dart';
 
 part 'activity_js_api.dart';
 part 'activity_data_selectors.dart';
@@ -49,6 +51,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   late ActivityService _activityService;
   late ActivityNotificationService _notificationService;
   late ActivityUseCase _activityUseCase;
+  late ActivityTTSAnnouncementService _ttsAnnouncementService;
   bool _isInitialized = false;
 
   // 缓存今日统计数据（用于同步访问）
@@ -83,6 +86,14 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       throw StateError('ActivityPlugin has not been initialized');
     }
     return _notificationService;
+  }
+
+  // 获取播报服务实例
+  ActivityTTSAnnouncementService get ttsAnnouncementService {
+    if (!_isInitialized) {
+      throw StateError('ActivityPlugin has not been initialized');
+    }
+    return _ttsAnnouncementService;
   }
 
   @override
@@ -174,6 +185,12 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     _notificationService = ActivityNotificationService(_activityService);
     await _notificationService.initialize();
 
+    // 初始化 TTS 播报服务
+    _ttsAnnouncementService = ActivityTTSAnnouncementService(
+      activityService: _activityService,
+      ttsPlugin: TTSPlugin.instance,
+    );
+
     _isInitialized = true;
 
     // 自动恢复通知栏显示（如果之前是开启的）
@@ -187,6 +204,20 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       }
     } catch (e) {
       debugPrint('[ActivityPlugin] 恢复通知栏显示失败: $e');
+    }
+
+    // 自动恢复播报服务（如果之前是开启的）
+    try {
+      final ttsSettings = await storage.read(
+        'activity/tts_announcement_settings.json',
+      );
+      if (ttsSettings.isNotEmpty && ttsSettings['isEnabled'] == true) {
+        debugPrint('[ActivityPlugin] 检测到之前开启了播报服务，正在自动恢复...');
+        await _loadTTSAnnouncementSettings();
+        await _ttsAnnouncementService.start();
+      }
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 恢复播报服务失败: $e');
     }
 
     // 注册 JS API
@@ -538,6 +569,223 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       );
     } catch (e) {
       debugPrint('[ActivityPlugin] 设置通知更新频率失败: $e');
+      rethrow;
+    }
+  }
+
+  // ==================== TTS 播报服务设置 ====================
+
+  /// 启用播报服务
+  Future<void> enableTTSAnnouncement() async {
+    try {
+      await _ttsAnnouncementService.start();
+
+      // 保存设置
+      await _saveTTSAnnouncementSettings(isEnabled: true);
+      debugPrint('[ActivityPlugin] 播报服务已启用并保存');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 启用播报服务失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 禁用播报服务
+  Future<void> disableTTSAnnouncement() async {
+    try {
+      await _ttsAnnouncementService.stop();
+
+      // 保存设置
+      await _saveTTSAnnouncementSettings(isEnabled: false);
+      debugPrint('[ActivityPlugin] 播报服务已禁用并保存');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 禁用播报服务失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 检查播报服务是否启用
+  bool isTTSAnnouncementEnabled() {
+    return _ttsAnnouncementService.isActive;
+  }
+
+  /// 加载播报服务设置
+  Future<void> _loadTTSAnnouncementSettings() async {
+    try {
+      final settings = await storage.read(
+        'activity/tts_announcement_settings.json',
+      );
+
+      _ttsAnnouncementService.updateConfig(
+        serviceId: settings['serviceId'] as String?,
+        unrecordedIntervalMinutes: settings['unrecordedIntervalMinutes'] as int? ?? 5,
+        textTemplate: settings['textTemplate'] as String? ?? '已超过 {unrecorded_time} 分钟未记录活动',
+        checkOnlyWorkHours: settings['checkOnlyWorkHours'] as bool? ?? false,
+        workHoursStart: settings['workHoursStart'] as int? ?? 9,
+        workHoursEnd: settings['workHoursEnd'] as int? ?? 18,
+      );
+
+      debugPrint('[ActivityPlugin] 播报设置已加载');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 加载播报设置失败: $e');
+    }
+  }
+
+  /// 保存播报服务设置
+  Future<void> _saveTTSAnnouncementSettings({
+    bool? isEnabled,
+    String? serviceId,
+    int? unrecordedIntervalMinutes,
+    String? textTemplate,
+    bool? checkOnlyWorkHours,
+    int? workHoursStart,
+    int? workHoursEnd,
+  }) async {
+    try {
+      Map<String, dynamic> settings = {};
+      try {
+        settings = await storage.read('activity/tts_announcement_settings.json');
+      } catch (e) {
+        // 如果文件不存在，使用默认值
+        settings = {};
+      }
+
+      // 只更新提供的参数
+      if (isEnabled != null) settings['isEnabled'] = isEnabled;
+      if (serviceId != null) settings['serviceId'] = serviceId;
+      if (unrecordedIntervalMinutes != null) {
+        settings['unrecordedIntervalMinutes'] = unrecordedIntervalMinutes;
+      }
+      if (textTemplate != null) settings['textTemplate'] = textTemplate;
+      if (checkOnlyWorkHours != null) {
+        settings['checkOnlyWorkHours'] = checkOnlyWorkHours;
+      }
+      if (workHoursStart != null) settings['workHoursStart'] = workHoursStart;
+      if (workHoursEnd != null) settings['workHoursEnd'] = workHoursEnd;
+
+      await storage.write('activity/tts_announcement_settings.json', settings);
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 保存播报设置失败: $e');
+    }
+  }
+
+  /// 获取播报间隔（分钟）
+  Future<int> getTTSAnnouncementInterval() async {
+    try {
+      final settings = await storage.read(
+        'activity/tts_announcement_settings.json',
+      );
+      return settings['unrecordedIntervalMinutes'] as int? ?? 5;
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 读取播报间隔失败: $e');
+      return 5;
+    }
+  }
+
+  /// 设置播报间隔（分钟）
+  Future<void> setTTSAnnouncementInterval(int minutes) async {
+    try {
+      _ttsAnnouncementService.updateConfig(
+        unrecordedIntervalMinutes: minutes,
+      );
+      await _saveTTSAnnouncementSettings(unrecordedIntervalMinutes: minutes);
+      debugPrint('[ActivityPlugin] 播报间隔已设置为 $minutes 分钟');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置播报间隔失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取播报文本模板
+  Future<String> getTTSAnnouncementText() async {
+    try {
+      final settings = await storage.read(
+        'activity/tts_announcement_settings.json',
+      );
+      return settings['textTemplate'] as String? ?? '已超过 {unrecorded_time} 分钟未记录活动';
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 读取播报文本失败: $e');
+      return '已超过 {unrecorded_time} 分钟未记录活动';
+    }
+  }
+
+  /// 设置播报文本模板
+  Future<void> setTTSAnnouncementText(String text) async {
+    try {
+      _ttsAnnouncementService.updateConfig(textTemplate: text);
+      await _saveTTSAnnouncementSettings(textTemplate: text);
+      debugPrint('[ActivityPlugin] 播报文本已更新');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置播报文本失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取工作时间设置
+  Future<Map<String, dynamic>> getWorkHoursSettings() async {
+    try {
+      final settings = await storage.read(
+        'activity/tts_announcement_settings.json',
+      );
+      return {
+        'checkOnlyWorkHours': settings['checkOnlyWorkHours'] as bool? ?? false,
+        'workHoursStart': settings['workHoursStart'] as int? ?? 9,
+        'workHoursEnd': settings['workHoursEnd'] as int? ?? 18,
+      };
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 读取工作时间设置失败: $e');
+      return {
+        'checkOnlyWorkHours': false,
+        'workHoursStart': 9,
+        'workHoursEnd': 18,
+      };
+    }
+  }
+
+  /// 设置工作时间设置
+  Future<void> setWorkHoursSettings({
+    bool? checkOnlyWorkHours,
+    int? workHoursStart,
+    int? workHoursEnd,
+  }) async {
+    try {
+      _ttsAnnouncementService.updateConfig(
+        checkOnlyWorkHours: checkOnlyWorkHours,
+        workHoursStart: workHoursStart,
+        workHoursEnd: workHoursEnd,
+      );
+      await _saveTTSAnnouncementSettings(
+        checkOnlyWorkHours: checkOnlyWorkHours,
+        workHoursStart: workHoursStart,
+        workHoursEnd: workHoursEnd,
+      );
+      debugPrint('[ActivityPlugin] 工作时间设置已更新');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置工作时间失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取播报服务 ID
+  Future<String?> getTTSAnnouncementServiceId() async {
+    try {
+      final settings = await storage.read(
+        'activity/tts_announcement_settings.json',
+      );
+      return settings['serviceId'] as String?;
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 读取播报服务 ID 失败: $e');
+      return null;
+    }
+  }
+
+  /// 设置播报服务 ID
+  Future<void> setTTSAnnouncementServiceId(String? serviceId) async {
+    try {
+      _ttsAnnouncementService.updateConfig(serviceId: serviceId);
+      await _saveTTSAnnouncementSettings(serviceId: serviceId);
+      debugPrint('[ActivityPlugin] 播报服务 ID 已设置: $serviceId');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置播报服务 ID 失败: $e');
       rethrow;
     }
   }
