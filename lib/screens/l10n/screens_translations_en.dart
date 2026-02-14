@@ -80,7 +80,6 @@ final Map<String, String> screensTranslationsEn = {
 
   // home_grid
   'screens_quickCreateLayout': 'Quick Create Layout',
-  'screens_selectLayoutTemplate': 'Select a layout template to get started quickly:',
   'screens_dragToFolder': 'Drag to folder',
   'screens_dragItemToFolder': 'Drag "@item" to folder "@folder"',
   'screens_pleaseSelectAction': 'Please select an action:',
@@ -95,14 +94,6 @@ final Map<String, String> screensTranslationsEn = {
   'screens_switchToThisLayout': 'Switch to this layout',
   'screens_rename': 'Rename',
   'screens_close': 'Close',
-
-  // layout_type_selector
-  'screens_emptyLayout': 'Empty Layout',
-  'screens_emptyLayoutDescription': 'Blank layout without any widgets',
-  'screens_all1x1Widgets': 'All 1x1 Widgets',
-  'screens_all1x1WidgetsDescription': 'Add all widgets supporting 1x1 size',
-  'screens_all2x2Widgets': 'All 2x2 Widgets',
-  'screens_all2x2WidgetsDescription': 'Add all widgets supporting 2x2 size',
 
   // widget_settings_dialog
   'screens_oneColumn': 'One Column',
@@ -226,7 +217,6 @@ final Map<String, String> screensTranslationsEn = {
   'screens_customSizePreview': 'Preview: @width×@height',
   'screens_applyCustomSize': 'Apply Size',
   'screens_noLayoutName': 'No layout name',
-  'screens_quickCreateLayoutDescription': 'Select a layout template to get started quickly:',
   'screens_createNewLayout': 'Create New Layout',
   'screens_inputLayoutName': 'Please enter layout name',
   'screens_layoutName': 'Layout Name',

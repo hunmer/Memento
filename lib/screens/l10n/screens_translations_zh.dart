@@ -80,7 +80,6 @@ final Map<String, String> screensTranslationsZh = {
 
   // home_grid
   'screens_quickCreateLayout': '快速创建布局',
-  'screens_selectLayoutTemplate': '选择一个布局模板快速开始：',
   'screens_dragToFolder': '拖拽到文件夹',
   'screens_dragItemToFolder': '将 "@item" 拖拽到文件夹 "@folder"',
   'screens_pleaseSelectAction': '请选择操作：',
@@ -95,14 +94,6 @@ final Map<String, String> screensTranslationsZh = {
   'screens_switchToThisLayout': '切换到此布局',
   'screens_rename': '重命名',
   'screens_close': '关闭',
-
-  // layout_type_selector
-  'screens_emptyLayout': '空白布局',
-  'screens_emptyLayoutDescription': '不包含任何小组件的空白布局',
-  'screens_all1x1Widgets': '所有 1x1 小组件',
-  'screens_all1x1WidgetsDescription': '添加所有支持 1x1 尺寸的小组件',
-  'screens_all2x2Widgets': '所有 2x2 小组件',
-  'screens_all2x2WidgetsDescription': '添加所有支持 2x2 尺寸的小组件',
 
   // widget_settings_dialog
   'screens_oneColumn': '一列',
@@ -226,7 +217,6 @@ final Map<String, String> screensTranslationsZh = {
   'screens_customSizePreview': '预览: @width×@height',
   'screens_applyCustomSize': '应用尺寸',
   'screens_noLayoutName': '没有布局名称',
-  'screens_quickCreateLayoutDescription': '选择一个布局模板快速开始：',
   'screens_createNewLayout': '新建布局',
   'screens_inputLayoutName': '请输入布局名称',
   'screens_layoutName': '布局名称',
