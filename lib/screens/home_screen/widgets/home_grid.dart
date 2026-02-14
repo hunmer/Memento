@@ -1,6 +1,5 @@
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -73,6 +72,12 @@ class _HomeGridState extends State<HomeGrid> {
   final List<String> _displayOrder = [];
   String? _previewDraggingId;
   int? _pendingTargetIndex;
+
+  // 用于存储每个卡片的 GlobalKey，以准确获取其位置
+  final Map<int, GlobalKey> _cardKeys = {};
+
+  // 存储真正的指针全局位置
+  Offset? _lastPointerPosition;
 
   @override
   void initState() {
@@ -161,37 +166,45 @@ class _HomeGridState extends State<HomeGrid> {
       ),
     );
 
-    // 根据对齐方式选择不同的布局
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (widget.alignment == Alignment.center) {
-          // 居中模式：内容在可用空间中垂直居中
+    // 根据对齐方式选择不同的布局，并用 Listener 包裹以捕获真正的指针位置
+    return Listener(
+      onPointerMove: (event) {
+        _lastPointerPosition = event.position;
+      },
+      onPointerHover: (event) {
+        _lastPointerPosition = event.position;
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (widget.alignment == Alignment.center) {
+            // 居中模式：内容在可用空间中垂直居中
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Center(
+                  child: gridWidget,
+                ),
+              ),
+            );
+          }
+
+          // 顶部模式：内容从顶部开始
           return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight,
               ),
-              child: Center(
+              child: Align(
+                alignment: Alignment.topCenter,
                 child: gridWidget,
               ),
             ),
           );
-        }
-
-        // 顶部模式：内容从顶部开始
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: gridWidget,
-            ),
-          ),
-        );
-      },
+        },
+      ),
     );
   }
 
@@ -394,10 +407,14 @@ class _HomeGridState extends State<HomeGrid> {
       builder: (context, candidateData, rejectedData) => draggableCard,
     );
 
+    // 获取或创建该索引的 GlobalKey
+    _cardKeys[index] ??= GlobalKey();
+
     return StaggeredGridTile.count(
       crossAxisCellCount: crossAxisCellCount,
       mainAxisCellCount: mainAxisCellCount,
       child: Stack(
+        key: _cardKeys[index],
         clipBehavior: Clip.none,
         children: [
           centerTarget,
@@ -408,22 +425,26 @@ class _HomeGridState extends State<HomeGrid> {
   }
   Widget _buildDirectionalOverlay(BuildContext context, int index) {
     return Positioned.fill(
-      child: DragTarget<String>(
-        hitTestBehavior: HitTestBehavior.translucent,
-        onWillAcceptWithDetails: (details) => _handleDirectionalHover(context, index, details),
-        onMove: (details) => _handleDirectionalHover(context, index, details),
-        onLeave: (_) => _handleDirectionalLeave(index),
-        onAcceptWithDetails: (_) {},
-        builder: (context, candidateData, rejectedData) {
-          final zone = _hoveredDropZone;
-          final bool isActive = zone != null && zone.index == index;
-          return IgnorePointer(
-            ignoring: true,
-            child: AnimatedOpacity(
-              opacity: isActive ? 0.45 : 0,
-              duration: const Duration(milliseconds: 150),
-              child: _buildDropIndicator(context, zone?.direction),
-            ),
+      child: Builder(
+        builder: (overlayContext) {
+          return DragTarget<String>(
+            hitTestBehavior: HitTestBehavior.translucent,
+            onWillAcceptWithDetails: (details) => _handleDirectionalHover(overlayContext, index, details),
+            onMove: (details) => _handleDirectionalHover(overlayContext, index, details),
+            onLeave: (_) => _handleDirectionalLeave(index),
+            onAcceptWithDetails: (_) {},
+            builder: (context, candidateData, rejectedData) {
+              final zone = _hoveredDropZone;
+              final bool isActive = zone != null && zone.index == index;
+              return IgnorePointer(
+                ignoring: true,
+                child: AnimatedOpacity(
+                  opacity: isActive ? 0.45 : 0,
+                  duration: const Duration(milliseconds: 150),
+                  child: _buildDropIndicator(context, zone?.direction),
+                ),
+              );
+            },
           );
         },
       ),
@@ -431,9 +452,31 @@ class _HomeGridState extends State<HomeGrid> {
   }
 
   Widget _buildDropIndicator(BuildContext context, _DropDirection? direction) {
+    final theme = Theme.of(context);
+
+    // 中心区域：显示合并/堆叠指示器
     if (direction == null) {
-      return const SizedBox.shrink();
+      return Container(
+        decoration: BoxDecoration(
+          color: theme.primaryColor.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.primaryColor.withValues(alpha: 0.5),
+            width: 2,
+            strokeAlign: BorderSide.strokeAlignInside,
+          ),
+        ),
+        child: Center(
+          child: Icon(
+            Icons.layers,
+            size: 48,
+            color: theme.primaryColor.withValues(alpha: 0.6),
+          ),
+        ),
+      );
     }
+
+    // 边缘区域：显示方向指示器
     final bool isHorizontal = direction == _DropDirection.top || direction == _DropDirection.bottom;
     return Align(
       alignment: _alignmentForDirection(direction),
@@ -442,7 +485,7 @@ class _HomeGridState extends State<HomeGrid> {
         heightFactor: isHorizontal ? 0.35 : 1,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
+            color: theme.primaryColor.withValues(alpha: 0.25),
             borderRadius: BorderRadius.circular(12),
           ),
         ),
@@ -463,19 +506,31 @@ class _HomeGridState extends State<HomeGrid> {
     if (draggedId == displayItems[index].id) {
       return false;
     }
-    final renderBox = context.findRenderObject() as RenderBox?;
+
+    // 使用 GlobalKey 获取正确的 RenderBox
+    final cardKey = _cardKeys[index];
+    final renderBox = cardKey?.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.hasSize) {
-      return false;
-    }
-    final localOffset = renderBox.globalToLocal(details.offset);
-    final direction = _resolveDirectionFromOffset(localOffset, renderBox.size);
-    if (direction == null) {
-      if (_hoveredDropZone?.index == index) {
-        _clearHoveredZone();
-      }
+      debugPrint('[HomeGrid] ❌ renderBox is null or has no size for index $index');
       return false;
     }
 
+    // 使用真正的指针位置，而不是 details.offset（后者是 feedback widget 的位置）
+    final globalPosition = _lastPointerPosition ?? details.offset;
+    final localOffset = renderBox.globalToLocal(globalPosition);
+
+    // 调试输出
+    debugPrint('[HomeGrid] ────────────────────────────────────────');
+    debugPrint('[HomeGrid] 📍 Index: $index');
+    debugPrint('[HomeGrid] 🌍 Real pointer position: $globalPosition');
+    debugPrint('[HomeGrid] 📐 RenderBox size: ${renderBox.size}');
+    debugPrint('[HomeGrid] 🎯 Local offset: $localOffset');
+    debugPrint('[HomeGrid] 📊 Normalized: x=${(localOffset.dx / renderBox.size.width).toStringAsFixed(2)}, y=${(localOffset.dy / renderBox.size.height).toStringAsFixed(2)}');
+
+    final direction = _resolveDirectionFromOffset(localOffset, renderBox.size);
+    debugPrint('[HomeGrid] 🧭 Direction: $direction');
+
+    // direction 为 null 表示中心区域（合并/堆叠操作）
     final zone = _DropRegion(index, direction);
     if (_hoveredDropZone == zone) {
       return true;
@@ -496,37 +551,99 @@ class _HomeGridState extends State<HomeGrid> {
     final double width = size.width;
     final double height = size.height;
     if (!width.isFinite || !height.isFinite || width <= 0 || height <= 0) {
+      debugPrint('[HomeGrid] ⚠️ Invalid size: $size');
       return null;
     }
-    final double clampedX = local.dx.clamp(0, width);
-    final double clampedY = local.dy.clamp(0, height);
+
+    // 使用九宫格布局判断，边缘区域占35%，中间区域占30%
+    final double edgeRatio = 0.35;
+    final double clampedX = local.dx.clamp(0.0, width);
+    final double clampedY = local.dy.clamp(0.0, height);
+
+    // 计算归一化位置 (0-1)
+    final double normalizedX = clampedX / width;
+    final double normalizedY = clampedY / height;
+
+    // 判断水平位置：0=左, 1=中, 2=右
+    final int hZone;
+    final String hReason;
+    if (normalizedX < edgeRatio) {
+      hZone = 0; // 左
+      hReason = 'x=${normalizedX.toStringAsFixed(2)} < ${edgeRatio}';
+    } else if (normalizedX > (1 - edgeRatio)) {
+      hZone = 2; // 右
+      hReason = 'x=${normalizedX.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
+    } else {
+      hZone = 1; // 中
+      hReason = '${edgeRatio} <= x=${normalizedX.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
+    }
+
+    // 判断垂直位置：0=上, 1=中, 2=下
+    final int vZone;
+    final String vReason;
+    if (normalizedY < edgeRatio) {
+      vZone = 0; // 上
+      vReason = 'y=${normalizedY.toStringAsFixed(2)} < ${edgeRatio}';
+    } else if (normalizedY > (1 - edgeRatio)) {
+      vZone = 2; // 下
+      vReason = 'y=${normalizedY.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
+    } else {
+      vZone = 1; // 中
+      vReason = '${edgeRatio} <= y=${normalizedY.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
+    }
+
+    debugPrint('[HomeGrid] 🏓 hZone=$hZone (${['左', '中', '右'][hZone]}) ← $hReason');
+    debugPrint('[HomeGrid] 🏓 vZone=$vZone (${['上', '中', '下'][vZone]}) ← $vReason');
+
+    // 九宫格映射到方向
+    // 中心区域 (hZone=1, vZone=1) 返回 null，表示合并/堆叠操作
+    // 边缘区域返回对应方向
+    if (hZone == 1 && vZone == 1) {
+      // 中心区域：不返回方向，由调用方处理为合并/堆叠
+      debugPrint('[HomeGrid] 🎯 Result: CENTER (merge)');
+      return null;
+    }
+
+    // 根据所在区域选择方向
+    _DropDirection? result;
+    if (vZone == 0) {
+      // 上区域
+      result = _DropDirection.top;
+    } else if (vZone == 2) {
+      // 下区域
+      result = _DropDirection.bottom;
+    } else if (hZone == 0) {
+      // 左区域
+      result = _DropDirection.left;
+    } else if (hZone == 2) {
+      // 右区域
+      result = _DropDirection.right;
+    }
+
+    if (result != null) {
+      debugPrint('[HomeGrid] ✅ Result: $result');
+      return result;
+    }
+
+    // 备用逻辑：选择最近的边缘
+    final double distTop = clampedY;
+    final double distBottom = height - clampedY;
+    final double distLeft = clampedX;
+    final double distRight = width - clampedX;
+
     final distances = <_DropDirection, double>{
-      _DropDirection.top: clampedY,
-      _DropDirection.bottom: height - clampedY,
-      _DropDirection.left: clampedX,
-      _DropDirection.right: width - clampedX,
+      _DropDirection.top: distTop,
+      _DropDirection.bottom: distBottom,
+      _DropDirection.left: distLeft,
+      _DropDirection.right: distRight,
     };
+
     final minEntry = distances.entries.reduce((prev, next) {
-      if (prev.value == next.value) {
-        // 保持水平方向优先，避免在对角线位置震荡
-        if (_isHorizontalDirection(prev.key)) {
-          return prev;
-        }
-        if (_isHorizontalDirection(next.key)) {
-          return next;
-        }
-      }
       return prev.value <= next.value ? prev : next;
     });
-    final double threshold = math.min(width, height) * 0.28;
-    if (minEntry.value > threshold) {
-      return null;
-    }
-    return minEntry.key;
-  }
 
-  bool _isHorizontalDirection(_DropDirection direction) {
-    return direction == _DropDirection.top || direction == _DropDirection.bottom;
+    debugPrint('[HomeGrid] ✅ Result (fallback): ${minEntry.key}');
+    return minEntry.key;
   }
 
   void _activateDropZone(_DropRegion zone) {
@@ -574,6 +691,11 @@ class _HomeGridState extends State<HomeGrid> {
     }
     final draggedId = _draggingItemId;
     if (draggedId == null) {
+      return;
+    }
+
+    // 中心区域（direction == null）不应用排序预览，用于合并操作
+    if (zone.direction == null) {
       return;
     }
 
@@ -948,7 +1070,7 @@ enum _DropDirection { top, bottom, left, right }
 
 class _DropRegion {
   final int index;
-  final _DropDirection direction;
+  final _DropDirection? direction; // null 表示中心区域（合并/堆叠）
 
   const _DropRegion(this.index, this.direction);
 

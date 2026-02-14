@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:universal_platform/universal_platform.dart';
+
 /// Agent Chat 插件设置界面
 class AgentChatSettingsScreen extends StatefulWidget {
   final PluginBase plugin;
@@ -81,129 +82,112 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('agent_chat_agentChatSettings'.tr),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 工具调用设置标题
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      '工具调用设置',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-
-                  // 优先使用工具模版开关
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Card(
-                      child: SwitchListTile(
-                        title: Text('agent_chat_prioritizeToolTemplate'.tr),
-                        subtitle: Text('agent_chat_prioritizeToolTemplateDescription'.tr),
-                        value: _preferToolTemplates,
-                        onChanged: (value) {
-                          setState(() {
-                            _preferToolTemplates = value;
-                          });
-                          _saveSwitchSettings(); // 自动保存
-                        },
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-                  const Divider(),
-                  const SizedBox(height: 8),
-
-                  // 后台服务设置标题（仅Android）
-                  if (!kIsWeb && UniversalPlatform.isAndroid) ...[
+      appBar: AppBar(title: Text('agent_chat_agentChatSettings'.tr)),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 工具调用设置标题
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        '后台服务设置',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        '工具调用设置',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
 
-                    // 启用后台服务开关
+                    // 优先使用工具模版开关
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Card(
-                        child: Column(
-                          children: [
-                            SwitchListTile(
-                              title: Text('agent_chat_enableBackgroundService'.tr),
-                              subtitle: Text('agent_chat_enableBackgroundServiceDescription'.tr),
-                              value: _enableBackgroundService,
-                              onChanged: (value) {
-                                setState(() {
-                                  _enableBackgroundService = value;
-                                });
-                                _saveSwitchSettings(); // 自动保存
-                              },
-                            ),
+                        child: SwitchListTile(
+                          title: Text('agent_chat_prioritizeToolTemplate'.tr),
+                          subtitle: Text(
+                            'agent_chat_prioritizeToolTemplateDescription'.tr,
+                          ),
+                          value: _preferToolTemplates,
+                          onChanged: (value) {
+                            setState(() {
+                              _preferToolTemplates = value;
+                            });
+                            _saveSwitchSettings(); // 自动保存
+                          },
+                        ),
+                      ),
+                    ),
 
-                            if (_enableBackgroundService) ...[
-                              const Divider(height: 1),
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    const SizedBox(height: 8),
 
-                              // Token消耗显示开关
+                    // 后台服务设置标题（仅Android）
+                    if (!kIsWeb && UniversalPlatform.isAndroid) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          '后台服务设置',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                      // 启用后台服务开关
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Card(
+                          child: Column(
+                            children: [
                               SwitchListTile(
-                                title: Text('agent_chat_showTokenConsumption'.tr),
-                                subtitle: Text('agent_chat_showTokenConsumptionDescription'.tr),
-                                value: _showTokenInNotification,
+                                title: Text(
+                                  'agent_chat_enableBackgroundService'.tr,
+                                ),
+                                subtitle: Text(
+                                  'agent_chat_enableBackgroundServiceDescription'
+                                      .tr,
+                                ),
+                                value: _enableBackgroundService,
                                 onChanged: (value) {
                                   setState(() {
-                                    _showTokenInNotification = value;
+                                    _enableBackgroundService = value;
                                   });
                                   _saveSwitchSettings(); // 自动保存
                                 },
                               ),
+
+                              if (_enableBackgroundService) ...[
+                                const Divider(height: 1),
+
+                                // Token消耗显示开关
+                                SwitchListTile(
+                                  title: Text(
+                                    'agent_chat_showTokenConsumption'.tr,
+                                  ),
+                                  subtitle: Text(
+                                    'agent_chat_showTokenConsumptionDescription'
+                                        .tr,
+                                  ),
+                                  value: _showTokenInNotification,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _showTokenInNotification = value;
+                                    });
+                                    _saveSwitchSettings(); // 自动保存
+                                  },
+                                ),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 8),
+                    ],
                   ],
-
-                  // 语音识别设置提示
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      '语音识别设置',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Card(
-                      child: ListTile(
-                        leading: const Icon(Icons.info_outline),
-                        title: const Text('语音识别配置已迁移'),
-                        subtitle: const Text('语音识别设置现在在应用设置中统一管理，请前往 设置 > 应用设置 > 语音识别设置 进行配置'),
-                        trailing: const Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
     );
   }
 }
