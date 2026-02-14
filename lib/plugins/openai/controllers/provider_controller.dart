@@ -201,6 +201,13 @@ class ProviderController {
         baseUrl: 'https://api.mistral.ai/v1',
         headers: {'Authorization': 'Bearer YOUR_API_KEY'},
       ),
+      ServiceProvider(
+        id: 'minimax',
+        label: 'MiniMax',
+        baseUrl: 'https://api.minimax.chat/v1',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+        defaultModel: 'abab6.5s-chat',
+      ),
     ];
   }
 }

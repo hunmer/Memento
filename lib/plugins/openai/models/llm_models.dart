@@ -14,20 +14,20 @@ class LLMModel {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'description': description,
-        'url': url,
-        'group': group,
-      };
+    'id': id,
+    'name': name,
+    'description': description,
+    'url': url,
+    'group': group,
+  };
 
   factory LLMModel.fromJson(Map<String, dynamic> json) => LLMModel(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        description: json['description'] as String?,
-        url: json['url'] as String?,
-        group: json['group'] as String,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String?,
+    url: json['url'] as String?,
+    group: json['group'] as String,
+  );
 }
 
 class LLMModelGroup {
@@ -42,18 +42,19 @@ class LLMModelGroup {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'models': models.map((e) => e.toJson()).toList(),
-      };
+    'id': id,
+    'name': name,
+    'models': models.map((e) => e.toJson()).toList(),
+  };
 
   factory LLMModelGroup.fromJson(Map<String, dynamic> json) => LLMModelGroup(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        models: (json['models'] as List)
+    id: json['id'] as String,
+    name: json['name'] as String,
+    models:
+        (json['models'] as List)
             .map((e) => LLMModel.fromJson(e as Map<String, dynamic>))
             .toList(),
-      );
+  );
 }
 
 // 预定义的大模型列表
@@ -87,49 +88,57 @@ final llmModelGroups = [
       LLMModel(
         id: 'deepseek-math-7b',
         name: 'DeepSeek-Math-7B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-math-65f2962739da11599e441681',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-math-65f2962739da11599e441681',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-coder-1.3b',
         name: 'DeepSeek-Coder-1.3B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-coder-6.7b',
         name: 'DeepSeek-Coder-6.7B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-coder-7b',
         name: 'DeepSeek-Coder-7B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-coder-33b',
         name: 'DeepSeek-Coder-33B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-coder-65f295d7d8a0a29fe39b4ec4',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-vl-1.3b',
         name: 'DeepSeek-VL-1.3B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-vl-65f295948133d9cf92b706d3',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-vl-65f295948133d9cf92b706d3',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-vl-7b',
         name: 'DeepSeek-VL-7B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-vl-65f295948133d9cf92b706d3',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-vl-65f295948133d9cf92b706d3',
         group: 'deepseek',
       ),
       LLMModel(
         id: 'deepseek-moe-16b',
         name: 'DeepSeek-MoE-16B',
-        url: 'https://huggingface.co/collections/deepseek-ai/deepseek-moe-65f29679f5cf26fe063686bf',
+        url:
+            'https://huggingface.co/collections/deepseek-ai/deepseek-moe-65f29679f5cf26fe063686bf',
         group: 'deepseek',
       ),
     ],
@@ -148,25 +157,29 @@ final llmModelGroups = [
       LLMModel(
         id: 'qwen-1.8b',
         name: 'Qwen-1.8B',
-        url: 'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
+        url:
+            'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
         group: 'qwen',
       ),
       LLMModel(
         id: 'qwen-7b',
         name: 'Qwen-7B',
-        url: 'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
+        url:
+            'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
         group: 'qwen',
       ),
       LLMModel(
         id: 'qwen-14b',
         name: 'Qwen-14B',
-        url: 'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
+        url:
+            'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
         group: 'qwen',
       ),
       LLMModel(
         id: 'qwen-72b',
         name: 'Qwen-72B',
-        url: 'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
+        url:
+            'https://huggingface.co/collections/Qwen/qwen-65c0e50c3f1ab89cb8704144',
         group: 'qwen',
       ),
     ],
@@ -677,6 +690,40 @@ final llmModelGroups = [
         description: 'Google 开源模型',
         url: 'https://ai.google.dev/gemma',
         group: 'other',
+      ),
+    ],
+  ),
+  LLMModelGroup(
+    id: 'minimax',
+    name: 'MiniMax',
+    models: [
+      LLMModel(
+        id: 'abab6.5s-chat',
+        name: 'abab6.5s-chat',
+        description: 'MiniMax 最新对话模型，支持长上下文',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'abab6.5-chat',
+        name: 'abab6.5-chat',
+        description: 'MiniMax 对话模型',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'abab5.5-chat',
+        name: 'abab5.5-chat',
+        description: 'MiniMax 对话模型',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'abab5.5s-chat',
+        name: 'abab5.5s-chat',
+        description: 'MiniMax 对话模型',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
       ),
     ],
   ),

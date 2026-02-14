@@ -6,6 +6,7 @@ import 'package:Memento/core/services/clipboard_service.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/widgets/form_fields/index.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/models/api_format.dart';
 import 'package:Memento/plugins/openai/models/service_provider.dart';
 import 'package:Memento/plugins/openai/models/llm_models.dart';
 import 'package:Memento/plugins/openai/models/prompt_preset.dart';
@@ -79,6 +80,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
         return Colors.orange;
       case 'deepseek':
         return Colors.purple;
+      case 'minimax':
+        return Colors.indigo;
       default:
         return Colors.grey;
     }
@@ -187,6 +190,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
       openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
       messages: allMessages.isNotEmpty ? allMessages : null,
+      apiFormat: values['apiFormat'] as String? ?? 'openai',
     );
 
     try {
@@ -362,6 +366,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
       openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
       messages: allMessages.isNotEmpty ? allMessages : null,
+      apiFormat: values['apiFormat'] as String? ?? 'openai',
     );
 
     try {
@@ -481,6 +486,21 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
                       _handleProviderChange(provider);
                     }
                   },
+                ),
+                // API 格式选择
+                FormFieldConfig(
+                  name: 'apiFormat',
+                  type: FormFieldType.select,
+                  labelText: 'API 格式',
+                  hintText: '选择 API 格式',
+                  initialValue: widget.agent?.apiFormat ?? 'openai',
+                  required: true,
+                  items: ApiFormat.values
+                      .map((format) => DropdownMenuItem(
+                            value: format.value,
+                            child: Text(format.label),
+                          ))
+                      .toList(),
                 ),
                 // 描述
                 FormFieldConfig(
@@ -718,6 +738,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       enableOpeningQuestions: values['enableOpeningQuestions'] as bool? ?? false,
       openingQuestions: (values['openingQuestions'] as List<dynamic>?)?.cast<String>() ?? [],
       messages: allMessages.isNotEmpty ? allMessages : null,
+      apiFormat: values['apiFormat'] as String? ?? 'openai',
     );
 
     // 获取当前表单的值
