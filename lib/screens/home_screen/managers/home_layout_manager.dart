@@ -451,6 +451,74 @@ class HomeLayoutManager extends ChangeNotifier {
     _markDirty();
   }
 
+  /// 拆散折叠组件中的所有小组件
+  ///
+  /// 将 HomeStackItem 中的所有 HomeWidgetItem 拆散并插入到原位置
+  void unstackAllItems(String stackId) {
+    final index = _items.indexWhere((item) => item.id == stackId);
+    if (index == -1) {
+      return;
+    }
+    final stack = _items[index];
+    if (stack is! HomeStackItem) {
+      return;
+    }
+
+    // 移除折叠组件
+    _items.removeAt(index);
+
+    // 将所有子组件插入到原位置
+    for (int i = 0; i < stack.children.length; i++) {
+      _items.insert(index + i, stack.children[i]);
+    }
+
+    _markDirty();
+    notifyListeners();
+  }
+
+  /// 拆散折叠组件中的指定小组件
+  ///
+  /// 将 HomeStackItem 中的指定 HomeWidgetItem 拆散并插入到折叠组件之前
+  void unstackItem(String stackId, String widgetItemId) {
+    final index = _items.indexWhere((item) => item.id == stackId);
+    if (index == -1) {
+      return;
+    }
+    final stack = _items[index];
+    if (stack is! HomeStackItem) {
+      return;
+    }
+
+    final childIndex = stack.children.indexWhere((child) => child.id == widgetItemId);
+    if (childIndex == -1) {
+      return;
+    }
+
+    // 从折叠组件中移除该小组件
+    final child = stack.children[childIndex];
+    final updatedChildren = List<HomeWidgetItem>.from(stack.children)..removeAt(childIndex);
+
+    if (updatedChildren.isEmpty) {
+      // 没有子组件了，将小组件替换原来的折叠组件
+      _items[index] = child;
+    } else if (updatedChildren.length == 1) {
+      // 剩下一个子组件，将它替换为普通小组件，并删除折叠组件
+      final remainingChild = updatedChildren.first;
+      // 将拆散的小组件插入到原位置之前
+      _items[index] = remainingChild;
+      _items.insert(index, child);
+    } else {
+      // 还有多个子组件，更新折叠组件的子组件列表
+      _items[index] = stack.copyWith(children: updatedChildren);
+
+      // 将拆散的小组件插入到折叠组件之前
+      _items.insert(index, child);
+    }
+
+    _markDirty();
+    notifyListeners();
+  }
+
   HomeWidgetItem? _resolveStackReference(HomeItem item) {
     if (item is HomeWidgetItem) {
       return item;

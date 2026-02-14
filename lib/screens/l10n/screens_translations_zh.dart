@@ -289,4 +289,19 @@ final Map<String, String> screensTranslationsZh = {
   'screens_apiKeyLabel': 'API Key',
   'screens_apiKeyInputHint': '请输入 API Key',
   'screens_locationApiKeyGuide': '如何获取 API Key：\n1. 访问高德开放平台\n2. 注册并创建应用\n3. 获取 Web 服务 API Key',
+
+  // unstack
+  'screens_unstackCurrent': '拆散 @widget 小组件',
+  'screens_unstackAll': '拆散所有小组件',
+  'screens_confirmUnstack': '确认拆散',
+  'screens_confirmUnstackItem': '确定要将"@widget"小组件拆散吗？',
+  'screens_confirmUnstackAll': '确定要拆散所有 @count 个小组件吗？',
+  'screens_unstack': '拆散',
+  'screens_unstackSuccess': '已拆散"@widget"小组件',
+  'screens_unstackAllSuccess': '已拆散 @count 个小组件',
+
+  // stack merge
+  'screens_cannotMergeDifferentSizes': '无法合并不同尺寸的小组件',
+  'screens_mergeFailed': '合并失败',
+  'screens_mergeSuccess': '合并成功',
 };

@@ -289,4 +289,19 @@ final Map<String, String> screensTranslationsEn = {
   'screens_apiKeyLabel': 'API Key',
   'screens_apiKeyInputHint': 'Enter API Key',
   'screens_locationApiKeyGuide': 'How to get API Key:\n1. Visit Amap Open Platform\n2. Register and create application\n3. Get Web Service API Key',
+
+  // unstack
+  'screens_unstackCurrent': 'Unstack @widget widget',
+  'screens_unstackAll': 'Unstack all widgets',
+  'screens_confirmUnstack': 'Confirm Unstack',
+  'screens_confirmUnstackItem': 'Are you sure you want to unstack the "@widget" widget?',
+  'screens_confirmUnstackAll': 'Are you sure you want to unstack all @count widgets?',
+  'screens_unstack': 'Unstack',
+  'screens_unstackSuccess': 'Unstacked "@widget" widget',
+  'screens_unstackAllSuccess': 'Unstacked @count widgets',
+
+  // stack merge
+  'screens_cannotMergeDifferentSizes': 'Cannot merge widgets of different sizes',
+  'screens_mergeFailed': 'Merge failed',
+  'screens_mergeSuccess': 'Merge successful',
 };
