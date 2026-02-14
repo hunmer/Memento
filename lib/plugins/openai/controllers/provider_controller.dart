@@ -206,7 +206,7 @@ class ProviderController {
         label: 'MiniMax',
         baseUrl: 'https://api.minimax.chat/v1',
         headers: {'Authorization': 'Bearer YOUR_API_KEY'},
-        defaultModel: 'abab6.5s-chat',
+        defaultModel: 'MiniMax-M2.5',
       ),
     ];
   }
