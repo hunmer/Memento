@@ -35,7 +35,11 @@ class HomeScreenView extends StatelessWidget {
   final HomeScreenController controller;
   final TabController? tabController;
 
-  const HomeScreenView({super.key, required this.controller, this.tabController});
+  const HomeScreenView({
+    super.key,
+    required this.controller,
+    this.tabController,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -59,40 +63,46 @@ class HomeScreenView extends StatelessWidget {
               duration: const Duration(milliseconds: 500),
               switchInCurve: Curves.easeIn,
               switchOutCurve: Curves.easeOut,
-              child: controller.currentBackgroundPath != null
-                  ? _buildBackgroundImage()
-                  : const SizedBox.expand(key: ValueKey('no_background')),
+              child:
+                  controller.currentBackgroundPath != null
+                      ? _buildBackgroundImage()
+                      : const SizedBox.expand(key: ValueKey('no_background')),
             ),
             // 主内容
             controller.isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : controller.savedLayouts.isEmpty
-                    ? _buildHomeContent(context)
-                    : Positioned.fill(
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: NotificationListener<ScrollNotification>(
-                                onNotification: (notification) => _handleScrollNotification(notification, context),
-                                child: () {
-                                      final tc = tabController;
-                                      if (tc == null ||
-                                          tc.length != controller.savedLayouts.length) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      return ExtendedTabBarView(
-                                        controller: tc,
-                                        cacheExtent: 1,
-                                        children: controller.savedLayouts.map((layout) {
-                                          return _buildTabPage(context, layout.id);
-                                        }).toList(),
-                                      );
-                                    }(),
+                ? _buildHomeContent(context)
+                : Positioned.fill(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification:
+                              (notification) => _handleScrollNotification(
+                                notification,
+                                context,
                               ),
-                            ),
-                          ],
+                          child: () {
+                            final tc = tabController;
+                            if (tc == null ||
+                                tc.length != controller.savedLayouts.length) {
+                              return const SizedBox.shrink();
+                            }
+                            return ExtendedTabBarView(
+                              controller: tc,
+                              cacheExtent: 1,
+                              children:
+                                  controller.savedLayouts.map((layout) {
+                                    return _buildTabPage(context, layout.id);
+                                  }).toList(),
+                            );
+                          }(),
                         ),
                       ),
+                    ],
+                  ),
+                ),
           ],
         ),
       ),
@@ -103,7 +113,8 @@ class HomeScreenView extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: Center(child: _buildTabBar(context)),
-      backgroundColor: controller.currentBackgroundPath != null ? Colors.transparent : null,
+      backgroundColor:
+          controller.currentBackgroundPath != null ? Colors.transparent : null,
       elevation: controller.currentBackgroundPath != null ? 0 : null,
       leading: Builder(
         builder: (BuildContext context) {
@@ -158,7 +169,10 @@ class HomeScreenView extends StatelessWidget {
       key: ValueKey(controller.currentBackgroundPath),
       fit: StackFit.expand,
       children: [
-        Image.file(File(controller.currentBackgroundPath!), fit: controller.currentBackgroundFit),
+        Image.file(
+          File(controller.currentBackgroundPath!),
+          fit: controller.currentBackgroundFit,
+        ),
         if (controller.currentBackgroundBlur > 0)
           BackdropFilter(
             filter: ImageFilter.blur(
@@ -183,9 +197,10 @@ class HomeScreenView extends StatelessWidget {
 
           return Padding(
             padding: EdgeInsets.only(
-              top: !isCenter && controller.currentBackgroundPath != null
-                  ? MediaQuery.of(context).padding.top
-                  : 0,
+              top:
+                  !isCenter && controller.currentBackgroundPath != null
+                      ? MediaQuery.of(context).padding.top
+                      : 0,
             ),
             child: HomeGrid(
               items: controller.layoutManager.items,
@@ -199,9 +214,10 @@ class HomeScreenView extends StatelessWidget {
                 controller.layoutManager.moveToFolder(itemId, folderId);
                 Toast.success('已添加到文件夹');
               },
-              onItemTap: controller.isBatchMode
-                  ? (item) => controller.toggleItemSelection(item.id)
-                  : null,
+              onItemTap:
+                  controller.isBatchMode
+                      ? (item) => controller.toggleItemSelection(item.id)
+                      : null,
               onItemLongPress: (item) => _handleCardLongPress(context, item),
               onQuickCreateLayout: _createQuickLayout,
               onMergeIntoStack: _handleStackMerge,
@@ -216,7 +232,9 @@ class HomeScreenView extends StatelessWidget {
   Widget _buildTabBar(BuildContext context) {
     if (tabController == null || controller.savedLayouts.isEmpty) {
       return Text(
-        controller.currentLayoutName.isEmpty ? 'app_home'.tr : controller.currentLayoutName,
+        controller.currentLayoutName.isEmpty
+            ? 'app_home'.tr
+            : controller.currentLayoutName,
       );
     }
     return _DragAwareTabBar(
@@ -246,7 +264,12 @@ class HomeScreenView extends StatelessWidget {
   /// 构建单个 Tab 页面
   Widget _buildTabPage(BuildContext context, String layoutId) {
     final items = _getItemsForLayout(layoutId);
-    return _buildHomeContentForItems(context, layoutId: layoutId, items: items, key: ValueKey('page_$layoutId'));
+    return _buildHomeContentForItems(
+      context,
+      layoutId: layoutId,
+      items: items,
+      key: ValueKey('page_$layoutId'),
+    );
   }
 
   /// 获取指定布局对应的 items
@@ -255,7 +278,12 @@ class HomeScreenView extends StatelessWidget {
   }
 
   /// 为指定 items 构建主页内容
-  Widget _buildHomeContentForItems(BuildContext context, {required String layoutId, required List<HomeItem> items, Key? key}) {
+  Widget _buildHomeContentForItems(
+    BuildContext context, {
+    required String layoutId,
+    required List<HomeItem> items,
+    Key? key,
+  }) {
     return Opacity(
       key: key,
       opacity: controller.globalWidgetOpacity,
@@ -269,28 +297,42 @@ class HomeScreenView extends StatelessWidget {
             builder: (context, constraints) {
               // 如果是空布局，使用目标布局的结构显示骨架屏
               if (latestItems.isEmpty) {
-                debugPrint('Build skeleton for layout: $layoutId, current: ${controller.currentLayoutName}');
-                return FutureBuilder<({List<HomeWidgetSize> structure, int crossAxisCount})>(
+                debugPrint(
+                  'Build skeleton for layout: $layoutId, current: ${controller.currentLayoutName}',
+                );
+                return FutureBuilder<
+                  ({List<HomeWidgetSize> structure, int crossAxisCount})
+                >(
                   future: controller.getLayoutStructureById(layoutId),
                   builder: (context, snapshot) {
-                    debugPrint('FutureBuilder snapshot: ${snapshot.connectionState}, data: ${snapshot.data?.structure.length}');
+                    debugPrint(
+                      'FutureBuilder snapshot: ${snapshot.connectionState}, data: ${snapshot.data?.structure.length}',
+                    );
                     final layoutStructure = snapshot.data;
-                    if (layoutStructure == null || layoutStructure.structure.isEmpty) {
+                    if (layoutStructure == null ||
+                        layoutStructure.structure.isEmpty) {
                       return _buildEmptyState(context);
                     }
-                    return _buildSkeletonFromStructure(context, layoutStructure.structure, layoutStructure.crossAxisCount);
+                    return _buildSkeletonFromStructure(
+                      context,
+                      layoutStructure.structure,
+                      layoutStructure.crossAxisCount,
+                    );
                   },
                 );
               }
 
-              final isCenter = controller.layoutManager.gridAlignment == 'center';
-              final alignment = isCenter ? Alignment.center : Alignment.topCenter;
+              final isCenter =
+                  controller.layoutManager.gridAlignment == 'center';
+              final alignment =
+                  isCenter ? Alignment.center : Alignment.topCenter;
 
               return Padding(
                 padding: EdgeInsets.only(
-                  top: !isCenter && controller.currentBackgroundPath != null
-                      ? MediaQuery.of(context).padding.top
-                      : 0,
+                  top:
+                      !isCenter && controller.currentBackgroundPath != null
+                          ? MediaQuery.of(context).padding.top
+                          : 0,
                 ),
                 child: HomeGrid(
                   items: latestItems,
@@ -305,10 +347,12 @@ class HomeScreenView extends StatelessWidget {
                     controller.layoutManager.moveToFolder(itemId, folderId);
                     Toast.success('已添加到文件夹');
                   },
-                  onItemTap: controller.isBatchMode
-                      ? (item) => controller.toggleItemSelection(item.id)
-                      : null,
-                  onItemLongPress: (item) => _handleCardLongPress(context, item),
+                  onItemTap:
+                      controller.isBatchMode
+                          ? (item) => controller.toggleItemSelection(item.id)
+                          : null,
+                  onItemLongPress:
+                      (item) => _handleCardLongPress(context, item),
                   onQuickCreateLayout: _createQuickLayout,
                   onMergeIntoStack: _handleStackMerge,
                   onDragStarted: controller.handleDragStart,
@@ -330,25 +374,31 @@ class HomeScreenView extends StatelessWidget {
   }
 
   /// 从当前布局结构构建骨架屏
-  Widget _buildSkeletonFromStructure(BuildContext context, List<HomeWidgetSize> structure, int crossAxisCount) {
+  Widget _buildSkeletonFromStructure(
+    BuildContext context,
+    List<HomeWidgetSize> structure,
+    int crossAxisCount,
+  ) {
     final isCenter = controller.layoutManager.gridAlignment == 'center';
     final alignment = isCenter ? Alignment.center : Alignment.topCenter;
 
     // 转换为骨架 items
-    final skeletonItems = structure.map((size) {
-      return HomeWidgetItem(
-        id: 'skeleton_${UniqueKey().toString()}',
-        widgetId: 'skeleton',
-        size: size == HomeWidgetSize.custom ? HomeWidgetSize.small : size,
-        config: {},
-      );
-    }).toList();
+    final skeletonItems =
+        structure.map((size) {
+          return HomeWidgetItem(
+            id: 'skeleton_${UniqueKey().toString()}',
+            widgetId: 'skeleton',
+            size: size == HomeWidgetSize.custom ? HomeWidgetSize.small : size,
+            config: {},
+          );
+        }).toList();
 
     return Padding(
       padding: EdgeInsets.only(
-        top: !isCenter && controller.currentBackgroundPath != null
-            ? kToolbarHeight + 8
-            : 0,
+        top:
+            !isCenter && controller.currentBackgroundPath != null
+                ? kToolbarHeight + 8
+                : 0,
       ),
       child: HomeGrid(
         items: skeletonItems,
@@ -373,9 +423,10 @@ class HomeScreenView extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        top: !isCenter && controller.currentBackgroundPath != null
-            ? kToolbarHeight + 8
-            : 0,
+        top:
+            !isCenter && controller.currentBackgroundPath != null
+                ? kToolbarHeight + 8
+                : 0,
       ),
       child: Center(
         child: Column(
@@ -407,7 +458,10 @@ class HomeScreenView extends StatelessWidget {
   }
 
   /// 处理滚动通知
-  bool _handleScrollNotification(ScrollNotification notification, BuildContext context) {
+  bool _handleScrollNotification(
+    ScrollNotification notification,
+    BuildContext context,
+  ) {
     if (notification is UserScrollNotification) {
       if (notification.direction == ScrollDirection.forward ||
           notification.direction == ScrollDirection.reverse) {
@@ -441,34 +495,42 @@ class HomeScreenView extends StatelessWidget {
   }
 
   void _showCreateFolderDialog(BuildContext context) {
-    showDialog(context: context, builder: (context) => const CreateFolderDialog());
+    showDialog(
+      context: context,
+      builder: (context) => const CreateFolderDialog(),
+    );
   }
 
   void _showGridSizeDialog(BuildContext context) async {
     await showDialog(
       context: context,
-      builder: (context) => _GridSizeDialog(layoutManager: controller.layoutManager),
+      builder:
+          (context) => _GridSizeDialog(layoutManager: controller.layoutManager),
     );
   }
 
   void _confirmClearLayout(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('screens_confirmClear'.tr),
-        content: Text('screens_confirmClearAllWidgets'.tr),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              controller.layoutManager.clear();
-              Toast.success('screens_allWidgetsCleared'.tr);
-            },
-            child: Text('screens_confirm'.tr),
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_confirmClear'.tr),
+            content: Text('screens_confirmClearAllWidgets'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  controller.layoutManager.clear();
+                  Toast.success('screens_allWidgetsCleared'.tr);
+                },
+                child: Text('screens_confirm'.tr),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -495,7 +557,10 @@ class HomeScreenView extends StatelessWidget {
   Future<void> _addAllWidgetsOfSize(HomeWidgetSize size) async {
     final registry = HomeWidgetRegistry();
     final allWidgets = registry.getAllWidgets();
-    final widgets = allWidgets.where((widget) => widget.supportedSizes.contains(size)).toList();
+    final widgets =
+        allWidgets
+            .where((widget) => widget.supportedSizes.contains(size))
+            .toList();
 
     for (final widget in widgets) {
       final item = HomeWidgetItem(
@@ -513,50 +578,57 @@ class HomeScreenView extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('screens_saveCurrentLayout'.tr),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            labelText: 'screens_layoutName'.tr,
-            hintText: 'screens_layoutNameHint'.tr,
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_saveCurrentLayout'.tr),
+            content: TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'screens_layoutName'.tr,
+                hintText: 'screens_layoutNameHint'.tr,
+              ),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final name = nameController.text.trim();
+                  if (name.isEmpty) {
+                    Toast.error('screens_pleaseEnterLayoutName'.tr);
+                    return;
+                  }
+                  Navigator.pop(context);
+                  try {
+                    await controller.layoutManager.saveCurrentLayoutAs(name);
+                    await controller.initializeLayout();
+                    Toast.success(
+                      'screens_layoutSaved'.trParams({'name': name}),
+                    );
+                  } catch (e) {
+                    Toast.error('${'screens_saveFailed'.tr}: $e');
+                  }
+                },
+                child: Text('screens_save'.tr),
+              ),
+            ],
           ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
-          TextButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              if (name.isEmpty) {
-                Toast.error('screens_pleaseEnterLayoutName'.tr);
-                return;
-              }
-              Navigator.pop(context);
-              try {
-                await controller.layoutManager.saveCurrentLayoutAs(name);
-                await controller.initializeLayout();
-                Toast.success('screens_layoutSaved'.trParams({'name': name}));
-              } catch (e) {
-                Toast.error('${'screens_saveFailed'.tr}: $e');
-              }
-            },
-            child: Text('screens_save'.tr),
-          ),
-        ],
-      ),
     );
   }
 
   Future<void> _showLayoutManagerDialog(BuildContext context) async {
     await showDialog(
       context: context,
-      builder: (context) => LayoutManagerDialog(
-        onLayoutChanged: () async {
-          // 布局删除时重新加载并切换到第一个
-          await controller.reloadLayouts();
-        },
-      ),
+      builder:
+          (context) => LayoutManagerDialog(
+            onLayoutChanged: () async {
+              // 布局删除时重新加载并切换到第一个
+              await controller.reloadLayouts();
+            },
+          ),
     );
     // 对话框关闭后重新初始化（处理新建布局的情况）
     await controller.initializeLayout();
@@ -572,55 +644,89 @@ class HomeScreenView extends StatelessWidget {
 
     SmoothBottomSheet.show(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (item is HomeWidgetItem) ...[
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: Text('screens_widgetSettings'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showWidgetSettings(context, item);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.aspect_ratio),
-              title: Text('screens_adjustSize'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showSizeAdjuster(context, item);
-              },
-            ),
-            if (controller.isSelectorWidget(item))
+      builder:
+          (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (item is HomeWidgetItem) ...[
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: Text('screens_widgetSettings'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showWidgetSettings(context, item);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.aspect_ratio),
+                  title: Text('screens_adjustSize'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showSizeAdjuster(context, item);
+                  },
+                ),
+                if (controller.isSelectorWidget(item))
+                  ListTile(
+                    leading: const Icon(Icons.refresh),
+                    title: Text('screens_reselectData'.tr),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _reselectWidgetData(context, item);
+                    },
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.swap_horiz),
+                  title: Text('screens_replaceWidget'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _replaceWidget(context, item);
+                  },
+                ),
+                const Divider(),
+              ],
+              if (item is HomeStackItem) ...[
+                // 当前小组件拆散选项
+                if (item.currentItem != null)
+                  ListTile(
+                    leading: const Icon(Icons.call_split),
+                    title: Text(
+                      'screens_unstackCurrent'.trParams({
+                        'widget':
+                            HomeWidgetRegistry()
+                                .getWidget(item.currentItem!.widgetId)
+                                ?.name ??
+                            'screens_component'.tr,
+                      }),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _confirmUnstackItem(context, item, item.currentItem!.id);
+                    },
+                  ),
+                // 拆散所有选项
+                ListTile(
+                  leading: const Icon(Icons.call_split),
+                  title: Text('screens_unstackAll'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmUnstackAll(context, item);
+                  },
+                ),
+                const Divider(),
+              ],
               ListTile(
-                leading: const Icon(Icons.refresh),
-                title: Text('screens_reselectData'.tr),
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: Text(
+                  'screens_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  _reselectWidgetData(context, item);
+                  _confirmDeleteItem(context, item);
                 },
               ),
-            ListTile(
-              leading: const Icon(Icons.swap_horiz),
-              title: Text('screens_replaceWidget'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _replaceWidget(context, item);
-              },
-            ),
-            const Divider(),
-          ],
-          ListTile(
-            leading: const Icon(Icons.delete, color: Colors.red),
-            title: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
-            onTap: () {
-              Navigator.pop(context);
-              _confirmDeleteItem(context, item);
-            },
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -674,7 +780,10 @@ class HomeScreenView extends StatelessWidget {
     }
 
     // 非公共小组件，使用原有的选择器逻辑
-    final result = await pluginDataSelectorService.showSelector(context, widget.selectorId!);
+    final result = await pluginDataSelectorService.showSelector(
+      context,
+      widget.selectorId!,
+    );
 
     if (result == null || result.cancelled) {
       return; // 取消时不做任何操作
@@ -683,7 +792,8 @@ class HomeScreenView extends StatelessWidget {
     // 清除旧的选择器相关配置
     final updatedConfig = Map<String, dynamic>.from(item.config);
     updatedConfig.remove('selectorWidgetConfig');
-    final keysToRemove = widget.dataSelector != null ? _getSelectorDataKeys(widget) : [];
+    final keysToRemove =
+        widget.dataSelector != null ? _getSelectorDataKeys(widget) : [];
     for (final key in keysToRemove) {
       updatedConfig.remove(key);
     }
@@ -713,10 +823,11 @@ class HomeScreenView extends StatelessWidget {
     // 使用插件名称作为初始搜索关键词，过滤出同插件的其他小组件
     showDialog(
       context: context,
-      builder: (context) => AddWidgetDialog(
-        replaceWidgetItemId: item.id,
-        initialSearchQuery: widget.pluginId,
-      ),
+      builder:
+          (context) => AddWidgetDialog(
+            replaceWidgetItemId: item.id,
+            initialSearchQuery: widget.pluginId,
+          ),
     );
   }
 
@@ -727,7 +838,7 @@ class HomeScreenView extends StatelessWidget {
   ) async {
     final layoutManager = controller.layoutManager;
     if (!layoutManager.canMergeIntoStack(targetItem, draggedItem)) {
-      Toast.warning('????????????');
+      Toast.warning('screens_cannotMergeDifferentSizes'.tr);
       return false;
     }
 
@@ -746,20 +857,31 @@ class HomeScreenView extends StatelessWidget {
     );
 
     if (result == null) {
-      Toast.error('??????????');
+      Toast.error('screens_mergeFailed'.tr);
       return false;
     }
 
     await layoutManager.saveLayout();
-    Toast.success('???????');
+    Toast.success('screens_mergeSuccess'.tr);
     return true;
   }
 
   List<String> _getSelectorDataKeys(dynamic widget) {
-    return ['accountId', 'accountTitle', 'accountIcon', 'periodId', 'periodLabel', 'periodStart', 'periodEnd'];
+    return [
+      'accountId',
+      'accountTitle',
+      'accountIcon',
+      'periodId',
+      'periodLabel',
+      'periodStart',
+      'periodEnd',
+    ];
   }
 
-  Map<String, dynamic> _processSelectorResult(dynamic widget, SelectorResult result) {
+  Map<String, dynamic> _processSelectorResult(
+    dynamic widget,
+    SelectorResult result,
+  ) {
     SelectorResult finalResult = result;
     Map<String, dynamic>? extractedData;
 
@@ -778,7 +900,9 @@ class HomeScreenView extends StatelessWidget {
     }
 
     final selectorConfig = SelectorWidgetConfig.fromSelectorResult(finalResult);
-    final newConfig = <String, dynamic>{'selectorWidgetConfig': selectorConfig.toJson()};
+    final newConfig = <String, dynamic>{
+      'selectorWidgetConfig': selectorConfig.toJson(),
+    };
 
     if (extractedData != null) {
       newConfig.addAll(extractedData);
@@ -805,7 +929,9 @@ class HomeScreenView extends StatelessWidget {
     PluginWidgetConfig currentConfig;
     try {
       if (item.config.containsKey('pluginWidgetConfig')) {
-        currentConfig = PluginWidgetConfig.fromJson(item.config['pluginWidgetConfig'] as Map<String, dynamic>);
+        currentConfig = PluginWidgetConfig.fromJson(
+          item.config['pluginWidgetConfig'] as Map<String, dynamic>,
+        );
       } else {
         currentConfig = PluginWidgetConfig();
       }
@@ -815,11 +941,16 @@ class HomeScreenView extends StatelessWidget {
 
     final result = await showDialog<PluginWidgetConfig>(
       context: context,
-      builder: (context) => WidgetSettingsDialog(initialConfig: currentConfig, availableItems: availableItems),
+      builder:
+          (context) => WidgetSettingsDialog(
+            initialConfig: currentConfig,
+            availableItems: availableItems,
+          ),
     );
 
     if (result != null) {
-      final updatedConfig = Map<String, dynamic>.from(item.config)..['pluginWidgetConfig'] = result.toJson();
+      final updatedConfig = Map<String, dynamic>.from(item.config)
+        ..['pluginWidgetConfig'] = result.toJson();
       final updatedItem = item.copyWith(config: updatedConfig);
       controller.layoutManager.updateItem(item.id, updatedItem);
       await controller.layoutManager.saveLayout();
@@ -844,119 +975,196 @@ class HomeScreenView extends StatelessWidget {
       return;
     }
 
-    int customWidth = item.size == HomeWidgetSize.custom ? (item.config['customWidth'] as int? ?? 2) : 2;
-    int customHeight = item.size == HomeWidgetSize.custom ? (item.config['customHeight'] as int? ?? 2) : 2;
+    int customWidth =
+        item.size == HomeWidgetSize.custom
+            ? (item.config['customWidth'] as int? ?? 2)
+            : 2;
+    int customHeight =
+        item.size == HomeWidgetSize.custom
+            ? (item.config['customHeight'] as int? ?? 2)
+            : 2;
     HomeWidgetSize? selectedSize = item.size;
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return AlertDialog(
-            title: Text('screens_selectWidgetSize'.tr),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ...supportedSizes.map((size) {
-                  final isSelected = size == selectedSize;
-                  final sizeLabel = _getSizeLabel(size);
-                  return RadioListTile<HomeWidgetSize>(
-                    title: Text(sizeLabel),
-                    subtitle: size == HomeWidgetSize.custom
-                        ? Text('screens_customSizeDesc'.tr)
-                        : Text('screens_widgetSize'.trParams({'width': size.width.toString(), 'height': size.height.toString()})),
-                    value: size,
-                    groupValue: selectedSize,
-                    selected: isSelected,
-                    onChanged: (HomeWidgetSize? newSize) {
-                      if (newSize != null) {
-                        setDialogState(() {
-                          selectedSize = newSize;
-                          if (newSize != HomeWidgetSize.custom) {
-                            // 选择非自定义尺寸时，重置自定义尺寸为默认值
-                            customWidth = 2;
-                            customHeight = 2;
+      builder:
+          (context) => StatefulBuilder(
+            builder: (context, setDialogState) {
+              return AlertDialog(
+                title: Text('screens_selectWidgetSize'.tr),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...supportedSizes.map((size) {
+                      final isSelected = size == selectedSize;
+                      final sizeLabel = _getSizeLabel(size);
+                      return RadioListTile<HomeWidgetSize>(
+                        title: Text(sizeLabel),
+                        subtitle:
+                            size == HomeWidgetSize.custom
+                                ? Text('screens_customSizeDesc'.tr)
+                                : Text(
+                                  'screens_widgetSize'.trParams({
+                                    'width': size.width.toString(),
+                                    'height': size.height.toString(),
+                                  }),
+                                ),
+                        value: size,
+                        groupValue: selectedSize,
+                        selected: isSelected,
+                        onChanged: (HomeWidgetSize? newSize) {
+                          if (newSize != null) {
+                            setDialogState(() {
+                              selectedSize = newSize;
+                              if (newSize != HomeWidgetSize.custom) {
+                                // 选择非自定义尺寸时，重置自定义尺寸为默认值
+                                customWidth = 2;
+                                customHeight = 2;
+                              }
+                            });
                           }
-                        });
-                      }
-                    },
-                  );
-                }),
-                if (hasCustom && selectedSize == HomeWidgetSize.custom) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Text('screens_customSizeAdjust'.tr, style: Theme.of(context).textTheme.titleSmall),
-                  const SizedBox(height: 8),
-                  _buildSizeSlider(context, '宽度', customWidth, (v) => setDialogState(() => customWidth = v.toInt()), (v) => setDialogState(() => customWidth = v.toInt())),
-                  _buildSizeSlider(context, '高度', customHeight, (v) => setDialogState(() => customHeight = v.toInt()), (v) => setDialogState(() => customHeight = v.toInt())),
-                  const SizedBox(height: 8),
-                  Text('screens_customSizePreview'.trParams({'width': customWidth.toString(), 'height': customHeight.toString()}),
-                      style: Theme.of(context).textTheme.bodySmall),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
+                        },
+                      );
+                    }),
+                    if (hasCustom && selectedSize == HomeWidgetSize.custom) ...[
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Text(
+                        'screens_customSizeAdjust'.tr,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 8),
+                      _buildSizeSlider(
+                        context,
+                        '宽度',
+                        customWidth,
+                        (v) => setDialogState(() => customWidth = v.toInt()),
+                        (v) => setDialogState(() => customWidth = v.toInt()),
+                      ),
+                      _buildSizeSlider(
+                        context,
+                        '高度',
+                        customHeight,
+                        (v) => setDialogState(() => customHeight = v.toInt()),
+                        (v) => setDialogState(() => customHeight = v.toInt()),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'screens_customSizePreview'.trParams({
+                          'width': customWidth.toString(),
+                          'height': customHeight.toString(),
+                        }),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _saveWidgetSize(
+                              context,
+                              item,
+                              HomeWidgetSize.custom,
+                              customWidth,
+                              customHeight,
+                            );
+                          },
+                          child: Text('screens_applyCustomSize'.tr),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('screens_cancel'.tr),
+                  ),
+                  if (selectedSize != HomeWidgetSize.custom)
+                    TextButton(
                       onPressed: () {
                         Navigator.pop(context);
-                        _saveWidgetSize(context, item, HomeWidgetSize.custom, customWidth, customHeight);
+                        _saveWidgetSize(
+                          context,
+                          item,
+                          selectedSize!,
+                          customWidth,
+                          customHeight,
+                        );
                       },
-                      child: Text('screens_applyCustomSize'.tr),
+                      child: Text('screens_confirm'.tr),
                     ),
-                  ),
                 ],
-              ],
-            ),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
-              if (selectedSize != HomeWidgetSize.custom)
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _saveWidgetSize(context, item, selectedSize!, customWidth, customHeight);
-                  },
-                  child: Text('screens_confirm'.tr),
-                ),
-            ],
-          );
-        },
-      ),
+              );
+            },
+          ),
     );
   }
 
-  Widget _buildSizeSlider(BuildContext context, String label, int value, ValueChanged<double> onChanged, ValueChanged<int> onChangedInt) {
-    return Row(children: [
-      Text(label),
-      const SizedBox(width: 8),
-      Expanded(
-        child: Slider(
-          value: value.toDouble(),
-          min: 1,
-          max: 4,
-          divisions: 3,
-          label: value.toString(),
-          onChanged: onChanged,
+  Widget _buildSizeSlider(
+    BuildContext context,
+    String label,
+    int value,
+    ValueChanged<double> onChanged,
+    ValueChanged<int> onChangedInt,
+  ) {
+    return Row(
+      children: [
+        Text(label),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Slider(
+            value: value.toDouble(),
+            min: 1,
+            max: 4,
+            divisions: 3,
+            label: value.toString(),
+            onChanged: onChanged,
+          ),
         ),
-      ),
-      const SizedBox(width: 8),
-      SizedBox(width: 32, child: Text(value.toString(), style: Theme.of(context).textTheme.titleSmall, textAlign: TextAlign.center)),
-    ]);
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 32,
+          child: Text(
+            value.toString(),
+            style: Theme.of(context).textTheme.titleSmall,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
   }
 
   String _getSizeLabel(HomeWidgetSize size) {
     switch (size) {
-      case HomeWidgetSize.small: return 'screens_smallSize'.tr;
-      case HomeWidgetSize.medium: return 'screens_mediumSize'.tr;
-      case HomeWidgetSize.large: return 'screens_largeSize'.tr;
-      case HomeWidgetSize.large3: return 'screens_large3Size'.tr;
-      case HomeWidgetSize.wide: return 'screens_wideSize'.tr;
-      case HomeWidgetSize.wide2: return 'screens_wide2Size'.tr;
-      case HomeWidgetSize.wide3: return 'screens_wide3Size'.tr;
-      case HomeWidgetSize.custom: return 'screens_customSize'.tr;
+      case HomeWidgetSize.small:
+        return 'screens_smallSize'.tr;
+      case HomeWidgetSize.medium:
+        return 'screens_mediumSize'.tr;
+      case HomeWidgetSize.large:
+        return 'screens_largeSize'.tr;
+      case HomeWidgetSize.large3:
+        return 'screens_large3Size'.tr;
+      case HomeWidgetSize.wide:
+        return 'screens_wideSize'.tr;
+      case HomeWidgetSize.wide2:
+        return 'screens_wide2Size'.tr;
+      case HomeWidgetSize.wide3:
+        return 'screens_wide3Size'.tr;
+      case HomeWidgetSize.custom:
+        return 'screens_customSize'.tr;
     }
   }
 
-  Future<void> _saveWidgetSize(BuildContext context, HomeWidgetItem item, HomeWidgetSize newSize, int customWidth, int customHeight) async {
+  Future<void> _saveWidgetSize(
+    BuildContext context,
+    HomeWidgetItem item,
+    HomeWidgetSize newSize,
+    int customWidth,
+    int customHeight,
+  ) async {
     final updatedConfig = Map<String, dynamic>.from(item.config);
     if (newSize == HomeWidgetSize.custom) {
       updatedConfig['customWidth'] = customWidth;
@@ -971,57 +1179,157 @@ class HomeScreenView extends StatelessWidget {
   void _confirmDeleteItem(BuildContext context, HomeItem item) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('screens_confirmDelete'.tr),
-        content: Text(controller.getDeleteConfirmMessage(item)),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              controller.layoutManager.removeItem(item.id);
-              await controller.layoutManager.saveLayout();
-              ToastService.instance.showToast(
-                '"${item is HomeWidgetItem ? HomeWidgetRegistry().getWidget(item.widgetId)?.name ?? '组件' : (item as HomeFolderItem).name}" ${'screens_deleted'.tr}',
-              );
-            },
-            child: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_confirmDelete'.tr),
+            content: Text(controller.getDeleteConfirmMessage(item)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  controller.layoutManager.removeItem(item.id);
+                  await controller.layoutManager.saveLayout();
+                  ToastService.instance.showToast(
+                    '"${item is HomeWidgetItem ? HomeWidgetRegistry().getWidget(item.widgetId)?.name ?? '组件' : (item as HomeFolderItem).name}" ${'screens_deleted'.tr}',
+                  );
+                },
+                child: Text(
+                  'screens_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+    );
+  }
+
+  void _confirmUnstackItem(
+    BuildContext context,
+    HomeStackItem stackItem,
+    String widgetItemId,
+  ) {
+    final child = stackItem.children.firstWhere(
+      (child) => child.id == widgetItemId,
+    );
+    final widgetDef = HomeWidgetRegistry().getWidget(child.widgetId);
+    final widgetName = widgetDef?.name ?? 'screens_component'.tr;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_confirmUnstack'.tr),
+            content: Text(
+              'screens_confirmUnstackItem'.trParams({'widget': widgetName}),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  controller.layoutManager.unstackItem(
+                    stackItem.id,
+                    widgetItemId,
+                  );
+                  await controller.layoutManager.saveLayout();
+                  Toast.success(
+                    'screens_unstackSuccess'.trParams({'widget': widgetName}),
+                  );
+                },
+                child: Text('screens_unstack'.tr),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _confirmUnstackAll(BuildContext context, HomeStackItem stackItem) {
+    final count = stackItem.children.length;
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_confirmUnstack'.tr),
+            content: Text(
+              'screens_confirmUnstackAll'.trParams({'count': count.toString()}),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  controller.layoutManager.unstackAllItems(stackItem.id);
+                  await controller.layoutManager.saveLayout();
+                  Toast.success(
+                    'screens_unstackAllSuccess'.trParams({
+                      'count': count.toString(),
+                    }),
+                  );
+                },
+                child: Text('screens_unstackAll'.tr),
+              ),
+            ],
+          ),
     );
   }
 
   void _confirmBatchDelete(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('screens_confirmDelete'.tr),
-        content: Text('screens_confirmDeleteSelectedItems'.trParams({'count': controller.selectedItemIds.length.toString()})),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr)),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              for (final itemId in controller.selectedItemIds) {
-                controller.layoutManager.removeItem(itemId);
-              }
-              await controller.layoutManager.saveLayout();
-              Toast.success('screens_itemsDeleted'.trParams({'count': controller.selectedItemIds.length.toString()}));
-              controller.exitBatchMode();
-            },
-            child: Text('screens_delete'.tr, style: const TextStyle(color: Colors.red)),
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_confirmDelete'.tr),
+            content: Text(
+              'screens_confirmDeleteSelectedItems'.trParams({
+                'count': controller.selectedItemIds.length.toString(),
+              }),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  for (final itemId in controller.selectedItemIds) {
+                    controller.layoutManager.removeItem(itemId);
+                  }
+                  await controller.layoutManager.saveLayout();
+                  Toast.success(
+                    'screens_itemsDeleted'.trParams({
+                      'count': controller.selectedItemIds.length.toString(),
+                    }),
+                  );
+                  controller.exitBatchMode();
+                },
+                child: Text(
+                  'screens_delete'.tr,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showMoveToFolderDialog(BuildContext context) {
-    final folders = controller.layoutManager.items
-        .whereType<HomeFolderItem>()
-        .where((folder) => !controller.selectedItemIds.contains(folder.id))
-        .toList();
+    final folders =
+        controller.layoutManager.items
+            .whereType<HomeFolderItem>()
+            .where((folder) => !controller.selectedItemIds.contains(folder.id))
+            .toList();
 
     if (folders.isEmpty) {
       Toast.warning('screens_noAvailableFolders'.tr);
@@ -1030,29 +1338,39 @@ class HomeScreenView extends StatelessWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('screens_moveToFolder'.tr),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: folders.length,
-            itemBuilder: (context, index) {
-              final folder = folders[index];
-              return ListTile(
-                leading: Icon(folder.icon, color: folder.color),
-                title: Text(folder.name),
-                subtitle: Text('screens_itemCount'.trParams({'count': folder.children.length.toString()})),
-                onTap: () {
-                  Navigator.pop(context);
-                  _moveSelectedItemsToFolder(context, folder.id);
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_moveToFolder'.tr),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: folders.length,
+                itemBuilder: (context, index) {
+                  final folder = folders[index];
+                  return ListTile(
+                    leading: Icon(folder.icon, color: folder.color),
+                    title: Text(folder.name),
+                    subtitle: Text(
+                      'screens_itemCount'.trParams({
+                        'count': folder.children.length.toString(),
+                      }),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _moveSelectedItemsToFolder(context, folder.id);
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+            ],
           ),
-        ),
-        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_cancel'.tr))],
-      ),
     );
   }
 
@@ -1061,7 +1379,11 @@ class HomeScreenView extends StatelessWidget {
       controller.layoutManager.moveToFolder(itemId, folderId);
     }
     await controller.layoutManager.saveLayout();
-    Toast.success('screens_itemsMovedToFolder'.trParams({'count': controller.selectedItemIds.length.toString()}));
+    Toast.success(
+      'screens_itemsMovedToFolder'.trParams({
+        'count': controller.selectedItemIds.length.toString(),
+      }),
+    );
     controller.exitBatchMode();
   }
 
@@ -1069,90 +1391,95 @@ class HomeScreenView extends StatelessWidget {
     SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder: (context) => SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(controller.isEditMode ? Icons.check : Icons.edit),
-              title: Text(controller.isEditMode ? '完成排序' : '自定义排序'),
-              onTap: () {
-                Navigator.pop(context);
-                controller.toggleEditMode();
-                Toast.info(controller.isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式');
-              },
+      builder:
+          (context) => SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(
+                    controller.isEditMode ? Icons.check : Icons.edit,
+                  ),
+                  title: Text(controller.isEditMode ? '完成排序' : '自定义排序'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    controller.toggleEditMode();
+                    Toast.info(controller.isEditMode ? '长按拖拽可调整顺序' : '已退出编辑模式');
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.check_box_outline_blank),
+                  title: const Text('批量编辑'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    controller.toggleBatchMode();
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.create_new_folder),
+                  title: Text('screens_createNewFolder'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showCreateFolderDialog(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.add_box),
+                  title: Text('screens_addWidget'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showAddWidgetDialog(context);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.save),
+                  title: Text('screens_saveCurrentLayout'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showSaveLayoutDialog(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.layers),
+                  title: Text('screens_manageLayouts'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showLayoutManagerDialog(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.palette),
+                  title: Text('screens_themeSettings'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showThemeSettings(context);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.grid_view),
+                  title: Text('screens_gridSettings'.tr),
+                  subtitle: Text(
+                    '${controller.layoutManager.gridCrossAxisCount} 列 · ${controller.layoutManager.gridAlignment == "top" ? 'screens_topDisplay'.tr : 'screens_centerDisplay'.tr}',
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showGridSizeDialog(context);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.delete_sweep),
+                  title: Text('screens_clearLayout'.tr),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _confirmClearLayout(context);
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.check_box_outline_blank),
-              title: const Text('批量编辑'),
-              onTap: () {
-                Navigator.pop(context);
-                controller.toggleBatchMode();
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.create_new_folder),
-              title: Text('screens_createNewFolder'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showCreateFolderDialog(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.add_box),
-              title: Text('screens_addWidget'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showAddWidgetDialog(context);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.save),
-              title: Text('screens_saveCurrentLayout'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showSaveLayoutDialog(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.layers),
-              title: Text('screens_manageLayouts'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showLayoutManagerDialog(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.palette),
-              title: Text('screens_themeSettings'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _showThemeSettings(context);
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.grid_view),
-              title: Text('screens_gridSettings'.tr),
-              subtitle: Text('${controller.layoutManager.gridCrossAxisCount} 列 · ${controller.layoutManager.gridAlignment == "top" ? 'screens_topDisplay'.tr : 'screens_centerDisplay'.tr}'),
-              onTap: () {
-                Navigator.pop(context);
-                _showGridSizeDialog(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete_sweep),
-              title: Text('screens_clearLayout'.tr),
-              onTap: () {
-                Navigator.pop(context);
-                _confirmClearLayout(context);
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }
@@ -1186,45 +1513,122 @@ class _GridSizeDialogState extends State<_GridSizeDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('screens_gridSize'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'screens_gridSize'.tr,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text('screens_gridSizeDescription'.tr, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              'screens_gridSizeDescription'.tr,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 16),
-            Row(children: [
-              Text('screens_gridColumns'.trParams({'count': _currentSize.toString()}), style: Theme.of(context).textTheme.titleLarge),
-              const Spacer(),
-              IconButton(icon: const Icon(Icons.remove), onPressed: _currentSize > 1 ? () { setState(() { _currentSize--; widget.layoutManager.setGridCrossAxisCount(_currentSize); }); } : null),
-              IconButton(icon: const Icon(Icons.add), onPressed: _currentSize < 10 ? () { setState(() { _currentSize++; widget.layoutManager.setGridCrossAxisCount(_currentSize); }); } : null),
-            ]),
+            Row(
+              children: [
+                Text(
+                  'screens_gridColumns'.trParams({
+                    'count': _currentSize.toString(),
+                  }),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.remove),
+                  onPressed:
+                      _currentSize > 1
+                          ? () {
+                            setState(() {
+                              _currentSize--;
+                              widget.layoutManager.setGridCrossAxisCount(
+                                _currentSize,
+                              );
+                            });
+                          }
+                          : null,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed:
+                      _currentSize < 10
+                          ? () {
+                            setState(() {
+                              _currentSize++;
+                              widget.layoutManager.setGridCrossAxisCount(
+                                _currentSize,
+                              );
+                            });
+                          }
+                          : null,
+                ),
+              ],
+            ),
             Slider(
               value: _currentSize.toDouble(),
               min: 1,
               max: 10,
               divisions: 9,
               label: '$_currentSize',
-              onChanged: (value) { setState(() { _currentSize = value.round(); widget.layoutManager.setGridCrossAxisCount(_currentSize); }); },
+              onChanged: (value) {
+                setState(() {
+                  _currentSize = value.round();
+                  widget.layoutManager.setGridCrossAxisCount(_currentSize);
+                });
+              },
             ),
             const SizedBox(height: 8),
-            Text('提示：数字越大，每行显示的组件越多', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).hintColor)),
+            Text(
+              '提示：数字越大，每行显示的组件越多',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).hintColor,
+              ),
+            ),
             const SizedBox(height: 32),
             const Divider(),
             const SizedBox(height: 16),
-            Text('screens_displayPosition'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text(
+              'screens_displayPosition'.tr,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text('screens_displayPositionDescription'.tr, style: Theme.of(context).textTheme.bodyMedium),
+            Text(
+              'screens_displayPositionDescription'.tr,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
             const SizedBox(height: 16),
             SegmentedButton<String>(
               segments: [
-                ButtonSegment<String>(value: 'top', label: Text('screens_topDisplay'.tr), icon: const Icon(Icons.vertical_align_top)),
-                ButtonSegment<String>(value: 'center', label: Text('screens_centerDisplay'.tr), icon: const Icon(Icons.vertical_align_center)),
+                ButtonSegment<String>(
+                  value: 'top',
+                  label: Text('screens_topDisplay'.tr),
+                  icon: const Icon(Icons.vertical_align_top),
+                ),
+                ButtonSegment<String>(
+                  value: 'center',
+                  label: Text('screens_centerDisplay'.tr),
+                  icon: const Icon(Icons.vertical_align_center),
+                ),
               ],
               selected: {_currentAlignment},
-              onSelectionChanged: (Set<String> newSelection) { setState(() { _currentAlignment = newSelection.first; widget.layoutManager.setGridAlignment(_currentAlignment); }); },
+              onSelectionChanged: (Set<String> newSelection) {
+                setState(() {
+                  _currentAlignment = newSelection.first;
+                  widget.layoutManager.setGridAlignment(_currentAlignment);
+                });
+              },
             ),
           ],
         ),
       ),
-      actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('screens_complete'.tr))],
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('screens_complete'.tr),
+        ),
+      ],
     );
   }
 }
