@@ -50,6 +50,62 @@ class _ActivityGridViewState extends State<ActivityGridView> {
              end.isAtSameMomentAs(activity.endTime);
     });
   }
+
+  // 获取与给定时间范围冲突的活动
+  ActivityRecord? _getConflictingActivity(DateTime start, DateTime end) {
+    for (final activity in widget.activities) {
+      if ((start.isBefore(activity.endTime) && end.isAfter(activity.startTime)) ||
+          start.isAtSameMomentAs(activity.startTime) ||
+          end.isAtSameMomentAs(activity.endTime)) {
+        return activity;
+      }
+    }
+    return null;
+  }
+
+  // 调整时间范围以避免与现有活动重叠
+  // 返回调整后的时间范围
+  ({DateTime start, DateTime end}) _adjustTimeToAvoidOverlap(DateTime start, DateTime end) {
+    DateTime adjustedStart = start;
+    DateTime adjustedEnd = end;
+
+    // 按开始时间排序所有活动
+    final sortedActivities = List<ActivityRecord>.from(widget.activities)
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+    // 检查开始时间是否在某个活动内
+    for (final activity in sortedActivities) {
+      if (adjustedStart.isAfter(activity.startTime) &&
+          adjustedStart.isBefore(activity.endTime)) {
+        // 开始时间在活动内，调整到该活动的结束时间
+        adjustedStart = activity.endTime;
+      } else if (adjustedStart.isAtSameMomentAs(activity.startTime)) {
+        // 开始时间正好是活动的开始时间，也调整到结束时间
+        adjustedStart = activity.endTime;
+      }
+    }
+
+    // 检查结束时间是否在某个活动内
+    for (final activity in sortedActivities) {
+      if (adjustedEnd.isAfter(activity.startTime) &&
+          adjustedEnd.isBefore(activity.endTime)) {
+        // 结束时间在活动内，调整到该活动的开始时间
+        adjustedEnd = activity.startTime;
+      } else if (adjustedEnd.isAtSameMomentAs(activity.endTime)) {
+        // 结束时间正好是活动的结束时间，也调整到开始时间
+        adjustedEnd = activity.startTime;
+      }
+    }
+
+    // 检查调整后的时间是否仍然有效（开始时间必须在结束时间之前，且至少相差1分钟）
+    if (adjustedStart.isAfter(adjustedEnd) ||
+        adjustedEnd.difference(adjustedStart).inMinutes < 1) {
+      // 如果调整后无效，保持原始时间（由表单层处理冲突）
+      return (start: start, end: end);
+    }
+
+    return (start: adjustedStart, end: adjustedEnd);
+  }
   
   final GlobalKey _gridKey = GlobalKey();
 
@@ -293,8 +349,14 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         final start = adjustedStart;
         final end = adjustedEnd;
 
+        // 重要：调整时间后，检查是否与现有活动重叠
+        // 如果重叠，自动调整时间到活动边界
+        final adjustedTime = _adjustTimeToAvoidOverlap(start, end);
+        final finalStart = adjustedTime.start;
+        final finalEnd = adjustedTime.end;
+
         // 调用回调函数，传入调整后的开始时间和结束时间
-        widget.onUnrecordedTimeTap(start, end);
+        widget.onUnrecordedTimeTap(finalStart, finalEnd);
       }
     }
     setState(() {
@@ -318,11 +380,6 @@ class _ActivityGridViewState extends State<ActivityGridView> {
     // 如果是鼠标事件，需要检查鼠标是否按下
     // 如果是触摸事件（通过onPanUpdate或onLongPressMoveUpdate触发），则直接更新
     if (_isMouseDown || _isDragging) {
-      // 检查时间点是否已经有活动
-      if (_isTimeOverlapping(time)) {
-        return; // 如果时间点已经有活动，不允许选择
-      }
-
       // 检查是否为未来时间，未来时间不允许选择
       if (time.isAfter(DateTime.now())) {
         return; // 如果是未来时间，不允许选择
@@ -341,18 +398,8 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         final now = DateTime.now();
         final currentTime = time.isAfter(now) ? now : time;
 
-        // 检查当前选择范围是否与现有活动重叠
-        if (_selectionStart != null) {
-          DateTime start = _selectionStart!.isBefore(currentTime) ? _selectionStart! : currentTime;
-          DateTime end = _selectionStart!.isBefore(currentTime) ? currentTime : _selectionStart!;
-
-          // 如果选择范围与现有活动重叠，不更新选择范围
-          if (_isRangeOverlapping(start, end)) {
-            return;
-          }
-        }
-
-        // 只有当进入新的时间块时才更新
+        // 允许用户自由选择，包括重叠区域
+        // 时间调整会在拖拽结束时自动进行
         if (_lastEnteredTime != currentTime) {
           setState(() {
             _lastEnteredTime = currentTime;
