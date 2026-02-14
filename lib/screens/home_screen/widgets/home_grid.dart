@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -30,13 +29,23 @@ class HomeGrid extends StatefulWidget {
   final Set<String> selectedItemIds;
   final Alignment alignment;
   final void Function(Map<String, String>)? onQuickCreateLayout;
+
   /// 是否显示骨架屏（用于占位加载）
   final bool showSkeleton;
-  final Future<bool> Function(BuildContext context, HomeItem target, HomeItem dragged)? onMergeIntoStack;
+  final Future<bool> Function(
+    BuildContext context,
+    HomeItem target,
+    HomeItem dragged,
+  )?
+  onMergeIntoStack;
   final void Function(String layoutId, HomeItem item)? onDragStarted;
   final VoidCallback? onDragEnded;
-  final Future<bool> Function(String draggedItemId, String targetLayoutId, int targetIndex)?
-      onCrossLayoutDrop;
+  final Future<bool> Function(
+    String draggedItemId,
+    String targetLayoutId,
+    int targetIndex,
+  )?
+  onCrossLayoutDrop;
 
   const HomeGrid({
     super.key,
@@ -78,6 +87,9 @@ class _HomeGridState extends State<HomeGrid> {
 
   // 存储真正的指针全局位置
   Offset? _lastPointerPosition;
+
+  // 防止 _handleCenterDrop 被重复调用
+  bool _isDropping = false;
 
   @override
   void initState() {
@@ -181,12 +193,8 @@ class _HomeGridState extends State<HomeGrid> {
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight,
-                ),
-                child: Center(
-                  child: gridWidget,
-                ),
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(child: gridWidget),
               ),
             );
           }
@@ -194,13 +202,8 @@ class _HomeGridState extends State<HomeGrid> {
           // 顶部模式：内容从顶部开始
           return SingleChildScrollView(
             child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: gridWidget,
-              ),
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Align(alignment: Alignment.topCenter, child: gridWidget),
             ),
           );
         },
@@ -224,8 +227,10 @@ class _HomeGridState extends State<HomeGrid> {
     } else if (item is HomeStackItem) {
       if (item.size == HomeWidgetSize.custom) {
         if (item.children.isNotEmpty) {
-          crossAxisCellCount = item.children.first.config['customWidth'] as int? ?? 2;
-          mainAxisCellCount = item.children.first.config['customHeight'] as int? ?? 2;
+          crossAxisCellCount =
+              item.children.first.config['customWidth'] as int? ?? 2;
+          mainAxisCellCount =
+              item.children.first.config['customHeight'] as int? ?? 2;
         } else {
           crossAxisCellCount = 2;
           mainAxisCellCount = 2;
@@ -252,23 +257,34 @@ class _HomeGridState extends State<HomeGrid> {
     final pluginState = _resolvePluginState(context, item);
 
     if (!widget.isEditMode) {
-      final isSelected = widget.isBatchMode && widget.selectedItemIds.contains(item.id);
-      final bool shouldInterceptTap = pluginState.isPluginItem && pluginState.isDisabled;
+      final isSelected =
+          widget.isBatchMode && widget.selectedItemIds.contains(item.id);
+      final bool shouldInterceptTap =
+          pluginState.isPluginItem && pluginState.isDisabled;
 
       Widget card = HomeCard(
         key: ValueKey(item.id),
         item: item,
         isSelected: isSelected,
         isBatchMode: widget.isBatchMode,
-        onTap: shouldInterceptTap
-            ? () => _showPluginDisabledToast(context, pluginState)
-            : widget.onItemTap != null
+        onTap:
+            shouldInterceptTap
+                ? () => _showPluginDisabledToast(context, pluginState)
+                : widget.onItemTap != null
                 ? () => widget.onItemTap!(item)
                 : null,
-        onLongPress: widget.onItemLongPress != null ? () => widget.onItemLongPress!(item) : null,
+        onLongPress:
+            widget.onItemLongPress != null
+                ? () => widget.onItemLongPress!(item)
+                : null,
       );
 
-      card = _wrapWithDisabledOverlay(context, card, pluginState, isInEditMode: false);
+      card = _wrapWithDisabledOverlay(
+        context,
+        card,
+        pluginState,
+        isInEditMode: false,
+      );
 
       return StaggeredGridTile.count(
         crossAxisCellCount: crossAxisCellCount,
@@ -325,9 +341,7 @@ class _HomeGridState extends State<HomeGrid> {
         opacity: 0.3,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
           child: _wrapWithDisabledOverlay(
             context,
             HomeCard(
@@ -353,25 +367,26 @@ class _HomeGridState extends State<HomeGrid> {
         HapticFeedback.mediumImpact();
       },
       onDragEnd: (_) {
+        // 注意：不要在这里清除 _hoveredDropZone！
+        // onDragEnd 在 onAcceptWithDetails 之前被调用
+        // _hoveredDropZone 需要在 _handleCenterDrop 中使用
         setState(() {
           _draggingIndex = null;
           _draggingItemId = null;
-          _hoveredDropZone = null;
+          // _hoveredDropZone 会在 _resetPreviewStateAfterDrop 中清除
           _resetPreviewOrder();
         });
         _previewTimer?.cancel();
-        widget.onDragEnded?.call();
+        // onDragEnded 会在 _handleCenterDrop 处理完成后调用
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          border: isHoveringCenter
-              ? Border.all(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
-                )
-              : null,
+          border:
+              isHoveringCenter
+                  ? Border.all(color: Theme.of(context).primaryColor, width: 2)
+                  : null,
         ),
         child: _wrapWithDisabledOverlay(
           context,
@@ -423,16 +438,24 @@ class _HomeGridState extends State<HomeGrid> {
       ),
     );
   }
+
   Widget _buildDirectionalOverlay(BuildContext context, int index) {
     return Positioned.fill(
       child: Builder(
         builder: (overlayContext) {
           return DragTarget<String>(
             hitTestBehavior: HitTestBehavior.translucent,
-            onWillAcceptWithDetails: (details) => _handleDirectionalHover(overlayContext, index, details),
-            onMove: (details) => _handleDirectionalHover(overlayContext, index, details),
+            onWillAcceptWithDetails:
+                (details) =>
+                    _handleDirectionalHover(overlayContext, index, details),
+            onMove:
+                (details) =>
+                    _handleDirectionalHover(overlayContext, index, details),
             onLeave: (_) => _handleDirectionalLeave(index),
-            onAcceptWithDetails: (_) {},
+            onAcceptWithDetails: (details) async {
+              // 方向检测的 DragTarget 也要调用 drop 处理
+              await _handleCenterDrop(context, index, details);
+            },
             builder: (context, candidateData, rejectedData) {
               final zone = _hoveredDropZone;
               final bool isActive = zone != null && zone.index == index;
@@ -477,7 +500,8 @@ class _HomeGridState extends State<HomeGrid> {
     }
 
     // 边缘区域：显示方向指示器
-    final bool isHorizontal = direction == _DropDirection.top || direction == _DropDirection.bottom;
+    final bool isHorizontal =
+        direction == _DropDirection.top || direction == _DropDirection.bottom;
     return Align(
       alignment: _alignmentForDirection(direction),
       child: FractionallySizedBox(
@@ -511,7 +535,6 @@ class _HomeGridState extends State<HomeGrid> {
     final cardKey = _cardKeys[index];
     final renderBox = cardKey?.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null || !renderBox.hasSize) {
-      debugPrint('[HomeGrid] ❌ renderBox is null or has no size for index $index');
       return false;
     }
 
@@ -519,16 +542,7 @@ class _HomeGridState extends State<HomeGrid> {
     final globalPosition = _lastPointerPosition ?? details.offset;
     final localOffset = renderBox.globalToLocal(globalPosition);
 
-    // 调试输出
-    debugPrint('[HomeGrid] ────────────────────────────────────────');
-    debugPrint('[HomeGrid] 📍 Index: $index');
-    debugPrint('[HomeGrid] 🌍 Real pointer position: $globalPosition');
-    debugPrint('[HomeGrid] 📐 RenderBox size: ${renderBox.size}');
-    debugPrint('[HomeGrid] 🎯 Local offset: $localOffset');
-    debugPrint('[HomeGrid] 📊 Normalized: x=${(localOffset.dx / renderBox.size.width).toStringAsFixed(2)}, y=${(localOffset.dy / renderBox.size.height).toStringAsFixed(2)}');
-
     final direction = _resolveDirectionFromOffset(localOffset, renderBox.size);
-    debugPrint('[HomeGrid] 🧭 Direction: $direction');
 
     // direction 为 null 表示中心区域（合并/堆叠操作）
     final zone = _DropRegion(index, direction);
@@ -551,7 +565,6 @@ class _HomeGridState extends State<HomeGrid> {
     final double width = size.width;
     final double height = size.height;
     if (!width.isFinite || !height.isFinite || width <= 0 || height <= 0) {
-      debugPrint('[HomeGrid] ⚠️ Invalid size: $size');
       return null;
     }
 
@@ -572,10 +585,12 @@ class _HomeGridState extends State<HomeGrid> {
       hReason = 'x=${normalizedX.toStringAsFixed(2)} < ${edgeRatio}';
     } else if (normalizedX > (1 - edgeRatio)) {
       hZone = 2; // 右
-      hReason = 'x=${normalizedX.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
+      hReason =
+          'x=${normalizedX.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
     } else {
       hZone = 1; // 中
-      hReason = '${edgeRatio} <= x=${normalizedX.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
+      hReason =
+          '${edgeRatio} <= x=${normalizedX.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
     }
 
     // 判断垂直位置：0=上, 1=中, 2=下
@@ -586,21 +601,19 @@ class _HomeGridState extends State<HomeGrid> {
       vReason = 'y=${normalizedY.toStringAsFixed(2)} < ${edgeRatio}';
     } else if (normalizedY > (1 - edgeRatio)) {
       vZone = 2; // 下
-      vReason = 'y=${normalizedY.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
+      vReason =
+          'y=${normalizedY.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
     } else {
       vZone = 1; // 中
-      vReason = '${edgeRatio} <= y=${normalizedY.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
+      vReason =
+          '${edgeRatio} <= y=${normalizedY.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
     }
-
-    debugPrint('[HomeGrid] 🏓 hZone=$hZone (${['左', '中', '右'][hZone]}) ← $hReason');
-    debugPrint('[HomeGrid] 🏓 vZone=$vZone (${['上', '中', '下'][vZone]}) ← $vReason');
 
     // 九宫格映射到方向
     // 中心区域 (hZone=1, vZone=1) 返回 null，表示合并/堆叠操作
     // 边缘区域返回对应方向
     if (hZone == 1 && vZone == 1) {
       // 中心区域：不返回方向，由调用方处理为合并/堆叠
-      debugPrint('[HomeGrid] 🎯 Result: CENTER (merge)');
       return null;
     }
 
@@ -678,11 +691,30 @@ class _HomeGridState extends State<HomeGrid> {
       return widget.items.length;
     }
     final referenceId = displayOrder[displayIndex];
-    final actualIndex = widget.items.indexWhere((element) => element.id == referenceId);
+    final actualIndex = widget.items.indexWhere(
+      (element) => element.id == referenceId,
+    );
     if (actualIndex == -1) {
       return widget.items.length;
     }
     return actualIndex;
+  }
+
+  /// 根据拖放方向计算目标索引
+  int _calculateTargetIndex(int targetIndex, _DropDirection? direction) {
+    // 如果没有方向信息（中心区域），默认放在目标位置
+    if (direction == null) {
+      return targetIndex;
+    }
+
+    // 对于 bottom 和 right 方向，目标位置是目标项的后面
+    if (direction == _DropDirection.bottom ||
+        direction == _DropDirection.right) {
+      return targetIndex + 1;
+    }
+
+    // 对于 top 和 left 方向，目标位置是目标位置（即插入到目标项前面）
+    return targetIndex;
   }
 
   void _applyPreview(_DropRegion zone) {
@@ -699,20 +731,25 @@ class _HomeGridState extends State<HomeGrid> {
       return;
     }
 
-    final currentOrder = _displayOrder.isEmpty
-        ? widget.items.map((item) => item.id).toList()
-        : List<String>.from(_displayOrder);
+    final currentOrder =
+        _displayOrder.isEmpty
+            ? widget.items.map((item) => item.id).toList()
+            : List<String>.from(_displayOrder);
     final fromIndex = currentOrder.indexOf(draggedId);
     if (fromIndex == -1) {
       return;
     }
 
     int displayTargetIndex = zone.index;
-    if (zone.direction == _DropDirection.bottom || zone.direction == _DropDirection.right) {
+    if (zone.direction == _DropDirection.bottom ||
+        zone.direction == _DropDirection.right) {
       displayTargetIndex += 1;
     }
     displayTargetIndex = displayTargetIndex.clamp(0, currentOrder.length);
-    final actualTargetIndex = _mapDisplayIndexToActual(displayTargetIndex, currentOrder);
+    final actualTargetIndex = _mapDisplayIndexToActual(
+      displayTargetIndex,
+      currentOrder,
+    );
 
     final newOrder = List<String>.from(currentOrder);
     final removed = newOrder.removeAt(fromIndex);
@@ -736,71 +773,120 @@ class _HomeGridState extends State<HomeGrid> {
     int targetIndex,
     DragTargetDetails<String> details,
   ) async {
+    // 防止重复调用
+    if (_isDropping) {
+      debugPrint('[HomeGrid] ⚠️ Already dropping, skipping duplicate call');
+      return;
+    }
+    _isDropping = true;
+
+    debugPrint('[HomeGrid] 🚀 _handleCenterDrop called');
+    debugPrint('[HomeGrid] 📍 targetIndex: $targetIndex');
+    debugPrint('[HomeGrid] 🎯 _hoveredDropZone: $_hoveredDropZone');
+    debugPrint('[HomeGrid] 🧭 _hoveredDropZone?.direction: ${_hoveredDropZone?.direction}');
+
     final draggedId = details.data;
     if (draggedId == null) {
+      debugPrint('[HomeGrid] ⚠️ draggedId is null');
       _resetPreviewStateAfterDrop();
       return;
     }
 
     final orderedItems = _buildOrderedItems();
     if (targetIndex < 0 || targetIndex >= orderedItems.length) {
+      debugPrint('[HomeGrid] ⚠️ invalid targetIndex: $targetIndex');
       _resetPreviewStateAfterDrop();
       return;
     }
 
     final targetItem = orderedItems[targetIndex];
     if (draggedId == targetItem.id) {
+      debugPrint('[HomeGrid] ⚠️ same item');
       _resetPreviewStateAfterDrop();
       return;
     }
 
     final draggedItem = _findItemById(draggedId);
+    debugPrint('[HomeGrid] 📦 draggedItem: ${draggedItem?.id}');
 
-    if (targetItem is HomeFolderItem && widget.onReorder != null) {
-      if (draggedItem == null) {
-        _resetPreviewStateAfterDrop();
-        return;
-      }
-      final result = await _showDragToFolderDialog(context, draggedItem, targetItem);
-      if (result == _DragToFolderAction.replace) {
-        final sourceIndex = widget.items.indexWhere((element) => element.id == draggedId);
-        if (sourceIndex != -1) {
-          widget.onReorder!(sourceIndex, targetIndex);
+    // 获取当前悬停区域的方向
+    final dropDirection = _hoveredDropZone?.direction;
+    debugPrint('[HomeGrid] 🧭 dropDirection: $dropDirection');
+
+    // 中心区域（direction == null）：合并/堆叠操作
+    if (dropDirection == null) {
+      if (targetItem is HomeFolderItem &&
+          widget.onReorder != null &&
+          draggedItem != null) {
+        final result = await _showDragToFolderDialog(
+          context,
+          draggedItem,
+          targetItem,
+        );
+        if (result == _DragToFolderAction.replace) {
+          final sourceIndex = widget.items.indexWhere(
+            (element) => element.id == draggedId,
+          );
+          if (sourceIndex != -1) {
+            widget.onReorder!(sourceIndex, targetIndex);
+          }
+        } else if (result == _DragToFolderAction.addToFolder) {
+          _handleAddToFolder(draggedItem.id, targetItem.id);
         }
-      } else if (result == _DragToFolderAction.addToFolder) {
-        _handleAddToFolder(draggedItem.id, targetItem.id);
-      }
-      _resetPreviewStateAfterDrop();
-      return;
-    }
-
-    if (draggedItem != null && widget.onMergeIntoStack != null) {
-      final handled = await widget.onMergeIntoStack!(context, targetItem, draggedItem);
-      if (handled) {
         _resetPreviewStateAfterDrop();
         return;
       }
+
+      // 尝试合并到 stack
+      if (draggedItem != null && widget.onMergeIntoStack != null) {
+        final handled = await widget.onMergeIntoStack!(
+          context,
+          targetItem,
+          draggedItem,
+        );
+        if (handled) {
+          _resetPreviewStateAfterDrop();
+          return;
+        }
+      }
     }
 
+    // 边缘区域或中心区域合并失败：执行重排序
     bool handled = false;
     if (draggedItem != null && widget.onReorder != null) {
-      final sourceIndex = widget.items.indexWhere((element) => element.id == draggedId);
+      final sourceIndex = widget.items.indexWhere(
+        (element) => element.id == draggedId,
+      );
       if (sourceIndex != -1) {
-        final newIndex = _pendingTargetIndex ??
-            _mapDisplayIndexToActual(targetIndex, _displayOrder.isEmpty
-                ? widget.items.map((item) => item.id).toList()
-                : _displayOrder);
-        widget.onReorder!(sourceIndex, newIndex);
+        // 根据方向计算目标位置
+        int calculatedTargetIndex;
+        if (_pendingTargetIndex != null) {
+          // 如果有预览的目标位置，使用它
+          calculatedTargetIndex = _pendingTargetIndex!;
+        } else {
+          // 否则根据方向实时计算
+          calculatedTargetIndex = _calculateTargetIndex(
+            targetIndex,
+            dropDirection,
+          );
+        }
+        debugPrint(
+          '[HomeGrid] 🔄 Reorder: sourceIndex=$sourceIndex, targetIndex=$calculatedTargetIndex, direction=$dropDirection',
+        );
+        widget.onReorder!(sourceIndex, calculatedTargetIndex);
         handled = true;
       }
     } else if (draggedItem == null &&
         widget.onCrossLayoutDrop != null &&
         widget.layoutId != null) {
-      final actualIndex = _pendingTargetIndex ??
-          _mapDisplayIndexToActual(targetIndex, _displayOrder.isEmpty
-              ? widget.items.map((item) => item.id).toList()
-              : _displayOrder);
-      handled = await widget.onCrossLayoutDrop!(draggedId, widget.layoutId!, actualIndex);
+      final actualIndex =
+          _pendingTargetIndex ??
+          _calculateTargetIndex(targetIndex, dropDirection);
+      handled = await widget.onCrossLayoutDrop!(
+        draggedId,
+        widget.layoutId!,
+        actualIndex,
+      );
     }
 
     _resetPreviewStateAfterDrop();
@@ -816,6 +902,7 @@ class _HomeGridState extends State<HomeGrid> {
       _draggingItemId = null;
       _hoveredDropZone = null;
       _resetPreviewOrder();
+      _isDropping = false;
     });
     _previewTimer?.cancel();
     _previewTimer = null;
@@ -922,9 +1009,9 @@ class _HomeGridState extends State<HomeGrid> {
                     const SizedBox(height: 4),
                     Text(
                       'screens_pluginDisabled'.tr,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.white),
                     ),
                   ],
                 ),
@@ -936,24 +1023,19 @@ class _HomeGridState extends State<HomeGrid> {
     );
   }
 
-  void _showPluginDisabledToast(
-    BuildContext context,
-    _PluginCardState state,
-  ) {
+  void _showPluginDisabledToast(BuildContext context, _PluginCardState state) {
     final messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
       SnackBar(
-        content: Text(
-          '${state.displayName} ${'screens_pluginDisabled'.tr}',
-        ),
+        content: Text('${state.displayName} ${'screens_pluginDisabled'.tr}'),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
   /// 构建空状态
-  Widget _buildEmptyState(BuildContext context, ) {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1016,7 +1098,8 @@ class _HomeGridState extends State<HomeGrid> {
 
     final result = await showDialog<Map<String, String>>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder:
+          (context) => AlertDialog(
             title: Text('screens_quickCreateLayout'.tr),
             content: TextField(
               controller: nameController,
@@ -1076,7 +1159,9 @@ class _DropRegion {
 
   @override
   bool operator ==(Object other) {
-    return other is _DropRegion && other.index == index && other.direction == direction;
+    return other is _DropRegion &&
+        other.index == index &&
+        other.direction == direction;
   }
 
   @override
@@ -1084,9 +1169,9 @@ class _DropRegion {
 }
 
 enum _DragToFolderAction {
-  replace,      // 替换位置
-  addToFolder,  // 添加到文件夹
-  cancel,       // 取消
+  replace, // 替换位置
+  addToFolder, // 添加到文件夹
+  cancel, // 取消
 }
 
 /// 显示拖拽到文件夹的对话框
@@ -1110,37 +1195,41 @@ Future<_DragToFolderAction?> _showDragToFolderDialog(
 
   return showDialog<_DragToFolderAction>(
     context: context,
-    builder: (context) => AlertDialog(
+    builder:
+        (context) => AlertDialog(
           title: Text('screens_dragToFolder'.tr),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
                 'screens_dragItemToFolder'.trParams({
                   'item': itemName,
                   'folder': targetFolder.name,
                 }),
               ),
-          const SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text('screens_pleaseSelectAction'.tr),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, _DragToFolderAction.cancel),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed:
+                  () => Navigator.pop(context, _DragToFolderAction.cancel),
               child: Text('screens_cancel'.tr),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, _DragToFolderAction.replace),
+            ),
+            TextButton(
+              onPressed:
+                  () => Navigator.pop(context, _DragToFolderAction.replace),
               child: Text('screens_replacePosition'.tr),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, _DragToFolderAction.addToFolder),
+            ),
+            ElevatedButton(
+              onPressed:
+                  () => Navigator.pop(context, _DragToFolderAction.addToFolder),
               child: Text('screens_addToFolder'.tr),
+            ),
+          ],
         ),
-      ],
-    ),
   );
 }
 
