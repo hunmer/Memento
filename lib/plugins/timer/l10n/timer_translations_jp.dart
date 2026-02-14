@@ -1,0 +1,52 @@
+/// Timer plugin Japanese translations
+class TimerTranslationsJp {
+  static const Map<String, String> keys = {
+    'timer_name': 'タイマー',
+    'timer_totalTimer': '合計',
+    'timer_deleteTimer': 'タイマーを削除',
+    'timer_deleteTimerConfirmation': 'このタイマーを削除してもよろしいですか？',
+    'timer_countUpTimer': '加算',
+    'timer_countDownTimer': '減算',
+    'timer_pomodoroTimer': 'ポモドーロ',
+    'timer_enableNotification': '通知を有効にする',
+    'timer_addTimer': 'タイマーを追加',
+    'timer_reset': 'リセット',
+    'timer_timerName': 'タイマー名',
+    'timer_timerDescription': 'タイマーの説明',
+    'timer_timerType': 'タイマータイプ',
+    'timer_repeatCount': 'リピート回数',
+    'timer_hours': '時間',
+    'timer_minutes': '分',
+    'timer_seconds': '秒',
+    'timer_workDuration': '作業時間（分）',
+    'timer_breakDuration': '休憩時間（分）',
+    'timer_cycleCount': 'サイクル数',
+    'timer_taskName': 'タスク名',
+    'timer_selectGroup': 'グループを選択',
+    'timer_cancelTimer': 'タイマーをキャンセル',
+    'timer_pauseTimerConfirm': 'タイマーを一時停止してもよろしいですか？経過時間: @time',
+    'timer_continueTimer': 'タイマーを再開',
+    'timer_confirmCancel': 'キャンセル確認',
+    'timer_completeTimer': 'タイマーを完了',
+    'timer_completeTimerConfirm': 'タイマーを完了してもよろしいですか？\n経過時間: @time@note',
+    'timer_timerNotePrefix': 'メモ: ',
+    'timer_continueAdjust': '再開調整',
+    'timer_confirmComplete': '完了確認',
+    'timer_searchPlaceholder': 'タイマータスクを検索...',
+
+    // Timer Task Details Page
+    'timer_remainingTime': '残り',
+    'timer_pause': '一時停止',
+    'timer_play': '再生',
+    'timer_running': '実行中',
+
+    // Widget Home Strings
+    'timer_widgetName': 'タイマー',
+    'timer_widgetDescription': 'タイマーへのクイックアクセス',
+    'timer_overviewName': 'タイマー概要',
+    'timer_overviewDescription': 'タイマー統計を表示',
+    'timer_quickAccess': 'クイックアクセス',
+    'timer_quickAccessDesc': 'タップしてタイマー詳細へ',
+    'viewDetail': '詳細を表示',
+  };
+}

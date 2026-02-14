@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'agent_chat_translations_zh.dart';
 import 'agent_chat_translations_en.dart';
+import 'agent_chat_translations_jp.dart';
 
 /// Agent Chat插件GetX翻译类
 class AgentChatTranslations extends Translations {
@@ -8,5 +9,6 @@ class AgentChatTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
         'zh_CN': agentChatTranslationsZh,
         'en_US': agentChatTranslationsEn,
+        'ja_JP': agentChatTranslationsJp,
       };
 }

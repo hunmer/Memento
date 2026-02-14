@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'notes_translations_zh.dart';
 import 'notes_translations_en.dart';
+import 'notes_translations_jp.dart';
 
 /// Notes 插件的国际化翻译类
 ///
@@ -11,5 +12,6 @@ class NotesTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
     'zh_CN': notesTranslationsZh,
     'en_US': notesTranslationsEn,
+    'ja_JP': notesTranslationsJp,
   };
 }
