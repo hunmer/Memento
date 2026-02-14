@@ -4,12 +4,8 @@ library;
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/extensions/internacionalization.dart';
-import 'package:intl/intl.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
-import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:memento_widgets/memento_widgets.dart';
-import 'bill_colors.dart';
 
 /// 从选择器数据数组中提取小组件需要的数据
 Map<String, dynamic> extractBillWidgetData(List<dynamic> dataArray) {

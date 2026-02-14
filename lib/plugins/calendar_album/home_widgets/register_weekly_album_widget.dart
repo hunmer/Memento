@@ -1,4 +1,5 @@
 /// 日历相册插件 - 本周相册小组件注册
+library;
 
 import 'dart:io';
 
@@ -64,8 +65,9 @@ Widget _buildWeeklyAlbumWidget(
 
 /// 构建本周相册小组件内容（获取最新数据）
 Widget _buildWeeklyAlbumWidgetContent(BuildContext context) {
-  final plugin = PluginManager.instance.getPlugin('calendar_album')
-      as CalendarAlbumPlugin?;
+  final plugin =
+      PluginManager.instance.getPlugin('calendar_album')
+          as CalendarAlbumPlugin?;
   if (plugin == null) {
     return HomeWidget.buildErrorWidget(context, 'Plugin not found');
   }
@@ -93,16 +95,12 @@ Widget _buildWeeklyAlbumWidgetContent(BuildContext context) {
         Expanded(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: weekDays.map((date) {
-              final entries = weekEntries[date] ?? [];
-              final firstEntry = entries.isNotEmpty ? entries.first : null;
-              return _buildDayPhotoCard(
-                context,
-                date,
-                firstEntry,
-                plugin,
-              );
-            }).toList(),
+            children:
+                weekDays.map((date) {
+                  final entries = weekEntries[date] ?? [];
+                  final firstEntry = entries.isNotEmpty ? entries.first : null;
+                  return _buildDayPhotoCard(context, date, firstEntry, plugin);
+                }).toList(),
           ),
         ),
       ],
@@ -144,9 +142,9 @@ Widget _buildDayPhotoCard(
                 Text(
                   weekdayText,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: isToday ? pluginColor : Colors.grey,
-                        fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                      ),
+                    color: isToday ? pluginColor : Colors.grey,
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 // 图片预览区域
@@ -156,9 +154,9 @@ Widget _buildDayPhotoCard(
                 Text(
                   dayText,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: isToday ? pluginColor : Colors.black87,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: isToday ? pluginColor : Colors.black87,
+                  ),
                 ),
               ],
             ),
@@ -188,9 +186,10 @@ Widget _buildPhotoPreview(BuildContext context, CalendarEntry? entry) {
   }
 
   // 获取第一张图片（优先使用缩略图）
-  final imageUrl = entry.thumbUrls.isNotEmpty
-      ? entry.thumbUrls.first
-      : (entry.imageUrls.isNotEmpty ? entry.imageUrls.first : null);
+  final imageUrl =
+      entry.thumbUrls.isNotEmpty
+          ? entry.thumbUrls.first
+          : (entry.imageUrls.isNotEmpty ? entry.imageUrls.first : null);
 
   if (imageUrl == null) {
     return Container(

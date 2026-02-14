@@ -1,10 +1,11 @@
 part of 'notes_plugin.dart';
 
-  // ==================== 数据选择器注册 ====================
+// ==================== 数据选择器注册 ====================
 
-  void _registerDataSelectors() {
-    // 注册笔记选择器
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
+void _registerDataSelectors() {
+  // 注册笔记选择器
+  pluginDataSelectorService.registerSelector(
+    SelectorDefinition(
       id: 'notes.note',
       pluginId: NotesPlugin.instance.id,
       name: '选择笔记',
@@ -22,11 +23,14 @@ part of 'notes_plugin.dart';
             if (!NotesPlugin.instance._isInitialized) return [];
 
             // 获取所有笔记
-            final allNotes = NotesPlugin.instance.controller.searchNotes(query: '');
+            final allNotes = NotesPlugin.instance.controller.searchNotes(
+              query: '',
+            );
 
             // 构建文件夹路径映射
             final folderPaths = <String, String>{};
-            for (final folder in NotesPlugin.instance.controller.getAllFolders()) {
+            for (final folder
+                in NotesPlugin.instance.controller.getAllFolders()) {
               folderPaths[folder.id] = _buildFolderPath(folder.id);
             }
 
@@ -46,15 +50,17 @@ part of 'notes_plugin.dart';
             final lowerQuery = query.toLowerCase();
             return items.where((item) {
               return item.title.toLowerCase().contains(lowerQuery) ||
-                     (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
+                  (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
             }).toList();
           },
         ),
       ],
-    ));
+    ),
+  );
 
-    // 注册文件夹选择器
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
+  // 注册文件夹选择器
+  pluginDataSelectorService.registerSelector(
+    SelectorDefinition(
       id: 'notes.folder',
       pluginId: NotesPlugin.instance.id,
       name: 'notes_folderSelectorName'.tr,
@@ -72,13 +78,18 @@ part of 'notes_plugin.dart';
             if (!NotesPlugin.instance._isInitialized) return [];
 
             // 获取所有文件夹（不包括 root）
-            final allFolders = NotesPlugin.instance.controller.getAllFolders()
-                .where((folder) => folder.id != 'root')
-                .toList();
+            final allFolders =
+                NotesPlugin.instance.controller
+                    .getAllFolders()
+                    .where((folder) => folder.id != 'root')
+                    .toList();
 
             return allFolders.map((folder) {
               // 获取文件夹中的笔记数量
-              final notesCount = NotesPlugin.instance.controller.getFolderNotes(folder.id).length;
+              final notesCount =
+                  NotesPlugin.instance.controller
+                      .getFolderNotes(folder.id)
+                      .length;
 
               // 构建文件夹路径
               final folderPath = _buildFolderPath(folder.id);
@@ -106,16 +117,18 @@ part of 'notes_plugin.dart';
             final lowerQuery = query.toLowerCase();
             return items.where((item) {
               return item.title.toLowerCase().contains(lowerQuery) ||
-                     (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
+                  (item.subtitle?.toLowerCase().contains(lowerQuery) ?? false);
             }).toList();
           },
           isFinalStep: true,
         ),
       ],
-    ));
+    ),
+  );
 
-    // 注册笔记列表配置选择器（选择文件夹、标签、日期范围）
-    pluginDataSelectorService.registerSelector(SelectorDefinition(
+  // 注册笔记列表配置选择器（选择文件夹、标签、日期范围）
+  pluginDataSelectorService.registerSelector(
+    SelectorDefinition(
       id: 'notes.list.config',
       pluginId: NotesPlugin.instance.id,
       name: 'notes_listConfigSelectorName'.tr,
@@ -141,33 +154,36 @@ part of 'notes_plugin.dart';
           },
         ),
       ],
-    ));
-  }
+    ),
+  );
+}
 
-  /// 构建文件夹完整路径（用于显示在副标题）
-  String _buildFolderPath(String folderId) {
-    final folder = NotesPlugin.instance.controller.getFolder(folderId);
-    if (folder == null || folder.id == 'root') return '';
+/// 构建文件夹完整路径（用于显示在副标题）
+String _buildFolderPath(String folderId) {
+  final folder = NotesPlugin.instance.controller.getFolder(folderId);
+  if (folder == null || folder.id == 'root') return '';
 
-    final pathParts = <String>[];
-    var currentFolder = folder;
+  final pathParts = <String>[];
+  var currentFolder = folder;
 
-    while (currentFolder.id != 'root') {
-      pathParts.insert(0, currentFolder.name);
-      if (currentFolder.parentId != null) {
-        final parent = NotesPlugin.instance.controller.getFolder(currentFolder.parentId!);
-        if (parent != null) {
-          currentFolder = parent;
-        } else {
-          break;
-        }
+  while (currentFolder.id != 'root') {
+    pathParts.insert(0, currentFolder.name);
+    if (currentFolder.parentId != null) {
+      final parent = NotesPlugin.instance.controller.getFolder(
+        currentFolder.parentId!,
+      );
+      if (parent != null) {
+        currentFolder = parent;
       } else {
         break;
       }
+    } else {
+      break;
     }
-
-    return pathParts.join(' / ');
   }
+
+  return pathParts.join(' / ');
+}
 
 /// 笔记列表配置表单
 class _NotesListConfigForm extends StatefulWidget {
@@ -200,9 +216,11 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
     final controller = NotesPlugin.instance.controller;
 
     // 获取所有文件夹
-    final allFolders = controller.getAllFolders()
-        .where((folder) => folder.id != 'root')
-        .toList();
+    final allFolders =
+        controller
+            .getAllFolders()
+            .where((folder) => folder.id != 'root')
+            .toList();
 
     // 获取所有标签
     final allNotes = controller.searchNotes(query: '');
@@ -305,7 +323,10 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('notes_selectFolderTitle'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          'notes_selectFolderTitle'.tr,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: _selectedFolderId ?? 'all',
@@ -315,16 +336,18 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
             fillColor: Theme.of(context).colorScheme.surface,
           ),
           items: [
-            DropdownMenuItem(
-              value: 'all',
-              child: Text('notes_allNotes'.tr),
-            ),
+            DropdownMenuItem(value: 'all', child: Text('notes_allNotes'.tr)),
             ..._folders.map((folder) {
-              final notesCount = NotesPlugin.instance.controller.getFolderNotes(folder.id).length;
+              final notesCount =
+                  NotesPlugin.instance.controller
+                      .getFolderNotes(folder.id)
+                      .length;
               final folderPath = _buildFolderPath(folder.id);
               return DropdownMenuItem(
                 value: folder.id,
-                child: Text('$folderPath • $notesCount ${'notes_notesCount'.tr}'),
+                child: Text(
+                  '$folderPath • $notesCount ${'notes_notesCount'.tr}',
+                ),
               );
             }),
           ],
@@ -349,32 +372,39 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('notes_selectTagsTitle'.tr + ' (${'notes_optional'.tr})', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          '${'notes_selectTagsTitle'.tr} (${'notes_optional'.tr})',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         if (_allTags.isEmpty)
-          Text('notes_noTags'.tr, style: TextStyle(color: Theme.of(context).colorScheme.outline))
+          Text(
+            'notes_noTags'.tr,
+            style: TextStyle(color: Theme.of(context).colorScheme.outline),
+          )
         else
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _allTags.map((tag) {
-              final isSelected = _selectedTags.contains(tag);
-              return FilterChip(
-                label: Text(tag),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedTags.add(tag);
-                    } else {
-                      _selectedTags.remove(tag);
-                    }
-                  });
-                },
-                selectedColor: NotesPlugin.instance.color.withOpacity(0.3),
-                checkmarkColor: NotesPlugin.instance.color,
-              );
-            }).toList(),
+            children:
+                _allTags.map((tag) {
+                  final isSelected = _selectedTags.contains(tag);
+                  return FilterChip(
+                    label: Text(tag),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedTags.add(tag);
+                        } else {
+                          _selectedTags.remove(tag);
+                        }
+                      });
+                    },
+                    selectedColor: NotesPlugin.instance.color.withOpacity(0.3),
+                    checkmarkColor: NotesPlugin.instance.color,
+                  );
+                }).toList(),
           ),
       ],
     );
@@ -384,7 +414,10 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('notes_selectDateRangeTitle'.tr + ' (${'notes_optional'.tr})', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          '${'notes_selectDateRangeTitle'.tr} (${'notes_optional'.tr})',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -402,7 +435,11 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
                   }
                 },
                 icon: const Icon(Icons.calendar_today),
-                label: Text(_startDate == null ? 'notes_startDate'.tr : DateFormat('yyyy-MM-dd').format(_startDate!)),
+                label: Text(
+                  _startDate == null
+                      ? 'notes_startDate'.tr
+                      : DateFormat('yyyy-MM-dd').format(_startDate!),
+                ),
               ),
             ),
             const SizedBox(width: 8),
@@ -420,7 +457,11 @@ class _NotesListConfigFormState extends State<_NotesListConfigForm> {
                   }
                 },
                 icon: const Icon(Icons.calendar_today),
-                label: Text(_endDate == null ? 'notes_endDate'.tr : DateFormat('yyyy-MM-dd').format(_endDate!)),
+                label: Text(
+                  _endDate == null
+                      ? 'notes_endDate'.tr
+                      : DateFormat('yyyy-MM-dd').format(_endDate!),
+                ),
               ),
             ),
           ],

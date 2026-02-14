@@ -1,4 +1,5 @@
 /// 日历相册插件 - 概览小组件注册
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -31,10 +32,7 @@ void registerOverviewWidget(HomeWidgetRegistry registry) {
 }
 
 /// 构建 2x2 详细卡片组件
-Widget _buildOverviewWidget(
-  BuildContext context,
-  Map<String, dynamic> config,
-) {
+Widget _buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
   try {
     // 解析插件配置
     PluginWidgetConfig widgetConfig;

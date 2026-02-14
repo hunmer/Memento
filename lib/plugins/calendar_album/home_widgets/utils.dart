@@ -1,4 +1,5 @@
 /// 日历相册插件主页小组件工具函数
+library;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

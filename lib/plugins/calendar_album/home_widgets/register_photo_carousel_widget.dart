@@ -1,4 +1,5 @@
 /// 日历相册插件 - 图片轮播小组件注册
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -64,8 +65,9 @@ Widget _buildPhotoCarouselWidget(
 
 /// 构建滑动滚动图片小组件内容（获取最新数据）
 Widget _buildPhotoCarouselWidgetContent(BuildContext context) {
-  final plugin = PluginManager.instance.getPlugin('calendar_album')
-      as CalendarAlbumPlugin?;
+  final plugin =
+      PluginManager.instance.getPlugin('calendar_album')
+          as CalendarAlbumPlugin?;
   if (plugin == null) {
     return HomeWidget.buildErrorWidget(context, 'Plugin not found');
   }
@@ -82,10 +84,7 @@ Widget _buildPhotoCarouselWidgetContent(BuildContext context) {
     return _buildEmptyPhotoWidget(context);
   }
 
-  return PhotoCarouselWidget(
-    photos: photos,
-    plugin: plugin,
-  );
+  return PhotoCarouselWidget(photos: photos, plugin: plugin);
 }
 
 /// 获取最近指定天数的图片列表
@@ -107,21 +106,13 @@ List<PhotoItem> _getRecentPhotos(
       if (entry.thumbUrls.isNotEmpty) {
         for (final imageUrl in entry.thumbUrls) {
           photos.add(
-            PhotoItem(
-              imageUrl: imageUrl,
-              entry: entry,
-              date: normalizedDate,
-            ),
+            PhotoItem(imageUrl: imageUrl, entry: entry, date: normalizedDate),
           );
         }
       } else if (entry.imageUrls.isNotEmpty) {
         for (final imageUrl in entry.imageUrls) {
           photos.add(
-            PhotoItem(
-              imageUrl: imageUrl,
-              entry: entry,
-              date: normalizedDate,
-            ),
+            PhotoItem(imageUrl: imageUrl, entry: entry, date: normalizedDate),
           );
         }
       }
@@ -158,10 +149,9 @@ Widget _buildEmptyPhotoWidget(BuildContext context) {
           const SizedBox(height: 12),
           Text(
             'calendar_album_no_photos'.tr,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: Colors.grey),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 /// 活动插件主页小组件数据模型
+library;
 
 /// 一天活动数据（用于7天统计）
 class DayActivityData {

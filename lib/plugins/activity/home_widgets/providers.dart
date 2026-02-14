@@ -1,4 +1,5 @@
 /// 活动插件主页小组件数据提供者
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -53,10 +54,7 @@ List<StatItemData> getAvailableStats(BuildContext context) {
 }
 
 /// 构建 2x2 详细卡片组件
-Widget buildOverviewWidget(
-  BuildContext context,
-  Map<String, dynamic> config,
-) {
+Widget buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
   try {
     // 解析插件配置
     PluginWidgetConfig widgetConfig;
@@ -118,10 +116,7 @@ Widget buildCommonWidgetsWidget(
   final selectorConfig =
       config['selectorWidgetConfig'] as Map<String, dynamic>?;
   if (selectorConfig == null) {
-    return HomeWidget.buildErrorWidget(
-      context,
-      '配置错误：缺少 selectorWidgetConfig',
-    );
+    return HomeWidget.buildErrorWidget(context, '配置错误：缺少 selectorWidgetConfig');
   }
 
   final commonWidgetId = selectorConfig['commonWidgetId'] as String?;
@@ -138,10 +133,7 @@ Widget buildCommonWidgetsWidget(
   // 查找对应的 CommonWidgetId 枚举
   final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
   if (widgetIdEnum == null) {
-    return HomeWidget.buildErrorWidget(
-      context,
-      '未知的公共小组件类型: $commonWidgetId',
-    );
+    return HomeWidget.buildErrorWidget(context, '未知的公共小组件类型: $commonWidgetId');
   }
 
   // 获取元数据以确定默认尺寸
@@ -298,9 +290,7 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
     'dailyScheduleCard': {
       'todayDate': '${now.month}月${now.day}日',
       'todayEvents':
-          todayActivities
-              .map((a) => convertActivityToEventData(a))
-              .toList(),
+          todayActivities.map((a) => convertActivityToEventData(a)).toList(),
       'tomorrowEvents':
           yesterdayActivities
               .map((a) => convertActivityToEventData(a))
@@ -318,11 +308,14 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
               .map(
                 (e) => {
                   'label': e.key,
-                  'percentage': todayDurationMinutes > 0
-                      ? (e.value / todayDurationMinutes * 100)
-                      : 0.0,
+                  'percentage':
+                      todayDurationMinutes > 0
+                          ? (e.value / todayDurationMinutes * 100)
+                          : 0.0,
                   'color': getColorFromTag(e.key).value,
-                  'subtitle': formatActivitiesTimeRange(activitiesByTag[e.key] ?? []),
+                  'subtitle': formatActivitiesTimeRange(
+                    activitiesByTag[e.key] ?? [],
+                  ),
                 },
               )
               .toList(),
@@ -368,9 +361,10 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
               .map(
                 (a) => {
                   'title': a.title.isEmpty ? '未命名活动' : a.title,
-                  'color': a.tags.isNotEmpty
-                      ? getColorFromTag(a.tags.first).value
-                      : Colors.pink.value,
+                  'color':
+                      a.tags.isNotEmpty
+                          ? getColorFromTag(a.tags.first).value
+                          : Colors.pink.value,
                   'tag': formatTimeRangeStatic(a.startTime, a.endTime),
                 },
               )
@@ -490,10 +484,7 @@ Map<String, dynamic> buildHeatmapCardData(
   }
 
   // 计算时间槽数据
-  final timeSlots = calculateTimeSlotData(
-    activities,
-    timeGranularity,
-  );
+  final timeSlots = calculateTimeSlotData(activities, timeGranularity);
 
   // 计算总时长
   final totalMinutes = activities.fold<int>(
@@ -626,11 +617,13 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       0,
       (sum, a) => sum + a.durationInMinutes,
     );
-    sevenDaysData.add(DayActivityData(
-      date: date,
-      totalMinutes: totalMinutes,
-      activityCount: activities.length,
-    ));
+    sevenDaysData.add(
+      DayActivityData(
+        date: date,
+        totalMinutes: totalMinutes,
+        activityCount: activities.length,
+      ),
+    );
   }
 
   // 计算统计数据
@@ -639,14 +632,17 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
     (sum, d) => sum + d.totalMinutes,
   );
   final avgMinutes = totalWeekMinutes / 7;
-  final maxMinutes =
-      sevenDaysData.map((d) => d.totalMinutes).reduce((a, b) => a > b ? a : b);
+  final maxMinutes = sevenDaysData
+      .map((d) => d.totalMinutes)
+      .reduce((a, b) => a > b ? a : b);
 
   // 为各种图表组件准备数据
-  final weeklyDurations = sevenDaysData.map((d) => d.totalMinutes.toDouble()).toList();
-  final weeklyNormalized = maxMinutes > 0
-      ? weeklyDurations.map((d) => d / maxMinutes).toList()
-      : List.filled(7, 0.0);
+  final weeklyDurations =
+      sevenDaysData.map((d) => d.totalMinutes.toDouble()).toList();
+  final weeklyNormalized =
+      maxMinutes > 0
+          ? weeklyDurations.map((d) => d / maxMinutes).toList()
+          : List.filled(7, 0.0);
 
   // 格式化日期范围
   final startDate = DateFormat('MM月dd日').format(sevenDaysData.first.date);
@@ -654,11 +650,12 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
 
   // 获取今天和昨天的数据用于对比
   final todayMinutes = sevenDaysData.last.totalMinutes.toDouble();
-  final yesterdayMinutes = sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
-  final changePercent = yesterdayMinutes > 0
-          ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100)
-              .floor()
-      : 0.0;
+  final yesterdayMinutes =
+      sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
+  final changePercent =
+      yesterdayMinutes > 0
+          ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100).floor()
+          : 0.0;
 
   return {
     // StressLevelMonitor (CardBarChartMonitor) - 压力水平监测样式
@@ -668,15 +665,21 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       'currentScore': avgMinutes / 60, // 转换为小时
       'status': getActivityStatus(avgMinutes),
       'scoreUnit': '小时/天',
-      'weeklyData': sevenDaysData.asMap().entries.map((entry) {
-        final index = entry.key;
-        final data = entry.value;
-        return {
-          'day': weekDayLabelsEn[(now.subtract(Duration(days: 6 - index)).weekday - 1) % 7],
-          'value': maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0,
-          'isSelected': index == 6,
-        };
-      }).toList(),
+      'weeklyData':
+          sevenDaysData.asMap().entries.map((entry) {
+            final index = entry.key;
+            final data = entry.value;
+            return {
+              'day':
+                  weekDayLabelsEn[(now
+                              .subtract(Duration(days: 6 - index))
+                              .weekday -
+                          1) %
+                      7],
+              'value': maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0,
+              'isSelected': index == 6,
+            };
+          }).toList(),
     },
 
     // LineChartTrendCard - 折线图趋势卡片
@@ -695,7 +698,7 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
             final normalized =
                 maxMinutes > 0 ? d.totalMinutes / maxMinutes : 0.0;
             return normalized * 100; // 转换为0-100的百分比
-      }).toList(),
+          }).toList(),
     },
 
     // SmoothLineChartCard - 平滑折线图卡片
@@ -708,14 +711,15 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       'unit': '分钟',
       'maxValue': 120.0, // 匹配 y 值范围 0-120
       'timeLabels': weekDayLabels, // 星期标签
-      'dataPoints': sevenDaysData.asMap().entries.map((entry) {
-        final value = entry.value.totalMinutes;
-        final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
-        return {
-          'x': (entry.key * 53.33).clamp(0.0, 320.0),
-          'y': (120 - normalized * 100).clamp(0.0, 120.0),
-        };
-      }).toList(),
+      'dataPoints':
+          sevenDaysData.asMap().entries.map((entry) {
+            final value = entry.value.totalMinutes;
+            final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
+            return {
+              'x': (entry.key * 53.33).clamp(0.0, 320.0),
+              'y': (120 - normalized * 100).clamp(0.0, 120.0),
+            };
+          }).toList(),
     },
 
     // BarChartStatsCard - 柱状图统计卡片
@@ -741,9 +745,10 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       'currentValue': avgMinutes / 60, // 转为小时
       'unit': '小时',
       'status': '日均',
-      'dailyValues': maxMinutes > 0
-          ? sevenDaysData.map((d) => d.totalMinutes / maxMinutes).toList()
-          : List.filled(7, 0.0),
+      'dailyValues':
+          maxMinutes > 0
+              ? sevenDaysData.map((d) => d.totalMinutes / maxMinutes).toList()
+              : List.filled(7, 0.0),
     },
 
     // ExpenseComparisonChart - 支出对比图表
@@ -757,14 +762,16 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
         final date = now.subtract(Duration(days: 6 - index));
         return DateFormat('dd').format(date);
       }),
-      'dailyData': sevenDaysData.asMap().entries.map((entry) {
-        return {
-          'lastMonth': entry.key > 0
-              ? sevenDaysData[entry.key - 1].totalMinutes / 60
-              : 0.0,
-          'currentMonth': entry.value.totalMinutes / 60,
-        };
-      }).toList(),
+      'dailyData':
+          sevenDaysData.asMap().entries.map((entry) {
+            return {
+              'lastMonth':
+                  entry.key > 0
+                      ? sevenDaysData[entry.key - 1].totalMinutes / 60
+                      : 0.0,
+              'currentMonth': entry.value.totalMinutes / 60,
+            };
+          }).toList(),
     },
 
     // BloodPressureTracker (DualValueTrackerCardWrapper) - 双数值追踪卡片
@@ -775,16 +782,23 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       'status': getActivityStatus(avgMinutes),
       'unit': '小时',
       'icon': 'timeline',
-      'weekData': sevenDaysData.asMap().entries.map((entry) {
-        final index = entry.key;
-        final data = entry.value;
-        final normalized = maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0;
-        return {
-          'label': weekDayLabelsEn[(now.subtract(Duration(days: 6 - index)).weekday - 1) % 7],
-          'normalPercent': normalized,
-          'elevatedPercent': 0.0,
-        };
-      }).toList(),
+      'weekData':
+          sevenDaysData.asMap().entries.map((entry) {
+            final index = entry.key;
+            final data = entry.value;
+            final normalized =
+                maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0;
+            return {
+              'label':
+                  weekDayLabelsEn[(now
+                              .subtract(Duration(days: 6 - index))
+                              .weekday -
+                          1) %
+                      7],
+              'normalPercent': normalized,
+              'elevatedPercent': 0.0,
+            };
+          }).toList(),
     },
 
     // TrendLineChartCard (TrendLineChartCardWrapper) - 趋势折线图卡片
@@ -792,17 +806,23 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       'title': '活动趋势',
       'icon': 'show_chart',
       'value': avgMinutes / 60, // 转为小时
-      'dataPoints': sevenDaysData.asMap().entries.map((entry) {
-        final value = entry.value.totalMinutes;
-        final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
-        return {
-          'x': (entry.key * 53.33).clamp(0.0, 320.0),
-          'y': (120 - normalized * 100).clamp(0.0, 120.0),
-        };
-      }).toList(),
-      'timeLabels': sevenDaysData.asMap().entries.map((entry) {
-        return weekDayLabelsEn[(now.subtract(Duration(days: 6 - entry.key)).weekday - 1) % 7];
-      }).toList(),
+      'dataPoints':
+          sevenDaysData.asMap().entries.map((entry) {
+            final value = entry.value.totalMinutes;
+            final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
+            return {
+              'x': (entry.key * 53.33).clamp(0.0, 320.0),
+              'y': (120 - normalized * 100).clamp(0.0, 120.0),
+            };
+          }).toList(),
+      'timeLabels':
+          sevenDaysData.asMap().entries.map((entry) {
+            return weekDayLabelsEn[(now
+                        .subtract(Duration(days: 6 - entry.key))
+                        .weekday -
+                    1) %
+                7];
+          }).toList(),
       'primaryColor': Colors.pink.value,
       'valueColor': Colors.pinkAccent.value,
     },
@@ -889,8 +909,7 @@ Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
       sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
   final changePercent =
       yesterdayMinutes > 0
-          ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100)
-              .floor()
+          ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100).floor()
           : 0;
 
   final startDate = DateFormat('MM月dd日').format(sevenDaysData.first.date);
@@ -944,10 +963,10 @@ Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
       'chartData':
           weeklyDurations.isNotEmpty
               ? weeklyDurations.map((d) {
-                  return maxMinutes > 0
-                      ? (d / maxMinutes * 100).clamp(0.0, 100.0)
-                      : 0.0;
-                }).toList()
+                return maxMinutes > 0
+                    ? (d / maxMinutes * 100).clamp(0.0, 100.0)
+                    : 0.0;
+              }).toList()
               : List.filled(7, 0.0),
     },
     'spendingTrendChart': {
@@ -966,9 +985,6 @@ Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
 }
 
 /// 构建标签周统计通用小组件（根据配置渲染选中的公共小组件）
-Widget buildTagCommonWidget(
-  BuildContext context,
-  Map<String, dynamic> config,
-) {
+Widget buildTagCommonWidget(BuildContext context, Map<String, dynamic> config) {
   return buildCommonWidgetsWidget(context, config);
 }

@@ -13,14 +13,10 @@ import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/bill/screens/bill_edit_screen.dart';
-import 'bill_colors.dart';
 import 'utils.dart';
 
 /// 构建 2x2 详细卡片组件（概览组件）
-Widget buildOverviewWidget(
-  BuildContext context,
-  Map<String, dynamic> config,
-) {
+Widget buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
   try {
     // 解析插件配置
     PluginWidgetConfig widgetConfig;
@@ -249,10 +245,7 @@ Widget buildBillTypeCard({
 }
 
 /// 导航到创建账单界面（点击整个卡片时触发）
-void navigateToCreateBill(
-  BuildContext context,
-  SelectorResult result,
-) {
+void navigateToCreateBill(BuildContext context, SelectorResult result) {
   // 从 result.data 获取已转换的数据（由 dataSelector 处理）
   final data =
       result.data is Map<String, dynamic>
@@ -265,10 +258,6 @@ void navigateToCreateBill(
   NavigationHelper.pushNamed(
     navContext,
     '/bill',
-    arguments: {
-      'action': 'create',
-      'accountId': accountId,
-      'isExpense': true,
-    },
+    arguments: {'action': 'create', 'accountId': accountId, 'isExpense': true},
   );
 }

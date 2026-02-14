@@ -1,4 +1,5 @@
 /// 日历相册插件主页小组件数据提供者
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,8 +11,9 @@ import 'utils.dart';
 /// 获取可用的统计项
 List<StatItemData> getAvailableStats(BuildContext context) {
   try {
-    final plugin = PluginManager.instance.getPlugin('calendar_album')
-        as CalendarAlbumPlugin?;
+    final plugin =
+        PluginManager.instance.getPlugin('calendar_album')
+            as CalendarAlbumPlugin?;
     if (plugin == null) return [];
 
     final todayCount = plugin.calendarController?.getTodayEntriesCount();

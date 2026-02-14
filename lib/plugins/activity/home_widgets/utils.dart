@@ -1,4 +1,5 @@
 /// 活动插件主页小组件工具函数
+library;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -55,10 +56,11 @@ String formatActivitiesTimeRange(List<ActivityRecord> activities) {
   sortedActivities.sort((a, b) => a.startTime.compareTo(b.startTime));
 
   // 最多显示3个时间段
-  final timeRanges = sortedActivities
-      .take(3)
-      .map((a) => formatTimeRangeStatic(a.startTime, a.endTime))
-      .toList();
+  final timeRanges =
+      sortedActivities
+          .take(3)
+          .map((a) => formatTimeRangeStatic(a.startTime, a.endTime))
+          .toList();
 
   if (sortedActivities.length > 3) {
     return '${timeRanges.join('、')}...';
@@ -76,7 +78,8 @@ Map<String, dynamic> convertActivityToEventData(ActivityRecord activity) {
   final startPeriod = startHour >= 12 ? 'PM' : 'AM';
   final endPeriod = endHour >= 12 ? 'PM' : 'AM';
 
-  final startHour12 = startHour == 0 ? 12 : (startHour > 12 ? startHour - 12 : startHour);
+  final startHour12 =
+      startHour == 0 ? 12 : (startHour > 12 ? startHour - 12 : startHour);
   final endHour12 = endHour == 0 ? 12 : (endHour > 12 ? endHour - 12 : endHour);
 
   // 根据标签选择颜色
@@ -125,14 +128,14 @@ Map<String, dynamic> buildTimelineScheduleCardData(
   final yesterdayWeekday = getWeekdayName(yesterday.weekday);
 
   // 转换今日活动为 TimelineEvent 格式
-  final todayEvents = todayActivities
-      .map((a) => convertActivityToTimelineEvent(a))
-      .toList();
+  final todayEvents =
+      todayActivities.map((a) => convertActivityToTimelineEvent(a)).toList();
 
   // 转换昨日活动为 TimelineEvent 格式
-  final yesterdayEvents = yesterdayActivities
-      .map((a) => convertActivityToTimelineEvent(a))
-      .toList();
+  final yesterdayEvents =
+      yesterdayActivities
+          .map((a) => convertActivityToTimelineEvent(a))
+          .toList();
 
   return {
     'todayWeekday': todayWeekday,
@@ -151,13 +154,12 @@ String getWeekdayName(int weekday) {
 }
 
 /// 将活动记录转换为 TimelineEvent 格式
-Map<String, dynamic> convertActivityToTimelineEvent(
-  ActivityRecord activity,
-) {
+Map<String, dynamic> convertActivityToTimelineEvent(ActivityRecord activity) {
   // 获取主标签颜色
-  final tagColor = activity.tags.isNotEmpty
-      ? getColorFromTag(activity.tags.first)
-      : Colors.pink;
+  final tagColor =
+      activity.tags.isNotEmpty
+          ? getColorFromTag(activity.tags.first)
+          : Colors.pink;
 
   // 计算背景色和文本色
   final backgroundColorLight = tagColor.withOpacity(0.15);
