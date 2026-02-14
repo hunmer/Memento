@@ -128,6 +128,23 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
     }
   }
 
+  Future<void> _cloneProvider(ServiceProvider provider) async {
+    try {
+      final clonedProvider = provider.copyWith(
+        id: '${provider.id}_clone_${DateTime.now().millisecondsSinceEpoch}',
+        label: '${provider.label} (副本)',
+      );
+      await _controller.addProvider(clonedProvider);
+      await _loadProviders();
+      if (!mounted) return;
+      toastService.showToast('openai_cloneProviderSuccess'.tr);
+    } catch (e) {
+      _showErrorSnackBar(
+        '${'openai_cloneProviderFailed'.tr}: $e',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -190,6 +207,11 @@ class _ProviderSettingsScreenState extends State<ProviderSettingsScreen> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                IconButton(
+                  icon: const Icon(Icons.content_copy),
+                  onPressed: () => _cloneProvider(provider),
+                  tooltip: 'openai_cloneAgent'.tr,
+                ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _editProvider(provider),

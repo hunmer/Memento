@@ -4,6 +4,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/plugins/openai/models/service_provider.dart';
 import 'package:Memento/plugins/openai/models/llm_models.dart';
+import 'package:Memento/plugins/openai/models/api_format.dart';
 import 'package:Memento/plugins/openai/controllers/provider_controller.dart';
 import 'model_search_screen.dart';
 
@@ -29,6 +30,9 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   // 存储当前的 headers
   Map<String, String> _headers = {};
 
+  // API 格式
+  String _apiFormat = 'openai';
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +41,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
       _baseUrlController.text = widget.provider!.baseUrl;
       _headers = Map<String, String>.from(widget.provider!.headers);
       _defaultModelController.text = widget.provider!.defaultModel ?? '';
+      _apiFormat = widget.provider!.apiFormat;
     }
   }
 
@@ -80,9 +85,7 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   Future<void> _selectDefaultModel() async {
     final selectedModel = await NavigationHelper.push<LLMModel>(
       context,
-      ModelSearchScreen(
-        initialModelId: _defaultModelController.text,
-      ),
+      ModelSearchScreen(initialModelId: _defaultModelController.text),
     );
 
     if (selectedModel != null) {
@@ -100,15 +103,15 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
     final controller = ProviderController();
 
     final provider = ServiceProvider(
-      id:
-          widget.provider?.id ??
-          const Uuid().v4(),
+      id: widget.provider?.id ?? const Uuid().v4(),
       label: _labelController.text.trim(),
       baseUrl: _baseUrlController.text.trim(),
       headers: _headers,
-      defaultModel: _defaultModelController.text.trim().isEmpty
-          ? null
-          : _defaultModelController.text.trim(),
+      defaultModel:
+          _defaultModelController.text.trim().isEmpty
+              ? null
+              : _defaultModelController.text.trim(),
+      apiFormat: _apiFormat,
     );
 
     if (widget.provider == null) {
@@ -131,20 +134,21 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   Future<bool> _showUnsavedChangesDialog() async {
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('openai_unsavedChangesTitle'.tr),
-        content: Text('openai_unsavedHeaderWarning'.tr),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('openai_cancel'.tr),
+      builder:
+          (context) => AlertDialog(
+            title: Text('openai_unsavedChangesTitle'.tr),
+            content: Text('openai_unsavedHeaderWarning'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('openai_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('openai_discard'.tr),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('openai_discard'.tr),
-          ),
-        ],
-      ),
     );
     return result ?? false;
   }
@@ -184,160 +188,178 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
           ],
         ),
         body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _labelController,
-              decoration: InputDecoration(
-                labelText: 'openai_serviceProvider'.tr,
-                hintText: 'openai_pleaseSelectProvider'.tr,
-                border: OutlineInputBorder(),
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _labelController,
+                decoration: InputDecoration(
+                  labelText: 'openai_serviceProvider'.tr,
+                  hintText: 'openai_pleaseSelectProvider'.tr,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'openai_providerLabelError'.tr;
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'openai_providerLabelError'.tr;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _baseUrlController,
-              decoration: InputDecoration(
-                labelText: 'openai_baseUrl'.tr,
-                hintText: 'openai_enterBaseUrl'.tr,
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _baseUrlController,
+                decoration: InputDecoration(
+                  labelText: 'openai_baseUrl'.tr,
+                  hintText: 'openai_enterBaseUrl'.tr,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'openai_pleaseEnterBaseUrl'.tr;
+                  }
+                  if (!value.startsWith('http://') &&
+                      !value.startsWith('https://')) {
+                    return 'openai_baseUrlError'.tr;
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'openai_pleaseEnterBaseUrl'.tr;
-                }
-                if (!value.startsWith('http://') &&
-                    !value.startsWith('https://')) {
-                  return 'openai_baseUrlError'.tr;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _defaultModelController,
-                    decoration: InputDecoration(
-                      labelText: '默认模型',
-                      hintText: '选择此服务商的默认模型',
-                      border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _defaultModelController,
+                      decoration: InputDecoration(
+                        labelText: '默认模型',
+                        hintText: '选择此服务商的默认模型',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: _selectDefaultModel,
+                    tooltip: 'openai_searchModel'.tr,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _apiFormat,
+                decoration: InputDecoration(
+                  labelText: 'API 格式',
+                  hintText: '选择 API 格式',
+                  border: OutlineInputBorder(),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: _selectDefaultModel,
-                  tooltip: 'openai_searchModel'.tr,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Headers',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _headerKeyController,
-                            decoration: InputDecoration(
-                              labelText:
-                                  'openai_headerKey'.tr,
-                              hintText:
-                                  'openai_enterHeaders'.tr,
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _headerValueController,
-                            decoration: InputDecoration(
-                              labelText:
-                                  'openai_headerValue'.tr,
-                              hintText:
-                                  'openai_enterHeaders'.tr,
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle),
-                          onPressed: _addHeader,
-                          tooltip: 'openai_addHeader'.tr,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    _headers.isEmpty
-                        ? Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              'openai_noHeaders'.tr,
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        )
-                        : ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _headers.length,
-                          itemBuilder: (context, index) {
-                            final key = _headers.keys.elementAt(index);
-                            final value = _headers[key]!;
-                            return ListTile(
-                              title: Text(key),
-                              subtitle: Text(
-                                value,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                items: ApiFormat.values.map((format) {
+                  return DropdownMenuItem(
+                    value: format.value,
+                    child: Text(format.label),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _apiFormat = value;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Headers',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _headerKeyController,
+                              decoration: InputDecoration(
+                                labelText: 'openai_headerKey'.tr,
+                                hintText: 'openai_enterHeaders'.tr,
+                                border: OutlineInputBorder(),
                               ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    onPressed: () => _editHeader(key),
-                                    tooltip: 'openai_editHeader'.tr,
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    onPressed: () => _removeHeader(key),
-                                    tooltip: 'openai_deleteHeader'.tr,
-                                  ),
-                                ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _headerValueController,
+                              decoration: InputDecoration(
+                                labelText: 'openai_headerValue'.tr,
+                                hintText: 'openai_enterHeaders'.tr,
+                                border: OutlineInputBorder(),
                               ),
-                            );
-                          },
-                        ),
-                  ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.add_circle),
+                            onPressed: _addHeader,
+                            tooltip: 'openai_addHeader'.tr,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      _headers.isEmpty
+                          ? Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text(
+                                'openai_noHeaders'.tr,
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          )
+                          : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _headers.length,
+                            itemBuilder: (context, index) {
+                              final key = _headers.keys.elementAt(index);
+                              final value = _headers[key]!;
+                              return ListTile(
+                                title: Text(key),
+                                subtitle: Text(
+                                  value,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () => _editHeader(key),
+                                      tooltip: 'openai_editHeader'.tr,
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () => _removeHeader(key),
+                                      tooltip: 'openai_deleteHeader'.tr,
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

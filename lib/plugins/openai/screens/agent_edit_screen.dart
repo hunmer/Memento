@@ -18,6 +18,8 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'model_search_screen.dart';
 
+// ServiceProvider 模型已包含 apiFormat 字段
+
 class AgentEditScreen extends StatefulWidget {
   final AIAgent? agent;
   final bool isFromMarketplace; // 是否来自商场
@@ -723,6 +725,7 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
       );
       currentValues['baseUrl'] = provider.baseUrl;
       currentValues['headers'] = _formatHeaders(provider.headers);
+      currentValues['apiFormat'] = provider.apiFormat;
       if (provider.defaultModel != null && provider.defaultModel!.isNotEmpty) {
         currentValues['model'] = provider.defaultModel!;
       }
