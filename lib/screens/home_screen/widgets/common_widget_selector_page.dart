@@ -113,7 +113,9 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
-        debugPrint('[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data');
+        debugPrint(
+          '[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data',
+        );
         final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
@@ -226,7 +228,9 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
-        debugPrint('[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data');
+        debugPrint(
+          '[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data',
+        );
         final result = await widget.pluginWidget.commonWidgetsProvider!(data);
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
@@ -647,7 +651,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
         final firstItem = dataList.first;
         if (firstItem is Map) {
           data = {};
-          (firstItem as Map).forEach((key, value) {
+          (firstItem).forEach((key, value) {
             data[key.toString()] = value;
           });
         } else {
@@ -665,10 +669,16 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     Map<String, Map<String, dynamic>> availableWidgets = {};
     if (widget.pluginWidget.commonWidgetsProvider != null) {
       try {
-        debugPrint('[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data');
+        debugPrint(
+          '[CommonWidgetSelectorPage] 传入 commonWidgetsProvider 的数据: $data',
+        );
         final result = await widget.pluginWidget.commonWidgetsProvider!(data);
-        debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回的类型: ${result.runtimeType}');
-        debugPrint('[CommonWidgetSelectorPage] commonWidgetsProvider 返回的键: ${result.keys.toList()}');
+        debugPrint(
+          '[CommonWidgetSelectorPage] commonWidgetsProvider 返回的类型: ${result.runtimeType}',
+        );
+        debugPrint(
+          '[CommonWidgetSelectorPage] commonWidgetsProvider 返回的键: ${result.keys.toList()}',
+        );
         // 验证返回值类型并过滤无效配置
         if (result is Map<String, Map<String, dynamic>>) {
           availableWidgets = result;
@@ -680,7 +690,9 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
           for (final entry in result.entries) {
             final key = entry.key.toString();
             final value = entry.value;
-            debugPrint('[CommonWidgetSelectorPage] 处理键值对: $key = $value (${value.runtimeType})');
+            debugPrint(
+              '[CommonWidgetSelectorPage] 处理键值对: $key = $value (${value.runtimeType})',
+            );
             if (value is Map<String, dynamic>) {
               availableWidgets[key] = value;
             } else if (value is Map) {

@@ -1,4 +1,5 @@
 /// 创建活动快捷入口小组件（1x1）
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

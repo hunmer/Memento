@@ -1,4 +1,5 @@
 /// 日历相册插件 - 图标小组件注册
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -21,11 +22,12 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       defaultSize: HomeWidgetSize.small,
       supportedSizes: [HomeWidgetSize.small],
       category: 'home_categoryRecord'.tr,
-      builder: (context, config) => GenericIconWidget(
-        icon: Icons.notes_rounded,
-        color: pluginColor,
-        name: 'calendar_album_widget_name'.tr,
-      ),
+      builder:
+          (context, config) => GenericIconWidget(
+            icon: Icons.notes_rounded,
+            color: pluginColor,
+            name: 'calendar_album_widget_name'.tr,
+          ),
     ),
   );
 }

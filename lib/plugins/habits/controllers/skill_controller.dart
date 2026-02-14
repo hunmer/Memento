@@ -4,7 +4,6 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/event_args.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/models/skill.dart';
-import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'package:Memento/plugins/habits/sample_data.dart';
 
 class SkillController {
@@ -77,7 +76,10 @@ class SkillController {
     final defaultSkills = skillMaps.map((m) => Skill.fromMap(m)).toList();
 
     _skills = defaultSkills;
-    await storage.writeJson(_skillsKey, defaultSkills.map((s) => s.toMap()).toList());
+    await storage.writeJson(
+      _skillsKey,
+      defaultSkills.map((s) => s.toMap()).toList(),
+    );
     print('Created default skills: ${defaultSkills.length} items');
   }
 

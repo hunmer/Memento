@@ -7,7 +7,6 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
-import 'bill_colors.dart';
 
 /// 注册图标组件（1x1 简单图标组件 - 快速访问）
 void registerIconWidget(HomeWidgetRegistry registry) {

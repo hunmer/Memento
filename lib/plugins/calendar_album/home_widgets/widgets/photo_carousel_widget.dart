@@ -1,4 +1,5 @@
 /// 图片轮播小组件（支持多种尺寸）
+library;
 
 import 'dart:async';
 import 'dart:io';
@@ -117,22 +118,24 @@ class PhotoCarouselWidgetState extends State<PhotoCarouselWidget>
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(16),
-                    image: imageFile != null
-                        ? DecorationImage(
-                            image: FileImage(imageFile),
-                            fit: BoxFit.fitHeight,
-                          )
-                        : null,
+                    image:
+                        imageFile != null
+                            ? DecorationImage(
+                              image: FileImage(imageFile),
+                              fit: BoxFit.fitHeight,
+                            )
+                            : null,
                   ),
-                  child: imageFile == null
-                      ? const Center(
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        )
-                      : null,
+                  child:
+                      imageFile == null
+                          ? const Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                          : null,
                 ),
               ),
             );

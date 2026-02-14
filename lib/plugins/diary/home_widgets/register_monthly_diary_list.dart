@@ -1,4 +1,5 @@
 /// 日记插件 - 本月日记列表组件注册
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

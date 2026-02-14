@@ -1,4 +1,5 @@
 /// 活动插件 - 七天图表组件注册
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

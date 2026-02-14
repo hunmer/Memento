@@ -1,4 +1,5 @@
 /// 活动插件 - 创建快捷入口注册
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

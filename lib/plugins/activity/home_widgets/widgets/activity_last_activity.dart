@@ -1,5 +1,6 @@
 /// 上次活动小组件（2x1）
 /// 显示距离上次活动经过的时间和上次活动的时间，点击跳转到活动编辑界面
+library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
