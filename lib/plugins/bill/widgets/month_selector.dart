@@ -66,7 +66,8 @@ class _MonthSelectorState extends State<MonthSelector> {
   @override
   void didUpdateWidget(MonthSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.selectedMonth != oldWidget.selectedMonth && widget.selectedMonth != null) {
+    if (widget.selectedMonth != oldWidget.selectedMonth &&
+        widget.selectedMonth != null) {
       setState(() {
         _selectedMonth = widget.selectedMonth!;
         // 重新初始化月份列表以包含新的选中月份
@@ -90,23 +91,35 @@ class _MonthSelectorState extends State<MonthSelector> {
     final months = <DateTime>[];
 
     // 确定最大月份（如果设置了 maxDate）
-    final maxMonth = widget.maxDate != null
-        ? DateTime(widget.maxDate!.year, widget.maxDate!.month)
-        : null;
+    final maxMonth =
+        widget.maxDate != null
+            ? DateTime(widget.maxDate!.year, widget.maxDate!.month)
+            : null;
 
     // 确保 _selectedMonth 在列表范围内
     final selectedMonth = widget.selectedMonth ?? DateTime.now();
-    final monthDiff = (selectedMonth.year - now.year) * 12 + (selectedMonth.month - now.month);
+    final monthDiff =
+        (selectedMonth.year - now.year) * 12 +
+        (selectedMonth.month - now.month);
 
     // 如果选中月份超出初始范围，调整加载范围
-    final startOffset = monthDiff > _loadCount ? monthDiff - _loadCount :
-                       monthDiff < -_loadCount ? monthDiff + _loadCount : -_loadCount;
-    var endOffset = monthDiff > _loadCount ? _loadCount :
-                      monthDiff < -_loadCount ? -monthDiff - _loadCount : _loadCount;
+    final startOffset =
+        monthDiff > _loadCount
+            ? monthDiff - _loadCount
+            : monthDiff < -_loadCount
+            ? monthDiff + _loadCount
+            : -_loadCount;
+    var endOffset =
+        monthDiff > _loadCount
+            ? _loadCount
+            : monthDiff < -_loadCount
+            ? -monthDiff - _loadCount
+            : _loadCount;
 
     // 如果设置了最大日期，限制结束偏移量
     if (maxMonth != null) {
-      final maxOffset = (maxMonth.year - now.year) * 12 + (maxMonth.month - now.month);
+      final maxOffset =
+          (maxMonth.year - now.year) * 12 + (maxMonth.month - now.month);
       endOffset = endOffset > maxOffset ? maxOffset : endOffset;
     }
 
@@ -160,9 +173,10 @@ class _MonthSelectorState extends State<MonthSelector> {
       final lastMonth = _allMonths.last;
 
       // 检查是否设置了最大日期限制
-      final maxMonth = widget.maxDate != null
-          ? DateTime(widget.maxDate!.year, widget.maxDate!.month)
-          : null;
+      final maxMonth =
+          widget.maxDate != null
+              ? DateTime(widget.maxDate!.year, widget.maxDate!.month)
+              : null;
 
       for (int i = 1; i <= loadCount; i++) {
         final newMonth = DateTime(lastMonth.year, lastMonth.month + i);
@@ -170,7 +184,8 @@ class _MonthSelectorState extends State<MonthSelector> {
         // 如果设置了最大日期，检查是否超出范围
         if (maxMonth != null) {
           if (newMonth.year > maxMonth.year ||
-              (newMonth.year == maxMonth.year && newMonth.month > maxMonth.month)) {
+              (newMonth.year == maxMonth.year &&
+                  newMonth.month > maxMonth.month)) {
             break; // 停止加载未来月份
           }
         }
@@ -267,16 +282,18 @@ class _MonthSelectorState extends State<MonthSelector> {
           (selectedIndex * itemWidth) - (viewportWidth / 2) + (itemWidth / 2);
 
       // 执行滚动
-      _scrollController.animateTo(
-        targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      ).then((_) {
-        // 滚动完成后标记初始化完成
-        if (mounted) {
-          _isInitialized = true;
-        }
-      });
+      _scrollController
+          .animateTo(
+            targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          )
+          .then((_) {
+            // 滚动完成后标记初始化完成
+            if (mounted) {
+              _isInitialized = true;
+            }
+          });
     });
   }
 
@@ -318,8 +335,9 @@ class _MonthSelectorState extends State<MonthSelector> {
           separatorBuilder: (_, __) => const SizedBox(width: 12),
           itemBuilder: (context, index) {
             final month = _allMonths[index];
-            final isSelected = month.year == _selectedMonth.year &&
-                             month.month == _selectedMonth.month;
+            final isSelected =
+                month.year == _selectedMonth.year &&
+                month.month == _selectedMonth.month;
             final stats = widget.getMonthStats(month);
 
             return GestureDetector(
@@ -332,19 +350,24 @@ class _MonthSelectorState extends State<MonthSelector> {
               child: Container(
                 width: 80,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? (isDark ? Colors.grey[800] : Colors.white)
-                      : (isDark ? Colors.transparent : Colors.white),
+                  color:
+                      isSelected
+                          ? (isDark ? Colors.grey[800] : Colors.white)
+                          : (isDark ? Colors.transparent : Colors.white),
                   borderRadius: BorderRadius.circular(16),
-                  border: isSelected
-                      ? Border.all(color: widget.primaryColor, width: 2)
-                      : null,
-                  boxShadow: isSelected || !isDark
-                      ? [BoxShadow(
-                          color: Colors.black.withAlpha(10),
-                          blurRadius: 4,
-                        )]
-                      : null,
+                  border:
+                      isSelected
+                          ? Border.all(color: widget.primaryColor, width: 2)
+                          : null,
+                  boxShadow:
+                      isSelected || !isDark
+                          ? [
+                            BoxShadow(
+                              color: Colors.black.withAlpha(10),
+                              blurRadius: 4,
+                            ),
+                          ]
+                          : null,
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
@@ -355,9 +378,12 @@ class _MonthSelectorState extends State<MonthSelector> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: isSelected
-                            ? (isDark ? Colors.white : Colors.black)
-                            : (isDark ? Colors.grey[500] : Colors.grey[400]),
+                        color:
+                            isSelected
+                                ? (isDark ? Colors.white : Colors.black)
+                                : (isDark
+                                    ? Colors.grey[500]
+                                    : Colors.grey[400]),
                       ),
                     ),
                     const SizedBox(height: 4),
