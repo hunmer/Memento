@@ -171,20 +171,15 @@ class _ActivityCalendarScreenState extends State<ActivityCalendarScreen> {
                 firstDayOfWeek: 1,
                 nonWorkingDays: const [6, 7], // 周六、周日不显示
                 viewHeaderHeight: 50, // 时间线视图需要更高的头部
-                viewHeaderStyle: ViewHeaderStyle(
-                  dayTextStyle: const TextStyle(
+                viewHeaderStyle: const ViewHeaderStyle(
+                  dayTextStyle: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
-                  dateTextStyle: const TextStyle(
+                  dateTextStyle: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
-                  monthTextStyle: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  height: 50, // 垂直显示时需要更高
                 ),
                 scheduleViewSettings: const ScheduleViewSettings(
                   appointmentTextStyle: TextStyle(
@@ -192,7 +187,6 @@ class _ActivityCalendarScreenState extends State<ActivityCalendarScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                   hideEmptyScheduleWeek: false,
-                  scheduleViewHeight: 200,
                 ),
                 dataSource: ActivityCalendarDataSource(_activities),
                 onViewChanged: _onViewChanged,
