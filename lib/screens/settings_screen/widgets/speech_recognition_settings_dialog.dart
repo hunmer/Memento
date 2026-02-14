@@ -5,7 +5,6 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
 import 'package:Memento/plugins/openai/screens/agent_edit_screen.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
-import 'package:Memento/plugins/openai/controllers/agent_controller.dart';
 import 'package:uuid/uuid.dart';
 
 /// 语音识别设置对话框
@@ -29,8 +28,7 @@ class _SpeechRecognitionSettingsDialogState
   bool _hasChanges = false;
 
   // AI纠错Agent相关
-  String? _correctionAgentId;
-  String _correctionAgentName = '';
+  AIAgent? _correctionAgent;
   bool _isLoadingAgent = false;
 
   @override
@@ -79,10 +77,7 @@ class _SpeechRecognitionSettingsDialogState
       }
 
       // 加载AI纠错Agent信息
-      _correctionAgentId = SpeechRecognitionConfigService.instance.correctionAgentId;
-      if (_correctionAgentId != null && _correctionAgentId!.isNotEmpty) {
-        await _loadAgentInfo(_correctionAgentId!);
-      }
+      _correctionAgent = SpeechRecognitionConfigService.instance.correctionAgent;
     } catch (e) {
       _showError('加载设置失败: $e');
     } finally {
@@ -90,31 +85,6 @@ class _SpeechRecognitionSettingsDialogState
         _isLoading = false;
         _hasChanges = false;
       });
-    }
-  }
-
-  /// 加载Agent信息
-  Future<void> _loadAgentInfo(String agentId) async {
-    try {
-      setState(() {
-        _isLoadingAgent = true;
-      });
-
-      final agentController = AgentController();
-      final agent = await agentController.getAgent(agentId);
-      if (agent != null && mounted) {
-        setState(() {
-          _correctionAgentName = agent.name;
-        });
-      }
-    } catch (e) {
-      debugPrint('加载Agent信息失败: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAgent = false;
-        });
-      }
     }
   }
 
@@ -193,34 +163,10 @@ class _SpeechRecognitionSettingsDialogState
 
   /// 配置AI纠错Agent
   Future<void> _configureCorrectionAgent() async {
-    AIAgent? agentToEdit;
-
-    // 如果已有保存的Agent，先加载它
-    if (_correctionAgentId != null && _correctionAgentId!.isNotEmpty) {
-      try {
-        setState(() {
-          _isLoadingAgent = true;
-        });
-        final agentController = AgentController();
-        agentToEdit = await agentController.getAgent(_correctionAgentId!);
-        if (agentToEdit == null) {
-          _showError('未找到已保存的AI纠错Agent，将创建新的配置');
-        }
-      } catch (e) {
-        _showError('加载Agent失败: $e');
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoadingAgent = false;
-          });
-        }
-      }
-    }
-
-    // 如果没有加载到Agent，创建默认的
-    agentToEdit ??= AIAgent(
-      id: _correctionAgentId ?? const Uuid().v4(),
-      name: _correctionAgentName.isNotEmpty ? _correctionAgentName : '语音文本纠错',
+    // 如果没有配置，创建默认的Agent
+    final agentToEdit = _correctionAgent ?? AIAgent(
+      id: const Uuid().v4(),
+      name: '语音文本纠错',
       description: '用于自动纠正语音识别错误的AI助手',
       tags: const ['语音纠错'],
       serviceProviderId: 'openai',
@@ -242,35 +188,26 @@ class _SpeechRecognitionSettingsDialogState
       ],
     );
 
-    final result = await Navigator.of(context).push<bool>(
+    // 使用回调模式，不保存到 agent 插件
+    final savedAgent = await Navigator.of(context).push<AIAgent>(
       MaterialPageRoute(
-        builder: (context) => AgentEditScreen(agent: agentToEdit),
+        builder: (context) => AgentEditScreen(
+          agent: agentToEdit,
+          onSave: (agent) async {
+            // 保存到自定义配置文件
+            await SpeechRecognitionConfigService.instance.saveCorrectionAgent(agent);
+            return agent; // 返回保存后的 agent
+          },
+        ),
       ),
     );
 
-    // 如果用户保存了Agent，保存Agent ID
-    if (result == true) {
-      try {
-        final agentController = AgentController();
-        // 使用Agent的ID重新加载最新配置
-        final savedAgent = await agentController.getAgent(agentToEdit.id);
-
-        if (savedAgent == null) {
-          _showError('未找到保存的Agent');
-          return;
-        }
-
-        if (mounted) {
-          await SpeechRecognitionConfigService.instance.saveCorrectionAgentId(savedAgent.id);
-          setState(() {
-            _correctionAgentId = savedAgent.id;
-            _correctionAgentName = savedAgent.name;
-          });
-          toastService.showToast('AI纠错Agent设置成功');
-        }
-      } catch (e) {
-        _showError('保存AI纠错Agent失败: $e');
-      }
+    // 如果用户保存了Agent，更新UI
+    if (savedAgent != null && mounted) {
+      setState(() {
+        _correctionAgent = savedAgent;
+      });
+      toastService.showToast('AI纠错Agent设置成功');
     }
   }
 
@@ -296,10 +233,9 @@ class _SpeechRecognitionSettingsDialogState
 
     if (confirmed == true) {
       try {
-        await SpeechRecognitionConfigService.instance.saveCorrectionAgentId(null);
+        await SpeechRecognitionConfigService.instance.saveCorrectionAgent(null);
         setState(() {
-          _correctionAgentId = null;
-          _correctionAgentName = '';
+          _correctionAgent = null;
         });
         toastService.showToast('已清除AI纠错Agent设置');
       } catch (e) {
@@ -455,17 +391,17 @@ class _SpeechRecognitionSettingsDialogState
                         padding: EdgeInsets.all(24.0),
                         child: Center(child: CircularProgressIndicator()),
                       )
-                    : _correctionAgentId != null && _correctionAgentName.isNotEmpty
+                    : _correctionAgent != null
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ListTile(
                                 leading: CircleAvatar(
-                                  child: Text(_correctionAgentName.isNotEmpty
-                                      ? _correctionAgentName[0]
+                                  child: Text(_correctionAgent!.name.isNotEmpty
+                                      ? _correctionAgent!.name[0]
                                       : 'A'),
                                 ),
-                                title: Text(_correctionAgentName),
+                                title: Text(_correctionAgent!.name),
                                 subtitle: const Text('已配置AI纠错助手'),
                                 trailing: IconButton(
                                   icon: const Icon(Icons.delete_outline),

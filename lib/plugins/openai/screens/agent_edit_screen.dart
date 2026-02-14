@@ -22,12 +22,14 @@ class AgentEditScreen extends StatefulWidget {
   final AIAgent? agent;
   final bool isFromMarketplace; // 是否来自商场
   final String? extraStorageKey; // 如果提供,保存到extra storage;否则保存到临时agents
+  final Future<AIAgent?> Function(AIAgent agent)? onSave; // 保存回调，如果不为null则调用回调而不保存到controller
 
   const AgentEditScreen({
     super.key,
     this.agent,
     this.isFromMarketplace = false,
     this.extraStorageKey,
+    this.onSave,
   });
 
   @override
@@ -194,6 +196,21 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
     );
 
     try {
+      // 如果提供了 onSave 回调，调用它并返回 agent
+      if (widget.onSave != null) {
+        final resultAgent = await widget.onSave!(agent);
+        if (mounted) {
+          // 回调返回的 agent（可能是处理后的版本）
+          final finalAgent = resultAgent ?? agent;
+          // 显示成功提示
+          ToastService.instance.showToast('保存成功');
+          // 返回配置
+          Navigator.of(context).pop(finalAgent);
+        }
+        return;
+      }
+
+      // 否则按原有逻辑保存到 controller
       final plugin = PluginManager.instance.getPlugin('openai') as OpenAIPlugin;
       final controller = plugin.controller;
 
@@ -411,7 +428,8 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
               : 'openai_editAgent'.tr,
         ),
         actions: [
-          if (widget.agent != null) ...[
+          // 只有在非回调模式下才显示删除、分享、克隆按钮
+          if (widget.onSave == null && widget.agent != null) ...[
             IconButton(
               icon: const Icon(Icons.share),
               onPressed: _shareAgent,
