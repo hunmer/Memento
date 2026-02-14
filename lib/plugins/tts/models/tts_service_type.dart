@@ -5,6 +5,9 @@ enum TTSServiceType {
 
   /// HTTP API服务
   http,
+
+  /// MiniMax 语音合成服务
+  minimax,
 }
 
 /// 扩展方法
@@ -16,6 +19,8 @@ extension TTSServiceTypeExtension on TTSServiceType {
         return 'system';
       case TTSServiceType.http:
         return 'http';
+      case TTSServiceType.minimax:
+        return 'minimax';
     }
   }
 
@@ -26,6 +31,8 @@ extension TTSServiceTypeExtension on TTSServiceType {
         return '系统语音';
       case TTSServiceType.http:
         return 'HTTP服务';
+      case TTSServiceType.minimax:
+        return 'MiniMax';
     }
   }
 
@@ -36,6 +43,8 @@ extension TTSServiceTypeExtension on TTSServiceType {
         return TTSServiceType.system;
       case 'http':
         return TTSServiceType.http;
+      case 'minimax':
+        return TTSServiceType.minimax;
       default:
         return TTSServiceType.system;
     }

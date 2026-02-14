@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'tts_base_service.dart';
 import 'system_tts_service.dart';
 import 'http_tts_service.dart';
+import 'minimax_tts_service.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
 import 'package:Memento/plugins/tts/models/tts_queue_item.dart';
@@ -156,6 +157,8 @@ class TTSManagerService extends ChangeNotifier {
         return SystemTTSService(config);
       case TTSServiceType.http:
         return HttpTTSService(config);
+      case TTSServiceType.minimax:
+        return MiniMaxTTSService(config);
     }
   }
 

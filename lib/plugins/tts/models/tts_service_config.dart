@@ -41,6 +41,20 @@ class TTSServiceConfig {
   /// 音频是否为base64编码
   bool? audioIsBase64;
 
+  // === MiniMax 特有配置 ===
+
+  /// MiniMax API Key
+  String? apiKey;
+
+  /// MiniMax 语音ID
+  String? voiceId;
+
+  /// MiniMax 情绪 (happy, sad, angry, fearful, disgusted, surprised, calm, fluent, whisper)
+  String? emotion;
+
+  /// MiniMax 模型 (speech-2.8-hd, speech-2.8-turbo, speech-2.6-hd, speech-2.6-turbo, etc.)
+  String? model;
+
   // === 通用配置 ===
 
   /// 音调 (0.5-2.0, 默认1.0)
@@ -75,6 +89,11 @@ class TTSServiceConfig {
     this.responseType,
     this.audioFieldPath,
     this.audioIsBase64,
+    // MiniMax配置
+    this.apiKey,
+    this.voiceId,
+    this.emotion,
+    this.model,
     // 通用配置
     this.pitch = 1.0,
     this.speed = 1.0,
@@ -104,6 +123,11 @@ class TTSServiceConfig {
       responseType: json['responseType'] as String?,
       audioFieldPath: json['audioFieldPath'] as String?,
       audioIsBase64: json['audioIsBase64'] as bool?,
+      // MiniMax配置
+      apiKey: json['apiKey'] as String?,
+      voiceId: json['voiceId'] as String?,
+      emotion: json['emotion'] as String?,
+      model: json['model'] as String?,
       // 通用配置
       pitch: (json['pitch'] as num?)?.toDouble() ?? 1.0,
       speed: (json['speed'] as num?)?.toDouble() ?? 1.0,
@@ -130,6 +154,11 @@ class TTSServiceConfig {
       if (responseType != null) 'responseType': responseType,
       if (audioFieldPath != null) 'audioFieldPath': audioFieldPath,
       if (audioIsBase64 != null) 'audioIsBase64': audioIsBase64,
+      // MiniMax配置
+      if (apiKey != null) 'apiKey': apiKey,
+      if (voiceId != null) 'voiceId': voiceId,
+      if (emotion != null) 'emotion': emotion,
+      if (model != null) 'model': model,
       // 通用配置
       'pitch': pitch,
       'speed': speed,
@@ -153,6 +182,10 @@ class TTSServiceConfig {
     String? responseType,
     String? audioFieldPath,
     bool? audioIsBase64,
+    String? apiKey,
+    String? voiceId,
+    String? emotion,
+    String? model,
     double? pitch,
     double? speed,
     double? volume,
@@ -171,6 +204,10 @@ class TTSServiceConfig {
       responseType: responseType ?? this.responseType,
       audioFieldPath: audioFieldPath ?? this.audioFieldPath,
       audioIsBase64: audioIsBase64 ?? this.audioIsBase64,
+      apiKey: apiKey ?? this.apiKey,
+      voiceId: voiceId ?? this.voiceId,
+      emotion: emotion ?? this.emotion,
+      model: model ?? this.model,
       pitch: pitch ?? this.pitch,
       speed: speed ?? this.speed,
       volume: volume ?? this.volume,
@@ -194,6 +231,12 @@ class TTSServiceConfig {
           (audioFieldPath == null || audioFieldPath!.isEmpty)) {
         return false;
       }
+    }
+
+    if (type == TTSServiceType.minimax) {
+      // MiniMax服务需要API Key和语音ID
+      if (apiKey == null || apiKey!.isEmpty) return false;
+      if (voiceId == null || voiceId!.isEmpty) return false;
     }
 
     return true;

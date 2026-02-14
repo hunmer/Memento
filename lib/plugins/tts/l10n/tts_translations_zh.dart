@@ -10,6 +10,7 @@ const Map<String, String> ttsTranslationsZh = {
   'tts_serviceType': '服务类型',
   'tts_systemTts': '系统TTS',
   'tts_httpService': 'HTTP服务',
+  'tts_minimaxService': 'MiniMax',
   'tts_defaultService': '默认服务',
 
   // 状态
@@ -38,6 +39,7 @@ const Map<String, String> ttsTranslationsZh = {
   'tts_basicConfig': '基础配置',
   'tts_readingParameters': '朗读参数',
   'tts_httpConfig': 'HTTP 配置',
+  'tts_minimaxConfig': 'MiniMax 配置',
 
   // 操作
   'tts_test': '测试',
@@ -88,6 +90,16 @@ const Map<String, String> ttsTranslationsZh = {
   'tts_pleaseEnterAudioFieldPath': '请输入音频字段路径',
   'tts_urlMustStartWithHttp': 'URL 必须以 http:// 或 https:// 开头',
   'tts_configValidationFailed': '配置验证失败，请检查必填项',
+  'tts_pleaseEnterApiKey': '请输入 API Key',
+  'tts_pleaseEnterVoiceId': '请输入语音 ID',
+
+  // MiniMax 配置
+  'tts_apiKey': 'API Key',
+  'tts_voiceId': '语音 ID',
+  'tts_model': '模型',
+  'tts_emotion': '情绪',
+  'tts_emotionHelper': '模型会根据文本自动匹配合适的情绪',
+  'tts_auto': '自动',
 
   // 语音相关
   'tts_voiceTestText': '你好，这是语音测试',

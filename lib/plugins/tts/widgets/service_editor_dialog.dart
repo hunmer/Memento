@@ -6,6 +6,7 @@ import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
 import 'package:Memento/plugins/tts/models/tts_voice.dart';
 import 'package:Memento/plugins/tts/services/system_tts_service.dart';
+import 'package:Memento/plugins/tts/services/minimax_tts_service.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
@@ -47,6 +48,12 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
   late TextEditingController _audioFieldPathController;
   late bool _audioIsBase64;
 
+  // MiniMax 配置
+  late TextEditingController _apiKeyController;
+  late TextEditingController _voiceIdController;
+  late TextEditingController _emotionController;
+  late TextEditingController _modelController;
+
   // 可用语音列表
   List<TTSVoice> _availableVoices = [];
   bool _loadingVoices = false;
@@ -80,6 +87,12 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     _audioFieldPathController = TextEditingController(text: service?.audioFieldPath ?? '');
     _audioIsBase64 = service?.audioIsBase64 ?? false;
 
+    // MiniMax 配置
+    _apiKeyController = TextEditingController(text: service?.apiKey ?? '');
+    _voiceIdController = TextEditingController(text: service?.voiceId ?? 'female-tianmei');
+    _emotionController = TextEditingController(text: service?.emotion ?? '');
+    _modelController = TextEditingController(text: service?.model ?? 'speech-2.8-hd');
+
     // 如果是系统 TTS，加载可用语音列表
     if (_selectedType == TTSServiceType.system) {
       _loadAvailableVoices();
@@ -95,6 +108,10 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     _requestBodyController.dispose();
     _audioFormatController.dispose();
     _audioFieldPathController.dispose();
+    _apiKeyController.dispose();
+    _voiceIdController.dispose();
+    _emotionController.dispose();
+    _modelController.dispose();
     super.dispose();
   }
 
@@ -196,6 +213,16 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                     ],
                   ),
                 ),
+                DropdownMenuItem(
+                  value: TTSServiceType.minimax,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.auto_awesome, size: 20),
+                      const SizedBox(width: 8),
+                      Text('tts_minimaxService'.tr),
+                    ],
+                  ),
+                ),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -280,7 +307,7 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                       helperText: 'tts_availableVoiceCount'.trParams({'count': '${_availableVoices.length}'}),
                     ),
                     isExpanded: true,
-                    items: _availableVoices.map((voice) {
+                    items: _deduplicateVoices(_availableVoices).map((voice) {
                       return DropdownMenuItem(
                         value: voice.id,
                         child: _buildVoiceItem(voice),
@@ -344,23 +371,15 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                   ),
                 ],
               )
-            else
+            // HTTP 服务的语音配置
+            else if (_selectedType == TTSServiceType.http)
               TextFormField(
                 controller: _voiceController,
                 decoration: InputDecoration(
                   labelText: 'tts_voice'.tr,
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.language),
-                  hintText: _selectedType == TTSServiceType.system
-                    ? 'zh-CN, en-US, etc.'
-                    : 'tts_fillAccordingToApi'.tr,
-                  suffixIcon: _selectedType == TTSServiceType.system && !_loadingVoices
-                    ? IconButton(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: _loadAvailableVoices,
-                        tooltip: 'tts_reloadVoiceList'.tr,
-                      )
-                    : null,
+                  hintText: 'tts_fillAccordingToApi'.tr,
                 ),
               ),
 
@@ -488,6 +507,143 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
                 ),
               ),
             ],
+
+            // MiniMax 特有配置
+            if (_selectedType == TTSServiceType.minimax) ...[
+              const SizedBox(height: 24),
+              _buildSectionTitle('tts_minimaxConfig'.tr),
+              const SizedBox(height: 8),
+
+              // API Key
+              TextFormField(
+                controller: _apiKeyController,
+                decoration: InputDecoration(
+                  labelText: 'tts_apiKey'.tr,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.key),
+                  hintText: 'MiniMax API Key',
+                  helperText: '在 https://platform.minimaxi.com 获取',
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (_selectedType == TTSServiceType.minimax) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'tts_pleaseEnterApiKey'.tr;
+                    }
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 语音ID
+              TextFormField(
+                controller: _voiceIdController,
+                decoration: InputDecoration(
+                  labelText: 'tts_voiceId'.tr,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.record_voice_over),
+                  hintText: 'female-tianmei, male-qn-qingse, etc.',
+                  helperText: '支持系统音色、复刻音色和文生音色',
+                ),
+                validator: (value) {
+                  if (_selectedType == TTSServiceType.minimax) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'tts_pleaseEnterVoiceId'.tr;
+                    }
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 模型
+              DropdownButtonFormField<String>(
+                value: _modelController.text.isNotEmpty &&
+                        MiniMaxTTSService.getAvailableModels().contains(_modelController.text)
+                    ? _modelController.text
+                    : MiniMaxTTSService.getAvailableModels().first,
+                decoration: InputDecoration(
+                  labelText: 'tts_model'.tr,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.model_training),
+                ),
+                items: MiniMaxTTSService.getAvailableModels().map((model) {
+                  return DropdownMenuItem(
+                    value: model,
+                    child: Text(model),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    _modelController.text = value;
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 情绪
+              DropdownButtonFormField<String>(
+                value: _emotionController.text.isNotEmpty &&
+                        MiniMaxTTSService.getAvailableEmotions().contains(_emotionController.text)
+                    ? _emotionController.text
+                    : null,
+                decoration: InputDecoration(
+                  labelText: 'tts_emotion'.tr,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.emoji_emotions),
+                  helperText: 'tts_emotionHelper'.tr,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text('tts_auto'.tr),
+                  ),
+                  ...MiniMaxTTSService.getAvailableEmotions().map((emotion) {
+                    return DropdownMenuItem(
+                      value: emotion,
+                      child: Text(_getEmotionLabel(emotion)),
+                    );
+                  }),
+                ],
+                onChanged: (value) {
+                  _emotionController.text = value ?? '';
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 音频格式
+              DropdownButtonFormField<String>(
+                value: _audioFormatController.text.isNotEmpty &&
+                        ['mp3', 'pcm', 'flac'].contains(_audioFormatController.text)
+                    ? _audioFormatController.text
+                    : 'mp3',
+                decoration: InputDecoration(
+                  labelText: 'tts_audioFormat'.tr,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.audiotrack),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'mp3',
+                    child: Text('MP3'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'pcm',
+                    child: Text('PCM'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'flac',
+                    child: Text('FLAC'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    _audioFormatController.text = value;
+                  }
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -540,7 +696,19 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     );
   }
 
-  /// 构建语音��项项
+  /// 去除重复 ID 的语音列表
+  List<TTSVoice> _deduplicateVoices(List<TTSVoice> voices) {
+    final seenIds = <String>{};
+    final deduplicated = <TTSVoice>[];
+    for (final voice in voices) {
+      if (seenIds.add(voice.id)) {
+        deduplicated.add(voice);
+      }
+    }
+    return deduplicated;
+  }
+
+  /// 构建语音选项项
   Widget _buildVoiceItem(TTSVoice voice) {
     return Row(
       children: [
@@ -620,6 +788,32 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
     }
   }
 
+  /// 获取情绪标签
+  String _getEmotionLabel(String emotion) {
+    switch (emotion) {
+      case 'happy':
+        return '高兴';
+      case 'sad':
+        return '悲伤';
+      case 'angry':
+        return '愤怒';
+      case 'fearful':
+        return '害怕';
+      case 'disgusted':
+        return '厌恶';
+      case 'surprised':
+        return '惊讶';
+      case 'calm':
+        return '中性';
+      case 'fluent':
+        return '生动';
+      case 'whisper':
+        return '低语';
+      default:
+        return emotion;
+    }
+  }
+
   /// 解析请求头
   Map<String, String>? _parseHeaders() {
     final text = _headersController.text.trim();
@@ -656,17 +850,26 @@ class _ServiceEditorDialogState extends State<ServiceEditorDialog> {
         pitch: _pitch,
         speed: _speed,
         volume: _volume,
-        voice: _voiceController.text.trim(),
+        voice: (_selectedType == TTSServiceType.system || _selectedType == TTSServiceType.http)
+          ? _voiceController.text.trim()
+          : null,
         // HTTP 配置
         url: _selectedType == TTSServiceType.http ? _urlController.text.trim() : null,
         headers: _selectedType == TTSServiceType.http ? _parseHeaders() : null,
         requestBody: _selectedType == TTSServiceType.http ? _requestBodyController.text.trim() : null,
-        audioFormat: _selectedType == TTSServiceType.http ? _audioFormatController.text.trim() : null,
+        audioFormat: (_selectedType == TTSServiceType.http || _selectedType == TTSServiceType.minimax)
+          ? _audioFormatController.text.trim()
+          : null,
         responseType: _selectedType == TTSServiceType.http ? _responseType : null,
         audioFieldPath: _selectedType == TTSServiceType.http && _responseType == 'json'
           ? _audioFieldPathController.text.trim()
           : null,
         audioIsBase64: _selectedType == TTSServiceType.http ? _audioIsBase64 : null,
+        // MiniMax 配置
+        apiKey: _selectedType == TTSServiceType.minimax ? _apiKeyController.text.trim() : null,
+        voiceId: _selectedType == TTSServiceType.minimax ? _voiceIdController.text.trim() : null,
+        emotion: _selectedType == TTSServiceType.minimax ? _emotionController.text.trim().isEmpty ? null : _emotionController.text.trim() : null,
+        model: _selectedType == TTSServiceType.minimax ? _modelController.text.trim() : null,
         createdAt: widget.service?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
