@@ -7,7 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../../../../core/services/toast_service.dart';
 import '../../../../../../core/services/speech_recognition_config_service.dart';
 import '../../../../../../plugins/openai/services/request_service.dart';
-import '../../../../../../plugins/openai/controllers/agent_controller.dart';
+import '../../../../../../plugins/openai/models/ai_agent.dart';
 
 /// 语音输入对话框
 ///
@@ -289,9 +289,9 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
 
     // 检查是否配置了AI纠错Agent
     final configService = SpeechRecognitionConfigService.instance;
-    final agentId = configService.correctionAgentId;
+    final agent = configService.correctionAgent;
 
-    if (agentId == null || agentId.isEmpty) {
+    if (agent == null) {
       // 未配置，提示用户跳转到设置界面
       final shouldGoToSettings = await showDialog<bool>(
         context: context,
@@ -335,16 +335,6 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
     });
 
     try {
-      // 加载Agent配置
-      final agentController = AgentController();
-      final agent = await agentController.getAgent(agentId);
-
-      if (agent == null) {
-        _showErrorSnackBar('AI纠错Agent配置无效，请重新配置');
-        await configService.saveCorrectionAgentId(null);
-        return;
-      }
-
       // 构建纠错请求
       final correctionPrompt = '请纠正以下文本中的识别错误，只输出纠正后的文本：\n\n$text';
 

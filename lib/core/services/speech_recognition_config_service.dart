@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:Memento/core/app_initializer.dart' show globalConfigManager;
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 
 /// 语音识别配置服务
 ///
@@ -23,20 +24,20 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
   /// 缓存的配置
   TencentASRConfig? _cachedConfig;
 
-  /// AI纠错Agent ID
-  String? _correctionAgentId;
+  /// AI纠错Agent（完整配置）
+  AIAgent? _correctionAgent;
 
   /// 获取腾讯云 ASR 配置
   TencentASRConfig? get config => _cachedConfig;
 
-  /// 获取AI纠错Agent ID
-  String? get correctionAgentId => _correctionAgentId;
+  /// 获取AI纠错Agent
+  AIAgent? get correctionAgent => _correctionAgent;
 
   /// 检查是否已配置ASR
   bool get isConfigured => _cachedConfig != null && _cachedConfig!.isValid();
 
   /// 检查是否已配置AI纠错
-  bool get isCorrectionConfigured => _correctionAgentId != null && _correctionAgentId!.isNotEmpty;
+  bool get isCorrectionConfigured => _correctionAgent != null;
 
   /// 初始化服务，加载配置
   Future<void> initialize() async {
@@ -56,16 +57,22 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
           debugPrint('🎤 [语音识别配置服务] 加载配置成功: appId=${_cachedConfig?.appId}');
         }
 
-        // 加载AI纠错Agent ID
-        _correctionAgentId = configMap['correctionAgentId'] as String?;
-        if (_correctionAgentId != null) {
-          debugPrint('🎤 [语音识别配置服务] 加载AI纠错Agent: $_correctionAgentId');
+        // 加载AI纠错Agent（完整配置）
+        final agentMap = configMap['correctionAgent'] as Map<String, dynamic>?;
+        if (agentMap != null) {
+          try {
+            _correctionAgent = AIAgent.fromJson(agentMap);
+            debugPrint('🎤 [语音识别配置服务] 加载AI纠错Agent: ${_correctionAgent?.name}');
+          } catch (e) {
+            debugPrint('🎤 [语音识别配置服务] 解析AI纠错Agent失败: $e');
+            _correctionAgent = null;
+          }
         }
       }
     } catch (e) {
       debugPrint('🎤 [语音识别配置服务] 加载配置失败: $e');
       _cachedConfig = null;
-      _correctionAgentId = null;
+      _correctionAgent = null;
     }
     notifyListeners();
   }
@@ -75,7 +82,7 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
     try {
       await globalConfigManager.savePluginConfig(_configPluginId, {
         'asrConfig': config.toJson(),
-        'correctionAgentId': _correctionAgentId,
+        'correctionAgent': _correctionAgent?.toJson(),
       });
 
       _cachedConfig = config;
@@ -88,25 +95,25 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
     }
   }
 
-  /// 保存AI纠错Agent ID
-  Future<void> saveCorrectionAgentId(String? agentId) async {
+  /// 保存AI纠错Agent
+  Future<void> saveCorrectionAgent(AIAgent? agent) async {
     try {
-      _correctionAgentId = agentId;
+      _correctionAgent = agent;
 
       // 如果已有ASR配置，保存所有配置
       if (_cachedConfig != null) {
         await globalConfigManager.savePluginConfig(_configPluginId, {
           'asrConfig': _cachedConfig!.toJson(),
-          'correctionAgentId': agentId,
+          'correctionAgent': agent?.toJson(),
         });
       } else {
-        // 只保存Agent ID
+        // 只保存Agent配置
         await globalConfigManager.savePluginConfig(_configPluginId, {
-          'correctionAgentId': agentId,
+          'correctionAgent': agent?.toJson(),
         });
       }
 
-      debugPrint('🎤 [语音识别配置服务] 保存AI纠错Agent成功: $agentId');
+      debugPrint('🎤 [语音识别配置服务] 保存AI纠错Agent成功: ${agent?.name}');
 
       notifyListeners();
     } catch (e) {
@@ -120,7 +127,7 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
     try {
       await globalConfigManager.savePluginConfig(_configPluginId, {});
       _cachedConfig = null;
-      _correctionAgentId = null;
+      _correctionAgent = null;
       debugPrint('🎤 [语音识别配置服务] 配置已清除');
       notifyListeners();
     } catch (e) {

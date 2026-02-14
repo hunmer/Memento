@@ -9,11 +9,7 @@ class ExampleFile {
   final String path; // 文件路径
   final String category; // 分类
 
-  ExampleFile({
-    required this.name,
-    required this.path,
-    required this.category,
-  });
+  ExampleFile({required this.name, required this.path, required this.category});
 }
 
 class JSConsoleController extends ChangeNotifier {
@@ -117,25 +113,6 @@ class JSConsoleController extends ChangeNotifier {
       final exampleFilePaths = [
         'lib/screens/js_console/examples/basic_examples.json',
         'lib/screens/js_console/examples/flutter_api_examples.json',
-        'lib/screens/js_console/examples/chat_examples.json',
-        'lib/screens/js_console/examples/activity_examples.json',
-        'lib/screens/js_console/examples/bill_examples.json',
-        'lib/screens/js_console/examples/calendar_examples.json',
-        'lib/screens/js_console/examples/calendar_album_examples.json',
-        'lib/screens/js_console/examples/checkin_examples.json',
-        'lib/screens/js_console/examples/contact_examples.json',
-        'lib/screens/js_console/examples/database_examples.json',
-        'lib/screens/js_console/examples/day_examples.json',
-        'lib/screens/js_console/examples/diary_examples.json',
-        'lib/screens/js_console/examples/goods_examples.json',
-        'lib/screens/js_console/examples/habits_examples.json',
-        'lib/screens/js_console/examples/nodes_examples.json',
-        'lib/screens/js_console/examples/notes_examples.json',
-        'lib/screens/js_console/examples/openai_examples.json',
-        'lib/screens/js_console/examples/store_examples.json',
-        'lib/screens/js_console/examples/timer_examples.json',
-        'lib/screens/js_console/examples/todo_examples.json',
-        'lib/screens/js_console/examples/tracker_examples.json',
       ];
 
       _examples = {};
@@ -175,7 +152,8 @@ class JSConsoleController extends ChangeNotifier {
                 fileExamples[title] = code;
 
                 // 全局示例仍使用 "分类 - 标题" 格式
-                final globalKey = category == '未分类' ? title : '$category - $title';
+                final globalKey =
+                    category == '未分类' ? title : '$category - $title';
                 _examples[globalKey] = code;
               }
             }
