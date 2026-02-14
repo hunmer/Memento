@@ -206,7 +206,28 @@ class _ActivityEditScreenState extends State<ActivityEditScreen> {
   @override
   Widget build(BuildContext context) {
     // 如果没有提供 selectedDate，使用今天的日期
-    final selectedDate = widget.selectedDate ?? DateTime.now();
+    // 但如果提供了 startTime 或 endTime，使用它们的日期
+    DateTime selectedDate;
+    if (widget.selectedDate != null) {
+      selectedDate = widget.selectedDate!;
+    } else if (_defaultStartTime != null) {
+      // 使用开始时间的日期
+      selectedDate = DateTime(
+        _defaultStartTime!.year,
+        _defaultStartTime!.month,
+        _defaultStartTime!.day,
+      );
+    } else if (_defaultEndTime != null) {
+      // 使用结束时间的日期
+      selectedDate = DateTime(
+        _defaultEndTime!.year,
+        _defaultEndTime!.month,
+        _defaultEndTime!.day,
+      );
+    } else {
+      // 默认使用今天
+      selectedDate = DateTime.now();
+    }
     final title = widget.activity != null
         ? 'activity_editActivity'.tr
         : 'activity_addActivity'.tr;
