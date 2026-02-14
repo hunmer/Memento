@@ -10,6 +10,7 @@ const Map<String, String> ttsTranslationsEn = {
   'tts_serviceType': 'Service Type',
   'tts_systemTts': 'System TTS',
   'tts_httpService': 'HTTP Service',
+  'tts_minimaxService': 'MiniMax',
   'tts_defaultService': 'Default Service',
 
   // Status
@@ -38,6 +39,7 @@ const Map<String, String> ttsTranslationsEn = {
   'tts_basicConfig': 'Basic Config',
   'tts_readingParameters': 'Reading Parameters',
   'tts_httpConfig': 'HTTP Config',
+  'tts_minimaxConfig': 'MiniMax Config',
 
   // Actions
   'tts_test': 'Test',
@@ -88,6 +90,16 @@ const Map<String, String> ttsTranslationsEn = {
   'tts_pleaseEnterAudioFieldPath': 'Please enter audio field path',
   'tts_urlMustStartWithHttp': 'URL must start with http:// or https://',
   'tts_configValidationFailed': 'Config validation failed, please check required fields',
+  'tts_pleaseEnterApiKey': 'Please enter API Key',
+  'tts_pleaseEnterVoiceId': 'Please enter Voice ID',
+
+  // MiniMax Config
+  'tts_apiKey': 'API Key',
+  'tts_voiceId': 'Voice ID',
+  'tts_model': 'Model',
+  'tts_emotion': 'Emotion',
+  'tts_emotionHelper': 'The model will automatically match appropriate emotions based on text',
+  'tts_auto': 'Auto',
 
   // Voice related
   'tts_voiceTestText': 'Hello, this is a voice test',
