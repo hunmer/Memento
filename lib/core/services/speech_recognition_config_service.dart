@@ -23,11 +23,20 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
   /// 缓存的配置
   TencentASRConfig? _cachedConfig;
 
+  /// AI纠错Agent ID
+  String? _correctionAgentId;
+
   /// 获取腾讯云 ASR 配置
   TencentASRConfig? get config => _cachedConfig;
 
-  /// 检查是否已配置
+  /// 获取AI纠错Agent ID
+  String? get correctionAgentId => _correctionAgentId;
+
+  /// 检查是否已配置ASR
   bool get isConfigured => _cachedConfig != null && _cachedConfig!.isValid();
+
+  /// 检查是否已配置AI纠错
+  bool get isCorrectionConfigured => _correctionAgentId != null && _correctionAgentId!.isNotEmpty;
 
   /// 初始化服务，加载配置
   Future<void> initialize() async {
@@ -46,10 +55,17 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
           _cachedConfig = TencentASRConfig.fromJson(asrConfigMap);
           debugPrint('🎤 [语音识别配置服务] 加载配置成功: appId=${_cachedConfig?.appId}');
         }
+
+        // 加载AI纠错Agent ID
+        _correctionAgentId = configMap['correctionAgentId'] as String?;
+        if (_correctionAgentId != null) {
+          debugPrint('🎤 [语音识别配置服务] 加载AI纠错Agent: $_correctionAgentId');
+        }
       }
     } catch (e) {
       debugPrint('🎤 [语音识别配置服务] 加载配置失败: $e');
       _cachedConfig = null;
+      _correctionAgentId = null;
     }
     notifyListeners();
   }
@@ -59,6 +75,7 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
     try {
       await globalConfigManager.savePluginConfig(_configPluginId, {
         'asrConfig': config.toJson(),
+        'correctionAgentId': _correctionAgentId,
       });
 
       _cachedConfig = config;
@@ -71,11 +88,39 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
     }
   }
 
+  /// 保存AI纠错Agent ID
+  Future<void> saveCorrectionAgentId(String? agentId) async {
+    try {
+      _correctionAgentId = agentId;
+
+      // 如果已有ASR配置，保存所有配置
+      if (_cachedConfig != null) {
+        await globalConfigManager.savePluginConfig(_configPluginId, {
+          'asrConfig': _cachedConfig!.toJson(),
+          'correctionAgentId': agentId,
+        });
+      } else {
+        // 只保存Agent ID
+        await globalConfigManager.savePluginConfig(_configPluginId, {
+          'correctionAgentId': agentId,
+        });
+      }
+
+      debugPrint('🎤 [语音识别配置服务] 保存AI纠错Agent成功: $agentId');
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('🎤 [语音识别配置服务] 保存AI纠错Agent失败: $e');
+      rethrow;
+    }
+  }
+
   /// 清除配置
   Future<void> clearConfig() async {
     try {
       await globalConfigManager.savePluginConfig(_configPluginId, {});
       _cachedConfig = null;
+      _correctionAgentId = null;
       debugPrint('🎤 [语音识别配置服务] 配置已清除');
       notifyListeners();
     } catch (e) {

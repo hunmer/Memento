@@ -5,6 +5,9 @@ import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_se
 import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_state.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../../../../../core/services/toast_service.dart';
+import '../../../../../../core/services/speech_recognition_config_service.dart';
+import '../../../../../../plugins/openai/services/request_service.dart';
+import '../../../../../../plugins/openai/controllers/agent_controller.dart';
 
 /// 语音输入对话框
 ///
@@ -57,6 +60,9 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
 
   // 标点符号替换设置
   bool _enablePunctuationReplacement = false;
+
+  // AI纠错状态
+  bool _isCorrecting = false;
 
   @override
   void initState() {
@@ -273,6 +279,101 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
     return text;
   }
 
+  /// 执行AI智能纠错
+  Future<void> _performAICorrection() async {
+    final text = _textController.text.trim();
+    if (text.isEmpty) {
+      _showErrorSnackBar('请先输入或录音获取文本');
+      return;
+    }
+
+    // 检查是否配置了AI纠错Agent
+    final configService = SpeechRecognitionConfigService.instance;
+    final agentId = configService.correctionAgentId;
+
+    if (agentId == null || agentId.isEmpty) {
+      // 未配置，提示用户跳转到设置界面
+      final shouldGoToSettings = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.auto_fix_high),
+              SizedBox(width: 8),
+              Text('AI智能纠错'),
+            ],
+          ),
+          content: const Text(
+            '您还未配置AI纠错助手。是否跳转到设置界面进行配置？',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('取消'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('去设置'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldGoToSettings == true && mounted) {
+        // 关闭当前对话框
+        Navigator.of(context).pop();
+        // 打开设置界面
+        // 注意：这里需要根据实际的设置界面路由来调整
+        _showErrorSnackBar('请在设置中配置AI纠错Agent');
+      }
+      return;
+    }
+
+    // 已配置，执行AI纠错
+    setState(() {
+      _isCorrecting = true;
+    });
+
+    try {
+      // 加载Agent配置
+      final agentController = AgentController();
+      final agent = await agentController.getAgent(agentId);
+
+      if (agent == null) {
+        _showErrorSnackBar('AI纠错Agent配置无效，请重新配置');
+        await configService.saveCorrectionAgentId(null);
+        return;
+      }
+
+      // 构建纠错请求
+      final correctionPrompt = '请纠正以下文本中的识别错误，只输出纠正后的文本：\n\n$text';
+
+      // 调用OpenAI服务进行纠错
+      final correctedText = await RequestService.chat(
+        correctionPrompt,
+        agent,
+      );
+
+      if (correctedText.startsWith('Error:')) {
+        _showErrorSnackBar('AI纠错失败：${correctedText.substring(7)}');
+      } else {
+        // 应用纠错结果
+        setState(() {
+          _textController.text = correctedText.trim();
+        });
+        _showErrorSnackBar('AI纠错完成');
+      }
+    } catch (e) {
+      _showErrorSnackBar('AI纠错失败：$e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCorrecting = false;
+        });
+      }
+    }
+  }
+
   /// 确认发送
   void _confirmSend() {
     final text = _textController.text.trim();
@@ -478,15 +579,14 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
 
         const SizedBox(width: 16),
 
-        // AI智能纠错按钮（右侧，占位）
+        // AI智能纠错按钮（右侧）
         _buildIconButton(
           icon: Icons.auto_fix_high,
           tooltip: 'AI智能纠错',
-          isActive: false,
-          onPressed: () {
-            // TODO: 实现AI智能纠错功能
-            _showErrorSnackBar('AI智能纠错功能开发中...');
-          },
+          isActive: _isCorrecting,
+          onPressed: _isCorrecting
+              ? () {}
+              : () => _performAICorrection(),
         ),
       ],
     );
