@@ -9,6 +9,7 @@ import 'package:Memento/widgets/picker/calendar_strip_date_picker.dart';
 import 'package:Memento/plugins/activity/services/activity_service.dart';
 import 'package:Memento/plugins/activity/widgets/activity_timeline.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/plugins/activity/screens/activity_calendar_screen.dart';
 import 'components/activity_grid_view.dart';
 import 'controllers/activity_controller.dart';
 import 'controllers/tag_controller.dart';
@@ -510,6 +511,24 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       searchBody: _buildSearchResults(),
       enableLargeTitle: true,
       actions: [
+        // 日历视图按钮
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: IconButton(
+            icon: const Icon(Icons.calendar_month),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ActivityCalendarScreen(
+                    activityService: _activityService,
+                  ),
+                ),
+              );
+            },
+            tooltip: '日历视图',
+          ),
+        ),
         // 视图切换按钮
         Padding(
           padding: const EdgeInsets.only(right: 8.0),
