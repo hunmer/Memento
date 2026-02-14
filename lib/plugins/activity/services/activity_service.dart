@@ -360,6 +360,34 @@ class ActivityService {
     }
   }
 
+  /// 获取指定日期范围的活动（用于日历视图）
+  Future<List<ActivityRecord>> getActivitiesForRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final List<ActivityRecord> allActivities = [];
+
+      // 遍历日期范围
+      DateTime current = DateTime(startDate.year, startDate.month, startDate.day);
+      final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+
+      while (current.isBefore(end) || current.isAtSameMomentAs(end)) {
+        final activities = await getActivitiesForDate(current);
+        allActivities.addAll(activities);
+        current = current.add(const Duration(days: 1));
+      }
+
+      // 按开始时间排序
+      allActivities.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+      return allActivities;
+    } catch (e) {
+      debugPrint('Error getting activities for range: $e');
+      return [];
+    }
+  }
+
   /// 初始化默认数据
   /// 当插件首次使用时（没有任何JSON文件存在），自动插入示例数据
   Future<void> initializeDefaultData() async {
