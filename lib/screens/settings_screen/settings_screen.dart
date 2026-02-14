@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:Memento/core/services/backup_service.dart';
 import 'package:Memento/core/theme_controller.dart';
+import 'package:Memento/core/services/speech_recognition_config_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -9,6 +10,7 @@ import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
 import './widgets/server_sync_settings_section.dart';
 import './widgets/api_forwarding_settings_dialog.dart';
+import './widgets/speech_recognition_settings_dialog.dart';
 import './controllers/webdav_controller.dart';
 import 'package:Memento/core/floating_ball/settings_screen.dart';
 import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
@@ -39,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isWebDAVConnected = false;
   bool _isServerSyncLoggedIn = false;
   bool _isApiForwardingConnected = false;
+  bool _isSpeechRecognitionConfigured = false;
 
   StreamSubscription? _apiForwardingSubscription;
 
@@ -54,6 +57,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     });
 
+    // 初始化语音识别配置服务
+    _initSpeechRecognitionConfig();
     // 检查WebDAV配置
     _checkWebDAVConfig();
     // 检查服务器同步配置
@@ -62,6 +67,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _checkApiForwardingStatus();
     // 监听 API 转发状态变化
     _listenToApiForwardingEvents();
+  }
+
+  // 初始化语音识别配置服务
+  Future<void> _initSpeechRecognitionConfig() async {
+    await SpeechRecognitionConfigService.instance.initialize();
+    if (mounted) {
+      setState(() {
+        _isSpeechRecognitionConfigured =
+            SpeechRecognitionConfigService.instance.isConfigured;
+      });
+    }
+  }
+
+  // 显示语音识别设置对话框
+  Future<void> _showSpeechRecognitionSettings() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => const SpeechRecognitionSettingsDialog(),
+    );
+
+    if (result == true && mounted) {
+      setState(() {
+        _isSpeechRecognitionConfigured =
+            SpeechRecognitionConfigService.instance.isConfigured;
+      });
+    }
   }
 
   @override
@@ -117,16 +148,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // 监听 API 转发事件
   void _listenToApiForwardingEvents() {
-    _apiForwardingSubscription = ApiForwardingService.instance.eventStream.listen((event) {
-      if (mounted) {
-        final type = event['type'] as String?;
-        if (type == 'connected' || type == 'disconnected' || type == 'stopped') {
-          setState(() {
-            _isApiForwardingConnected = type == 'connected';
-          });
-        }
-      }
-    });
+    _apiForwardingSubscription = ApiForwardingService.instance.eventStream
+        .listen((event) {
+          if (mounted) {
+            final type = event['type'] as String?;
+            if (type == 'connected' ||
+                type == 'disconnected' ||
+                type == 'stopped') {
+              setState(() {
+                _isApiForwardingConnected = type == 'connected';
+              });
+            }
+          }
+        });
   }
 
   late BackupService _backupService;
@@ -156,17 +190,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await SmoothBottomSheet.show(
       context: context,
       isScrollControlled: true,
-      builder: (context) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.85,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+      builder:
+          (context) => SizedBox(
+            height: MediaQuery.of(context).size.height * 0.85,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: const ServerSyncSettingsSection(),
+              ),
             ),
-            child: const ServerSyncSettingsSection(),
           ),
-        ),
-      ),
     );
 
     // 重新检查服务器同步状态
@@ -246,11 +281,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             builder: (context, setModalState) {
               final List<PluginBase> plugins = List<PluginBase>.from(
                 _controller.availablePlugins,
-              )
-                ..sort(
-                  (a, b) => (a.getPluginName(context) ?? a.id)
-                      .compareTo(b.getPluginName(context) ?? b.id),
-                );
+              )..sort(
+                (a, b) => (a.getPluginName(context) ?? a.id).compareTo(
+                  b.getPluginName(context) ?? b.id,
+                ),
+              );
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -269,8 +304,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         final plugin = plugins[index];
                         final pluginName =
                             plugin.getPluginName(context) ?? plugin.id;
-                        final isEnabled =
-                            _controller.isPluginEnabled(plugin.id);
+                        final isEnabled = _controller.isPluginEnabled(
+                          plugin.id,
+                        );
                         return SwitchListTile(
                           title: Text(pluginName),
                           subtitle: Text(plugin.id),
@@ -364,7 +400,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('settings_screen_dataManagementTitle'.tr),
             subtitle: Text('settings_screen_dataManagementSubtitle'.tr),
             onTap: () {
-              NavigationHelper.push(context, DataManagementScreen(), routeName: '/settings/data_management');
+              NavigationHelper.push(
+                context,
+                DataManagementScreen(),
+                routeName: '/settings/data_management',
+              );
             },
           ),
           ListTile(
@@ -489,11 +529,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('screens_locationApiKey'.tr),
             subtitle: Text(
               _controller.locationApiKey.isEmpty
-                ? 'screens_locationApiKeyNotSet'.tr
-                : 'screens_locationApiKeyPartial'.trParams({'key': _controller.locationApiKey.substring(0, 8)}),
+                  ? 'screens_locationApiKeyNotSet'.tr
+                  : 'screens_locationApiKeyPartial'.trParams({
+                    'key': _controller.locationApiKey.substring(0, 8),
+                  }),
             ),
             trailing: const Icon(Icons.edit),
             onTap: () => _showLocationApiKeyDialog(),
+          ),
+          ListTile(
+            leading: const Icon(Icons.mic),
+            title: const Text('语音识别设置'),
+            subtitle: Text(
+              _isSpeechRecognitionConfigured ? '已配置腾讯云语音识别' : '配置语音识别服务',
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isSpeechRecognitionConfigured)
+                  const Icon(Icons.check_circle, color: Colors.green),
+                const Icon(Icons.arrow_forward_ios),
+              ],
+            ),
+            onTap: _showSpeechRecognitionSettings,
           ),
           const Divider(),
 
@@ -513,9 +571,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('启用后将自动识别剪切板中的数据'),
             trailing: Switch(
               value: _controller.clipboardAutoRead,
-              onChanged: (value) => setState(() {
-                _controller.clipboardAutoRead = value;
-              }),
+              onChanged:
+                  (value) => setState(() {
+                    _controller.clipboardAutoRead = value;
+                  }),
             ),
           ),
           ListTile(
@@ -593,9 +652,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.cloud_sync),
             title: const Text('转发数据服务'),
             subtitle: Text(
-              _isApiForwardingConnected
-                  ? '已连接到转发服务器'
-                  : '配置 API 转发服务，支持前端访问',
+              _isApiForwardingConnected ? '已连接到转发服务器' : '配置 API 转发服务，支持前端访问',
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -611,9 +668,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               final result = await showDialog<bool>(
                 context: context,
-                builder: (context) => ApiForwardingSettingsDialog(
-                  initialConfig: config,
-                ),
+                builder:
+                    (context) =>
+                        ApiForwardingSettingsDialog(initialConfig: config),
               );
 
               if (result == true) {
@@ -637,7 +694,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('测试 TTS 后台定时播报功能'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.pushNamed(context, AppRoutes.backgroundAnnouncementTest);
+              Navigator.pushNamed(
+                context,
+                AppRoutes.backgroundAnnouncementTest,
+              );
             },
           ),
           ListTile(
@@ -755,7 +815,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('app_aboutTitle'.tr),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              NavigationHelper.push(context, const AboutScreen(), routeName: '/settings/about');
+              NavigationHelper.push(
+                context,
+                const AboutScreen(),
+                routeName: '/settings/about',
+              );
             },
           ),
         ],
