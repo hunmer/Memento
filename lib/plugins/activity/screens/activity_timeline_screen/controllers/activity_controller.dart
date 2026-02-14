@@ -11,7 +11,6 @@ class ActivityController {
   final VoidCallback onActivitiesChanged;
 
   List<ActivityRecord> activities = [];
-  int sortMode = 0;
 
   static const int maxRecentItems = 10;
   List<String> recentMoods = [];
@@ -22,29 +21,8 @@ class ActivityController {
     required this.onActivitiesChanged,
   });
 
-  void setSortMode(int mode) {
-    sortMode = mode;
-    _sortActivities();
-    onActivitiesChanged();
-  }
-
   void _sortActivities() {
-    switch (sortMode) {
-      case 1: // 按活动时长排序
-        activities.sort(
-          (a, b) => b.endTime
-              .difference(b.startTime)
-              .compareTo(a.endTime.difference(a.startTime)),
-        );
-        break;
-      case 2: // 按起始时间排序（降序）
-        activities.sort((a, b) => b.startTime.compareTo(a.startTime));
-        break;
-      case 0: // 默认按起始时间排序（升序）
-      default:
-        activities.sort((a, b) => a.startTime.compareTo(b.startTime));
-        break;
-    }
+    activities.sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
   Future<void> loadActivities(DateTime date) async {

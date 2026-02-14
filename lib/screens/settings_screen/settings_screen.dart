@@ -649,6 +649,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.calendar_month),
+            title: const Text('MementoSfCalendar 测试'),
+            subtitle: const Text('Syncfusion 日历封装组件测试'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/widgets_gallery/memento_sf_calendar');
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.cloud_sync),
             title: const Text('转发数据服务'),
             subtitle: Text(
