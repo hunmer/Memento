@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_input_dialog.dart';
+import 'package:Memento/core/services/speech_recognition_config_service.dart';
 import 'speech_recognition_config.dart';
 import 'tencent_asr_service.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -12,6 +13,7 @@ import 'package:Memento/core/services/toast_service.dart';
 /// - 封装语音识别的配置读取和服务创建
 /// - 支持带 UI 和不带 UI 两种模式
 /// - 自动管理资源释放
+/// - 优先使用全局配置服务，向后兼容插件配置
 class VoiceRecognitionHelper {
   /// 显示语音输入对话框（带 UI 模式）
   ///
@@ -114,21 +116,34 @@ class VoiceRecognitionHelper {
   /// 创建语音识别服务
   ///
   /// 私有方法，用于创建并初始化语音识别服务
+  /// 优先使用全局配置服务，如果未配置则回退到插件配置（向后兼容）
   static Future<TencentASRService?> _createRecognitionService(
     BuildContext context, {
     bool showError = true,
   }) async {
     try {
-      // 获取插件实例
-      final plugin = AgentChatPlugin.instance;
+      TencentASRConfig? asrConfig;
 
-      // 读取配置
-      final settings = plugin.settings;
-      debugPrint('🎤 [语音识别] 读取到的完整配置: $settings');
-      final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
-      debugPrint('🎤 [语音识别] ASR配置: $asrConfigMap');
+      // 1. 优先尝试从全局配置服务获取
+      final globalConfig = SpeechRecognitionConfigService.instance.config;
+      if (globalConfig != null && globalConfig.isValid()) {
+        debugPrint('🎤 [语音识别] 使用全局配置服务');
+        asrConfig = globalConfig;
+      } else {
+        // 2. 回退到插件配置（向后兼容）
+        debugPrint('🎤 [语音识别] 全局配置为空，尝试从插件配置读取');
+        final plugin = AgentChatPlugin.instance;
+        final settings = plugin.settings;
+        debugPrint('🎤 [语音识别] 读取到的完整配置: $settings');
+        final asrConfigMap = settings['asrConfig'] as Map<String, dynamic>?;
+        debugPrint('🎤 [语音识别] ASR配置: $asrConfigMap');
 
-      if (asrConfigMap == null) {
+        if (asrConfigMap != null) {
+          asrConfig = TencentASRConfig.fromJson(asrConfigMap);
+        }
+      }
+
+      if (asrConfig == null) {
         debugPrint('⚠️ [语音识别] ASR配置为空');
         if (showError && context.mounted) {
           toastService.showToast('请先在设置中配置腾讯云语音识别服务');
@@ -136,8 +151,6 @@ class VoiceRecognitionHelper {
         return null;
       }
 
-      // 创建配置对象
-      final asrConfig = TencentASRConfig.fromJson(asrConfigMap);
       debugPrint('🎤 [语音识别] 创建配置对象: appId=${asrConfig.appId}');
 
       // 验证配置

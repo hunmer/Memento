@@ -10,6 +10,8 @@ import 'widgets/send_button.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/message_input_actions_drawer.dart';
 import 'package:Memento/plugins/chat/screens/chat_screen/widgets/message_input_actions/message_input_actions_builder.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/voice_recognition_helper.dart';
 
 class MessageInput extends StatefulWidget {
   final TextEditingController controller;
@@ -41,6 +43,9 @@ class _MessageInputState extends State<MessageInput> {
 
   late MessageInputState _messageInputState;
 
+  // 语音识别服务
+  TencentASRService? _recognitionService;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +58,28 @@ class _MessageInputState extends State<MessageInput> {
     _updateMessageInputState();
 
     widget.controller.addListener(_onTextChanged);
+
+    // 初始化语音识别服务
+    _initializeVoiceRecognition();
+  }
+
+  /// 初始化语音识别服务
+  Future<void> _initializeVoiceRecognition() async {
+    if (!mounted) return;
+
+    try {
+      // 使用 VoiceRecognitionHelper 创建服务（不显示错误提示）
+      final service =
+          await VoiceRecognitionHelper.createServiceSilently(context);
+
+      if (service != null && mounted) {
+        setState(() {
+          _recognitionService = service;
+        });
+      }
+    } catch (e) {
+      debugPrint('初始化语音识别服务失败: $e');
+    }
   }
 
   // 加载频道元数据
@@ -87,6 +114,7 @@ class _MessageInputState extends State<MessageInput> {
     }
     _keyboardListenerFocusNode.dispose();
     widget.controller.removeListener(_onTextChanged);
+    _recognitionService?.dispose();
     super.dispose();
   }
 
@@ -217,6 +245,23 @@ class _MessageInputState extends State<MessageInput> {
     }
   }
 
+  /// 显示语音输入对话框
+  Future<void> _showVoiceInputDialog() async {
+    if (!mounted) return;
+
+    await VoiceRecognitionHelper.showVoiceInputDialog(
+      context: context,
+      onComplete: (text) {
+        // 将识别的文本填充到输入框
+        widget.controller.text = text;
+        widget.onSaveDraft(text);
+
+        // 聚焦到输入框
+        _focusNode.requestFocus();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -281,6 +326,20 @@ class _MessageInputState extends State<MessageInput> {
                       (event) => _messageInputState.handleKeyPress(event),
                 ),
               ),
+
+              // 语音输入按钮
+              if (_recognitionService != null)
+                IconButton(
+                  icon: const Icon(Icons.mic),
+                  onPressed: _showVoiceInputDialog,
+                  tooltip: '语音输入',
+                )
+              else
+                IconButton(
+                  icon: const Icon(Icons.mic),
+                  onPressed: null,
+                  tooltip: '语音输入（未配置）',
+                ),
 
               // 发送按钮
               Padding(

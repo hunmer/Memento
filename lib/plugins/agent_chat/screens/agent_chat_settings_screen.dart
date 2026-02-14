@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
-import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:universal_platform/universal_platform.dart';
 /// Agent Chat 插件设置界面
@@ -17,14 +16,7 @@ class AgentChatSettingsScreen extends StatefulWidget {
 }
 
 class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _appIdController = TextEditingController();
-  final _secretIdController = TextEditingController();
-  final _secretKeyController = TextEditingController();
-
-  bool _obscureSecretKey = true;
   bool _isLoading = false;
-  bool _hasChanges = false;
   bool _preferToolTemplates = false; // 优先使用工具模版开关
 
   // 后台服务设置
@@ -35,28 +27,6 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
-
-    // 监听文本变化
-    _appIdController.addListener(_onTextChanged);
-    _secretIdController.addListener(_onTextChanged);
-    _secretKeyController.addListener(_onTextChanged);
-  }
-
-  @override
-  void dispose() {
-    _appIdController.dispose();
-    _secretIdController.dispose();
-    _secretKeyController.dispose();
-    super.dispose();
-  }
-
-  /// 文本改变回调
-  void _onTextChanged() {
-    if (!_hasChanges) {
-      setState(() {
-        _hasChanges = true;
-      });
-    }
   }
 
   /// 加载设置
@@ -67,7 +37,6 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
 
     try {
       final settings = widget.plugin.settings;
-      final asrConfig = settings['asrConfig'] as Map<String, dynamic>?;
 
       // 加载工具模版设置
       _preferToolTemplates = settings['preferToolTemplates'] as bool? ?? false;
@@ -77,85 +46,19 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
           settings['enableBackgroundService'] as bool? ?? true;
       _showTokenInNotification =
           settings['showTokenInNotification'] as bool? ?? true;
-
-      // 在 setState 回调中设置控制器文本，确保状态正确更新
-      if (asrConfig != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _appIdController.text = asrConfig['appId'] as String? ?? '';
-          _secretIdController.text = asrConfig['secretId'] as String? ?? '';
-          _secretKeyController.text = asrConfig['secretKey'] as String? ?? '';
-        });
-      }
     } catch (e) {
       _showError('加载设置失败: $e');
     } finally {
       setState(() {
         _isLoading = false;
-        _hasChanges = false;
       });
     }
   }
 
-  /// 保存设置（包含表单验证）
-  Future<void> _saveSettings() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final asrConfig = {
-        'appId': _appIdController.text.trim(),
-        'secretId': _secretIdController.text.trim(),
-        'secretKey': _secretKeyController.text.trim(),
-        'sampleRate': 16000,
-        'engineModelType': '16k_zh',
-        'needVad': false,
-        'filterDirty': 0,
-        'wordInfo': false,
-      };
-
-      debugPrint('🔧 [设置页面] 准备保存配置: appId=${asrConfig['appId']}');
-      await widget.plugin.updateSettings({
-        'asrConfig': asrConfig,
-        'preferToolTemplates': _preferToolTemplates,
-        'enableBackgroundService': _enableBackgroundService,
-        'showTokenInNotification': _showTokenInNotification,
-      });
-
-      // 验证保存后立即读取
-      final savedConfig = widget.plugin.settings['asrConfig'];
-      debugPrint('🔧 [设置页面] 保存后验证: $savedConfig');
-      debugPrint('🔧 [设置页面] 工具模版设置: $_preferToolTemplates');
-
-      setState(() {
-        _hasChanges = false;
-      });
-
-      if (mounted) {
-        toastService.showToast('设置保存成功');
-      }
-    } catch (e) {
-      debugPrint('❌ [设置页面] 保存失败: $e');
-      _showError('${'agent_chat_saveSettings'.tr} failed: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  /// 保存开关设置（不需要表单验证）
+  /// 保存开关设置
   Future<void> _saveSwitchSettings() async {
     try {
-      // 保留现有的腾讯云配置
-      final currentAsrConfig = widget.plugin.settings['asrConfig'];
-
       await widget.plugin.updateSettings({
-        if (currentAsrConfig != null) 'asrConfig': currentAsrConfig,
         'preferToolTemplates': _preferToolTemplates,
         'enableBackgroundService': _enableBackgroundService,
         'showTokenInNotification': _showTokenInNotification,
@@ -165,33 +68,6 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
     } catch (e) {
       debugPrint('❌ [设置页面] 自动保存失败: $e');
       _showError('自动保存失败: $e');
-    }
-  }
-
-  /// 测试连接
-  Future<void> _testConnection() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    try {
-      final config = TencentASRConfig(
-        appId: _appIdController.text.trim(),
-        secretId: _secretIdController.text.trim(),
-        secretKey: _secretKeyController.text.trim(),
-      );
-
-      if (!config.isValid()) {
-        _showError('配置无效，请检查输入');
-        return;
-      }
-
-      // 显示成功消息
-      if (mounted) {
-        toastService.showToast('配置验证通过！');
-      }
-    } catch (e) {
-      _showError('验证失败: $e');
     }
   }
 
@@ -208,252 +84,126 @@ class _AgentChatSettingsScreenState extends State<AgentChatSettingsScreen> {
       appBar: AppBar(
         title: Text('agent_chat_agentChatSettings'.tr),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          // 工具调用设置标题
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '工具调用设置',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // 优先使用工具模版开关
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Card(
-              child: SwitchListTile(
-                title: Text('agent_chat_prioritizeToolTemplate'.tr),
-                subtitle: Text('agent_chat_prioritizeToolTemplateDescription'.tr),
-                value: _preferToolTemplates,
-                onChanged: (value) {
-                  setState(() {
-                    _preferToolTemplates = value;
-                  });
-                  _saveSwitchSettings(); // 自动保存
-                },
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 8),
-
-          // 后台服务设置标题（仅Android）
-          if (!kIsWeb && UniversalPlatform.isAndroid) ...[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                '后台服务设置',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ),
-
-            // 启用后台服务开关
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Card(
-                child: Column(
-                  children: [
-                    SwitchListTile(
-                      title: Text('agent_chat_enableBackgroundService'.tr),
-                      subtitle: Text('agent_chat_enableBackgroundServiceDescription'.tr),
-                      value: _enableBackgroundService,
-                      onChanged: (value) {
-                        setState(() {
-                          _enableBackgroundService = value;
-                        });
-                        _saveSwitchSettings(); // 自动保存
-                      },
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 工具调用设置标题
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      '工具调用设置',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                     ),
+                  ),
 
-                    if (_enableBackgroundService) ...[
-                      const Divider(height: 1),
-
-                      // Token消耗显示开关
-                      SwitchListTile(
-                        title: Text('agent_chat_showTokenConsumption'.tr),
-                        subtitle: Text('agent_chat_showTokenConsumptionDescription'.tr),
-                        value: _showTokenInNotification,
+                  // 优先使用工具模版开关
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Card(
+                      child: SwitchListTile(
+                        title: Text('agent_chat_prioritizeToolTemplate'.tr),
+                        subtitle: Text('agent_chat_prioritizeToolTemplateDescription'.tr),
+                        value: _preferToolTemplates,
                         onChanged: (value) {
                           setState(() {
-                            _showTokenInNotification = value;
+                            _preferToolTemplates = value;
                           });
                           _saveSwitchSettings(); // 自动保存
                         },
                       ),
-                    ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
+                  // 后台服务设置标题（仅Android）
+                  if (!kIsWeb && UniversalPlatform.isAndroid) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        '后台服务设置',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+
+                    // 启用后台服务开关
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Card(
+                        child: Column(
+                          children: [
+                            SwitchListTile(
+                              title: Text('agent_chat_enableBackgroundService'.tr),
+                              subtitle: Text('agent_chat_enableBackgroundServiceDescription'.tr),
+                              value: _enableBackgroundService,
+                              onChanged: (value) {
+                                setState(() {
+                                  _enableBackgroundService = value;
+                                });
+                                _saveSwitchSettings(); // 自动保存
+                              },
+                            ),
+
+                            if (_enableBackgroundService) ...[
+                              const Divider(height: 1),
+
+                              // Token消耗显示开关
+                              SwitchListTile(
+                                title: Text('agent_chat_showTokenConsumption'.tr),
+                                subtitle: Text('agent_chat_showTokenConsumptionDescription'.tr),
+                                value: _showTokenInNotification,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _showTokenInNotification = value;
+                                  });
+                                  _saveSwitchSettings(); // 自动保存
+                                },
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Divider(),
+                    const SizedBox(height: 8),
                   ],
-                ),
-              ),
-            ),
-            const Divider(),
-            const SizedBox(height: 8),
-          ],
 
-          // 语音识别设置标题
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '语音识别设置',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ),
-
-          // 说明文本
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              '配置腾讯云实时语音识别服务，用于聊天界面的语音输入功能。',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // 获取凭证链接
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: InkWell(
-              onTap: () {
-                // TODO: 打开浏览器到腾讯云控制台
-              },
-              child: Text(
-                '如何获取 API 凭证？',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // 表单
-          if (_isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32.0),
-                child: CircularProgressIndicator(),
-              ),
-            )
-          else
-            Form(
-              key: _formKey,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  children: [
-                    // App ID 输入框
-                    TextFormField(
-                      controller: _appIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'App ID',
-                        hintText: '请输入腾讯云应用 ID',
-                        border: OutlineInputBorder(),
-                        helperText: '在腾讯云控制台获取',
+                  // 语音识别设置提示
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      '语音识别设置',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.info_outline),
+                        title: const Text('语音识别配置已迁移'),
+                        subtitle: const Text('语音识别设置现在在应用设置中统一管理，请前往 设置 > 应用设置 > 语音识别设置 进行配置'),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入 App ID';
-                        }
-                        return null;
-                      },
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Secret ID 输入框
-                    TextFormField(
-                      controller: _secretIdController,
-                      decoration: const InputDecoration(
-                        labelText: 'Secret ID',
-                        hintText: '请输入密钥 ID',
-                        border: OutlineInputBorder(),
-                        helperText: '访问密钥 ID',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入 Secret ID';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Secret Key 输入框
-                    TextFormField(
-                      controller: _secretKeyController,
-                      obscureText: _obscureSecretKey,
-                      decoration: InputDecoration(
-                        labelText: 'Secret Key',
-                        hintText: '请输入密钥 Key',
-                        border: const OutlineInputBorder(),
-                        helperText: '访问密钥 Key（请妥善保管）',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureSecretKey
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureSecretKey = !_obscureSecretKey;
-                            });
-                          },
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return '请输入 Secret Key';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // 操作按钮
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: _testConnection,
-                            child: Text('agent_chat_testConfiguration'.tr),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: _hasChanges ? _saveSettings : null,
-                            child: Text('agent_chat_saveSettings'.tr),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
