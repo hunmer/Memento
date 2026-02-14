@@ -14,7 +14,6 @@ import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'home_card.dart';
-import 'layout_type_selector.dart';
 
 /// 主页网格布局组件
 ///
@@ -74,7 +73,6 @@ class _HomeGridState extends State<HomeGrid> {
   final List<String> _displayOrder = [];
   String? _previewDraggingId;
   int? _pendingTargetIndex;
-  final String _quickLayoutType = 'empty';
 
   @override
   void initState() {
@@ -893,35 +891,16 @@ class _HomeGridState extends State<HomeGrid> {
     final TextEditingController nameController = TextEditingController(
       text: 'screens_quickLayout'.tr,
     );
-    String selectedType = _quickLayoutType;
 
     final result = await showDialog<Map<String, String>>(
       context: context,
-      builder:
-          (context) => AlertDialog(
+      builder: (context) => AlertDialog(
             title: Text('screens_quickCreateLayout'.tr),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'screens_layoutName'.tr,
-                      hintText: 'screens_layoutNameHint'.tr,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('screens_selectLayoutTemplate'.tr),
-                  const SizedBox(height: 16),
-                  LayoutTypeSelector(
-                    initialType: selectedType,
-                    onTypeChanged: (type) {
-                      selectedType = type;
-                    },
-                  ),
-                ],
+            content: TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'screens_layoutName'.tr,
+                hintText: 'screens_layoutNameHint'.tr,
               ),
             ),
             actions: [
@@ -933,21 +912,19 @@ class _HomeGridState extends State<HomeGrid> {
                 onPressed: () {
                   final name = nameController.text.trim();
                   if (name.isEmpty) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('screens_pleaseEnterLayoutName'.tr),
                       ),
                     );
                     return;
                   }
-                  Navigator.pop(context, {'name': name, 'type': selectedType});
+                  Navigator.pop(context, {'name': name});
                 },
                 child: Text('screens_create'.tr),
               ),
-        ],
-      ),
+            ],
+          ),
     );
 
     return result;

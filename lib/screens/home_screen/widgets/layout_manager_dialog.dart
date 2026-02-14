@@ -3,12 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
-import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import '../../../../core/services/toast_service.dart';
-import 'layout_type_selector.dart';
 
 /// 布局管理对话框
 ///
@@ -318,7 +314,6 @@ class _CreateLayoutDialog extends StatefulWidget {
 class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
   final TextEditingController _nameController = TextEditingController();
   final HomeLayoutManager _layoutManager = HomeLayoutManager();
-  String _selectedLayoutType = 'empty';
 
   @override
   void dispose() {
@@ -335,18 +330,10 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
     }
 
     try {
-      // 创建临时的 items 列表(不修改当前布局状态)
-      final List<HomeItem> newItems = [];
+      // 创建空白布局
+      final newItems = <HomeItem>[];
 
-      // 根据选择的类型添加小组件
-      if (_selectedLayoutType == '1x1') {
-        newItems.addAll(await _getAllWidgetsOfSize(HomeWidgetSize.small));
-      } else if (_selectedLayoutType == '2x2') {
-        newItems.addAll(await _getAllWidgetsOfSize(HomeWidgetSize.large));
-      }
-      // 空白布局不添加任何内容
-
-      // 保存新布局(不修改当前布局状态)
+      // 保存新布局
       final newLayoutId = await _layoutManager.saveLayoutAs(
         name,
         newItems,
@@ -365,57 +352,17 @@ class _CreateLayoutDialogState extends State<_CreateLayoutDialog> {
     }
   }
 
-  /// 获取所有指定尺寸的小组件(返回列表,不添加到 layoutManager)
-  Future<List<HomeItem>> _getAllWidgetsOfSize(HomeWidgetSize size) async {
-    final registry = HomeWidgetRegistry();
-    final allWidgets = registry.getAllWidgets();
-
-    // 筛选支持指定尺寸的小组件
-    final widgets = allWidgets
-        .where((widget) => widget.supportedSizes.contains(size))
-        .toList();
-
-    // 创建小组件项列表
-    final items = <HomeItem>[];
-    for (final widget in widgets) {
-      final item = HomeWidgetItem(
-        id: _layoutManager.generateId(),
-        widgetId: widget.id,
-        size: size,
-        config: {},
-      );
-      items.add(item);
-    }
-
-    return items;
-  }
-
   @override
   Widget build(BuildContext context) {    return AlertDialog(
       title: Text('screens_newLayout'.tr),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'screens_layoutName'.tr,
-                hintText: 'screens_layoutNameHint'.tr,
-              ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 24),
-            LayoutTypeSelector(
-              initialType: _selectedLayoutType,
-              onTypeChanged: (value) {
-                setState(() {
-                  _selectedLayoutType = value;
-                });
-              },
-            ),
-          ],
+        child: TextField(
+          controller: _nameController,
+          decoration: InputDecoration(
+            labelText: 'screens_layoutName'.tr,
+            hintText: 'screens_layoutNameHint'.tr,
+          ),
+          autofocus: true,
         ),
       ),
       actions: [
