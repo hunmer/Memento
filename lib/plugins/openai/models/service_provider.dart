@@ -1,9 +1,12 @@
+import 'package:Memento/plugins/openai/models/api_format.dart';
+
 class ServiceProvider {
   String id;
   String label;
   String baseUrl;
   Map<String, String> headers;
   String? defaultModel; // 默认模型
+  String apiFormat; // API 格式
 
   ServiceProvider({
     required this.id,
@@ -11,6 +14,7 @@ class ServiceProvider {
     required this.baseUrl,
     Map<String, String>? headers,
     this.defaultModel,
+    this.apiFormat = 'openai',
   }) : headers = headers ?? {};
 
   // 从JSON构造
@@ -21,6 +25,7 @@ class ServiceProvider {
       baseUrl: json['baseUrl'] as String,
       headers: Map<String, String>.from(json['headers'] as Map),
       defaultModel: json['defaultModel'] as String?,
+      apiFormat: json['apiFormat'] as String? ?? 'openai',
     );
   }
 
@@ -32,6 +37,7 @@ class ServiceProvider {
       'baseUrl': baseUrl,
       'headers': headers,
       if (defaultModel != null) 'defaultModel': defaultModel,
+      'apiFormat': apiFormat,
     };
   }
 
@@ -42,6 +48,7 @@ class ServiceProvider {
     String? baseUrl,
     Map<String, String>? headers,
     String? defaultModel,
+    String? apiFormat,
   }) {
     return ServiceProvider(
       id: id ?? this.id,
@@ -49,6 +56,7 @@ class ServiceProvider {
       baseUrl: baseUrl ?? this.baseUrl,
       headers: headers ?? Map<String, String>.from(this.headers),
       defaultModel: defaultModel ?? this.defaultModel,
+      apiFormat: apiFormat ?? this.apiFormat,
     );
   }
 }
