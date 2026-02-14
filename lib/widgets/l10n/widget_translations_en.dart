@@ -153,7 +153,7 @@ const Map<String, String> enUS = {
   'widget_calendarStrip_loadingMore': 'Loading more...',
 
   // TagManager 标签管理器
-  'tagManager_clearSelected': 'Clear Selected (\$selectedCount)',
+  'tagManager_clearSelected': 'Clear Selected (@selectedCount)',
   'tagManager_cancel': 'Cancel',
   'tagManager_confirm': 'Confirm',
   'tagManager_newGroup': 'New Group',

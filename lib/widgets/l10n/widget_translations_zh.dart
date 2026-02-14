@@ -144,7 +144,7 @@ const Map<String, String> zhCN = {
   'widget_calendarStrip_loadingMore': '加载更多...',
 
   // TagManager 标签管理器
-  'tagManager_clearSelected': '清空选中 (\$selectedCount)',
+  'tagManager_clearSelected': '清空选中 (@selectedCount)',
   'tagManager_cancel': '取消',
   'tagManager_confirm': '确定',
   'tagManager_newGroup': '新建分组',

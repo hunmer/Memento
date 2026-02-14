@@ -153,7 +153,7 @@ const Map<String, String> jpJP = {
   'widget_calendarStrip_loadingMore': '読み込み中...',
 
   // TagManager
-  'tagManager_clearSelected': '選択をクリア（$selectedCount）',
+  'tagManager_clearSelected': '選択をクリア（@selectedCount）',
   'tagManager_cancel': 'キャンセル',
   'tagManager_confirm': '確認',
   'tagManager_newGroup': '新しいグループ',

@@ -38,7 +38,7 @@ class BaseSettingsController extends ChangeNotifier {
                 ),
               ),
               SimpleDialogOption(
-                onPressed: () => Navigator.pop(context, const Locale('ja')),
+                onPressed: () => Navigator.pop(context, const Locale('ja', 'JP')),
                 child: Row(
                   children: [
                     if (_currentLocale.languageCode == 'ja')
