@@ -37,12 +37,13 @@ class AppDrawer extends StatelessWidget {
                 }
 
                 final plugins = snapshot.data ?? [];
-                final visiblePlugins = plugins
-                    .where(
-                      (plugin) =>
-                          globalConfigManager.isPluginEnabled(plugin.id),
-                    )
-                    .toList();
+                final visiblePlugins =
+                    plugins
+                        .where(
+                          (plugin) =>
+                              globalConfigManager.isPluginEnabled(plugin.id),
+                        )
+                        .toList();
 
                 return ListView.builder(
                   itemCount: visiblePlugins.length,
@@ -53,6 +54,7 @@ class AppDrawer extends StatelessWidget {
                     final hasSettings = [
                       'chat',
                       'openai',
+                      'activity',
                       'agent_chat',
                       'webview',
                       'store',
@@ -73,7 +75,8 @@ class AppDrawer extends StatelessWidget {
                                     NavigationHelper.push(
                                       context,
                                       plugin.buildSettingsView(context),
-                                      routeName: '/plugin/${plugin.id}/settings',
+                                      routeName:
+                                          '/plugin/${plugin.id}/settings',
                                     );
                                   }
                                 },
