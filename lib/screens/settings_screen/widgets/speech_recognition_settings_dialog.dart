@@ -218,31 +218,29 @@ class _SpeechRecognitionSettingsDialogState
     }
 
     // 如果没有加载到Agent，创建默认的
-    if (agentToEdit == null) {
-      agentToEdit = AIAgent(
-        id: _correctionAgentId ?? const Uuid().v4(),
-        name: _correctionAgentName.isNotEmpty ? _correctionAgentName : '语音文本纠错',
-        description: '用于自动纠正语音识别错误的AI助手',
-        tags: const ['语音纠错'],
-        serviceProviderId: 'openai',
-        baseUrl: '',
-        headers: const {},
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        model: 'gpt-4o-mini',
-        temperature: 0.3,
-        maxLength: 2000,
-        topP: 1.0,
-        frequencyPenalty: 0.0,
-        presencePenalty: 0.0,
-        messages: [
-          Prompt(
-            type: 'system',
-            content: '你是一个专业的语音文本纠错助手。你的任务是纠正语音识别中的错误。\n\n## 工作流程\n1. 分析用户输入的文本\n2. 识别可能的识别错误（同音字、语法错误、标点错误等）\n3. 纠正错误，保持原意不变\n4. 只输出纠正后的文本，不要添加任何解释或说明\n\n## 注意事项\n- 只处理明显的识别错误\n- 保持口语化表达的自然流畅\n- 适当添加标点符号以提高可读性\n- 不要改变原文的意思\n- 如果文本本身就没有错误，直接返回原文',
-          ),
-        ],
-      );
-    }
+    agentToEdit ??= AIAgent(
+      id: _correctionAgentId ?? const Uuid().v4(),
+      name: _correctionAgentName.isNotEmpty ? _correctionAgentName : '语音文本纠错',
+      description: '用于自动纠正语音识别错误的AI助手',
+      tags: const ['语音纠错'],
+      serviceProviderId: 'openai',
+      baseUrl: '',
+      headers: const {},
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      model: 'gpt-4o-mini',
+      temperature: 0.3,
+      maxLength: 2000,
+      topP: 1.0,
+      frequencyPenalty: 0.0,
+      presencePenalty: 0.0,
+      messages: [
+        Prompt(
+          type: 'system',
+          content: '你是一个专业的语音文本纠错助手。你的任务是纠正语音识别中的错误。\n\n## 工作流程\n1. 分析用户输入的文本\n2. 识别可能的识别错误（同音字、语法错误、标点错误等）\n3. 纠正错误，保持原意不变\n4. 只输出纠正后的文本，不要添加任何解释或说明\n\n## 注意事项\n- 只处理明显的识别错误\n- 保持口语化表达的自然流畅\n- 适当添加标点符号以提高可读性\n- 不要改变原文的意思\n- 如果文本本身就没有错误，直接返回原文',
+        ),
+      ],
+    );
 
     final result = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
@@ -255,7 +253,7 @@ class _SpeechRecognitionSettingsDialogState
       try {
         final agentController = AgentController();
         // 使用Agent的ID重新加载最新配置
-        final savedAgent = await agentController.getAgent(agentToEdit!.id);
+        final savedAgent = await agentController.getAgent(agentToEdit.id);
 
         if (savedAgent == null) {
           _showError('未找到保存的Agent');
