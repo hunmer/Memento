@@ -79,6 +79,7 @@ dependencies:
   record: ^6.0.0
   flutter_staggered_grid_view: ^0.7.0
   openai_dart: ^0.4.5
+  anthropic_sdk_dart: ^0.2.2  # Anthropic Claude API client
   web_socket_channel: ^3.0.0
   crypto: ^3.0.3
   encrypt: ^5.0.3  # AES-256-GCM encryption for sync service

@@ -3,7 +3,10 @@ import 'dart:io';
 import 'dart:async';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:Memento/plugins/openai/models/api_format.dart';
 import 'prompt_preset_service.dart';
+import 'anthropic_request_service.dart';
+import 'minimax_request_service.dart';
 import 'dart:developer' as developer;
 
 /// 统一的错误消息提取和修复方法
@@ -366,6 +369,44 @@ class RequestService {
     bool Function()? shouldCancel,
     Map<String, String>? additionalPrompts,
   }) async {
+    // 根据 apiFormat 分发到不同的实现
+    final apiFormat = ApiFormat.fromString(agent.apiFormat);
+    developer.log(
+      'streamResponse: apiFormat=${apiFormat.value}',
+      name: 'RequestService',
+    );
+
+    if (apiFormat == ApiFormat.anthropic) {
+      await _streamResponseAnthropic(
+        agent: agent,
+        prompt: prompt,
+        onToken: onToken,
+        onError: onError,
+        onComplete: onComplete,
+        filePath: filePath,
+        contextMessages: contextMessages,
+        shouldCancel: shouldCancel,
+        additionalPrompts: additionalPrompts,
+      );
+      return;
+    }
+
+    if (apiFormat == ApiFormat.minimax) {
+      await _streamResponseMiniMax(
+        agent: agent,
+        prompt: prompt,
+        onToken: onToken,
+        onError: onError,
+        onComplete: onComplete,
+        filePath: filePath,
+        contextMessages: contextMessages,
+        shouldCancel: shouldCancel,
+        additionalPrompts: additionalPrompts,
+      );
+      return;
+    }
+
+    // OpenAI 格式（默认）
     try {
       // 获取有效的系统提示词（可能是预设）
       var effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
@@ -937,5 +978,296 @@ class RequestService {
       name: 'RequestService',
     );
     _clients.clear();
+    AnthropicRequestService.dispose();
+  }
+
+  /// Anthropic API 流式响应处理
+  ///
+  /// 将 OpenAI 格式的消息转换为 Anthropic 格式并调用 AnthropicRequestService
+  static Future<void> _streamResponseAnthropic({
+    required AIAgent agent,
+    String? prompt,
+    required Function(String) onToken,
+    required Function(String) onError,
+    required Function() onComplete,
+    String? filePath,
+    List<ChatCompletionMessage>? contextMessages,
+    bool Function()? shouldCancel,
+    Map<String, String>? additionalPrompts,
+  }) async {
+    try {
+      // 获取有效的系统提示词（可能是预设）
+      var effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
+      // 处理占位符替换（与 OpenAI 版本相同）
+      if (additionalPrompts != null && additionalPrompts.isNotEmpty) {
+        final originalAgentPrompt = effectiveSystemPrompt;
+
+        if (!effectiveSystemPrompt.contains('{agent_prompt}') &&
+            !effectiveSystemPrompt.contains('{tool_templates}') &&
+            !effectiveSystemPrompt.contains('{tool_brief}') &&
+            !effectiveSystemPrompt.contains('{tool_detail}')) {
+          effectiveSystemPrompt =
+              '{agent_prompt}\n{tool_templates}{tool_brief}{tool_detail}';
+        }
+
+        effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+          '{agent_prompt}',
+          originalAgentPrompt,
+        );
+
+        additionalPrompts.forEach((placeholder, content) {
+          final fullPlaceholder = '{$placeholder}';
+          if (content.isNotEmpty) {
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+              fullPlaceholder,
+              content,
+            );
+          } else {
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+              fullPlaceholder,
+              '',
+            );
+          }
+        });
+
+        final standardToolPlaceholders = [
+          'tool_templates',
+          'tool_brief',
+          'tool_detail',
+        ];
+
+        for (final placeholder in standardToolPlaceholders) {
+          if (!additionalPrompts.containsKey(placeholder)) {
+            final fullPlaceholder = '{$placeholder}';
+            if (effectiveSystemPrompt.contains(fullPlaceholder)) {
+              effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+                fullPlaceholder,
+                '',
+              );
+            }
+          }
+        }
+      }
+
+      // 将 OpenAI 格式的消息转换为通用格式
+      final List<Map<String, dynamic>> messages = [];
+
+      if (contextMessages != null && contextMessages.isNotEmpty) {
+        for (final msg in contextMessages) {
+          final role = msg.role.name;
+          String content = '';
+
+          // 提取消息内容
+          final rawContent = msg.content;
+          if (rawContent is String) {
+            content = rawContent;
+          } else if (rawContent is ChatCompletionUserMessageContent) {
+            content = rawContent.map(
+              parts: (parts) => parts.value
+                  .map(
+                    (p) => p.map(
+                      text: (t) => t.text,
+                      image: (i) => '[图片]',
+                      audio: (a) => '[音频]',
+                      refusal: (r) => '',
+                    ),
+                  )
+                  .where((s) => s.isNotEmpty)
+                  .join(' '),
+              string: (s) => s.value,
+            );
+          }
+
+          if (content.isNotEmpty) {
+            messages.add({'role': role, 'content': content});
+          }
+        }
+      } else if (prompt != null) {
+        messages.add({'role': 'user', 'content': prompt});
+      } else {
+        onError('错误：未提供消息内容');
+        return;
+      }
+
+      developer.log(
+        '发送 Anthropic 流式请求: ${agent.model}',
+        name: 'RequestService',
+      );
+      developer.log(
+        '系统提示词长度: ${effectiveSystemPrompt.length}字符',
+        name: 'RequestService',
+      );
+      developer.log(
+        '消息数量: ${messages.length}条',
+        name: 'RequestService',
+      );
+
+      // 调用 AnthropicRequestService
+      await AnthropicRequestService.streamResponse(
+        agent: agent,
+        systemPrompt: effectiveSystemPrompt,
+        messages: messages,
+        onToken: onToken,
+        onError: onError,
+        onComplete: onComplete,
+        filePath: filePath,
+        shouldCancel: shouldCancel,
+      );
+    } catch (e, stackTrace) {
+      final errorMessage = '处理 Anthropic 响应时出错: $e';
+      developer.log(
+        errorMessage,
+        name: 'RequestService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      onError(errorMessage);
+    }
+  }
+
+  /// MiniMax API 流式响应处理
+  ///
+  /// 将 OpenAI 格式的消息转换为 MiniMax 格式并调用 MiniMaxRequestService
+  static Future<void> _streamResponseMiniMax({
+    required AIAgent agent,
+    String? prompt,
+    required Function(String) onToken,
+    required Function(String) onError,
+    required Function() onComplete,
+    String? filePath,
+    List<ChatCompletionMessage>? contextMessages,
+    bool Function()? shouldCancel,
+    Map<String, String>? additionalPrompts,
+  }) async {
+    try {
+      // 获取有效的系统提示词（可能是预设）
+      var effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
+      // 处理占位符替换（与 OpenAI 版本相同）
+      if (additionalPrompts != null && additionalPrompts.isNotEmpty) {
+        final originalAgentPrompt = effectiveSystemPrompt;
+
+        if (!effectiveSystemPrompt.contains('{agent_prompt}') &&
+            !effectiveSystemPrompt.contains('{tool_templates}') &&
+            !effectiveSystemPrompt.contains('{tool_brief}') &&
+            !effectiveSystemPrompt.contains('{tool_detail}')) {
+          effectiveSystemPrompt =
+              '{agent_prompt}\n{tool_templates}{tool_brief}{tool_detail}';
+        }
+
+        effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+          '{agent_prompt}',
+          originalAgentPrompt,
+        );
+
+        additionalPrompts.forEach((placeholder, content) {
+          final fullPlaceholder = '{$placeholder}';
+          if (content.isNotEmpty) {
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+              fullPlaceholder,
+              content,
+            );
+          } else {
+            effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+              fullPlaceholder,
+              '',
+            );
+          }
+        });
+
+        final standardToolPlaceholders = [
+          'tool_templates',
+          'tool_brief',
+          'tool_detail',
+        ];
+
+        for (final placeholder in standardToolPlaceholders) {
+          if (!additionalPrompts.containsKey(placeholder)) {
+            final fullPlaceholder = '{$placeholder}';
+            if (effectiveSystemPrompt.contains(fullPlaceholder)) {
+              effectiveSystemPrompt = effectiveSystemPrompt.replaceAll(
+                fullPlaceholder,
+                '',
+              );
+            }
+          }
+        }
+      }
+
+      // 将 OpenAI 格式的消息转换为通用格式
+      final List<Map<String, dynamic>> messages = [];
+
+      if (contextMessages != null && contextMessages.isNotEmpty) {
+        for (final msg in contextMessages) {
+          final role = msg.role.name;
+          String content = '';
+
+          // 提取消息内容
+          final rawContent = msg.content;
+          if (rawContent is String) {
+            content = rawContent;
+          } else if (rawContent is ChatCompletionUserMessageContent) {
+            content = rawContent.map(
+              parts: (parts) => parts.value
+                  .map(
+                    (p) => p.map(
+                      text: (t) => t.text,
+                      image: (i) => '[图片]',
+                      audio: (a) => '[音频]',
+                      refusal: (r) => '',
+                    ),
+                  )
+                  .where((s) => s.isNotEmpty)
+                  .join(' '),
+              string: (s) => s.value,
+            );
+          }
+
+          if (content.isNotEmpty) {
+            messages.add({'role': role, 'content': content});
+          }
+        }
+      } else if (prompt != null) {
+        messages.add({'role': 'user', 'content': prompt});
+      } else {
+        onError('错误：未提供消息内容');
+        return;
+      }
+
+      developer.log(
+        '发送 MiniMax 流式请求: ${agent.model}',
+        name: 'RequestService',
+      );
+      developer.log(
+        '系统提示词长度: ${effectiveSystemPrompt.length}字符',
+        name: 'RequestService',
+      );
+      developer.log(
+        '消息数量: ${messages.length}条',
+        name: 'RequestService',
+      );
+
+      // 调用 MiniMaxRequestService
+      await MiniMaxRequestService.streamResponse(
+        agent: agent,
+        systemPrompt: effectiveSystemPrompt,
+        messages: messages,
+        onToken: onToken,
+        onError: onError,
+        onComplete: onComplete,
+        filePath: filePath,
+        shouldCancel: shouldCancel,
+      );
+    } catch (e, stackTrace) {
+      final errorMessage = '处理 MiniMax 响应时出错: $e';
+      developer.log(
+        errorMessage,
+        name: 'RequestService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      onError(errorMessage);
+    }
   }
 }

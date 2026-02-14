@@ -38,6 +38,7 @@ class AIAgent {
   final bool enableOpeningQuestions; // 是否开启猜你想问功能
   final List<String> openingQuestions; // 预设的开场白问题列表
   final List<Prompt>? messages; // 预设消息列表（system, user, assistant）
+  final String apiFormat; // API 格式: 'openai' 或 'anthropic'
 
   /// 从 messages 中获取 system 类型的提示词
   /// 优先级：messages 中 type="system" 的第一条 > systemPrompt（兼容旧数据）
@@ -76,6 +77,7 @@ class AIAgent {
     this.enableOpeningQuestions = false,
     this.openingQuestions = const [],
     this.messages,
+    this.apiFormat = 'openai',
   });
 
   Map<String, dynamic> toJson() => {
@@ -104,6 +106,7 @@ class AIAgent {
     'enableOpeningQuestions': enableOpeningQuestions,
     'openingQuestions': openingQuestions,
     'messages': messages?.map((msg) => msg.toJson()).toList(),
+    'apiFormat': apiFormat,
   };
 
   factory AIAgent.fromJson(Map<String, dynamic> json) {
@@ -166,6 +169,7 @@ class AIAgent {
           (json['openingQuestions'] as List<dynamic>?)?.cast<String>() ??
           const [],
       messages: messages,
+      apiFormat: json['apiFormat'] as String? ?? 'openai',
     );
   }
 
@@ -195,6 +199,7 @@ class AIAgent {
     bool? enableOpeningQuestions,
     List<String>? openingQuestions,
     List<Prompt>? messages,
+    String? apiFormat,
   }) {
     return AIAgent(
       id: id ?? this.id,
@@ -224,6 +229,7 @@ class AIAgent {
           enableOpeningQuestions ?? this.enableOpeningQuestions,
       openingQuestions: openingQuestions ?? this.openingQuestions,
       messages: messages ?? this.messages,
+      apiFormat: apiFormat ?? this.apiFormat,
     );
   }
 }
