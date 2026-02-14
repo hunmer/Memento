@@ -698,6 +698,41 @@ final llmModelGroups = [
     name: 'MiniMax',
     models: [
       LLMModel(
+        id: 'MiniMax-M2.5',
+        name: 'MiniMax-M2.5',
+        description: '顶尖性能与极致性价比，轻松驾驭复杂任务 (输出速度约60tps)',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'MiniMax-M2.5-highspeed',
+        name: 'MiniMax-M2.5-highspeed',
+        description: 'M2.5 极速版：效果不变，更快，更敏捷 (输出速度约100tps)',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'MiniMax-M2.1',
+        name: 'MiniMax-M2.1',
+        description: '强大多语言编程能力，全面升级编程体验 (输出速度约60tps)',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'MiniMax-M2.1-highspeed',
+        name: 'MiniMax-M2.1-highspeed',
+        description: 'M2.1 极速版：效果不变，更快，更敏捷 (输出速度约100tps)',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'MiniMax-M2',
+        name: 'MiniMax-M2',
+        description: '专为高效编码与Agent工作流而生',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
         id: 'abab6.5s-chat',
         name: 'abab6.5s-chat',
         description: 'MiniMax 最新对话模型，支持长上下文',
