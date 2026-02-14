@@ -1,11 +1,13 @@
 import 'package:get/get.dart';
+import 'core_translations_jp.dart';
 import 'core_translations_zh.dart';
 import 'core_translations_en.dart';
 
-/// 核心模块 GetX 国际化 Translations 类
+/// Core module GetX internationalization Translations class
 class CoreTranslations extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
+        'ja_JP': coreTranslationsJp,
         'zh_CN': coreTranslationsZh,
         'en_US': coreTranslationsEn,
       };
