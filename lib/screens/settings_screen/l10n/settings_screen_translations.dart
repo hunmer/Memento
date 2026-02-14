@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'settings_screen_translations_zh.dart';
 import 'settings_screen_translations_en.dart';
+import 'settings_screen_translations_jp.dart';
 
 /// 设置屏幕GetX翻译类
 class SettingsScreenTranslations extends Translations {
@@ -8,5 +9,6 @@ class SettingsScreenTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
         'zh_CN': settingsScreenTranslationsZh,
         'en_US': settingsScreenTranslationsEn,
+        'ja_JP': settingsScreenTranslationsJp,
       };
 }
