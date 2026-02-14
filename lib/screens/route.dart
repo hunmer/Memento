@@ -63,6 +63,7 @@ import 'package:Memento/screens/json_dynamic_test/json_dynamic_test_screen.dart'
 import 'package:Memento/screens/notification_test/notification_test_page.dart';
 import 'package:Memento/screens/data_selector_test/data_selector_test_screen.dart';
 import 'package:Memento/screens/settings_screen/screens/live_activities_test_screen.dart';
+import 'package:Memento/screens/settings_screen/screens/background_announcement_test_screen.dart';
 
 class AppRoutes extends NavigatorObserver {
   // 单例路由管理器
@@ -130,6 +131,7 @@ class AppRoutes extends NavigatorObserver {
   static const String jsConsole = '/js_console';
   static const String jsonDynamicTest = '/json_dynamic_test';
   static const String notificationTest = '/notification_test';
+  static const String backgroundAnnouncementTest = '/background_announcement_test';
   static const String superCupertinoTest = '/super_cupertino_test';
   static const String overlayTest = '/overlay_test';
   static const String formFieldsTest = '/form_fields_test';
@@ -283,6 +285,7 @@ class AppRoutes extends NavigatorObserver {
     jsConsole: (context) => const JSConsoleScreen(),
     jsonDynamicTest: (context) => const JsonDynamicTestScreen(),
     notificationTest: (context) => const NotificationTestPage(),
+    backgroundAnnouncementTest: (context) => const BackgroundAnnouncementTestScreen(),
     'data_selector_test': (context) => const DataSelectorTestScreen(),
     'live_activities_test': (context) => const LiveActivitiesTestScreen(),
   };

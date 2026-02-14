@@ -24,6 +24,7 @@ import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/widgets/route_viewer_dialog.dart';
+import 'package:Memento/screens/route.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -628,6 +629,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/toast_test');
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.record_voice_over),
+            title: const Text('后台播报测试'),
+            subtitle: const Text('测试 TTS 后台定时播报功能'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, AppRoutes.backgroundAnnouncementTest);
             },
           ),
           ListTile(
