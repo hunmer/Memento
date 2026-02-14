@@ -34,6 +34,7 @@ import 'services/file_watch_sync_service.dart';
 import 'services/log_service.dart';
 import 'api_forwarding/api_forwarding_config.dart';
 import 'api_forwarding/api_forwarding_service.dart';
+import 'services/speech_recognition_config_service.dart';
 
 /// 应用启动状态管理
 class AppStartupState extends ChangeNotifier {
@@ -259,6 +260,18 @@ Future<void> _initializeBackgroundServices() async {
           })
           .catchError((e) {
             debugPrint('JS Bridge 初始化失败: $e');
+          }),
+    );
+
+    // 初始化语音识别配置服务
+    unawaited(
+      SpeechRecognitionConfigService.instance
+          .initialize()
+          .then((_) {
+            debugPrint('语音识别配置服务初始化成功');
+          })
+          .catchError((e) {
+            debugPrint('语音识别配置服务初始化失败: $e');
           }),
     );
 
