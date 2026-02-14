@@ -258,6 +258,22 @@ class RequestService {
     File? imageFile,
     List<ChatCompletionMessage>? contextMessages,
   }) async {
+    // 根据 apiFormat 分发到不同的实现
+    final apiFormat = ApiFormat.fromString(agent.apiFormat);
+    developer.log(
+      'chat: apiFormat=${apiFormat.value}',
+      name: 'RequestService',
+    );
+
+    if (apiFormat == ApiFormat.anthropic) {
+      return await _chatAnthropic(input, agent, imageFile: imageFile, contextMessages: contextMessages);
+    }
+
+    if (apiFormat == ApiFormat.minimax) {
+      return await _chatMiniMax(input, agent, imageFile: imageFile, contextMessages: contextMessages);
+    }
+
+    // OpenAI 格式（默认）
     try {
       developer.log('开始聊天请求: ${agent.id}', name: 'RequestService');
       developer.log('用户输入: $input', name: 'RequestService');
@@ -340,6 +356,192 @@ class RequestService {
       final errorDetails = _extractErrorMessage(e);
       developer.log('聊天请求错误: $errorDetails', name: 'RequestService', error: e);
       return 'Error: $errorDetails';
+    }
+  }
+
+  /// Anthropic 聊天请求（非流式）
+  static Future<String> _chatAnthropic(
+    String input,
+    AIAgent agent, {
+    File? imageFile,
+    List<ChatCompletionMessage>? contextMessages,
+  }) async {
+    try {
+      developer.log('开始 Anthropic 聊天请求: ${agent.id}', name: 'RequestService');
+      developer.log('用户输入: $input', name: 'RequestService');
+
+      // 获取有效的系统提示词
+      final effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
+      // 构建消息列表
+      final List<Map<String, dynamic>> messages = [];
+
+      if (contextMessages != null && contextMessages.isNotEmpty) {
+        for (final msg in contextMessages) {
+          final role = msg.role.name;
+          String content = '';
+
+          final rawContent = msg.content;
+          if (rawContent is String) {
+            content = rawContent;
+          } else if (rawContent is ChatCompletionUserMessageContent) {
+            content = rawContent.map(
+              parts: (parts) => parts.value
+                  .map(
+                    (p) => p.map(
+                      text: (t) => t.text,
+                      image: (i) => '[图片]',
+                      audio: (a) => '[音频]',
+                      refusal: (r) => '',
+                    ),
+                  )
+                  .where((s) => s.isNotEmpty)
+                  .join(' '),
+              string: (s) => s.value,
+            );
+          }
+
+          if (content.isNotEmpty && role != 'system') {
+            messages.add({'role': role, 'content': content});
+          }
+        }
+      }
+
+      // 添加当前用户消息
+      messages.add({'role': 'user', 'content': input});
+
+      // 使用流式 API 收集完整响应
+      final StringBuffer fullResponse = StringBuffer();
+      String? errorMessage;
+
+      await AnthropicRequestService.streamResponse(
+        agent: agent,
+        systemPrompt: effectiveSystemPrompt,
+        messages: messages,
+        filePath: imageFile?.path,
+        onToken: (token) {
+          fullResponse.write(token);
+        },
+        onError: (error) {
+          errorMessage = error;
+        },
+        onComplete: () {
+          // 流式响应完成
+        },
+      );
+
+      if (errorMessage != null) {
+        return 'Error: $errorMessage';
+      }
+
+      final content = fullResponse.toString();
+      developer.log(
+        '收到 Anthropic 响应: ${content.length}字符',
+        name: 'RequestService',
+      );
+
+      return content.isNotEmpty ? content : 'No response content';
+    } catch (e) {
+      final errorMessage = e.toString();
+      developer.log(
+        'Anthropic 聊天请求错误: $errorMessage',
+        name: 'RequestService',
+        error: e,
+      );
+      return 'Error: $errorMessage';
+    }
+  }
+
+  /// MiniMax 聊天请求（非流式）
+  static Future<String> _chatMiniMax(
+    String input,
+    AIAgent agent, {
+    File? imageFile,
+    List<ChatCompletionMessage>? contextMessages,
+  }) async {
+    try {
+      developer.log('开始 MiniMax 聊天请求: ${agent.id}', name: 'RequestService');
+      developer.log('用户输入: $input', name: 'RequestService');
+
+      // 获取有效的系统提示词
+      final effectiveSystemPrompt = await getEffectiveSystemPrompt(agent);
+
+      // 构建消息列表
+      final List<Map<String, dynamic>> messages = [];
+
+      if (contextMessages != null && contextMessages.isNotEmpty) {
+        for (final msg in contextMessages) {
+          final role = msg.role.name;
+          String content = '';
+
+          final rawContent = msg.content;
+          if (rawContent is String) {
+            content = rawContent;
+          } else if (rawContent is ChatCompletionUserMessageContent) {
+            content = rawContent.map(
+              parts: (parts) => parts.value
+                  .map(
+                    (p) => p.map(
+                      text: (t) => t.text,
+                      image: (i) => '[图片]',
+                      audio: (a) => '[音频]',
+                      refusal: (r) => '',
+                    ),
+                  )
+                  .where((s) => s.isNotEmpty)
+                  .join(' '),
+              string: (s) => s.value,
+            );
+          }
+
+          if (content.isNotEmpty && role != 'system') {
+            messages.add({'role': role, 'content': content});
+          }
+        }
+      }
+
+      // 添加当前用户消息
+      messages.add({'role': 'user', 'content': input});
+
+      // 使用流式 API 收集完整响应
+      final StringBuffer fullResponse = StringBuffer();
+      String? errorMessage;
+
+      await MiniMaxRequestService.streamResponse(
+        agent: agent,
+        systemPrompt: effectiveSystemPrompt,
+        messages: messages,
+        filePath: imageFile?.path,
+        onToken: (token) {
+          fullResponse.write(token);
+        },
+        onError: (error) {
+          errorMessage = error;
+        },
+        onComplete: () {
+          // 流式响应完成
+        },
+      );
+
+      if (errorMessage != null) {
+        return 'Error: $errorMessage';
+      }
+
+      final content = fullResponse.toString();
+      developer.log(
+        '收到 MiniMax 响应: ${content.length}字符',
+        name: 'RequestService',
+      );
+
+      return content.isNotEmpty ? content : 'No response content';
+    } catch (e) {
+      final errorMessage = e.toString();
+      developer.log(
+        'MiniMax 聊天请求错误: $errorMessage',
+        name: 'RequestService',
+        error: e,
+      );
+      return 'Error: $errorMessage';
     }
   }
 

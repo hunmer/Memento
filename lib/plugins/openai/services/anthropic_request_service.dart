@@ -1,35 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
+import 'package:http/http.dart' as http;
 import 'dart:developer' as developer;
 
 /// Anthropic API 请求服务
 ///
-/// 处理与 Anthropic Claude API 的通信
+/// 处理与 Anthropic Claude API 及其兼容 API 的通信
+/// 自动兼容各种 Anthropic 格式的 API，无需特殊配置
 class AnthropicRequestService {
-  static final Map<String, AnthropicClient> _clients = {};
-
-  /// 获取或创建 Anthropic 客户端
-  static AnthropicClient _getClient(AIAgent agent) {
-    // 从 headers 中提取 API 密钥
-    // Anthropic 使用 x-api-key 或 Authorization: Bearer
-    final apiKey = agent.headers['x-api-key'] ??
-        agent.headers['X-Api-Key'] ??
-        agent.headers['Authorization']?.replaceAll('Bearer ', '') ??
-        '';
-
-    developer.log('创建 Anthropic 客户端: ${agent.id}', name: 'AnthropicRequestService');
-    developer.log('baseUrl: ${agent.baseUrl}', name: 'AnthropicRequestService');
-    developer.log('model: ${agent.model}', name: 'AnthropicRequestService');
-
-    return AnthropicClient(
-      apiKey: apiKey,
-      baseUrl: agent.baseUrl.isNotEmpty ? agent.baseUrl : null,
-    );
-  }
-
   /// 流式处理 Anthropic API 响应
   ///
   /// [agent] - AI 助手配置
@@ -41,6 +21,8 @@ class AnthropicRequestService {
   /// [filePath] - 图片文件路径（vision 模式）
   /// [shouldCancel] - 检查是否应该取消的函数
   /// [maxTokens] - 最大生成 token 数（Anthropic 必须指定）
+  ///
+  /// 自动兼容各种 Anthropic 格式的 API，无需特殊配置
   static Future<void> streamResponse({
     required AIAgent agent,
     required String systemPrompt,
@@ -52,185 +34,239 @@ class AnthropicRequestService {
     bool Function()? shouldCancel,
     int? maxTokens,
   }) async {
+    // 统一使用原生 HTTP 请求处理，自动兼容各种 Anthropic 格式 API
+    await _streamResponseUniversal(
+      agent: agent,
+      systemPrompt: systemPrompt,
+      messages: messages,
+      onToken: onToken,
+      onError: onError,
+      onComplete: onComplete,
+      filePath: filePath,
+      shouldCancel: shouldCancel,
+      maxTokens: maxTokens,
+    );
+  }
+
+  /// 统一的 Anthropic 兼容 API 流式响应处理
+  ///
+  /// 使用原生 HTTP 请求解析 SSE，自动兼容各种 Anthropic 格式 API
+  /// 支持 text_delta 和 thinking_delta 等内容块类型
+  static Future<void> _streamResponseUniversal({
+    required AIAgent agent,
+    required String systemPrompt,
+    required List<Map<String, dynamic>> messages,
+    required Function(String) onToken,
+    required Function(String) onError,
+    required Function() onComplete,
+    String? filePath,
+    bool Function()? shouldCancel,
+    int? maxTokens,
+  }) async {
     try {
-      final client = _getClient(agent);
+      // 从 headers 中提取 API 密钥
+      final apiKey = agent.headers['x-api-key'] ??
+          agent.headers['X-Api-Key'] ??
+          agent.headers['Authorization']?.replaceAll('Bearer ', '') ??
+          '';
+
+      developer.log('发送 Anthropic 流式请求: ${agent.model}', name: 'AnthropicRequestService');
+
+      // 处理 baseUrl，自动添加 /v1（如 MiniMax 风格）
+      String baseUrl = agent.baseUrl;
+      if (baseUrl.isNotEmpty) {
+        // 移除末尾的斜杠
+        baseUrl = baseUrl.replaceAll(RegExp(r'/+$'), '');
+        // 检查是否以 /anthropic 结尾但没有 /v1，自动添加
+        if (baseUrl.endsWith('/anthropic') && !baseUrl.endsWith('/v1')) {
+          baseUrl = '$baseUrl/v1';
+          developer.log(
+            '检测到需要 /v1 后缀，自动添加: $baseUrl',
+            name: 'AnthropicRequestService',
+          );
+        }
+      }
+
+      developer.log('baseUrl: $baseUrl', name: 'AnthropicRequestService');
+      developer.log('系统提示词长度: ${systemPrompt.length}字符', name: 'AnthropicRequestService');
 
       // 转换消息格式为 Anthropic 格式
       final anthropicMessages = await _convertMessages(messages, filePath);
 
-      developer.log(
-        '发送 Anthropic 流式请求: ${agent.model}',
-        name: 'AnthropicRequestService',
-      );
-      developer.log(
-        '系统提示词长度: ${systemPrompt.length}字符',
-        name: 'AnthropicRequestService',
-      );
-      developer.log(
-        '消息数量: ${anthropicMessages.length}条',
-        name: 'AnthropicRequestService',
-      );
+      developer.log('消息数量: ${anthropicMessages.length}条', name: 'AnthropicRequestService');
 
-      final request = CreateMessageRequest(
-        model: Model.modelId(agent.model),
-        messages: anthropicMessages,
-        system: systemPrompt.isNotEmpty
-            ? CreateMessageRequestSystem.text(systemPrompt)
-            : null,
-        maxTokens: maxTokens ?? (agent.maxLength > 0 ? agent.maxLength : 4096),
-        temperature: agent.temperature,
-        topP: agent.topP > 0 ? agent.topP : null,
-        stopSequences: agent.stop,
-      );
+      // 构建请求体
+      final requestBody = {
+        'model': agent.model,
+        'messages': anthropicMessages,
+        'max_tokens': maxTokens ?? (agent.maxLength > 0 ? agent.maxLength : 4096),
+        'stream': true,
+        if (systemPrompt.isNotEmpty) 'system': systemPrompt,
+        if (agent.temperature > 0) 'temperature': agent.temperature,
+        if (agent.topP > 0) 'top_p': agent.topP,
+        if (agent.stop != null && agent.stop!.isNotEmpty) 'stop_sequences': agent.stop,
+      };
+
+      final url = Uri.parse('$baseUrl/messages');
 
       final stopwatch = Stopwatch()..start();
-      final stream = client.createMessageStream(request: request);
+
+      // 发送请求
+      final request = http.Request('POST', url);
+      request.headers.addAll({
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
+        ...agent.headers,
+      });
+      request.body = jsonEncode(requestBody);
+
+      final response = await http.Client().send(request);
+
+      if (response.statusCode != 200) {
+        final errorBody = await response.stream.bytesToString();
+        developer.log(
+          'Anthropic API 错误: ${response.statusCode}',
+          name: 'AnthropicRequestService',
+          error: errorBody,
+        );
+        onError('API 错误: ${response.statusCode} - $errorBody');
+        return;
+      }
 
       int totalChars = 0;
       int chunkCount = 0;
       bool wasCancelled = false;
 
-      StreamSubscription? subscription;
-      Timer? cancelCheckTimer;
-      final completer = Completer<void>();
+      // 处理流式响应
+      final stream = response.stream
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
 
-      // 定期检查是否需要取消
-      if (shouldCancel != null) {
-        cancelCheckTimer = Timer.periodic(const Duration(milliseconds: 100), (
-          timer,
-        ) {
-          if (shouldCancel() && !wasCancelled) {
-            developer.log('🛑 定时检查发现取消请求', name: 'AnthropicRequestService');
-            wasCancelled = true;
-            timer.cancel();
-            subscription?.cancel();
-            onError('已取消发送');
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-          }
-        });
-      }
+      await for (final line in stream) {
+        // 检查是否应该取消
+        if (shouldCancel != null && shouldCancel() && !wasCancelled) {
+          developer.log('🛑 流数据处理中检测到取消请求', name: 'AnthropicRequestService');
+          wasCancelled = true;
+          onError('已取消发送');
+          break;
+        }
 
-      subscription = stream.listen(
-        (event) {
-          // 检查是否应该取消
-          if (shouldCancel != null && shouldCancel() && !wasCancelled) {
-            developer.log('🛑 流数据处理中检测到取消请求', name: 'AnthropicRequestService');
-            wasCancelled = true;
-            cancelCheckTimer?.cancel();
-            subscription?.cancel();
-            onError('已取消发送');
-            if (!completer.isCompleted) {
-              completer.complete();
-            }
-            return;
-          }
+        if (line.isEmpty) continue;
 
-          // 处理 Anthropic 流式事件
-          event.map(
-            messageStart: (e) {
-              developer.log('消息开始', name: 'AnthropicRequestService');
-            },
-            contentBlockStart: (e) {
-              developer.log('内容块开始', name: 'AnthropicRequestService');
-            },
-            contentBlockDelta: (e) {
-              final delta = e.delta;
-              if (delta is TextBlockDelta) {
-                final content = delta.text;
-                if (content.isNotEmpty) {
+        // 解析 SSE 格式
+        String? eventData;
+        if (line.startsWith('data: ')) {
+          eventData = line.substring(6).trim();
+        } else if (line.startsWith('event:')) {
+          // 跳过 event 行，等待 data 行
+          continue;
+        } else {
+          continue;
+        }
+
+        if (eventData.isEmpty) continue;
+
+        try {
+          final json = jsonDecode(eventData) as Map<String, dynamic>;
+          final type = json['type'] as String?;
+
+          switch (type) {
+            case 'content_block_start':
+              final contentBlock = json['content_block'] as Map<String, dynamic>?;
+              if (contentBlock != null) {
+                final blockType = contentBlock['type'] as String?;
+                developer.log('内容块开始: $blockType', name: 'AnthropicRequestService');
+              }
+              break;
+
+            case 'content_block_delta':
+              final delta = json['delta'] as Map<String, dynamic>?;
+              if (delta != null) {
+                final deltaType = delta['type'] as String?;
+                String? content;
+
+                if (deltaType == 'text_delta') {
+                  content = delta['text'] as String?;
+                } else if (deltaType == 'thinking_delta') {
+                  content = delta['thinking'] as String?;
+                  // 可选：为思考内容添加前缀
+                  // if (content != null && content.isNotEmpty) {
+                  //   content = '> $content';
+                  // }
+                }
+
+                if (content != null && content.isNotEmpty) {
                   totalChars += content.length;
                   chunkCount++;
                   onToken(content);
+
+                  if (chunkCount % 10 == 0) {
+                    developer.log(
+                      '流式响应进度: $totalChars字符, $chunkCount个块, 已耗时: ${stopwatch.elapsedMilliseconds}ms',
+                      name: 'AnthropicRequestService',
+                    );
+                  }
                 }
               }
-            },
-            contentBlockStop: (e) {
+              break;
+
+            case 'content_block_stop':
               developer.log('内容块结束', name: 'AnthropicRequestService');
-            },
-            messageDelta: (e) {
-              developer.log('消息增量', name: 'AnthropicRequestService');
-            },
-            messageStop: (e) {
+              break;
+
+            case 'message_stop':
               developer.log('消息结束', name: 'AnthropicRequestService');
-            },
-            ping: (e) {
-              developer.log('Ping', name: 'AnthropicRequestService');
-            },
-            error: (e) {
-              final error = e.error;
+              break;
+
+            case 'error':
+              final error = json['error'] as Map<String, dynamic>?;
+              final errorMessage = error?['message'] as String? ?? '未知错误';
               developer.log(
-                '流式响应错误: ${error.message}',
+                '流式响应错误: $errorMessage',
                 name: 'AnthropicRequestService',
-                error: error,
               );
               if (!wasCancelled) {
-                onError('处理AI响应时出错: ${error.message}');
+                onError('API 错误: $errorMessage');
               }
-            },
-          );
-        },
-        onError: (error) {
-          cancelCheckTimer?.cancel();
-          if (!wasCancelled) {
-            String errorMessage = error.toString();
-            developer.log(
-              '流式响应错误: $errorMessage',
-              name: 'AnthropicRequestService',
-              error: error,
-            );
-            onError('处理AI响应时出错: $errorMessage');
+              return;
           }
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        },
-        onDone: () {
-          cancelCheckTimer?.cancel();
-          if (!wasCancelled) {
-            stopwatch.stop();
-            developer.log(
-              '流式响应完成: 总计$totalChars字符, $chunkCount个块, 总耗时: ${stopwatch.elapsedMilliseconds}ms',
-              name: 'AnthropicRequestService',
-            );
-            onComplete();
-          }
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        },
-        cancelOnError: true,
-      );
+        } catch (e) {
+          developer.log('解析流数据失败: $e', name: 'AnthropicRequestService');
+        }
+      }
 
-      // 等待流处理完成
-      await completer.future;
-
-      // 确保资源被清理
-      cancelCheckTimer?.cancel();
-      await subscription.cancel();
+      if (!wasCancelled) {
+        stopwatch.stop();
+        developer.log(
+          '流式响应完成: 总计$totalChars字符, $chunkCount个块, 总耗时: ${stopwatch.elapsedMilliseconds}ms',
+          name: 'AnthropicRequestService',
+        );
+        onComplete();
+      }
     } catch (e, stackTrace) {
       String errorMessage = e.toString();
       developer.log(
-        '处理AI响应时出错: $errorMessage',
+        '处理 AI 响应时出错: $errorMessage',
         name: 'AnthropicRequestService',
         error: e,
         stackTrace: stackTrace,
       );
-      onError('处理AI响应时出错: $errorMessage');
+      onError('处理 AI 响应时出错: $errorMessage');
     }
   }
 
-  /// 将消息列表转换为 Anthropic 格式
+  /// 将消息列表转换为 Anthropic 格式（JSON）
   ///
   /// Anthropic 的消息格式:
   /// - 不包含 system 消息（system 作为单独参数传递）
   /// - 只有 user 和 assistant 两种角色
-  static Future<List<Message>> _convertMessages(
+  static Future<List<Map<String, dynamic>>> _convertMessages(
     List<Map<String, dynamic>> messages,
     String? imagePath,
   ) async {
-    final result = <Message>[];
+    final result = <Map<String, dynamic>>[];
 
     for (final msg in messages) {
       final role = msg['role'] as String?;
@@ -247,39 +283,33 @@ class AnthropicRequestService {
             // 第一条用户消息附带图片
             final imageBlock = await _loadImageBlock(imagePath);
             if (imageBlock != null) {
-              result.add(
-                Message(
-                  role: MessageRole.user,
-                  content: MessageContent.blocks([
-                    Block.text(text: content),
-                    imageBlock,
-                  ]),
-                ),
-              );
+              result.add({
+                'role': 'user',
+                'content': [
+                  {'type': 'text', 'text': content},
+                  imageBlock,
+                ],
+              });
             } else {
-              result.add(
-                Message(
-                  role: MessageRole.user,
-                  content: MessageContent.text(content),
-                ),
-              );
+              result.add({
+                'role': 'user',
+                'content': content,
+              });
             }
           } else {
-            result.add(
-              Message(
-                role: MessageRole.user,
-                content: MessageContent.text(content),
-              ),
-            );
+            result.add({
+              'role': 'user',
+              'content': content,
+            });
           }
         } else if (content is List) {
           // 多部分内容
-          final blocks = <Block>[];
+          final blocks = <Map<String, dynamic>>[];
           for (final part in content) {
             if (part is Map) {
               final type = part['type'] as String?;
               if (type == 'text') {
-                blocks.add(Block.text(text: part['text'] as String? ?? ''));
+                blocks.add({'type': 'text', 'text': part['text'] as String? ?? ''});
               } else if (type == 'image_url') {
                 final imageUrl = part['image_url'] as Map?;
                 final url = imageUrl?['url'] as String?;
@@ -293,7 +323,10 @@ class AnthropicRequestService {
               }
             }
           }
-          result.add(Message(role: MessageRole.user, content: MessageContent.blocks(blocks)));
+          result.add({
+            'role': 'user',
+            'content': blocks,
+          });
         }
       } else if (role == 'assistant') {
         // 处理助手消息
@@ -309,20 +342,18 @@ class AnthropicRequestService {
             }
           }
         }
-        result.add(
-          Message(
-            role: MessageRole.assistant,
-            content: MessageContent.text(textContent),
-          ),
-        );
+        result.add({
+          'role': 'assistant',
+          'content': textContent,
+        });
       }
     }
 
     return result;
   }
 
-  /// 加载图片为 Block
-  static Future<Block?> _loadImageBlock(String imagePath) async {
+  /// 加载图片为 Anthropic 格式的 JSON
+  static Future<Map<String, dynamic>?> _loadImageBlock(String imagePath) async {
     try {
       final file = File(imagePath);
       if (!await file.exists()) return null;
@@ -331,22 +362,23 @@ class AnthropicRequestService {
       final base64Data = base64Encode(bytes);
 
       // 检测图片类型
-      ImageBlockSourceMediaType mediaType = ImageBlockSourceMediaType.imageJpeg;
+      String mediaType = 'image/jpeg';
       if (imagePath.endsWith('.png')) {
-        mediaType = ImageBlockSourceMediaType.imagePng;
+        mediaType = 'image/png';
       } else if (imagePath.endsWith('.gif')) {
-        mediaType = ImageBlockSourceMediaType.imageGif;
+        mediaType = 'image/gif';
       } else if (imagePath.endsWith('.webp')) {
-        mediaType = ImageBlockSourceMediaType.imageWebp;
+        mediaType = 'image/webp';
       }
 
-      return Block.image(
-        source: ImageBlockSource(
-          type: ImageBlockSourceType.base64,
-          mediaType: mediaType,
-          data: base64Data,
-        ),
-      );
+      return {
+        'type': 'image',
+        'source': {
+          'type': 'base64',
+          'media_type': mediaType,
+          'data': base64Data,
+        },
+      };
     } catch (e) {
       developer.log(
         '加载图片失败: $imagePath',
@@ -357,8 +389,8 @@ class AnthropicRequestService {
     }
   }
 
-  /// 转换 OpenAI 格式的 image_url 为 Anthropic 格式
-  static Block? _convertImageUrl(String url) {
+  /// 转换 OpenAI 格式的 image_url 为 Anthropic 格式（JSON）
+  static Map<String, dynamic>? _convertImageUrl(String url) {
     try {
       if (url.startsWith('data:')) {
         // Data URL 格式: data:image/jpeg;base64,xxxx
@@ -374,29 +406,14 @@ class AnthropicRequestService {
             ? header.substring(0, mediaTypeEnd)
             : header;
 
-        // 转换为枚举
-        ImageBlockSourceMediaType mediaType;
-        switch (mediaTypeStr) {
-          case 'image/png':
-            mediaType = ImageBlockSourceMediaType.imagePng;
-            break;
-          case 'image/gif':
-            mediaType = ImageBlockSourceMediaType.imageGif;
-            break;
-          case 'image/webp':
-            mediaType = ImageBlockSourceMediaType.imageWebp;
-            break;
-          default:
-            mediaType = ImageBlockSourceMediaType.imageJpeg;
-        }
-
-        return Block.image(
-          source: ImageBlockSource(
-            type: ImageBlockSourceType.base64,
-            mediaType: mediaType,
-            data: data,
-          ),
-        );
+        return {
+          'type': 'image',
+          'source': {
+            'type': 'base64',
+            'media_type': mediaTypeStr,
+            'data': data,
+          },
+        };
       }
       // 不支持外部 URL，返回 null
       return null;
@@ -410,12 +427,8 @@ class AnthropicRequestService {
     }
   }
 
-  /// 清理客户端资源
+  /// 清理资源
   static void dispose() {
-    developer.log(
-      '清理所有 Anthropic 客户端资源: ${_clients.length}个客户端',
-      name: 'AnthropicRequestService',
-    );
-    _clients.clear();
+    developer.log('清理 Anthropic 服务资源', name: 'AnthropicRequestService');
   }
 }
