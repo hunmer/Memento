@@ -140,6 +140,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
 
+  /// 根据保存的 locale 获取初始 Locale
+  Locale _getInitialLocale(Locale savedLocale) {
+    final langCode = savedLocale.languageCode;
+    if (langCode == 'zh') {
+      return const Locale('zh', 'CN');
+    } else if (langCode == 'en') {
+      return const Locale('en', 'US');
+    } else if (langCode == 'ja') {
+      return const Locale('ja', 'JP');
+    }
+    return const Locale('zh', 'CN');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -241,10 +254,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           (theme, darkTheme) => WidgetUriHandler(
             child: GetMaterialApp(
               translations: UnifiedTranslations(),
-              locale:
-                  globalConfigManager.getLocale().languageCode == 'zh'
-                      ? const Locale('zh', 'CN')
-                      : const Locale('en', 'US'),
+              locale: _getInitialLocale(globalConfigManager.getLocale()),
               fallbackLocale: const Locale('zh', 'CN'),
               scaffoldMessengerKey: scaffoldMessengerKey,
               navigatorKey: navigatorKey,
@@ -261,7 +271,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               supportedLocales: const [
                 Locale('zh', 'CN'), // 中文
                 Locale('en', 'US'), // 英文
-                Locale('ja'), // 日文
+                Locale('ja', 'JP'), // 日文
               ],
               theme: theme,
               darkTheme: darkTheme,
