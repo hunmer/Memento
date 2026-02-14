@@ -5,6 +5,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:Memento/utils/platform_utils.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
+import 'package:Memento/widgets/memento_sf_calendar/memento_sf_calendar.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -833,7 +834,7 @@ class _CalendarMainViewState extends State<CalendarMainView> {
               Column(
                 children: [
                   Expanded(
-                    child: syncfusion.SfCalendar(
+                    child: MementoSfCalendar(
                       view:
                           plugin.sfController.view ??
                           syncfusion.CalendarView.month,

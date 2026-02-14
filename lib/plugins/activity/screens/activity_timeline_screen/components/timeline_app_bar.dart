@@ -43,53 +43,6 @@ class TimelineAppBar extends StatelessWidget implements PreferredSizeWidget {
                   : 'activity_switchToGridView'.tr,
         ),
         // 标签管理按钮
-        IconButton(
-          icon: const Icon(Icons.label),
-          onPressed: () => tagController.showTagManagerDialog(context),
-          tooltip: 'activity_tagManagement'.tr,
-        ),
-        // 排序下拉菜单
-        PopupMenuButton<int>(
-          icon: const Icon(Icons.sort),
-          tooltip: 'activity_sortBy'.tr,
-          initialValue: activityController.sortMode,
-          onSelected: (int index) {
-            activityController.setSortMode(index);
-          },
-          itemBuilder:
-              (context) => [
-                PopupMenuItem(
-                  value: 0,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.arrow_upward, size: 16),
-                      const SizedBox(width: 8),
-                      Text('activity_sortByStartTimeAsc'.tr),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.timer, size: 16),
-                      const SizedBox(width: 8),
-                      Text('activity_sortByDuration'.tr),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.arrow_downward, size: 16),
-                      const SizedBox(width: 8),
-                      Text('activity_sortByStartTimeDesc'.tr),
-                    ],
-                  ),
-                ),
-              ],
-        ),
       ],
     );
   }

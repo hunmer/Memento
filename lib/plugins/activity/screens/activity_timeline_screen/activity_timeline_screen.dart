@@ -527,48 +527,6 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
           onPressed: () => _tagController.showTagManagerDialog(context),
           tooltip: '标签管理',
         ),
-        // 排序下拉菜单
-        PopupMenuButton<int>(
-          icon: const Icon(Icons.sort),
-          tooltip: '排序',
-          initialValue: _activityController.sortMode,
-          onSelected: (int index) {
-            _activityController.setSortMode(index);
-          },
-          itemBuilder:
-              (context) => [
-                PopupMenuItem(
-                  value: 0,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.arrow_upward, size: 16),
-                      const SizedBox(width: 8),
-                      Text('activity_sortByStartTimeAsc'.tr),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.timer, size: 16),
-                      const SizedBox(width: 8),
-                      Text('activity_sortByDuration'.tr),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.arrow_downward, size: 16),
-                      const SizedBox(width: 8),
-                      Text('activity_sortByStartTimeDesc'.tr),
-                    ],
-                  ),
-                ),
-              ],
-        ),
         // 添加活动的按钮（使用IconButton避免Hero冲突）
         Padding(
           padding: const EdgeInsets.only(right: 8.0),

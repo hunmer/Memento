@@ -128,6 +128,7 @@ import 'package:Memento/screens/widgets_gallery/screens/rounded_task_progress_wi
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weather_forecast_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_stat_card_example.dart';
+import 'package:Memento/screens/widgets_gallery/screens/memento_sf_calendar_example.dart';
 
 /// 组件展示路由注册表
 class WidgetGalleryRoutes implements RouteRegistry {
@@ -817,6 +818,11 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/task_list_stat_card',
           handler: (settings) => RouteHelpers.createRoute(const TaskListStatCardExample(), settings: settings),
           description: '任务统计列表卡片',
+        ),
+        RouteDefinition(
+          path: '/widgets_gallery/memento_sf_calendar',
+          handler: (settings) => RouteHelpers.createRoute(const MementoSfCalendarExample(), settings: settings),
+          description: 'MementoSfCalendar 日历封装组件示例',
         ),
       ];
 }
