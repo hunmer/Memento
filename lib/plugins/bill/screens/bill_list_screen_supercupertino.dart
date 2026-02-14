@@ -76,6 +76,11 @@ class _BillListScreenSupercupertinoState
     };
     widget.billPlugin.addListener(_billPluginListener);
 
+    // 初始化时加载当月账单数据，确保日历能显示账单标记
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMonthBills();
+    });
+
     // 初始化时设置路由上下文（包含选中的日期）
     _updateRouteContext(_focusedDay, selectedDay: _selectedDay);
   }
@@ -248,63 +253,62 @@ class _BillListScreenSupercupertinoState
     final isIncomePositive = (stats?.income ?? 0) > 0;
     final isExpensePositive = (stats?.expense ?? 0) > 0;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints.tight(
-        Size(48, 48), // 设置固定宽度和高度，确保每个单元格尺寸一致（调整高度避免约束冲突）
+    return Container(
+      margin: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: isSelected ? _primaryColor.withOpacity(0.2) : null,
+        border: isToday ? Border.all(color: _primaryColor, width: 2) : null,
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: Container(
-        margin: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: isSelected ? _primaryColor.withOpacity(0.2) : null,
-          border: isToday ? Border.all(color: _primaryColor, width: 2) : null,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            Text(
-              '${day.day}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? _primaryColor : null,
-              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '${day.day}',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isSelected ? _primaryColor : null,
             ),
-            if (stats != null && isIncomePositive)
-              Positioned(
-                top: -6,
-                left: 22,
-                child: _buildStatBadge(stats.income, _incomeColor),
-              ),
-            if (stats != null && isExpensePositive)
-              Positioned(
-                top: -6,
-                right: 22,
-                child: _buildStatBadge(stats.expense, _expenseColor),
-              ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 2),
+          // 始终显示收入位置（有数据显示badge，无数据显示空占位）
+          SizedBox(
+            height: 10,
+            child: isIncomePositive
+                ? _buildStatBadge(stats!.income, _incomeColor, Icons.arrow_downward)
+                : const SizedBox.shrink(),
+          ),
+          // 始终显示支出位置（有数据显示badge，无数据显示空占位）
+          SizedBox(
+            height: 10,
+            child: isExpensePositive
+                ? _buildStatBadge(stats!.expense, _expenseColor, Icons.arrow_upward)
+                : const SizedBox.shrink(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatBadge(double amount, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(3),
-        border: Border.all(color: color.withOpacity(0.5), width: 0.5),
-      ),
-      child: Text(
-        amount.toInt().toString(),
-        style: TextStyle(
-          fontSize: 7,
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+  Widget _buildStatBadge(double amount, Color color, IconData icon) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 8, color: color),
+          const SizedBox(width: 1),
+          Text(
+            amount.toInt().toString(),
+            style: TextStyle(
+              fontSize: 8,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -415,6 +419,7 @@ class _BillListScreenSupercupertinoState
             onMonthSelected: (month) {
               setState(() {
                 _focusedDay = month;
+                _calendarController.displayDate = month;
                 _loadMonthBills();
               });
               // 更新路由上下文（切换月份时清除具体日期）
@@ -435,7 +440,7 @@ class _BillListScreenSupercupertinoState
             viewHeaderHeight: 40,
             showNavigationArrow: false,
             monthViewSettings: const MonthViewSettings(
-              showTrailingAndLeadingDates: false,
+              showTrailingAndLeadingDates: true,
               dayFormat: 'EEE',
             ),
             cellBorderColor: Colors.transparent,
