@@ -35,7 +35,8 @@
       "Skill(add-home-widget-selector)",
       "Bash(grep:*)",
       "Skill(add-widget-from-prototype)",
-      "Skill(create-common-widget-from-renderer)"
+      "Skill(create-common-widget-from-renderer)",
+      "Skill(glm-plan-usage:usage-query-skill)"
     ],
     "deny": [],
     "ask": []

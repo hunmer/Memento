@@ -261,6 +261,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               supportedLocales: const [
                 Locale('zh', 'CN'), // 中文
                 Locale('en', 'US'), // 英文
+                Locale('ja'), // 日文
               ],
               theme: theme,
               darkTheme: darkTheme,

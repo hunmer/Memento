@@ -1,0 +1,126 @@
+/// Contact plugin Japanese translations
+const Map<String, String> contactTranslationsJp = {
+  // Basic info
+  'contact_name': '連絡先',
+  'contact_contactList': '連絡先リスト',
+  'contact_newContact': '新規連絡先',
+  'contact_editContact': '連絡先を編集',
+  'contact_deleteContact': '連絡先を削除',
+  'contact_username': '名前',
+  'contact_phone': '電話',
+  'contact_email': 'メール',
+  'contact_address': '住所',
+  'contact_notes': 'メモ',
+  'contact_save': '保存',
+  'contact_cancel': 'キャンセル',
+  'contact_deleteConfirmation': 'この連絡先を削除してもよろしいですか？',
+  'contact_noContacts': '連絡先がありません',
+  'contact_searchContacts': '連絡先を検索',
+
+  // Groups
+  'contact_contactGroups': 'グループ',
+  'contact_addGroup': 'グループを追加',
+  'contact_editGroup': 'グループを編集',
+  'contact_deleteGroup': 'グループを削除',
+  'contact_groupName': 'グループ名',
+  'contact_selectGroup': 'グループを選択',
+
+  // Import/Export
+  'contact_importContacts': '連絡先をインポート',
+  'contact_exportContacts': '連絡先をエクスポート',
+  'contact_shareContact': '連絡先を共有',
+
+  // Details and Favorites
+  'contact_contactDetails': '連絡先詳細',
+  'contact_favoriteContacts': 'お気に入り',
+  'contact_addToFavorites': 'お気に入りに追加',
+  'contact_removeFromFavorites': 'お気に入りから削除',
+
+  // Actions
+  'contact_call': '通話',
+  'contact_message': 'メッセージ',
+  'contact_emailContact': 'メール',
+  'contact_share': '共有',
+  'contact_contactNotFound': '連絡先が見つかりません',
+
+  // Statistics
+  'contact_addContact': '連絡先を追加',
+  'contact_confirmDelete': '削除を確認',
+  'contact_contactCount': '連絡先数',
+  'contact_contacts': '連絡先',
+  'contact_createdTime': '作成日時',
+  'contact_deleteConfirmMessage': 'この連絡先を削除してもよろしいですか？',
+  'contact_errorMessage': 'エラー: @error',
+  'contact_formValidationMessage': 'フォームを正しく入力してください',
+  'contact_lastContactTime': '最終接触日時',
+  'contact_recentContacts': '最近',
+  'contact_saveFailedMessage': '保存に失敗しました: @error',
+  'contact_sortBy': '並べ替え',
+  'contact_totalContacts': '合計',
+
+  // Custom fields and tags
+  'contact_addCustomField': 'カスタムフィールドを追加',
+  'contact_addCustomFieldTooltip': 'この連絡先にカスタムフィールドを追加',
+  'contact_addTag': 'タグを追加',
+  'contact_addTagTooltip': 'この連絡先にタグを追加',
+  'contact_addressLabel': '住所',
+  'contact_basicInfoTab': '基本情報',
+  'contact_dateRange': '日付範囲',
+  'contact_days': '日',
+  'contact_deleteFieldTooltip': 'このフィールドを削除',
+  'contact_endDate': '終了日',
+  'contact_filter': 'フィルター',
+  'contact_nameKeyword': '名前キーワード',
+  'contact_nameLabel': '名前',
+  'contact_nameRequiredError': '名前は必須です',
+  'contact_noLimit': '制限なし',
+  'contact_notesLabel': 'メモ',
+  'contact_phoneLabel': '電話',
+  'contact_recordsTab': '記録',
+  'contact_reset': 'リセット',
+  'contact_saveFirstMessage': 'まず連絡先を保存してください',
+  'contact_searchContactsHint': '連絡先を検索...',
+  'contact_selectContactTitle': '連絡先を選択',
+  'contact_startDate': '開始日',
+  'contact_tags': 'タグ',
+  'contact_uncontactedDays': '未接触日数',
+  'contact_upload': 'アップロード',
+
+  // Interaction record form
+  'contact_addInteractionRecord': '接触記録を追加',
+  'contact_editInteractionRecord': '接触記録を編集',
+  'contact_dateLabel': '日付',
+  'contact_timeLabel': '時間',
+  'contact_notesHint': '接触詳細を入力...',
+  'contact_otherParticipants': '他の参加者',
+  'contact_addParticipantTooltip': '参加者を追加',
+
+  // Other fields
+  'contact_organizationLabel': '組織',
+  'contact_emailLabel': 'メール',
+  'contact_websiteLabel': 'ウェブサイト',
+  'contact_done': '完了',
+
+  // Separator and custom
+  'contact_separator': ' - ',
+  'contact_customFields': 'カスタムフィールド',
+  'contact_customActivityEvents': 'カスタムアクティビティイベント',
+  'contact_addCustomEvent': 'カスタムイベントを追加',
+  'contact_pickColor': '色を選択',
+
+  'contact_contactListTitle': '連絡先リスト',
+  'contact_searchPlaceholder': '名前、電話、メモで連絡先を検索...',
+  // Home Widget Strings
+  'contact_widgetName': '連絡先',
+  'contact_widgetDescription': '連絡先へのクイックアクセス',
+  'contact_overviewName': '連絡先概要',
+  'contact_overviewDescription': '連絡先統計を表示',
+  'contact_personCardName': '連絡先カード',
+  'contact_personCardDescription': 'ホームに表示する連絡先を選択',
+  'contact_today': '今日',
+  'contact_yesterday': '昨日',
+  'contact_daysAgo': '@days 日前',
+  'contact_notFound': '連絡先が見つかりません',
+  'contact_unknownContact': '不明な連絡先',
+  'contact_pluginNotFound': '連絡先プラグインが初期化されていません',
+};
