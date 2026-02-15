@@ -24,19 +24,12 @@ class ChartIconEntry {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'emoji': emoji,
-      'label': label,
-      'value': value,
-    };
+    return {'emoji': emoji, 'label': label, 'value': value};
   }
 }
 
 /// 心情类型枚举
-enum ChartIconType {
-  emoji,
-  color,
-}
+enum ChartIconType { emoji, color }
 
 /// 心情类型扩展
 extension ChartIconTypeExtension on ChartIconType {
@@ -100,7 +93,8 @@ class ChartIconDisplayCard extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final moodsList = (props['moods'] as List<dynamic>?)
+    final moodsList =
+        (props['moods'] as List<dynamic>?)
             ?.map((e) => ChartIconEntry.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -109,12 +103,14 @@ class ChartIconDisplayCard extends StatefulWidget {
       title: props['title'] as String? ?? '',
       subtitle: props['subtitle'] as String? ?? '',
       moods: moodsList,
-      displayType: props['displayType'] != null
-          ? ChartIconTypeExtension.fromJson(props['displayType'] as String)
-          : ChartIconType.emoji,
-      primaryColor: props.containsKey('primaryColor')
-          ? Color(props['primaryColor'] as int)
-          : const Color(0xFF6366F1),
+      displayType:
+          props['displayType'] != null
+              ? ChartIconTypeExtension.fromJson(props['displayType'] as String)
+              : ChartIconType.emoji,
+      primaryColor:
+          props.containsKey('primaryColor')
+              ? Color(props['primaryColor'] as int)
+              : const Color(0xFF6366F1),
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -165,7 +161,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
               constraints: const BoxConstraints(minWidth: 280),
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   if (!isDark)
                     BoxShadow(
@@ -174,7 +170,10 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
                       offset: const Offset(0, 12),
                     ),
                 ],
-                border: isDark ? Border.all(color: Colors.white.withOpacity(0.1)) : null,
+                border:
+                    isDark
+                        ? Border.all(color: Colors.white.withOpacity(0.1))
+                        : null,
               ),
               padding: widget.size.getPadding(),
               child: Column(
@@ -183,7 +182,6 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
                 children: [
                   // 标题和副标题
                   _buildHeader(isDark),
-                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 心情图表
                   _buildMoodChart(isDark),
                 ],
@@ -205,17 +203,16 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
           widget.title,
           style: TextStyle(
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-            fontSize: 14,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
           ),
         ),
-        SizedBox(height: widget.size.getItemSpacing() / 2),
         Text(
           widget.subtitle,
           style: TextStyle(
             color: isDark ? Colors.white : Colors.grey.shade900,
-            fontSize: 20,
+            fontSize: widget.size.getTitleFontSize(),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -231,6 +228,40 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
       if (mood.value > maxValue) maxValue = mood.value;
     }
 
+    // 根据尺寸计算柱状图高度和宽度
+    final chartHeight = widget.size.getHeightConstraints().minHeight * 0.4;
+    final axisFontSize = widget.size.getLegendFontSize();
+    final axisLabelFontSize = widget.size.getLegendFontSize() * 0.9;
+
+    // 根据 size 计算柱子宽度和间距
+    double barWidth;
+    double barSpacing;
+    if (widget.size is SmallSize) {
+      barWidth = 24;
+      barSpacing = 8;
+    } else if (widget.size is MediumSize) {
+      barWidth = 36;
+      barSpacing = 12;
+    } else if (widget.size is LargeSize) {
+      barWidth = 48;
+      barSpacing = 16;
+    } else if (widget.size is WideSize) {
+      barWidth = 40;
+      barSpacing = 14;
+    } else {
+      // Wide2Size
+      barWidth = 48;
+      barSpacing = 18;
+    }
+
+    // 计算所有柱子的总宽度（包括间距）
+    final totalBarsWidth =
+        (widget.moods.length * barWidth) +
+        ((widget.moods.length - 1) * barSpacing);
+
+    // 判断是否需要滚动（总宽度超过可用宽度）
+    final needsScroll = totalBarsWidth > 400;
+
     return Column(
       children: [
         // Y轴刻度
@@ -240,14 +271,17 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
               final value = maxValue * (4 - index) ~/ 4;
               return Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: widget.size.getItemSpacing() / 2),
+                  padding: EdgeInsets.only(
+                    bottom: widget.size.getItemSpacing() / 2,
+                  ),
                   child: Text(
                     value.toString(),
                     style: TextStyle(
-                      color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                      fontSize: 10,
+                      color:
+                          isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                      fontSize: axisFontSize,
                     ),
-                    textAlign: TextAlign.right,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               );
@@ -255,53 +289,141 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
             SizedBox(width: widget.size.getItemSpacing() / 2),
           ],
         ),
-        // 柱状图
+        // 柱状图（支持横向滚动）
         SizedBox(
-          height: 150,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: List.generate(widget.moods.length, (index) {
-              final mood = widget.moods[index];
-              final barAnimation = CurvedAnimation(
-                parent: _animation,
-                curve: Interval(
-                  index * 0.1,
-                  0.5 + index * 0.1,
-                  curve: Curves.easeOutCubic,
-                ),
-              );
-
-              return _MoodBar(
-                mood: mood,
-                maxValue: maxValue,
-                animation: barAnimation,
-                displayType: widget.displayType,
-                primaryColor: widget.primaryColor,
-                isDark: isDark,
-              );
-            }),
-          ),
+          height: chartHeight,
+          child:
+              needsScroll
+                  ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: widget.size.getItemSpacing(),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: _buildMoodBars(
+                        maxValue,
+                        isDark,
+                        barWidth,
+                        barSpacing,
+                        chartHeight,
+                      ),
+                    ),
+                  )
+                  : Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: _buildMoodBars(
+                      maxValue,
+                      isDark,
+                      barWidth,
+                      barSpacing,
+                      chartHeight,
+                    ),
+                  ),
         ),
-        // X轴标签
+        // X轴标签（支持横向滚动）
         SizedBox(height: widget.size.getItemSpacing()),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: widget.moods.map((mood) {
-            return Expanded(
-              child: Text(
-                mood.label,
-                style: TextStyle(
-                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                  fontSize: 11,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            );
-          }).toList(),
+        SizedBox(
+          height: axisLabelFontSize * 1.5,
+          child:
+              needsScroll
+                  ? SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: widget.size.getItemSpacing(),
+                    ),
+                    child: Row(
+                      children: _buildAxisLabels(
+                        axisLabelFontSize,
+                        barWidth,
+                        barSpacing,
+                        isDark,
+                      ),
+                    ),
+                  )
+                  : Row(
+                    children: _buildAxisLabels(
+                      axisLabelFontSize,
+                      barWidth,
+                      barSpacing,
+                      isDark,
+                    ),
+                  ),
         ),
       ],
     );
+  }
+
+  /// 构建柱子列表
+  List<Widget> _buildMoodBars(
+    int maxValue,
+    bool isDark,
+    double barWidth,
+    double barSpacing,
+    double chartHeight,
+  ) {
+    return List.generate(widget.moods.length, (index) {
+      final mood = widget.moods[index];
+
+      // 计算动画区间，确保 end 不超过 1.0
+      final start = (index * 0.1).clamp(0.0, 0.9);
+      final end = (0.5 + index * 0.1).clamp(0.1, 1.0);
+
+      final barAnimation = CurvedAnimation(
+        parent: _animation,
+        curve: Interval(start, end, curve: Curves.easeOutCubic),
+      );
+
+      return Padding(
+        padding: EdgeInsets.only(
+          right: index < widget.moods.length - 1 ? barSpacing : 0,
+        ),
+        child: SizedBox(
+          width: barWidth,
+          child: _MoodBar(
+            mood: mood,
+            maxValue: maxValue,
+            animation: barAnimation,
+            displayType: widget.displayType,
+            primaryColor: widget.primaryColor,
+            isDark: isDark,
+            size: widget.size,
+            maxHeight: chartHeight,
+          ),
+        ),
+      );
+    });
+  }
+
+  /// 构建X轴标签列表
+  List<Widget> _buildAxisLabels(
+    double fontSize,
+    double barWidth,
+    double barSpacing,
+    bool isDark,
+  ) {
+    return List.generate(widget.moods.length, (index) {
+      final mood = widget.moods[index];
+
+      return Padding(
+        padding: EdgeInsets.only(
+          right: index < widget.moods.length - 1 ? barSpacing : 0,
+        ),
+        child: SizedBox(
+          width: barWidth,
+          child: Text(
+            mood.label,
+            style: TextStyle(
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              fontSize: fontSize,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      );
+    });
   }
 }
 
@@ -313,6 +435,8 @@ class _MoodBar extends StatelessWidget {
   final ChartIconType displayType;
   final Color primaryColor;
   final bool isDark;
+  final HomeWidgetSize size;
+  final double maxHeight;
 
   const _MoodBar({
     required this.mood,
@@ -321,42 +445,51 @@ class _MoodBar extends StatelessWidget {
     required this.displayType,
     required this.primaryColor,
     required this.isDark,
+    required this.size,
+    required this.maxHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    final barHeight = maxValue > 0 ? (mood.value / maxValue) * 130 : 0.0;
+    final baseEmojiSize = size.getIconSize();
+    final borderRadius = baseEmojiSize * 0.4;
+    final barHeight =
+        maxValue > 0 ? (mood.value / maxValue) * (maxHeight * 0.9) : 0.0;
 
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) {
-              return Container(
-                height: barHeight * animation.value,
-                decoration: BoxDecoration(
-                  color: displayType == ChartIconType.color
-                      ? primaryColor.withOpacity(0.7)
-                      : isDark
-                          ? Colors.grey.shade700
-                          : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: displayType == ChartIconType.emoji
-                    ? Center(
+    // 如果柱子高度小于 emoji 基础尺寸，则缩小 emoji
+    final actualEmojiSize =
+        barHeight < baseEmojiSize ? barHeight * 0.8 : baseEmojiSize;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            return Container(
+              height: barHeight * animation.value,
+              decoration: BoxDecoration(
+                color:
+                    displayType == ChartIconType.color
+                        ? primaryColor.withOpacity(0.7)
+                        : isDark
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(borderRadius),
+              ),
+              child:
+                  displayType == ChartIconType.emoji
+                      ? Center(
                         child: Text(
                           mood.emoji,
-                          style: const TextStyle(fontSize: 20),
+                          style: TextStyle(fontSize: actualEmojiSize),
                         ),
                       )
-                    : null,
-              );
-            },
-          ),
-        ],
-      ),
+                      : null,
+            );
+          },
+        ),
+      ],
     );
   }
 }
