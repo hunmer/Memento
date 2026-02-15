@@ -27,8 +27,8 @@ void registerPhotoCarouselWidget(HomeWidgetRegistry registry) {
       defaultSize: const LargeSize(),
       supportedSizes: [
         const LargeSize(), // 2x2
-        const WideSize()2, // 4x2
-        const WideSize()3, // 4x3
+        const Wide2Size(), // 4x2
+        const Wide3Size(), // 4x3
       ],
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildPhotoCarouselWidget(context, config),
