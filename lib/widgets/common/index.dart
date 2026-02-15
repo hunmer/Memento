@@ -19,7 +19,6 @@ export 'storage_breakdown_card.dart';
 export 'vertical_bar_chart_card.dart';
 export 'vertical_bar_chart_widget.dart';
 export 'weekly_steps_progress_card.dart';
-export 'weight_tracking_card.dart';
 export 'mood_tracker_card.dart';
 export 'trend_line_chart_card.dart';
 export 'dot_tracker_card.dart';

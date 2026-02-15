@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 饮水追踪器示例
 class HydrationTrackerWidgetExample extends StatelessWidget {
@@ -30,6 +31,7 @@ class HydrationTrackerWidgetExample extends StatelessWidget {
                       consumed: 0.7,
                       unit: 'Liters',
                       streakDays: 5,
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -45,6 +47,7 @@ class HydrationTrackerWidgetExample extends StatelessWidget {
                       consumed: 0.7,
                       unit: 'Liters',
                       streakDays: 5,
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -60,7 +63,36 @@ class HydrationTrackerWidgetExample extends StatelessWidget {
                       consumed: 0.7,
                       unit: 'Liters',
                       streakDays: 5,
+                      size: const LargeSize(),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: HydrationTrackerCard(
+                    goal: 2.0,
+                    consumed: 0.7,
+                    unit: 'Liters',
+                    streakDays: 5,
+                    size: const WideSize(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 320,
+                  child: HydrationTrackerCard(
+                    goal: 2.0,
+                    consumed: 0.7,
+                    unit: 'Liters',
+                    streakDays: 5,
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

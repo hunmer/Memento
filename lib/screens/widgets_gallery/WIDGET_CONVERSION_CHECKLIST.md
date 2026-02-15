@@ -1,6 +1,6 @@
 # 桌面小组件转换清单
 
-> 已转换：95/95 | 未转换：0
+> 已转换：94/94 | 未转换：0
 
 最后更新：2026-01-12
 
@@ -51,7 +51,6 @@
 - [x] 每周步数进度卡片 - `weekly_steps_progress_card` → `WeeklyStepsProgressCard`
 - [x] 运输追踪路线卡片 - `route_tracking_card` → `RouteTrackingCardWidget`
 - [x] 周点阵追踪卡片 - `weekly_dot_tracker_card` → `DotTrackerCardWidget` (使用 `DotTrackerCardData` 数据模型，支持 JSON 序列化，已更新示例文件)
-- [x] 体重追踪柱状图卡片 - `weight_tracking_widget` → `WeightTrackingCard` (使用 `WeightTrackingData` 数据模型，支持 JSON 序列化)
 - [x] 观看进度卡片 - `watch_progress_card` → `watchProgressCard`
 - [x] 存储分段小组件 - `storage_breakdown_widget` → `StorageBreakdownCard` (使用 `SegmentedCategory` 数据模型，支持 JSON 序列化)
 - [x] 双数值追踪卡片 - `blood_pressure_tracker_example` → `DualValueTrackerCard` (已更新示例文件)
