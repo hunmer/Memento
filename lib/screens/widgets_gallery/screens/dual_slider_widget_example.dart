@@ -64,7 +64,7 @@ class DualSliderWidgetExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 200,
                   child: DualSliderWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     label1: 'Shibuya, Tokyo, Japan',
                     label2: '+9',
                     label3: 'Aug 12',
@@ -100,7 +100,7 @@ class DualSliderWidgetExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 280,
                   child: DualSliderWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     label1: 'Shibuya, Tokyo, Japan',
                     label2: '+9',
                     label3: 'Aug 12',

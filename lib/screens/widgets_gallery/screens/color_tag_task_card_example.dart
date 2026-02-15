@@ -145,7 +145,7 @@ class ColorTagTaskCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 220,
                   child: ColorTagTaskCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     data: const ColorTagTaskCardData(
                       taskCount: 56,
                       label: 'Upcoming tasks',
@@ -261,7 +261,7 @@ class ColorTagTaskCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 300,
                   child: ColorTagTaskCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     data: const ColorTagTaskCardData(
                       taskCount: 56,
                       label: 'Upcoming tasks',

@@ -92,7 +92,7 @@ class DailyEventsCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 200,
                   child: DailyEventsCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     weekday: 'Monday',
                     day: 7,
                     events: const [
@@ -177,7 +177,7 @@ class DailyEventsCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 280,
                   child: DailyEventsCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     weekday: 'Monday',
                     day: 7,
                     events: const [
