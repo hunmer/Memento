@@ -270,15 +270,18 @@ class _HeaderSection extends StatelessWidget {
                 Text(
                   date,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: size.getTitleFontSize(),
                     fontWeight: FontWeight.w500,
                     color: isDark ? Colors.black87 : Colors.black87,
                     height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: size.getSmallSpacing() * 1.5),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.getSmallSpacing() * 2,
+                    vertical: size.getSmallSpacing() * 0.5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(6),
@@ -286,7 +289,7 @@ class _HeaderSection extends StatelessWidget {
                   child: Text(
                     time,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: size.getLegendFontSize(),
                       fontWeight: FontWeight.bold,
                       color: isDark ? Colors.black87 : Colors.black87,
                     ),
@@ -409,7 +412,7 @@ class _TaskItem extends StatelessWidget {
                     child: Text(
                       task.title,
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: size.getSubtitleFontSize() + 3,
                         fontWeight: FontWeight.w400,
                         color: task.isCompleted
                             ? (isDark
@@ -523,7 +526,7 @@ class _ReminderSection extends StatelessWidget {
                         Text(
                           reminder.text,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: size.getSubtitleFontSize() + 1,
                             fontWeight: FontWeight.w400,
                             color: isDark
                                 ? const Color(0xFFE4E4E7)
@@ -531,22 +534,22 @@ class _ReminderSection extends StatelessWidget {
                             height: 1.2,
                           ),
                         ),
-                        SizedBox(width: size.getItemSpacing() / 2),
+                        SizedBox(width: size.getSmallSpacing()),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: size.getSmallSpacing(),
+                            vertical: size.getSmallSpacing() * 0.5,
                           ),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? const Color(0xFF831843).withOpacity(0.4)
                                 : const Color(0xFFFDF2F8),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(size.getSmallSpacing()),
                           ),
                           child: Text(
                             reminder.hashtag,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: size.getSubtitleFontSize() + 1,
                               fontWeight: FontWeight.w500,
                               color: isDark
                                   ? const Color(0xFFF472B6)
@@ -554,11 +557,11 @@ class _ReminderSection extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(width: size.getItemSpacing() / 2),
+                        SizedBox(width: size.getSmallSpacing()),
                         Text(
                           reminder.hashtagEmoji,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: size.getSubtitleFontSize() + 1,
                             fontWeight: FontWeight.w400,
                             color: isDark
                                 ? const Color(0xFFE4E4E7)

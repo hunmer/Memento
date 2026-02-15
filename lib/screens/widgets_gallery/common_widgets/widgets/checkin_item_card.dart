@@ -57,7 +57,7 @@ class CheckinItemCardWidget extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: size.getPadding(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -66,19 +66,19 @@ class CheckinItemCardWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: size.getIconSize() * 1.6,
+                height: size.getIconSize() * 1.6,
                 decoration: BoxDecoration(
                   color: itemColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(size.getIconSize() * 0.3),
                 ),
                 child: Icon(
                   IconData(iconCode, fontFamily: 'MaterialIcons'),
                   color: itemColor,
-                  size: 24,
+                  size: size.getIconSize(),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: size.getItemSpacing() * 1.5),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,12 +105,15 @@ class CheckinItemCardWidget extends StatelessWidget {
               ),
               // 右上角打卡状态
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.getSmallSpacing() * 2,
+                  vertical: size.getSmallSpacing(),
+                ),
                 decoration: BoxDecoration(
                   color: isCheckedToday
                       ? Colors.green.withOpacity(0.15)
                       : Colors.grey.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(size.getSmallSpacing() * 1.5),
                   border: Border.all(
                     color: isCheckedToday
                         ? Colors.green.withOpacity(0.3)
@@ -123,15 +126,15 @@ class CheckinItemCardWidget extends StatelessWidget {
                   children: [
                     Icon(
                       isCheckedToday ? Icons.check_circle : Icons.circle_outlined,
-                      size: 14,
+                      size: size.getLegendFontSize(),
                       color: isCheckedToday ? Colors.green : Colors.grey,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: size.getSmallSpacing()),
                     Text(
                       isCheckedToday ? '已打卡' : '未打卡',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isCheckedToday ? Colors.green : Colors.grey,
-                        fontSize: 11,
+                        fontSize: size.getLegendFontSize() - 1,
                       ),
                     ),
                   ],
@@ -141,7 +144,7 @@ class CheckinItemCardWidget extends StatelessWidget {
           ),
           // 热力图（根据卡片大小显示不同范围）
           if (showHeatmap) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: size.getItemSpacing() * 1.5),
             _buildHeatmapGrid(itemColor),
           ],
         ],

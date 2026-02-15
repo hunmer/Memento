@@ -184,7 +184,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                   Text(
                     widget.todayDate,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: widget.size.getLegendFontSize(),
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1,
                       color: Theme.of(context).colorScheme.primary,
@@ -206,7 +206,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                               child: Text(
                                 '今日暂无活动',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: widget.size.getLegendFontSize(),
                                   color:
                                       isDark
                                           ? const Color(0xFF71717A)
@@ -238,7 +238,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                           Text(
                             'Yesterday',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: widget.size.getLegendFontSize(),
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
                               color:
@@ -257,7 +257,7 @@ class _DailyScheduleCardWidgetState extends State<DailyScheduleCardWidget>
                               child: Text(
                                 '昨日暂无活动',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: widget.size.getLegendFontSize(),
                                   color:
                                       isDark
                                           ? const Color(0xFF71717A)
@@ -399,7 +399,7 @@ class _EventItemWidget extends StatelessWidget {
                         Text(
                           event.title,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w600,
                             color: _getTextColor(event.color),
                           ),
@@ -409,7 +409,7 @@ class _EventItemWidget extends StatelessWidget {
                     Text(
                       'all-day',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: size.getLegendFontSize(),
                         fontWeight: FontWeight.w500,
                         color:
                             isDark
@@ -461,17 +461,17 @@ class _EventItemWidget extends StatelessWidget {
                         Text(
                           event.title,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w600,
                             color: _getTextColor(event.color),
                           ),
                         ),
                         if (event.location != null) ...[
-                          SizedBox(height: size.getPadding().top / 6),
+                          SizedBox(height: size.getSmallSpacing()),
                           Text(
                             event.location!,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: size.getLegendFontSize(),
                               color: _getTextColor(
                                 event.color,
                               ).withOpacity(0.7),
@@ -493,7 +493,7 @@ class _EventItemWidget extends StatelessWidget {
                             Text(
                               event.startTime,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: size.getLegendFontSize(),
                                 fontWeight: FontWeight.w500,
                                 color: _getTextColor(
                                   event.color,
@@ -503,7 +503,7 @@ class _EventItemWidget extends StatelessWidget {
                             Text(
                               event.startPeriod,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: size.getLegendFontSize() - 2,
                                 fontWeight: FontWeight.w500,
                                 color: _getTextColor(
                                   event.color,
@@ -518,7 +518,7 @@ class _EventItemWidget extends StatelessWidget {
                             Text(
                               event.endTime,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: size.getLegendFontSize(),
                                 fontWeight: FontWeight.w500,
                                 color: _getTextColor(
                                   event.color,
@@ -528,7 +528,7 @@ class _EventItemWidget extends StatelessWidget {
                             Text(
                               event.endPeriod,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: size.getLegendFontSize() - 2,
                                 fontWeight: FontWeight.w500,
                                 color: _getTextColor(
                                   event.color,

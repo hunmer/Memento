@@ -128,7 +128,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(widget.size.getIconSize() + 12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -145,7 +145,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                       Text(
                         widget.date,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: widget.size.getTitleFontSize() - 6,
                           fontWeight: FontWeight.bold,
                           color: isDark
                               ? const Color(0xFFF3F4F6)
@@ -157,17 +157,17 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                           Text(
                             '16 Feb',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: widget.size.getLegendFontSize() + 2,
                               fontWeight: FontWeight.w500,
                               color: isDark
                                   ? const Color(0xFF6B7280)
                                   : const Color(0xFF6B7280),
                             ),
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: widget.size.getSmallSpacing()),
                           Icon(
                             Icons.chevron_right,
-                            size: 20,
+                            size: widget.size.getIconSize(),
                             color: isDark
                                 ? const Color(0xFF6B7280)
                                 : const Color(0xFF6B7280),
@@ -186,7 +186,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
-                            height: 54,
+                            height: widget.size.getLargeFontSize(),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
@@ -195,7 +195,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                                       widget.steps.toDouble() *
                                       _animation.value,
                                   textStyle: TextStyle(
-                                    fontSize: 52,
+                                    fontSize: widget.size.getLargeFontSize(),
                                     fontWeight: FontWeight.w800,
                                     color: isDark
                                         ? Colors.white
@@ -205,11 +205,11 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                                 ),
                                 SizedBox(width: widget.size.getItemSpacing()),
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 6),
+                                  padding: EdgeInsets.only(bottom: widget.size.getSmallSpacing()),
                                   child: Text(
                                     'steps',
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: widget.size.getTitleFontSize() - 6,
                                       fontWeight: FontWeight.w500,
                                       color: isDark
                                           ? const Color(0xFF9CA3AF)
@@ -228,13 +228,13 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                                 color: isDark
                                     ? const Color(0xFFF97316)
                                     : const Color(0xFFF97316),
-                                size: 24,
+                                size: widget.size.getIconSize(),
                               ),
                               SizedBox(width: widget.size.getItemSpacing()),
                               Text(
                                 widget.status,
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: widget.size.getSubtitleFontSize() + 2,
                                   fontWeight: FontWeight.w500,
                                   color: isDark
                                       ? const Color(0xFFD1D5DB)
@@ -261,6 +261,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                               data: widget.rings[index],
                               animation: ringAnimation,
                               isDark: isDark,
+                              size: widget.size,
                             ),
                           );
                         }),
@@ -281,18 +282,24 @@ class _RingWidget extends StatelessWidget {
   final RingData data;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _RingWidget({
     required this.data,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    final ringSize = size.getIconSize() * 1.8;
+    final strokeWidth = ringSize * 0.1;
+    final centerSize = ringSize * 0.3;
+
     return SizedBox(
-      width: 44,
-      height: 44,
+      width: ringSize,
+      height: ringSize,
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, child) {
@@ -302,27 +309,28 @@ class _RingWidget extends StatelessWidget {
               color: data.color,
               backgroundColor:
                   isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+              strokeWidth: strokeWidth,
             ),
-            child: Center(child: _buildCenterWidget()),
+            child: Center(child: _buildCenterWidget(centerSize)),
           );
         },
       ),
     );
   }
 
-  Widget _buildCenterWidget() {
+  Widget _buildCenterWidget(double centerSize) {
     if (data.isDiamond) {
       return Container(
-        width: 14,
-        height: 14,
+        width: centerSize,
+        height: centerSize,
         decoration: BoxDecoration(
           color: data.color,
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(centerSize / 4),
         ),
         child: Center(
           child: Container(
-            width: 4,
-            height: 4,
+            width: centerSize / 3,
+            height: centerSize / 3,
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
@@ -333,7 +341,7 @@ class _RingWidget extends StatelessWidget {
     }
 
     if (data.icon != null) {
-      return Icon(data.icon, size: 18, color: data.color);
+      return Icon(data.icon, size: centerSize * 0.7, color: data.color);
     }
 
     return const SizedBox.shrink();
@@ -344,18 +352,19 @@ class _RingPainter extends CustomPainter {
   final double progress;
   final Color color;
   final Color backgroundColor;
+  final double strokeWidth;
 
   _RingPainter({
     required this.progress,
     required this.color,
     required this.backgroundColor,
+    this.strokeWidth = 4.0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - 4) / 2;
-    final strokeWidth = 4.0;
+    final radius = (size.width - strokeWidth) / 2;
 
     final backgroundPaint = Paint()
       ..color = backgroundColor

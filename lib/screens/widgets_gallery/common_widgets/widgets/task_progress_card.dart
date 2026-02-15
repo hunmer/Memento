@@ -22,6 +22,9 @@ class TaskProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const TaskProgressCardWidget({
     super.key,
     required this.title,
@@ -33,6 +36,7 @@ class TaskProgressCardWidget extends StatefulWidget {
     this.pendingLabel = '待办',
     this.maxPendingTasks,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例
@@ -53,6 +57,7 @@ class TaskProgressCardWidget extends StatefulWidget {
       pendingLabel: props['pendingLabel'] as String? ?? '待办',
       maxPendingTasks: props['maxPendingTasks'] as int?,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -101,7 +106,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: widget.size.getPadding(),
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(16),
@@ -120,13 +125,13 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 // 标题部分
                 _buildHeaderSection(textColor, secondaryTextColor),
 
-                const SizedBox(height: 16),
+                SizedBox(height: widget.size.getTitleSpacing()),
 
                 // 进度条部分
                 _buildProgressSection(progressTrackColor),
 
                 if (widget.pendingTasks.isNotEmpty) ...[
-                  const SizedBox(height: 16),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 待办任务列表
                   _buildPendingTasksSection(secondaryTextColor, dividerColor),
                 ],
@@ -145,7 +150,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
         Text(
           widget.title,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: widget.size.getTitleFontSize(),
             fontWeight: FontWeight.bold,
             color: textColor,
           ),
@@ -156,7 +161,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
           Text(
             widget.subtitle,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: widget.size.getLegendFontSize(),
               fontWeight: FontWeight.w500,
               color: secondaryTextColor,
             ),
@@ -171,6 +176,8 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
     final primaryColor = Theme.of(context).colorScheme.primary;
     final progress =
         widget.totalTasks > 0 ? widget.completedTasks / widget.totalTasks : 0;
+    final legendFontSize = widget.size.getLegendFontSize();
+    final iconSize = widget.size.getIconSize() * 0.6;
 
     return Column(
       children: [
@@ -181,17 +188,17 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
               children: [
                 Icon(
                   Icons.format_list_bulleted,
-                  size: 14,
+                  size: iconSize,
                   color: Theme.of(context)
                       .colorScheme
                       .onSurface
                       .withOpacity(0.5),
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: widget.size.getSmallSpacing()),
                 Text(
                   widget.progressLabel,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: legendFontSize,
                     fontWeight: FontWeight.w500,
                     color: Theme.of(context)
                         .colorScheme
@@ -204,13 +211,13 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
             Row(
               children: [
                 SizedBox(
-                  width: 24,
-                  height: 16,
+                  width: legendFontSize * 2,
+                  height: legendFontSize * 1.3,
                   child: AnimatedFlipCounter(
                     value: widget.completedTasks.toDouble() * _animation.value,
                     fractionDigits: 0,
                     textStyle: TextStyle(
-                      fontSize: 12,
+                      fontSize: legendFontSize,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context)
                           .colorScheme
@@ -219,15 +226,15 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                     ),
                   ),
                 ),
-                const Text(' / ', style: TextStyle(fontSize: 12)),
+                Text(' / ', style: TextStyle(fontSize: legendFontSize)),
                 SizedBox(
-                  width: 24,
-                  height: 16,
+                  width: legendFontSize * 2,
+                  height: legendFontSize * 1.3,
                   child: AnimatedFlipCounter(
                     value: widget.totalTasks.toDouble(),
                     fractionDigits: 0,
                     textStyle: TextStyle(
-                      fontSize: 12,
+                      fontSize: legendFontSize,
                       fontWeight: FontWeight.w500,
                       color: Theme.of(context)
                           .colorScheme
@@ -240,15 +247,15 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: widget.size.getItemSpacing()),
         Container(
-          height: 4,
+          height: widget.size.getLegendIndicatorHeight(),
           decoration: BoxDecoration(
             color: progressTrackColor,
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(2),
+            borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
@@ -256,7 +263,7 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 child: Container(
                   decoration: BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
                   ),
                 ),
               ),
@@ -274,23 +281,24 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
     final tasks = widget.maxPendingTasks == null
         ? widget.pendingTasks
         : widget.pendingTasks.take(widget.maxPendingTasks!).toList();
+    final legendFontSize = widget.size.getLegendFontSize();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: 6),
+          padding: EdgeInsets.only(bottom: widget.size.getSmallSpacing()),
           child: Text(
             widget.pendingLabel,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: legendFontSize,
               fontWeight: FontWeight.w500,
               color: secondaryTextColor,
             ),
           ),
         ),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 80),
+          constraints: BoxConstraints(maxHeight: legendFontSize * 7),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,11 +306,11 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 for (int i = 0; i < tasks.length; i++) ...[
                   if (i > 0) Divider(color: dividerColor, height: 1),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: EdgeInsets.symmetric(vertical: widget.size.getSmallSpacing()),
                     child: Text(
                       tasks[i],
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: legendFontSize,
                         fontWeight: FontWeight.w500,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),

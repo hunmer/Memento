@@ -280,7 +280,7 @@ enum HomeWidgetSize {
   double getTitleFontSize() {
     switch (this) {
       case HomeWidgetSize.small:
-        return 18;
+        return 16;
       case HomeWidgetSize.medium:
         return 24;
       case HomeWidgetSize.large:

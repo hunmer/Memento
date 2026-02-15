@@ -273,13 +273,13 @@ class _FeaturedSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
                         data.avatarUrl,
-                        width: 80,
-                        height: 80,
+                        width: size.getIconSize() * 3,
+                        height: size.getIconSize() * 3,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: 80,
-                            height: 80,
+                            width: size.getIconSize() * 3,
+                            height: size.getIconSize() * 3,
                             decoration: BoxDecoration(
                               color:
                                   isDark
@@ -298,7 +298,7 @@ class _FeaturedSection extends StatelessWidget {
                         },
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: size.getItemSpacing()),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,12 +310,12 @@ class _FeaturedSection extends StatelessWidget {
                                   isDark
                                       ? const Color(0xFF9CA3AF)
                                       : const Color(0xFF6B7280),
-                              fontSize: 10,
+                              fontSize: size.getLegendFontSize() - 2,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 1,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: size.getSmallSpacing()),
                           Text(
                             data.title,
                             style: TextStyle(
@@ -323,12 +323,12 @@ class _FeaturedSection extends StatelessWidget {
                                   isDark
                                       ? const Color(0xFFF9FAFB)
                                       : const Color(0xFF111827),
-                              fontSize: 16,
+                              fontSize: size.getTitleFontSize(),
                               fontWeight: FontWeight.w700,
                               height: 1.2,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: size.getSmallSpacing()),
                           Text(
                             data.summary,
                             maxLines: 2,
@@ -338,7 +338,7 @@ class _FeaturedSection extends StatelessWidget {
                                   isDark
                                       ? const Color(0xFF9CA3AF)
                                       : const Color(0xFF6B7280),
-                              fontSize: 11,
+                              fontSize: size.getLegendFontSize(),
                               height: 1.3,
                             ),
                           ),
@@ -394,9 +394,9 @@ class _MessageListSection extends StatelessWidget {
                           isDark
                               ? const Color(0xFF9CA3AF)
                               : const Color(0xFF6B7280),
-                      size: 16,
+                      size: size.getIconSize() * 0.7,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: size.getSmallSpacing()),
                     Text(
                       'RECENT MESSAGES',
                       style: TextStyle(
@@ -404,7 +404,7 @@ class _MessageListSection extends StatelessWidget {
                             isDark
                                 ? const Color(0xFF9CA3AF)
                                 : const Color(0xFF6B7280),
-                        fontSize: 10,
+                        fontSize: size.getLegendFontSize() - 2,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 1.5,
                       ),

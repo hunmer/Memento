@@ -152,11 +152,13 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
       curve: const Interval(0, 0.7, curve: Curves.easeOutCubic),
     );
 
+    final iconSize = widget.size.getIconSize() * 2;
+
     return Align(
       alignment: Alignment.centerLeft,
       child: SizedBox(
-        width: 48,
-        height: 48,
+        width: iconSize,
+        height: iconSize,
         child: AnimatedBuilder(
           animation: progressAnimation,
           builder: (context, child) {
@@ -165,6 +167,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
                 progress: widget.progress * progressAnimation.value,
                 progressColor: progressColor,
                 trackColor: trackColor,
+                strokeWidth: iconSize * 0.1,
               ),
             );
           },
@@ -191,7 +194,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
               Text(
                 widget.title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: widget.size.getTitleFontSize(),
                   fontWeight: FontWeight.w700,
                   color: textColor,
                 ),
@@ -203,7 +206,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
                 Text(
                   widget.subtitle,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: widget.size.getLegendFontSize(),
                     fontWeight: FontWeight.w500,
                     color: subtitleColor,
                   ),
@@ -236,7 +239,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
               fractionDigits: 1,
               suffix: '%',
               textStyle: TextStyle(
-                fontSize: 28,
+                fontSize: widget.size.getLargeFontSize() * 0.5,
                 fontWeight: FontWeight.w700,
                 color: textColor,
               ),
@@ -253,23 +256,25 @@ class _CircularProgressPainter extends CustomPainter {
   final double progress;
   final Color progressColor;
   final Color trackColor;
+  final double strokeWidth;
 
   _CircularProgressPainter({
     required this.progress,
     required this.progressColor,
     required this.trackColor,
+    this.strokeWidth = 4.0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - 6) / 2;
+    final radius = (size.width - strokeWidth) / 2;
 
     // 背景轨道
     final trackPaint = Paint()
       ..color = trackColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, trackPaint);
@@ -278,7 +283,7 @@ class _CircularProgressPainter extends CustomPainter {
     final progressPaint = Paint()
       ..color = progressColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     const startAngle = -math.pi / 2;

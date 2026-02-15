@@ -241,7 +241,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
           Text(
             widget.title,
             style: TextStyle(
-              fontSize: 22,
+              fontSize: widget.size.getTitleFontSize(),
               fontWeight: FontWeight.w700,
               color: textColor,
               height: 1.2,
@@ -257,7 +257,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
           Text(
             widget.description,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: widget.size.getSubtitleFontSize(),
               fontWeight: FontWeight.w400,
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
               height: 1.6,
@@ -308,14 +308,14 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
         children: [
           Icon(
             widget.actionIcon,
-            size: 20,
+            size: widget.size.getIconSize() * 0.8,
             color: primaryColor,
           ),
           SizedBox(width: widget.size.getItemSpacing()),
           Text(
             widget.actionLabel,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: widget.size.getSubtitleFontSize(),
               fontWeight: FontWeight.w600,
               color: primaryColor,
             ),
@@ -351,14 +351,14 @@ class _MetadataItemWidget extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: 16,
+          size: size.getIconSize() * 0.7,
           color: textColor,
         ),
-        SizedBox(width: size.getItemSpacing() - 2),
+        SizedBox(width: size.getSmallSpacing()),
         Text(
           label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: size.getLegendFontSize() + 1,
             fontWeight: FontWeight.w500,
             color: textColor,
             letterSpacing: 0.5,

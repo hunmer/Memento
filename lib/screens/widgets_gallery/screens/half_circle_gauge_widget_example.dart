@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/half_gauge_card.dart';
 
 /// 半圆形统计小组件示例
@@ -34,6 +35,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
                       totalBudget: 10000,
                       remaining: 5089.49,
                       currency: 'AED',
+                      size: HomeWidgetSize.small,
                     ),
                   ),
                 ),
@@ -49,6 +51,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
                       totalBudget: 10000,
                       remaining: 5089.49,
                       currency: 'AED',
+                      size: HomeWidgetSize.medium,
                     ),
                   ),
                 ),
@@ -64,6 +67,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
                       totalBudget: 10000,
                       remaining: 5089.49,
                       currency: 'AED',
+                      size: HomeWidgetSize.large,
                     ),
                   ),
                 ),

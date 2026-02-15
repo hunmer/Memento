@@ -117,19 +117,19 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                           widget.weekday,
                           style: TextStyle(
                             color: primaryColor,
-                            fontSize: 12,
+                            fontSize: widget.size.getLegendFontSize(),
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                           ),
                         ),
-                        SizedBox(height: widget.size.getItemSpacing() / 4),
+                        SizedBox(height: widget.size.getSmallSpacing()),
                         AnimatedFlipCounter(
                           value: widget.day.toDouble() * _animation.value,
                           wholeDigits: 1,
                           fractionDigits: 0,
                           textStyle: TextStyle(
                             color: isDark ? Colors.white : Colors.black,
-                            fontSize: 48,
+                            fontSize: widget.size.getLargeFontSize(),
                             fontWeight: FontWeight.w300,
                             height: 1.0,
                           ),
@@ -196,7 +196,7 @@ class _EventItem extends StatelessWidget {
             offset: Offset(0, 10 * (1 - animation.value)),
             child: Container(
               margin: EdgeInsets.only(bottom: events.length > 1 ? size.getItemSpacing() : 0),
-              height: 42,
+              height: size.getSubtitleFontSize() * 3.5,
               decoration: BoxDecoration(
                 color: Color(isDark
                     ? event.backgroundColorDarkValue
@@ -228,21 +228,21 @@ class _EventItem extends StatelessWidget {
                               color: Color(isDark
                                   ? event.textColorDarkValue
                                   : event.textColorLightValue),
-                              fontSize: 11,
+                              fontSize: size.getLegendFontSize(),
                               fontWeight: FontWeight.w600,
                               height: 1.2,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: size.getItemSpacing() / 4),
+                          SizedBox(height: size.getSmallSpacing()),
                           Text(
                             event.time,
                             style: TextStyle(
                               color: Color(isDark
                                   ? event.subtextDarkValue
                                   : event.subtextLightValue),
-                              fontSize: 9,
+                              fontSize: size.getLegendFontSize() - 2,
                               fontWeight: FontWeight.w500,
                               height: 1.2,
                             ),

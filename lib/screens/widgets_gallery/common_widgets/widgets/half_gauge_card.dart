@@ -91,166 +91,193 @@ class _HalfGaugeCardWidgetState extends State<HalfGaugeCardWidget>
         isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA);
     final primaryColor = const Color(0xFF7C5CFF);
 
-    return Container(
-      padding: widget.size.getPadding(),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 标题
-          Text(
-            widget.title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-              color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-            ),
-          ),
+    // 获取字体大小（使用已有的 size 方法）
+    final gaugeTitleFontSize = widget.size.getTitleFontSize();
+    final gaugeAmountFontSize = widget.size.getSubtitleFontSize() + 2;
+    final gaugeIconSize = widget.size.getIconSize();
+    final gaugeLabelFontSize = widget.size.getLegendFontSize();
+    final gaugeRemainLabelFontSize = widget.size.getLegendFontSize() - 2;
 
-          // 中间仪表盘区域
-          SizedBox(
-            height: 100,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 半圆形仪表盘
-                  SizedBox(
-                    width: 160,
-                    height: 80,
-                    child: Stack(
-                      children: [
-                        AnimatedBuilder(
-                          animation: _progressAnimation,
-                          builder: (context, child) {
-                            return CustomPaint(
-                              size: const Size(160, 80),
-                              painter: _GaugePainter(
-                                progress: progress * _progressAnimation.value,
-                                backgroundColor: gaugeBackgroundColor,
-                                progressColor: primaryColor,
-                                isDark: isDark,
-                              ),
-                            );
-                          },
-                        ),
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 4,
-                          child: Column(
-                            children: [
-                              Text(
-                                'REMAIN',
-                                style: TextStyle(
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 1.5,
-                                  color: isDark
-                                      ? Colors.grey.shade500
-                                      : Colors.grey.shade400,
-                                ),
-                              ),
-                              SizedBox(height: widget.size.getItemSpacing() / 2),
-                              const Text('🛍️', style: TextStyle(fontSize: 20)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 根据可用宽度计算仪表盘尺寸（自适应）
+        final availableWidth = constraints.maxWidth;
+        final gaugeWidth = availableWidth * 0.8; // 仪表盘占可用宽度的 80%
+        final gaugeHeight = gaugeWidth * 0.5; // 半圆高度是宽度的一半
+        final strokeWidth = gaugeWidth * 0.12; // 描边宽度是宽度的 12%
+        final pointerSize = strokeWidth * 0.3; // 指针大小是描边的 30%
+        final gaugeSectionHeight = gaugeWidth * 0.7; // 仪表盘区域高度
 
-                  // 刻度标记
-                  SizedBox(
-                    width: 160,
-                    height: 16,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: 0,
-                          bottom: 0,
-                          child: Text(
-                            '0%',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: isDark
-                                  ? Colors.grey.shade600
-                                  : Colors.grey.shade400,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              '50%',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: isDark
-                                    ? Colors.grey.shade600
-                                    : Colors.grey.shade400,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: Text(
-                            '100%',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              color: isDark
-                                  ? Colors.grey.shade600
-                                  : Colors.grey.shade400,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+        return Container(
+          padding: widget.size.getPadding(),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
           ),
-
-          // 底部金额显示
-          Padding(
-            padding: EdgeInsets.only(
-              top: widget.size.getItemSpacing(),
-              bottom: widget.size.getItemSpacing() / 2,
-            ),
-            child: Center(
-              child: Text(
-                '${_formatAmount(widget.remaining)}.${_getDecimalPart(widget.remaining)} / ${_formatAmount(widget.totalBudget)}.${_getDecimalPart(widget.totalBudget)} (${widget.currency})',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 标题
+              Text(
+                widget.title,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: gaugeTitleFontSize,
                   fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.grey.shade900,
+                  letterSpacing: 1.2,
+                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                 ),
               ),
-            ),
+
+              // 中间仪表盘区域
+              SizedBox(
+                height: gaugeSectionHeight,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 半圆形仪表盘
+                      SizedBox(
+                        width: gaugeWidth,
+                        height: gaugeHeight,
+                        child: Stack(
+                          children: [
+                            AnimatedBuilder(
+                              animation: _progressAnimation,
+                              builder: (context, child) {
+                                return CustomPaint(
+                                  size: Size(gaugeWidth, gaugeHeight),
+                                  painter: _GaugePainter(
+                                    progress:
+                                        progress * _progressAnimation.value,
+                                    backgroundColor: gaugeBackgroundColor,
+                                    progressColor: primaryColor,
+                                    isDark: isDark,
+                                    strokeWidth: strokeWidth,
+                                    pointerSize: pointerSize,
+                                  ),
+                                );
+                              },
+                            ),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: gaugeHeight * 0.05,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'REMAIN',
+                                    style: TextStyle(
+                                      fontSize: gaugeRemainLabelFontSize,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 1.5,
+                                      color:
+                                          isDark
+                                              ? Colors.grey.shade500
+                                              : Colors.grey.shade400,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: widget.size.getSmallSpacing() * 2,
+                                  ),
+                                  Icon(
+                                    Icons.shopping_bag_outlined,
+                                    size: gaugeIconSize,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // 刻度标记
+                      SizedBox(
+                        width: gaugeWidth,
+                        height: gaugeLabelFontSize * 2,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: 0,
+                              bottom: 0,
+                              child: Text(
+                                '0%',
+                                style: TextStyle(
+                                  fontSize: gaugeLabelFontSize,
+                                  fontWeight: FontWeight.w500,
+                                  color:
+                                      isDark
+                                          ? Colors.grey.shade600
+                                          : Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '50%',
+                                  style: TextStyle(
+                                    fontSize: gaugeLabelFontSize,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? Colors.grey.shade600
+                                            : Colors.grey.shade400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Text(
+                                '100%',
+                                style: TextStyle(
+                                  fontSize: gaugeLabelFontSize,
+                                  fontWeight: FontWeight.w500,
+                                  color:
+                                      isDark
+                                          ? Colors.grey.shade600
+                                          : Colors.grey.shade400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // 底部金额显示
+              Center(
+                child: Text(
+                  '${_formatAmount(widget.remaining)}.${_getDecimalPart(widget.remaining)} / ${_formatAmount(widget.totalBudget)}.${_getDecimalPart(widget.totalBudget)} (${widget.currency})',
+                  style: TextStyle(
+                    fontSize: gaugeAmountFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.grey.shade900,
+                  ),
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -274,27 +301,31 @@ class _GaugePainter extends CustomPainter {
   final Color backgroundColor;
   final Color progressColor;
   final bool isDark;
+  final double strokeWidth;
+  final double pointerSize;
 
   _GaugePainter({
     required this.progress,
     required this.backgroundColor,
     required this.progressColor,
     required this.isDark,
+    this.strokeWidth = 16.0,
+    this.pointerSize = 4.0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height);
-    final radius = size.width / 2 - 10;
-    const strokeWidth = 20.0;
+    final radius = size.width / 2 - strokeWidth / 2 - 2;
 
     final angleAdjustment = math.asin(strokeWidth / (2 * radius));
 
-    final backgroundPaint = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final backgroundPaint =
+        Paint()
+          ..color = backgroundColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius),
@@ -305,11 +336,12 @@ class _GaugePainter extends CustomPainter {
     );
 
     if (progress > 0) {
-      final progressPaint = Paint()
-        ..color = progressColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
+      final progressPaint =
+          Paint()
+            ..color = progressColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = StrokeCap.round;
 
       final maxSweepAngle = math.pi - 2 * angleAdjustment;
       final sweepAngle = maxSweepAngle * progress.clamp(0.0, 1.0);
@@ -323,15 +355,15 @@ class _GaugePainter extends CustomPainter {
     }
 
     final adjustedProgress = progress.clamp(0.0, 1.0);
-    final pointerAngle = math.pi +
+    final pointerAngle =
+        math.pi +
         angleAdjustment +
         ((math.pi - 2 * angleAdjustment) * adjustedProgress);
 
-    final pointerPaint = Paint()
-      ..color = isDark ? Colors.white : Colors.grey.shade800
-      ..style = PaintingStyle.fill;
-
-    final pointerSize = 5.0;
+    final pointerPaint =
+        Paint()
+          ..color = isDark ? Colors.white : Colors.grey.shade800
+          ..style = PaintingStyle.fill;
 
     canvas.save();
 
@@ -359,6 +391,8 @@ class _GaugePainter extends CustomPainter {
     return oldDelegate.progress != progress ||
         oldDelegate.backgroundColor != backgroundColor ||
         oldDelegate.progressColor != progressColor ||
-        oldDelegate.isDark != isDark;
+        oldDelegate.isDark != isDark ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.pointerSize != pointerSize;
   }
 }
