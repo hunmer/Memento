@@ -234,7 +234,7 @@ class TaskProgressListCardExample extends StatelessWidget {
                         title: '更新项目文档和规范',
                         time: '1 小时前',
                         progress: 0.0,
-                        status: TaskStatus.pending,
+                        status: TaskStatus.started,
                       ),
                     ],
                     moreCount: 10,
