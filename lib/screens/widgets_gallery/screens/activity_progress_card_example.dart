@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/card_dot_progress_display.dart';
 
 /// 活动进度卡片示例
@@ -19,7 +20,7 @@ class CardDotProgressDisplayExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (1x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -33,11 +34,12 @@ class CardDotProgressDisplayExample extends StatelessWidget {
                       activities: 15,
                       totalProgress: 20,
                       completedProgress: 17,
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (2x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -51,11 +53,12 @@ class CardDotProgressDisplayExample extends StatelessWidget {
                       activities: 15,
                       totalProgress: 20,
                       completedProgress: 17,
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (2x2)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -69,6 +72,45 @@ class CardDotProgressDisplayExample extends StatelessWidget {
                       activities: 15,
                       totalProgress: 20,
                       completedProgress: 17,
+                      size: const LargeSize(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width - 32,
+                    height: 220,
+                    child: CardDotProgressDisplay(
+                      title: 'Mileage',
+                      subtitle: 'January 2025',
+                      value: 153.20,
+                      unit: 'km',
+                      activities: 15,
+                      totalProgress: 20,
+                      completedProgress: 17,
+                      size: const WideSize(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width - 32,
+                    height: 320,
+                    child: CardDotProgressDisplay(
+                      title: 'Mileage',
+                      subtitle: 'January 2025',
+                      value: 153.20,
+                      unit: 'km',
+                      activities: 15,
+                      totalProgress: 20,
+                      completedProgress: 17,
+                      size: const Wide2Size(),
                     ),
                   ),
                 ),

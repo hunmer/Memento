@@ -138,31 +138,79 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
     final colorScheme = Theme.of(context).colorScheme;
     final size = widget.size;
 
-    return Container(
-      width: widget.width ?? double.infinity,
-      padding: size.getPadding(),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(size.getIconSize() * 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: size.getIconSize(),
-            offset: Offset(0, size.getSmallSpacing()),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 获取卡片的可用高度
+        final availableHeight = constraints.maxHeight;
+        final hasHeightConstraint =
+            availableHeight.isFinite && availableHeight > 0;
+
+        return Container(
+          width: widget.width ?? double.infinity,
+          padding: size.getPadding(),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: size.getIconSize(),
+                offset: Offset(0, size.getSmallSpacing()),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 标题栏
-          _buildHeader(context),
-          // 数值和趋势图
-          _buildContent(context),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 标题栏
+              _buildHeader(context),
+              // 数值显示
+              _buildDualValue(context),
+              SizedBox(height: size.getItemSpacing()),
+              // 周趋势图 - 填满剩余空间
+              if (hasHeightConstraint)
+                Expanded(
+                  child: _buildWeekTrendChart(
+                    context,
+                    availableChartHeight: _calculateAvailableChartHeight(
+                      availableHeight,
+                      size,
+                    ),
+                  ),
+                )
+              else
+                _buildWeekTrendChart(context, availableChartHeight: null),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  /// 计算柱状图可用高度
+  double _calculateAvailableChartHeight(
+    double totalHeight,
+    HomeWidgetSize size,
+  ) {
+    final padding = size.getPadding();
+    final headerHeight =
+        size.getIconSize() + size.getSmallSpacing() * 4; // 图标容器 + padding
+    final valueFontSize = size.getLargeFontSize() * 0.5;
+    final valueHeight = valueFontSize * 1.5; // 数值行高度
+    final statusHeight =
+        size.getSmallSpacing() + size.getLegendFontSize() * 1.2; // 状态文本高度
+    final itemSpacing = size.getItemSpacing();
+
+    // 可用高度 = 总高度 - padding - 标题 - 数值 - 状态 - 间距
+    final usedHeight =
+        padding.top +
+        padding.bottom +
+        headerHeight +
+        valueHeight +
+        statusHeight +
+        itemSpacing;
+    final available = totalHeight - usedHeight;
+    return available > 0 ? available : size.getIconSize() * 2; // 最小高度保底
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -227,20 +275,6 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    final size = widget.size;
-
-    return Column(
-      children: [
-        // 双数值显示
-        _buildDualValue(context),
-        SizedBox(height: size.getItemSpacing()),
-        // 周趋势图
-        _buildWeekTrendChart(context),
-      ],
-    );
-  }
-
   Widget _buildDualValue(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = widget.primaryColor ?? colorScheme.primary;
@@ -297,7 +331,6 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
             ),
           ],
         ),
-        SizedBox(height: size.getSmallSpacing()),
         // 状态描述
         if (widget.status != null)
           Text(
@@ -311,20 +344,37 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
     );
   }
 
-  Widget _buildWeekTrendChart(BuildContext context) {
+  Widget _buildWeekTrendChart(
+    BuildContext context, {
+    required double? availableChartHeight,
+  }) {
     final size = widget.size;
-    final chartHeight = size.getIconSize() * 2; // 约 36-56px
+    final barWidth = size.getBarWidth();
+    final labelFontSize = size.getLegendFontSize();
+    final spacing = size.getSmallSpacing() * 2;
+
+    // 计算柱状图区域高度
+    final labelHeight = labelFontSize * 1.2;
+    // 使用传入的可用高度或回退到默认计算
+    final maxBarHeight =
+        availableChartHeight != null
+            ? (availableChartHeight - spacing - labelHeight).clamp(
+              size.getIconSize(),
+              double.infinity,
+            )
+            : size.getIconSize() * 2;
 
     // 找到所有数据中的最大总百分比，用于按比例缩放
     final maxTotalPercent = widget.weekData.fold<double>(
       0.0,
-      (max, data) => (data.normalPercent + data.elevatedPercent) > max
-          ? data.normalPercent + data.elevatedPercent
-          : max,
+      (max, data) =>
+          (data.normalPercent + data.elevatedPercent) > max
+              ? data.normalPercent + data.elevatedPercent
+              : max,
     );
 
     return SizedBox(
-      height: chartHeight,
+      height: maxBarHeight + spacing + labelHeight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -338,6 +388,10 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
                 animationController: _animationController,
                 primaryColor: widget.primaryColor,
                 size: size,
+                maxBarHeight: maxBarHeight,
+                barWidth: barWidth,
+                labelFontSize: labelFontSize,
+                spacing: spacing,
               );
             }).toList(),
       ),
@@ -354,6 +408,10 @@ class WeekBar extends StatelessWidget {
   final AnimationController animationController;
   final Color? primaryColor;
   final HomeWidgetSize size;
+  final double maxBarHeight;
+  final double barWidth;
+  final double labelFontSize;
+  final double spacing;
 
   const WeekBar({
     super.key,
@@ -364,110 +422,112 @@ class WeekBar extends StatelessWidget {
     required this.animationController,
     this.primaryColor,
     required this.size,
+    required this.maxBarHeight,
+    required this.barWidth,
+    required this.labelFontSize,
+    required this.spacing,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final barColor = primaryColor ?? colorScheme.primary;
-    final barWidth = size.getBarWidth();
-    final labelFontSize = size.getLegendFontSize();
-    final spacing = size.getSmallSpacing() * 2;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 计算可用高度（减去间距和标签高度）
-        final labelHeight = labelFontSize * 1.2; // 估算标签高度
-        final availableHeight = constraints.maxHeight - spacing - labelHeight;
-        final maxAvailableHeight = availableHeight > 0 ? availableHeight.toDouble() : 0.0;
+    // 根据最大百分比计算缩放比例
+    final totalPercent = normalPercent + elevatedPercent;
+    final scale = maxTotalPercent > 0 ? totalPercent / maxTotalPercent : 0.0;
+    final barHeight = maxBarHeight * scale;
 
-        // 根据最大百分比计算缩放比例
-        final totalPercent = normalPercent + elevatedPercent;
-        final scale = maxTotalPercent > 0 ? totalPercent / maxTotalPercent : 0.0;
-        final barHeight = maxAvailableHeight * scale;
+    // 柱状图圆角 - 只在顶部有圆角，不是纯圆
+    final barRadius = BorderRadius.vertical(top: Radius.circular(barWidth * 0.25));
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // 柱状图
-            SizedBox(
-              height: barHeight,
-              width: barWidth,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  // 背景条
-                  Container(
-                    width: barWidth,
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(barWidth * 0.5),
-                    ),
-                  ),
-                  // 正常范围条（浅色）
-                  AnimatedBuilder(
-                    animation: animationController,
-                    builder: (context, child) {
-                      final heightFactor = totalPercent > 0
-                          ? normalPercent * animationController.value / totalPercent
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // 柱状图 - 使用 Expanded 让柱子填满可用空间
+        SizedBox(
+          height: maxBarHeight,
+          width: barWidth,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              // 背景条 - 显示完整的可用高度
+              Container(
+                width: barWidth,
+                height: maxBarHeight,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest,
+                  borderRadius: barRadius,
+                ),
+              ),
+              // 正常范围条（浅色）
+              AnimatedBuilder(
+                animation: animationController,
+                builder: (context, child) {
+                  final animHeight =
+                      totalPercent > 0
+                          ? normalPercent *
+                              barHeight *
+                              animationController.value /
+                              totalPercent
                           : 0.0;
-                      return FractionallySizedBox(
-                        heightFactor: heightFactor,
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: barColor.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(barWidth * 0.5),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  // 升高范围条（深色）
-                  Positioned(
-                    bottom: totalPercent > 0
-                        ? (normalPercent - elevatedPercent) * barHeight / totalPercent
-                        : 0.0,
-                    child: AnimatedBuilder(
-                      animation: animationController,
-                      builder: (context, child) {
-                        final barAnimHeight = totalPercent > 0
-                            ? elevatedPercent *
-                                barHeight *
-                                animationController.value / totalPercent
-                            : 0.0;
-                        return SizedBox(
-                          height: barAnimHeight,
-                          width: barWidth,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: barColor,
-                              borderRadius: BorderRadius.circular(
-                                barWidth * 0.5,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+                  return SizedBox(
+                    height: animHeight,
+                    width: barWidth,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: barColor.withOpacity(0.3),
+                        borderRadius: barRadius,
+                      ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-            SizedBox(height: spacing),
-            // 标签
-            Text(
-              label,
-              style: TextStyle(
-                color: colorScheme.onSurface.withOpacity(0.5),
-                fontWeight: FontWeight.w500,
-                fontSize: labelFontSize,
+              // 升高范围条（深色）
+              AnimatedBuilder(
+                animation: animationController,
+                builder: (context, child) {
+                  final animHeight =
+                      totalPercent > 0
+                          ? elevatedPercent *
+                              barHeight *
+                              animationController.value /
+                              totalPercent
+                          : 0.0;
+                  final bottomPosition =
+                      totalPercent > 0
+                          ? normalPercent * barHeight / totalPercent
+                          : 0.0;
+                  return Positioned(
+                    bottom: bottomPosition,
+                    child: SizedBox(
+                      height: animHeight,
+                      width: barWidth,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: barColor,
+                          borderRadius: barRadius,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+        SizedBox(height: spacing),
+        // 标签
+        Text(
+          label,
+          style: TextStyle(
+            color: colorScheme.onSurface.withOpacity(0.5),
+            fontWeight: FontWeight.w500,
+            fontSize: labelFontSize,
+          ),
+        ),
+      ],
     );
   }
 }

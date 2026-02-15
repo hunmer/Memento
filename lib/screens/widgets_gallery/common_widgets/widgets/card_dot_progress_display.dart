@@ -50,8 +50,7 @@ class CardDotProgressDisplay extends StatefulWidget {
   }
 
   @override
-  State<CardDotProgressDisplay> createState() =>
-      _CardDotProgressDisplayState();
+  State<CardDotProgressDisplay> createState() => _CardDotProgressDisplayState();
 }
 
 class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
@@ -84,14 +83,25 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
+    // 根据尺寸计算各元素大小
+    final iconSize = widget.size.getIconSize() * 0.7;
+    final iconContainerSize =
+        widget.size.getIconSize() * widget.size.iconContainerScale;
+    final titleFontSize = widget.size.getTitleFontSize() * 0.6;
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    final valueFontSize = widget.size.getLargeFontSize() * 0.6;
+    final unitFontSize = widget.size.getSubtitleFontSize();
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
         return Opacity(
           opacity: _animation.value,
           child: Container(
-            width: widget.inline ? double.maxFinite : 300,
-            height: widget.inline ? double.maxFinite : 150,
+            width: widget.inline ? double.maxFinite : null,
+            height: widget.inline ? double.maxFinite : null,
+            constraints:
+                widget.inline ? null : widget.size.getHeightConstraints(),
             padding: widget.size.getPadding(),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -119,11 +129,10 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                           Text(
                             widget.title,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: titleFontSize,
                               fontWeight: FontWeight.w600,
-                              color: isDark
-                                  ? Colors.white
-                                  : Colors.grey.shade900,
+                              color:
+                                  isDark ? Colors.white : Colors.grey.shade900,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -132,11 +141,12 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                             Text(
                               widget.subtitle,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: subtitleFontSize,
                                 fontWeight: FontWeight.w500,
-                                color: isDark
-                                    ? Colors.grey.shade400
-                                    : Colors.grey.shade500,
+                                color:
+                                    isDark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey.shade500,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -144,17 +154,19 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                         ],
                       ),
                     ),
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.directions_run,
-                        color: Colors.white,
-                        size: 16,
+                    SizedBox(
+                      width: iconContainerSize,
+                      height: iconContainerSize,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.directions_run,
+                          color: Colors.white,
+                          size: iconSize,
+                        ),
                       ),
                     ),
                   ],
@@ -170,22 +182,23 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                       value: widget.value * _animation.value,
                       fractionDigits: 1,
                       textStyle: TextStyle(
-                        fontSize: 28,
+                        fontSize: valueFontSize,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : Colors.grey.shade900,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: widget.size.getSmallSpacing()),
                     SizedBox(
-                      height: 20,
+                      height: unitFontSize * 1.5,
                       child: Text(
                         widget.unit,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: unitFontSize,
                           fontWeight: FontWeight.w500,
-                          color: isDark
-                              ? Colors.grey.shade400
-                              : Colors.grey.shade500,
+                          color:
+                              isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade500,
                         ),
                       ),
                     ),
@@ -194,11 +207,12 @@ class _CardDotProgressDisplayState extends State<CardDotProgressDisplay>
                       Text(
                         '${widget.activities} 活动',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: subtitleFontSize,
                           fontWeight: FontWeight.w500,
-                          color: isDark
-                              ? Colors.grey.shade400
-                              : Colors.grey.shade500,
+                          color:
+                              isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade500,
                         ),
                       ),
                   ],
@@ -241,43 +255,59 @@ class _ProgressDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(total, (index) {
-        final isCompleted = index < completed;
-        final dotAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Interval(
-            index * 0.05,
-            0.5 + index * 0.05,
-            curve: Curves.easeOutCubic,
-          ),
-        );
+    // 根据尺寸计算点的大小
+    final baseDotSize = size.getStrokeWidth() * 0.8;
 
-        return Padding(
-          padding: EdgeInsets.only(right: size.getItemSpacing() - 2),
-          child: AnimatedBuilder(
-            animation: dotAnimation,
-            builder: (context, child) {
-              return Opacity(
-                opacity: dotAnimation.value,
-                child: Transform.scale(
-                  scale: 0.8 + 0.2 * dotAnimation.value,
-                  child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: isCompleted
-                          ? color
-                          : color.withOpacity(0.4),
-                      shape: BoxShape.circle,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 计算可用宽度，考虑间距
+        final spacing = size.getSmallSpacing();
+        final totalSpacing = spacing * (total - 1);
+        final availableWidth = constraints.maxWidth - totalSpacing;
+
+        // 计算每个点的实际大小
+        final dotSize = (availableWidth / total).clamp(0.5, baseDotSize);
+
+        return Row(
+          children: List.generate(total, (index) {
+            final isCompleted = index < completed;
+            final isLast = index == total - 1;
+
+            // 确保 end 值不超过 1.0
+            final start = (index / total) * 0.3;
+            final end = (index / total) * 0.3 + 0.5;
+            final clampedEnd = end.clamp(0.0, 1.0);
+
+            final dotAnimation = CurvedAnimation(
+              parent: animation,
+              curve: Interval(start, clampedEnd, curve: Curves.easeOutCubic),
+            );
+
+            return Padding(
+              padding: EdgeInsets.only(right: isLast ? 0 : spacing),
+              child: AnimatedBuilder(
+                animation: dotAnimation,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: dotAnimation.value,
+                    child: Transform.scale(
+                      scale: 0.8 + 0.2 * dotAnimation.value,
+                      child: Container(
+                        width: dotSize,
+                        height: dotSize,
+                        decoration: BoxDecoration(
+                          color: isCompleted ? color : color.withOpacity(0.4),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }
