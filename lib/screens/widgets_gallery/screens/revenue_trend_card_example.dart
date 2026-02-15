@@ -13,17 +13,112 @@ class RevenueTrendCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('收入趋势卡片')),
       body: Container(
         color: isDark ? const Color(0xFF18181B) : const Color(0xFFE5E5E5),
-        child: const Center(
-          child: RevenueTrendCardWidget(
-            value: 145.32,
-            currency: '\$',
-            percentage: 12,
-            period: 'Weekly',
-            chartData: [80, 70, 90, 75, 60, 50, 40],
-            dates: [22, 23, 24, 25, 26],
-            highlightIndex: 4,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 200,
+                    height: 150,
+                    child: RevenueTrendCardWidget(
+                      value: 145.32,
+                      currency: '\$',
+                      percentage: 12,
+                      period: 'Weekly',
+                      chartData: [80, 70, 90, 75, 60],
+                      dates: [22, 23, 24, 25, 26],
+                      highlightIndex: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 280,
+                    height: 180,
+                    child: RevenueTrendCardWidget(
+                      value: 145.32,
+                      currency: '\$',
+                      percentage: 12,
+                      period: 'Weekly',
+                      chartData: [80, 70, 90, 75, 60, 50, 40],
+                      dates: [22, 23, 24, 25, 26, 27, 28],
+                      highlightIndex: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 350,
+                    height: 220,
+                    child: RevenueTrendCardWidget(
+                      value: 145.32,
+                      currency: '\$',
+                      percentage: 12,
+                      period: 'Weekly',
+                      chartData: [80, 70, 90, 75, 60, 50, 40, 65, 85],
+                      dates: [20, 21, 22, 23, 24, 25, 26, 27, 28],
+                      highlightIndex: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 200,
+                  child: RevenueTrendCardWidget(
+                    value: 145.32,
+                    currency: '\$',
+                    percentage: 12,
+                    period: 'Weekly',
+                    chartData: [80, 70, 90, 75, 60, 50, 40, 65, 85, 72],
+                    dates: [20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+                    highlightIndex: 4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 280,
+                  child: RevenueTrendCardWidget(
+                    value: 145.32,
+                    currency: '\$',
+                    percentage: 12,
+                    period: 'Weekly',
+                    chartData: [80, 70, 90, 75, 60, 50, 40, 65, 85, 72, 68, 78, 82],
+                    dates: [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
+                    highlightIndex: 4,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

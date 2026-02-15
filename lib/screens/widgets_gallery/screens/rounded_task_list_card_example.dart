@@ -13,38 +13,192 @@ class RoundedTaskListCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('圆角任务列表卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: RoundedTaskListCard(
-            tasks: [
-              TaskListItem(
-                title: 'Design mobile UI dashboard',
-                subtitle: 'Widgefy UI kit',
-                date: '12 Jan 2021',
-              ),
-              TaskListItem(
-                title: 'Calculate budget and contract',
-                subtitle: 'BetaCRM',
-                date: '1 Feb 2021',
-              ),
-              TaskListItem(
-                title: 'Search for a UI kit',
-                subtitle: 'Cardify landing pack',
-                date: '9 Mar 2021',
-              ),
-              TaskListItem(
-                title: 'Design search page for website',
-                subtitle: 'IOTask UI kit',
-                date: '10 Feb 2021',
-              ),
-              TaskListItem(
-                title: 'Create HTML & CSS for startup',
-                subtitle: 'Roomsfy',
-                date: '21 Feb 2021',
-              ),
-            ],
-            headerText: 'Upcoming',
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 280,
+                    height: 200,
+                    child: RoundedTaskListCard(
+                      tasks: [
+                        TaskListItem(
+                          title: 'Design mobile UI',
+                          subtitle: 'Widgefy UI kit',
+                          date: '12 Jan 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Calculate budget',
+                          subtitle: 'BetaCRM',
+                          date: '1 Feb 2021',
+                        ),
+                      ],
+                      headerText: 'Upcoming',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 320,
+                    height: 280,
+                    child: RoundedTaskListCard(
+                      tasks: [
+                        TaskListItem(
+                          title: 'Design mobile UI dashboard',
+                          subtitle: 'Widgefy UI kit',
+                          date: '12 Jan 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Calculate budget and contract',
+                          subtitle: 'BetaCRM',
+                          date: '1 Feb 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Search for a UI kit',
+                          subtitle: 'Cardify landing pack',
+                          date: '9 Mar 2021',
+                        ),
+                      ],
+                      headerText: 'Upcoming',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 380,
+                    height: 380,
+                    child: RoundedTaskListCard(
+                      tasks: [
+                        TaskListItem(
+                          title: 'Design mobile UI dashboard',
+                          subtitle: 'Widgefy UI kit',
+                          date: '12 Jan 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Calculate budget and contract',
+                          subtitle: 'BetaCRM',
+                          date: '1 Feb 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Search for a UI kit',
+                          subtitle: 'Cardify landing pack',
+                          date: '9 Mar 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Design search page for website',
+                          subtitle: 'IOTask UI kit',
+                          date: '10 Feb 2021',
+                        ),
+                        TaskListItem(
+                          title: 'Create HTML & CSS for startup',
+                          subtitle: 'Roomsfy',
+                          date: '21 Feb 2021',
+                        ),
+                      ],
+                      headerText: 'Upcoming',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 320,
+                  child: RoundedTaskListCard(
+                    tasks: [
+                      TaskListItem(
+                        title: 'Design mobile UI dashboard',
+                        subtitle: 'Widgefy UI kit - Mobile Application',
+                        date: '12 Jan 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Calculate budget and contract',
+                        subtitle: 'BetaCRM - Client Management',
+                        date: '1 Feb 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Search for a UI kit',
+                        subtitle: 'Cardify landing pack - Design Resources',
+                        date: '9 Mar 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Design search page for website',
+                        subtitle: 'IOTask UI kit - Web Development',
+                        date: '10 Feb 2021',
+                      ),
+                    ],
+                    headerText: 'Upcoming Tasks',
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 450,
+                  child: RoundedTaskListCard(
+                    tasks: [
+                      TaskListItem(
+                        title: 'Design mobile UI dashboard',
+                        subtitle: 'Widgefy UI kit - Mobile Application Design',
+                        date: '12 Jan 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Calculate budget and contract',
+                        subtitle: 'BetaCRM - Client Management System',
+                        date: '1 Feb 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Search for a UI kit',
+                        subtitle: 'Cardify landing pack - Design Resources',
+                        date: '9 Mar 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Design search page for website',
+                        subtitle: 'IOTask UI kit - Web Development',
+                        date: '10 Feb 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Create HTML & CSS for startup',
+                        subtitle: 'Roomsfy - Web Development Project',
+                        date: '21 Feb 2021',
+                      ),
+                      TaskListItem(
+                        title: 'Review project documentation',
+                        subtitle: 'Internal - Project Management',
+                        date: '25 Feb 2021',
+                      ),
+                    ],
+                    headerText: 'Upcoming Tasks Overview',
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

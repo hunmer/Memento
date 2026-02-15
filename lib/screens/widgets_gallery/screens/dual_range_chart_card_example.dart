@@ -91,6 +91,47 @@ class DualRangeChartCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: DualRangeChartCardWidget(
+                    size: const MediumWideSize(),
+                    date: 'Jan 12, 2028',
+                    weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon'],
+                    ranges: const [
+                      DualRangeData(
+                        day: 'Wed',
+                        primaryRange: RangeData(min: 130, max: 145, startPercent: 0.15, heightPercent: 0.25),
+                        secondaryRange: RangeData(min: 75, max: 85, startPercent: 0.55, heightPercent: 0.15),
+                      ),
+                      DualRangeData(
+                        day: 'Thu',
+                        primaryRange: RangeData(min: 125, max: 150, startPercent: 0.20, heightPercent: 0.40),
+                        secondaryRange: RangeData(min: 78, max: 88, startPercent: 0.65, heightPercent: 0.25),
+                      ),
+                      DualRangeData(
+                        day: 'Fri',
+                        primaryRange: RangeData(min: 135, max: 142, startPercent: 0.10, heightPercent: 0.20),
+                        secondaryRange: RangeData(min: 72, max: 80, startPercent: 0.50, heightPercent: 0.18),
+                      ),
+                      DualRangeData(
+                        day: 'Sat',
+                        primaryRange: RangeData(min: 128, max: 138, startPercent: 0.25, heightPercent: 0.15),
+                        secondaryRange: RangeData(min: 76, max: 82, startPercent: 0.58, heightPercent: 0.10),
+                      ),
+                      DualRangeData(
+                        day: 'Sun',
+                        primaryRange: RangeData(min: 132, max: 140, startPercent: 0.18, heightPercent: 0.22),
+                        secondaryRange: RangeData(min: 74, max: 84, startPercent: 0.52, heightPercent: 0.20),
+                      ),
+                    ],
+                    primarySummary: RangeSummary(min: 129, max: 141, label: 'sys'),
+                    secondarySummary: RangeSummary(min: 70, max: 99, label: 'mmHg'),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 _buildSectionTitle('大尺寸'),
                 const SizedBox(height: 8),
                 Center(
@@ -126,6 +167,52 @@ class DualRangeChartCardExample extends StatelessWidget {
                       primarySummary: RangeSummary(min: 129, max: 141, label: 'sys'),
                       secondarySummary: RangeSummary(min: 70, max: 99, label: 'mmHg'),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 300,
+                  child: DualRangeChartCardWidget(
+                    size: const LargeWideSize(),
+                    date: 'Jan 12, 2028',
+                    weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue'],
+                    ranges: const [
+                      DualRangeData(
+                        day: 'Wed',
+                        primaryRange: RangeData(min: 130, max: 145, startPercent: 0.15, heightPercent: 0.25),
+                        secondaryRange: RangeData(min: 75, max: 85, startPercent: 0.55, heightPercent: 0.15),
+                      ),
+                      DualRangeData(
+                        day: 'Thu',
+                        primaryRange: RangeData(min: 125, max: 150, startPercent: 0.20, heightPercent: 0.40),
+                        secondaryRange: RangeData(min: 78, max: 88, startPercent: 0.65, heightPercent: 0.25),
+                      ),
+                      DualRangeData(
+                        day: 'Fri',
+                        primaryRange: RangeData(min: 135, max: 142, startPercent: 0.10, heightPercent: 0.20),
+                        secondaryRange: RangeData(min: 72, max: 80, startPercent: 0.50, heightPercent: 0.18),
+                      ),
+                      DualRangeData(
+                        day: 'Sat',
+                        primaryRange: RangeData(min: 128, max: 138, startPercent: 0.25, heightPercent: 0.15),
+                        secondaryRange: RangeData(min: 76, max: 82, startPercent: 0.58, heightPercent: 0.10),
+                      ),
+                      DualRangeData(
+                        day: 'Sun',
+                        primaryRange: RangeData(min: 132, max: 140, startPercent: 0.18, heightPercent: 0.22),
+                        secondaryRange: RangeData(min: 74, max: 84, startPercent: 0.52, heightPercent: 0.20),
+                      ),
+                      DualRangeData(
+                        day: 'Mon',
+                        primaryRange: RangeData(min: 126, max: 144, startPercent: 0.22, heightPercent: 0.28),
+                        secondaryRange: RangeData(min: 77, max: 86, startPercent: 0.60, heightPercent: 0.22),
+                      ),
+                    ],
+                    primarySummary: RangeSummary(min: 129, max: 141, label: 'sys'),
+                    secondarySummary: RangeSummary(min: 70, max: 99, label: 'mmHg'),
                   ),
                 ),
               ],

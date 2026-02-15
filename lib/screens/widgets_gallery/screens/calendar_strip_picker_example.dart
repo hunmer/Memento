@@ -94,6 +94,46 @@ class _CalendarStripPickerExampleState extends State<CalendarStripPickerExample>
                   ),
                 ),
                 const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 100,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: CalendarStripDatePicker(
+                        selectedDate: selectedDate,
+                        onDateChanged: (date) {
+                          setState(() {
+                            selectedDate = date;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 120,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: CalendarStripDatePicker(
+                        selectedDate: selectedDate,
+                        onDateChanged: (date) {
+                          setState(() {
+                            selectedDate = date;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Center(
                   child: Text(
                     '已选择: ${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}',

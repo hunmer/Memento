@@ -74,6 +74,44 @@ class DonutChartStatsCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: DonutChartStatsCardWidget(
+                    totalValue: 85964.45,
+                    unit: '',
+                    categories: const [
+                      ChartCategoryData(
+                        label: 'Marketing Channels',
+                        value: 0.20,
+                        color: Color(0xFF4F46E5),
+                      ),
+                      ChartCategoryData(
+                        label: 'Direct Sales',
+                        value: 0.20,
+                        color: Color(0xFF6EE7B7),
+                      ),
+                      ChartCategoryData(
+                        label: 'Offline',
+                        value: 0.35,
+                        color: Color(0xFFFBBF24),
+                      ),
+                      ChartCategoryData(
+                        label: 'Referral',
+                        value: 0.15,
+                        color: Color(0xFFF472B6),
+                      ),
+                      ChartCategoryData(
+                        label: 'Other',
+                        value: 0.10,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
                 _buildSectionTitle('大尺寸'),
                 const SizedBox(height: 8),
                 Center(
@@ -106,6 +144,49 @@ class DonutChartStatsCardExample extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 300,
+                  child: DonutChartStatsCardWidget(
+                    totalValue: 85964.45,
+                    unit: '',
+                    categories: const [
+                      ChartCategoryData(
+                        label: 'Marketing Channels',
+                        value: 0.20,
+                        color: Color(0xFF4F46E5),
+                      ),
+                      ChartCategoryData(
+                        label: 'Direct Sales',
+                        value: 0.20,
+                        color: Color(0xFF6EE7B7),
+                      ),
+                      ChartCategoryData(
+                        label: 'Offline Channels',
+                        value: 0.30,
+                        color: Color(0xFFFBBF24),
+                      ),
+                      ChartCategoryData(
+                        label: 'Referral Programs',
+                        value: 0.15,
+                        color: Color(0xFFF472B6),
+                      ),
+                      ChartCategoryData(
+                        label: 'Partner Networks',
+                        value: 0.10,
+                        color: Color(0xFF14B8A6),
+                      ),
+                      ChartCategoryData(
+                        label: 'Other',
+                        value: 0.05,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ],
                   ),
                 ),
               ],

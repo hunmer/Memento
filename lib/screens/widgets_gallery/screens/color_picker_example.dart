@@ -132,6 +132,70 @@ class _ColorPickerExampleState extends State<ColorPickerExample> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: selectedColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ColorPickerSection(
+                            selectedColor: selectedColor,
+                            onColorChanged: (color) {
+                              setState(() {
+                                selectedColor = color;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: selectedColor,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ColorPickerSection(
+                            selectedColor: selectedColor,
+                            onColorChanged: (color) {
+                              setState(() {
+                                selectedColor = color;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

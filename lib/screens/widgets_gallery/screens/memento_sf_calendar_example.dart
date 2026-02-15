@@ -29,6 +29,9 @@ class _MementoSfCalendarExampleState extends State<MementoSfCalendarExample> {
   double _endHour = 23;
   int _firstDayOfWeek = 1;
 
+  // 尺寸模式
+  String _sizeMode = 'small';
+
   @override
   void initState() {
     super.initState();
@@ -101,9 +104,34 @@ class _MementoSfCalendarExampleState extends State<MementoSfCalendarExample> {
     ];
   }
 
+  /// 获取宽度
+  double _getWidth() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    switch (_sizeMode) {
+      case 'small':
+        return 360;
+      case 'medium':
+        return 440;
+      case 'mediumWide':
+        return screenWidth - 32;
+      case 'large':
+        return 520;
+      case 'largeWide':
+        return screenWidth - 32;
+      default:
+        return 360;
+    }
+  }
+
+  /// 是否占满宽度
+  bool _isFullWidth() {
+    return _sizeMode == 'mediumWide' || _sizeMode == 'largeWide';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
@@ -118,82 +146,173 @@ class _MementoSfCalendarExampleState extends State<MementoSfCalendarExample> {
       ),
       body: Column(
         children: [
-          // 视图切换按钮
-          _buildViewSelector(theme),
+          // 尺寸切换按钮
+          _buildSizeSelector(theme),
           const Divider(height: 1),
           // 日历
           Expanded(
-            child: MementoSfCalendar(
-              view: _currentView,
-              controller: _controller,
-              allowedViews: const [
-                CalendarView.day,
-                CalendarView.week,
-                CalendarView.workWeek,
-                CalendarView.month,
-                CalendarView.timelineDay,
-                CalendarView.timelineWeek,
-                CalendarView.timelineWorkWeek,
-                CalendarView.schedule,
-              ],
-              allowViewNavigation: _allowViewNavigation,
-              initialDisplayDate: DateTime.now(),
-              firstDayOfWeek: _firstDayOfWeek,
-              dataSource: _getDataSource(),
-              // 月视图
-              showAgenda: _showAgenda,
-              agendaViewHeight: 180,
-              appointmentDisplayMode:
-                  MonthAppointmentDisplayMode.appointment,
-              // 时间槽
-              startHour: _startHour,
-              endHour: _endHour,
-              timeInterval: const Duration(minutes: 30),
-              // 外观
-              todayHighlightColor: theme.primaryColor,
-              showWeekNumber: _showWeekNumber,
-              showNavigationArrow: _showNavigationArrow,
-              showDatePickerButton: _showDatePickerButton,
-              showTodayButton: _showTodayButton,
-              showCurrentTimeIndicator: _showCurrentTimeIndicator,
-              // 高级
-              allowDragAndDrop: _allowDragAndDrop,
-              allowAppointmentResize: _allowAppointmentResize,
-              specialRegions: _getSpecialRegions(),
-              // 回调
-              onViewChanged: (details) {
-                if (details.visibleDates.isNotEmpty) {
-                  // 视图变化
-                }
-              },
-              onTap: (details) {
-                if (details.appointments != null &&
-                    details.appointments!.isNotEmpty) {
-                  final appointment =
-                      details.appointments!.first as Appointment;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('点击: ${appointment.subject}'),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                }
-              },
-              onDragEnd: _allowDragAndDrop
-                  ? (details) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            '拖放事件到 ${details.droppingTime}',
+            child: _isFullWidth()
+                ? MementoSfCalendar(
+                    view: _currentView,
+                    controller: _controller,
+                    allowedViews: const [
+                      CalendarView.day,
+                      CalendarView.week,
+                      CalendarView.workWeek,
+                      CalendarView.month,
+                      CalendarView.timelineDay,
+                      CalendarView.timelineWeek,
+                      CalendarView.timelineWorkWeek,
+                      CalendarView.schedule,
+                    ],
+                    allowViewNavigation: _allowViewNavigation,
+                    initialDisplayDate: DateTime.now(),
+                    firstDayOfWeek: _firstDayOfWeek,
+                    dataSource: _getDataSource(),
+                    showAgenda: _showAgenda,
+                    agendaViewHeight: 200,
+                    appointmentDisplayMode:
+                        MonthAppointmentDisplayMode.appointment,
+                    startHour: _startHour,
+                    endHour: _endHour,
+                    timeInterval: const Duration(minutes: 30),
+                    todayHighlightColor: theme.primaryColor,
+                    showWeekNumber: _showWeekNumber,
+                    showNavigationArrow: _showNavigationArrow,
+                    showDatePickerButton: _showDatePickerButton,
+                    showTodayButton: _showTodayButton,
+                    showCurrentTimeIndicator: _showCurrentTimeIndicator,
+                    allowDragAndDrop: _allowDragAndDrop,
+                    allowAppointmentResize: _allowAppointmentResize,
+                    specialRegions: _getSpecialRegions(),
+                    onViewChanged: (details) {
+                      if (details.visibleDates.isNotEmpty) {}
+                    },
+                    onTap: (details) {
+                      if (details.appointments != null &&
+                          details.appointments!.isNotEmpty) {
+                        final appointment =
+                            details.appointments!.first as Appointment;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('点击: ${appointment.subject}'),
+                            duration: const Duration(seconds: 1),
                           ),
-                          duration: const Duration(seconds: 1),
-                        ),
-                      );
-                    }
-                  : null,
-            ),
+                        );
+                      }
+                    },
+                    onDragEnd: _allowDragAndDrop
+                        ? (details) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('拖放事件到 ${details.droppingTime}'),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        : null,
+                  )
+                : Center(
+                    child: SizedBox(
+                      width: _getWidth(),
+                      height: screenWidth * 0.9,
+                      child: MementoSfCalendar(
+                        view: _currentView,
+                        controller: _controller,
+                        allowedViews: const [
+                          CalendarView.day,
+                          CalendarView.week,
+                          CalendarView.workWeek,
+                          CalendarView.month,
+                          CalendarView.timelineDay,
+                          CalendarView.timelineWeek,
+                          CalendarView.timelineWorkWeek,
+                          CalendarView.schedule,
+                        ],
+                        allowViewNavigation: _allowViewNavigation,
+                        initialDisplayDate: DateTime.now(),
+                        firstDayOfWeek: _firstDayOfWeek,
+                        dataSource: _getDataSource(),
+                        showAgenda: _showAgenda,
+                        agendaViewHeight: 150,
+                        appointmentDisplayMode:
+                            MonthAppointmentDisplayMode.appointment,
+                        startHour: _startHour,
+                        endHour: _endHour,
+                        timeInterval: const Duration(minutes: 30),
+                        todayHighlightColor: theme.primaryColor,
+                        showWeekNumber: _showWeekNumber,
+                        showNavigationArrow: _showNavigationArrow,
+                        showDatePickerButton: _showDatePickerButton,
+                        showTodayButton: _showTodayButton,
+                        showCurrentTimeIndicator: _showCurrentTimeIndicator,
+                        allowDragAndDrop: _allowDragAndDrop,
+                        allowAppointmentResize: _allowAppointmentResize,
+                        specialRegions: _getSpecialRegions(),
+                        onViewChanged: (details) {
+                          if (details.visibleDates.isNotEmpty) {}
+                        },
+                        onTap: (details) {
+                          if (details.appointments != null &&
+                              details.appointments!.isNotEmpty) {
+                            final appointment =
+                                details.appointments!.first as Appointment;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('点击: ${appointment.subject}'),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
+                        onDragEnd: _allowDragAndDrop
+                            ? (details) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    contentText: '拖放事件到 ${details.droppingTime}',
+                                    duration: const Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            : null,
+                      ),
+                    ),
+                  ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// 尺寸选择器
+  Widget _buildSizeSelector(ThemeData theme) {
+    final sizes = [
+      {'value': 'small', 'label': '小尺寸'},
+      {'value': 'medium', 'label': '中尺寸'},
+      {'value': 'mediumWide', 'label': '中宽'},
+      {'value': 'large', 'label': '大尺寸'},
+      {'value': 'largeWide', 'label': '大宽'},
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Row(
+        children: sizes.map((size) {
+          final isSelected = _sizeMode == size['value'];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            ChoiceChip(
+              label: Text(size['label']!),
+              selected: isSelected,
+              onSelected: (_) {
+                setState(() {
+                  _sizeMode = size['value']!;
+                });
+              },
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -223,7 +342,7 @@ class _MementoSfCalendarExampleState extends State<MementoSfCalendarExample> {
               onSelected: (_) {
                 setState(() {
                   _currentView = entry.key;
-                  _controller.view = entry.key;
+                  _controller.view = _currentView;
                 });
               },
             ),

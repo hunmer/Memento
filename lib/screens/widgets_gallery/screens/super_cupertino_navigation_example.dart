@@ -25,6 +25,9 @@ class _SuperCupertinoNavigationExampleState
   /// 多条件过滤状态
   final MultiFilterState _multiFilterState = MultiFilterState();
 
+  /// 尺寸模式
+  String _sizeMode = 'small';
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +38,30 @@ class _SuperCupertinoNavigationExampleState
   void dispose() {
     _multiFilterState.dispose();
     super.dispose();
+  }
+
+  /// 获取宽度
+  double _getWidth() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    switch (_sizeMode) {
+      case 'small':
+        return 360;
+      case 'medium':
+        return 440;
+      case 'mediumWide':
+        return screenWidth - 32;
+      case 'large':
+        return 520;
+      case 'largeWide':
+        return screenWidth - 32;
+      default:
+        return 360;
+    }
+  }
+
+  /// 是否占满宽度
+  bool _isFullWidth() {
+    return _sizeMode == 'mediumWide' || _sizeMode == 'largeWide';
   }
 
   /// 构建多条件过滤项
@@ -216,26 +243,104 @@ class _SuperCupertinoNavigationExampleState
 
   @override
   Widget build(BuildContext context) {
-    return SuperCupertinoNavigationWrapper(
-      title: const Text('任务列表'),
-      largeTitle: '任务列表',
-      automaticallyImplyLeading: true,
+    final theme = Theme.of(context);
 
-      // 启用搜索栏
-      enableSearchBar: true,
-      searchPlaceholder: '搜索任务标题或描述...',
-      onSearchChanged: _onSearchChanged,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Super Cupertino 导航'),
+      ),
+      body: Column(
+        children: [
+          // 尺寸切换按钮
+          _buildSizeSelector(theme),
+          const Divider(height: 1),
+          // 内容
+          Expanded(
+            child: _isFullWidth()
+                ? SuperCupertinoNavigationWrapper(
+                    title: const Text('任务列表'),
+                    largeTitle: '任务列表',
+                    automaticallyImplyLeading: true,
 
-      // 启用多条件过滤
-      enableMultiFilter: true,
-      multiFilterItems: _buildFilterItems(),
-      multiFilterBarHeight: 50,
-      onMultiFilterChanged: _onMultiFilterChanged,
+                    // 启用搜索栏
+                    enableSearchBar: true,
+                    searchPlaceholder: '搜索任务标题或描述...',
+                    onSearchChanged: _onSearchChanged,
 
-      // 主体内容
-      body: _filteredTasks.isEmpty
-          ? _buildEmptyState()
-          : _buildTaskList(),
+                    // 启用多条件过滤
+                    enableMultiFilter: true,
+                    multiFilterItems: _buildFilterItems(),
+                    multiFilterBarHeight: 50,
+                    onMultiFilterChanged: _onMultiFilterChanged,
+
+                    // 主体内容
+                    body: _filteredTasks.isEmpty
+                        ? _buildEmptyState()
+                        : _buildTaskList(isWide: true),
+                  )
+                : Center(
+                    child: SizedBox(
+                      width: _getWidth(),
+                      height: double.infinity,
+                      child: SuperCupertinoNavigationWrapper(
+                        title: const Text('任务列表'),
+                        largeTitle: '任务列表',
+                        automaticallyImplyLeading: true,
+
+                        // 启用搜索栏
+                        enableSearchBar: true,
+                        searchPlaceholder: '搜索任务标题或描述...',
+                        onSearchChanged: _onSearchChanged,
+
+                        // 启用多条件过滤
+                        enableMultiFilter: true,
+                        multiFilterItems: _buildFilterItems(),
+                        multiFilterBarHeight: 50,
+                        onMultiFilterChanged: _onMultiFilterChanged,
+
+                        // 主体内容
+                        body: _filteredTasks.isEmpty
+                            ? _buildEmptyState()
+                            : _buildTaskList(isWide: false),
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 尺寸选择器
+  Widget _buildSizeSelector(ThemeData theme) {
+    final sizes = [
+      {'value': 'small', 'label': '小尺寸'},
+      {'value': 'medium', 'label': '中尺寸'},
+      {'value': 'mediumWide', 'label': '中宽'},
+      {'value': 'large', 'label': '大尺寸'},
+      {'value': 'largeWide', 'label': '大宽'},
+    ];
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: Row(
+        children: sizes.map((size) {
+          final isSelected = _sizeMode == size['value'];
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            ChoiceChip(
+              label: Text(size['label']!),
+              selected: isSelected,
+              onSelected: (_) {
+                setState(() {
+                  _sizeMode = size['value']!;
+                });
+              },
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -280,19 +385,20 @@ class _SuperCupertinoNavigationExampleState
   }
 
   /// 构建任务列表
-  Widget _buildTaskList() {
+  Widget _buildTaskList({required bool isWide}) {
+    final horizontalPadding = isWide ? 16 : 0;
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8),
       itemCount: _filteredTasks.length,
       itemBuilder: (context, index) {
         final task = _filteredTasks[index];
-        return _buildTaskCard(task);
+        return _buildTaskCard(task, isWide: isWide);
       },
     );
   }
 
   /// 构建任务卡片
-  Widget _buildTaskCard(_TaskItem task) {
+  Widget _buildTaskCard(_TaskItem task, {required bool isWide}) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(

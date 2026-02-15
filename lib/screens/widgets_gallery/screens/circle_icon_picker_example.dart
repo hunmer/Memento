@@ -98,6 +98,48 @@ class _CircleIconPickerExampleState extends State<CircleIconPickerExample> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 150,
+                  child: CircleIconPicker(
+                    currentIcon: selectedIcon,
+                    backgroundColor: selectedColor,
+                    onIconSelected: (icon) {
+                      setState(() {
+                        selectedIcon = icon;
+                      });
+                    },
+                    onColorSelected: (color) {
+                      setState(() {
+                        selectedColor = color;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 200,
+                  child: CircleIconPicker(
+                    currentIcon: selectedIcon,
+                    backgroundColor: selectedColor,
+                    onIconSelected: (icon) {
+                      setState(() {
+                        selectedIcon = icon;
+                      });
+                    },
+                    onColorSelected: (color) {
+                      setState(() {
+                        selectedColor = color;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
                 Center(
                   child: Text(
                     '当前配置: 图标 + 颜色 ${selectedColor.value.toRadixString(16).toUpperCase()}',
