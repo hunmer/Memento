@@ -215,7 +215,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: size.getLegendFontSize(),
+                      fontSize: widget.size.getLegendFontSize(),
                       fontWeight: FontWeight.w500,
                       color: _getTextColor(color),
                     ),
@@ -225,7 +225,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
                   Text(
                     _formatMinutes(durationMinutes),
                     style: TextStyle(
-                      fontSize: size.getLegendFontSize() - 2,
+                      fontSize: widget.size.getLegendFontSize() - 2,
                       color: _getTextColor(color),
                     ),
                   ),
@@ -331,7 +331,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
               ),
             ),
             const SizedBox(width: 4),
-            Text(entry.key, style: TextStyle(fontSize: size.getLegendFontSize())),
+            Text(entry.key, style: TextStyle(fontSize: widget.size.getLegendFontSize())),
           ],
         );
       }).toList(),
@@ -348,7 +348,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
       return Text(
         '今日暂无活动',
         style: TextStyle(
-          fontSize: size.getLegendFontSize(),
+          fontSize: widget.size.getLegendFontSize(),
           color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
         ),
       );
@@ -360,14 +360,14 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
         Text(
           '总时长: ${_formatMinutes(widget.totalMinutes)}',
           style: TextStyle(
-            fontSize: size.getLegendFontSize(),
+            fontSize: widget.size.getLegendFontSize(),
             color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
           ),
         ),
         Text(
           '活跃: ${widget.activeHours}小时',
           style: TextStyle(
-            fontSize: size.getLegendFontSize(),
+            fontSize: widget.size.getLegendFontSize(),
             color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
           ),
         ),

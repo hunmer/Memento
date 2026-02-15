@@ -180,6 +180,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
           data: widget.data.items[i],
           animation: _animation,
           index: i,
+          size: widget.size,
         ),
       );
     }
@@ -217,11 +218,13 @@ class _TrendItemWidget extends StatelessWidget {
   final TrendItemData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _TrendItemWidget({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -257,20 +260,20 @@ class _TrendItemWidget extends StatelessWidget {
               Text(
                 data.symbol,
                 style: TextStyle(
-                  fontSize: widget.size.getSubtitleFontSize(),
+                  fontSize: size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w600,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                   letterSpacing: 0.5,
                 ),
               ),
-              SizedBox(height: widget.size.getSmallSpacing()),
+              SizedBox(height: size.getSmallSpacing()),
               SizedBox(
                 height: 24,
                 child: AnimatedFlipCounter(
                   value: data.value * itemAnimation.value,
                   fractionDigits: 2,
                   textStyle: TextStyle(
-                    fontSize: widget.size.getSubtitleFontSize() + 4,
+                    fontSize: size.getSubtitleFontSize() + 4,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     height: 1.0,
@@ -286,18 +289,18 @@ class _TrendItemWidget extends StatelessWidget {
             Text(
               '${data.isPositive ? '+' : ''}${data.percentChange.toStringAsFixed(2)}%',
               style: TextStyle(
-                fontSize: widget.size.getSubtitleFontSize(),
+                fontSize: size.getSubtitleFontSize(),
                 fontWeight: FontWeight.w700,
                 color: trendColor,
               ),
             ),
-            SizedBox(height: widget.size.getSmallSpacing()),
+            SizedBox(height: size.getSmallSpacing()),
             SizedBox(
               height: 20,
               child: Text(
                 '${data.isPositive ? '+' : ''}${data.valueChange.toStringAsFixed(2)}',
                 style: TextStyle(
-                  fontSize: widget.size.getSubtitleFontSize(),
+                  fontSize: size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w500,
                   color: trendColor.withOpacity(0.8),
                   height: 1.0,

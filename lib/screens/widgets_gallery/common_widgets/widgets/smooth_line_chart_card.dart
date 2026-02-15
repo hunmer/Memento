@@ -221,7 +221,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
-          padding: widget.size.getSmallSpacing(),
+          padding: EdgeInsets.all(widget.size.getSmallSpacing()),
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(20),

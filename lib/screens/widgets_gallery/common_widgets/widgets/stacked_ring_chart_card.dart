@@ -226,6 +226,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                 label: segment.label,
                 color: segment.color,
                 animation: itemAnimation,
+                size: widget.size,
               );
             }).toList(),
           ),
@@ -318,11 +319,13 @@ class _LegendItem extends StatelessWidget {
   final String label;
   final Color color;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _LegendItem({
     required this.label,
     required this.color,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -346,12 +349,12 @@ class _LegendItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  SizedBox(width: widget.size.getSmallSpacing()),
+                  SizedBox(width: size.getSmallSpacing()),
                   Expanded(
                     child: Text(
                       label,
                       style: TextStyle(
-                        fontSize: widget.size.getLegendFontSize() - 1,
+                        fontSize: size.getLegendFontSize() - 1,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.grey.shade200

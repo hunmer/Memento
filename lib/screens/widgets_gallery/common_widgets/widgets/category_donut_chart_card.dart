@@ -168,6 +168,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
                         totalAmount: widget.totalAmount,
                         totalUnit: widget.totalUnit,
                         animation: _animation,
+                        size: widget.size,
                       ),
                     ),
                   ),
@@ -200,7 +201,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
           child: Text(
             widget.badgeLabel,
             style: TextStyle(
-              fontSize: size.getLegendFontSize(),
+              fontSize: widget.size.getLegendFontSize(),
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
               color: Colors.black,
@@ -211,7 +212,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
         Text(
           widget.timePeriod,
           style: TextStyle(
-            fontSize: size.getSubtitleFontSize(),
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             color: Colors.grey.shade500,
           ),
@@ -258,12 +259,14 @@ class _DonutChart extends StatelessWidget {
   final double totalAmount;
   final String totalUnit;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DonutChart({
     required this.categories,
     required this.totalAmount,
     required this.totalUnit,
     required this.animation,
+    required this.size,
   });
 
   @override

@@ -173,6 +173,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                           isSelected: isSelected,
                           isDark: isDark,
                           primaryColor: primaryColor,
+                          size: widget.size,
                         );
                       }).toList(),
                     ),
@@ -194,18 +195,21 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                       animation: _animation,
                       isDark: isDark,
                       primaryColor: primaryColor,
+                      size: widget.size,
                     ),
                     SizedBox(height: widget.size.getTitleSpacing()),
                     // 底部信息
                     _HeatmapFooter(
                       isDark: isDark,
                       primaryColor: primaryColor,
+                      size: widget.size,
                     ),
                     SizedBox(height: widget.size.getTitleSpacing()),
                     // 显示更多按钮
                     _ShowMoreButton(
                       label: widget.showMoreLabel,
                       isDark: isDark,
+                      size: widget.size,
                     ),
                   ],
                 ),
@@ -248,12 +252,14 @@ class _YearButton extends StatelessWidget {
   final bool isSelected;
   final bool isDark;
   final Color primaryColor;
+  final HomeWidgetSize size;
 
   const _YearButton({
     required this.year,
     required this.isSelected,
     required this.isDark,
     required this.primaryColor,
+    required this.size,
   });
 
   @override
@@ -280,7 +286,7 @@ class _YearButton extends StatelessWidget {
       child: Text(
         year,
         style: TextStyle(
-          fontSize: widget.size.getSubtitleFontSize(),
+          fontSize: size.getSubtitleFontSize(),
           fontWeight: FontWeight.bold,
           color: isSelected ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151)),
         ),
@@ -296,6 +302,7 @@ class _ContributionHeatmap extends StatelessWidget {
   final Animation<double> animation;
   final bool isDark;
   final Color primaryColor;
+  final HomeWidgetSize size;
 
   const _ContributionHeatmap({
     required this.months,
@@ -303,6 +310,7 @@ class _ContributionHeatmap extends StatelessWidget {
     required this.animation,
     required this.isDark,
     required this.primaryColor,
+    required this.size,
   });
 
   Color _getColorForLevel(int level) {
@@ -336,7 +344,7 @@ class _ContributionHeatmap extends StatelessWidget {
                   child: Text(
                     month,
                     style: TextStyle(
-                      fontSize: widget.size.getLegendFontSize(),
+                      fontSize: size.getLegendFontSize(),
                       fontWeight: FontWeight.bold,
                       color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937),
                     ),
@@ -404,10 +412,12 @@ class _ContributionHeatmap extends StatelessWidget {
 class _HeatmapFooter extends StatelessWidget {
   final bool isDark;
   final Color primaryColor;
+  final HomeWidgetSize size;
 
   const _HeatmapFooter({
     required this.isDark,
     required this.primaryColor,
+    required this.size,
   });
 
   @override
@@ -420,7 +430,7 @@ class _HeatmapFooter extends StatelessWidget {
           Text(
             'Learn how we\ncount contributions',
             style: TextStyle(
-              fontSize: widget.size.getLegendFontSize(),
+              fontSize: size.getLegendFontSize(),
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
               decoration: TextDecoration.underline,
             ),
@@ -430,7 +440,7 @@ class _HeatmapFooter extends StatelessWidget {
               Text(
                 'Less',
                 style: TextStyle(
-                  fontSize: widget.size.getLegendFontSize(),
+                  fontSize: size.getLegendFontSize(),
                   fontWeight: FontWeight.bold,
                   color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937),
                 ),
@@ -451,7 +461,7 @@ class _HeatmapFooter extends StatelessWidget {
               Text(
                 'More',
                 style: TextStyle(
-                  fontSize: widget.size.getLegendFontSize(),
+                  fontSize: size.getLegendFontSize(),
                   fontWeight: FontWeight.bold,
                   color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937),
                 ),
@@ -487,10 +497,12 @@ class _LegendBox extends StatelessWidget {
 class _ShowMoreButton extends StatelessWidget {
   final String label;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _ShowMoreButton({
     required this.label,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -507,7 +519,7 @@ class _ShowMoreButton extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: widget.size.getSubtitleFontSize(),
+              fontSize: size.getSubtitleFontSize(),
               fontWeight: FontWeight.w600,
               color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF1F2937),
             ),

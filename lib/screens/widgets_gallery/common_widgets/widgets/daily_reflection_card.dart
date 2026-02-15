@@ -334,6 +334,7 @@ class _ButtonGroup extends StatelessWidget {
             onTap: () {
               // TODO: 处理新建操作
             },
+            size: size,
           ),
         ),
         SizedBox(width: size.getItemSpacing()),
@@ -348,6 +349,7 @@ class _ButtonGroup extends StatelessWidget {
           onTap: () {
             // TODO: 处理同步操作
           },
+          size: size,
         ),
       ],
     );
@@ -364,6 +366,7 @@ class _AnimatedButton extends StatefulWidget {
   final String? label;
   final bool isIconOnly;
   final VoidCallback onTap;
+  final HomeWidgetSize size;
 
   const _AnimatedButton({
     required this.animation,
@@ -374,6 +377,7 @@ class _AnimatedButton extends StatefulWidget {
     this.label,
     this.isIconOnly = false,
     required this.onTap,
+    required this.size,
   });
 
   @override
