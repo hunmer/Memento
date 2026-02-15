@@ -269,7 +269,7 @@ class _MementoSfCalendarExampleState extends State<MementoSfCalendarExample> {
                             ? (details) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    contentText: '拖放事件到 ${details.droppingTime}',
+                                    content: Text('拖放事件到 ${details.droppingTime}'),
                                     duration: const Duration(seconds: 1),
                                   ),
                                 );

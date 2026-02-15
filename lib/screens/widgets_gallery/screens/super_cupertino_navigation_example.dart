@@ -386,7 +386,7 @@ class _SuperCupertinoNavigationExampleState
 
   /// 构建任务列表
   Widget _buildTaskList({required bool isWide}) {
-    final horizontalPadding = isWide ? 16 : 0;
+    final horizontalPadding = isWide ? 16.0 : 0.0;
     return ListView.builder(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8),
       itemCount: _filteredTasks.length,

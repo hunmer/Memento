@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/widgets/preset_edit_form/preset_edit_form.dart';
 
 /// 预设编辑表单示例
 class PresetEditFormExample extends StatefulWidget {
@@ -326,7 +325,7 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
         const SizedBox(height: 8),
 
         // 字段列表
-        ..._samplePreset['fields'].map<Widget>((field) {
+        ...(_samplePreset['fields'] as List<dynamic>).map<Widget>((field) {
           return Card(
             elevation: 0,
             color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
