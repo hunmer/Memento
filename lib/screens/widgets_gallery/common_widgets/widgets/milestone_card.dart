@@ -96,24 +96,36 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // 使用主题颜色适配
-    final backgroundColor = isDark
-        ? const Color(0xFF151517)
-        : Theme.of(context).colorScheme.surface;
-    final titleColor = isDark
-        ? const Color(0xFFD9F99D)
-        : Theme.of(context).colorScheme.primary;
-    final dateColor = isDark
-        ? const Color(0xFF9CA3AF)
-        : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
-    final valueColor = isDark
-        ? const Color(0xFFA5B4FC)
-        : Theme.of(context).colorScheme.primary;
-    final unitColor = isDark
-        ? const Color(0xFF6B7280)
-        : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
-    final ringColor = isDark
-        ? Colors.white10
-        : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5);
+    final backgroundColor =
+        isDark
+            ? const Color(0xFF151517)
+            : Theme.of(context).colorScheme.surface;
+    final titleColor =
+        isDark
+            ? const Color(0xFFD9F99D)
+            : Theme.of(context).colorScheme.primary;
+    final dateColor =
+        isDark
+            ? const Color(0xFF9CA3AF)
+            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+    final valueColor =
+        isDark
+            ? const Color(0xFFA5B4FC)
+            : Theme.of(context).colorScheme.primary;
+    final unitColor =
+        isDark
+            ? const Color(0xFF6B7280)
+            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+    final ringColor =
+        isDark
+            ? Colors.white10
+            : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5);
+
+    // 根据 size 获取容器尺寸
+    final containerSize =
+        widget.size.width > 1 || widget.size.height > 1
+            ? 260.0 * widget.size.scale
+            : 180.0 * widget.size.scale;
 
     return AnimatedBuilder(
       animation: _animation,
@@ -123,11 +135,11 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 260,
-              height: widget.inline ? double.maxFinite : 260,
+              width: widget.inline ? double.maxFinite : containerSize,
+              height: widget.inline ? double.maxFinite : containerSize,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(36),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
@@ -164,6 +176,11 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
       curve: const Interval(0, 0.5, curve: Curves.easeOutCubic),
     );
 
+    // 根据 size 获取头像容器大小和边框粗细
+    final avatarSize =
+        widget.size.getIconSize() * widget.size.iconContainerScale;
+    final borderWidth = widget.size.getStrokeWidth() / 4; // 缩小边框
+
     return AnimatedBuilder(
       animation: avatarAnimation,
       builder: (context, child) {
@@ -172,31 +189,35 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
           child: Align(
             alignment: Alignment.centerLeft,
             child: Container(
-              width: 60,
-              height: 60,
+              width: avatarSize,
+              height: avatarSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: ringColor,
-                  width: 2,
-                ),
+                border: Border.all(color: ringColor, width: borderWidth),
               ),
               child: ClipOval(
-                child: widget.imageUrl != null
-                    ? Image.network(
-                        widget.imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.person, size: 32),
-                          );
-                        },
-                      )
-                    : Container(
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.person, size: 32),
-                      ),
+                child:
+                    widget.imageUrl != null
+                        ? Image.network(
+                          widget.imageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey.shade300,
+                              child: Icon(
+                                Icons.person,
+                                size: widget.size.getIconSize(),
+                              ),
+                            );
+                          },
+                        )
+                        : Container(
+                          color: Colors.grey.shade300,
+                          child: Icon(
+                            Icons.person,
+                            size: widget.size.getIconSize(),
+                          ),
+                        ),
               ),
             ),
           ),
@@ -225,7 +246,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                 Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: 21.6, // 1.35rem
+                    fontSize: widget.size.getTitleFontSize() * 0.9,
                     fontWeight: FontWeight.w800,
                     color: titleColor,
                     height: 1.2,
@@ -238,7 +259,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                     Text(
                       widget.date,
                       style: TextStyle(
-                        fontSize: 12.8, // 0.8rem
+                        fontSize: widget.size.getSubtitleFontSize() * 0.9,
                         fontWeight: FontWeight.w500,
                         color: dateColor,
                         height: 1.1,
@@ -247,7 +268,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                     Text(
                       ' · ',
                       style: TextStyle(
-                        fontSize: 12.8,
+                        fontSize: widget.size.getSubtitleFontSize() * 0.9,
                         fontWeight: FontWeight.w500,
                         color: dateColor,
                         height: 1.1,
@@ -258,7 +279,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                       fractionDigits: 0,
                       suffix: ' days',
                       textStyle: TextStyle(
-                        fontSize: 12.8,
+                        fontSize: widget.size.getSubtitleFontSize() * 0.9,
                         fontWeight: FontWeight.w500,
                         color: dateColor,
                         height: 1.1,
@@ -293,7 +314,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                 Text(
                   widget.value,
                   style: TextStyle(
-                    fontSize: 67.2, // 4.2rem
+                    fontSize: widget.size.getLargeFontSize(),
                     fontWeight: FontWeight.w800,
                     color: valueColor,
                     height: 0.85,
@@ -302,7 +323,9 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                 ),
                 SizedBox(width: widget.size.getItemSpacing()),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: EdgeInsets.only(
+                    bottom: widget.size.getSmallSpacing() * 3,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -310,7 +333,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                       Text(
                         widget.unit,
                         style: TextStyle(
-                          fontSize: 14.4, // 0.9rem
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w600,
                           color: unitColor,
                           height: 1,
@@ -320,7 +343,7 @@ class _MilestoneCardWidgetState extends State<MilestoneCardWidget>
                         Text(
                           widget.suffix,
                           style: TextStyle(
-                            fontSize: 14.4,
+                            fontSize: widget.size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w600,
                             color: unitColor,
                             height: 1,

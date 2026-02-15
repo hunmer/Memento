@@ -41,10 +41,7 @@ class DailyEmotion {
   factory DailyEmotion.fromJson(Map<String, dynamic> json) {
     return DailyEmotion(
       day: json['day'] as String,
-      icon: IconData(
-        json['iconCodePoint'] as int,
-        fontFamily: 'MaterialIcons',
-      ),
+      icon: IconData(json['iconCodePoint'] as int, fontFamily: 'MaterialIcons'),
       emotionType: EmotionType.values.firstWhere(
         (e) => e.name == json['emotionType'],
         orElse: () => EmotionType.neutral,
@@ -79,31 +76,6 @@ enum EmotionType {
   terrible,
 }
 
-/// 情绪追踪卡片组件
-///
-/// 用于展示一周情绪记录的卡片组件，支持动画效果和主题适配。
-/// 显示当前情绪文本、记录统计和周情绪按钮。
-///
-/// 使用示例：
-/// ```dart
-/// EmotionTrackerCard(
-///   currentEmotionText: 'Happy',
-///   loggedCount: 2,
-///   totalCount: 5,
-///   weekEmotions: [
-///     DailyEmotion(
-///       day: 'M',
-///       icon: Icons.sentiment_satisfied,
-///       emotionType: EmotionType.good,
-///       isLogged: true,
-///     ),
-///     // ... 更多数据
-///   ],
-///   onDayTapped: (index) => print('Day $index tapped'),
-///   onHistoryTap: () => print('History tapped'),
-///   size: const MediumSize(),
-/// )
-/// ```
 class EmotionTrackerCard extends StatefulWidget {
   /// 当前情绪文本
   final String currentEmotionText;
@@ -158,9 +130,10 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
 
     _fadeController.forward();
   }
@@ -177,11 +150,15 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
     return FadeTransition(
       opacity: _fadeAnimation,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: size.getPadding().horizontal / 2),
-        constraints: BoxConstraints(maxWidth: widget.inline ? double.maxFinite : 400),
+        margin: EdgeInsets.symmetric(
+          horizontal: size.getPadding().horizontal / 2,
+        ),
+        constraints: BoxConstraints(
+          maxWidth: widget.inline ? double.maxFinite : 400,
+        ),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -194,9 +171,10 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
           borderRadius: BorderRadius.circular(24),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1F2937)
-                  : Colors.white,
+              color:
+                  Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF1F2937)
+                      : Colors.white,
               borderRadius: BorderRadius.circular(24),
             ),
             padding: size.getPadding(),
@@ -219,39 +197,31 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
 
   /// 构建标题行
   Widget _buildHeader(BuildContext context) {
+    final size = widget.size;
+    final iconSize = size.getIconSize();
+    final titleFontSize = size.getTitleFontSize();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.sentiment_satisfied,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 10),
             Text(
               'Emotion',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                fontWeight: FontWeight.w500,
+                fontSize: titleFontSize * 0.67,
+              ),
             ),
           ],
         ),
         InkWell(
-          onTap: widget.onHistoryTap ??
+          onTap:
+              widget.onHistoryTap ??
               () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('查看历史情绪记录')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('查看历史情绪记录')));
               },
           borderRadius: BorderRadius.circular(8),
           child: Row(
@@ -259,18 +229,18 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
               Text(
                 'Today',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.6),
-                      fontWeight: FontWeight.w300,
-                    ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.6),
+                  fontWeight: FontWeight.w300,
+                  fontSize: size.getSubtitleFontSize(),
+                ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: size.getSmallSpacing()),
               Icon(
                 Icons.chevron_right,
                 color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                size: 24,
+                size: iconSize,
               ),
             ],
           ),
@@ -290,28 +260,33 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedEmotionText(emotionText: widget.currentEmotionText),
+            AnimatedEmotionText(
+              emotionText: widget.currentEmotionText,
+              size: size,
+            ),
             SizedBox(height: size.getItemSpacing() / 2),
             Text(
               'Logged ${widget.loggedCount}/${widget.totalCount}',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.6),
-                    fontWeight: FontWeight.w300,
-                  ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                fontWeight: FontWeight.w300,
+                fontSize: size.getSubtitleFontSize(),
+              ),
             ),
           ],
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (int i = 0; i < widget.weekEmotions.length; i += 1) ...[
-              if (i > 0) SizedBox(width: size.getItemSpacing()),
-              _buildDayButton(context, i),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int i = 0; i < widget.weekEmotions.length; i += 1) ...[
+                if (i > 0) SizedBox(width: size.getItemSpacing()),
+                _buildDayButton(context, i),
+              ],
             ],
-          ],
+          ),
         ),
       ],
     );
@@ -319,8 +294,13 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
 
   /// 构建日期按钮
   Widget _buildDayButton(BuildContext context, int index) {
+    final size = widget.size;
     final day = widget.weekEmotions[index];
     final isSelected = day.isLogged;
+
+    final iconSize = size.getIconSize();
+    final containerSize = iconSize * size.iconContainerScale;
+    final dayFontSize = size.getLegendFontSize();
 
     return InkWell(
       onTap: () => widget.onDayTapped(index),
@@ -329,55 +309,54 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: 32,
-            height: 32,
+            width: containerSize,
+            height: containerSize,
             decoration: BoxDecoration(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : (Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFF374151)
-                      : const Color(0xFFE5E7EB)),
+              color:
+                  isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : (Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF374151)
+                          : const Color(0xFFE5E7EB)),
               shape: BoxShape.circle,
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  isSelected
+                      ? [
+                        BoxShadow(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                      : null,
             ),
-            child: Icon(
-              day.icon,
-              color: Colors.white,
-              size: 18,
-            ),
+            child: Icon(day.icon, color: Colors.white, size: iconSize * 0.8),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: size.getSmallSpacing()),
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            style:
+                Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.6),
+                  fontSize: dayFontSize,
+                  color:
+                      isSelected
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.6),
                 ) ??
                 TextStyle(
-                  fontSize: 12,
+                  fontSize: dayFontSize,
                   fontWeight: FontWeight.w500,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.6),
+                  color:
+                      isSelected
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.6),
                 ),
             child: Text(day.day),
           ),
@@ -392,7 +371,14 @@ class AnimatedEmotionText extends StatefulWidget {
   /// 情绪文本
   final String emotionText;
 
-  const AnimatedEmotionText({super.key, required this.emotionText});
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
+  const AnimatedEmotionText({
+    super.key,
+    required this.emotionText,
+    required this.size,
+  });
 
   @override
   State<AnimatedEmotionText> createState() => _AnimatedEmotionTextState();
@@ -419,9 +405,10 @@ class _AnimatedEmotionTextState extends State<AnimatedEmotionText>
       vsync: this,
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _controller.forward();
   }
@@ -434,11 +421,19 @@ class _AnimatedEmotionTextState extends State<AnimatedEmotionText>
 
   @override
   Widget build(BuildContext context) {
+    final size = widget.size;
+    final emotionFontSize = size.getLargeFontSize() * 0.35;
+
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Text(
         widget.emotionText,
-        style: Theme.of(context).textTheme.titleMedium
+        style:
+            Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontSize: emotionFontSize,
+              fontWeight: FontWeight.w700,
+            ) ??
+            TextStyle(fontSize: emotionFontSize, fontWeight: FontWeight.w700),
       ),
     );
   }

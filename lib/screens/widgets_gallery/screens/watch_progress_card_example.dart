@@ -109,6 +109,82 @@ class WatchProgressCardExample extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 450,
+                    height: 180,
+                    child: WatchProgressCardWidget(
+                      size: const WideSize(),
+                      userName: 'James',
+                      lastWatched: '2 days ago',
+                      currentCount: 16,
+                      totalCount: 24,
+                      items: [
+                        WatchProgressItem(
+                          title: 'Dune: Part Two',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'Oppenheimer',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'Small Things like It',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'The Creator',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 450,
+                    height: 350,
+                    child: WatchProgressCardWidget(
+                      size: const Wide2Size(),
+                      userName: 'James',
+                      lastWatched: '2 days ago',
+                      currentCount: 16,
+                      totalCount: 24,
+                      items: [
+                        WatchProgressItem(
+                          title: 'Dune: Part Two',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'Oppenheimer',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'Small Things like It',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'The Creator',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'Mission Impossible',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                        WatchProgressItem(
+                          title: 'John Wick 4',
+                          thumbnailUrl: 'https://via.placeholder.com/40',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

@@ -134,6 +134,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  late ScrollController _scrollController;
   static const double _baseEnd = 0.6;
 
   @override
@@ -147,12 +148,14 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     );
+    _scrollController = ScrollController();
     _animationController.forward();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -216,13 +219,14 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
     if (widget.enableHeader) {
       children.add(_buildHeader(isDark, index, step));
       index++;
-      children.add(SizedBox(height: widget.size.getTitleSpacing()));
+      children.add(SizedBox(height: widget.size.getSmallSpacing()));
     }
 
     children.add(_buildProgressSection(isDark, index, step));
     index++;
-    children.add(SizedBox(height: widget.size.getTitleSpacing()));
-    children.add(_buildItemsList(isDark, step, index));
+    children.add(SizedBox(height: widget.size.getSmallSpacing()));
+    // 使用 Expanded 让 items list 自适应剩余空间
+    children.add(Expanded(child: _buildItemsList(isDark, step, index)));
 
     return children;
   }
@@ -252,19 +256,20 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: widget.size.getIconSize() * widget.size.iconContainerScale,
+              height:
+                  widget.size.getIconSize() * widget.size.iconContainerScale,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isDark ? Colors.grey.shade700 : Colors.white,
-                  width: 2,
+                  width: 2 * widget.size.scale,
                 ),
               ),
               child: ClipOval(
                 child: Container(
                   color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-                  child: const Icon(Icons.person, size: 24),
+                  child: Icon(Icons.person, size: widget.size.getIconSize()),
                 ),
               ),
             ),
@@ -358,10 +363,16 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
             ),
             SizedBox(height: widget.size.getItemSpacing()),
             Container(
-              height: 6,
+              height:
+                  widget.size.getStrokeWidth() *
+                  widget.size.progressStrokeScale *
+                  2,
               decoration: BoxDecoration(
                 color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(
+                  widget.size.getStrokeWidth() *
+                      widget.size.progressStrokeScale,
+                ),
               ),
               child: FractionallySizedBox(
                 widthFactor: progress * itemAnimation.value,
@@ -369,11 +380,25 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                 child: Container(
                   decoration: BoxDecoration(
                     color: effectiveProgressColor,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(3),
-                      bottomLeft: Radius.circular(3),
-                      topRight: Radius.circular(1),
-                      bottomRight: Radius.circular(1),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(
+                        widget.size.getStrokeWidth() *
+                            widget.size.progressStrokeScale,
+                      ),
+                      bottomLeft: Radius.circular(
+                        widget.size.getStrokeWidth() *
+                            widget.size.progressStrokeScale,
+                      ),
+                      topRight: Radius.circular(
+                        widget.size.getStrokeWidth() *
+                            widget.size.progressStrokeScale *
+                            0.33,
+                      ),
+                      bottomRight: Radius.circular(
+                        widget.size.getStrokeWidth() *
+                            widget.size.progressStrokeScale *
+                            0.33,
+                      ),
                     ),
                   ),
                 ),
@@ -395,23 +420,56 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
       items.add(_buildItem(widget.items[i], isDark, index, step));
     }
 
-    // 计算每个 item 的近似高度，设置固定高度（最多显示 3 个 item）
-    final itemHeight = widget.size.getItemSpacing() * 3;
-    final listHeight = (itemHeight * widget.items.length).clamp(
-      itemHeight * 2,
-      itemHeight * 3,
-    );
+    // 计算每个 item 的实际高度（考虑图标容器和文本）
+    // 图标容器高度: getIconSize() * 1.5
+    // 文本高度: getSubtitleFontSize()
+    // 副标题高度: getLegendFontSize()（可选）
+    // 间距: getItemSpacing()
+    final itemHeight =
+        (widget.size.getIconSize() * 1.5) +
+        widget.size.getSubtitleFontSize() +
+        widget.size.getSmallSpacing() * 2;
 
-    return SizedBox(
-      height: listHeight,
-      child: Scrollbar(
-        thumbVisibility: true,
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: items,
+    // 使用 ConstrainedBox 设置最大高度约束，而不是固定高度
+    final maxDisplayItems = widget.size.height >= 2 ? 3 : 2;
+    final maxHeight = itemHeight * maxDisplayItems;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: ScrollbarTheme(
+        data: ScrollbarThemeData(
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.hovered)) {
+              return (widget.progressColor ??
+                  (isDark ? Colors.grey.shade600 : Colors.grey.shade400));
+            }
+            return (widget.progressColor ??
+                    (isDark ? Colors.grey.shade700 : Colors.grey.shade300))
+                .withOpacity(0.6);
+          }),
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.hovered)) {
+              return (isDark ? Colors.grey.shade800 : Colors.grey.shade200);
+            }
+            return Colors.transparent;
+          }),
+          thickness: WidgetStateProperty.all(4 * widget.size.scale),
+          radius: const Radius.circular(2),
+          crossAxisMargin: 2,
+          mainAxisMargin: 2,
+          minThumbLength: 24,
+        ),
+        child: Scrollbar(
+          controller: _scrollController,
+          thumbVisibility: true,
+          trackVisibility: true,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: items,
+            ),
           ),
         ),
       ),
@@ -440,13 +498,13 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: widget.size.getIconSize(),
+              height: widget.size.getIconSize(),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
               ),
-              child: const Icon(Icons.movie, size: 20),
+              child: Icon(Icons.movie, size: widget.size.getIconSize() * 0.75),
             ),
             SizedBox(width: widget.size.getItemSpacing()),
             Expanded(
