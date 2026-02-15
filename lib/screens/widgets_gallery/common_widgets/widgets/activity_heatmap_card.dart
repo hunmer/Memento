@@ -27,7 +27,7 @@ class ActivityHeatmapCardWidget extends StatefulWidget {
     required this.timeSlots,
     required this.totalMinutes,
     required this.activeHours,
-    this.size = const LargeSize()3,
+    this.size = const Large3Size(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）

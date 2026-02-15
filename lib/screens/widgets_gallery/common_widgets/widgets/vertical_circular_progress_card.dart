@@ -141,7 +141,12 @@ class VerticalCircularProgressCard extends StatefulWidget {
     VerticalCircularProgressCardData data, {
     HomeWidgetSize? size,
   }) {
-    return {'data': data.toJsonString(), if (size != null) 'size': size.name};
+    final props = {'data': data.toJsonString()};
+    if (size != null) {
+      // 将 size 转换为 JSON 字符串存储
+      props['size'] = size.toJson().toString();
+    }
+    return props;
   }
 
   @override

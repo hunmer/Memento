@@ -215,9 +215,9 @@ class CommonWidgetsRegistry {
       description: '显示百分比进度，带圆形进度环',
       icon: Icons.circle_outlined,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: const [HomeWidgetSize.medium, HomeWidgetSize.large],
+      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
     ),
-    CommonWidgetId.iconCircularProgressCard: const CommonWidgetMetadata(
+    CommonWidgetId.iconCircularProgressCard: CommonWidgetMetadata(
       id: CommonWidgetId.iconCircularProgressCard,
       name: '图标圆形进度卡片',
       description: '显示带圆形进度条的卡片，支持图标、通知点、标题和副标题',
@@ -233,7 +233,7 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
-    CommonWidgetId.activityProgressCard: const CommonWidgetMetadata(
+    CommonWidgetId.activityProgressCard: CommonWidgetMetadata(
       id: CommonWidgetId.activityProgressCard,
       name: '活动进度卡片',
       description: '显示活动数值、单位、活动数和进度点',
@@ -257,13 +257,13 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
-    CommonWidgetId.taskListCard: const CommonWidgetMetadata(
+    CommonWidgetId.taskListCard: CommonWidgetMetadata(
       id: CommonWidgetId.taskListCard,
       name: '任务列表卡片',
       description: '显示任务列表和计数信息',
       icon: Icons.format_list_bulleted,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
+      supportedSizes: const [HomeWidgetSize.large],
     ),
     CommonWidgetId.audioWaveformCard: const CommonWidgetMetadata(
       id: CommonWidgetId.audioWaveformCard,
@@ -281,13 +281,13 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
-    CommonWidgetId.milestoneCard: const CommonWidgetMetadata(
+    CommonWidgetId.milestoneCard: CommonWidgetMetadata(
       id: CommonWidgetId.milestoneCard,
       name: '里程碑追踪卡片',
       description: '时间里程碑追踪展示卡片',
       icon: Icons.flag,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
+      supportedSizes: const [HomeWidgetSize.large],
     ),
     CommonWidgetId.monthlyProgressDotsCard: const CommonWidgetMetadata(
       id: CommonWidgetId.monthlyProgressDotsCard,
@@ -731,21 +731,21 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
-    CommonWidgetId.categoryStackWidget: const CommonWidgetMetadata(
+    CommonWidgetId.categoryStackWidget: CommonWidgetMetadata(
       id: CommonWidgetId.categoryStackWidget,
       name: '分类堆叠消费卡片',
       description: '显示分类消费堆叠图，支持当前金额、目标金额和分类列表',
       icon: Icons.pie_chart,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
+      supportedSizes: const [HomeWidgetSize.large],
     ),
-    CommonWidgetId.performanceBarChart: const CommonWidgetMetadata(
+    CommonWidgetId.performanceBarChart: CommonWidgetMetadata(
       id: CommonWidgetId.performanceBarChart,
       name: '性能指标柱状图',
       description: '显示性能指标柱状图，支持增长百分比和时间周期',
       icon: Icons.bar_chart,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
+      supportedSizes: const [HomeWidgetSize.large],
     ),
     CommonWidgetId.expenseDonutChart: const CommonWidgetMetadata(
       id: CommonWidgetId.expenseDonutChart,
@@ -755,13 +755,13 @@ class CommonWidgetsRegistry {
       defaultSize: HomeWidgetSize.large,
       supportedSizes: [HomeWidgetSize.large],
     ),
-    CommonWidgetId.rankedBarChartCard: const CommonWidgetMetadata(
+    CommonWidgetId.rankedBarChartCard: CommonWidgetMetadata(
       id: CommonWidgetId.rankedBarChartCard,
       name: '排名条形图卡片',
       description: '显示排名条形图列表，支持标题、副标题、条目计数和页脚文本',
       icon: Icons.bar_chart,
       defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
+      supportedSizes: const [HomeWidgetSize.large],
     ),
     CommonWidgetId.rentalPreviewCard: const CommonWidgetMetadata(
       id: CommonWidgetId.rentalPreviewCard,

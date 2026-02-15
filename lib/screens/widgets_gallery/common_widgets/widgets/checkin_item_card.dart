@@ -47,14 +47,7 @@ class CheckinItemCardWidget extends StatelessWidget {
     final isCheckedToday = props['isCheckedToday'] as bool? ?? false;
 
     final itemColor = Color(colorValue);
-    // 获取 custom 尺寸的实际宽高（从 props 中获取）
-    final actualWidth = props['customWidth'] as int?;
-    final actualHeight = props['customHeight'] as int?;
-    final showHeatmap = size.isAtLeast(
-      const MediumSize(),
-      actualWidth: actualWidth,
-      actualHeight: actualHeight,
-    );
+    final showHeatmap = size.isAtLeast(const MediumSize());
 
     return Container(
       padding: size.getPadding(),
@@ -157,16 +150,13 @@ class CheckinItemCardWidget extends StatelessWidget {
     // 从 props 获取热力图数据
     final weekData = props['weekData'] as List<dynamic>?;
     final daysData = props['daysData'] as List<dynamic>?;
-    // 获取 custom 尺寸的实际宽高
-    final actualWidth = props['customWidth'] as int?;
-    final actualHeight = props['customHeight'] as int?;
 
     // 根据尺寸决定使用哪个数据
     // large(2,2) 或更高尺寸：优先显示月数据
     if (size.isAtLeast(
           const LargeSize(),
-          actualWidth: actualWidth,
-          actualHeight: actualHeight,
+          
+          
         ) &&
         daysData != null &&
         daysData.isNotEmpty) {
@@ -175,8 +165,8 @@ class CheckinItemCardWidget extends StatelessWidget {
     // medium(2,1) 或更高尺寸：显示周数据
     else if (size.isAtLeast(
           const MediumSize(),
-          actualWidth: actualWidth,
-          actualHeight: actualHeight,
+          
+          
         ) &&
         weekData != null &&
         weekData.isNotEmpty) {

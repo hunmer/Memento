@@ -56,8 +56,7 @@ class TaskListCardWidget extends StatefulWidget {
     // 从 props 中读取 size，如果不存在则使用传入的 size 参数
     HomeWidgetSize widgetSize = size;
     if (props['size'] != null) {
-      final sizeData = HomeWidgetSize.fromJsonWithData(props['size'] as Map<String, dynamic>);
-      widgetSize = sizeData['size'] as HomeWidgetSize;
+      widgetSize = HomeWidgetSize.fromJson(props['size'] as Map<String, dynamic>);
     }
 
     return TaskListCardWidget(
