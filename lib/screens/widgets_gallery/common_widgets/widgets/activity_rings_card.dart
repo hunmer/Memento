@@ -133,9 +133,7 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                borderRadius: BorderRadius.circular(
-                  widget.size.getIconSize() + 12,
-                ),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -187,107 +185,211 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                     ],
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            height: widget.size.getLargeFontSize(),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                AnimatedFlipCounter(
-                                  value:
-                                      widget.steps.toDouble() *
-                                      _animation.value,
-                                  textStyle: TextStyle(
-                                    fontSize: widget.size.getLargeFontSize(),
-                                    fontWeight: FontWeight.w800,
-                                    color:
-                                        isDark
-                                            ? Colors.white
-                                            : const Color(0xFF111827),
-                                    height: 1.0,
-                                  ),
-                                ),
-                                SizedBox(width: widget.size.getItemSpacing()),
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: widget.size.getSmallSpacing(),
-                                  ),
-                                  child: Text(
-                                    'steps',
-                                    style: TextStyle(
-                                      fontSize:
-                                          widget.size.getTitleFontSize() - 6,
-                                      fontWeight: FontWeight.w500,
+                  // 只有 WideSize 使用水平布局，其他尺寸使用垂直布局
+                  widget.size is WideSize
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: widget.size.getLargeFontSize(),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  AnimatedFlipCounter(
+                                    value:
+                                        widget.steps.toDouble() *
+                                        _animation.value,
+                                    textStyle: TextStyle(
+                                      fontSize: widget.size.getLargeFontSize(),
+                                      fontWeight: FontWeight.w800,
                                       color:
                                           isDark
-                                              ? const Color(0xFF9CA3AF)
-                                              : const Color(0xFF6B7280),
+                                              ? Colors.white
+                                              : const Color(0xFF111827),
+                                      height: 1.0,
                                     ),
+                                  ),
+                                  SizedBox(width: widget.size.getItemSpacing()),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: widget.size.getSmallSpacing(),
+                                    ),
+                                    child: Text(
+                                      'steps',
+                                      style: TextStyle(
+                                        fontSize:
+                                            widget.size.getTitleFontSize() - 6,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isDark
+                                                ? const Color(0xFF9CA3AF)
+                                                : const Color(0xFF6B7280),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: widget.size.getItemSpacing()),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.local_fire_department,
+                                  color:
+                                      isDark
+                                          ? const Color(0xFFF97316)
+                                          : const Color(0xFFF97316),
+                                  size: widget.size.getIconSize(),
+                                ),
+                                SizedBox(width: widget.size.getItemSpacing()),
+                                Text(
+                                  widget.status,
+                                  style: TextStyle(
+                                    fontSize:
+                                        widget.size.getSubtitleFontSize() + 2,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? const Color(0xFFD1D5DB)
+                                            : const Color(0xFF374151),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          SizedBox(height: widget.size.getItemSpacing()),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.local_fire_department,
-                                color:
-                                    isDark
-                                        ? const Color(0xFFF97316)
-                                        : const Color(0xFFF97316),
-                                size: widget.size.getIconSize(),
+                          ],
+                        ),
+                        Row(
+                          children: List.generate(widget.rings.length, (index) {
+                            final ringAnimation = CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                index * 0.08,
+                                0.5 + index * 0.08,
+                                curve: Curves.easeOutCubic,
                               ),
-                              SizedBox(width: widget.size.getItemSpacing()),
-                              Text(
-                                widget.status,
-                                style: TextStyle(
-                                  fontSize:
-                                      widget.size.getSubtitleFontSize() + 2,
-                                  fontWeight: FontWeight.w500,
+                            );
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                left: widget.size.getItemSpacing(),
+                              ),
+                              child: _RingWidget(
+                                data: widget.rings[index],
+                                animation: ringAnimation,
+                                isDark: isDark,
+                                size: widget.size,
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: widget.size.getLargeFontSize(),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  AnimatedFlipCounter(
+                                    value:
+                                        widget.steps.toDouble() *
+                                        _animation.value,
+                                    textStyle: TextStyle(
+                                      fontSize: widget.size.getLargeFontSize(),
+                                      fontWeight: FontWeight.w800,
+                                      color:
+                                          isDark
+                                              ? Colors.white
+                                              : const Color(0xFF111827),
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                  SizedBox(width: widget.size.getItemSpacing()),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                      bottom: widget.size.getSmallSpacing(),
+                                    ),
+                                    child: Text(
+                                      'steps',
+                                      style: TextStyle(
+                                        fontSize:
+                                            widget.size.getTitleFontSize() - 6,
+                                        fontWeight: FontWeight.w500,
+                                        color:
+                                            isDark
+                                                ? const Color(0xFF9CA3AF)
+                                                : const Color(0xFF6B7280),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: widget.size.getItemSpacing()),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.local_fire_department,
                                   color:
                                       isDark
-                                          ? const Color(0xFFD1D5DB)
-                                          : const Color(0xFF374151),
+                                          ? const Color(0xFFF97316)
+                                          : const Color(0xFFF97316),
+                                  size: widget.size.getIconSize(),
                                 ),
+                                SizedBox(width: widget.size.getItemSpacing()),
+                                Text(
+                                  widget.status,
+                                  style: TextStyle(
+                                    fontSize:
+                                        widget.size.getSubtitleFontSize() + 2,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? const Color(0xFFD1D5DB)
+                                            : const Color(0xFF374151),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: widget.size.getItemSpacing()),
+                        Row(
+                          children: List.generate(widget.rings.length, (index) {
+                            final ringAnimation = CurvedAnimation(
+                              parent: _animationController,
+                              curve: Interval(
+                                index * 0.08,
+                                0.5 + index * 0.08,
+                                curve: Curves.easeOutCubic,
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: List.generate(widget.rings.length, (index) {
-                          final ringAnimation = CurvedAnimation(
-                            parent: _animationController,
-                            curve: Interval(
-                              index * 0.08,
-                              0.5 + index * 0.08,
-                              curve: Curves.easeOutCubic,
-                            ),
-                          );
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              left: widget.size.getItemSpacing(),
-                            ),
-                            child: _RingWidget(
-                              data: widget.rings[index],
-                              animation: ringAnimation,
-                              isDark: isDark,
-                              size: widget.size,
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
+                            );
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                left: widget.size.getItemSpacing(),
+                              ),
+                              child: _RingWidget(
+                                data: widget.rings[index],
+                                animation: ringAnimation,
+                                isDark: isDark,
+                                size: widget.size,
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

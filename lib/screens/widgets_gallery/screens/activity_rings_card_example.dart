@@ -13,15 +13,6 @@ class ActivityRingsCardExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('活动圆环卡片')),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [const Color(0xFF0F172A), const Color(0xFF1E293B)]
-                : [const Color(0xFF3B82F6), const Color(0xFF2563EB)],
-          ),
-        ),
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -39,9 +30,22 @@ class ActivityRingsCardExample extends StatelessWidget {
                       steps: 858,
                       status: 'Normal',
                       rings: const [
-                        RingData(value: 70, color: Color(0xFFF97316), icon: Icons.print),
-                        RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
-                        RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
+                        RingData(
+                          value: 70,
+                          color: Color(0xFFF97316),
+                          icon: Icons.print,
+                        ),
+                        RingData(
+                          value: 20,
+                          color: Color(0xFF2563EB),
+                          icon: null,
+                          isDiamond: true,
+                        ),
+                        RingData(
+                          value: 40,
+                          color: Color(0xFF6B7280),
+                          icon: Icons.directions_run,
+                        ),
                       ],
                       size: const SmallSize(),
                     ),
@@ -59,9 +63,22 @@ class ActivityRingsCardExample extends StatelessWidget {
                       steps: 858,
                       status: 'Normal',
                       rings: const [
-                        RingData(value: 70, color: Color(0xFFF97316), icon: Icons.print),
-                        RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
-                        RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
+                        RingData(
+                          value: 70,
+                          color: Color(0xFFF97316),
+                          icon: Icons.print,
+                        ),
+                        RingData(
+                          value: 20,
+                          color: Color(0xFF2563EB),
+                          icon: null,
+                          isDiamond: true,
+                        ),
+                        RingData(
+                          value: 40,
+                          color: Color(0xFF6B7280),
+                          icon: Icons.directions_run,
+                        ),
                       ],
                       size: const MediumSize(),
                     ),
@@ -78,9 +95,22 @@ class ActivityRingsCardExample extends StatelessWidget {
                     steps: 858,
                     status: 'Normal',
                     rings: const [
-                      RingData(value: 70, color: Color(0xFFF97316), icon: Icons.print),
-                      RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
-                      RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
+                      RingData(
+                        value: 70,
+                        color: Color(0xFFF97316),
+                        icon: Icons.print,
+                      ),
+                      RingData(
+                        value: 20,
+                        color: Color(0xFF2563EB),
+                        icon: null,
+                        isDiamond: true,
+                      ),
+                      RingData(
+                        value: 40,
+                        color: Color(0xFF6B7280),
+                        icon: Icons.directions_run,
+                      ),
                     ],
                     size: const WideSize(),
                   ),
@@ -97,9 +127,22 @@ class ActivityRingsCardExample extends StatelessWidget {
                       steps: 858,
                       status: 'Normal',
                       rings: const [
-                        RingData(value: 70, color: Color(0xFFF97316), icon: Icons.print),
-                        RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
-                        RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
+                        RingData(
+                          value: 70,
+                          color: Color(0xFFF97316),
+                          icon: Icons.print,
+                        ),
+                        RingData(
+                          value: 20,
+                          color: Color(0xFF2563EB),
+                          icon: null,
+                          isDiamond: true,
+                        ),
+                        RingData(
+                          value: 40,
+                          color: Color(0xFF6B7280),
+                          icon: Icons.directions_run,
+                        ),
                       ],
                       size: const LargeSize(),
                     ),
@@ -116,9 +159,22 @@ class ActivityRingsCardExample extends StatelessWidget {
                     steps: 858,
                     status: 'Normal',
                     rings: const [
-                      RingData(value: 70, color: Color(0xFFF97316), icon: Icons.print),
-                      RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
-                      RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
+                      RingData(
+                        value: 70,
+                        color: Color(0xFFF97316),
+                        icon: Icons.print,
+                      ),
+                      RingData(
+                        value: 20,
+                        color: Color(0xFF2563EB),
+                        icon: null,
+                        isDiamond: true,
+                      ),
+                      RingData(
+                        value: 40,
+                        color: Color(0xFF6B7280),
+                        icon: Icons.directions_run,
+                      ),
                     ],
                     size: const Wide2Size(),
                   ),
