@@ -1114,7 +1114,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.timelineScheduleCard:
         return TimelineScheduleCard.fromProps(finalProps, size);
       case CommonWidgetId.bloodPressureTracker:
-        return DualValueTrackerCardWrapper.fromProps(finalProps);
+        return DualValueTrackerCardWrapper.fromProps(finalProps, size);
       case CommonWidgetId.trendLineChartCard:
         return TrendLineChartCardWrapper.fromProps(finalProps, size);
       case CommonWidgetId.modernRoundedBalanceCard:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 双数值追踪卡片
 ///
@@ -80,6 +81,9 @@ class DualValueTrackerCard extends StatefulWidget {
   /// 卡片宽度
   final double? width;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DualValueTrackerCard({
     super.key,
     required this.title,
@@ -95,6 +99,7 @@ class DualValueTrackerCard extends StatefulWidget {
     this.actionLabel,
     this.onActionPressed,
     this.width,
+    this.size = const MediumSize(),
   });
 
   @override
@@ -131,18 +136,19 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
 
   Widget _buildCardContent(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final size = widget.size;
 
     return Container(
-      width: widget.width ?? 350,
-      padding: const EdgeInsets.all(28),
+      width: widget.width ?? double.infinity,
+      padding: size.getPadding(),
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(40),
+        borderRadius: BorderRadius.circular(size.getIconSize() * 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            blurRadius: size.getIconSize(),
+            offset: Offset(0, size.getSmallSpacing()),
           ),
         ],
       ),
@@ -152,7 +158,6 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
         children: [
           // 标题栏
           _buildHeader(context),
-          const SizedBox(height: 32),
           // 数值和趋势图
           _buildContent(context),
         ],
@@ -163,32 +168,38 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
   Widget _buildHeader(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = widget.primaryColor ?? colorScheme.primary;
+    final size = widget.size;
+    final iconSize = size.getIconSize();
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: EdgeInsets.all(size.getSmallSpacing() * 2),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(iconSize * 0.5),
+                ),
+                child: Icon(widget.icon, color: primaryColor, size: iconSize),
               ),
-              child: Icon(
-                widget.icon,
-                color: primaryColor,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              widget.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              SizedBox(width: size.getSmallSpacing() * 3),
+              Flexible(
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: size.getTitleFontSize(),
                     fontWeight: FontWeight.w600,
                   ),
-            ),
-          ],
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
         ),
         if (widget.showActionButton)
           TextButton.icon(
@@ -196,17 +207,20 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
             icon: Icon(
               Icons.chevron_right,
               color: colorScheme.onSurface.withOpacity(0.5),
-              size: 20,
+              size: iconSize * 0.8,
             ),
             label: Text(
               widget.actionLabel ?? 'Today',
               style: TextStyle(
                 color: colorScheme.onSurface.withOpacity(0.5),
-                fontSize: 14,
+                fontSize: size.getSubtitleFontSize(),
               ),
             ),
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: EdgeInsets.symmetric(
+                horizontal: size.getSmallSpacing() * 2,
+                vertical: size.getSmallSpacing(),
+              ),
             ),
           ),
       ],
@@ -214,11 +228,13 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
   }
 
   Widget _buildContent(BuildContext context) {
+    final size = widget.size;
+
     return Column(
       children: [
         // 双数值显示
         _buildDualValue(context),
-        const SizedBox(height: 16),
+        SizedBox(height: size.getItemSpacing()),
         // 周趋势图
         _buildWeekTrendChart(context),
       ],
@@ -228,6 +244,10 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
   Widget _buildDualValue(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final primaryColor = widget.primaryColor ?? colorScheme.primary;
+    final size = widget.size;
+    final valueFontSize = size.getLargeFontSize() * 0.5; // 约 18-28px
+    final unitFontSize = size.getSubtitleFontSize();
+    final statusFontSize = size.getLegendFontSize();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,69 +261,85 @@ class _DualValueTrackerCardState extends State<DualValueTrackerCard>
               count: widget.primaryValue,
               duration: const Duration(milliseconds: 1000),
               decimalPlaces: widget.decimalPlaces,
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 40,
-                    color: primaryColor,
-                  ),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: valueFontSize,
+                color: primaryColor,
+              ),
             ),
             Text(
               '/',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 40,
-                    color: primaryColor,
-                  ),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: valueFontSize,
+                color: primaryColor,
+              ),
             ),
             // 次数值
             AnimatedCountText(
               count: widget.secondaryValue,
               duration: const Duration(milliseconds: 1000),
               decimalPlaces: widget.decimalPlaces,
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 40,
-                    color: primaryColor,
-                  ),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: valueFontSize,
+                color: primaryColor,
+              ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: size.getSmallSpacing()),
             Text(
               widget.unit,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.6),
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: TextStyle(
+                color: colorScheme.onSurface.withOpacity(0.6),
+                fontWeight: FontWeight.w500,
+                fontSize: unitFontSize,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: size.getSmallSpacing()),
         // 状态描述
         if (widget.status != null)
           Text(
             widget.status!,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.6),
-                ),
+            style: TextStyle(
+              color: colorScheme.onSurface.withOpacity(0.6),
+              fontSize: statusFontSize,
+            ),
           ),
       ],
     );
   }
 
   Widget _buildWeekTrendChart(BuildContext context) {
+    final size = widget.size;
+    final chartHeight = size.getIconSize() * 2; // 约 36-56px
+
+    // 找到所有数据中的最大总百分比，用于按比例缩放
+    final maxTotalPercent = widget.weekData.fold<double>(
+      0.0,
+      (max, data) => (data.normalPercent + data.elevatedPercent) > max
+          ? data.normalPercent + data.elevatedPercent
+          : max,
+    );
+
     return SizedBox(
-      height: 80,
+      height: chartHeight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.end,
-        children: widget.weekData.map((dayData) {
-          return WeekBar(
-            label: dayData.label,
-            normalPercent: dayData.normalPercent,
-            elevatedPercent: dayData.elevatedPercent,
-            animationController: _animationController,
-            primaryColor: widget.primaryColor,
-          );
-        }).toList(),
+        children:
+            widget.weekData.map((dayData) {
+              return WeekBar(
+                label: dayData.label,
+                normalPercent: dayData.normalPercent,
+                elevatedPercent: dayData.elevatedPercent,
+                maxTotalPercent: maxTotalPercent,
+                animationController: _animationController,
+                primaryColor: widget.primaryColor,
+                size: size,
+              );
+            }).toList(),
       ),
     );
   }
@@ -314,90 +350,124 @@ class WeekBar extends StatelessWidget {
   final String label;
   final double normalPercent;
   final double elevatedPercent;
+  final double maxTotalPercent;
   final AnimationController animationController;
   final Color? primaryColor;
+  final HomeWidgetSize size;
 
   const WeekBar({
     super.key,
     required this.label,
     required this.normalPercent,
     required this.elevatedPercent,
+    required this.maxTotalPercent,
     required this.animationController,
     this.primaryColor,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final barColor = primaryColor ?? colorScheme.primary;
+    final barWidth = size.getBarWidth();
+    final labelFontSize = size.getLegendFontSize();
+    final spacing = size.getSmallSpacing() * 2;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        // 柱状图
-        SizedBox(
-          height: 48,
-          width: 8,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              // 背景条
-              Container(
-                width: 8,
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              // 正常范围条（浅色）
-              AnimatedBuilder(
-                animation: animationController,
-                builder: (context, child) {
-                  return FractionallySizedBox(
-                    heightFactor: normalPercent * animationController.value,
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: barColor.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 计算可用高度（减去间距和标签高度）
+        final labelHeight = labelFontSize * 1.2; // 估算标签高度
+        final availableHeight = constraints.maxHeight - spacing - labelHeight;
+        final maxAvailableHeight = availableHeight > 0 ? availableHeight.toDouble() : 0.0;
+
+        // 根据最大百分比计算缩放比例
+        final totalPercent = normalPercent + elevatedPercent;
+        final scale = maxTotalPercent > 0 ? totalPercent / maxTotalPercent : 0.0;
+        final barHeight = maxAvailableHeight * scale;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 柱状图
+            SizedBox(
+              height: barHeight,
+              width: barWidth,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  // 背景条
+                  Container(
+                    width: barWidth,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(barWidth * 0.5),
                     ),
-                  );
-                },
-              ),
-              // 升高范围条（深色）
-              Positioned(
-                bottom: (normalPercent - elevatedPercent) * 48,
-                child: AnimatedBuilder(
-                  animation: animationController,
-                  builder: (context, child) {
-                    return SizedBox(
-                      height: elevatedPercent * 48 * animationController.value,
-                      width: 8,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: barColor,
-                          borderRadius: BorderRadius.circular(4),
+                  ),
+                  // 正常范围条（浅色）
+                  AnimatedBuilder(
+                    animation: animationController,
+                    builder: (context, child) {
+                      final heightFactor = totalPercent > 0
+                          ? normalPercent * animationController.value / totalPercent
+                          : 0.0;
+                      return FractionallySizedBox(
+                        heightFactor: heightFactor,
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: barColor.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(barWidth * 0.5),
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+                  // 升高范围条（深色）
+                  Positioned(
+                    bottom: totalPercent > 0
+                        ? (normalPercent - elevatedPercent) * barHeight / totalPercent
+                        : 0.0,
+                    child: AnimatedBuilder(
+                      animation: animationController,
+                      builder: (context, child) {
+                        final barAnimHeight = totalPercent > 0
+                            ? elevatedPercent *
+                                barHeight *
+                                animationController.value / totalPercent
+                            : 0.0;
+                        return SizedBox(
+                          height: barAnimHeight,
+                          width: barWidth,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: barColor,
+                              borderRadius: BorderRadius.circular(
+                                barWidth * 0.5,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        // 标签
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            ),
+            SizedBox(height: spacing),
+            // 标签
+            Text(
+              label,
+              style: TextStyle(
                 color: colorScheme.onSurface.withOpacity(0.5),
                 fontWeight: FontWeight.w500,
-                fontSize: 10,
+                fontSize: labelFontSize,
               ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -429,17 +499,12 @@ class _AnimatedCountTextState extends State<AnimatedCountText>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: widget.duration,
-      vsync: this,
-    );
+    _controller = AnimationController(duration: widget.duration, vsync: this);
 
-    _animation = Tween<double>(begin: 0.0, end: widget.count).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    _animation = Tween<double>(
+      begin: 0.0,
+      end: widget.count,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -456,13 +521,11 @@ class _AnimatedCountTextState extends State<AnimatedCountText>
       animation: _animation,
       builder: (context, child) {
         final value = _animation.value;
-        final displayValue = widget.decimalPlaces > 0
-            ? value.toStringAsFixed(widget.decimalPlaces)
-            : value.toInt().toString();
-        return Text(
-          displayValue,
-          style: widget.style,
-        );
+        final displayValue =
+            widget.decimalPlaces > 0
+                ? value.toStringAsFixed(widget.decimalPlaces)
+                : value.toInt().toString();
+        return Text(displayValue, style: widget.style);
       },
     );
   }
@@ -489,11 +552,7 @@ class WeekData {
 
   /// 创建默认的空数据
   factory WeekData.empty(String label) {
-    return WeekData(
-      label: label,
-      normalPercent: 0.0,
-      elevatedPercent: 0.0,
-    );
+    return WeekData(label: label, normalPercent: 0.0, elevatedPercent: 0.0);
   }
 
   /// 从 JSON 创建
@@ -546,6 +605,9 @@ class DualValueTrackerCardWrapper extends StatelessWidget {
   /// 周数据
   final List<WeekData> weekData;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const DualValueTrackerCardWrapper({
     super.key,
     required this.title,
@@ -557,16 +619,20 @@ class DualValueTrackerCardWrapper extends StatelessWidget {
     this.primaryColor,
     this.decimalPlaces = 0,
     required this.weekData,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
   factory DualValueTrackerCardWrapper.fromProps(
     Map<String, dynamic> props,
+    HomeWidgetSize size,
   ) {
     final weekDataList = props['weekData'] as List?;
-    final weekData = weekDataList?.map((item) {
-      return WeekData.fromJson(item as Map<String, dynamic>);
-    }).toList() ?? <WeekData>[];
+    final weekData =
+        weekDataList?.map((item) {
+          return WeekData.fromJson(item as Map<String, dynamic>);
+        }).toList() ??
+        <WeekData>[];
 
     return DualValueTrackerCardWrapper(
       title: props['title'] as String? ?? '统计',
@@ -575,11 +641,13 @@ class DualValueTrackerCardWrapper extends StatelessWidget {
       status: props['status'] as String?,
       unit: props['unit'] as String? ?? '',
       icon: props['icon'] as String? ?? 'info',
-      primaryColor: props['primaryColor'] != null
-          ? Color(props['primaryColor'] as int)
-          : null,
+      primaryColor:
+          props['primaryColor'] != null
+              ? Color(props['primaryColor'] as int)
+              : null,
       decimalPlaces: props['decimalPlaces'] as int? ?? 0,
       weekData: weekData,
+      size: size,
     );
   }
 
@@ -610,6 +678,7 @@ class DualValueTrackerCardWrapper extends StatelessWidget {
       decimalPlaces: decimalPlaces,
       weekData: weekData,
       showActionButton: false,
+      size: size,
     );
   }
 }
