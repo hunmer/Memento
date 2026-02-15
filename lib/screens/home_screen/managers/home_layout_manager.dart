@@ -543,7 +543,7 @@ class HomeLayoutManager extends ChangeNotifier {
     if (a.size != b.size) {
       return false;
     }
-    if (a.size != HomeWidgetSize.custom) {
+    if (a.size != const CustomSize(width: -1, height: -1)) {
       return true;
     }
     final aw = (a.config['customWidth'] as int?) ?? 2;

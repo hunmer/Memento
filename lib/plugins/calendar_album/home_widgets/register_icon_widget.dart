@@ -19,8 +19,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'calendar_album_widget_description'.tr,
       icon: Icons.notes_rounded,
       color: pluginColor,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryRecord'.tr,
       builder:
           (context, config) => GenericIconWidget(

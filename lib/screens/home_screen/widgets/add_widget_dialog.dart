@@ -246,9 +246,9 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
     ValueChanged<List<String>> onChanged,
   ) {
     final sizes = [
-      {'label': '1×1', 'size': HomeWidgetSize.small},
-      {'label': '2×1', 'size': HomeWidgetSize.medium},
-      {'label': '2×2', 'size': HomeWidgetSize.large},
+      {'label': '1×1', 'size': const SmallSize()},
+      {'label': '2×1', 'size': const MediumSize()},
+      {'label': '2×2', 'size': const LargeSize()},
     ];
 
     final selected = selectedSizes ?? [];

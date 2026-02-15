@@ -18,8 +18,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'todo_widgetDescription'.tr,
       icon: Icons.check_box,
       color: Colors.blue,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryTools'.tr,
       builder:
           (context, config) => GenericIconWidget(

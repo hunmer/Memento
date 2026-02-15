@@ -29,7 +29,7 @@ class WeatherForecastCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: WeatherForecastCard(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       cityName: 'London',
                       weatherDescription: 'Heavy showers',
                       currentTemp: 12,
@@ -46,7 +46,7 @@ class WeatherForecastCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: WeatherForecastCard(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       cityName: 'London',
                       weatherDescription: 'Heavy showers',
                       currentTemp: 12,
@@ -63,7 +63,7 @@ class WeatherForecastCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: WeatherForecastCard(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       cityName: 'London',
                       weatherDescription: 'Heavy showers',
                       currentTemp: 12,
@@ -125,7 +125,7 @@ class WeatherForecastCardPropsExample extends StatelessWidget {
                   child: SizedBox(
                     width: 150,
                     height: 150,
-                    child: WeatherForecastCard.fromProps(props, HomeWidgetSize.small),
+                    child: WeatherForecastCard.fromProps(props, const SmallSize()),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -135,7 +135,7 @@ class WeatherForecastCardPropsExample extends StatelessWidget {
                   child: SizedBox(
                     width: 220,
                     height: 220,
-                    child: WeatherForecastCard.fromProps(props, HomeWidgetSize.medium),
+                    child: WeatherForecastCard.fromProps(props, const MediumSize()),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -145,7 +145,7 @@ class WeatherForecastCardPropsExample extends StatelessWidget {
                   child: SizedBox(
                     width: 300,
                     height: 300,
-                    child: WeatherForecastCard.fromProps(props, HomeWidgetSize.large),
+                    child: WeatherForecastCard.fromProps(props, const LargeSize()),
                   ),
                 ),
               ],

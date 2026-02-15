@@ -18,8 +18,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'agent_chat_description'.tr,
       icon: Icons.chat_bubble_outline,
       color: const Color(0xFF2196F3),
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryTools'.tr,
       builder:
           (context, config) => GenericIconWidget(

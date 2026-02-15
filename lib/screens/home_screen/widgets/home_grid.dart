@@ -217,7 +217,7 @@ class _HomeGridState extends State<HomeGrid> {
     int mainAxisCellCount = 1;
 
     if (item is HomeWidgetItem) {
-      if (item.size == HomeWidgetSize.custom) {
+      if (item.size == const CustomSize(width: -1, height: -1)) {
         crossAxisCellCount = item.config['customWidth'] as int? ?? 2;
         mainAxisCellCount = item.config['customHeight'] as int? ?? 2;
       } else {
@@ -225,7 +225,7 @@ class _HomeGridState extends State<HomeGrid> {
         mainAxisCellCount = item.size.height;
       }
     } else if (item is HomeStackItem) {
-      if (item.size == HomeWidgetSize.custom) {
+      if (item.size == const CustomSize(width: -1, height: -1)) {
         if (item.children.isNotEmpty) {
           crossAxisCellCount =
               item.children.first.config['customWidth'] as int? ?? 2;
@@ -582,7 +582,7 @@ class _HomeGridState extends State<HomeGrid> {
     final String hReason;
     if (normalizedX < edgeRatio) {
       hZone = 0; // 左
-      hReason = 'x=${normalizedX.toStringAsFixed(2)} < ${edgeRatio}';
+      hReason = 'x=${normalizedX.toStringAsFixed(2)} < $edgeRatio';
     } else if (normalizedX > (1 - edgeRatio)) {
       hZone = 2; // 右
       hReason =
@@ -590,7 +590,7 @@ class _HomeGridState extends State<HomeGrid> {
     } else {
       hZone = 1; // 中
       hReason =
-          '${edgeRatio} <= x=${normalizedX.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
+          '$edgeRatio <= x=${normalizedX.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
     }
 
     // 判断垂直位置：0=上, 1=中, 2=下
@@ -598,7 +598,7 @@ class _HomeGridState extends State<HomeGrid> {
     final String vReason;
     if (normalizedY < edgeRatio) {
       vZone = 0; // 上
-      vReason = 'y=${normalizedY.toStringAsFixed(2)} < ${edgeRatio}';
+      vReason = 'y=${normalizedY.toStringAsFixed(2)} < $edgeRatio';
     } else if (normalizedY > (1 - edgeRatio)) {
       vZone = 2; // 下
       vReason =
@@ -606,7 +606,7 @@ class _HomeGridState extends State<HomeGrid> {
     } else {
       vZone = 1; // 中
       vReason =
-          '${edgeRatio} <= y=${normalizedY.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
+          '$edgeRatio <= y=${normalizedY.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
     }
 
     // 九宫格映射到方向
@@ -783,7 +783,9 @@ class _HomeGridState extends State<HomeGrid> {
     debugPrint('[HomeGrid] 🚀 _handleCenterDrop called');
     debugPrint('[HomeGrid] 📍 targetIndex: $targetIndex');
     debugPrint('[HomeGrid] 🎯 _hoveredDropZone: $_hoveredDropZone');
-    debugPrint('[HomeGrid] 🧭 _hoveredDropZone?.direction: ${_hoveredDropZone?.direction}');
+    debugPrint(
+      '[HomeGrid] 🧭 _hoveredDropZone?.direction: ${_hoveredDropZone?.direction}',
+    );
 
     final draggedId = details.data;
     if (draggedId == null) {

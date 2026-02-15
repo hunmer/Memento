@@ -18,8 +18,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'activity_widgetDescription'.tr,
       icon: Icons.timeline,
       color: Colors.pink,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryRecord'.tr,
       builder:
           (context, config) => GenericIconWidget(

@@ -18,8 +18,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'bill_widgetDescription'.tr,
       icon: Icons.account_balance_wallet,
       color: Colors.green,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryRecord'.tr,
       builder:
           (context, config) => GenericIconWidget(

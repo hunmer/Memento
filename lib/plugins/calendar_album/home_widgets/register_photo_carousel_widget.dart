@@ -24,11 +24,11 @@ void registerPhotoCarouselWidget(HomeWidgetRegistry registry) {
       description: 'calendar_album_photo_carousel_description'.tr,
       icon: Icons.photo_camera_rounded,
       color: pluginColor,
-      defaultSize: HomeWidgetSize.large,
+      defaultSize: const LargeSize(),
       supportedSizes: [
-        HomeWidgetSize.large, // 2x2
-        HomeWidgetSize.wide2, // 4x2
-        HomeWidgetSize.wide3, // 4x3
+        const LargeSize(), // 2x2
+        const WideSize()2, // 4x2
+        const WideSize()3, // 4x3
       ],
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => _buildPhotoCarouselWidget(context, config),

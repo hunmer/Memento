@@ -24,8 +24,8 @@ void registerFolderSelectorWidget(HomeWidgetRegistry registry) {
       description: 'notes_folderQuickAccessDesc'.tr,
       icon: Icons.folder_open,
       color: notesColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const MediumSize(), const LargeSize()],
       category: 'home_categoryRecord'.tr,
 
       // 选择器配置
@@ -90,7 +90,7 @@ Widget _buildFolderWidget(
 
   // 获取小组件尺寸
   final widgetSize = config['widgetSize'] as HomeWidgetSize?;
-  final isMediumSize = widgetSize == HomeWidgetSize.medium;
+  final isMediumSize = widgetSize == const MediumSize();
 
   // 从 PluginManager 获取最新的笔记数据
   List<Map<String, dynamic>> notes = [];

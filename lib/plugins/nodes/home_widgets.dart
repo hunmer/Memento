@@ -32,8 +32,8 @@ class NodesHomeWidgets {
         description: 'nodes_widgetDescription'.tr,
         icon: Icons.account_tree,
         color: Colors.amber,
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryTools'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -53,8 +53,8 @@ class NodesHomeWidgets {
         description: 'nodes_overviewDescription'.tr,
         icon: Icons.dashboard,
         color: Colors.amber,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const LargeSize()],
         category: 'home_categoryTools'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
@@ -70,12 +70,12 @@ class NodesHomeWidgets {
         description: 'nodes_notebookListDescription'.tr,
         icon: Icons.view_list,
         color: Colors.amber,
-        defaultSize: HomeWidgetSize.wide2,
+        defaultSize: const WideSize()2,
         supportedSizes: [
-          HomeWidgetSize.large, // 2x2
-          HomeWidgetSize.large3, // 2x3
-          HomeWidgetSize.wide2, // 4x2
-          HomeWidgetSize.wide3, // 4x3
+          const LargeSize(), // 2x2
+          const LargeSize()3, // 2x3
+          const WideSize()2, // 4x2
+          const WideSize()3, // 4x3
         ],
         category: 'home_categoryTools'.tr,
         selectorId: 'nodes.notebook',

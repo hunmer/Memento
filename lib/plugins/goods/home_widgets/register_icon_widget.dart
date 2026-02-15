@@ -20,8 +20,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'goods_widgetDescription'.tr,
       icon: Icons.inventory_2,
       color: _goodsColor,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => GenericIconWidget(
         icon: Icons.inventory_2,

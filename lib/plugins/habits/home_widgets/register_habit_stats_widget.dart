@@ -23,8 +23,8 @@ void registerHabitStatsWidget(HomeWidgetRegistry registry) {
       description: 'habits_habitStatsDescription'.tr,
       icon: Icons.trending_up,
       color: pluginColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const MediumSize(), const LargeSize()],
       category: 'home_categoryRecord'.tr,
 
       selectorId: 'habits.habit_stats.config',

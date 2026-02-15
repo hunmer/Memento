@@ -23,8 +23,8 @@ void registerGoodsListWidget(HomeWidgetRegistry registry) {
       description: 'goods_listWidgetDescription'.tr,
       icon: Icons.view_list,
       color: goodsColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.custom, HomeWidgetSize.large],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const CustomSize(width: -1, height: -1), const LargeSize()],
       category: 'home_categoryRecord'.tr,
 
       // 选择器配置

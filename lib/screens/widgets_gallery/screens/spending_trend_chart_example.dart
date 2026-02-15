@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/spending_trend_chart.dart';
 
 /// 支出趋势折线图示例
@@ -16,7 +16,7 @@ class SpendingTrendChartExample extends StatelessWidget {
         color: isDark ? const Color(0xFF1a1c1a) : const Color(0xFFe2e8e4),
         child: const Center(
           child: SpendingTrendChartWidget(
-            size: HomeWidgetSize.large,
+            size: const LargeSize(),
             dateRange: '1-31 October 2025',
             title: 'Spending trends',
             currentMonthLabel: 'Oct 2025',

@@ -26,7 +26,7 @@ class HomeWidgetItem extends HomeItem {
   @override
   Map<String, dynamic> toJson() {
     // 如果是 custom 尺寸，从 config 中获取实际宽高
-    if (size == HomeWidgetSize.custom) {
+    if (size == const CustomSize(width: -1, height: -1)) {
       final actualWidth = config['customWidth'] as int?;
       final actualHeight = config['customHeight'] as int?;
       return {
@@ -67,14 +67,11 @@ class HomeWidgetItem extends HomeItem {
       }
     }
 
-    // 使用 fromJsonWithData 来正确处理 custom 尺寸
-    final sizeData = HomeWidgetSize.fromJsonWithData(
-      json['size'] as Map<String, dynamic>,
-    );
-    final size = sizeData['size'] as HomeWidgetSize;
+    // 使用 fromJson 来正确处理尺寸
+    final size = HomeWidgetSize.fromJson(json['size'] as Map<String, dynamic>);
 
     // 如果是 custom 尺寸，将实际宽高保存到 config 中
-    if (size == HomeWidgetSize.custom) {
+    if (size == const CustomSize(width: -1, height: -1)) {
       final actualWidth = sizeData['actualWidth'] as int?;
       final actualHeight = sizeData['actualHeight'] as int?;
       if (actualWidth != null) {

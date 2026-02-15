@@ -116,7 +116,7 @@ class LevelMonitorCard extends StatefulWidget {
     this.onTodayTap,
     this.onBarTap,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   @override

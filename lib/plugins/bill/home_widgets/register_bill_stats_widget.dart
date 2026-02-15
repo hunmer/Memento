@@ -22,11 +22,11 @@ void registerBillStatsWidget(HomeWidgetRegistry registry) {
       description: 'bill_statsWidgetDescription'.tr,
       icon: Icons.pie_chart,
       color: billColor,
-      defaultSize: HomeWidgetSize.large,
+      defaultSize: const LargeSize(),
       supportedSizes: [
-        HomeWidgetSize.medium,
-        HomeWidgetSize.large,
-        HomeWidgetSize.custom,
+        const MediumSize(),
+        const LargeSize(),
+        const CustomSize(width: -1, height: -1),
       ],
       category: 'home_categoryRecord'.tr,
 

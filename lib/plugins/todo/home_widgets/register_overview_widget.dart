@@ -21,8 +21,8 @@ void registerOverviewWidget(HomeWidgetRegistry registry) {
       description: 'todo_overviewDescription'.tr,
       icon: Icons.check_box_outlined,
       color: Colors.blue,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const LargeSize()],
       category: 'home_categoryTools'.tr,
       builder:
           (context, config) => _buildOverviewWidget(context, config),

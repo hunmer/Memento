@@ -18,8 +18,8 @@ void registerLastActivityWidget(HomeWidgetRegistry registry) {
       description: '显示距离上次活动经过的时间和上次活动的时间',
       icon: Icons.history,
       color: Colors.pink,
-      defaultSize: HomeWidgetSize.medium, // 2x1
-      supportedSizes: [HomeWidgetSize.medium],
+      defaultSize: const MediumSize(), // 2x1
+      supportedSizes: [const MediumSize()],
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => const ActivityLastActivityWidget(),
     ),

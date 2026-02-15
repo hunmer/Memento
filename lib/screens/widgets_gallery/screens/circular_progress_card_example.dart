@@ -27,7 +27,7 @@ class CircularProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: CircularProgressCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: '2020 Progress',
                       subtitle: '157d/366d • Passed',
                       percentage: 71.23,
@@ -43,7 +43,7 @@ class CircularProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: CircularProgressCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: '2020 Progress',
                       subtitle: '157d/366d • Passed',
                       percentage: 71.23,
@@ -59,7 +59,7 @@ class CircularProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: CircularProgressCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: '2020 Progress',
                       subtitle: '157d/366d • Passed',
                       percentage: 71.23,

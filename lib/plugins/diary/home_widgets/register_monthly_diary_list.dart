@@ -19,8 +19,8 @@ void registerMonthlyDiaryListWidget(HomeWidgetRegistry registry) {
       description: '展示本月的日记列表，支持多种小组件样式',
       icon: Icons.calendar_month,
       color: Colors.indigo,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const LargeSize(), const CustomSize(width: -1, height: -1)],
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideMonthlyDiaryListWidgets,
       builder: (context, config) {

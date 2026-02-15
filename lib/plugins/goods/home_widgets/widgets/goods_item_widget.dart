@@ -55,7 +55,7 @@ class GoodsItemWidget extends StatelessWidget {
             snapshot.data!.isNotEmpty;
 
         // 判断是否为 large 模式
-        final isLarge = widgetSize == HomeWidgetSize.large;
+        final isLarge = widgetSize == const LargeSize();
 
         return Material(
           color: Colors.transparent,

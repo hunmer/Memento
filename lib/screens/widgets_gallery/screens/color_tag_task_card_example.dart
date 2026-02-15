@@ -28,7 +28,7 @@ class ColorTagTaskCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ColorTagTaskCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       data: const ColorTagTaskCardData(
                         taskCount: 56,
                         label: 'Upcoming tasks',
@@ -87,7 +87,7 @@ class ColorTagTaskCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ColorTagTaskCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       data: const ColorTagTaskCardData(
                         taskCount: 56,
                         label: 'Upcoming tasks',
@@ -146,7 +146,7 @@ class ColorTagTaskCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: ColorTagTaskCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       data: const ColorTagTaskCardData(
                         taskCount: 56,
                         label: 'Upcoming tasks',

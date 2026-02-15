@@ -19,8 +19,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'notes_widgetDescription'.tr,
       icon: Icons.note_alt_outlined,
       color: notesColor,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryRecord'.tr,
       builder:
           (context, config) => GenericIconWidget(

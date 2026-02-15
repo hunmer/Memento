@@ -91,8 +91,8 @@ class _HabitHeatmapContent extends StatelessWidget {
                 _buildHeader(context, heatmapData),
                 // 热力图（根据卡片大小显示不同范围）
                 if (heatmapData != null &&
-                    (widgetSize == HomeWidgetSize.medium ||
-                        widgetSize == HomeWidgetSize.large)) ...[
+                    (widgetSize == const MediumSize() ||
+                        widgetSize == const LargeSize())) ...[
                   const SizedBox(height: 8),
                   Expanded(
                     child: _buildHeatmapGrid(
@@ -203,7 +203,7 @@ class _HabitHeatmapContent extends StatelessWidget {
     final List<int> dailyMinutes = [];
     final habitColor = Colors.amber;
 
-    if (size == HomeWidgetSize.medium) {
+    if (size == const MediumSize()) {
       // medium: 显示过去7天
       for (int i = 6; i >= 0; i--) {
         final date = today.subtract(Duration(days: i));
@@ -238,8 +238,8 @@ class _HabitHeatmapContent extends StatelessWidget {
     }
 
     final crossAxisCount = 7;
-    final spacing = size == HomeWidgetSize.medium ? 4.0 : 3.0;
-    final showNumber = size == HomeWidgetSize.large;
+    final spacing = size == const MediumSize() ? 4.0 : 3.0;
+    final showNumber = size == const LargeSize();
     final maxMinutes = dailyMinutes
         .where((m) => m > 0)
         .fold<int>(0, (max, m) => m > max ? m : max);

@@ -27,7 +27,7 @@ class DailyBarChartCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DailyBarChartCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'Monthly Steps',
                       subtitle: 'January 2025',
                       value: 187297,
@@ -50,7 +50,7 @@ class DailyBarChartCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: DailyBarChartCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'Monthly Steps',
                       subtitle: 'January 2025',
                       value: 187297,
@@ -78,7 +78,7 @@ class DailyBarChartCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: DailyBarChartCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'Monthly Steps',
                       subtitle: 'January 2025',
                       value: 187297,

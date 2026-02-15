@@ -371,7 +371,7 @@ class HomeWidget {
         // 使用用户在【公共组件样式】对话框中选择并保存的数据
         // 添加 custom 尺寸的实际宽高到 props 中
         final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
-        if (size == HomeWidgetSize.custom) {
+        if (size == const CustomSize(width: -1, height: -1)) {
           props['customWidth'] = config['customWidth'] as int?;
           props['customHeight'] = config['customHeight'] as int?;
         }
@@ -406,7 +406,7 @@ class HomeWidget {
             if (latestProps != null) {
               // 添加 custom 尺寸的实际宽高到 props 中
               final props = Map<String, dynamic>.from(latestProps);
-              if (size == HomeWidgetSize.custom) {
+              if (size == const CustomSize(width: -1, height: -1)) {
                 props['customWidth'] = config['customWidth'] as int?;
                 props['customHeight'] = config['customHeight'] as int?;
               }

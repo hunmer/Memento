@@ -28,7 +28,7 @@ class DailyEventsCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DailyEventsCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       weekday: 'Monday',
                       day: 7,
                       events: const [
@@ -55,7 +55,7 @@ class DailyEventsCardExample extends StatelessWidget {
                     width: 220,
                     height: 200,
                     child: DailyEventsCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       weekday: 'Monday',
                       day: 7,
                       events: const [
@@ -93,7 +93,7 @@ class DailyEventsCardExample extends StatelessWidget {
                     width: 300,
                     height: 280,
                     child: DailyEventsCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       weekday: 'Monday',
                       day: 7,
                       events: const [

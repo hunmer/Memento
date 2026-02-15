@@ -1,5 +1,3 @@
-import 'package:Memento/plugins/openai/models/api_format.dart';
-
 class ServiceProvider {
   String id;
   String label;

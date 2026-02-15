@@ -27,7 +27,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                     width: 150,
                     height: 180,
                     child: DailyTodoListWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
@@ -50,7 +50,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                     width: 220,
                     height: 250,
                     child: DailyTodoListWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
@@ -75,7 +75,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                     width: 300,
                     height: 320,
                     child: DailyTodoListWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [

@@ -388,7 +388,7 @@ class HomeScreenView extends StatelessWidget {
           return HomeWidgetItem(
             id: 'skeleton_${UniqueKey().toString()}',
             widgetId: 'skeleton',
-            size: size == HomeWidgetSize.custom ? HomeWidgetSize.small : size,
+            size: size == const CustomSize(width: -1, height: -1) ? const SmallSize() : size,
             config: {},
           );
         }).toList();
@@ -541,9 +541,9 @@ class HomeScreenView extends StatelessWidget {
     try {
       controller.layoutManager.clear();
       if (type == '1x1') {
-        await _addAllWidgetsOfSize(HomeWidgetSize.small);
+        await _addAllWidgetsOfSize(const SmallSize());
       } else if (type == '2x2') {
-        await _addAllWidgetsOfSize(HomeWidgetSize.large);
+        await _addAllWidgetsOfSize(const LargeSize());
       }
       await controller.layoutManager.saveCurrentLayoutAs(name);
       // 重新加载布局列表，确保包含新创建的布局
@@ -968,7 +968,7 @@ class HomeScreenView extends StatelessWidget {
     }
 
     final supportedSizes = widget.supportedSizes;
-    final hasCustom = supportedSizes.contains(HomeWidgetSize.custom);
+    final hasCustom = supportedSizes.contains(const CustomSize(width: -1, height: -1));
 
     if (supportedSizes.length <= 1 && !hasCustom) {
       Toast.warning('该小组件不支持调整大小');
@@ -976,11 +976,11 @@ class HomeScreenView extends StatelessWidget {
     }
 
     int customWidth =
-        item.size == HomeWidgetSize.custom
+        item.size == const CustomSize(width: -1, height: -1)
             ? (item.config['customWidth'] as int? ?? 2)
             : 2;
     int customHeight =
-        item.size == HomeWidgetSize.custom
+        item.size == const CustomSize(width: -1, height: -1)
             ? (item.config['customHeight'] as int? ?? 2)
             : 2;
     HomeWidgetSize? selectedSize = item.size;
@@ -1001,7 +1001,7 @@ class HomeScreenView extends StatelessWidget {
                       return RadioListTile<HomeWidgetSize>(
                         title: Text(sizeLabel),
                         subtitle:
-                            size == HomeWidgetSize.custom
+                            size == const CustomSize(width: -1, height: -1)
                                 ? Text('screens_customSizeDesc'.tr)
                                 : Text(
                                   'screens_widgetSize'.trParams({
@@ -1016,7 +1016,7 @@ class HomeScreenView extends StatelessWidget {
                           if (newSize != null) {
                             setDialogState(() {
                               selectedSize = newSize;
-                              if (newSize != HomeWidgetSize.custom) {
+                              if (newSize != const CustomSize(width: -1, height: -1)) {
                                 // 选择非自定义尺寸时，重置自定义尺寸为默认值
                                 customWidth = 2;
                                 customHeight = 2;
@@ -1026,7 +1026,7 @@ class HomeScreenView extends StatelessWidget {
                         },
                       );
                     }),
-                    if (hasCustom && selectedSize == HomeWidgetSize.custom) ...[
+                    if (hasCustom && selectedSize == const CustomSize(width: -1, height: -1)) ...[
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 8),
@@ -1066,7 +1066,7 @@ class HomeScreenView extends StatelessWidget {
                             _saveWidgetSize(
                               context,
                               item,
-                              HomeWidgetSize.custom,
+                              const CustomSize(width: -1, height: -1),
                               customWidth,
                               customHeight,
                             );
@@ -1082,7 +1082,7 @@ class HomeScreenView extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                     child: Text('screens_cancel'.tr),
                   ),
-                  if (selectedSize != HomeWidgetSize.custom)
+                  if (selectedSize != const CustomSize(width: -1, height: -1))
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
@@ -1139,21 +1139,21 @@ class HomeScreenView extends StatelessWidget {
 
   String _getSizeLabel(HomeWidgetSize size) {
     switch (size) {
-      case HomeWidgetSize.small:
+      case const SmallSize():
         return 'screens_smallSize'.tr;
-      case HomeWidgetSize.medium:
+      case const MediumSize():
         return 'screens_mediumSize'.tr;
-      case HomeWidgetSize.large:
+      case const LargeSize():
         return 'screens_largeSize'.tr;
-      case HomeWidgetSize.large3:
+      case const LargeSize()3:
         return 'screens_large3Size'.tr;
-      case HomeWidgetSize.wide:
+      case const WideSize():
         return 'screens_wideSize'.tr;
-      case HomeWidgetSize.wide2:
+      case const WideSize()2:
         return 'screens_wide2Size'.tr;
-      case HomeWidgetSize.wide3:
+      case const WideSize()3:
         return 'screens_wide3Size'.tr;
-      case HomeWidgetSize.custom:
+      case const CustomSize(width: -1, height: -1):
         return 'screens_customSize'.tr;
     }
   }
@@ -1166,7 +1166,7 @@ class HomeScreenView extends StatelessWidget {
     int customHeight,
   ) async {
     final updatedConfig = Map<String, dynamic>.from(item.config);
-    if (newSize == HomeWidgetSize.custom) {
+    if (newSize == const CustomSize(width: -1, height: -1)) {
       updatedConfig['customWidth'] = customWidth;
       updatedConfig['customHeight'] = customHeight;
     }

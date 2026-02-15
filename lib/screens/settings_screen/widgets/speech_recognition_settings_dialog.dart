@@ -29,7 +29,7 @@ class _SpeechRecognitionSettingsDialogState
 
   // AI纠错Agent相关
   AIAgent? _correctionAgent;
-  bool _isLoadingAgent = false;
+  final bool _isLoadingAgent = false;
 
   @override
   void initState() {
@@ -77,7 +77,8 @@ class _SpeechRecognitionSettingsDialogState
       }
 
       // 加载AI纠错Agent信息
-      _correctionAgent = SpeechRecognitionConfigService.instance.correctionAgent;
+      _correctionAgent =
+          SpeechRecognitionConfigService.instance.correctionAgent;
     } catch (e) {
       _showError('加载设置失败: $e');
     } finally {
@@ -164,41 +165,46 @@ class _SpeechRecognitionSettingsDialogState
   /// 配置AI纠错Agent
   Future<void> _configureCorrectionAgent() async {
     // 如果没有配置，创建默认的Agent
-    final agentToEdit = _correctionAgent ?? AIAgent(
-      id: const Uuid().v4(),
-      name: '语音文本纠错',
-      description: '用于自动纠正语音识别错误的AI助手',
-      tags: const ['语音纠错'],
-      serviceProviderId: 'openai',
-      baseUrl: '',
-      headers: const {},
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      model: 'gpt-4o-mini',
-      temperature: 0.3,
-      maxLength: 2000,
-      topP: 1.0,
-      frequencyPenalty: 0.0,
-      presencePenalty: 0.0,
-      messages: [
-        Prompt(
-          type: 'system',
-          content: '你是一个专业的语音文本纠错助手。你的任务是纠正语音识别中的错误。\n\n## 工作流程\n1. 分析用户输入的文本\n2. 识别可能的识别错误（同音字、语法错误、标点错误等）\n3. 纠正错误，保持原意不变\n4. 只输出纠正后的文本，不要添加任何解释或说明\n\n## 注意事项\n- 只处理明显的识别错误\n- 保持口语化表达的自然流畅\n- 适当添加标点符号以提高可读性\n- 不要改变原文的意思\n- 如果文本本身就没有错误，直接返回原文',
-        ),
-      ],
-    );
+    final agentToEdit =
+        _correctionAgent ??
+        AIAgent(
+          id: const Uuid().v4(),
+          name: '语音文本纠错',
+          description: '用于自动纠正语音识别错误的AI助手',
+          tags: const ['语音纠错'],
+          serviceProviderId: 'openai',
+          baseUrl: '',
+          headers: const {},
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          model: 'gpt-4o-mini',
+          temperature: 0.3,
+          maxLength: 2000,
+          topP: 1.0,
+          frequencyPenalty: 0.0,
+          presencePenalty: 0.0,
+          messages: [
+            Prompt(
+              type: 'system',
+              content:
+                  '你是一个专业的语音文本纠错助手。你的任务是纠正语音识别中的错误。\n\n## 工作流程\n1. 分析用户输入的文本\n2. 识别可能的识别错误（同音字、语法错误、标点错误等）\n3. 纠正错误，保持原意不变\n4. 只输出纠正后的文本，不要添加任何解释或说明\n\n## 注意事项\n- 只处理明显的识别错误\n- 保持口语化表达的自然流畅\n- 适当添加标点符号以提高可读性\n- 不要改变原文的意思\n- 如果文本本身就没有错误，直接返回原文',
+            ),
+          ],
+        );
 
     // 使用回调模式，不保存到 agent 插件
     final savedAgent = await Navigator.of(context).push<AIAgent>(
       MaterialPageRoute(
-        builder: (context) => AgentEditScreen(
-          agent: agentToEdit,
-          onSave: (agent) async {
-            // 保存到自定义配置文件
-            await SpeechRecognitionConfigService.instance.saveCorrectionAgent(agent);
-            return agent; // 返回保存后的 agent
-          },
-        ),
+        builder:
+            (context) => AgentEditScreen(
+              agent: agentToEdit,
+              onSave: (agent) async {
+                // 保存到自定义配置文件
+                await SpeechRecognitionConfigService.instance
+                    .saveCorrectionAgent(agent);
+                return agent; // 返回保存后的 agent
+              },
+            ),
       ),
     );
 
@@ -215,20 +221,21 @@ class _SpeechRecognitionSettingsDialogState
   Future<void> _clearCorrectionAgent() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('确认清除'),
-        content: const Text('确定要清除AI纠错Agent设置吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('确认清除'),
+            content: const Text('确定要清除AI纠错Agent设置吗？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('确定'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('确定'),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -371,7 +378,10 @@ class _SpeechRecognitionSettingsDialogState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 children: [
-                  Icon(Icons.auto_fix_high, color: Theme.of(context).colorScheme.primary),
+                  Icon(
+                    Icons.auto_fix_high,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'AI智能纠错',
@@ -386,65 +396,76 @@ class _SpeechRecognitionSettingsDialogState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
-                child: _isLoadingAgent
-                    ? const Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : _correctionAgent != null
+                child:
+                    _isLoadingAgent
+                        ? const Padding(
+                          padding: EdgeInsets.all(24.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                        : _correctionAgent != null
                         ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                leading: CircleAvatar(
-                                  child: Text(_correctionAgent!.name.isNotEmpty
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              leading: CircleAvatar(
+                                child: Text(
+                                  _correctionAgent!.name.isNotEmpty
                                       ? _correctionAgent!.name[0]
-                                      : 'A'),
-                                ),
-                                title: Text(_correctionAgent!.name),
-                                subtitle: const Text('已配置AI纠错助手'),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: _clearCorrectionAgent,
-                                  tooltip: '清除',
+                                      : 'A',
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: FilledButton.icon(
-                                        icon: const Icon(Icons.edit),
-                                        label: const Text('编辑AI纠错Agent'),
-                                        onPressed: _configureCorrectionAgent,
-                                      ),
+                              title: Text(_correctionAgent!.name),
+                              subtitle: const Text('已配置AI纠错助手'),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: _clearCorrectionAgent,
+                                tooltip: '清除',
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: FilledButton.icon(
+                                      icon: const Icon(Icons.edit),
+                                      label: const Text('编辑AI纠错Agent'),
+                                      onPressed: _configureCorrectionAgent,
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                        : Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                '配置AI助手来自动纠正语音识别中的错误',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                 ),
+                              ),
+                              const SizedBox(height: 12),
+                              OutlinedButton.icon(
+                                icon: const Icon(Icons.add),
+                                label: const Text('配置AI纠错Agent'),
+                                onPressed: _configureCorrectionAgent,
                               ),
                             ],
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  '配置AI助手来自动纠正语音识别中的错误',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                OutlinedButton.icon(
-                                  icon: const Icon(Icons.add),
-                                  label: const Text('配置AI纠错Agent'),
-                                  onPressed: _configureCorrectionAgent,
-                                ),
-                              ],
-                            ),
                           ),
+                        ),
               ),
             ),
           ],

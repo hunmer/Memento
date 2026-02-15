@@ -14,8 +14,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
     description: 'openai_widgetDescription'.tr,
     icon: Icons.smart_toy,
     color: Colors.deepOrange,
-    defaultSize: HomeWidgetSize.small,
-    supportedSizes: [HomeWidgetSize.small],
+    defaultSize: const SmallSize(),
+    supportedSizes: [const SmallSize()],
     category: 'home_categoryTools'.tr,
     builder: (context, config) => GenericIconWidget(
       icon: Icons.smart_toy,

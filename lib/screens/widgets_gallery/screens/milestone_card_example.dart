@@ -27,7 +27,7 @@ class MilestoneCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MilestoneCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCPuaYriTNZj_aRzOEEhoGRXOuhwyTTRssklQfbQOrtJLboxJj5BPDtQEJiouPbdl8Fyf1fkcO8kDgVUHaWkC2LL_Bwz4NPa-dxLcKp8bNYV6gp7HNf3YCUHbbh6lxYHU2gAfc3Ot1wO6PnfgQAZBwkTNwBYpsrGjTZ9WaQ8TH57VZvwvg2ranIpItpDK_gZRyiBnzHsmJ0CQS6SC1J6PhC05_JOHWl2k63hPclOmqBLBdQArbrj_9drOSPIcDt6ltyq7-Bq-pHDiNW',
                       title: "Will's life",
                       date: 'July 21, 2020',
@@ -46,7 +46,7 @@ class MilestoneCardExample extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: MilestoneCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCPuaYriTNZj_aRzOEEhoGRXOuhwyTTRssklQfbQOrtJLboxJj5BPDtQEJiouPbdl8Fyf1fkcO8kDgVUHaWkC2LL_Bwz4NPa-dxLcKp8bNYV6gp7HNf3YCUHbbh6lxYHU2gAfc3Ot1wO6PnfgQAZBwkTNwBYpsrGjTZ9WaQ8TH57VZvwvg2ranIpItpDK_gZRyiBnzHsmJ0CQS6SC1J6PhC05_JOHWl2k63hPclOmqBLBdQArbrj_9drOSPIcDt6ltyq7-Bq-pHDiNW',
                       title: "Will's life",
                       date: 'July 21, 2020',
@@ -65,7 +65,7 @@ class MilestoneCardExample extends StatelessWidget {
                     width: 280,
                     height: 280,
                     child: MilestoneCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCPuaYriTNZj_aRzOEEhoGRXOuhwyTTRssklQfbQOrtJLboxJj5BPDtQEJiouPbdl8Fyf1fkcO8kDgVUHaWkC2LL_Bwz4NPa-dxLcKp8bNYV6gp7HNf3YCUHbbh6lxYHU2gAfc3Ot1wO6PnfgQAZBwkTNwBYpsrGjTZ9WaQ8TH57VZvwvg2ranIpItpDK_gZRyiBnzHsmJ0CQS6SC1J6PhC05_JOHWl2k63hPclOmqBLBdQArbrj_9drOSPIcDt6ltyq7-Bq-pHDiNW',
                       title: "Will's life",
                       date: 'July 21, 2020',

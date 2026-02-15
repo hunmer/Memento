@@ -27,7 +27,7 @@ class NewsUpdateCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: NewsUpdateCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       icon: Icons.bolt,
                       title: '"I confess."',
                       timestamp: '4 minutes ago',
@@ -44,7 +44,7 @@ class NewsUpdateCardExample extends StatelessWidget {
                     width: 220,
                     height: 200,
                     child: NewsUpdateCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       icon: Icons.bolt,
                       title: '"I confess." The Belarusian pro-governmental',
                       timestamp: '4 minutes ago',
@@ -61,7 +61,7 @@ class NewsUpdateCardExample extends StatelessWidget {
                     width: 300,
                     height: 250,
                     child: NewsUpdateCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       icon: Icons.bolt,
                       title: '"I confess." The Belarusian pro-governmental telegram channel published a video of Roman Protasevich',
                       timestamp: '4 minutes ago',

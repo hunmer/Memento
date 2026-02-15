@@ -14,9 +14,9 @@ class ProfileCardWidgetExample extends StatelessWidget {
       appBar: AppBar(title: const Text('个人资料卡片')),
       body: Container(
         color: isDark ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
-        child: const Center(
+        child: Center(
           child: ProfileCardWidget(
-            size: HomeWidgetSize.large,
+            size: const LargeSize(),
             imageUrl:
                 'https://lh3.googleusercontent.com/aida-public/AB6AXuAQa5mwNY07R4lgli2Pgrxz3J9D6F6Plz6c9LGFNt4BYe9qp7wGfu6OnEFI-UAnneZ-qsWObIYUU_LVIN9_RypXCavX3hG7YUVTVgYgYhQiHXBBfy_W5EtO3oCjLBQ2eNlXRXxiKMEcC_tGq7UHLix8Zm7_Zawt0dvlp6ouuGhSkraBr9hjl6hKfAC5CL8rTgObw-xh-DnmtLVs5Msvp8N6dZgasjTEMmwR8or2JI6MCsXD0i43ZVNUATo21RHx95nyAFAf5zJuuDyg',
             name: 'Sophie Bennett',

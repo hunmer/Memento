@@ -29,7 +29,7 @@ class JournalPromptCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: JournalPromptCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       weekday: 'Monday',
                       prompt: 'How will you make tomorrow meaningful?',
                       onNewPressed: _dummyCallback,
@@ -45,7 +45,7 @@ class JournalPromptCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: JournalPromptCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       weekday: 'Monday',
                       prompt: 'How will you make tomorrow meaningful?',
                       onNewPressed: _dummyCallback,
@@ -61,7 +61,7 @@ class JournalPromptCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: JournalPromptCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       weekday: 'Monday',
                       prompt: 'How will you make tomorrow meaningful?',
                       onNewPressed: _dummyCallback,

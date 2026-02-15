@@ -14,9 +14,9 @@ class SocialProfileCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('社交资料卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFF6B7280),
-        child: const Center(
+        child: Center(
           child: SocialProfileCardWidget(
-            size: HomeWidgetSize.large,
+            size: const LargeSize(),
             avatarUrl:
                 'https://lh3.googleusercontent.com/aida-public/AB6AXuDQBpvx8sVdqYMemqByF96wLVYDtKW2gysxp-DEVKMyV3MGBTO-SsYubZDkdx5YssNyEMNJt6kvNtVYwQcVPx5B_mWC8_-MjNgJneO5473aTTjd1qXZfgDNP6VeWyC_C84X-Bp7lNiLH1tILc1wpNs41UWjaBbQDyDvaPqVEPVQelJXoG5ULoGdueUtFJNSli1Ld1TpetG4-BdTLbjtKH0Zfusp7suNwuqNbbeI2QIExxTTHzhIq474K8TdUTKrDO3Pe01o91TWNw',
             name: 'Sammy Lawson',

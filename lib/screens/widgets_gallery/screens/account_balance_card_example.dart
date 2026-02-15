@@ -28,7 +28,7 @@ class AccountBalanceCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: AccountBalanceCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       accounts: const [
                         AccountBalanceCardData(
                           name: '现金',
@@ -49,7 +49,7 @@ class AccountBalanceCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: AccountBalanceCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       accounts: const [
                         AccountBalanceCardData(
                           name: '现金',
@@ -77,7 +77,7 @@ class AccountBalanceCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: AccountBalanceCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       accounts: const [
                         AccountBalanceCardData(
                           name: '现金',

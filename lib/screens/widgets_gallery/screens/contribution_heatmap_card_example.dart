@@ -27,7 +27,7 @@ class ContributionHeatmapCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ContributionHeatmapCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'Contributions',
                       contributionCount: '12 contributions',
                       years: ['2016', '2017'],
@@ -50,7 +50,7 @@ class ContributionHeatmapCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ContributionHeatmapCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'Contributions',
                       contributionCount: '86 contributions',
                       years: ['2016', '2017', '2018'],
@@ -74,7 +74,7 @@ class ContributionHeatmapCardExample extends StatelessWidget {
                     width: 350,
                     height: 300,
                     child: ContributionHeatmapCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'Sales per employee per month',
                       contributionCount: '263 contributions in the last year',
                       years: ['2016', '2017', '2018', '2019'],

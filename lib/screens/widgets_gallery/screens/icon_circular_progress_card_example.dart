@@ -27,7 +27,7 @@ class IconCircularProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: IconCircularProgressCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       progress: 0.75,
                       icon: Icons.inventory_2,
                       title: 'Widgefy UI kit',
@@ -44,7 +44,7 @@ class IconCircularProgressCardExample extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: IconCircularProgressCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       progress: 0.75,
                       icon: Icons.inventory_2,
                       title: 'Widgefy UI kit',
@@ -61,7 +61,7 @@ class IconCircularProgressCardExample extends StatelessWidget {
                     width: 280,
                     height: 280,
                     child: IconCircularProgressCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       progress: 0.75,
                       icon: Icons.inventory_2,
                       title: 'Widgefy UI kit',

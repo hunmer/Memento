@@ -27,7 +27,7 @@ class VerticalBarChartCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: VerticalBarChartCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'Vertical bar',
                       subtitle: 'Statistics of the month',
                       dataLabel1: 'Data one',
@@ -52,7 +52,7 @@ class VerticalBarChartCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: VerticalBarChartCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'Vertical bar',
                       subtitle: 'Statistics of the month',
                       dataLabel1: 'Data one',
@@ -77,7 +77,7 @@ class VerticalBarChartCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: VerticalBarChartCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'Vertical bar',
                       subtitle: 'Statistics of the month',
                       dataLabel1: 'Data one',

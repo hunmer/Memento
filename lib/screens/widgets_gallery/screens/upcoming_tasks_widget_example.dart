@@ -27,7 +27,7 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: UpcomingTasksWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       taskCount: 56,
                       tasks: [
                         TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
@@ -47,7 +47,7 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: UpcomingTasksWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       taskCount: 56,
                       tasks: [
                         TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
@@ -67,7 +67,7 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: UpcomingTasksWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       taskCount: 56,
                       tasks: [
                         TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),

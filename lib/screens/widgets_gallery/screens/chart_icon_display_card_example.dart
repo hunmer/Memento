@@ -27,7 +27,7 @@ class ChartIconDisplayCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ChartIconDisplayCard(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'This Week',
                       subtitle: 'Your Mood',
                       moods: const [
@@ -47,7 +47,7 @@ class ChartIconDisplayCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ChartIconDisplayCard(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'This Week',
                       subtitle: 'Your Mood',
                       moods: const [
@@ -68,7 +68,7 @@ class ChartIconDisplayCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: ChartIconDisplayCard(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'This Week',
                       subtitle: 'Your Mood',
                       moods: const [

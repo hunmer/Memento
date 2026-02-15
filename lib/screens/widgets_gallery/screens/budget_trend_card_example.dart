@@ -27,7 +27,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: BudgetTrendCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       label: 'Budget',
                       value: 142000,
                       valuePrefix: r'$',
@@ -48,7 +48,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: BudgetTrendCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       label: 'Budget',
                       value: 142000,
                       valuePrefix: r'$',
@@ -69,7 +69,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: BudgetTrendCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       label: 'Budget',
                       value: 142000,
                       valuePrefix: r'$',
