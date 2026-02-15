@@ -11,6 +11,7 @@ class RoundedTaskProgressWidget extends StatefulWidget {
   final int commentCount;
   final int attachmentCount;
   final List<String> teamAvatars;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
@@ -41,16 +42,19 @@ class RoundedTaskProgressWidget extends StatefulWidget {
       subtitle: props['subtitle'] as String? ?? '',
       completedTasks: props['completedTasks'] as int? ?? 0,
       totalTasks: props['totalTasks'] as int? ?? 0,
-      pendingTasks: (props['pendingTasks'] as List<dynamic>?)?.cast<String>() ?? const [],
+      pendingTasks:
+          (props['pendingTasks'] as List<dynamic>?)?.cast<String>() ?? const [],
       commentCount: props['commentCount'] as int? ?? 0,
       attachmentCount: props['attachmentCount'] as int? ?? 0,
-      teamAvatars: (props['teamAvatars'] as List<dynamic>?)?.cast<String>() ?? const [],
+      teamAvatars:
+          (props['teamAvatars'] as List<dynamic>?)?.cast<String>() ?? const [],
       inline: props['inline'] as bool? ?? false,
     );
   }
 
   @override
-  State<RoundedTaskProgressWidget> createState() => _RoundedTaskProgressWidgetState();
+  State<RoundedTaskProgressWidget> createState() =>
+      _RoundedTaskProgressWidgetState();
 }
 
 class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
@@ -66,10 +70,7 @@ class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
       vsync: this,
     );
     _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _progressController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
     );
     _progressController.forward();
   }
@@ -83,7 +84,10 @@ class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final progress = (widget.completedTasks / widget.totalTasks).clamp(0.0, 1.0);
+    final progress = (widget.completedTasks / widget.totalTasks).clamp(
+      0.0,
+      1.0,
+    );
 
     return AnimatedBuilder(
       animation: _progressAnimation,
@@ -94,41 +98,54 @@ class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
             opacity: _progressAnimation.value,
             child: Container(
               width: widget.inline ? double.maxFinite : 380,
-              constraints: const BoxConstraints(minHeight: 400),
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                borderRadius: BorderRadius.circular(36),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
-                    blurRadius: 40,
-                    offset: const Offset(0, 20),
+                    blurRadius: 40 * widget.size.scale,
+                    offset: Offset(0, 20 * widget.size.scale),
                   ),
                 ],
               ),
               child: Padding(
                 padding: widget.size.getPadding(),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _HeaderSection(title: widget.title, subtitle: widget.subtitle, isDark: isDark),
-                    const SizedBox(height: 32),
+                    _HeaderSection(
+                      title: widget.title,
+                      subtitle: widget.subtitle,
+                      isDark: isDark,
+                      size: widget.size,
+                    ),
+                    SizedBox(height: widget.size.getTitleSpacing() * 0.5),
                     _ProgressSection(
                       completedTasks: widget.completedTasks,
                       totalTasks: widget.totalTasks,
                       progress: progress,
                       animation: _progressAnimation,
                       isDark: isDark,
+                      size: widget.size,
                     ),
-                    const SizedBox(height: 32),
-                    _PendingTasksSection(tasks: widget.pendingTasks, isDark: isDark),
-                    const SizedBox(height: 32),
+                    SizedBox(height: widget.size.getTitleSpacing() * 0.5),
+                    Expanded(
+                      child: _PendingTasksSection(
+                        tasks: widget.pendingTasks,
+                        isDark: isDark,
+                        size: widget.size,
+                      ),
+                    ),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     _FooterSection(
                       commentCount: widget.commentCount,
                       attachmentCount: widget.attachmentCount,
                       teamAvatars: widget.teamAvatars,
                       isDark: isDark,
+                      size: widget.size,
                     ),
                   ],
                 ),
@@ -145,17 +162,38 @@ class _HeaderSection extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool isDark;
+  final HomeWidgetSize size;
 
-  const _HeaderSection({required this.title, required this.subtitle, required this.isDark});
+  const _HeaderSection({
+    required this.title,
+    required this.subtitle,
+    required this.isDark,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1F2937), height: 1.2)),
-        const SizedBox(height: 4),
-        Text(subtitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: size.getTitleFontSize(),
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF1F2937),
+            height: 1.2,
+          ),
+        ),
+        SizedBox(height: size.getSmallSpacing()),
+        Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: size.getSubtitleFontSize(),
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
+          ),
+        ),
       ],
     );
   }
@@ -167,6 +205,7 @@ class _ProgressSection extends StatelessWidget {
   final double progress;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _ProgressSection({
     required this.completedTasks,
@@ -174,6 +213,7 @@ class _ProgressSection extends StatelessWidget {
     required this.progress,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -185,31 +225,64 @@ class _ProgressSection extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.format_list_bulleted, size: 18, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
-                const SizedBox(width: 8),
-                Text('Progress', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
+                Icon(
+                  Icons.format_list_bulleted,
+                  size: size.getIconSize() * 0.75,
+                  color:
+                      isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF9CA3AF),
+                ),
+                SizedBox(width: size.getSmallSpacing() * 2),
+                Text(
+                  'Progress',
+                  style: TextStyle(
+                    fontSize: size.getSubtitleFontSize(),
+                    fontWeight: FontWeight.w500,
+                    color:
+                        isDark
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF9CA3AF),
+                  ),
+                ),
               ],
             ),
-            Text('$completedTasks / $totalTasks', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
+            Text(
+              '$completedTasks / $totalTasks',
+              style: TextStyle(
+                fontSize: size.getSubtitleFontSize(),
+                fontWeight: FontWeight.w500,
+                color:
+                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
+              ),
+            ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: size.getSmallSpacing() * 2),
         AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
             return ClipRRect(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(4 * size.scale),
               child: Stack(
                 children: [
                   Container(
-                    height: 6,
-                    decoration: BoxDecoration(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6)),
+                    height: size.getStrokeWidth(),
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? const Color(0xFF374151)
+                              : const Color(0xFFF3F4F6),
+                    ),
                   ),
                   FractionallySizedBox(
                     widthFactor: progress * animation.value,
                     child: Container(
-                      height: 6,
-                      decoration: BoxDecoration(color: const Color(0xFFFBBF24), borderRadius: BorderRadius.circular(4)),
+                      height: size.getStrokeWidth(),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFBBF24),
+                        borderRadius: BorderRadius.circular(4 * size.scale),
+                      ),
                     ),
                   ),
                 ],
@@ -222,31 +295,96 @@ class _ProgressSection extends StatelessWidget {
   }
 }
 
-class _PendingTasksSection extends StatelessWidget {
+class _PendingTasksSection extends StatefulWidget {
   final List<String> tasks;
   final bool isDark;
+  final HomeWidgetSize size;
 
-  const _PendingTasksSection({required this.tasks, required this.isDark});
+  const _PendingTasksSection({
+    required this.tasks,
+    required this.isDark,
+    required this.size,
+  });
+
+  @override
+  State<_PendingTasksSection> createState() => _PendingTasksSectionState();
+}
+
+class _PendingTasksSectionState extends State<_PendingTasksSection> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Pending', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF))),
-        const SizedBox(height: 8),
-        Flexible(
-          child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                tasks.length,
-                (index) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Container(
-                    decoration: BoxDecoration(border: Border(bottom: BorderSide(color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6), width: 1))),
-                    child: Text(tasks[index], style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937), height: 1.3)),
+        Text(
+          'Pending',
+          style: TextStyle(
+            fontSize: widget.size.getSubtitleFontSize(),
+            fontWeight: FontWeight.w500,
+            color:
+                widget.isDark
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF9CA3AF),
+          ),
+        ),
+        SizedBox(height: widget.size.getSmallSpacing() * 2),
+        Expanded(
+          child: Scrollbar(
+            thickness: 6 * widget.size.scale,
+            radius: Radius.circular(3 * widget.size.scale),
+            thumbVisibility: false,
+            controller: _scrollController,
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              controller: _scrollController,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: List.generate(
+                  widget.tasks.length,
+                  (index) => Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: widget.size.getSmallSpacing(),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color:
+                                widget.isDark
+                                    ? const Color(0xFF374151)
+                                    : const Color(0xFFF3F4F6),
+                            width: 1 * widget.size.scale,
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        widget.tasks[index],
+                        style: TextStyle(
+                          fontSize: widget.size.getSubtitleFontSize(),
+                          fontWeight: FontWeight.w600,
+                          color:
+                              widget.isDark
+                                  ? const Color(0xFFE5E7EB)
+                                  : const Color(0xFF1F2937),
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -263,12 +401,14 @@ class _FooterSection extends StatelessWidget {
   final int attachmentCount;
   final List<String> teamAvatars;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _FooterSection({
     required this.commentCount,
     required this.attachmentCount,
     required this.teamAvatars,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -278,22 +418,38 @@ class _FooterSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            _ActionButton(icon: Icons.chat_bubble_outline, count: commentCount, isDark: isDark),
-            const SizedBox(width: 20),
-            _ActionButton(icon: Icons.attach_file, count: attachmentCount, rotate: true, isDark: isDark),
+            _ActionButton(
+              icon: Icons.chat_bubble_outline,
+              count: commentCount,
+              isDark: isDark,
+              size: size,
+            ),
+            SizedBox(width: size.getSmallSpacing() * 5),
+            _ActionButton(
+              icon: Icons.attach_file,
+              count: attachmentCount,
+              rotate: true,
+              isDark: isDark,
+              size: size,
+            ),
           ],
         ),
         Row(
           children: List.generate(
             teamAvatars.length,
             (index) => Padding(
-              padding: EdgeInsets.only(left: index > 0 ? 12 : 0),
+              padding: EdgeInsets.only(
+                left: index > 0 ? size.getSmallSpacing() * 3 : 0,
+              ),
               child: Container(
-                width: 32,
-                height: 32,
+                width: size.getIconSize(),
+                height: size.getIconSize(),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: isDark ? const Color(0xFF1E293B) : Colors.white, width: 2),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                    width: 2 * size.scale,
+                  ),
                 ),
                 child: ClipOval(
                   child: Image.network(
@@ -301,8 +457,18 @@ class _FooterSection extends StatelessWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
-                        child: Icon(Icons.person, size: 16, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280)),
+                        color:
+                            isDark
+                                ? const Color(0xFF374151)
+                                : const Color(0xFFE5E7EB),
+                        child: Icon(
+                          Icons.person,
+                          size: 16 * size.scale,
+                          color:
+                              isDark
+                                  ? const Color(0xFF9CA3AF)
+                                  : const Color(0xFF6B7280),
+                        ),
                       );
                     },
                   ),
@@ -321,8 +487,15 @@ class _ActionButton extends StatefulWidget {
   final int count;
   final bool rotate;
   final bool isDark;
+  final HomeWidgetSize size;
 
-  const _ActionButton({required this.icon, required this.count, this.rotate = false, required this.isDark});
+  const _ActionButton({
+    required this.icon,
+    required this.count,
+    this.rotate = false,
+    required this.isDark,
+    required this.size,
+  });
 
   @override
   State<_ActionButton> createState() => _ActionButtonState();
@@ -344,17 +517,31 @@ class _ActionButtonState extends State<_ActionButton> {
               angle: widget.rotate ? 45 * 3.14159 / 180 : 0,
               child: Icon(
                 widget.icon,
-                size: 18,
-                color: _isHovered ? (widget.isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)) : (widget.isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
+                size: widget.size.getIconSize() * 0.75,
+                color:
+                    _isHovered
+                        ? (widget.isDark
+                            ? const Color(0xFFD1D5DB)
+                            : const Color(0xFF4B5563))
+                        : (widget.isDark
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF9CA3AF)),
               ),
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: widget.size.getSmallSpacing()),
             Text(
               widget.count.toString(),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: widget.size.getLegendFontSize(),
                 fontWeight: FontWeight.w600,
-                color: _isHovered ? (widget.isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)) : (widget.isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF)),
+                color:
+                    _isHovered
+                        ? (widget.isDark
+                            ? const Color(0xFFD1D5DB)
+                            : const Color(0xFF4B5563))
+                        : (widget.isDark
+                            ? const Color(0xFF9CA3AF)
+                            : const Color(0xFF9CA3AF)),
               ),
             ),
           ],

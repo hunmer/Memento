@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 任务状态枚举
 ///
@@ -74,6 +75,7 @@ class TaskItem {
 /// - 深色模式适配
 /// - 可选的"更多"链接
 /// - 可自定义标题和图标
+/// - 支持 HomeWidgetSize 自适应尺寸
 ///
 /// 示例用法：
 /// ```dart
@@ -125,6 +127,9 @@ class TaskProgressListCard extends StatefulWidget {
   /// 任务项点击回调
   final ValueChanged<int>? onTaskTap;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const TaskProgressListCard({
     super.key,
     this.title = '进度',
@@ -134,7 +139,34 @@ class TaskProgressListCard extends StatefulWidget {
     this.width,
     this.onMoreTap,
     this.onTaskTap,
+    this.size = const MediumSize(),
   });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory TaskProgressListCard.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    // 解析任务列表
+    final tasks =
+        (props['tasks'] as List<dynamic>?)
+            ?.map((e) => TaskItem.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+
+    return TaskProgressListCard(
+      title: props['title'] as String? ?? '进度',
+      icon:
+          props['icon'] is IconData
+              ? props['icon'] as IconData
+              : Icons.check_circle_outline,
+      tasks: tasks,
+      moreCount: props['moreCount'] as int? ?? 0,
+      onMoreTap: props['onMoreTap'] as VoidCallback?,
+      onTaskTap: props['onTaskTap'] as ValueChanged<int>?,
+      size: size,
+    );
+  }
 
   @override
   State<TaskProgressListCard> createState() => _TaskProgressListCardState();
@@ -170,6 +202,11 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
 
+    // 根据 size 计算尺寸
+    final padding = widget.size.getPadding();
+    final itemSpacing = widget.size.getItemSpacing();
+    final titleSpacing = widget.size.getTitleSpacing();
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -179,10 +216,11 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
             opacity: _animation.value,
             child: Container(
               width: widget.width ?? 312,
-              padding: const EdgeInsets.all(24),
+              padding: padding,
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -192,19 +230,26 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
                 ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 标题区域
                   _buildHeader(context, isDark),
-                  const SizedBox(height: 24),
+                  SizedBox(height: titleSpacing * 0.6),
 
-                  // 任务列表
-                  ..._buildTaskList(context, isDark),
+                  // 任务列表（支持滚动）
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: _buildTaskList(context, isDark),
+                      ),
+                    ),
+                  ),
 
                   // 底部更多链接
                   if (widget.moreCount > 0) ...[
-                    const SizedBox(height: 8),
+                    SizedBox(height: itemSpacing),
                     _buildMoreLink(context, isDark),
                   ],
                 ],
@@ -218,18 +263,22 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
 
   /// 构建标题区域
   Widget _buildHeader(BuildContext context, bool isDark) {
+    final iconSize = widget.size.getIconSize();
+    final labelFontSize = widget.size.getSubtitleFontSize();
+    final smallSpacing = widget.size.getSmallSpacing();
+
     return Row(
       children: [
         Icon(
           widget.icon ?? Icons.check_circle_outline,
-          size: 20,
+          size: iconSize,
           color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: smallSpacing),
         Text(
           widget.title,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
             letterSpacing: 0.5,
@@ -242,30 +291,30 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
   /// 构建任务列表
   List<Widget> _buildTaskList(BuildContext context, bool isDark) {
     final List<Widget> widgets = [];
+    final itemSpacing = widget.size.getItemSpacing();
 
     for (int i = 0; i < widget.tasks.length; i++) {
       if (i > 0) {
-        widgets.add(const SizedBox(height: 20));
+        widgets.add(SizedBox(height: itemSpacing * 2.5));
       }
 
       // 计算每个任务的动画延迟，确保 end 不超过 1.0
       final end = (0.6 + i * 0.12).clamp(0.0, 1.0);
       final itemAnimation = CurvedAnimation(
         parent: _animationController,
-        curve: Interval(
-          i * 0.12,
-          end,
-          curve: Curves.easeOutCubic,
-        ),
+        curve: Interval(i * 0.12, end, curve: Curves.easeOutCubic),
       );
 
-      widgets.add(_TaskItemWidget(
-        task: widget.tasks[i],
-        animation: itemAnimation,
-        isDark: isDark,
-        isLast: i == widget.tasks.length - 1,
-        onTap: widget.onTaskTap != null ? () => widget.onTaskTap!(i) : null,
-      ));
+      widgets.add(
+        _TaskItemWidget(
+          task: widget.tasks[i],
+          animation: itemAnimation,
+          isDark: isDark,
+          isLast: i == widget.tasks.length - 1,
+          onTap: widget.onTaskTap != null ? () => widget.onTaskTap!(i) : null,
+          size: widget.size,
+        ),
+      );
     }
 
     return widgets;
@@ -273,14 +322,17 @@ class _TaskProgressListCardState extends State<TaskProgressListCard>
 
   /// 构建更多链接
   Widget _buildMoreLink(BuildContext context, bool isDark) {
+    final labelFontSize = widget.size.getSubtitleFontSize();
+    final smallSpacing = widget.size.getSmallSpacing();
+
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: EdgeInsets.only(top: smallSpacing),
       child: GestureDetector(
         onTap: widget.onMoreTap,
         child: Text(
           '+${widget.moreCount} 更多',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).colorScheme.primary,
           ),
@@ -297,6 +349,7 @@ class _TaskItemWidget extends StatelessWidget {
   final bool isDark;
   final bool isLast;
   final VoidCallback? onTap;
+  final HomeWidgetSize size;
 
   const _TaskItemWidget({
     required this.task,
@@ -304,12 +357,19 @@ class _TaskItemWidget extends StatelessWidget {
     required this.isDark,
     required this.isLast,
     this.onTap,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     final borderColor =
         isDark ? const Color(0xFF27272A) : const Color(0xFFF3F4F6);
+
+    // 根据 size 计算尺寸
+    final titleFontSize = size.getSubtitleFontSize() * 0.9; // 约 11/13/15
+    final timeFontSize = size.getLegendFontSize(); // 约 10/12/14
+    final smallSpacing = size.getSmallSpacing();
+    final itemSpacing = size.getItemSpacing();
 
     return AnimatedBuilder(
       animation: animation,
@@ -321,16 +381,19 @@ class _TaskItemWidget extends StatelessWidget {
             child: GestureDetector(
               onTap: onTap,
               child: Container(
-                padding: const EdgeInsets.only(bottom: 20),
+                padding: EdgeInsets.only(bottom: itemSpacing * 2),
                 decoration: BoxDecoration(
-                  border: isLast
-                      ? null
-                      : Border(
-                          bottom: BorderSide(
-                            color: borderColor,
-                            width: 1,
+                  border:
+                      isLast
+                          ? null
+                          : Border(
+                            bottom: BorderSide(
+                              color: borderColor,
+                              width:
+                                  size.getStrokeWidth() *
+                                  0.125, // 约 0.75/1/1.25
+                            ),
                           ),
-                        ),
                 ),
                 child: Row(
                   children: [
@@ -343,23 +406,25 @@ class _TaskItemWidget extends StatelessWidget {
                           Text(
                             task.title,
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: titleFontSize,
                               fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? const Color(0xFFF9FAFB)
-                                  : const Color(0xFF111827),
+                              color:
+                                  isDark
+                                      ? const Color(0xFFF9FAFB)
+                                      : const Color(0xFF111827),
                               height: 1.3,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: smallSpacing * 1.5),
                           Text(
                             task.time,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: timeFontSize,
                               fontWeight: FontWeight.w500,
-                              color: isDark
-                                  ? const Color(0xFF6B7280)
-                                  : const Color(0xFF9CA3AF),
+                              color:
+                                  isDark
+                                      ? const Color(0xFF6B7280)
+                                      : const Color(0xFF9CA3AF),
                             ),
                           ),
                         ],
@@ -371,6 +436,7 @@ class _TaskItemWidget extends StatelessWidget {
                       progress: task.progress,
                       status: task.status,
                       animation: animation,
+                      size: size,
                     ),
                   ],
                 ),
@@ -388,16 +454,24 @@ class _ProgressBarWidget extends StatelessWidget {
   final double progress;
   final TaskStatus status;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _ProgressBarWidget({
     required this.progress,
     required this.status,
     required this.animation,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // 根据 size 计算尺寸
+    final barWidth = size.getIconSize() * 2; // 约 36/48/56
+    final barHeight =
+        size.getStrokeWidth() * size.progressStrokeScale * 1.5; // 约 3.6/4.8/6
+    final borderRadius = barHeight / 2;
 
     // 根据状态获取颜色
     Color getProgressColor() {
@@ -416,14 +490,14 @@ class _ProgressBarWidget extends StatelessWidget {
         isDark ? const Color(0xFF3F3F46) : const Color(0xFFF3F4F6);
 
     return Container(
-      width: 48,
-      height: 6,
+      width: barWidth,
+      height: barHeight,
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(borderRadius),
         child: Align(
           alignment: Alignment.centerLeft,
           child: AnimatedBuilder(
