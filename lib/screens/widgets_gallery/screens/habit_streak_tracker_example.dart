@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/index.dart';
 
 /// 连续打卡追踪器示例
@@ -19,7 +20,7 @@ class HabitStreakTrackerExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (SmallSize)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -30,11 +31,12 @@ class HabitStreakTrackerExample extends StatelessWidget {
                       longestStreak: 15,
                       totalDays: 10,
                       completedDays: const [1, 2, 3, 4, 5],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (MediumSize)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -45,11 +47,12 @@ class HabitStreakTrackerExample extends StatelessWidget {
                       longestStreak: 15,
                       totalDays: 10,
                       completedDays: const [1, 2, 3, 4, 5],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (LargeSize)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -60,11 +63,12 @@ class HabitStreakTrackerExample extends StatelessWidget {
                       longestStreak: 15,
                       totalDays: 10,
                       completedDays: const [1, 2, 3, 4, 5],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中宽尺寸'),
+                _buildSectionTitle('中宽尺寸 (WideSize)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
@@ -74,10 +78,11 @@ class HabitStreakTrackerExample extends StatelessWidget {
                     longestStreak: 15,
                     totalDays: 10,
                     completedDays: const [1, 2, 3, 4, 5],
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大宽尺寸'),
+                _buildSectionTitle('大宽尺寸 (Wide2Size)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
@@ -87,6 +92,7 @@ class HabitStreakTrackerExample extends StatelessWidget {
                     longestStreak: 15,
                     totalDays: 10,
                     completedDays: const [1, 2, 3, 4, 5],
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

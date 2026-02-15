@@ -1,10 +1,12 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 连续打卡追踪器
 ///
 /// 用于展示打卡的连续天数、最长连续天数和完成状态。
 /// 支持动画效果，包含进入动画和网格逐项动画。
+/// 根据 HomeWidgetSize 自动调整所有元素的大小。
 class HabitStreakTracker extends StatefulWidget {
   /// 当前连续天数
   final int currentStreak;
@@ -42,6 +44,9 @@ class HabitStreakTracker extends StatefulWidget {
   /// 最长连续标签文本（默认 'Longest Streak'）
   final String? longestStreakLabel;
 
+  /// 小组件尺寸（用于调整所有元素大小）
+  final HomeWidgetSize size;
+
   const HabitStreakTracker({
     super.key,
     required this.currentStreak,
@@ -56,6 +61,7 @@ class HabitStreakTracker extends StatefulWidget {
     this.showShadow = true,
     this.titleText,
     this.longestStreakLabel,
+    this.size = const MediumSize(),
   });
 
   @override
@@ -106,25 +112,41 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
   }
 
   Widget _buildContent(bool isDark) {
-    final effectiveBackgroundColor = widget.backgroundColor ??
+    final effectiveBackgroundColor =
+        widget.backgroundColor ??
         (isDark ? const Color(0xFF27272A) : Colors.white);
-    final effectivePrimaryColor = widget.primaryColor ?? const Color(0xFF3f51b5);
+    final effectivePrimaryColor =
+        widget.primaryColor ?? const Color(0xFF3f51b5);
+    final size = widget.size;
+
+    // 根据尺寸获取各个值
+    final titleFontSize = size.getSubtitleFontSize();
+    final largeFontSize = size.getLargeFontSize() * 0.6; // 约 28-34px
+    const smallSpacing = 4.0;
+    final mediumSpacing = size.getSmallSpacing() * 2; // 约 8-12px
+    final largeSpacing = size.getItemSpacing(); // 约 8-16px
+    final strokeWidth = size.getStrokeWidth() * 0.25; // 约 2-3px
+    final dayFontSize = size.getLegendFontSize() * 1.0; // 约 10-14px
+    final iconSize = size.getIconSize() * 0.7; // 约 16-20px
 
     return Container(
       width: widget.width ?? 340,
-      padding: widget.padding ?? const EdgeInsets.all(32),
+      padding: widget.padding ?? size.getPadding(),
       decoration: BoxDecoration(
         color: effectiveBackgroundColor,
-        borderRadius: BorderRadius.circular(widget.borderRadius ?? 28),
-        boxShadow: widget.showShadow
-            ? [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
+        borderRadius: BorderRadius.circular(
+          widget.borderRadius ?? size.getIconSize() * 0.8,
+        ),
+        boxShadow:
+            widget.showShadow
+                ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: size.getIconSize(),
+                    offset: Offset(0, mediumSpacing),
+                  ),
+                ]
+                : null,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -136,38 +158,38 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
               Text(
                 widget.titleText ?? 'Weekly Streak',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.w500,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: smallSpacing),
               AnimatedFlipCounter(
                 value: widget.currentStreak * _animation.value,
                 suffix: ' Days',
                 textStyle: TextStyle(
-                  fontSize: 36,
+                  fontSize: largeFontSize,
                   fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white : Colors.grey.shade900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: largeSpacing),
 
           // 分隔线
           Container(
-            height: 2,
+            height: strokeWidth,
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
                   color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                  width: 2,
+                  width: strokeWidth,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: largeSpacing),
 
           // 最长连续打卡
           Row(
@@ -176,7 +198,7 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
               Text(
                 widget.longestStreakLabel ?? 'Longest Streak',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.w500,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
@@ -184,36 +206,46 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
               Text(
                 '${widget.longestStreak} days',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white : Colors.grey.shade900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: largeSpacing),
 
           // 日期网格
-          _buildDaysGrid(isDark, effectivePrimaryColor),
+          _buildDaysGrid(isDark, effectivePrimaryColor, dayFontSize, iconSize),
         ],
       ),
     );
   }
 
-  Widget _buildDaysGrid(bool isDark, Color primaryColor) {
+  Widget _buildDaysGrid(
+    bool isDark,
+    Color primaryColor,
+    double dayFontSize,
+    double iconSize,
+  ) {
     // 计算延迟步长，确保 Interval end <= 1.0
     final elementCount = widget.totalDays;
     final baseEnd = 0.6;
     final maxStep = (1.0 - baseEnd) / (elementCount - 1);
     final step = maxStep * 0.8; // 留安全余量
 
+    // 根据尺寸计算间距
+    final size = widget.size;
+    final crossAxisSpacing = size.getSmallSpacing();
+    final mainAxisSpacing = size.getItemSpacing();
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 5,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: crossAxisSpacing,
+        mainAxisSpacing: mainAxisSpacing,
         childAspectRatio: 1,
       ),
       itemCount: widget.totalDays,
@@ -239,6 +271,8 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
           primaryColor: primaryColor,
           isDark: isDark,
           animation: itemAnimation,
+          dayFontSize: dayFontSize,
+          iconSize: iconSize,
         );
       },
     );
@@ -253,6 +287,8 @@ class _DayItem extends StatelessWidget {
   final Color primaryColor;
   final bool isDark;
   final Animation<double> animation;
+  final double dayFontSize;
+  final double iconSize;
 
   const _DayItem({
     required this.dayNumber,
@@ -261,6 +297,8 @@ class _DayItem extends StatelessWidget {
     required this.primaryColor,
     required this.isDark,
     required this.animation,
+    required this.dayFontSize,
+    required this.iconSize,
   });
 
   @override
@@ -270,16 +308,16 @@ class _DayItem extends StatelessWidget {
       builder: (context, child) {
         return Transform.scale(
           scale: 0.8 + (0.2 * animation.value),
-          child: Opacity(
-            opacity: animation.value,
-            child: _buildContent(),
-          ),
+          child: Opacity(opacity: animation.value, child: _buildContent()),
         );
       },
     );
   }
 
   Widget _buildContent() {
+    const smallSpacing = 2.0;
+    final strokeWidth = dayFontSize * 0.15; // 约 1.5-2px
+
     if (isCurrent && isCompleted) {
       // 已完成 - 实心圆
       return Container(
@@ -289,7 +327,7 @@ class _DayItem extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: primaryColor.withOpacity(0.3),
-              blurRadius: 4,
+              blurRadius: iconSize * 0.2,
             ),
           ],
         ),
@@ -298,18 +336,14 @@ class _DayItem extends StatelessWidget {
           children: [
             Text(
               dayNumber.toString().padLeft(2, '0'),
-              style: const TextStyle(
-                fontSize: 12,
+              style: TextStyle(
+                fontSize: dayFontSize,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 2),
-            Icon(
-              Icons.check_circle,
-              color: Colors.white,
-              size: 18,
-            ),
+            SizedBox(height: smallSpacing),
+            Icon(Icons.check_circle, color: Colors.white, size: iconSize),
           ],
         ),
       );
@@ -317,9 +351,10 @@ class _DayItem extends StatelessWidget {
       // 已完成但不在当前连续中
       return Container(
         decoration: BoxDecoration(
-          color: isDark
-              ? Colors.grey.shade700.withOpacity(0.5)
-              : Colors.grey.shade100,
+          color:
+              isDark
+                  ? Colors.grey.shade700.withOpacity(0.5)
+                  : Colors.grey.shade100,
           shape: BoxShape.circle,
         ),
         child: Column(
@@ -328,16 +363,16 @@ class _DayItem extends StatelessWidget {
             Text(
               dayNumber.toString().padLeft(2, '0'),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: dayFontSize,
                 fontWeight: FontWeight.w600,
                 color: isDark ? Colors.grey.shade200 : Colors.grey.shade900,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: smallSpacing),
             Icon(
               Icons.check_circle,
               color: isDark ? Colors.grey.shade500 : Colors.grey.shade300,
-              size: 18,
+              size: iconSize,
             ),
           ],
         ),
@@ -349,7 +384,7 @@ class _DayItem extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(
             color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-            width: 2,
+            width: strokeWidth,
           ),
         ),
         child: Column(
@@ -358,16 +393,16 @@ class _DayItem extends StatelessWidget {
             Text(
               dayNumber.toString().padLeft(2, '0'),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: dayFontSize,
                 fontWeight: FontWeight.w600,
                 color: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: smallSpacing),
             Icon(
               Icons.check_circle,
               color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-              size: 18,
+              size: iconSize,
             ),
           ],
         ),
