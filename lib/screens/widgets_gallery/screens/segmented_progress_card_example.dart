@@ -30,15 +30,31 @@ class SegmentedProgressCardExample extends StatelessWidget {
                   child: SizedBox(
                     width: 160,
                     height: 180,
-                    child: const SegmentedProgressCardWidget(
+                    child: SegmentedProgressCardWidget(
                       title: 'Small',
                       currentValue: 50,
                       targetValue: 100,
-                      segments: [
-                        SegmentData(label: '餐饮', value: 20, color: Color(0xFFFF3B30)),
-                        SegmentData(label: '健身', value: 15, color: Color(0xFF007AFF)),
-                        SegmentData(label: '交通', value: 10, color: Color(0xFFFFCC00)),
-                        SegmentData(label: '其他', value: 5, color: Color(0xFF8E8E93)),
+                      segments: const [
+                        SegmentData(
+                          label: '餐饮',
+                          value: 20,
+                          color: Color(0xFFFF3B30),
+                        ),
+                        SegmentData(
+                          label: '健身',
+                          value: 15,
+                          color: Color(0xFF007AFF),
+                        ),
+                        SegmentData(
+                          label: '交通',
+                          value: 10,
+                          color: Color(0xFFFFCC00),
+                        ),
+                        SegmentData(
+                          label: '其他',
+                          value: 5,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ],
                       unit: '\$',
                       size: HomeWidgetSize.small,
@@ -52,15 +68,31 @@ class SegmentedProgressCardExample extends StatelessWidget {
                   child: SizedBox(
                     width: 280,
                     height: 300,
-                    child: const SegmentedProgressCardWidget(
+                    child: SegmentedProgressCardWidget(
                       title: 'Medium',
                       currentValue: 322,
                       targetValue: 443,
-                      segments: [
-                        SegmentData(label: '餐饮', value: 37, color: Color(0xFFFF3B30)),
-                        SegmentData(label: '健身', value: 43, color: Color(0xFF007AFF)),
-                        SegmentData(label: '交通', value: 31, color: Color(0xFFFFCC00)),
-                        SegmentData(label: '其他', value: 11, color: Color(0xFF8E8E93)),
+                      segments: const [
+                        SegmentData(
+                          label: '餐饮',
+                          value: 37,
+                          color: Color(0xFFFF3B30),
+                        ),
+                        SegmentData(
+                          label: '健身',
+                          value: 43,
+                          color: Color(0xFF007AFF),
+                        ),
+                        SegmentData(
+                          label: '交通',
+                          value: 31,
+                          color: Color(0xFFFFCC00),
+                        ),
+                        SegmentData(
+                          label: '其他',
+                          value: 11,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ],
                       unit: '\$',
                       size: HomeWidgetSize.medium,
@@ -74,17 +106,41 @@ class SegmentedProgressCardExample extends StatelessWidget {
                   child: SizedBox(
                     width: 360,
                     height: 400,
-                    child: const SegmentedProgressCardWidget(
+                    child: SegmentedProgressCardWidget(
                       title: 'Large',
                       currentValue: 890,
                       targetValue: 1200,
-                      segments: [
-                        SegmentData(label: '餐饮', value: 120, color: Color(0xFFFF3B30)),
-                        SegmentData(label: '健身', value: 150, color: Color(0xFF007AFF)),
-                        SegmentData(label: '交通', value: 85, color: Color(0xFFFFCC00)),
-                        SegmentData(label: '购物', value: 200, color: Color(0xFF34C759)),
-                        SegmentData(label: '娱乐', value: 95, color: Color(0xFFAF52DE)),
-                        SegmentData(label: '其他', value: 240, color: Color(0xFF8E8E93)),
+                      segments: const [
+                        SegmentData(
+                          label: '餐饮',
+                          value: 120,
+                          color: Color(0xFFFF3B30),
+                        ),
+                        SegmentData(
+                          label: '健身',
+                          value: 150,
+                          color: Color(0xFF007AFF),
+                        ),
+                        SegmentData(
+                          label: '交通',
+                          value: 85,
+                          color: Color(0xFFFFCC00),
+                        ),
+                        SegmentData(
+                          label: '购物',
+                          value: 200,
+                          color: Color(0xFF34C759),
+                        ),
+                        SegmentData(
+                          label: '娱乐',
+                          value: 95,
+                          color: Color(0xFFAF52DE),
+                        ),
+                        SegmentData(
+                          label: '其他',
+                          value: 240,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ],
                       unit: '\$',
                       size: HomeWidgetSize.large,

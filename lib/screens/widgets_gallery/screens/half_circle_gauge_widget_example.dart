@@ -30,7 +30,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
                   child: SizedBox(
                     width: 150,
                     height: 150,
-                    child: const HalfGaugeCardWidget(
+                    child: HalfGaugeCardWidget(
                       title: 'Small',
                       totalBudget: 10000,
                       remaining: 5089.49,
@@ -46,7 +46,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
                   child: SizedBox(
                     width: 220,
                     height: 220,
-                    child: const HalfGaugeCardWidget(
+                    child: HalfGaugeCardWidget(
                       title: 'Medium',
                       totalBudget: 10000,
                       remaining: 5089.49,
@@ -62,7 +62,7 @@ class HalfCircleGaugeWidgetExample extends StatelessWidget {
                   child: SizedBox(
                     width: 300,
                     height: 300,
-                    child: const HalfGaugeCardWidget(
+                    child: HalfGaugeCardWidget(
                       title: 'Large',
                       totalBudget: 10000,
                       remaining: 5089.49,
