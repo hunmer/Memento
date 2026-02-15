@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/circular_metrics_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 环形指标卡片示例
 class CircularMetricsCardExample extends StatelessWidget {
@@ -43,6 +44,7 @@ class CircularMetricsCardExample extends StatelessWidget {
                           color: Color(0xFFFB7185),
                         ),
                       ],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -78,6 +80,7 @@ class CircularMetricsCardExample extends StatelessWidget {
                           color: Color(0xFFFBBF24),
                         ),
                       ],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -120,6 +123,7 @@ class CircularMetricsCardExample extends StatelessWidget {
                           color: Color(0xFF6366F1),
                         ),
                       ],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),

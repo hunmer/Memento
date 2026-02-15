@@ -336,8 +336,8 @@ class _IconWithProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconSize = size.getIconSize();
-    final containerSize = iconSize * 1.2;  // 图标容器 = 图标大小 * 1.2
-    final strokeWidth = size.getStrokeWidth() * 0.4;  // 进度条粗细 = strokeWidth * 0.4
+    final containerSize = iconSize * size.iconContainerScale;
+    final strokeWidth = size.getStrokeWidth() * size.progressStrokeScale;
 
     return SizedBox(
       width: containerSize,
