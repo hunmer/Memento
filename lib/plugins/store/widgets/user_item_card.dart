@@ -92,12 +92,11 @@ class UserItemCard extends StatelessWidget {
                 // Image Section with Badge
                 Stack(
                   children: [
-                    SizedBox(
-                      height: 100,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 200),
                       child: AdaptiveImage(
                         imagePath: item.productImage.isEmpty ? null : item.productImage,
                         width: double.infinity,
-                        height: 100,
                         fit: BoxFit.cover,
                         borderRadius: 8,
                       ),

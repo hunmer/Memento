@@ -1,6 +1,7 @@
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/form_fields/event_multi_select_field.dart';
@@ -236,58 +237,61 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 通知设置标题
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                '通知设置',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            // 通知设置 - 仅在移动端平台显示
+            if (UniversalPlatform.isIOS || UniversalPlatform.isAndroid) ...[
+              // 通知设置标题
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  '通知设置',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
 
-            // 积分变动通知开关
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Card(
-                child: SwitchListTile(
-                  title: Text('store_enablePointsNotification'.tr),
-                  subtitle: Text(
-                    'store_enablePointsNotificationDescription'.tr,
+              // 积分变动通知开关
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  child: SwitchListTile(
+                    title: Text('store_enablePointsNotification'.tr),
+                    subtitle: Text(
+                      'store_enablePointsNotificationDescription'.tr,
+                    ),
+                    value: _enablePointsNotification,
+                    onChanged: (value) {
+                      setState(() {
+                        _enablePointsNotification = value;
+                      });
+                      _saveSwitchSettings(); // 自动保存
+                    },
                   ),
-                  value: _enablePointsNotification,
-                  onChanged: (value) {
-                    setState(() {
-                      _enablePointsNotification = value;
-                    });
-                    _saveSwitchSettings(); // 自动保存
-                  },
                 ),
               ),
-            ),
 
-            // 到期提醒开关
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Card(
-                child: SwitchListTile(
-                  title: Text('store_enableExpiringReminder'.tr),
-                  subtitle: Text('store_enableExpiringReminderDescription'.tr),
-                  value: _enableExpiringReminder,
-                  onChanged: (value) {
-                    setState(() {
-                      _enableExpiringReminder = value;
-                    });
-                    _saveSwitchSettings(); // 自动保存
-                  },
+              // 到期提醒开关
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  child: SwitchListTile(
+                    title: Text('store_enableExpiringReminder'.tr),
+                    subtitle: Text('store_enableExpiringReminderDescription'.tr),
+                    value: _enableExpiringReminder,
+                    onChanged: (value) {
+                      setState(() {
+                        _enableExpiringReminder = value;
+                      });
+                      _saveSwitchSettings(); // 自动保存
+                    },
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 24),
-            const Divider(),
-            const SizedBox(height: 8),
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 8),
+            ],
 
             // 积分奖励设置标题
             Padding(

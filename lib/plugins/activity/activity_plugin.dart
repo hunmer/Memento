@@ -22,6 +22,7 @@ import 'services/activity_service.dart';
 import 'services/activity_notification_service.dart';
 import 'services/activity_tts_announcement_service.dart';
 import 'models/activity_record.dart';
+import 'models/tts_announcement_settings.dart';
 import 'repositories/client_activity_repository.dart';
 import 'package:shared_models/shared_models.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -52,6 +53,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   late ActivityNotificationService _notificationService;
   late ActivityUseCase _activityUseCase;
   late ActivityTTSAnnouncementService _ttsAnnouncementService;
+  late TTSAnnouncementSettingsManager _ttsSettingsManager;
   bool _isInitialized = false;
 
   // 缓存今日统计数据（用于同步访问）
@@ -189,6 +191,11 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     _ttsAnnouncementService = ActivityTTSAnnouncementService(
       activityService: _activityService,
       ttsPlugin: TTSPlugin.instance,
+    );
+
+    // 初始化 TTS 设置管理器
+    _ttsSettingsManager = TTSAnnouncementSettingsManager(
+      storage: storage,
     );
 
     _isInitialized = true;
@@ -611,17 +618,16 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 加载播报服务设置
   Future<void> _loadTTSAnnouncementSettings() async {
     try {
-      final settings = await storage.read(
-        'activity/tts_announcement_settings.json',
-      );
+      final settings = await _ttsSettingsManager.load();
 
       _ttsAnnouncementService.updateConfig(
-        serviceId: settings['serviceId'] as String?,
-        unrecordedIntervalMinutes: settings['unrecordedIntervalMinutes'] as int? ?? 5,
-        textTemplate: settings['textTemplate'] as String? ?? '已超过 {unrecorded_time} 分钟未记录活动',
-        checkOnlyWorkHours: settings['checkOnlyWorkHours'] as bool? ?? false,
-        workHoursStart: settings['workHoursStart'] as int? ?? 9,
-        workHoursEnd: settings['workHoursEnd'] as int? ?? 18,
+        serviceId: settings.serviceId,
+        unrecordedIntervalMinutes: settings.unrecordedIntervalMinutes,
+        textTemplate: settings.textTemplate,
+        checkOnlyWorkHours: settings.checkOnlyWorkHours,
+        workHoursStart: settings.workHoursStart,
+        workHoursEnd: settings.workHoursEnd,
+        enableHapticFeedback: settings.enableHapticFeedback,
       );
 
       debugPrint('[ActivityPlugin] 播报设置已加载');
@@ -639,30 +645,19 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     bool? checkOnlyWorkHours,
     int? workHoursStart,
     int? workHoursEnd,
+    bool? enableHapticFeedback,
   }) async {
     try {
-      Map<String, dynamic> settings = {};
-      try {
-        settings = await storage.read('activity/tts_announcement_settings.json');
-      } catch (e) {
-        // 如果文件不存在，使用默认值
-        settings = {};
-      }
-
-      // 只更新提供的参数
-      if (isEnabled != null) settings['isEnabled'] = isEnabled;
-      if (serviceId != null) settings['serviceId'] = serviceId;
-      if (unrecordedIntervalMinutes != null) {
-        settings['unrecordedIntervalMinutes'] = unrecordedIntervalMinutes;
-      }
-      if (textTemplate != null) settings['textTemplate'] = textTemplate;
-      if (checkOnlyWorkHours != null) {
-        settings['checkOnlyWorkHours'] = checkOnlyWorkHours;
-      }
-      if (workHoursStart != null) settings['workHoursStart'] = workHoursStart;
-      if (workHoursEnd != null) settings['workHoursEnd'] = workHoursEnd;
-
-      await storage.write('activity/tts_announcement_settings.json', settings);
+      await _ttsSettingsManager.update(
+        isEnabled: isEnabled,
+        serviceId: serviceId,
+        unrecordedIntervalMinutes: unrecordedIntervalMinutes,
+        textTemplate: textTemplate,
+        checkOnlyWorkHours: checkOnlyWorkHours,
+        workHoursStart: workHoursStart,
+        workHoursEnd: workHoursEnd,
+        enableHapticFeedback: enableHapticFeedback,
+      );
     } catch (e) {
       debugPrint('[ActivityPlugin] 保存播报设置失败: $e');
     }
@@ -671,10 +666,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取播报间隔（分钟）
   Future<int> getTTSAnnouncementInterval() async {
     try {
-      final settings = await storage.read(
-        'activity/tts_announcement_settings.json',
-      );
-      return settings['unrecordedIntervalMinutes'] as int? ?? 5;
+      final settings = await _ttsSettingsManager.load();
+      return settings.unrecordedIntervalMinutes;
     } catch (e) {
       debugPrint('[ActivityPlugin] 读取播报间隔失败: $e');
       return 5;
@@ -698,10 +691,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取播报文本模板
   Future<String> getTTSAnnouncementText() async {
     try {
-      final settings = await storage.read(
-        'activity/tts_announcement_settings.json',
-      );
-      return settings['textTemplate'] as String? ?? '已超过 {unrecorded_time} 分钟未记录活动';
+      final settings = await _ttsSettingsManager.load();
+      return settings.textTemplate;
     } catch (e) {
       debugPrint('[ActivityPlugin] 读取播报文本失败: $e');
       return '已超过 {unrecorded_time} 分钟未记录活动';
@@ -768,10 +759,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   /// 获取播报服务 ID
   Future<String?> getTTSAnnouncementServiceId() async {
     try {
-      final settings = await storage.read(
-        'activity/tts_announcement_settings.json',
-      );
-      return settings['serviceId'] as String?;
+      final settings = await _ttsSettingsManager.load();
+      return settings.serviceId;
     } catch (e) {
       debugPrint('[ActivityPlugin] 读取播报服务 ID 失败: $e');
       return null;
@@ -786,6 +775,28 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       debugPrint('[ActivityPlugin] 播报服务 ID 已设置: $serviceId');
     } catch (e) {
       debugPrint('[ActivityPlugin] 设置播报服务 ID 失败: $e');
+      rethrow;
+    }
+  }
+
+  /// 获取震动反馈设置
+  Future<bool> getTTSAnnouncementHapticFeedback() async {
+    try {
+      final settings = await _ttsSettingsManager.load();
+      return settings.enableHapticFeedback;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  /// 设置震动反馈
+  Future<void> setTTSAnnouncementHapticFeedback(bool enabled) async {
+    try {
+      _ttsAnnouncementService.updateConfig(enableHapticFeedback: enabled);
+      await _saveTTSAnnouncementSettings(enableHapticFeedback: enabled);
+      debugPrint('[ActivityPlugin] 震动反馈已设置为: $enabled');
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 设置震动反馈失败: $e');
       rethrow;
     }
   }

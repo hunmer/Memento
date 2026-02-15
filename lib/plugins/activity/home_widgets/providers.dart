@@ -130,6 +130,34 @@ Widget buildCommonWidgetsWidget(
     );
   }
 
+  // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return EventListenerContainer(
+        events: const [
+          'activity_added',
+          'activity_updated',
+          'activity_deleted',
+        ],
+        onEvent: () => setState(() {}),
+        child: _buildCommonWidgetsContent(
+          context,
+          config,
+          commonWidgetId,
+          commonWidgetProps,
+        ),
+      );
+    },
+  );
+}
+
+/// 构建公共小组件内容（获取最新数据）
+Widget _buildCommonWidgetsContent(
+  BuildContext context,
+  Map<String, dynamic> config,
+  String commonWidgetId,
+  Map<String, dynamic> commonWidgetProps,
+) {
   // 查找对应的 CommonWidgetId 枚举
   final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
   if (widgetIdEnum == null) {
@@ -139,10 +167,14 @@ Widget buildCommonWidgetsWidget(
   // 获取元数据以确定默认尺寸
   final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
 
+  // 每次重建时重新获取最新数据
+  final latestData = provideCommonWidgets({});
+  final latestProps = latestData[commonWidgetId] ?? commonWidgetProps;
+
   return CommonWidgetBuilder.build(
     context,
     widgetIdEnum,
-    commonWidgetProps,
+    latestProps,
     metadata.defaultSize,
     inline: true,
   );
