@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/activity_record.dart';
 import '../services/activity_service.dart';
@@ -40,6 +41,9 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
   /// 工作时间结束（小时）
   int _workHoursEnd = 18;
 
+  /// 是否启用震动反馈
+  bool _enableHapticFeedback = true;
+
   /// 最近一次检查时间
   DateTime? _lastCheckTime;
 
@@ -69,6 +73,9 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
 
   /// 工作时间结束（小时）
   int get workHoursEnd => _workHoursEnd;
+
+  /// 是否启用震动反馈
+  bool get enableHapticFeedback => _enableHapticFeedback;
 
   /// 最近一次检查时间
   DateTime? get lastCheckTime => _lastCheckTime;
@@ -269,6 +276,10 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
   /// 执行播报
   Future<void> _speak(String text) async {
     try {
+      // 震动反馈
+      if (_enableHapticFeedback) {
+        HapticFeedback.heavyImpact();
+      }
       await ttsPlugin.speak(text, serviceId: _serviceId);
     } catch (e) {
       debugPrint('[ActivityTTSAnnouncement] 播报失败: $e');
@@ -283,6 +294,7 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
     bool? checkOnlyWorkHours,
     int? workHoursStart,
     int? workHoursEnd,
+    bool? enableHapticFeedback,
   }) {
     bool needRestart = false;
 
@@ -315,6 +327,11 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
     if (workHoursEnd != null && workHoursEnd != _workHoursEnd) {
       _workHoursEnd = workHoursEnd;
       needRestart = true;
+    }
+
+    if (enableHapticFeedback != null &&
+        enableHapticFeedback != _enableHapticFeedback) {
+      _enableHapticFeedback = enableHapticFeedback;
     }
 
     if (needRestart && _isActive) {

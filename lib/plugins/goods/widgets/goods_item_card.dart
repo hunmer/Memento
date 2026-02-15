@@ -196,12 +196,12 @@ class _GoodsItemCardState extends State<GoodsItemCard> {
                 // Image Section
                 Stack(
                   children: [
-                    AspectRatio(
-                      aspectRatio: 1.5, 
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 200),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: widget.item.imageUrl != null 
-                            ? _buildImage() 
+                        child: widget.item.imageUrl != null
+                            ? _buildImage()
                             : _buildIcon(),
                       ),
                     ),

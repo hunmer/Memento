@@ -25,14 +25,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  anthropic_sdk_dart:
-    dependency: "direct main"
-    description:
-      name: anthropic_sdk_dart
-      sha256: "50a0cca4d9706114034e31e0a56d1d6571d5277c91292b59b811c1e28d3ddbf5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.2"
   archive:
     dependency: "direct main"
     description:

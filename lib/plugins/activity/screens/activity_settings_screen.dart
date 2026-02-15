@@ -43,6 +43,9 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
   bool _isLoadingTTSServices = true;
   String? _selectedTTSServiceId;
 
+  // 震动反馈设置
+  bool _enableHapticFeedback = true;
+
   @override
   void initState() {
     super.initState();
@@ -231,6 +234,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
       final interval = await plugin.getTTSAnnouncementInterval();
       final text = await plugin.getTTSAnnouncementText();
       final workHours = await plugin.getWorkHoursSettings();
+      final hapticFeedback = await plugin.getTTSAnnouncementHapticFeedback();
 
       if (mounted) {
         setState(() {
@@ -240,6 +244,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
           _checkOnlyWorkHours = workHours['checkOnlyWorkHours'] as bool;
           _workHoursStart = workHours['workHoursStart'] as int;
           _workHoursEnd = workHours['workHoursEnd'] as int;
+          _enableHapticFeedback = hapticFeedback;
         });
       }
     } catch (e) {
@@ -341,34 +346,33 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('设置'),
-      ),
+      appBar: AppBar(title: Text('设置')),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : ListView(
                 padding: const EdgeInsets.all(16.0),
                 children: [
-                  // 通知设置区域
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.notifications_active,
-                                color: ActivityPlugin.instance.color,
-                                size: 28,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'activity_notificationSettings'.tr,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                  // 通知设置区域 - 仅在移动端平台显示
+                  if (UniversalPlatform.isIOS || UniversalPlatform.isAndroid)
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.notifications_active,
+                                  color: ActivityPlugin.instance.color,
+                                  size: 28,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'activity_notificationSettings'.tr,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -395,37 +399,6 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                               ),
                             ],
                           ),
-                          if (!UniversalPlatform.isAndroid) ...[
-                            const SizedBox(height: 12),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.orange.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.orange,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'activity_onlySupportsAndroid'.tr,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.orange),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-
                           // 通知时间设置
                           if (_isNotificationEnabled &&
                               UniversalPlatform.isAndroid) ...[
@@ -826,32 +799,39 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                             ],
 
                             const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.orange.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.orange,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      '需要先在 TTS 插件中配置语音服务',
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(color: Colors.orange),
+
+                            // 震动反馈开关
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.vibration,
+                                      size: 20,
+                                      color: ActivityPlugin.instance.color,
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '震动反馈',
+                                      style: theme.textTheme.titleSmall,
+                                    ),
+                                  ],
+                                ),
+                                Switch(
+                                  value: _enableHapticFeedback,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _enableHapticFeedback = value;
+                                    });
+                                    ActivityPlugin.instance
+                                        .setTTSAnnouncementHapticFeedback(
+                                          value,
+                                        );
+                                  },
+                                  activeColor: ActivityPlugin.instance.color,
+                                ),
+                              ],
                             ),
                           ],
                         ],
