@@ -253,39 +253,43 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
   Widget _buildMainContent(BuildContext context) {
     final size = widget.size;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedEmotionText(
-              emotionText: widget.currentEmotionText,
-              size: size,
-            ),
-            SizedBox(height: size.getItemSpacing() / 2),
-            Text(
-              'Logged ${widget.loggedCount}/${widget.totalCount}',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                fontWeight: FontWeight.w300,
-                fontSize: size.getSubtitleFontSize(),
-              ),
-            ),
-          ],
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Row(
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              for (int i = 0; i < widget.weekEmotions.length; i += 1) ...[
-                if (i > 0) SizedBox(width: size.getItemSpacing()),
-                _buildDayButton(context, i),
-              ],
+              AnimatedEmotionText(
+                emotionText: widget.currentEmotionText,
+                size: size,
+              ),
+              SizedBox(height: size.getItemSpacing() / 2),
+              Text(
+                'Logged ${widget.loggedCount}/${widget.totalCount}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  fontWeight: FontWeight.w300,
+                  fontSize: size.getSubtitleFontSize(),
+                ),
+              ),
             ],
+          ),
+        ),
+        SizedBox(width: size.getItemSpacing()),
+        Flexible(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 0; i < widget.weekEmotions.length; i += 1) ...[
+                  if (i > 0) SizedBox(width: size.getItemSpacing()),
+                  _buildDayButton(context, i),
+                ],
+              ],
+            ),
           ),
         ),
       ],

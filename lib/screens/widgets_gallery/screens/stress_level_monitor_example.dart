@@ -34,11 +34,31 @@ class StressLevelMonitorExample extends StatelessWidget {
                       status: 'Stressed',
                       scoreUnit: 'pts',
                       weeklyData: [
-                        WeeklyLevelData(day: 'M', value: 0.45, isSelected: false),
-                        WeeklyLevelData(day: 'T', value: 0.25, isSelected: false),
-                        WeeklyLevelData(day: 'W', value: 0.60, isSelected: true),
-                        WeeklyLevelData(day: 'T', value: 0.85, isSelected: false),
-                        WeeklyLevelData(day: 'F', value: 0.35, isSelected: false),
+                        WeeklyLevelData(
+                          day: 'M',
+                          value: 0.45,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'T',
+                          value: 0.25,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'W',
+                          value: 0.60,
+                          isSelected: true,
+                        ),
+                        WeeklyLevelData(
+                          day: 'T',
+                          value: 0.85,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'F',
+                          value: 0.35,
+                          isSelected: false,
+                        ),
                       ],
                       onTodayTap: _onTodayTap,
                       onBarTap: _onBarTap,
@@ -59,12 +79,36 @@ class StressLevelMonitorExample extends StatelessWidget {
                       status: 'Stressed Out',
                       scoreUnit: 'pts',
                       weeklyData: [
-                        WeeklyLevelData(day: 'Mon', value: 0.45, isSelected: false),
-                        WeeklyLevelData(day: 'Tue', value: 0.25, isSelected: false),
-                        WeeklyLevelData(day: 'Wed', value: 0.60, isSelected: false),
-                        WeeklyLevelData(day: 'Thu', value: 0.85, isSelected: true),
-                        WeeklyLevelData(day: 'Fri', value: 0.35, isSelected: false),
-                        WeeklyLevelData(day: 'Sat', value: 0.15, isSelected: false),
+                        WeeklyLevelData(
+                          day: 'Mon',
+                          value: 0.45,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Tue',
+                          value: 0.25,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Wed',
+                          value: 0.60,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Thu',
+                          value: 0.85,
+                          isSelected: true,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Fri',
+                          value: 0.35,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Sat',
+                          value: 0.15,
+                          isSelected: false,
+                        ),
                       ],
                       onTodayTap: _onTodayTap,
                       onBarTap: _onBarTap,
@@ -85,13 +129,41 @@ class StressLevelMonitorExample extends StatelessWidget {
                       status: 'Stressed Out',
                       scoreUnit: 'pts',
                       weeklyData: [
-                        WeeklyLevelData(day: 'Mon', value: 0.45, isSelected: false),
-                        WeeklyLevelData(day: 'Tue', value: 0.25, isSelected: false),
-                        WeeklyLevelData(day: 'Wed', value: 0.60, isSelected: false),
-                        WeeklyLevelData(day: 'Thu', value: 0.85, isSelected: true),
-                        WeeklyLevelData(day: 'Fri', value: 0.35, isSelected: false),
-                        WeeklyLevelData(day: 'Sat', value: 0.15, isSelected: false),
-                        WeeklyLevelData(day: 'Sun', value: 0.40, isSelected: false),
+                        WeeklyLevelData(
+                          day: 'Mon',
+                          value: 0.45,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Tue',
+                          value: 0.25,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Wed',
+                          value: 0.60,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Thu',
+                          value: 0.85,
+                          isSelected: true,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Fri',
+                          value: 0.35,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Sat',
+                          value: 0.15,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Sun',
+                          value: 0.40,
+                          isSelected: false,
+                        ),
                       ],
                       onTodayTap: _onTodayTap,
                       onBarTap: _onBarTap,
@@ -111,13 +183,41 @@ class StressLevelMonitorExample extends StatelessWidget {
                     status: 'Stressed Out - Needs Attention',
                     scoreUnit: 'pts',
                     weeklyData: [
-                      WeeklyLevelData(day: 'Mon', value: 0.45, isSelected: false),
-                      WeeklyLevelData(day: 'Tue', value: 0.25, isSelected: false),
-                      WeeklyLevelData(day: 'Wed', value: 0.60, isSelected: false),
-                      WeeklyLevelData(day: 'Thu', value: 0.85, isSelected: true),
-                      WeeklyLevelData(day: 'Fri', value: 0.35, isSelected: false),
-                      WeeklyLevelData(day: 'Sat', value: 0.15, isSelected: false),
-                      WeeklyLevelData(day: 'Sun', value: 0.40, isSelected: false),
+                      WeeklyLevelData(
+                        day: 'Mon',
+                        value: 0.45,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Tue',
+                        value: 0.25,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Wed',
+                        value: 0.60,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Thu',
+                        value: 0.85,
+                        isSelected: true,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Fri',
+                        value: 0.35,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Sat',
+                        value: 0.15,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Sun',
+                        value: 0.40,
+                        isSelected: false,
+                      ),
                     ],
                     onTodayTap: _onTodayTap,
                     onBarTap: _onBarTap,
@@ -136,13 +236,41 @@ class StressLevelMonitorExample extends StatelessWidget {
                     status: 'Stressed Out - Requires Immediate Attention',
                     scoreUnit: 'pts',
                     weeklyData: [
-                      WeeklyLevelData(day: 'Monday', value: 0.45, isSelected: false),
-                      WeeklyLevelData(day: 'Tuesday', value: 0.25, isSelected: false),
-                      WeeklyLevelData(day: 'Wednesday', value: 0.60, isSelected: false),
-                      WeeklyLevelData(day: 'Thursday', value: 0.85, isSelected: true),
-                      WeeklyLevelData(day: 'Friday', value: 0.35, isSelected: false),
-                      WeeklyLevelData(day: 'Saturday', value: 0.15, isSelected: false),
-                      WeeklyLevelData(day: 'Sunday', value: 0.40, isSelected: false),
+                      WeeklyLevelData(
+                        day: 'Monday',
+                        value: 0.45,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Tuesday',
+                        value: 0.25,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Wednesday',
+                        value: 0.60,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Thursday',
+                        value: 0.85,
+                        isSelected: true,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Friday',
+                        value: 0.35,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Saturday',
+                        value: 0.15,
+                        isSelected: false,
+                      ),
+                      WeeklyLevelData(
+                        day: 'Sunday',
+                        value: 0.40,
+                        isSelected: false,
+                      ),
                     ],
                     onTodayTap: _onTodayTap,
                     onBarTap: _onBarTap,
@@ -163,7 +291,9 @@ class StressLevelMonitorExample extends StatelessWidget {
 
   /// 柱状图点击回调
   static void _onBarTap(int index, WeeklyLevelData data) {
-    debugPrint('Bar tapped: index=$index, day=${data.day}, value=${data.value}');
+    debugPrint(
+      'Bar tapped: index=$index, day=${data.day}, value=${data.value}',
+    );
   }
 
   Widget _buildSectionTitle(String title) {
