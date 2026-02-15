@@ -148,7 +148,7 @@ class _SegmentedProgressCardWidgetState
         width: widget.inline ? double.maxFinite : 340,
         decoration: BoxDecoration(
           color: isDark ? Colors.black : Colors.white,
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             if (!isDark)
               BoxShadow(

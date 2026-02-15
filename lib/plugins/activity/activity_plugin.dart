@@ -148,10 +148,16 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       _handleNotificationTapped,
     );
 
-    // 监听活动变化事件，刷新7天缓存
-    eventManager.subscribe('activity_added', (_) => _refreshWeeklyActivitiesCache());
-    eventManager.subscribe('activity_updated', (_) => _refreshWeeklyActivitiesCache());
-    eventManager.subscribe('activity_deleted', (_) => _refreshWeeklyActivitiesCache());
+    // 监听活动变化事件，同时刷新周缓存和今日缓存
+    void refreshAllCaches() {
+      _refreshWeeklyActivitiesCache();
+      refreshTodayActivitiesCache();
+      _refreshYesterdayActivitiesCache();
+    }
+
+    eventManager.subscribe('activity_added', (_) => refreshAllCaches());
+    eventManager.subscribe('activity_updated', (_) => refreshAllCaches());
+    eventManager.subscribe('activity_deleted', (_) => refreshAllCaches());
   }
 
   /// 处理通知点击事件
@@ -312,6 +318,9 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       _cachedTodayActivityCount = activities.length;
       _cachedTodayActivityDuration =
           activities.fold<int>(0, (sum, a) => sum + a.durationInMinutes);
+
+      // 缓存刷新完成后通知监听器
+      eventManager.broadcast('activity_cache_updated', EventArgs());
     } catch (e) {
       debugPrint('[ActivityPlugin] 刷新今日活动缓存失败: $e');
     }

@@ -31,6 +31,7 @@ void registerCommonWidgets(HomeWidgetRegistry registry) {
                 'activity_added',
                 'activity_updated',
                 'activity_deleted',
+                'activity_cache_updated', // 缓存刷新完成事件
               ],
               onEvent: () => setState(() {}),
               child: buildCommonWidgetsWidget(context, config),
