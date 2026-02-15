@@ -6,41 +6,57 @@ class CustomDialogExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('自定义对话框示例'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'CustomDialog',
-              style: Theme.of(context).textTheme.titleLarge,
+      body: Container(
+        color: isDark ? Colors.black : const Color(0xFFF2F2F7),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('对话框类型'),
+                const SizedBox(height: 16),
+                _buildDialogButton(
+                  context,
+                  title: '基础对话框',
+                  icon: Icons.message,
+                  onPressed: () => _showBasicDialog(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDialogButton(
+                  context,
+                  title: '确认对话框',
+                  icon: Icons.check_circle,
+                  onPressed: () => _showConfirmDialog(context),
+                ),
+                const SizedBox(height: 16),
+                _buildDialogButton(
+                  context,
+                  title: '输入对话框',
+                  icon: Icons.edit,
+                  onPressed: () => _showInputDialog(context),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Text('Flutter 的 AlertDialog 和 SimpleDialogDialog 组件。'),
-            const SizedBox(height: 32),
-            _buildDialogButton(
-              context,
-              title: '基础对话框',
-              onPressed: () => _showBasicDialog(context),
-            ),
-            const SizedBox(height: 16),
-            _buildDialogButton(
-              context,
-              title: '确认对话框',
-              onPressed: () => _showConfirmDialog(context),
-            ),
-            const SizedBox(height: 16),
-            _buildDialogButton(
-              context,
-              title: '输入对话框',
-              onPressed: () => _showInputDialog(context),
-            ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }
@@ -48,13 +64,15 @@ class CustomDialogExample extends StatelessWidget {
   Widget _buildDialogButton(
     BuildContext context, {
     required String title,
+    required IconData icon,
     required VoidCallback onPressed,
   }) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: onPressed,
-        child: Text(title),
+        icon: Icon(icon),
+        label: Text(title),
       ),
     );
   }

@@ -13,17 +13,80 @@ class MiniTrendCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('迷你趋势卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF3F4F6),
-        child: const Center(
-          child: MiniTrendCardWidget(
-            title: 'Heart Rate',
-            icon: Icons.monitor_heart,
-            currentValue: 72,
-            unit: 'bpm',
-            subtitle: 'Resting Rate',
-            weekDays: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-            trendData: [20, 22, 15, 35, 25, 35, 28, 32, 25, 40, 45, 35, 50, 60],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: MiniTrendCardWidget(
+                      title: 'Heart Rate',
+                      icon: Icons.monitor_heart,
+                      currentValue: 72,
+                      unit: 'bpm',
+                      subtitle: 'Resting Rate',
+                      weekDays: const ['M', 'T', 'W'],
+                      trendData: const [20, 22, 15],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: MiniTrendCardWidget(
+                      title: 'Heart Rate',
+                      icon: Icons.monitor_heart,
+                      currentValue: 72,
+                      unit: 'bpm',
+                      subtitle: 'Resting Rate',
+                      weekDays: const ['M', 'T', 'W', 'T', 'F'],
+                      trendData: const [20, 22, 15, 35, 25],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 280,
+                    height: 280,
+                    child: MiniTrendCardWidget(
+                      title: 'Heart Rate',
+                      icon: Icons.monitor_heart,
+                      currentValue: 72,
+                      unit: 'bpm',
+                      subtitle: 'Resting Rate',
+                      weekDays: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+                      trendData: const [20, 22, 15, 35, 25, 35, 28],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

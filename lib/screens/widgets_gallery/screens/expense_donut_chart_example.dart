@@ -13,20 +13,86 @@ class ExpenseDonutChartExample extends StatelessWidget {
       appBar: AppBar(title: const Text('支出分类环形图')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF3F4F6),
-        child: const Center(
-          child: ExpenseDonutChartWidget(
-            badgeLabel: 'Expenses',
-            timePeriod: 'In the past 7 days',
-            totalAmount: 32,
-            totalUnit: 'K',
-            categories: [
-              ExpenseCategoryData(label: 'Relax', percentage: 54, color: Color(0xFF2DD4BF)),
-              ExpenseCategoryData(label: 'Food', percentage: 27, color: Color(0xFF8B5CF6)),
-              ExpenseCategoryData(label: 'Transport', percentage: 12, color: Color(0xFFD8F57E)),
-              ExpenseCategoryData(label: 'Pets', percentage: 7, color: Color(0xFFFDBA74)),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: ExpenseDonutChartWidget(
+                      badgeLabel: 'Expenses',
+                      timePeriod: 'In the past 7 days',
+                      totalAmount: 32,
+                      totalUnit: 'K',
+                      categories: const [
+                        ExpenseCategoryData(label: 'Relax', percentage: 54, color: Color(0xFF2DD4BF)),
+                        ExpenseCategoryData(label: 'Food', percentage: 27, color: Color(0xFF8B5CF6)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: ExpenseDonutChartWidget(
+                      badgeLabel: 'Expenses',
+                      timePeriod: 'In the past 7 days',
+                      totalAmount: 32,
+                      totalUnit: 'K',
+                      categories: const [
+                        ExpenseCategoryData(label: 'Relax', percentage: 54, color: Color(0xFF2DD4BF)),
+                        ExpenseCategoryData(label: 'Food', percentage: 27, color: Color(0xFF8B5CF6)),
+                        ExpenseCategoryData(label: 'Transport', percentage: 12, color: Color(0xFFD8F57E)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: ExpenseDonutChartWidget(
+                      badgeLabel: 'Expenses',
+                      timePeriod: 'In the past 7 days',
+                      totalAmount: 32,
+                      totalUnit: 'K',
+                      categories: const [
+                        ExpenseCategoryData(label: 'Relax', percentage: 54, color: Color(0xFF2DD4BF)),
+                        ExpenseCategoryData(label: 'Food', percentage: 27, color: Color(0xFF8B5CF6)),
+                        ExpenseCategoryData(label: 'Transport', percentage: 12, color: Color(0xFFD8F57E)),
+                        ExpenseCategoryData(label: 'Pets', percentage: 7, color: Color(0xFFFDBA74)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

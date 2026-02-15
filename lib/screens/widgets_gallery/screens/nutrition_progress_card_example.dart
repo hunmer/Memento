@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/split_column_progress_bar_card.dart';
 
 /// 营养进度卡片示例
-class SplitColumnProgressBarCardExample extends StatelessWidget {
-  const SplitColumnProgressBarCardExample({super.key});
+class NutritionProgressCardExample extends StatelessWidget {
+  const NutritionProgressCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,41 +13,152 @@ class SplitColumnProgressBarCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('营养进度卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: SplitColumnProgressBarCard(
-            leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
-            leftConfig: LeftSectionConfig(
-              icon: '🔥',
-              label: 'Calories',
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: SplitColumnProgressBarCard(
+                      leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
+                      leftConfig: LeftSectionConfig(
+                        icon: '🔥',
+                        label: 'Calories',
+                      ),
+                      rightItems: [
+                        ProgressItemData(
+                          icon: '🍔',
+                          name: 'Protein',
+                          current: 66,
+                          total: 94,
+                          color: const Color(0xFF34D399),
+                          subtitle: '早餐 / 午餐',
+                        ),
+                        ProgressItemData(
+                          icon: '🍉',
+                          name: 'Carbs',
+                          current: 35,
+                          total: 64,
+                          color: const Color(0xFFFED7AA),
+                          subtitle: '全麦面包',
+                        ),
+                        ProgressItemData(
+                          icon: '🥛',
+                          name: 'Fats',
+                          current: 21,
+                          total: 32,
+                          color: const Color(0xFF3B82F6),
+                          subtitle: '坚果 / 鳄梨',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: SplitColumnProgressBarCard(
+                      leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
+                      leftConfig: LeftSectionConfig(
+                        icon: '🔥',
+                        label: 'Calories',
+                      ),
+                      rightItems: [
+                        ProgressItemData(
+                          icon: '🍔',
+                          name: 'Protein',
+                          current: 66,
+                          total: 94,
+                          color: const Color(0xFF34D399),
+                          subtitle: '早餐 / 午餐',
+                        ),
+                        ProgressItemData(
+                          icon: '🍉',
+                          name: 'Carbs',
+                          current: 35,
+                          total: 64,
+                          color: const Color(0xFFFED7AA),
+                          subtitle: '全麦面包',
+                        ),
+                        ProgressItemData(
+                          icon: '🥛',
+                          name: 'Fats',
+                          current: 21,
+                          total: 32,
+                          color: const Color(0xFF3B82F6),
+                          subtitle: '坚果 / 鳄梨',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: SplitColumnProgressBarCard(
+                      leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
+                      leftConfig: LeftSectionConfig(
+                        icon: '🔥',
+                        label: 'Calories',
+                      ),
+                      rightItems: [
+                        ProgressItemData(
+                          icon: '🍔',
+                          name: 'Protein',
+                          current: 66,
+                          total: 94,
+                          color: const Color(0xFF34D399),
+                          subtitle: '早餐 / 午餐',
+                        ),
+                        ProgressItemData(
+                          icon: '🍉',
+                          name: 'Carbs',
+                          current: 35,
+                          total: 64,
+                          color: const Color(0xFFFED7AA),
+                          subtitle: '全麦面包',
+                        ),
+                        ProgressItemData(
+                          icon: '🥛',
+                          name: 'Fats',
+                          current: 21,
+                          total: 32,
+                          color: const Color(0xFF3B82F6),
+                          subtitle: '坚果 / 鳄梨',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            rightItems: [
-              ProgressItemData(
-                icon: '🍔',
-                name: 'Protein',
-                current: 66,
-                total: 94,
-                color: Color(0xFF34D399),
-                subtitle: '早餐 / 午餐',
-              ),
-              ProgressItemData(
-                icon: '🍉',
-                name: 'Carbs',
-                current: 35,
-                total: 64,
-                color: Color(0xFFFED7AA),
-                subtitle: '全麦面包',
-              ),
-              ProgressItemData(
-                icon: '🥛',
-                name: 'Fats',
-                current: 21,
-                total: 32,
-                color: Color(0xFF3B82F6),
-                subtitle: '坚果 / 鳄梨',
-              ),
-            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

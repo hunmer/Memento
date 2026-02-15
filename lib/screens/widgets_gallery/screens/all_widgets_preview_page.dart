@@ -357,7 +357,7 @@ class _WidgetRegistry {
     '/widgets_gallery/icon_circular_progress_card':
         () => const IconCircularProgressCardExample(),
     '/widgets_gallery/nutrition_progress_card':
-        () => SplitColumnProgressBarCardExample(),
+        () => const NutritionProgressCardExample(),
     '/widgets_gallery/task_progress_list_card':
         () => const TaskProgressListCardExample(),
     '/widgets_gallery/rounded_task_progress_widget':
@@ -441,7 +441,7 @@ class _WidgetRegistry {
     '/widgets_gallery/trend_value_card': () => const TrendValueCardExample(),
     '/widgets_gallery/trend_list_card': () => const TrendListCardExample(),
     '/widgets_gallery/weight_trend_chart':
-        () => CardTrendLineChartExample(),
+        () => const WeightTrendChartExample(),
     '/widgets_gallery/dual_bar_chart_card':
         () => const DualBarChartCardExample(),
     '/widgets_gallery/weekly_bars_card': () => const WeeklyBarsCardExample(),

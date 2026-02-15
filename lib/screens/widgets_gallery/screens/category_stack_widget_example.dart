@@ -13,20 +13,89 @@ class CategoryStackWidgetExample extends StatelessWidget {
       appBar: AppBar(title: const Text('分类堆叠消费卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: CategoryStackWidget(
-            title: 'Today Spending',
-            currentAmount: 322,
-            targetAmount: 443,
-            currency: '\$',
-            categories: [
-              CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
-              CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
-              CategoryData(label: 'Fitness', amount: 43, color: Color(0xFF0A84FF), percentage: 0.20),
-              CategoryData(label: 'Other', amount: 11, color: Color(0xFF8E8E93), percentage: 0.10),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: CategoryStackWidget(
+                      title: 'Today Spending',
+                      currentAmount: 322,
+                      targetAmount: 443,
+                      currency: r'$',
+                      categories: const [
+                        CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
+                        CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
+                        CategoryData(label: 'Fitness', amount: 43, color: Color(0xFF0A84FF), percentage: 0.20),
+                        CategoryData(label: 'Other', amount: 11, color: Color(0xFF8E8E93), percentage: 0.10),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: CategoryStackWidget(
+                      title: 'Today Spending',
+                      currentAmount: 322,
+                      targetAmount: 443,
+                      currency: r'$',
+                      categories: const [
+                        CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
+                        CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
+                        CategoryData(label: 'Fitness', amount: 43, color: Color(0xFF0A84FF), percentage: 0.20),
+                        CategoryData(label: 'Other', amount: 11, color: Color(0xFF8E8E93), percentage: 0.10),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: CategoryStackWidget(
+                      title: 'Today Spending',
+                      currentAmount: 322,
+                      targetAmount: 443,
+                      currency: r'$',
+                      categories: const [
+                        CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
+                        CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
+                        CategoryData(label: 'Fitness', amount: 43, color: Color(0xFF0A84FF), percentage: 0.20),
+                        CategoryData(label: 'Other', amount: 11, color: Color(0xFF8E8E93), percentage: 0.10),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

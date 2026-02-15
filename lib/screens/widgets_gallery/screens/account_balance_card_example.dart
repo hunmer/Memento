@@ -14,47 +14,107 @@ class AccountBalanceCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('账户余额卡片')),
       body: Container(
         color: isDark ? const Color(0xFF101622) : const Color(0xFFF6F6F8),
-        child: Center(
-          child: AccountBalanceCardWidget(
-            accounts: const [
-              AccountBalanceCardData(
-                name: '现金',
-                iconName: 'account_balance_wallet',
-                iconColor: '#3498DB',
-                billCount: 15,
-                balance: 1250.75,
-              ),
-              AccountBalanceCardData(
-                name: '银行卡 (6077)',
-                iconName: 'account_balance',
-                iconColor: '#F97316',
-                billCount: 82,
-                balance: 23890.12,
-              ),
-              AccountBalanceCardData(
-                name: '支付宝',
-                iconName: 'payment',
-                iconColor: '#0EA5E9',
-                billCount: 128,
-                balance: 5432.88,
-              ),
-              AccountBalanceCardData(
-                name: '微信钱包',
-                iconName: 'chat_bubble',
-                iconColor: '#10B981',
-                billCount: 97,
-                balance: 888.66,
-              ),
-              AccountBalanceCardData(
-                name: '信用卡 (2345)',
-                iconName: 'credit_card',
-                iconColor: '#EF4444',
-                billCount: 45,
-                balance: -4500.00,
-              ),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: AccountBalanceCardWidget(
+                      accounts: const [
+                        AccountBalanceCardData(
+                          name: '现金',
+                          iconName: 'account_balance_wallet',
+                          iconColor: '#3498DB',
+                          billCount: 15,
+                          balance: 1250.75,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: AccountBalanceCardWidget(
+                      accounts: const [
+                        AccountBalanceCardData(
+                          name: '现金',
+                          iconName: 'account_balance_wallet',
+                          iconColor: '#3498DB',
+                          billCount: 15,
+                          balance: 1250.75,
+                        ),
+                        AccountBalanceCardData(
+                          name: '银行卡 (6077)',
+                          iconName: 'account_balance',
+                          iconColor: '#F97316',
+                          billCount: 82,
+                          balance: 23890.12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: AccountBalanceCardWidget(
+                      accounts: const [
+                        AccountBalanceCardData(
+                          name: '现金',
+                          iconName: 'account_balance_wallet',
+                          iconColor: '#3498DB',
+                          billCount: 15,
+                          balance: 1250.75,
+                        ),
+                        AccountBalanceCardData(
+                          name: '银行卡 (6077)',
+                          iconName: 'account_balance',
+                          iconColor: '#F97316',
+                          billCount: 82,
+                          balance: 23890.12,
+                        ),
+                        AccountBalanceCardData(
+                          name: '支付宝',
+                          iconName: 'payment',
+                          iconColor: '#0EA5E9',
+                          billCount: 128,
+                          balance: 5432.88,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }
