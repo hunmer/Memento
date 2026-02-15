@@ -239,7 +239,7 @@ MyWidget(data: data, size: const LargeSize()),
 // 中宽尺寸 (4x1) - 宽度填满屏幕
 SizedBox(
   width: MediaQuery.of(context).size.width - 32,
-  height: 160,
+  height: 220,
   child: MyWidget(data: data, size: const WideSize()),
 ),
 
