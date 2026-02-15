@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/dual_range_chart_card.dart';
 
 /// 双范围图表统计卡片示例
@@ -26,6 +27,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DualRangeChartCardWidget(
+                      size: HomeWidgetSize.small,
                       date: 'Jan 12, 2028',
                       weekDays: ['Wed', 'Thu', 'Fri'],
                       ranges: const [
@@ -58,6 +60,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: DualRangeChartCardWidget(
+                      size: HomeWidgetSize.medium,
                       date: 'Jan 12, 2028',
                       weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                       ranges: const [
@@ -95,6 +98,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                     width: 350,
                     height: 300,
                     child: DualRangeChartCardWidget(
+                      size: HomeWidgetSize.large,
                       date: 'Jan 12, 2028',
                       weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue'],
                       ranges: const [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/dual_bar_chart_card.dart';
 
 /// 双柱状图统计卡片示例
@@ -38,6 +39,7 @@ class DualBarChartCardExample extends StatelessWidget {
                         DualBarData(primary: 12, secondary: 32),
                         DualBarData(primary: 20, secondary: 16),
                       ],
+                      size: HomeWidgetSize.small,
                     ),
                   ),
                 ),
@@ -66,6 +68,7 @@ class DualBarChartCardExample extends StatelessWidget {
                         DualBarData(primary: 16, secondary: 32),
                         DualBarData(primary: 40, secondary: 28),
                       ],
+                      size: HomeWidgetSize.medium,
                     ),
                   ),
                 ),
@@ -96,6 +99,7 @@ class DualBarChartCardExample extends StatelessWidget {
                         DualBarData(primary: 32, secondary: 36),
                         DualBarData(primary: 16, secondary: 48),
                       ],
+                      size: HomeWidgetSize.large,
                     ),
                   ),
                 ),

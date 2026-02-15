@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/watch_progress_card.dart';
 
 /// 观看进度卡片示例
@@ -26,6 +27,7 @@ class WatchProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: WatchProgressCardWidget(
+                      size: HomeWidgetSize.small,
                       userName: 'James',
                       lastWatched: '2 days ago',
                       currentCount: 16,
@@ -55,6 +57,7 @@ class WatchProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: WatchProgressCardWidget(
+                      size: HomeWidgetSize.medium,
                       userName: 'James',
                       lastWatched: '2 days ago',
                       currentCount: 16,
@@ -84,6 +87,7 @@ class WatchProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: WatchProgressCardWidget(
+                      size: HomeWidgetSize.large,
                       userName: 'James',
                       lastWatched: '2 days ago',
                       currentCount: 16,

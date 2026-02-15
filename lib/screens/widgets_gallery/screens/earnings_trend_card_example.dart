@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/earnings_trend_card.dart';
 
 /// 收益趋势卡片示例
@@ -26,6 +27,7 @@ class EarningsTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: EarningsTrendCardWidget(
+                      size: HomeWidgetSize.small,
                       title: 'Expected earnings',
                       value: 682.5,
                       currency: '€',
@@ -42,6 +44,7 @@ class EarningsTrendCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: EarningsTrendCardWidget(
+                      size: HomeWidgetSize.medium,
                       title: 'Expected earnings',
                       value: 682.5,
                       currency: '€',
@@ -58,6 +61,7 @@ class EarningsTrendCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: EarningsTrendCardWidget(
+                      size: HomeWidgetSize.large,
                       title: 'Expected earnings',
                       value: 682.5,
                       currency: '€',

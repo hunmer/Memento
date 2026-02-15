@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/curve_progress_card.dart';
 
 /// 曲线进度卡片示例
@@ -26,6 +27,7 @@ class CurveProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: CurveProgressCardWidget(
+                      size: HomeWidgetSize.small,
                       value: 8524.0,
                       label: 'Total Hours',
                       change: 1248.0,
@@ -45,6 +47,7 @@ class CurveProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: CurveProgressCardWidget(
+                      size: HomeWidgetSize.medium,
                       value: 8524.0,
                       label: 'Total Hours',
                       change: 1248.0,
@@ -64,6 +67,7 @@ class CurveProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: CurveProgressCardWidget(
+                      size: HomeWidgetSize.large,
                       value: 8524.0,
                       label: 'Total Hours',
                       change: 1248.0,

@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/profile_card_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/social_profile_card.dart';
 
-/// 个人资料卡片示例
-class ProfileCardWidgetExample extends StatelessWidget {
-  const ProfileCardWidgetExample({super.key});
+/// 社交资料卡片示例
+class SocialProfileCardExample extends StatelessWidget {
+  const SocialProfileCardExample({super.key});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('个人资料卡片')),
+      appBar: AppBar(title: const Text('社交资料卡片')),
       body: Container(
-        color: isDark ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
+        color: isDark ? Colors.black : const Color(0xFF6B7280),
         child: const Center(
-          child: ProfileCardWidget(
-            imageUrl:
-                'https://lh3.googleusercontent.com/aida-public/AB6AXuAQa5mwNY07R4lgli2Pgrxz3J9D6F6Plz6c9LGFNt4BYe9qp7wGfu6OnEFI-UAnneZ-qsWObIYUU_LVIN9_RypXCavX3hG7YUVTVgYgYhQiHXBBfy_W5EtO3oCjLBQ2eNlXRXxiKMEcC_tGq7UHLix8Zm7_Zawt0dvlp6ouuGhSkraBr9hjl6hKfAC5CL8rTgObw-xh-DnmtLVs5Msvp8N6dZgasjTEMmwR8or2JI6MCsXD0i43ZVNUATo21RHx95nyAFAf5zJuuDyg',
-            name: 'Sophie Bennett',
-            isVerified: true,
-            bio: 'Product Designer who focuses on simplicity & usability.',
-            followersCount: 312,
-            followingCount: 48,
+          child: SocialProfileCardWidget(
+            size: HomeWidgetSize.large,
+            avatarUrl:
+                'https://lh3.googleusercontent.com/aida-public/AB6AXuDQBpvx8sVdqYMemqByF96wLVYDtKW2gysxp-DEVKMyV3MGBTO-SsYubZDkdx5YssNyEMNJt6kvNtVYwQcVPx5B_mWC8_-MjNgJneO5473aTTjd1qXZfgDNP6VeWyC_C84X-Bp7lNiLH1tILc1wpNs41UWjaBbQDyDvaPqVEPVQelJXoG5ULoGdueUtFJNSli1Ld1TpetG4-BdTLbjtKH0Zfusp7suNwuqNbbeI2QIExxTTHzhIq474K8TdUTKrDO3Pe01o91TWNw',
+            name: 'Sammy Lawson',
+            handle: '@CoRay',
+            followers: 3600,
+            posts: 248,
+            tag: '#technology',
+            content: "It's incredible to see art, creativity and technology come together celebration",
+            comments: 3600,
+            shares: 12000,
           ),
         ),
       ),

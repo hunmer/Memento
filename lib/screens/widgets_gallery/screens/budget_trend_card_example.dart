@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/budget_trend_card.dart';
 
 /// 预算趋势卡片示例
@@ -26,6 +27,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: BudgetTrendCardWidget(
+                      size: HomeWidgetSize.small,
                       label: 'Budget',
                       value: 142000,
                       valuePrefix: r'$',
@@ -46,6 +48,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: BudgetTrendCardWidget(
+                      size: HomeWidgetSize.medium,
                       label: 'Budget',
                       value: 142000,
                       valuePrefix: r'$',
@@ -66,6 +69,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: BudgetTrendCardWidget(
+                      size: HomeWidgetSize.large,
                       label: 'Budget',
                       value: 142000,
                       valuePrefix: r'$',

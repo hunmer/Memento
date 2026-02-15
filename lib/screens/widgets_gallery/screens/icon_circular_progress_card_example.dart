@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/icon_circular_progress_card.dart';
 
 /// 图标圆形进度卡片示例
@@ -26,6 +27,7 @@ class IconCircularProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: IconCircularProgressCardWidget(
+                      size: HomeWidgetSize.small,
                       progress: 0.75,
                       icon: Icons.inventory_2,
                       title: 'Widgefy UI kit',
@@ -42,6 +44,7 @@ class IconCircularProgressCardExample extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: IconCircularProgressCardWidget(
+                      size: HomeWidgetSize.medium,
                       progress: 0.75,
                       icon: Icons.inventory_2,
                       title: 'Widgefy UI kit',
@@ -58,6 +61,7 @@ class IconCircularProgressCardExample extends StatelessWidget {
                     width: 280,
                     height: 280,
                     child: IconCircularProgressCardWidget(
+                      size: HomeWidgetSize.large,
                       progress: 0.75,
                       icon: Icons.inventory_2,
                       title: 'Widgefy UI kit',

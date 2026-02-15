@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/daily_reflection_card.dart';
 
 /// 每日反思卡片示例
@@ -28,6 +29,7 @@ class DailyReflectionCardExample extends StatelessWidget {
                     child: DailyReflectionCardWidget(
                       dayOfWeek: 'Monday',
                       question: 'How will you make tomorrow meaningful?',
+                      size: HomeWidgetSize.small,
                     ),
                   ),
                 ),
@@ -41,6 +43,7 @@ class DailyReflectionCardExample extends StatelessWidget {
                     child: DailyReflectionCardWidget(
                       dayOfWeek: 'Monday',
                       question: 'How will you make tomorrow meaningful?',
+                      size: HomeWidgetSize.medium,
                     ),
                   ),
                 ),
@@ -54,6 +57,7 @@ class DailyReflectionCardExample extends StatelessWidget {
                     child: DailyReflectionCardWidget(
                       dayOfWeek: 'Monday',
                       question: 'How will you make tomorrow meaningful?',
+                      size: HomeWidgetSize.large,
                     ),
                   ),
                 ),

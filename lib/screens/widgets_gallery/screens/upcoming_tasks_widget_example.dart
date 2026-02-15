@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/upcoming_tasks_widget.dart';
 
 /// 即将到来的任务小组件示例
@@ -26,6 +27,7 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: UpcomingTasksWidget(
+                      size: HomeWidgetSize.small,
                       taskCount: 56,
                       tasks: [
                         TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
@@ -45,6 +47,7 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: UpcomingTasksWidget(
+                      size: HomeWidgetSize.medium,
                       taskCount: 56,
                       tasks: [
                         TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
@@ -64,6 +67,7 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: UpcomingTasksWidget(
+                      size: HomeWidgetSize.large,
                       taskCount: 56,
                       tasks: [
                         TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),

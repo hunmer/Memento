@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/journal_prompt_card.dart';
 
 /// 日记提示卡片示例
@@ -28,6 +29,7 @@ class JournalPromptCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: JournalPromptCardWidget(
+                      size: HomeWidgetSize.small,
                       weekday: 'Monday',
                       prompt: 'How will you make tomorrow meaningful?',
                       onNewPressed: _dummyCallback,
@@ -43,6 +45,7 @@ class JournalPromptCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: JournalPromptCardWidget(
+                      size: HomeWidgetSize.medium,
                       weekday: 'Monday',
                       prompt: 'How will you make tomorrow meaningful?',
                       onNewPressed: _dummyCallback,
@@ -58,6 +61,7 @@ class JournalPromptCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: JournalPromptCardWidget(
+                      size: HomeWidgetSize.large,
                       weekday: 'Monday',
                       prompt: 'How will you make tomorrow meaningful?',
                       onNewPressed: _dummyCallback,

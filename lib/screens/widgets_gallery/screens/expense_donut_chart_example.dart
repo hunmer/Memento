@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/expense_donut_chart.dart';
 
 /// 支出分类环形图示例
@@ -26,6 +27,7 @@ class ExpenseDonutChartExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ExpenseDonutChartWidget(
+                      size: HomeWidgetSize.small,
                       badgeLabel: 'Expenses',
                       timePeriod: 'In the past 7 days',
                       totalAmount: 32,
@@ -45,6 +47,7 @@ class ExpenseDonutChartExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ExpenseDonutChartWidget(
+                      size: HomeWidgetSize.medium,
                       badgeLabel: 'Expenses',
                       timePeriod: 'In the past 7 days',
                       totalAmount: 32,
@@ -65,6 +68,7 @@ class ExpenseDonutChartExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: ExpenseDonutChartWidget(
+                      size: HomeWidgetSize.large,
                       badgeLabel: 'Expenses',
                       timePeriod: 'In the past 7 days',
                       totalAmount: 32,

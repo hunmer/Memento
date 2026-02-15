@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/social_activity_card.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/social_activity_card_data.dart';
 
@@ -16,6 +17,7 @@ class SocialActivityCardExample extends StatelessWidget {
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
         child: const Center(
           child: SocialActivityCardWidget(
+            size: HomeWidgetSize.large,
             user: SocialUser(
               name: 'Sammy Lawson',
               username: '@CoRay',

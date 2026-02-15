@@ -435,4 +435,24 @@ enum HomeWidgetSize {
         return 1;
     }
   }
+
+  /// 获取进度条线条粗细
+  double getStrokeWidth() {
+    switch (this) {
+      case HomeWidgetSize.small:
+        return 6.0;
+      case HomeWidgetSize.medium:
+        return 8.0;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 10.0;
+      case HomeWidgetSize.wide:
+        return 8.0;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 10.0;
+      case HomeWidgetSize.custom:
+        return 8.0;
+    }
+  }
 }
