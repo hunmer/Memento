@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 饮水追踪卡片组件
 ///
@@ -13,6 +14,8 @@ import 'package:flutter/material.dart';
 ///   consumed: 0.7,
 ///   unit: 'Liters',
 ///   streakDays: 5,
+///   size: const MediumSize(),
+///   titleText: '每日饮水 2 Liters',
 /// )
 /// ```
 class HydrationTrackerCard extends StatefulWidget {
@@ -28,12 +31,20 @@ class HydrationTrackerCard extends StatefulWidget {
   /// 连续打卡天数
   final int streakDays;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
+  /// 标题文本
+  final String? titleText;
+
   const HydrationTrackerCard({
     super.key,
     required this.goal,
     required this.consumed,
     this.unit = 'Liters',
     this.streakDays = 0,
+    this.size = const MediumSize(),
+    this.titleText,
   });
 
   @override
@@ -95,7 +106,24 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
 
     // 优先使用主题颜色，如果主题是蓝色系则使用主题色
     final primaryColor =
-        _isBlueTheme(context) ? Theme.of(context).colorScheme.primary : const Color(0xFF007AFF);
+        _isBlueTheme(context)
+            ? Theme.of(context).colorScheme.primary
+            : const Color(0xFF007AFF);
+
+    // 根据 size 计算尺寸
+    final padding = widget.size.getPadding();
+    final iconSize = widget.size.getIconSize();
+    final titleFontSize = widget.size.getTitleFontSize();
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    final strokeWidth = widget.size.getStrokeWidth();
+    final containerSize = iconSize * widget.size.iconContainerScale;
+    final titleSpacing = widget.size.getTitleSpacing();
+    final smallSpacing = widget.size.getSmallSpacing();
+
+    // 进度环尺寸基于容器大小
+    final arcWidth = containerSize * 3.5;
+    final arcHeight = containerSize * 2;
+    final waterIconSize = containerSize * 0.8;
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -107,82 +135,95 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
             child: Transform.scale(
               scale: 0.95 + 0.05 * _scaleAnimation.value,
               child: Container(
-                width: 320,
-                height: 320,
+                width: containerSize * 6,
+                constraints: widget.size.getHeightConstraints(),
                 decoration: BoxDecoration(
                   color: backgroundColor,
-                  borderRadius: BorderRadius.circular(40),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 40,
-                      offset: const Offset(0, 20),
+                      blurRadius: containerSize,
+                      offset: Offset(0, containerSize * 0.5),
                     ),
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
+                      blurRadius: containerSize * 0.4,
+                      offset: Offset(0, containerSize * 0.2),
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(24),
+                padding: padding,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // 上部进度环区域
-                    Expanded(
+                    Flexible(
+                      fit: FlexFit.loose,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // 半圆进度环
                           SizedBox(
-                            width: 224,
-                            height: 128,
+                            width: arcWidth,
+                            height: arcHeight,
                             child: Stack(
                               children: [
                                 // 背景虚线环
                                 CustomPaint(
-                                  size: const Size(224, 128),
+                                  size: Size(arcWidth, arcHeight),
                                   painter: _DashedArcPainter(
                                     progress: 1.0,
-                                    color: isDark
-                                        ? primaryColor.withOpacity(0.1)
-                                        : const Color(0xFFDBEAFE),
+                                    color:
+                                        isDark
+                                            ? primaryColor.withOpacity(0.1)
+                                            : const Color(0xFFDBEAFE),
                                     isBackground: true,
+                                    strokeWidth: strokeWidth,
                                   ),
                                 ),
                                 // 进度虚线环（带动画）
                                 CustomPaint(
-                                  size: const Size(224, 128),
+                                  size: Size(arcWidth, arcHeight),
                                   painter: _DashedArcPainter(
                                     progress: progress * _scaleAnimation.value,
                                     color: primaryColor,
                                     isBackground: false,
+                                    strokeWidth: strokeWidth,
                                   ),
                                 ),
                                 // 中间内容：水滴图标和剩余量
                                 Positioned(
                                   left: 0,
                                   right: 0,
-                                  bottom: 4,
+                                  bottom: smallSpacing,
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
                                         Icons.water_drop_rounded,
                                         color: primaryColor,
-                                        size: 48 * _scaleAnimation.value,
+                                        size:
+                                            waterIconSize *
+                                            _scaleAnimation.value,
                                       ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        '${remaining.toStringAsFixed(1)} ${widget.unit} Left',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: -0.5,
-                                          color: isDark
-                                              ? Colors.grey.shade500
-                                              : Colors.grey.shade400,
+                                      SizedBox(height: smallSpacing),
+                                      SizedBox(
+                                        height: subtitleFontSize * 1.5,
+                                        child: Center(
+                                          child: Text(
+                                            '${remaining.toStringAsFixed(1)} ${widget.unit} Left',
+                                            style: TextStyle(
+                                              fontSize: subtitleFontSize,
+                                              fontWeight: FontWeight.w600,
+                                              height: 1.5,
+                                              letterSpacing: -0.5,
+                                              color:
+                                                  isDark
+                                                      ? Colors.grey.shade500
+                                                      : Colors.grey.shade400,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -195,14 +236,17 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    SizedBox(height: smallSpacing),
 
                     // 中部目标说明
                     Text(
-                      'Drink ${widget.goal.toStringAsFixed(0)} ${widget.unit}\nOf Water Per Day',
+                      widget.titleText ??
+                          '${widget.goal.toStringAsFixed(0)} ${widget.unit}',
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.w800,
                         height: 1.2,
                         letterSpacing: -0.5,
@@ -210,7 +254,7 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: titleSpacing * 0.2),
 
                     // 底部连续打卡标签
                     if (widget.streakDays > 0)
@@ -219,6 +263,7 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
                         animation: _fadeAnimation,
                         primaryColor: primaryColor,
                         isDark: isDark,
+                        size: widget.size,
                       ),
                   ],
                 ),
@@ -245,16 +290,24 @@ class _StreakBadge extends StatelessWidget {
   final Animation<double> animation;
   final Color primaryColor;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _StreakBadge({
     required this.days,
     required this.animation,
     required this.primaryColor,
     required this.isDark,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = size.getIconSize();
+    final fontSize = size.getSubtitleFontSize();
+    final horizontalPadding = iconSize * 0.8;
+    final verticalPadding = iconSize * 0.4;
+    final spacing = size.getSmallSpacing() * 1.5;
+
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
@@ -263,17 +316,21 @@ class _StreakBadge extends StatelessWidget {
           child: Opacity(
             opacity: animation.value,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: verticalPadding,
+              ),
               decoration: BoxDecoration(
-                color: isDark
-                    ? primaryColor.withOpacity(0.2)
-                    : const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(20),
+                color:
+                    isDark
+                        ? primaryColor.withOpacity(0.2)
+                        : const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(iconSize * 0.8),
                 border: Border.all(
-                  color: isDark
-                      ? primaryColor.withOpacity(0.3)
-                      : const Color(0xFFBFDBFE),
+                  color:
+                      isDark
+                          ? primaryColor.withOpacity(0.3)
+                          : const Color(0xFFBFDBFE),
                   width: 1,
                 ),
               ),
@@ -283,17 +340,17 @@ class _StreakBadge extends StatelessWidget {
                   Text(
                     '$days Days Strike',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.5,
                       color: primaryColor,
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: spacing),
                   Icon(
                     Icons.local_fire_department_rounded,
                     color: primaryColor,
-                    size: 18,
+                    size: iconSize * 0.75,
                   ),
                 ],
               ),
@@ -310,50 +367,58 @@ class _DashedArcPainter extends CustomPainter {
   final double progress;
   final Color color;
   final bool isBackground;
+  final double strokeWidth;
 
   _DashedArcPainter({
     required this.progress,
     required this.color,
     required this.isBackground,
+    this.strokeWidth = 12.0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height);
-    final radius = size.width / 2 - 10;
+    final radius = size.width / 2 - strokeWidth;
 
-    // 虚线参数
-    const dashLength = 23.0;
-    const gapLength = 12.0;
-    const strokeWidth = 12.0;
+    // 虚线参数（基于 strokeWidth 比例计算）
+    final dashLength = strokeWidth * 1.9;
 
     // 计算总弧度（半圆，留出端点圆角空间）
     final angleAdjustment = math.asin(strokeWidth / (2 * radius));
     final totalAngle = math.pi - 2 * angleAdjustment;
+    final totalArcLength = totalAngle * radius;
 
-    // 计算虚线数量
-    final totalDashLength = dashLength + gapLength;
-    final circumference = totalAngle * radius;
-    final dashCount = (circumference / totalDashLength).floor();
+    // 计算虚线数量（最多10个，且必须是偶数）
+    final minGapLength = 10.0;
+    final calculatedDashCount =
+        (totalArcLength / (dashLength + minGapLength)).floor();
+    final dashCount = (calculatedDashCount.clamp(0, 10) ~/ 2) * 2;
 
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    // 重新计算间隙长度，让虚线在半圆范围内均匀分布（确保左右对齐）
+    final gapLength =
+        dashCount > 1
+            ? (totalArcLength - dashCount * dashLength) / (dashCount - 1)
+            : 0.0;
+
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     // 如果是背景，绘制完整的虚线环
     // 如果是进度，只绘制部分虚线
-    final maxDashes =
-        isBackground ? dashCount : (dashCount * progress).floor();
+    final maxDashes = isBackground ? dashCount : (dashCount * progress).floor();
 
     for (int i = 0; i < maxDashes; i++) {
-      // 计算当前虚线的起始角度
-      final dashProgress = i / dashCount;
-      final startAngle = math.pi + angleAdjustment + (totalAngle * dashProgress);
+      // 计算当前虚线的起始角度（从左端开始）
+      final startOffset = i * (dashLength + gapLength);
+      final startAngle = math.pi + angleAdjustment + (startOffset / radius);
 
       // 计算虚线的弧度长度
-      final dashAngle = (dashLength / radius).clamp(0.0, totalAngle * 0.2);
+      final dashAngle = dashLength / radius;
 
       // 绘制虚线段
       canvas.drawArc(
@@ -370,6 +435,7 @@ class _DashedArcPainter extends CustomPainter {
   bool shouldRepaint(covariant _DashedArcPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.color != color ||
-        oldDelegate.isBackground != isBackground;
+        oldDelegate.isBackground != isBackground ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

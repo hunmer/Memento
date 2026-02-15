@@ -249,13 +249,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.monitor_weight,
-        title: '体重追踪柱状图卡片',
-        subtitle: 'WeightTrackingCard - 体重数据追踪与目标警戒线展示',
-        route: '/widgets_gallery/weight_tracking_widget',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.favorite,
         title: '血压追踪器',
         subtitle: 'BloodPressureTracker - 血压数值与周趋势展示卡片',

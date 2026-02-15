@@ -66,7 +66,6 @@ import 'package:Memento/screens/widgets_gallery/screens/blood_pressure_tracker_e
 import 'package:Memento/screens/widgets_gallery/screens/mood_tracker_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stress_level_monitor_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/daily_todo_list_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weight_tracking_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_steps_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/dual_range_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_dot_tracker_card_example.dart';
@@ -473,11 +472,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/stress_level_monitor',
           handler: (settings) => RouteHelpers.createRoute(const StressLevelMonitorExample(), settings: settings),
           description: '压力水平监测卡片',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/weight_tracking_widget',
-          handler: (settings) => RouteHelpers.createRoute(const WeightTrackingWidgetExample(), settings: settings),
-          description: '体重追踪柱状图卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/daily_todo_list_widget',
@@ -972,13 +966,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '饮水追踪器',
     subtitle: 'HydrationTrackerWidget',
     route: '/widgets_gallery/hydration_tracker_widget',
-  ),
-  WidgetPreviewItem(
-    category: '追踪类',
-    icon: Icons.monitor_weight,
-    title: '体重追踪柱状图卡片',
-    subtitle: 'WeightTrackingCard',
-    route: '/widgets_gallery/weight_tracking_widget',
   ),
   WidgetPreviewItem(
     category: '追踪类',
