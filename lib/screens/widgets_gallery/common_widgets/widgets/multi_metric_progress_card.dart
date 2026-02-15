@@ -47,6 +47,86 @@ class MetricProgressData {
     required this.unit,
   });
 
+  /// 根据尺寸获取标题字体大小
+  double getTitleFontSize(HomeWidgetSize size) {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return 11;
+      case HomeWidgetSize.medium:
+        return 13;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 15;
+      case HomeWidgetSize.wide:
+        return 13;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 15;
+      case HomeWidgetSize.custom:
+        return 13;
+    }
+  }
+
+  /// 根据尺寸获取副标题字体大小
+  double getSubtitleFontSize(HomeWidgetSize size) {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return 9;
+      case HomeWidgetSize.medium:
+        return 11;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 12;
+      case HomeWidgetSize.wide:
+        return 11;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 12;
+      case HomeWidgetSize.custom:
+        return 11;
+    }
+  }
+
+  /// 根据尺寸获取数值字体大小
+  double getValueFontSize(HomeWidgetSize size) {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return 14;
+      case HomeWidgetSize.medium:
+        return 18;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 20;
+      case HomeWidgetSize.wide:
+        return 18;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 20;
+      case HomeWidgetSize.custom:
+        return 18;
+    }
+  }
+
+  /// 根据尺寸获取图标容器大小
+  double getIconContainerSize(HomeWidgetSize size) {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return 28;
+      case HomeWidgetSize.medium:
+        return 36;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 44;
+      case HomeWidgetSize.wide:
+        return 36;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 44;
+      case HomeWidgetSize.custom:
+        return 36;
+    }
+  }
+
   /// 从 JSON 创建（用于公共小组件系统）
   factory MetricProgressData.fromJson(Map<String, dynamic> json) {
     return MetricProgressData(
@@ -80,7 +160,7 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
   final List<MetricProgressData> trackers;
 
   /// 卡片背景色
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
@@ -91,7 +171,7 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
   const MultiMetricProgressCardWidget({
     super.key,
     required this.trackers,
-    required this.backgroundColor,
+    this.backgroundColor,
     this.inline = false,
     this.size = HomeWidgetSize.medium,
   });
@@ -101,23 +181,29 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final trackersList = (props['trackers'] as List<dynamic>?)
+    final trackersList =
+        (props['trackers'] as List<dynamic>?)
             ?.map((e) => MetricProgressData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
 
+    final bgColorInt = props['backgroundColor'] as int?;
+    final bgColor = bgColorInt != null ? Color(bgColorInt) : null;
+
     return MultiMetricProgressCardWidget(
       trackers: trackersList,
-      backgroundColor: Color(props['backgroundColor'] as int? ?? 0xFF007AFF),
+      backgroundColor: bgColor,
       inline: props['inline'] as bool? ?? false,
     );
   }
 
   @override
-  State<MultiMetricProgressCardWidget> createState() => _MultiMetricProgressCardWidgetState();
+  State<MultiMetricProgressCardWidget> createState() =>
+      _MultiMetricProgressCardWidgetState();
 }
 
-class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardWidget>
+class _MultiMetricProgressCardWidgetState
+    extends State<MultiMetricProgressCardWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -144,25 +230,28 @@ class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardW
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bgColor =
+        widget.backgroundColor ?? theme.colorScheme.primary.withOpacity(0.85);
+
     return Container(
       width: widget.inline ? double.maxFinite : 380,
       constraints: widget.inline ? null : const BoxConstraints(minWidth: 280),
       decoration: BoxDecoration(
-        color: widget.backgroundColor,
+        color: bgColor,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: widget.backgroundColor.withOpacity(0.2),
+            color: bgColor.withOpacity(0.2),
             blurRadius: 40,
             offset: const Offset(0, 10),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            // 渐变叠加层
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -184,11 +273,13 @@ class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardW
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       for (int i = 0; i < widget.trackers.length; i++) ...[
-                        if (i > 0) const SizedBox(height: 24),
+                        if (i > 0)
+                          SizedBox(height: widget.size.getItemSpacing()),
                         _MetricProgressItem(
                           data: widget.trackers[i],
                           animation: _animation,
                           index: i,
+                          size: widget.size,
                         ),
                       ],
                     ],
@@ -208,11 +299,13 @@ class _MetricProgressItem extends StatelessWidget {
   final MetricProgressData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _MetricProgressItem({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -224,11 +317,7 @@ class _MetricProgressItem extends StatelessWidget {
         final end = (0.6 + index * 0.15).clamp(0.0, 1.0);
         final itemAnimation = CurvedAnimation(
           parent: animation,
-          curve: Interval(
-            index * 0.15,
-            end,
-            curve: Curves.easeOutCubic,
-          ),
+          curve: Interval(index * 0.15, end, curve: Curves.easeOutCubic),
         );
 
         return Opacity(
@@ -243,8 +332,9 @@ class _MetricProgressItem extends StatelessWidget {
                   progress: data.progress,
                   progressColor: data.progressColor,
                   animation: itemAnimation,
+                  size: size,
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: size.getSmallSpacing() * 4),
                 // 标题和副标题
                 Expanded(
                   child: Column(
@@ -252,19 +342,19 @@ class _MetricProgressItem extends StatelessWidget {
                     children: [
                       Text(
                         data.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 17,
+                          fontSize: data.getTitleFontSize(size),
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.5,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: size.getSmallSpacing()),
                       Text(
                         data.subtitle,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
+                          color: Colors.white70,
+                          fontSize: data.getSubtitleFontSize(size),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -278,20 +368,20 @@ class _MetricProgressItem extends StatelessWidget {
                     AnimatedFlipCounter(
                       value: data.value * itemAnimation.value,
                       fractionDigits: data.value % 1 != 0 ? 2 : 0,
-                      textStyle: const TextStyle(
+                      textStyle: TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: data.getValueFontSize(size),
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
                         height: 1.0,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: size.getSmallSpacing()),
                     Text(
                       data.unit,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 13,
+                        color: Colors.white70,
+                        fontSize: data.getSubtitleFontSize(size),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -312,19 +402,24 @@ class _IconWithProgress extends StatelessWidget {
   final double progress;
   final Color progressColor;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _IconWithProgress({
     required this.emoji,
     required this.progress,
     required this.progressColor,
     required this.animation,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    final containerSize = _getContainerSize();
+    final iconSize = size.getIconSize();
+
     return SizedBox(
-      width: 56,
-      height: 56,
+      width: containerSize,
+      height: containerSize,
       child: AnimatedBuilder(
         animation: animation,
         builder: (context, child) {
@@ -333,14 +428,51 @@ class _IconWithProgress extends StatelessWidget {
               progress: progress / 100 * animation.value,
               progressColor: progressColor,
               backgroundColor: Colors.white.withOpacity(0.2),
+              strokeWidth: _getStrokeWidth(),
             ),
-            child: Center(
-              child: _renderIcon(emoji, size: 28),
-            ),
+            child: Center(child: _renderIcon(emoji, size: iconSize)),
           );
         },
       ),
     );
+  }
+
+  double _getContainerSize() {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return 28;
+      case HomeWidgetSize.medium:
+        return 36;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 44;
+      case HomeWidgetSize.wide:
+        return 36;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 44;
+      case HomeWidgetSize.custom:
+        return 36;
+    }
+  }
+
+  double _getStrokeWidth() {
+    switch (size) {
+      case HomeWidgetSize.small:
+        return 3.0;
+      case HomeWidgetSize.medium:
+        return 3.5;
+      case HomeWidgetSize.large:
+      case HomeWidgetSize.large3:
+        return 4.0;
+      case HomeWidgetSize.wide:
+        return 3.5;
+      case HomeWidgetSize.wide2:
+      case HomeWidgetSize.wide3:
+        return 4.0;
+      case HomeWidgetSize.custom:
+        return 3.5;
+    }
   }
 }
 
@@ -349,24 +481,26 @@ class _CircularProgressPainter extends CustomPainter {
   final double progress;
   final Color progressColor;
   final Color backgroundColor;
+  final double strokeWidth;
 
   _CircularProgressPainter({
     required this.progress,
     required this.progressColor,
     required this.backgroundColor,
+    this.strokeWidth = 3.8,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 2; // 留出边距
+    final radius = size.width / 2 - strokeWidth; // 确保圆环不超出容器
 
     // 背景圆环
     final backgroundPaint =
         Paint()
           ..color = backgroundColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 3.8
+          ..strokeWidth = strokeWidth
           ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, backgroundPaint);
@@ -377,7 +511,7 @@ class _CircularProgressPainter extends CustomPainter {
           Paint()
             ..color = progressColor
             ..style = PaintingStyle.stroke
-            ..strokeWidth = 3.8
+            ..strokeWidth = strokeWidth
             ..strokeCap = StrokeCap.round;
 
       const startAngle = -90 * 3.14159 / 180; // 从顶部开始
@@ -396,6 +530,7 @@ class _CircularProgressPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
     return oldDelegate.progress != progress ||
-        oldDelegate.progressColor != progressColor;
+        oldDelegate.progressColor != progressColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
