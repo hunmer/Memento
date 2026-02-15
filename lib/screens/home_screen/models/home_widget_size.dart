@@ -26,6 +26,12 @@ abstract class HomeWidgetSize {
   /// 线条粗细偏移（百分比）
   final double strokeWidth;
 
+  /// 图标容器大小倍数（相对于图标大小）
+  final double iconContainerScale;
+
+  /// 圆形进度条粗细倍数（相对于基础 strokeWidth）
+  final double progressStrokeScale;
+
   const HomeWidgetSize({
     required this.width,
     required this.height,
@@ -35,6 +41,8 @@ abstract class HomeWidgetSize {
     this.fontSize = 1.0,
     this.iconSize = 1.0,
     this.strokeWidth = 1.0,
+    this.iconContainerScale = 2.0,
+    this.progressStrokeScale = 0.4,
   });
 
   /// 向后兼容的静态 getter，支持 const SmallSize() 等访问方式
@@ -319,6 +327,8 @@ class SmallSize extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 1, height: 1);
 }
 
@@ -331,6 +341,8 @@ class MediumSize extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 2, height: 1);
 }
 
@@ -343,6 +355,8 @@ class LargeSize extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 2, height: 2);
 }
 
@@ -355,6 +369,8 @@ class Large3Size extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 2, height: 3);
 }
 
@@ -367,6 +383,8 @@ class WideSize extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 4, height: 1);
 }
 
@@ -379,6 +397,8 @@ class Wide2Size extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 4, height: 2);
 }
 
@@ -391,6 +411,8 @@ class Wide3Size extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   }) : super(width: 4, height: 3);
 }
 
@@ -405,6 +427,8 @@ class CustomSize extends HomeWidgetSize {
     super.fontSize,
     super.iconSize,
     super.strokeWidth,
+    super.iconContainerScale,
+    super.progressStrokeScale,
   });
 }
 

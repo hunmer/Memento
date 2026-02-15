@@ -193,6 +193,7 @@ class _CircularMetricsCardWidgetState extends State<CircularMetricsCardWidget>
             data: metrics[index],
             animation: _animation,
             index: index,
+            size: widget.size,
           ),
         );
       },
@@ -205,11 +206,13 @@ class _MetricItemWidget extends StatelessWidget {
   final MetricData data;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _MetricItemWidget({
     required this.data,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -225,13 +228,21 @@ class _MetricItemWidget extends StatelessWidget {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // 根据 size 计算各元素尺寸
+    final iconSize = size.getIconSize();
+    final containerSize = iconSize * size.iconContainerScale;
+    final strokeWidth = size.getStrokeWidth() * size.progressStrokeScale;
+    final valueFontSize = size.getLargeFontSize() * 0.35;
+    final labelFontSize = size.getSubtitleFontSize();
+    final itemSpacing = size.getSmallSpacing() * 2;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         // 环形进度条
         SizedBox(
-          width: 56,
-          height: 56,
+          width: containerSize,
+          height: containerSize,
           child: CustomPaint(
             painter: _CircularProgressPainter(
               progress: data.progress * itemAnimation.value,
@@ -239,38 +250,41 @@ class _MetricItemWidget extends StatelessWidget {
               backgroundColor: isDark
                   ? const Color(0xFF374151)
                   : const Color(0xFFF3F4F6),
+              strokeWidth: strokeWidth,
             ),
-            child: Center(child: Icon(data.icon, size: 20, color: data.color)),
+            child: Center(
+              child: Icon(data.icon, size: iconSize * 0.8, color: data.color),
+            ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: itemSpacing),
         // 数值和标签
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             SizedBox(
-              height: 20,
+              height: valueFontSize * 1.2,
               child: Text(
                 data.value,
                 style: TextStyle(
                   color: isDark ? Colors.white : const Color(0xFF111827),
-                  fontSize: 16,
+                  fontSize: valueFontSize,
                   fontWeight: FontWeight.w700,
                   height: 1.0,
                 ),
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: size.getSmallSpacing()),
             SizedBox(
-              height: 14,
+              height: labelFontSize * 1.2,
               child: Text(
                 data.label,
                 style: TextStyle(
                   color: isDark
                       ? const Color(0xFF9CA3AF)
                       : const Color(0xFF6B7280),
-                  fontSize: 12,
+                  fontSize: labelFontSize,
                   fontWeight: FontWeight.w500,
                   height: 1.0,
                 ),
@@ -288,23 +302,25 @@ class _CircularProgressPainter extends CustomPainter {
   final double progress;
   final Color color;
   final Color backgroundColor;
+  final double strokeWidth;
 
   _CircularProgressPainter({
     required this.progress,
     required this.color,
     required this.backgroundColor,
+    this.strokeWidth = 2.5,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 2.5;
+    final radius = size.width / 2 - strokeWidth / 2;
 
     // 背景圆环
     final backgroundPaint = Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, backgroundPaint);
@@ -313,7 +329,7 @@ class _CircularProgressPainter extends CustomPainter {
     final progressPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
     final sweepAngle = 2 * math.pi * progress;
@@ -328,6 +344,7 @@ class _CircularProgressPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _CircularProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

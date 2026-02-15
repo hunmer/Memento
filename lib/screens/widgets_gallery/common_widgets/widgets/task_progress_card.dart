@@ -49,7 +49,8 @@ class TaskProgressCardWidget extends StatefulWidget {
       subtitle: props['subtitle'] as String? ?? '',
       completedTasks: props['completedTasks'] as int? ?? 0,
       totalTasks: props['totalTasks'] as int? ?? 0,
-      pendingTasks: (props['pendingTasks'] as List<dynamic>?)
+      pendingTasks:
+          (props['pendingTasks'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -62,8 +63,7 @@ class TaskProgressCardWidget extends StatefulWidget {
   }
 
   @override
-  State<TaskProgressCardWidget> createState() =>
-      _TaskProgressCardWidgetState();
+  State<TaskProgressCardWidget> createState() => _TaskProgressCardWidgetState();
 }
 
 class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
@@ -96,9 +96,12 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.grey.shade900;
-    final secondaryTextColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
-    final dividerColor = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
-    final progressTrackColor = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
+    final secondaryTextColor =
+        isDark ? Colors.grey.shade500 : Colors.grey.shade400;
+    final dividerColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
+    final progressTrackColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -120,7 +123,6 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
                 // 标题部分
                 _buildHeaderSection(textColor, secondaryTextColor),
@@ -133,7 +135,12 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 if (widget.pendingTasks.isNotEmpty) ...[
                   SizedBox(height: widget.size.getTitleSpacing()),
                   // 待办任务列表
-                  _buildPendingTasksSection(secondaryTextColor, dividerColor),
+                  Expanded(
+                    child: _buildPendingTasksSection(
+                      secondaryTextColor,
+                      dividerColor,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -189,10 +196,9 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 Icon(
                   Icons.format_list_bulleted,
                   size: iconSize,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withOpacity(0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withOpacity(0.5),
                 ),
                 SizedBox(width: widget.size.getSmallSpacing()),
                 Text(
@@ -200,10 +206,9 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                   style: TextStyle(
                     fontSize: legendFontSize,
                     fontWeight: FontWeight.w500,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.5),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.5),
                   ),
                 ),
               ],
@@ -219,10 +224,9 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                     textStyle: TextStyle(
                       fontSize: legendFontSize,
                       fontWeight: FontWeight.w500,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.5),
                     ),
                   ),
                 ),
@@ -236,10 +240,9 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                     textStyle: TextStyle(
                       fontSize: legendFontSize,
                       fontWeight: FontWeight.w500,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.5),
                     ),
                   ),
                 ),
@@ -252,10 +255,14 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
           height: widget.size.getLegendIndicatorHeight(),
           decoration: BoxDecoration(
             color: progressTrackColor,
-            borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
+            borderRadius: BorderRadius.circular(
+              widget.size.getLegendIndicatorHeight() / 2,
+            ),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
+            borderRadius: BorderRadius.circular(
+              widget.size.getLegendIndicatorHeight() / 2,
+            ),
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
@@ -263,7 +270,9 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
                 child: Container(
                   decoration: BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
+                    borderRadius: BorderRadius.circular(
+                      widget.size.getLegendIndicatorHeight() / 2,
+                    ),
                   ),
                 ),
               ),
@@ -278,13 +287,15 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
     Color secondaryTextColor,
     Color dividerColor,
   ) {
-    final tasks = widget.maxPendingTasks == null
-        ? widget.pendingTasks
-        : widget.pendingTasks.take(widget.maxPendingTasks!).toList();
+    final tasks =
+        widget.maxPendingTasks == null
+            ? widget.pendingTasks
+            : widget.pendingTasks.take(widget.maxPendingTasks!).toList();
     final legendFontSize = widget.size.getLegendFontSize();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: EdgeInsets.only(bottom: widget.size.getSmallSpacing()),
@@ -297,29 +308,34 @@ class _TaskProgressCardWidgetState extends State<TaskProgressCardWidget>
             ),
           ),
         ),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: legendFontSize * 7),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (int i = 0; i < tasks.length; i++) ...[
-                  if (i > 0) Divider(color: dividerColor, height: 1),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: widget.size.getSmallSpacing()),
-                    child: Text(
-                      tasks[i],
-                      style: TextStyle(
-                        fontSize: legendFontSize,
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.onSurface,
+        Expanded(
+          child: Scrollbar(
+            thickness: 4,
+            radius: const Radius.circular(2),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (int i = 0; i < tasks.length; i++) ...[
+                    if (i > 0) Divider(color: dividerColor, height: 1),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: widget.size.getSmallSpacing(),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      child: Text(
+                        tasks[i],
+                        style: TextStyle(
+                          fontSize: legendFontSize,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

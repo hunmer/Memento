@@ -6,6 +6,39 @@ import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/curve_pro
 class CurveProgressCardExample extends StatelessWidget {
   const CurveProgressCardExample({super.key});
 
+  /// 示例数据点：时间使用趋势（最近7天）
+  List<CurveDataPoint> get _timeUsageData => const [
+    CurveDataPoint(value: 7200.0),
+    CurveDataPoint(value: 7500.0),
+    CurveDataPoint(value: 6800.0),
+    CurveDataPoint(value: 8000.0),
+    CurveDataPoint(value: 7800.0),
+    CurveDataPoint(value: 8200.0),
+    CurveDataPoint(value: 8524.0),
+  ];
+
+  /// 示例数据点：运动步数趋势
+  List<CurveDataPoint> get _stepsData => const [
+    CurveDataPoint(value: 4500.0),
+    CurveDataPoint(value: 5200.0),
+    CurveDataPoint(value: 4800.0),
+    CurveDataPoint(value: 6000.0),
+    CurveDataPoint(value: 5800.0),
+    CurveDataPoint(value: 6500.0),
+    CurveDataPoint(value: 7000.0),
+  ];
+
+  /// 示例数据点：简单上升趋势
+  List<CurveDataPoint> get _trendData => const [
+    CurveDataPoint(value: 100.0),
+    CurveDataPoint(value: 150.0),
+    CurveDataPoint(value: 130.0),
+    CurveDataPoint(value: 200.0),
+    CurveDataPoint(value: 250.0),
+    CurveDataPoint(value: 220.0),
+    CurveDataPoint(value: 300.0),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -20,7 +53,7 @@ class CurveProgressCardExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('时间使用趋势 - 小尺寸'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -28,19 +61,16 @@ class CurveProgressCardExample extends StatelessWidget {
                     height: 150,
                     child: CurveProgressCardWidget(
                       size: const SmallSize(),
-                      value: 8524.0,
-                      label: 'Total Hours',
-                      change: 1248.0,
-                      changePercent: 17.15,
+                      dataPoints: _timeUsageData,
                       unit: 'h',
                       icon: Icons.schedule,
-                      categoryLabel: 'Progress',
+                      categoryLabel: 'Time Usage',
                       lastUpdated: 'Updated 2h ago',
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('运动步数趋势 - 中尺寸'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -48,19 +78,16 @@ class CurveProgressCardExample extends StatelessWidget {
                     height: 220,
                     child: CurveProgressCardWidget(
                       size: const MediumSize(),
-                      value: 8524.0,
-                      label: 'Total Hours',
-                      change: 1248.0,
-                      changePercent: 17.15,
-                      unit: 'h',
-                      icon: Icons.schedule,
-                      categoryLabel: 'Progress',
+                      dataPoints: _stepsData,
+                      unit: 'steps',
+                      icon: Icons.directions_walk,
+                      categoryLabel: 'Steps',
                       lastUpdated: 'Updated 2h ago',
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('数据趋势 - 大尺寸'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -68,13 +95,10 @@ class CurveProgressCardExample extends StatelessWidget {
                     height: 300,
                     child: CurveProgressCardWidget(
                       size: const LargeSize(),
-                      value: 8524.0,
-                      label: 'Total Hours',
-                      change: 1248.0,
-                      changePercent: 17.15,
-                      unit: 'h',
-                      icon: Icons.schedule,
-                      categoryLabel: 'Progress',
+                      dataPoints: _trendData,
+                      unit: 'units',
+                      icon: Icons.trending_up,
+                      categoryLabel: 'Trend',
                       lastUpdated: 'Updated 2h ago',
                     ),
                   ),
