@@ -253,7 +253,7 @@ class _ShortcutItemWidget extends StatelessWidget {
                   shortcut.label,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: widget.size.getSubtitleFontSize(),
+                    fontSize: size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w600,
                     height: 1.2,
                     shadows: [

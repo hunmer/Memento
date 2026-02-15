@@ -393,7 +393,7 @@ class _ActionButton extends StatelessWidget {
                   label,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: widget.size.getSubtitleFontSize(),
+                    fontSize: size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

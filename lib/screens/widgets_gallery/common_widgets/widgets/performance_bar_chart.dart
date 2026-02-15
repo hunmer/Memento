@@ -148,7 +148,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         ),
                         child: Text(
                           widget.badgeLabel,
-                          style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, letterSpacing: 1.5),
+                          style: TextStyle(fontSize: widget.size.getLegendFontSize(), fontWeight: FontWeight.w700, letterSpacing: 1.5),
                         ),
                       ),
                       SizedBox(height: widget.size.getTitleSpacing()),
@@ -159,7 +159,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         suffix: '%',
                         duration: const Duration(milliseconds: 1000),
                         textStyle: TextStyle(
-                          fontSize: size.getLargeFontSize(),
+                          fontSize: widget.size.getLargeFontSize(),
                           fontWeight: FontWeight.w500,
                           color: isDark ? Colors.white : Colors.grey.shade900,
                           height: 1.0,
@@ -169,7 +169,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                       SizedBox(height: widget.size.getSmallSpacing()),
                       Text(
                         widget.timePeriod,
-                        style: TextStyle(fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: Colors.grey.shade500, height: 1.2),
+                        style: TextStyle(fontSize: widget.size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: Colors.grey.shade500, height: 1.2),
                       ),
                     ],
                   ),
@@ -216,6 +216,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                                       accentLime: accentLime,
                                       animation: barAnimation,
                                       barHeight: barHeight,
+                                      size: widget.size,
                                     ),
                                   ),
                                 );
@@ -235,7 +236,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         SizedBox(width: widget.size.getItemSpacing()),
                         Text(
                           widget.footerLabel.toUpperCase(),
-                          style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 1.5),
+                          style: TextStyle(fontSize: widget.size.getLegendFontSize(), fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 1.5),
                         ),
                       ],
                     ),
@@ -257,6 +258,7 @@ class _AnimatedBar extends StatelessWidget {
   final Color accentLime;
   final Animation<double> animation;
   final double barHeight;
+  final HomeWidgetSize size;
 
   const _AnimatedBar({
     required this.value,
@@ -265,6 +267,7 @@ class _AnimatedBar extends StatelessWidget {
     required this.accentLime,
     required this.animation,
     required this.barHeight,
+    required this.size,
   });
 
   @override

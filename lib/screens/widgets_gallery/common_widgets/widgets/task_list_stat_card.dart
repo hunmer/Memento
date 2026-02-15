@@ -273,6 +273,7 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
               primaryColor: primaryColor,
               animation: _animationController,
               index: displayTasks.length,
+              size: widget.size,
             ),
           ),
       ],
@@ -332,7 +333,7 @@ class _TaskListItem extends StatelessWidget {
             child: Text(
               task,
               style: TextStyle(
-                fontSize: widget.size.getSubtitleFontSize() - 1,
+                fontSize: size.getSubtitleFontSize() - 1,
                 fontWeight: FontWeight.w600,
                 color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
                 height: 1.2,
@@ -359,12 +360,14 @@ class _MoreLinkWidget extends StatelessWidget {
   final Color primaryColor;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _MoreLinkWidget({
     required this.count,
     required this.primaryColor,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -403,7 +406,7 @@ class _MoreLinkWidget extends StatelessWidget {
           child: Text(
             '+$count more',
             style: TextStyle(
-              fontSize: widget.size.getSubtitleFontSize(),
+              fontSize: size.getSubtitleFontSize(),
               fontWeight: FontWeight.w700,
               color: primaryColor,
               height: 1.0,

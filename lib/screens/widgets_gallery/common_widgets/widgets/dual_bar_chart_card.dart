@@ -397,7 +397,7 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
             ],
           ),
           Container(
-            padding: widget.size.getSmallSpacing(),
+            padding: EdgeInsets.all(widget.size.getSmallSpacing()),
             child: Icon(
               Icons.chevron_right,
               size: 28,

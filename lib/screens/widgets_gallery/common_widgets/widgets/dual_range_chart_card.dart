@@ -230,7 +230,7 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
       child: IconButton(
         icon: Icon(icon, color: textColor),
         onPressed: () {},
-        padding: widget.size.getSmallSpacing(),
+        padding: EdgeInsets.all(widget.size.getSmallSpacing()),
         constraints: widget.size.getHeightConstraints(),
       ),
     );

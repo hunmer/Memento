@@ -185,8 +185,8 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                                 ],
                               ),
                               Container(
-                                width: size.getIconSize() * 1.6,
-                                height: size.getIconSize() * 1.6,
+                                width: widget.size.getIconSize() * 1.6,
+                                height: widget.size.getIconSize() * 1.6,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
                                   shape: BoxShape.circle,
@@ -198,7 +198,7 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                                     ),
                                   ],
                                 ),
-                                child: Icon(Icons.directions_walk, color: Colors.white, size: size.getIconSize()),
+                                child: Icon(Icons.directions_walk, color: Colors.white, size: widget.size.getIconSize()),
                               ),
                             ],
                           ),

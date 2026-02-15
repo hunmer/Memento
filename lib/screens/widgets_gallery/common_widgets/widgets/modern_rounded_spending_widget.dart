@@ -255,6 +255,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
             textColor: textColor,
             secondaryTextColor: secondaryTextColor,
             unit: widget.unit,
+            size: widget.size,
           ),
         ),
       );
@@ -272,6 +273,7 @@ class _CategoryItem extends StatelessWidget {
   final Color textColor;
   final Color secondaryTextColor;
   final String unit;
+  final HomeWidgetSize size;
 
   const _CategoryItem({
     required this.category,
@@ -280,6 +282,7 @@ class _CategoryItem extends StatelessWidget {
     required this.textColor,
     required this.secondaryTextColor,
     required this.unit,
+    required this.size,
   });
 
   @override
@@ -318,7 +321,7 @@ class _CategoryItem extends StatelessWidget {
                       Text(
                         category.name,
                         style: TextStyle(
-                          fontSize: widget.size.getSubtitleFontSize() + 2,
+                          fontSize: size.getSubtitleFontSize() + 2,
                           fontWeight: FontWeight.w500,
                           color: textColor.withOpacity(0.87),
                         ),
@@ -330,7 +333,7 @@ class _CategoryItem extends StatelessWidget {
                           child: Text(
                             detailItems.map((e) => e.title).join(' · '),
                             style: TextStyle(
-                              fontSize: widget.size.getSubtitleFontSize(),
+                              fontSize: size.getSubtitleFontSize(),
                               fontWeight: FontWeight.w400,
                               color: secondaryTextColor,
                             ),
@@ -346,7 +349,7 @@ class _CategoryItem extends StatelessWidget {
                 Text(
                   '${category.amount.toInt()}$unit',
                   style: TextStyle(
-                    fontSize: widget.size.getSubtitleFontSize() + 2,
+                    fontSize: size.getSubtitleFontSize() + 2,
                     fontWeight: FontWeight.w600,
                     color: textColor,
                     letterSpacing: -0.3,

@@ -85,11 +85,15 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const MultiMetricProgressCardWidget({
     super.key,
     required this.trackers,
     required this.backgroundColor,
     this.inline = false,
+    this.size = HomeWidgetSize.medium,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
