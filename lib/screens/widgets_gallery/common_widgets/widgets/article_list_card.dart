@@ -260,7 +260,7 @@ class _FeaturedSection extends StatelessWidget {
                   children: [
                     Icon(Icons.local_fire_department, color: primaryColor, size: 18),
                     const SizedBox(width: 6),
-                    Text('POPULAR RIGHT NOW', style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+                    Text('POPULAR RIGHT NOW', style: TextStyle(color: primaryColor, fontSize: size.getLegendFontSize() - 2, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
                   ],
                 ),
               ),
@@ -284,11 +284,11 @@ class _FeaturedSection extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(data.author.toUpperCase(), style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1)),
-                          const SizedBox(height: 4),
-                          Text(data.title, style: TextStyle(color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.w700, height: 1.2)),
-                          const SizedBox(height: 4),
-                          Text(data.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 11, height: 1.3)),
+                          Text(data.author.toUpperCase(), style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize() - 2, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                          SizedBox(height: size.getSmallSpacing()),
+                          Text(data.title, style: TextStyle(color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827), fontSize: size.getTitleFontSize(), fontWeight: FontWeight.w700, height: 1.2)),
+                          SizedBox(height: size.getSmallSpacing()),
+                          Text(data.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize(), height: 1.3)),
                         ],
                       ),
                     ),
@@ -385,7 +385,7 @@ class _ArticleListSection extends StatelessWidget {
                   children: [
                     Icon(Icons.feed, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), size: 16),
                     const SizedBox(width: 6),
-                    Text('NEW ARTICLES', style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+                    Text('NEW ARTICLES', style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize() - 2, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
                   ],
                 ),
               ),
@@ -456,9 +456,9 @@ class _ArticleListItem extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827), fontSize: 14, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 2),
-                        Text('${data.author} in ${data.publication}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: 11)),
+                        Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827), fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w700)),
+                        SizedBox(height: size.getSmallSpacing()),
+                        Text('${data.author} in ${data.publication}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize())),
                       ],
                     ),
                   ),

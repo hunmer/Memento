@@ -177,13 +177,13 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
             Icon(
               widget.icon,
               color: primaryColor,
-              size: 28,
+              size: widget.size.getIconSize(),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: widget.size.getItemSpacing()),
             Text(
               widget.title,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: widget.size.getTitleFontSize(),
                 fontWeight: FontWeight.w600,
                 color: textColor,
                 letterSpacing: -0.5,
@@ -196,18 +196,21 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
           icon: Icon(
             Icons.chevron_right,
             color: mutedColor,
-            size: 20,
+            size: widget.size.getIconSize() * 0.8,
           ),
           label: Text(
             'Today',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: widget.size.getSubtitleFontSize(),
               fontWeight: FontWeight.w500,
               color: mutedColor,
             ),
           ),
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.size.getSmallSpacing(),
+              vertical: widget.size.getSmallSpacing(),
+            ),
           ),
         ),
       ],
@@ -220,27 +223,27 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 52,
+          height: widget.size.getLargeFontSize(),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               AnimatedFlipCounter(
                 value: widget.currentValue * _animation.value,
                 textStyle: TextStyle(
-                  fontSize: 48,
+                  fontSize: widget.size.getLargeFontSize(),
                   fontWeight: FontWeight.bold,
                   color: textColor,
                   height: 1.0,
                   letterSpacing: -1,
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: widget.size.getSmallSpacing()),
               Padding(
-                padding: const EdgeInsets.only(bottom: 4),
+                padding: EdgeInsets.only(bottom: widget.size.getSmallSpacing()),
                 child: Text(
                   widget.unit,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: widget.size.getSubtitleFontSize() + 4,
                     fontWeight: FontWeight.w500,
                     color: mutedColor,
                   ),
@@ -253,7 +256,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
         Text(
           widget.subtitle,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             color: mutedColor,
           ),
@@ -263,16 +266,21 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
   }
 
   Widget _buildMiniTrendChart(Color primaryColor) {
+    final chartHeight = widget.size.getLargeFontSize();
+    final chartWidth = widget.size.getLargeFontSize() * 3;
+
     return SizedBox(
-      width: 140,
+      width: chartWidth,
       child: Column(
         children: [
           SizedBox(
-            height: 60,
+            height: chartHeight,
             child: _AnimatedTrendLine(
               data: widget.trendData,
               color: primaryColor,
               animation: _animation,
+              chartHeight: chartHeight,
+              chartWidth: chartWidth,
             ),
           ),
           SizedBox(height: widget.size.getItemSpacing()),
@@ -283,7 +291,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
               return Text(
                 day,
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: widget.size.getLegendFontSize() - 2,
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF9CA3AF),
                 ),
@@ -301,22 +309,24 @@ class _AnimatedTrendChart extends StatelessWidget {
   final List<double> data;
   final Color color;
   final Animation<double> animation;
+  final double chartHeight;
+  final double chartWidth;
 
   const _AnimatedTrendChart({
     required this.data,
     required this.color,
     required this.animation,
+    required this.chartHeight,
+    required this.chartWidth,
   });
 
   @override
   Widget build(BuildContext context) {
     final maxHeight = data.reduce((a, b) => a > b ? a : b);
-    final chartHeight = 60.0;
-    final chartWidth = 140.0;
     final stepX = chartWidth / (data.length - 1);
 
     return CustomPaint(
-      size: const Size(140, 60),
+      size: Size(chartWidth, chartHeight),
       painter: _TrendLinePainter(
         data: data,
         color: color,
@@ -413,11 +423,15 @@ class _AnimatedTrendLine extends StatelessWidget {
   final List<double> data;
   final Color color;
   final Animation<double> animation;
+  final double chartHeight;
+  final double chartWidth;
 
   const _AnimatedTrendLine({
     required this.data,
     required this.color,
     required this.animation,
+    required this.chartHeight,
+    required this.chartWidth,
   });
 
   @override
@@ -429,6 +443,8 @@ class _AnimatedTrendLine extends StatelessWidget {
           data: data,
           color: color,
           animation: animation,
+          chartHeight: chartHeight,
+          chartWidth: chartWidth,
         );
       },
     );

@@ -236,7 +236,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
               child: Text(
                 widget.featuredNews.title,
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: widget.size.getTitleFontSize(),
                   fontWeight: FontWeight.bold,
                   color: textMainColor,
                   height: 1.2,
@@ -345,7 +345,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
           Text(
             widget.category,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: widget.size.getSubtitleFontSize(),
               fontWeight: FontWeight.bold,
               color: primaryColor,
               letterSpacing: 1.0,
@@ -427,7 +427,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                       Text(
                         item.title,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.bold,
                           color: textMainColor,
                           height: 1.3,
@@ -435,11 +435,11 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: widget.size.getItemSpacing() / 2),
+                      SizedBox(height: widget.size.getSmallSpacing()),
                       Text(
                         item.time,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: widget.size.getLegendFontSize(),
                           fontWeight: FontWeight.w500,
                           color: textSubColor,
                         ),

@@ -179,14 +179,14 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(widget.title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900)),
-                                  SizedBox(height: widget.size.getItemSpacing() / 2),
-                                  Text(widget.subtitle, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
+                                  Text(widget.title, style: TextStyle(fontSize: widget.size.getTitleFontSize(), fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900)),
+                                  SizedBox(height: widget.size.getSmallSpacing()),
+                                  Text(widget.subtitle, style: TextStyle(fontSize: widget.size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
                                 ],
                               ),
                               Container(
-                                width: 40,
-                                height: 40,
+                                width: size.getIconSize() * 1.6,
+                                height: size.getIconSize() * 1.6,
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).colorScheme.primary,
                                   shape: BoxShape.circle,
@@ -198,24 +198,24 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                                     ),
                                   ],
                                 ),
-                                child: Icon(Icons.directions_walk, color: Colors.white, size: 20),
+                                child: Icon(Icons.directions_walk, color: Colors.white, size: size.getIconSize()),
                               ),
                             ],
                           ),
                           SizedBox(height: widget.size.getItemSpacing()),
                           SizedBox(
-                            height: 56,
+                            height: widget.size.getLargeFontSize(),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 SizedBox(
-                                  width: 280,
-                                  height: 56,
+                                  width: widget.size.getLargeFontSize() * 5,
+                                  height: widget.size.getLargeFontSize(),
                                   child: AnimatedFlipCounter(
                                     value: widget.value.toDouble() * _animation.value,
                                     fractionDigits: 0,
                                     textStyle: TextStyle(
-                                      fontSize: 48,
+                                      fontSize: widget.size.getLargeFontSize(),
                                       fontWeight: FontWeight.bold,
                                       color: isDark ? Colors.white : Colors.grey.shade900,
                                       letterSpacing: -1,
@@ -223,10 +223,10 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: widget.size.getSmallSpacing()),
                                 SizedBox(
-                                  height: 28,
-                                  child: Text(widget.unit, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
+                                  height: widget.size.getSubtitleFontSize() + 4,
+                                  child: Text(widget.unit, style: TextStyle(fontSize: widget.size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
                                 ),
                               ],
                             ),
@@ -276,16 +276,16 @@ class _DailyBars extends StatelessWidget {
         final barColor = baseColor.withOpacity(bar.color == DailyBarColor.teal ? 1.0 : (isDark ? 0.9 : 0.8));
 
         return Padding(
-          padding: EdgeInsets.only(right: size.getItemSpacing() / 3),
+          padding: EdgeInsets.only(right: size.getItemSpacing() / 2),
           child: AnimatedBuilder(
             animation: barAnimation,
             builder: (context, child) {
               return Container(
-                width: 6,
-                height: 112 * bar.height * barAnimation.value,
+                width: size.getBarWidth(),
+                height: size.getLargeFontSize() * 2 * bar.height * barAnimation.value,
                 decoration: BoxDecoration(
                   color: barColor,
-                  borderRadius: BorderRadius.circular(3),
+                  borderRadius: BorderRadius.circular(size.getBarWidth() / 2),
                 ),
               );
             },

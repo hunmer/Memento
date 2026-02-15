@@ -198,14 +198,14 @@ class _SegmentedProgressCardWidgetState
           widget.title,
           style: TextStyle(
             color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-            fontSize: 15,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: widget.size.getSmallSpacing() * 2),
         SizedBox(
-          height: 48,
+          height: widget.size.getLargeFontSize() + widget.size.getSmallSpacing(),
           child: AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
@@ -218,7 +218,7 @@ class _SegmentedProgressCardWidgetState
                     fractionDigits: 0,
                     textStyle: TextStyle(
                       color: isDark ? Colors.white : Colors.grey.shade900,
-                      fontSize: 40,
+                      fontSize: widget.size.getLargeFontSize(),
                       fontWeight: FontWeight.bold,
                       height: 1.0,
                     ),
@@ -229,7 +229,7 @@ class _SegmentedProgressCardWidgetState
                     style: TextStyle(
                       color:
                           isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                      fontSize: 20,
+                      fontSize: widget.size.getLargeFontSize() * 0.5,
                       fontWeight: FontWeight.w500,
                       height: 1.0,
                     ),
@@ -251,13 +251,13 @@ class _SegmentedProgressCardWidgetState
     );
 
     return Container(
-      height: 10,
+      height: widget.size.getLegendIndicatorHeight(),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
         child: Row(
           children:
               widget.segments.map((segment) {
@@ -305,6 +305,7 @@ class _SegmentedProgressCardWidgetState
                   isDark: isDark,
                   animation: itemAnimation,
                   unit: widget.unit,
+                  size: widget.size,
                 ),
               ),
             );
@@ -323,25 +324,29 @@ class _SegmentItem extends StatelessWidget {
   final bool isDark;
   final Animation<double> animation;
   final String unit;
+  final HomeWidgetSize size;
 
   const _SegmentItem({
     required this.segment,
     required this.isDark,
     required this.animation,
     required this.unit,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    final indicatorSize = size.getLegendIndicatorWidth();
+
     return Row(
       children: [
         // 颜色指示器
         Container(
-          width: 16,
-          height: 16,
+          width: indicatorSize,
+          height: indicatorSize,
           decoration: BoxDecoration(
             color: segment.color,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(indicatorSize / 4),
             boxShadow: [
               BoxShadow(
                 color: segment.color.withOpacity(0.3),
@@ -351,20 +356,20 @@ class _SegmentItem extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(width: 14),
+        SizedBox(width: size.getItemSpacing()),
         // 标签
         Text(
           segment.label,
           style: TextStyle(
             color: isDark ? Colors.grey.shade200 : Colors.grey.shade700,
-            fontSize: 16,
+            fontSize: size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
           ),
         ),
         const Spacer(),
         // 数值 - 优先使用 display 字段
         SizedBox(
-          height: 20,
+          height: size.getSubtitleFontSize(),
           child: Text(
             segment.display.isNotEmpty
                 ? segment.display
@@ -373,7 +378,7 @@ class _SegmentItem extends StatelessWidget {
                     : '$unit${segment.value.toInt()}'),
             style: TextStyle(
               color: isDark ? Colors.white : Colors.grey.shade900,
-              fontSize: 16,
+              fontSize: size.getSubtitleFontSize(),
               fontWeight: FontWeight.w600,
               height: 1.0,
             ),
