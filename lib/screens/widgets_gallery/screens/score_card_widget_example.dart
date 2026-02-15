@@ -13,22 +13,137 @@ class ScoreCardWidgetExample extends StatelessWidget {
       appBar: AppBar(title: const Text('分数卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF3F4F6),
-        child: const Center(
-          child: ScoreCardWidget(
-            score: 912,
-            grade: 'A',
-            actions: [
-              ActionData(label: 'Charity Pay', value: 16, isPositive: true),
-              ActionData(
-                label: 'Traffic Violation',
-                value: 24,
-                isPositive: false,
-              ),
-              ActionData(label: 'Blood Donation', value: 42, isPositive: true),
-              ActionData(label: 'Volunteering', value: 32, isPositive: true),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: ScoreCardWidget(
+                      score: 912,
+                      grade: 'A',
+                      actions: [
+                        ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                        ActionData(
+                          label: 'Traffic Violation',
+                          value: 24,
+                          isPositive: false,
+                        ),
+                        ActionData(label: 'Blood Donation', value: 42, isPositive: true),
+                        ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: ScoreCardWidget(
+                      score: 912,
+                      grade: 'A',
+                      actions: [
+                        ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                        ActionData(
+                          label: 'Traffic Violation',
+                          value: 24,
+                          isPositive: false,
+                        ),
+                        ActionData(label: 'Blood Donation', value: 42, isPositive: true),
+                        ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: ScoreCardWidget(
+                      score: 912,
+                      grade: 'A',
+                      actions: [
+                        ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                        ActionData(
+                          label: 'Traffic Violation',
+                          value: 24,
+                          isPositive: false,
+                        ),
+                        ActionData(label: 'Blood Donation', value: 42, isPositive: true),
+                        ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 280,
+                  child: ScoreCardWidget(
+                    score: 912,
+                    grade: 'A',
+                    actions: [
+                      ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                      ActionData(
+                        label: 'Traffic Violation',
+                        value: 24,
+                        isPositive: false,
+                      ),
+                      ActionData(label: 'Blood Donation', value: 42, isPositive: true),
+                      ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 350,
+                  child: ScoreCardWidget(
+                    score: 912,
+                    grade: 'A',
+                    actions: [
+                      ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                      ActionData(
+                        label: 'Traffic Violation',
+                        value: 24,
+                        isPositive: false,
+                      ),
+                      ActionData(label: 'Blood Donation', value: 42, isPositive: true),
+                      ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

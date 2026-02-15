@@ -97,7 +97,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 220,
                   child: DualRangeChartCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     date: 'Jan 12, 2028',
                     weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon'],
                     ranges: const [
@@ -176,7 +176,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 300,
                   child: DualRangeChartCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     date: 'Jan 12, 2028',
                     weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue'],
                     ranges: const [

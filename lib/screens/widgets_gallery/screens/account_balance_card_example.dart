@@ -76,7 +76,7 @@ class AccountBalanceCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 220,
                   child: AccountBalanceCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     accounts: const [
                       AccountBalanceCardData(
                         name: '现金',
@@ -144,7 +144,7 @@ class AccountBalanceCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 300,
                   child: AccountBalanceCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     accounts: const [
                       AccountBalanceCardData(
                         name: '现金',

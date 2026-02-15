@@ -146,6 +146,121 @@ class ColorfulShortcutsGridExample extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 320,
+                  child: CommonWidgetBuilder.build(
+                    context,
+                    CommonWidgetId.colorfulShortcutsGrid,
+                    ColorfulShortcutsGridData(
+                      columns: 3,
+                      itemHeight: 80,
+                      spacing: 12,
+                      borderRadius: 30,
+                      shortcuts: const [
+                        ShortcutItemData(
+                          iconName: 'event_available',
+                          label: 'Block Off',
+                          color: 0xFFFF5E63,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'collections',
+                          label: 'Make GIF',
+                          color: 0xFFFFB74D,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'note_add',
+                          label: 'New Note',
+                          color: 0xFFEBCB0E,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'add_comment',
+                          label: 'Text Image',
+                          color: 0xFF4CD964,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'chat_bubble',
+                          label: 'Text',
+                          color: 0xFF00C7BE,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'mail',
+                          label: 'Email',
+                          color: 0xFF00D1F3,
+                        ),
+                      ],
+                    ).toJson(),
+                    const WideSize(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 400,
+                  child: CommonWidgetBuilder.build(
+                    context,
+                    CommonWidgetId.colorfulShortcutsGrid,
+                    ColorfulShortcutsGridData(
+                      columns: 3,
+                      itemHeight: 100,
+                      spacing: 16,
+                      borderRadius: 40,
+                      shortcuts: const [
+                        ShortcutItemData(
+                          iconName: 'event_available',
+                          label: 'Block Off an Hour',
+                          color: 0xFFFF5E63,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'collections',
+                          label: 'Make GIF',
+                          color: 0xFFFFB74D,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'note_add',
+                          label: 'New Note with Date',
+                          color: 0xFFEBCB0E,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'add_comment',
+                          label: 'Text Last Image',
+                          color: 0xFF4CD964,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'chat_bubble',
+                          label: 'Text Running Late',
+                          color: 0xFF00C7BE,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'mail',
+                          label: 'Email Running Late',
+                          color: 0xFF00D1F3,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'photo_camera',
+                          label: 'Quick Photo',
+                          color: 0xFFAF52DE,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'videocam',
+                          label: 'Record Video',
+                          color: 0xFFFF2D55,
+                        ),
+                        ShortcutItemData(
+                          iconName: 'location_on',
+                          label: 'Share Location',
+                          color: 0xFF5856D6,
+                        ),
+                      ],
+                    ).toJson(),
+                    const Wide2Size(),
+                  ),
+                ),
               ],
             ),
           ),

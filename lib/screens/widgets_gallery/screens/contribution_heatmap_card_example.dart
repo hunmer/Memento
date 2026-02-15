@@ -73,7 +73,7 @@ class ContributionHeatmapCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 220,
                   child: ContributionHeatmapCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     title: 'Contributions',
                     contributionCount: '86 contributions',
                     years: ['2016', '2017', '2018', '2019'],
@@ -123,7 +123,7 @@ class ContributionHeatmapCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 300,
                   child: ContributionHeatmapCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     title: 'Sales per employee per month',
                     contributionCount: '263 contributions in the last year',
                     years: ['2016', '2017', '2018', '2019', '2020'],

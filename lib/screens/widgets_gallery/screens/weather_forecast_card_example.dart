@@ -72,6 +72,36 @@ class WeatherForecastCardExample extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 280,
+                  child: WeatherForecastCard(
+                    size: const WideSize(),
+                    cityName: 'London',
+                    weatherDescription: 'Heavy showers',
+                    currentTemp: 12,
+                    lowTemp: 4,
+                    temperatureHistory: [0.70, 0.60, 0.55, 0.45, 0.35, 0.30, 0.25, 0.20, 0.20, 0.25],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 350,
+                  child: WeatherForecastCard(
+                    size: const Wide2Size(),
+                    cityName: 'London',
+                    weatherDescription: 'Heavy showers with thunderstorms',
+                    currentTemp: 12,
+                    lowTemp: 4,
+                    temperatureHistory: [0.70, 0.60, 0.55, 0.45, 0.35, 0.30, 0.25, 0.20, 0.20, 0.25],
+                  ),
+                ),
               ],
             ),
           ),
@@ -148,6 +178,22 @@ class WeatherForecastCardPropsExample extends StatelessWidget {
                     child: WeatherForecastCard.fromProps(props, const LargeSize()),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 280,
+                  child: WeatherForecastCard.fromProps(props, const WideSize()),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 350,
+                  child: WeatherForecastCard.fromProps(props, const Wide2Size()),
+                ),
               ],
             ),
           ),
@@ -167,4 +213,3 @@ class WeatherForecastCardPropsExample extends StatelessWidget {
     );
   }
 }
-

@@ -58,7 +58,7 @@ class CircularProgressCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 220,
                   child: CircularProgressCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     title: '2020 Progress',
                     subtitle: '157d/366d • Passed',
                     percentage: 71.23,
@@ -88,7 +88,7 @@ class CircularProgressCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 300,
                   child: CircularProgressCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     title: '2020 Progress',
                     subtitle: '157d/366d • Passed',
                     percentage: 71.23,

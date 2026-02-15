@@ -74,7 +74,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 250,
                   child: DailyTodoListWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     date: 'Thu, 2 May 2024',
                     time: '15:30',
                     tasks: const [
@@ -128,7 +128,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 320,
                   child: DailyTodoListWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     date: 'Thu, 2 May 2024',
                     time: '15:30',
                     tasks: const [

@@ -68,7 +68,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 220,
                   child: BudgetTrendCardWidget(
-                    size: const MediumWideSize(),
+                    size: const WideSize(),
                     label: 'Budget',
                     value: 142000,
                     valuePrefix: r'$',
@@ -108,7 +108,7 @@ class BudgetTrendCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 300,
                   child: BudgetTrendCardWidget(
-                    size: const LargeWideSize(),
+                    size: const Wide2Size(),
                     label: 'Budget',
                     value: 142000,
                     valuePrefix: r'$',
