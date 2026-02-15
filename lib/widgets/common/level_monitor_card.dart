@@ -32,19 +32,11 @@ class WeeklyLevelData {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'day': day,
-      'value': value,
-      'isSelected': isSelected,
-    };
+    return {'day': day, 'value': value, 'isSelected': isSelected};
   }
 
   /// 创建副本
-  WeeklyLevelData copyWith({
-    String? day,
-    double? value,
-    bool? isSelected,
-  }) {
+  WeeklyLevelData copyWith({String? day, double? value, bool? isSelected}) {
     return WeeklyLevelData(
       day: day ?? this.day,
       value: value ?? this.value,
@@ -139,13 +131,13 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
 
-    _scoreAnimation = Tween<double>(begin: 0.0, end: widget.currentScore).animate(
+    _scoreAnimation = Tween<double>(
+      begin: 0.0,
+      end: widget.currentScore,
+    ).animate(
       CurvedAnimation(
         parent: _animationController,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
@@ -155,8 +147,10 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
     // 为每个进度条创建动画
     _barAnimations = List.generate(
       widget.weeklyData.length,
-      (index) => Tween<double>(begin: 0.0, end: widget.weeklyData[index].value)
-          .animate(
+      (index) => Tween<double>(
+        begin: 0.0,
+        end: widget.weeklyData[index].value,
+      ).animate(
         CurvedAnimation(
           parent: _animationController,
           curve: Interval(
@@ -198,9 +192,8 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
   Widget _buildContent(bool isDark) {
     final backgroundColor = isDark ? const Color(0xFF27272A) : Colors.white;
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final surfaceColor = isDark
-        ? primaryColor.withOpacity(0.15)
-        : primaryColor.withOpacity(0.1);
+    final surfaceColor =
+        isDark ? primaryColor.withOpacity(0.15) : primaryColor.withOpacity(0.1);
 
     return Container(
       width: widget.inline ? double.maxFinite : 380,
@@ -230,15 +223,12 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
             children: [
               // 当前分数和状态
               Flexible(
-                flex: 3,
+                flex: 6,
                 child: _buildScoreSection(isDark, primaryColor),
               ),
               const SizedBox(width: 8),
               // 每周进度条靠右
-              Flexible(
-                flex: 7,
-                child: _buildWeeklyBars(isDark, primaryColor),
-              ),
+              Flexible(flex: 7, child: _buildWeeklyBars(isDark, primaryColor)),
             ],
           ),
         ],
@@ -263,11 +253,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                   color: surfaceColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  widget.icon,
-                  color: primaryColor,
-                  size: iconSize,
-                ),
+                child: Icon(widget.icon, color: primaryColor, size: iconSize),
               ),
               SizedBox(width: widget.size.getItemSpacing()),
               Flexible(
@@ -343,7 +329,6 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                 );
               },
             ),
-            SizedBox(width: widget.size.getItemSpacing()),
             Padding(
               padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
               child: Text(
@@ -384,32 +369,9 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
 
-        // 如果总宽度不超过最大宽度，不需要滚动
+        // 如果总宽度不超过最大宽度，不需要滚动，直接居中显示
         if (totalBarWidth <= maxWidth) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: List.generate(widget.weeklyData.length, (index) {
-              final data = widget.weeklyData[index];
-              return _WeeklyBar(
-                day: data.day.substring(0, 1),
-                value: data.value,
-                animation: _barAnimations[index],
-                isSelected: data.isSelected,
-                primaryColor: primaryColor,
-                isDark: isDark,
-                onTap: () => widget.onBarTap?.call(index, data),
-                size: widget.size,
-              );
-            }),
-          );
-        }
-
-        // 需要滚动，设置固定宽度以触发滚动
-        return SizedBox(
-          width: maxWidth,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          return Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -426,6 +388,33 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                   size: widget.size,
                 );
               }),
+            ),
+          );
+        }
+
+        // 需要滚动，设置固定宽度以触发滚动，居中显示
+        return SizedBox(
+          width: maxWidth,
+          child: Center(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: List.generate(widget.weeklyData.length, (index) {
+                  final data = widget.weeklyData[index];
+                  return _WeeklyBar(
+                    day: data.day.substring(0, 1),
+                    value: data.value,
+                    animation: _barAnimations[index],
+                    isSelected: data.isSelected,
+                    primaryColor: primaryColor,
+                    isDark: isDark,
+                    onTap: () => widget.onBarTap?.call(index, data),
+                    size: widget.size,
+                  );
+                }),
+              ),
             ),
           ),
         );
@@ -458,9 +447,8 @@ class _WeeklyBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isDark
-        ? const Color(0xFF374151)
-        : const Color(0xFFE5E7EB);
+    final backgroundColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
     final barWidth = size.getBarWidth();
     final barHeight = size.getLargeFontSize() * 1.15;
 
@@ -501,9 +489,12 @@ class _WeeklyBar extends StatelessWidget {
                   style: TextStyle(
                     fontSize: size.getLegendFontSize(),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected
-                        ? (isDark ? Colors.white : Colors.grey.shade900)
-                        : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
+                    color:
+                        isSelected
+                            ? (isDark ? Colors.white : Colors.grey.shade900)
+                            : (isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600),
                   ),
                 ),
               ],

@@ -198,7 +198,7 @@ class _VerticalCircularProgressCardState
               padding: widget.padding ?? widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                borderRadius: BorderRadius.circular(widget.borderRadius ?? 28),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow:
                     (widget.showShadow ?? (!isDark))
                         ? [
@@ -244,30 +244,36 @@ class _VerticalCircularProgressCardState
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: widget.size.getPadding(),
-              decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+        Expanded(
+          child: Row(
+            children: [
+              Container(
+                padding: widget.size.getPadding(),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  widget.icon ?? Icons.bedtime_rounded,
+                  color: primaryColor,
+                  size: widget.size.getIconSize(),
+                ),
               ),
-              child: Icon(
-                widget.icon ?? Icons.bedtime_rounded,
-                color: primaryColor,
-                size: widget.size.getIconSize(),
+              SizedBox(width: widget.size.getItemSpacing()),
+              Flexible(
+                child: Text(
+                  widget.data.title,
+                  style: TextStyle(
+                    fontSize: widget.size.getTitleFontSize(),
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : const Color(0xFF111827),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            SizedBox(width: widget.size.getItemSpacing()),
-            Text(
-              widget.data.title,
-              style: TextStyle(
-                fontSize: widget.size.getTitleFontSize(),
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : const Color(0xFF111827),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
         InkWell(
           onTap: widget.onActionTap,
@@ -364,7 +370,28 @@ class _VerticalCircularProgressCardState
           ],
         ),
         // 右侧：周日程进度
-        Row(
+        Flexible(child: _buildWeeklyProgress(isDark, primaryColor)),
+      ],
+    );
+  }
+
+  /// 构建周日程进度，支持横向滚动
+  Widget _buildWeeklyProgress(bool isDark, Color primaryColor) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+
+        // 预计算所需宽度：n 个指示器宽度 + (n-1) 个间距
+        final indicatorWidth = widget.size.getLegendIndicatorWidth();
+        final itemCount = widget.data.weeklyProgress.length;
+        final spacing = widget.size.getItemSpacing();
+        final estimatedWidth =
+            (indicatorWidth * itemCount) + (spacing * (itemCount - 1));
+
+        // 构建内容 Row
+        final contentRow = Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children:
               widget.data.weeklyProgress.asMap().entries.map((entry) {
                 final index = entry.key;
@@ -381,9 +408,7 @@ class _VerticalCircularProgressCardState
                 );
 
                 return Padding(
-                  padding: EdgeInsets.only(
-                    left: index == 0 ? 0 : widget.size.getItemSpacing(),
-                  ),
+                  padding: EdgeInsets.only(left: index == 0 ? 0 : spacing),
                   child: _DaySleepIndicator(
                     dayData: data,
                     primaryColor: primaryColor,
@@ -393,8 +418,19 @@ class _VerticalCircularProgressCardState
                   ),
                 );
               }).toList(),
-        ),
-      ],
+        );
+
+        // 如果估计宽度不超过最大宽度，居中显示
+        if (estimatedWidth <= maxWidth) {
+          return Center(child: contentRow);
+        }
+
+        // 需要滚动，使用 SingleChildScrollView
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: contentRow,
+        );
+      },
     );
   }
 }
@@ -447,6 +483,7 @@ class _DaySleepIndicator extends StatelessWidget {
                       isDark
                           ? const Color(0xFF4B5563)
                           : const Color(0xFFE5E7EB),
+                  strokeWidth: size.getStrokeWidth() * size.progressStrokeScale,
                 ),
               ),
             ),
@@ -473,18 +510,19 @@ class _CircleProgressPainter extends CustomPainter {
   final double progress;
   final Color primaryColor;
   final Color backgroundColor;
+  final double strokeWidth;
 
   _CircleProgressPainter({
     required this.progress,
     required this.primaryColor,
     required this.backgroundColor,
+    this.strokeWidth = 2.5,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 2.5; // 减去描边宽度的一半
-    final strokeWidth = 2.5;
+    final radius = size.width / 2 - strokeWidth / 2;
 
     // 绘制背景圆环
     final backgroundPaint =
@@ -522,6 +560,7 @@ class _CircleProgressPainter extends CustomPainter {
   bool shouldRepaint(covariant _CircleProgressPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.primaryColor != primaryColor ||
-        oldDelegate.backgroundColor != backgroundColor;
+        oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

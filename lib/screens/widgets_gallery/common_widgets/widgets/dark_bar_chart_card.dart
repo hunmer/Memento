@@ -100,6 +100,14 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
     final hours = widget.durationInMinutes ~/ 60;
     final minutes = widget.durationInMinutes % 60;
 
+    // 根据 size 计算尺寸
+    final iconSize = widget.size.getIconSize();
+    final iconContainerSize = iconSize * widget.size.iconContainerScale;
+    final largeFontSize = widget.size.getLargeFontSize();
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    final legendFontSize = widget.size.getLegendFontSize();
+    final padding = widget.size.getPadding();
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -108,8 +116,10 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: widget.inline ? double.maxFinite : 320,
-              height: widget.inline ? double.maxFinite : 320,
+              width: widget.inline ? double.maxFinite : null,
+              height: widget.inline ? double.maxFinite : null,
+              constraints: widget.inline ? null : widget.size.getHeightConstraints(),
+              padding: padding,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
@@ -125,35 +135,35 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                 children: [
                   // 左上角图标
                   Positioned(
-                    top: widget.size.getPadding().top,
-                    left: widget.size.getPadding().left,
+                    top: 0,
+                    left: 0,
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: iconContainerSize,
+                      height: iconContainerSize,
                       decoration: BoxDecoration(
                         color: iconBgColor.withOpacity(0.8),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.bed,
                         color: Colors.white,
-                        size: 16,
+                        size: iconSize,
                       ),
                     ),
                   ),
 
                   // 右侧柱状条（睡眠周期可视化）
                   Positioned(
-                    top: 16,
+                    top: padding.top,
                     right: 0,
-                    bottom: 16,
+                    bottom: padding.bottom,
                     child: _buildSleepCycles(barColor),
                   ),
 
                   // 左下角睡眠时长显示
                   Positioned(
-                    bottom: widget.size.getPadding().bottom,
-                    left: widget.size.getPadding().left,
+                    bottom: 0,
+                    left: 0,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -162,32 +172,32 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                         Text(
                           'TIME ASLEEP',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: legendFontSize,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 1.5,
                             color: const Color(0xFFD8B4FE).withOpacity(0.9),
                           ),
                         ),
-                        SizedBox(height: widget.size.getItemSpacing()),
+                        SizedBox(height: widget.size.getSmallSpacing()),
 
                         // 时长显示 + 趋势图标
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SizedBox(
-                              height: 54,
+                              height: largeFontSize * 1.1,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   // 小时数
                                   SizedBox(
-                                    width: 70,
-                                    height: 52,
+                                    width: largeFontSize * 1.5,
+                                    height: largeFontSize * 1.1,
                                     child: AnimatedFlipCounter(
                                       value: hours * _animation.value,
-                                      textStyle: const TextStyle(
+                                      textStyle: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 48,
+                                        fontSize: largeFontSize,
                                         fontWeight: FontWeight.w600,
                                         height: 1.0,
                                         letterSpacing: -1,
@@ -196,12 +206,12 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                                   ),
                                   // 单位 "h"
                                   SizedBox(
-                                    height: 22,
+                                    height: subtitleFontSize * 1.1,
                                     child: Text(
                                       'h',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 20,
+                                        fontSize: subtitleFontSize,
                                         fontWeight: FontWeight.w500,
                                         height: 1.0,
                                       ),
@@ -210,13 +220,13 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                                   SizedBox(width: widget.size.getItemSpacing()),
                                   // 分钟数
                                   SizedBox(
-                                    width: 70,
-                                    height: 52,
+                                    width: largeFontSize * 1.5,
+                                    height: largeFontSize * 1.1,
                                     child: AnimatedFlipCounter(
                                       value: minutes * _animation.value,
-                                      textStyle: const TextStyle(
+                                      textStyle: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 48,
+                                        fontSize: largeFontSize,
                                         fontWeight: FontWeight.w600,
                                         height: 1.0,
                                         letterSpacing: -1,
@@ -225,12 +235,12 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                                   ),
                                   // 单位 "m"
                                   SizedBox(
-                                    height: 22,
+                                    height: subtitleFontSize * 1.1,
                                     child: Text(
                                       'm',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 20,
+                                        fontSize: subtitleFontSize,
                                         fontWeight: FontWeight.w500,
                                         height: 1.0,
                                       ),
@@ -251,7 +261,7 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
                                       ? Icons.arrow_upward
                                       : Icons.arrow_downward,
                                   color: const Color(0xFFD8B4FE),
-                                  size: 24,
+                                  size: iconSize,
                                 ),
                               ),
                           ],
@@ -276,21 +286,55 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
       0.60, 0.45, 0.70, 0.40, 0.35, 0.50, 0.45,
     ];
 
-    return SizedBox(
-      width: 140, // 右侧区域宽度
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (int i = 0; i < cycleWidths.length; i++)
-            _buildCycleBar(cycleWidths[i], barColor, i),
-        ],
-      ),
+    // 根据 size 计算尺寸
+    final itemSpacing = widget.size.getSmallSpacing();
+    final barHeight = widget.size.getBarWidth() * 0.8; // 柱状条高度
+    final barMaxWidth = widget.size.getLegendIndicatorWidth() * 4; // 柱状条最大宽度
+
+    // 计算需要的总高度
+    final totalHeightNeeded = cycleWidths.length * barHeight + (cycleWidths.length - 1) * itemSpacing;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableHeight = constraints.maxHeight;
+
+        // 如果需要的总高度超过可用高度，启用垂直滚动
+        final needsScroll = totalHeightNeeded > availableHeight;
+
+        return SizedBox(
+          width: barMaxWidth,
+          child: needsScroll
+              ? SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (int i = 0; i < cycleWidths.length; i++)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: i < cycleWidths.length - 1 ? itemSpacing : 0,
+                          ),
+                          child: _buildCycleBar(cycleWidths[i], barColor, i, barHeight, barMaxWidth),
+                        ),
+                    ],
+                  ),
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    for (int i = 0; i < cycleWidths.length; i++)
+                      _buildCycleBar(cycleWidths[i], barColor, i, barHeight, barMaxWidth),
+                  ],
+                ),
+        );
+      },
     );
   }
 
   /// 构建单个睡眠周期柱状条
-  Widget _buildCycleBar(double widthRatio, Color color, int index) {
+  Widget _buildCycleBar(double widthRatio, Color color, int index, double barHeight, double barMaxWidth) {
     // 计算每个柱状条的动画延迟
     // 16个元素，baseEnd = 0.6
     // step <= (1.0 - 0.6) / 15 = 0.0267
@@ -308,18 +352,18 @@ class _DarkBarChartCardState extends State<DarkBarChartCard>
       animation: itemAnimation,
       builder: (context, child) {
         return Transform.translate(
-          offset: Offset(widget.size.getItemSpacing() * (1 - itemAnimation.value), 0),
+          offset: Offset(widget.size.getSmallSpacing() * (1 - itemAnimation.value), 0),
           child: Opacity(
             opacity: 0.9 * itemAnimation.value,
             child: Container(
-              height: 16,
-              width: 100 * widthRatio,
-              margin: EdgeInsets.only(right: widget.size.getItemSpacing()),
+              height: barHeight,
+              width: barMaxWidth * widthRatio,
+              margin: EdgeInsets.only(right: widget.size.getSmallSpacing()),
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  bottomLeft: Radius.circular(4),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(barHeight / 4),
+                  bottomLeft: Radius.circular(barHeight / 4),
                 ),
               ),
             ),
