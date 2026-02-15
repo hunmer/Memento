@@ -712,34 +712,6 @@
       ]
     },
     {
-      "name": "SquarePillProgressCard",
-      "displayName": "药物追踪器",
-      "description": "显示药物数量和胶囊形状进度条",
-      "category": "tracking",
-      "file": "medication_tracker_widget.dart",
-      "parameters": [
-        {
-          "name": "medicationCount",
-          "type": "int",
-          "required": true,
-          "description": "药物数量"
-        },
-        {
-          "name": "unit",
-          "type": "String",
-          "required": false,
-          "defaultValue": "'meds'",
-          "description": "单位标签"
-        },
-        {
-          "name": "progress",
-          "type": "double",
-          "required": true,
-          "description": "进度值（0.0 - 1.0）"
-        }
-      ]
-    },
-    {
       "name": "ModernRoundedBarIconCard",
       "displayName": "现代圆角心情追踪",
       "description": "显示每周心情柱状图和心情历史图标",

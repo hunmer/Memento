@@ -80,7 +80,6 @@ import 'package:Memento/screens/widgets_gallery/screens/daily_schedule_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/expense_comparison_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/activity_rings_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weekly_bars_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/medication_tracker_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/dual_bar_chart_card_example.dart';
@@ -551,15 +550,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '周柱状图卡片',
         ),
         RouteDefinition(
-          path: '/widgets_gallery/medication_tracker_widget',
-      handler:
-          (settings) => RouteHelpers.createRoute(
-            const SquarePillProgressCardExample(),
-            settings: settings,
-          ),
-          description: '药物追踪器卡片',
-        ),
-        RouteDefinition(
           path: '/widgets_gallery/modern_egfr_health_widget',
       handler:
           (settings) => RouteHelpers.createRoute(
@@ -975,13 +965,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: 'eGFR 健康指标卡片',
     subtitle: 'ModernEgfrHealthWidget',
     route: '/widgets_gallery/modern_egfr_health_widget',
-  ),
-  WidgetPreviewItem(
-    category: '追踪类',
-    icon: Icons.medication,
-    title: '药物追踪器卡片',
-    subtitle: 'MedicationTrackerWidget',
-    route: '/widgets_gallery/medication_tracker_widget',
   ),
   WidgetPreviewItem(
     category: '追踪类',
