@@ -167,17 +167,54 @@ Widget _buildCommonWidgetsContent(
   // 获取元数据以确定默认尺寸
   final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
 
-  // 每次重建时重新获取最新数据
-  final latestData = provideCommonWidgets({});
-  final latestProps = latestData[commonWidgetId] ?? commonWidgetProps;
+  // 每次重建时使用同步方法重新获取最新数据
+  final latestProps = _getCommonWidgetDataSync(commonWidgetId);
 
   return CommonWidgetBuilder.build(
     context,
     widgetIdEnum,
-    latestProps,
+    latestProps ?? commonWidgetProps,
     metadata.defaultSize,
     inline: true,
   );
+}
+
+/// 同步获取公共小组件数据
+Map<String, dynamic>? _getCommonWidgetDataSync(String commonWidgetId) {
+  final plugin =
+      PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
+  if (plugin == null) return null;
+
+  // 同步获取今日活动（使用缓存）
+  final todayActivities = plugin.getTodayActivitiesSync();
+
+  // 计算今日统计数据
+  final todayDurationMinutes = todayActivities.fold<int>(
+    0,
+    (sum, a) => sum + a.durationInMinutes,
+  );
+
+  // 按标签统计
+  final tagStats = <String, int>{};
+  for (final activity in todayActivities) {
+    for (final tag in activity.tags) {
+      tagStats[tag] = (tagStats[tag] ?? 0) + activity.durationInMinutes;
+    }
+  }
+
+  // 根据 commonWidgetId 返回对应的数据
+  switch (commonWidgetId) {
+    case 'activityHeatmapCard':
+      return buildHeatmapCardData(todayActivities, {});
+    case 'activityTodayPieChartCard':
+      return {
+        'tagStats': tagStats,
+        'totalDuration': todayDurationMinutes,
+      };
+    // 其他公共小组件数据可以在这里扩展
+    default:
+      return null;
+  }
 }
 
 /// 公共小组件提供者函数（同步版本）

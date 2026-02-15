@@ -287,7 +287,7 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
   }
 
   /// 更新配置
-  void updateConfig({
+  Future<void> updateConfig({
     String? serviceId,
     int? unrecordedIntervalMinutes,
     String? textTemplate,
@@ -295,7 +295,7 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
     int? workHoursStart,
     int? workHoursEnd,
     bool? enableHapticFeedback,
-  }) {
+  }) async {
     bool needRestart = false;
 
     if (serviceId != null && serviceId != _serviceId) {
@@ -336,8 +336,8 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
 
     if (needRestart && _isActive) {
       // 重启服务
-      stop();
-      start();
+      await stop();
+      await start();
     }
 
     notifyListeners();
