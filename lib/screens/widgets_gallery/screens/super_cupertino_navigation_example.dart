@@ -329,7 +329,7 @@ class _SuperCupertinoNavigationExampleState
           final isSelected = _sizeMode == size['value'];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 3),
-            ChoiceChip(
+            child: ChoiceChip(
               label: Text(size['label']!),
               selected: isSelected,
               onSelected: (_) {
