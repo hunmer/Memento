@@ -172,7 +172,7 @@ class _MultiMetricProgressCardWidgetState extends State<MultiMetricProgressCardW
             ),
             // 追踪器列表
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: widget.size.getPadding(),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 350),
                 child: SingleChildScrollView(

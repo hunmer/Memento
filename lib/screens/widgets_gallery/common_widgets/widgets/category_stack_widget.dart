@@ -219,7 +219,7 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                           letterSpacing: 0.5,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: widget.size.getSmallSpacing()),
                       SizedBox(
                         height: 40,
                         child: Row(
@@ -232,7 +232,7 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: widget.size.getSmallSpacing()),
                             SizedBox(
                               width: 80,
                               height: 40,
@@ -248,7 +248,7 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: widget.size.getItemSpacing()),
                             SizedBox(
                               height: 40,
                               child: Text(

@@ -199,8 +199,8 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
           ),
           child: Text(
             widget.badgeLabel,
-            style: const TextStyle(
-              fontSize: 9,
+            style: TextStyle(
+              fontSize: size.getLegendFontSize(),
               fontWeight: FontWeight.w700,
               letterSpacing: 1.2,
               color: Colors.black,
@@ -211,7 +211,7 @@ class _CategoryDonutChartCardWidgetState extends State<CategoryDonutChartCardWid
         Text(
           widget.timePeriod,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             color: Colors.grey.shade500,
           ),
@@ -290,7 +290,7 @@ class _DonutChart extends StatelessWidget {
                   suffix: totalUnit,
                   duration: const Duration(milliseconds: 800),
                   textStyle: TextStyle(
-                    fontSize: 36,
+                    fontSize: size.getLargeFontSize(),
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     height: 1.0,
@@ -393,7 +393,7 @@ class _CategoryItem extends StatelessWidget {
                     Text(
                       label,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: size.getSubtitleFontSize(),
                         fontWeight: FontWeight.w500,
                         color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
                       ),
@@ -406,7 +406,7 @@ class _CategoryItem extends StatelessWidget {
                   suffix: '%',
                   duration: const Duration(milliseconds: 600),
                   textStyle: TextStyle(
-                    fontSize: 13,
+                    fontSize: size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     height: 1.0,

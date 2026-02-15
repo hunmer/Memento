@@ -148,7 +148,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         ),
                         child: Text(
                           widget.badgeLabel,
-                          style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+                          style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, letterSpacing: 1.5),
                         ),
                       ),
                       SizedBox(height: widget.size.getTitleSpacing()),
@@ -159,17 +159,17 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         suffix: '%',
                         duration: const Duration(milliseconds: 1000),
                         textStyle: TextStyle(
-                          fontSize: 42,
+                          fontSize: size.getLargeFontSize(),
                           fontWeight: FontWeight.w500,
                           color: isDark ? Colors.white : Colors.grey.shade900,
                           height: 1.0,
                           letterSpacing: -1,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: widget.size.getSmallSpacing()),
                       Text(
                         widget.timePeriod,
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Colors.grey.shade500, height: 1.2),
+                        style: TextStyle(fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: Colors.grey.shade500, height: 1.2),
                       ),
                     ],
                   ),
@@ -235,7 +235,7 @@ class _PerformanceBarChartWidgetState extends State<PerformanceBarChartWidget>
                         SizedBox(width: widget.size.getItemSpacing()),
                         Text(
                           widget.footerLabel.toUpperCase(),
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 1.5),
+                          style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: Colors.grey.shade500, letterSpacing: 1.5),
                         ),
                       ],
                     ),
@@ -314,7 +314,7 @@ class _AnimatedBar extends StatelessWidget {
                               child: Text(
                                 label,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white),
+                                style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: Colors.white),
                               ),
                             ),
                           ),

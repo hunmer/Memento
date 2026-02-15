@@ -235,7 +235,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: widget.size.getTitleFontSize(),
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                   ),
@@ -244,7 +244,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 Text(
                   widget.dateRange,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w500,
                     color: textColor,
                   ),
@@ -301,7 +301,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 Text(
                   widget.averageValue.toStringAsFixed(1),
                   style: TextStyle(
-                    fontSize: 48,
+                    fontSize: widget.size.getLargeFontSize(),
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     letterSpacing: -2,
@@ -311,7 +311,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 Text(
                   widget.unit,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: widget.size.getTitleFontSize() - 4,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                   ),
@@ -322,7 +322,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
             Text(
               'Daily average',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: widget.size.getSubtitleFontSize() + 2,
                 fontWeight: FontWeight.w500,
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
               ),
@@ -372,7 +372,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
             child: Text(
               value.toInt().toString(),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: widget.size.getLegendFontSize(),
                 fontWeight: FontWeight.w500,
                 color: textColor,
               ),
@@ -480,7 +480,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 child: Text(
                   widget.labels[index],
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: widget.size.getLegendFontSize(),
                     fontWeight: FontWeight.w500,
                     color: textColor,
                   ),

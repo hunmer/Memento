@@ -211,7 +211,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                 widget.status.toUpperCase(),
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
-                  fontSize: 10,
+                  fontSize: widget.size.getLegendFontSize(),
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.5,
                 ),
@@ -223,9 +223,9 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                   SizedBox(width: widget.size.getItemSpacing() * 0.25),
                   Text(
                     widget.rating.toStringAsFixed(1),
-                    style: const TextStyle(
-                      color: Color(0xFFFBBF24),
-                      fontSize: 14,
+                    style: TextStyle(
+                      color: const Color(0xFFFBBF24),
+                      fontSize: widget.size.getSubtitleFontSize(),
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -238,7 +238,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
             widget.title,
             style: TextStyle(
               color: isDark ? Colors.white : const Color(0xFF111827),
-              fontSize: 18,
+              fontSize: widget.size.getTitleFontSize(),
               fontWeight: FontWeight.w700,
               height: 1.2,
             ),
@@ -250,7 +250,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
             widget.description,
             style: TextStyle(
               color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-              fontSize: 12,
+              fontSize: widget.size.getLegendFontSize(),
               height: 1.5,
             ),
             maxLines: 2,
@@ -279,7 +279,7 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                         isDark
                             ? const Color(0xFFD1D5DB)
                             : const Color(0xFF6B7280),
-                    fontSize: 11,
+                    fontSize: widget.size.getLegendFontSize() - 1,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -295,9 +295,9 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                   SizedBox(width: widget.size.getItemSpacing() * 0.75),
                   Text(
                     widget.duration,
-                    style: const TextStyle(
-                      color: Color(0xFF9CA3AF),
-                      fontSize: 11,
+                    style: TextStyle(
+                      color: const Color(0xFF9CA3AF),
+                      fontSize: widget.size.getLegendFontSize() - 1,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

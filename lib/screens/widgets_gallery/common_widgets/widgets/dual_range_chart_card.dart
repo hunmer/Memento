@@ -230,7 +230,7 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
       child: IconButton(
         icon: Icon(icon, color: textColor),
         onPressed: () {},
-        padding: const EdgeInsets.all(8),
+        padding: widget.size.getSmallSpacing(),
         constraints: widget.size.getHeightConstraints(),
       ),
     );
@@ -284,7 +284,7 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
     return Row(
       children: [
         Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-        const SizedBox(width: 12),
+        SizedBox(width: widget.size.getItemSpacing()),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

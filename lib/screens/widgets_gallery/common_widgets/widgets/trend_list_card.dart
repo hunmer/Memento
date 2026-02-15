@@ -137,11 +137,11 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
                 color: isDark ? Colors.green.shade900 : Colors.green.shade700,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: widget.size.getItemSpacing()),
             Text(
               widget.data.title,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: widget.size.getTitleFontSize(),
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.grey.shade900,
                 letterSpacing: -0.5,
@@ -156,7 +156,7 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
               size: 24,
               color: Colors.grey.shade400,
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: widget.size.getItemSpacing()),
             Icon(
               Icons.refresh,
               size: 20,
@@ -257,20 +257,20 @@ class _TrendItemWidget extends StatelessWidget {
               Text(
                 data.symbol,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: widget.size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w600,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: widget.size.getSmallSpacing()),
               SizedBox(
                 height: 24,
                 child: AnimatedFlipCounter(
                   value: data.value * itemAnimation.value,
                   fractionDigits: 2,
                   textStyle: TextStyle(
-                    fontSize: 18,
+                    fontSize: widget.size.getSubtitleFontSize() + 4,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     height: 1.0,
@@ -286,18 +286,18 @@ class _TrendItemWidget extends StatelessWidget {
             Text(
               '${data.isPositive ? '+' : ''}${data.percentChange.toStringAsFixed(2)}%',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: widget.size.getSubtitleFontSize(),
                 fontWeight: FontWeight.w700,
                 color: trendColor,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: widget.size.getSmallSpacing()),
             SizedBox(
               height: 20,
               child: Text(
                 '${data.isPositive ? '+' : ''}${data.valueChange.toStringAsFixed(2)}',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: widget.size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w500,
                   color: trendColor.withOpacity(0.8),
                   height: 1.0,

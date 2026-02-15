@@ -250,7 +250,7 @@ class _IconCircularProgressCardWidgetState
         Text(
           widget.title,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: widget.size.getTitleFontSize(),
             fontWeight: FontWeight.w700,
             color: titleColor,
             height: 1.2,
@@ -263,7 +263,7 @@ class _IconCircularProgressCardWidgetState
         Text(
           widget.subtitle,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: widget.size.getLegendFontSize(),
             fontWeight: FontWeight.w500,
             color: subtitleColor,
             height: 1.2,

@@ -80,7 +80,7 @@ class _ActivityTodayPieChartCardWidgetState
     ];
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: widget.size.getPadding(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -92,7 +92,7 @@ class _ActivityTodayPieChartCardWidgetState
               color: Colors.pink,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getItemSpacing()),
 
           // 饼状图（在上方）
           Expanded(
@@ -112,7 +112,7 @@ class _ActivityTodayPieChartCardWidgetState
             ),
           ),
 
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getItemSpacing()),
 
           // 图例（在下方）
           Expanded(
@@ -125,7 +125,7 @@ class _ActivityTodayPieChartCardWidgetState
             ),
           ),
 
-          const SizedBox(height: 4),
+          SizedBox(height: widget.size.getSmallSpacing()),
 
           // 总时长
           Text(
@@ -144,7 +144,7 @@ class _ActivityTodayPieChartCardWidgetState
     return SizedBox(
       width: double.infinity,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: widget.size.getPadding(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -156,7 +156,7 @@ class _ActivityTodayPieChartCardWidgetState
                 color: Colors.pink,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: widget.size.getTitleSpacing()),
 
             // 占位内容，保持2x3布局
             Expanded(
@@ -176,7 +176,7 @@ class _ActivityTodayPieChartCardWidgetState
                       color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: widget.size.getItemSpacing()),
                   Text(
                     '添加活动后查看统计',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -187,7 +187,7 @@ class _ActivityTodayPieChartCardWidgetState
               ),
             ),
 
-            const SizedBox(height: 8),
+            SizedBox(height: widget.size.getItemSpacing()),
 
             // 底部占位文字
             Text(
@@ -217,8 +217,8 @@ class _ActivityTodayPieChartCardWidgetState
         value: value.toDouble(),
         title: '$percentage%',
         radius: 40,
-        titleStyle: const TextStyle(
-          fontSize: 10,
+        titleStyle: TextStyle(
+          fontSize: widget.size.getLegendFontSize(),
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),

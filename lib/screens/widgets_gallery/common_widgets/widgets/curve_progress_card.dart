@@ -193,7 +193,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
         Text(
           label.toUpperCase(),
           style: TextStyle(
-            fontSize: 12,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.bold,
             letterSpacing: 2.4,
             color: secondaryTextColor,
@@ -232,7 +232,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                         value: widget.value * _progressAnimation.value,
                         fractionDigits: widget.value % 1 != 0 ? 2 : 0,
                         textStyle: TextStyle(
-                          fontSize: 48,
+                          fontSize: widget.size.getLargeFontSize(),
                           fontWeight: FontWeight.w800,
                           color: textColor,
                           height: 1.0,
@@ -246,7 +246,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
                         child: Text(
                           widget.unit,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: widget.size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w500,
                             color: textColor,
                             height: 1.0,
@@ -273,7 +273,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
               Text(
                 widget.label,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: widget.size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w600,
                   color: isDark ? Colors.grey.shade300 : Colors.grey.shade900,
                 ),
@@ -313,7 +313,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
         Text(
           changeText,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.bold,
             color: changeColor,
             letterSpacing: 0.5,
@@ -322,7 +322,7 @@ class _CurveProgressCardWidgetState extends State<CurveProgressCardWidget>
         Text(
           widget.lastUpdated,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             color: secondaryTextColor,
           ),

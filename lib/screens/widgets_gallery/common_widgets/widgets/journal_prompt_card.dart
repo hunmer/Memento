@@ -154,7 +154,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                           widget.weekday,
                           style: TextStyle(
                             color: const Color(0xFFD1D5DB),
-                            fontSize: 18,
+                            fontSize: widget.size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -171,7 +171,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                           widget.prompt,
                           style: TextStyle(
                             color: const Color(0xFF9FA8DA),
-                            fontSize: 28,
+                            fontSize: widget.size.getLargeFontSize() - 20,
                             fontWeight: FontWeight.bold,
                             height: 1.2,
                             letterSpacing: -0.5,
@@ -391,9 +391,9 @@ class _ActionButton extends StatelessWidget {
                 SizedBox(width: size.getItemSpacing()),
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 18,
+                    fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w600,
                   ),
                 ),

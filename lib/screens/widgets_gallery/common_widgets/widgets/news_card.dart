@@ -315,8 +315,8 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
           ),
         ],
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(8.0),
+      child: Padding(
+        padding: widget.size.getSmallSpacing(),
         child: Icon(Icons.fingerprint_outlined, color: Colors.white, size: 20),
       ),
     );

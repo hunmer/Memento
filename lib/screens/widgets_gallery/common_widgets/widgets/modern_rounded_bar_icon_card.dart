@@ -330,7 +330,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
                   right: -10,
                   child: Container(
                     decoration: BoxDecoration(color: isDark ? Colors.white : const Color(0xFF1F2937), shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4, offset: const Offset(0, 2))]),
-                    padding: const EdgeInsets.all(4),
+                    padding: widget.size.getSmallSpacing(),
                     child: Icon(Icons.thumb_up, size: 12, color: isDark ? const Color(0xFF1F2937) : Colors.white),
                   ),
                 ),
