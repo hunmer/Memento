@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/index.dart';
 
 /// 压力水平监测示例
@@ -10,6 +11,7 @@ class StressLevelMonitorExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(title: const Text('压力水平监测')),
@@ -21,18 +23,19 @@ class StressLevelMonitorExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (1x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 200,
+                    width: 150,
+                    height: 150,
                     child: LevelMonitorCard(
                       title: 'Stress',
                       icon: Icons.error_outline,
                       currentScore: 4.2,
                       status: 'Stressed',
                       scoreUnit: 'pts',
+                      size: const SmallSize(),
                       weeklyData: [
                         WeeklyLevelData(
                           day: 'M',
@@ -66,18 +69,19 @@ class StressLevelMonitorExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (2x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 250,
+                    width: 220,
+                    height: 220,
                     child: LevelMonitorCard(
                       title: 'Stress Level',
                       icon: Icons.error_outline,
                       currentScore: 4.2,
                       status: 'Stressed Out',
                       scoreUnit: 'pts',
+                      size: const MediumSize(),
                       weeklyData: [
                         WeeklyLevelData(
                           day: 'Mon',
@@ -116,11 +120,11 @@ class StressLevelMonitorExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (2x2)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
+                    width: 300,
                     height: 300,
                     child: LevelMonitorCard(
                       title: 'Stress Level',
@@ -128,6 +132,7 @@ class StressLevelMonitorExample extends StatelessWidget {
                       currentScore: 4.2,
                       status: 'Stressed Out',
                       scoreUnit: 'pts',
+                      size: const LargeSize(),
                       weeklyData: [
                         WeeklyLevelData(
                           day: 'Mon',
@@ -171,109 +176,117 @@ class StressLevelMonitorExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中宽尺寸'),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width - 32,
-                  height: 280,
-                  child: LevelMonitorCard(
-                    title: 'Weekly Stress Level Monitor',
-                    icon: Icons.monitor_heart,
-                    currentScore: 4.2,
-                    status: 'Stressed Out - Needs Attention',
-                    scoreUnit: 'pts',
-                    weeklyData: [
-                      WeeklyLevelData(
-                        day: 'Mon',
-                        value: 0.45,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Tue',
-                        value: 0.25,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Wed',
-                        value: 0.60,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Thu',
-                        value: 0.85,
-                        isSelected: true,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Fri',
-                        value: 0.35,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Sat',
-                        value: 0.15,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Sun',
-                        value: 0.40,
-                        isSelected: false,
-                      ),
-                    ],
-                    onTodayTap: _onTodayTap,
-                    onBarTap: _onBarTap,
+                Center(
+                  child: SizedBox(
+                    width: screenWidth - 32,
+                    height: 220,
+                    child: LevelMonitorCard(
+                      inline: true,
+                      title: 'Weekly Stress Level Monitor',
+                      icon: Icons.monitor_heart,
+                      currentScore: 4.2,
+                      status: 'Stressed Out - Needs Attention',
+                      scoreUnit: 'pts',
+                      size: const WideSize(),
+                      weeklyData: [
+                        WeeklyLevelData(
+                          day: 'Mon',
+                          value: 0.45,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Tue',
+                          value: 0.25,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Wed',
+                          value: 0.60,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Thu',
+                          value: 0.85,
+                          isSelected: true,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Fri',
+                          value: 0.35,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Sat',
+                          value: 0.15,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Sun',
+                          value: 0.40,
+                          isSelected: false,
+                        ),
+                      ],
+                      onTodayTap: _onTodayTap,
+                      onBarTap: _onBarTap,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大宽尺寸'),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
                 const SizedBox(height: 8),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width - 32,
-                  height: 350,
-                  child: LevelMonitorCard(
-                    title: 'Complete Stress Level Analysis and Monitoring',
-                    icon: Icons.health_and_safety,
-                    currentScore: 4.2,
-                    status: 'Stressed Out - Requires Immediate Attention',
-                    scoreUnit: 'pts',
-                    weeklyData: [
-                      WeeklyLevelData(
-                        day: 'Monday',
-                        value: 0.45,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Tuesday',
-                        value: 0.25,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Wednesday',
-                        value: 0.60,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Thursday',
-                        value: 0.85,
-                        isSelected: true,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Friday',
-                        value: 0.35,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Saturday',
-                        value: 0.15,
-                        isSelected: false,
-                      ),
-                      WeeklyLevelData(
-                        day: 'Sunday',
-                        value: 0.40,
-                        isSelected: false,
-                      ),
-                    ],
-                    onTodayTap: _onTodayTap,
-                    onBarTap: _onBarTap,
+                Center(
+                  child: SizedBox(
+                    width: screenWidth - 32,
+                    height: 320,
+                    child: LevelMonitorCard(
+                      inline: true,
+                      title: 'Complete Stress Level Analysis and Monitoring',
+                      icon: Icons.health_and_safety,
+                      currentScore: 4.2,
+                      status: 'Stressed Out - Requires Immediate Attention',
+                      scoreUnit: 'pts',
+                      size: const Wide2Size(),
+                      weeklyData: [
+                        WeeklyLevelData(
+                          day: 'Monday',
+                          value: 0.45,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Tuesday',
+                          value: 0.25,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Wednesday',
+                          value: 0.60,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Thursday',
+                          value: 0.85,
+                          isSelected: true,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Friday',
+                          value: 0.35,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Saturday',
+                          value: 0.15,
+                          isSelected: false,
+                        ),
+                        WeeklyLevelData(
+                          day: 'Sunday',
+                          value: 0.40,
+                          isSelected: false,
+                        ),
+                      ],
+                      onTodayTap: _onTodayTap,
+                      onBarTap: _onBarTap,
+                    ),
                   ),
                 ),
               ],
