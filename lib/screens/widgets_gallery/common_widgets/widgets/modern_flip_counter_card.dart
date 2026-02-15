@@ -104,28 +104,31 @@ class ModernFlipCounterCard extends StatefulWidget {
       unit: props['unit'] as String? ?? 'mL/min',
       date: props['date'] as String? ?? '',
       status: props['status'] as String? ?? 'Unknown',
-      icon: props['icon'] != null
-          ? IconData(
-              props['icon'] is int
-                  ? props['icon'] as int
-                  : int.parse(props['icon'].toString()),
-              fontFamily: 'MaterialIcons',
-            )
-          : Icons.science,
-      primaryColor: props['primaryColor'] != null
-          ? Color(
-              props['primaryColor'] is int
-                  ? props['primaryColor'] as int
-                  : int.parse(props['primaryColor'].toString()),
-            )
-          : null,
-      statusColor: props['statusColor'] != null
-          ? Color(
-              props['statusColor'] is int
-                  ? props['statusColor'] as int
-                  : int.parse(props['statusColor'].toString()),
-            )
-          : null,
+      icon:
+          props['icon'] != null
+              ? IconData(
+                props['icon'] is int
+                    ? props['icon'] as int
+                    : int.parse(props['icon'].toString()),
+                fontFamily: 'MaterialIcons',
+              )
+              : Icons.science,
+      primaryColor:
+          props['primaryColor'] != null
+              ? Color(
+                props['primaryColor'] is int
+                    ? props['primaryColor'] as int
+                    : int.parse(props['primaryColor'].toString()),
+              )
+              : null,
+      statusColor:
+          props['statusColor'] != null
+              ? Color(
+                props['statusColor'] is int
+                    ? props['statusColor'] as int
+                    : int.parse(props['statusColor'].toString()),
+              )
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -164,7 +167,8 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
-    final primaryColor = widget.primaryColor ??
+    final primaryColor =
+        widget.primaryColor ??
         (isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED));
     final accentColor = widget.statusColor ?? const Color(0xFF84CC16);
 
@@ -180,18 +184,20 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 40,
-                          offset: const Offset(0, -12),
-                        ),
-                      ],
-                border: isDark
-                    ? Border.all(color: Colors.white.withOpacity(0.1))
-                    : null,
+                boxShadow:
+                    isDark
+                        ? null
+                        : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 40,
+                            offset: const Offset(0, -12),
+                          ),
+                        ],
+                border:
+                    isDark
+                        ? Border.all(color: Colors.white.withOpacity(0.1))
+                        : null,
               ),
               padding: widget.size.getPadding(),
               child: Column(
@@ -216,31 +222,37 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.only(right: widget.size.getItemSpacing() / 2),
-              child: Icon(
-                widget.icon,
-                size: widget.size.getIconSize(),
-                color: primaryColor,
+        Flexible(
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.only(right: widget.size.getItemSpacing() / 2),
+                child: Icon(
+                  widget.icon,
+                  size: widget.size.getIconSize(),
+                  color: primaryColor,
+                ),
               ),
-            ),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
-                height: 1.0,
+              Flexible(
+                child: Text(
+                  widget.title,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: widget.size.getSubtitleFontSize(),
+                    fontWeight: FontWeight.bold,
+                    color:
+                        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
+                    height: 1.0,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Text(
           widget.date,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: widget.size.getLegendFontSize(),
             fontWeight: FontWeight.w600,
             color: isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
             height: 1.0,
@@ -252,51 +264,60 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
 
   /// 构建内容区域
   Widget _buildContent(bool isDark, Color primaryColor, Color accentColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // 数值
-        SizedBox(
-          height: 54,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 100,
-                height: 52,
-                child: FittedBox(
-                  fit: BoxFit.contain,
-                  alignment: Alignment.centerLeft,
-                  child: AnimatedFlipCounter(
-                    value: widget.value * _animation.value,
-                    fractionDigits: 1,
-                    textStyle: TextStyle(
-                      fontSize: widget.size.getLargeFontSize(),
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? Colors.white : const Color(0xFF111827),
-                      height: 1.0,
-                    ),
-                  ),
+    final valueFontSize = widget.size.getLargeFontSize();
+    final unitFontSize = widget.size.getSubtitleFontSize();
+    final valueHeight = valueFontSize * 1.1;
+
+    // 数值部分
+    final valueWidget = SizedBox(
+      height: valueHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: valueFontSize * 1.5,
+            height: valueHeight,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              alignment: Alignment.centerLeft,
+              child: AnimatedFlipCounter(
+                value: widget.value * _animation.value,
+                fractionDigits: 1,
+                textStyle: TextStyle(
+                  fontSize: valueFontSize,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white : const Color(0xFF111827),
+                  height: 1.0,
                 ),
               ),
-              SizedBox(width: widget.size.getItemSpacing() / 3),
-              SizedBox(
-                height: 22,
-                child: Text(
-                  widget.unit,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-                    height: 1.0,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-        // 状态指示器
+          SizedBox(width: widget.size.getItemSpacing() / 3),
+          SizedBox(
+            height: unitFontSize * 1.2,
+            child: Text(
+              widget.unit,
+              style: TextStyle(
+                fontSize: unitFontSize,
+                fontWeight: FontWeight.w600,
+                color:
+                    isDark
+                        ? const Color(0xFF9CA3AF)
+                        : const Color(0xFF6B7280),
+                height: 1.0,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // 始终使用 Column 布局，状态指示器在新的一行
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        valueWidget,
+        SizedBox(height: widget.size.getItemSpacing()),
         _buildStatusIndicator(isDark, accentColor),
       ],
     );
@@ -304,83 +325,96 @@ class _ModernFlipCounterCardState extends State<ModernFlipCounterCard>
 
   /// 构建状态指示器
   Widget _buildStatusIndicator(bool isDark, Color accentColor) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 12,
-          child: Text(
-            widget.status,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF1F2937),
-              letterSpacing: 0.5,
-              height: 1.0,
+    final statusFontSize = widget.size.getLegendFontSize();
+    final indicatorHeight = widget.size.getLegendIndicatorHeight();
+    final dotSize = widget.size.getSmallSpacing() * 5;
+
+    // 使用 LayoutBuilder 获取可用宽度，指示器填满可用空间
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final indicatorWidth = constraints.maxWidth;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: statusFontSize * 1.2,
+              child: Text(
+                widget.status,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: statusFontSize,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF1F2937),
+                  letterSpacing: 0.5,
+                  height: 1.0,
+                ),
+              ),
             ),
-          ),
-        ),
-        SizedBox(height: widget.size.getItemSpacing() / 3),
-        Container(
-          width: 88,
-          height: 8,
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF374151) : const Color(0xFFFDE68A),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Stack(
-            children: [
-              // 渐变背景
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    gradient: LinearGradient(
-                      colors: isDark
-                          ? [
-                              const Color(0xFF365314),
-                              const Color(0xFF3F6212),
-                              const Color(0xFF365314),
-                            ]
-                          : [
-                              const Color(0xFFFDE68A),
-                              const Color(0xFFBEF264),
-                              const Color(0xFFFDE68A),
-                            ],
-                    ),
-                  ),
-                ),
+            SizedBox(height: widget.size.getItemSpacing() / 3),
+            Container(
+              width: indicatorWidth,
+              height: indicatorHeight,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF374151) : const Color(0xFFFDE68A),
+                borderRadius: BorderRadius.circular(indicatorHeight / 2),
               ),
-              // 指示点
-              Positioned(
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: accentColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                        width: 2.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 2,
+              child: Stack(
+                children: [
+                  // 渐变背景
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(indicatorHeight / 2),
+                        gradient: LinearGradient(
+                          colors:
+                              isDark
+                                  ? [
+                                    const Color(0xFF365314),
+                                    const Color(0xFF3F6212),
+                                    const Color(0xFF365314),
+                                  ]
+                                  : [
+                                    const Color(0xFFFDE68A),
+                                    const Color(0xFFBEF264),
+                                    const Color(0xFFFDE68A),
+                                  ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  // 指示点
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        width: dotSize,
+                        height: dotSize,
+                        decoration: BoxDecoration(
+                          color: accentColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                            width: widget.size.getSmallSpacing(),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

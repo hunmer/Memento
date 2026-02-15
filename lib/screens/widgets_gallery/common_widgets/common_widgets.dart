@@ -76,7 +76,6 @@ import 'widgets/rounded_property_card.dart';
 import 'widgets/task_list_stat_card.dart';
 import 'widgets/vertical_property_card.dart';
 import 'widgets/task_progress_list.dart';
-import 'widgets/square_pill_progress_card.dart';
 import 'widgets/dark_bar_chart_card.dart';
 import 'widgets/card_emoji_icon_display.dart';
 import 'widgets/habit_streak_tracker_card.dart';
@@ -170,7 +169,6 @@ enum CommonWidgetId {
   taskListStatCard,
   verticalPropertyCard,
   taskProgressList,
-  medicationTrackerWidget,
   sleepDurationCard,
   moodTrackerCard,
   habitStreakTrackerCard,
@@ -803,14 +801,6 @@ class CommonWidgetsRegistry {
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
     ),
-    CommonWidgetId.medicationTrackerWidget: const CommonWidgetMetadata(
-      id: CommonWidgetId.medicationTrackerWidget,
-      name: '药物追踪器',
-      description: '显示药物数量和进度，带胶囊形状进度条',
-      icon: Icons.medication_outlined,
-      defaultSize: const MediumSize(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
-    ),
     CommonWidgetId.sleepDurationCard: const CommonWidgetMetadata(
       id: CommonWidgetId.sleepDurationCard,
       name: '睡眠时长统计卡片',
@@ -1107,8 +1097,6 @@ class CommonWidgetBuilder {
         return VerticalPropertyCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.taskProgressList:
         return TaskProgressListWidget.fromProps(finalProps, size);
-      case CommonWidgetId.medicationTrackerWidget:
-        return SquarePillProgressCard.fromProps(finalProps, size);
       case CommonWidgetId.sleepDurationCard:
         return DarkBarChartCard.fromProps(finalProps, size);
       case CommonWidgetId.moodTrackerCard:

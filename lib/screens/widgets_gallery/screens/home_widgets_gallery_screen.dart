@@ -242,13 +242,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.medication,
-        title: '药物追踪器卡片',
-        subtitle: 'MedicationTrackerWidget - 药物进度追踪展示卡片',
-        route: '/widgets_gallery/medication_tracker_widget',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.water_drop,
         title: '饮水追踪器',
         subtitle: 'HydrationTrackerWidget - 每日饮水量追踪与连续打卡',

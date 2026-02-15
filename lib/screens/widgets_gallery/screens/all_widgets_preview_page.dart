@@ -24,7 +24,6 @@ import 'package:Memento/screens/widgets_gallery/screens/stress_level_monitor_exa
 import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/medication_tracker_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/hydration_tracker_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weight_tracking_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/blood_pressure_tracker_example.dart';
@@ -377,8 +376,6 @@ class _WidgetRegistry {
         () => const SleepDurationCardExample(),
     '/widgets_gallery/modern_egfr_health_widget':
         () => const ModernFlipCounterCardExample(),
-    '/widgets_gallery/medication_tracker_widget':
-        () => const SquarePillProgressCardExample(),
     '/widgets_gallery/hydration_tracker_widget':
         () => const HydrationTrackerWidgetExample(),
     '/widgets_gallery/weight_tracking_widget':
