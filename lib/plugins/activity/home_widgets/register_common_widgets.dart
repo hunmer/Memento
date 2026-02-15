@@ -19,8 +19,8 @@ void registerCommonWidgets(HomeWidgetRegistry registry) {
       description: 'activity_commonWidgetsDesc'.tr,
       icon: Icons.dashboard,
       color: Colors.pink,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const LargeSize(), const CustomSize(width: -1, height: -1)],
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideCommonWidgets,
       builder: (context, config) {

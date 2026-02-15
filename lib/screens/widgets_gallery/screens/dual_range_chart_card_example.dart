@@ -27,7 +27,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DualRangeChartCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       date: 'Jan 12, 2028',
                       weekDays: ['Wed', 'Thu', 'Fri'],
                       ranges: const [
@@ -60,7 +60,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: DualRangeChartCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       date: 'Jan 12, 2028',
                       weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                       ranges: const [
@@ -98,7 +98,7 @@ class DualRangeChartCardExample extends StatelessWidget {
                     width: 350,
                     height: 300,
                     child: DualRangeChartCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       date: 'Jan 12, 2028',
                       weekDays: ['Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue'],
                       ranges: const [

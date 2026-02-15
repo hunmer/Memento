@@ -19,8 +19,8 @@ void registerWeeklyChartWidget(HomeWidgetRegistry registry) {
       description: '展示近七天的活动时长统计，支持多种图表样式',
       icon: Icons.bar_chart,
       color: Colors.pink,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.large, HomeWidgetSize.custom],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const LargeSize(), const CustomSize(width: -1, height: -1)],
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideWeeklyChartWidgets,
       builder: (context, config) {

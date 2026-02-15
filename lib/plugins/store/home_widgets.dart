@@ -28,10 +28,10 @@ class StoreHomeWidgets {
         description: '显示今日积分与目标的进度',
         icon: Icons.flag,
         color: Colors.orange,
-        defaultSize: HomeWidgetSize.medium, // 2x1
+        defaultSize: const MediumSize(), // 2x1
         supportedSizes: [
-          HomeWidgetSize.medium, // 2x1
-          HomeWidgetSize.large, // 2x2
+          const MediumSize(), // 2x1
+          const LargeSize(), // 2x2
         ],
         category: 'home_categoryTools'.tr,
         selectorId: 'store.pointsGoalForm',
@@ -61,8 +61,8 @@ class StoreHomeWidgets {
         description: 'store_widgetDescription'.tr,
         icon: Icons.store,
         color: Colors.pinkAccent,
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryTools'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -82,8 +82,8 @@ class StoreHomeWidgets {
         description: 'store_overviewDescription'.tr,
         icon: Icons.shopping_bag_outlined,
         color: Colors.pinkAccent,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const LargeSize()],
         category: 'home_categoryTools'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
@@ -99,8 +99,8 @@ class StoreHomeWidgets {
         description: 'store_productQuickAccessDesc'.tr,
         icon: Icons.shopping_bag,
         color: Colors.pinkAccent,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const MediumSize(), const LargeSize()],
         category: 'home_categoryTools'.tr,
 
         // 选择器配置
@@ -133,8 +133,8 @@ class StoreHomeWidgets {
         description: 'store_userItemQuickAccessDesc'.tr,
         icon: Icons.inventory_2,
         color: Colors.pinkAccent,
-        defaultSize: HomeWidgetSize.medium,
-        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        defaultSize: const MediumSize(),
+        supportedSizes: [const MediumSize(), const LargeSize()],
         category: 'home_categoryTools'.tr,
 
         // 选择器配置

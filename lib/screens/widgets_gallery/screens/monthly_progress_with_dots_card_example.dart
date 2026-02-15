@@ -27,7 +27,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MonthlyProgressWithDotsCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'September',
                       currentDay: 18,
                       totalDays: 31,
@@ -44,7 +44,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: MonthlyProgressWithDotsCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'September',
                       currentDay: 18,
                       totalDays: 31,
@@ -61,7 +61,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: MonthlyProgressWithDotsCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'September',
                       currentDay: 18,
                       totalDays: 31,

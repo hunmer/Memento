@@ -28,7 +28,7 @@ class TrendListCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: TrendListCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       data: TrendListCardData(
                         title: 'Stocks',
                         iconName: 'monetization_on',
@@ -74,7 +74,7 @@ class TrendListCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: TrendListCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       data: TrendListCardData(
                         title: 'Stocks',
                         iconName: 'monetization_on',
@@ -120,7 +120,7 @@ class TrendListCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: TrendListCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       data: TrendListCardData(
                         title: 'Stocks',
                         iconName: 'monetization_on',

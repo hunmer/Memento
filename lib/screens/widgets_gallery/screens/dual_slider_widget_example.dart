@@ -27,7 +27,7 @@ class DualSliderWidgetExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DualSliderWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       label1: 'Shibuya',
                       label2: '+9',
                       label3: 'Aug 12',
@@ -46,7 +46,7 @@ class DualSliderWidgetExample extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: DualSliderWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       label1: 'Shibuya, Tokyo',
                       label2: '+9',
                       label3: 'Aug 12',
@@ -65,7 +65,7 @@ class DualSliderWidgetExample extends StatelessWidget {
                     width: 280,
                     height: 280,
                     child: DualSliderWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       label1: 'Shibuya, Tokyo',
                       label2: '+9',
                       label3: 'Aug 12',

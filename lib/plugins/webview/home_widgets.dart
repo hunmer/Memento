@@ -27,8 +27,8 @@ class WebviewHomeWidgets {
         description: 'webview_widgetDescription'.tr,
         icon: Icons.language,
         color: const Color(0xFF4285F4),
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryTools'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -48,8 +48,8 @@ class WebviewHomeWidgets {
         description: 'webview_overviewDescription'.tr,
         icon: Icons.language_outlined,
         color: const Color(0xFF4285F4),
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const LargeSize()],
         category: 'home_categoryTools'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
@@ -65,8 +65,8 @@ class WebviewHomeWidgets {
         description: 'webview_cardQuickAccessDesc'.tr,
         icon: Icons.link,
         color: const Color(0xFF4285F4),
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const MediumSize(), const LargeSize()],
         category: 'home_categoryTools'.tr,
 
         // 选择器配置
@@ -95,8 +95,8 @@ class WebviewHomeWidgets {
         description: 'webview_embeddedDesc'.tr,
         icon: Icons.web,
         color: const Color(0xFF4285F4),
-        defaultSize: HomeWidgetSize.custom,
-        supportedSizes: [HomeWidgetSize.custom],
+        defaultSize: const CustomSize(width: -1, height: -1),
+        supportedSizes: [const CustomSize(width: -1, height: -1)],
         category: 'home_categoryTools'.tr,
 
         // 选择器配置

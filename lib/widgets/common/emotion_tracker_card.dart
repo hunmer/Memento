@@ -101,7 +101,7 @@ enum EmotionType {
 ///   ],
 ///   onDayTapped: (index) => print('Day $index tapped'),
 ///   onHistoryTap: () => print('History tapped'),
-///   size: HomeWidgetSize.medium,
+///   size: const MediumSize(),
 /// )
 /// ```
 class EmotionTrackerCard extends StatefulWidget {
@@ -138,7 +138,7 @@ class EmotionTrackerCard extends StatefulWidget {
     required this.onDayTapped,
     this.onHistoryTap,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   @override

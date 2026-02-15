@@ -29,8 +29,8 @@ class DiaryHomeWidgets {
         description: 'diary_widgetDescription'.tr,
         icon: Icons.book,
         color: Colors.indigo,
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryRecord'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -50,8 +50,8 @@ class DiaryHomeWidgets {
         description: 'diary_todayQuickDescription'.tr,
         icon: Icons.edit_calendar,
         color: Colors.indigo,
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryRecord'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -71,8 +71,8 @@ class DiaryHomeWidgets {
         description: 'diary_overviewDescription'.tr,
         icon: Icons.menu_book,
         color: Colors.indigo,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const LargeSize()],
         category: 'home_categoryRecord'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
@@ -88,8 +88,8 @@ class DiaryHomeWidgets {
         description: 'diary_weeklyDescription'.tr,
         icon: Icons.calendar_view_week,
         color: Colors.indigo,
-        defaultSize: HomeWidgetSize.wide2,
-        supportedSizes: [HomeWidgetSize.wide, HomeWidgetSize.wide2],
+        defaultSize: const WideSize()2,
+        supportedSizes: [const WideSize(), const WideSize()2],
         category: 'home_categoryRecord'.tr,
         builder: (context, config) => _buildWeeklyWidget(context, config),
       ),

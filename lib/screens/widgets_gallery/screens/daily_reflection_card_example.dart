@@ -29,7 +29,7 @@ class DailyReflectionCardExample extends StatelessWidget {
                     child: DailyReflectionCardWidget(
                       dayOfWeek: 'Monday',
                       question: 'How will you make tomorrow meaningful?',
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -43,7 +43,7 @@ class DailyReflectionCardExample extends StatelessWidget {
                     child: DailyReflectionCardWidget(
                       dayOfWeek: 'Monday',
                       question: 'How will you make tomorrow meaningful?',
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -57,7 +57,7 @@ class DailyReflectionCardExample extends StatelessWidget {
                     child: DailyReflectionCardWidget(
                       dayOfWeek: 'Monday',
                       question: 'How will you make tomorrow meaningful?',
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                     ),
                   ),
                 ),

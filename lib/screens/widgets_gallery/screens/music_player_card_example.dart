@@ -27,7 +27,7 @@ class MusicPlayerCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MusicPlayerCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       albumArtUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuChAOLt5u0er4__Bp0rfV05ioa26Y4hHez_fuqOlobjMz23KbKlE69I5g5mF_Y0VMl1HNjmbR5zy3KaTqsQw2U2TsC8Ha3ATc55trb49XdBuwzSYEAZdwAfEdPfWzyc1Ckrn6bFPsvUt4QVVhqI9mvIdFP317DlWD0oL2SEgMazNF5KhMPYKqGvxKM3F9r4aYILJ6-1vuKJfWeeNfPpB0ggyxPQ81TVAAQ1Shir7z73qpi3Y9F1hZaWpNnhaEF42CAws8VFZ5lX5Oc',
                       title: 'This blessing',
                       lyrics: const ['I can see it\'s', 'hard to find'],
@@ -45,7 +45,7 @@ class MusicPlayerCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: MusicPlayerCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       albumArtUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuChAOLt5u0er4__Bp0rfV05ioa26Y4hHez_fuqOlobjMz23KbKlE69I5g5mF_Y0VMl1HNjmbR5zy3KaTqsQw2U2TsC8Ha3ATc55trb49XdBuwzSYEAZdwAfEdPfWzyc1Ckrn6bFPsvUt4QVVhqI9mvIdFP317DlWD0oL2SEgMazNF5KhMPYKqGvxKM3F9r4aYILJ6-1vuKJfWeeNfPpB0ggyxPQ81TVAAQ1Shir7z73qpi3Y9F1hZaWpNnhaEF42CAws8VFZ5lX5Oc',
                       title: 'This blessing in disguise',
                       lyrics: const ['I can see it\'s', 'hard to find', 'This blessing'],
@@ -63,7 +63,7 @@ class MusicPlayerCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: MusicPlayerCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       albumArtUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuChAOLt5u0er4__Bp0rfV05ioa26Y4hHez_fuqOlobjMz23KbKlE69I5g5mF_Y0VMl1HNjmbR5zy3KaTqsQw2U2TsC8Ha3ATc55trb49XdBuwzSYEAZdwAfEdPfWzyc1Ckrn6bFPsvUt4QVVhqI9mvIdFP317DlWD0oL2SEgMazNF5KhMPYKqGvxKM3F9r4aYILJ6-1vuKJfWeeNfPpB0ggyxPQ81TVAAQ1Shir7z73qpi3Y9F1hZaWpNnhaEF42CAws8VFZ5lX5Oc',
                       title: 'This blessing in disguise',
                       lyrics: const ['I can see it\'s', 'hard to find', 'This blessing', 'in disguise', 'This blessing'],

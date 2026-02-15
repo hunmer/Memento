@@ -30,8 +30,8 @@ class ContactHomeWidgets {
         description: 'contact_widgetDescription'.tr,
         icon: Icons.contacts,
         color: Colors.deepPurple,
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryTools'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -51,8 +51,8 @@ class ContactHomeWidgets {
         description: 'contact_overviewDescription'.tr,
         icon: Icons.people,
         color: Colors.deepPurple,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const LargeSize()],
         category: 'home_categoryTools'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
@@ -68,8 +68,8 @@ class ContactHomeWidgets {
         description: 'contact_personCardDescription'.tr,
         icon: Icons.person,
         color: Colors.deepPurple,
-        defaultSize: HomeWidgetSize.medium,
-        supportedSizes: [HomeWidgetSize.medium],
+        defaultSize: const MediumSize(),
+        supportedSizes: [const MediumSize()],
         category: 'home_categoryTools'.tr,
 
         // 选择器配置

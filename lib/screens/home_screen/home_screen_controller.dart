@@ -137,16 +137,16 @@ class HomeScreenController extends ChangeNotifier {
   List<HomeWidgetSize> getCurrentLayoutStructure() {
     return _layoutManager.items.map((item) {
       if (item is HomeWidgetItem) {
-        if (item.size == HomeWidgetSize.custom) {
-          return HomeWidgetSize.custom;
+        if (item.size == const CustomSize(width: -1, height: -1)) {
+          return const CustomSize(width: -1, height: -1);
         }
         return item.size;
       } else if (item is HomeStackItem) {
         return item.size;
       } else if (item is HomeFolderItem) {
-        return HomeWidgetSize.small;
+        return const SmallSize();
       }
-      return HomeWidgetSize.small;
+      return const SmallSize();
     }).toList();
   }
 
@@ -178,9 +178,9 @@ class HomeScreenController extends ChangeNotifier {
         } else if (item is HomeStackItem) {
           size = item.size;
         } else if (item is HomeFolderItem) {
-          size = HomeWidgetSize.small;
+          size = const SmallSize();
         } else {
-          size = HomeWidgetSize.small;
+          size = const SmallSize();
         }
         debugPrint('  item: type=$type, size=$size');
         return size;

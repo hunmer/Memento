@@ -27,7 +27,7 @@ class MiniTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MiniTrendCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'Heart Rate',
                       icon: Icons.monitor_heart,
                       currentValue: 72,
@@ -46,7 +46,7 @@ class MiniTrendCardExample extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: MiniTrendCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'Heart Rate',
                       icon: Icons.monitor_heart,
                       currentValue: 72,
@@ -65,7 +65,7 @@ class MiniTrendCardExample extends StatelessWidget {
                     width: 280,
                     height: 280,
                     child: MiniTrendCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'Heart Rate',
                       icon: Icons.monitor_heart,
                       currentValue: 72,

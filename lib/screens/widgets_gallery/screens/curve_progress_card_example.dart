@@ -27,7 +27,7 @@ class CurveProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: CurveProgressCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       value: 8524.0,
                       label: 'Total Hours',
                       change: 1248.0,
@@ -47,7 +47,7 @@ class CurveProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: CurveProgressCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       value: 8524.0,
                       label: 'Total Hours',
                       change: 1248.0,
@@ -67,7 +67,7 @@ class CurveProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: CurveProgressCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       value: 8524.0,
                       label: 'Total Hours',
                       change: 1248.0,

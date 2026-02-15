@@ -216,7 +216,10 @@ class _ActivityCalendarScreenState extends State<ActivityCalendarScreen> {
                           if (activity.description != null &&
                               activity.description!.isNotEmpty)
                             activity.description,
-                          _formatTimeRange(activity.startTime, activity.endTime),
+                          _formatTimeRange(
+                            activity.startTime,
+                            activity.endTime,
+                          ),
                         ].join(' '),
                         style: const TextStyle(
                           color: Colors.white,
@@ -265,15 +268,10 @@ class ActivityAppointment extends Appointment {
   final ActivityRecord activity;
 
   ActivityAppointment({
-    required DateTime startTime,
-    required DateTime endTime,
-    required String subject,
-    required Color color,
+    required super.startTime,
+    required super.endTime,
+    required super.subject,
+    required super.color,
     required this.activity,
-  }) : super(
-         startTime: startTime,
-         endTime: endTime,
-         subject: subject,
-         color: color,
-       );
+  });
 }

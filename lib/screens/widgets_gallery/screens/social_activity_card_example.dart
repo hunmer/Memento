@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/social_activity_card.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/social_activity_card_data.dart';
 
@@ -15,9 +14,9 @@ class SocialActivityCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('社交活动动态卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
+        child: Center(
           child: SocialActivityCardWidget(
-            size: HomeWidgetSize.large,
+            size: const LargeSize(),
             user: SocialUser(
               name: 'Sammy Lawson',
               username: '@CoRay',
@@ -28,7 +27,8 @@ class SocialActivityCardExample extends StatelessWidget {
             posts: [
               SocialPost(
                 hashtag: '#iphone',
-                content: 'It\'s incredible to see art, creativity and technology come together in celebration',
+                content:
+                    'It\'s incredible to see art, creativity and technology come together in celebration',
                 commentCount: 3600,
                 repostCount: 12000,
                 imageUrl:

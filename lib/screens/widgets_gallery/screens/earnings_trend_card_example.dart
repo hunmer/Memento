@@ -27,7 +27,7 @@ class EarningsTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: EarningsTrendCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'Expected earnings',
                       value: 682.5,
                       currency: '€',
@@ -44,7 +44,7 @@ class EarningsTrendCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: EarningsTrendCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'Expected earnings',
                       value: 682.5,
                       currency: '€',
@@ -61,7 +61,7 @@ class EarningsTrendCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: EarningsTrendCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'Expected earnings',
                       value: 682.5,
                       currency: '€',

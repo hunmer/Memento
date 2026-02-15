@@ -37,7 +37,7 @@ abstract class HomeWidgetSize {
     this.strokeWidth = 1.0,
   });
 
-  /// 向后兼容的静态 getter，支持 HomeWidgetSize.small 等访问方式
+  /// 向后兼容的静态 getter，支持 const SmallSize() 等访问方式
   static HomeWidgetSize get small => const SmallSize();
   static HomeWidgetSize get medium => const MediumSize();
   static HomeWidgetSize get large => const LargeSize();
@@ -313,171 +313,99 @@ abstract class HomeWidgetSize {
 /// 1x1 小图标组件
 class SmallSize extends HomeWidgetSize {
   const SmallSize({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 1,
-          height: 1,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 1, height: 1);
 }
 
 /// 2x1 横向卡片
 class MediumSize extends HomeWidgetSize {
   const MediumSize({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 2,
-          height: 1,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 2, height: 1);
 }
 
 /// 2x2 大卡片
 class LargeSize extends HomeWidgetSize {
   const LargeSize({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 2,
-          height: 2,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 2, height: 2);
 }
 
 /// 2x3 高卡片（宽度2，高度3）
 class Large3Size extends HomeWidgetSize {
   const Large3Size({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 2,
-          height: 3,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 2, height: 3);
 }
 
 /// 4x1 宽屏卡片（占满所有宽度）
 class WideSize extends HomeWidgetSize {
   const WideSize({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 4,
-          height: 1,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 4, height: 1);
 }
 
 /// 4x2 全宽卡片（占满所有宽度，高度2）
 class Wide2Size extends HomeWidgetSize {
   const Wide2Size({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 4,
-          height: 2,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 4, height: 2);
 }
 
 /// 4x3 全宽卡片（占满所有宽度，高度3）
 class Wide3Size extends HomeWidgetSize {
   const Wide3Size({
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: 4,
-          height: 3,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  }) : super(width: 4, height: 3);
 }
 
 /// 自定义尺寸（支持任意宽高）
 class CustomSize extends HomeWidgetSize {
   const CustomSize({
-    required int width,
-    required int height,
-    double scale = 1.0,
-    double padding = 1.0,
-    double spacing = 1.0,
-    double fontSize = 1.0,
-    double iconSize = 1.0,
-    double strokeWidth = 1.0,
-  }) : super(
-          width: width,
-          height: height,
-          scale: scale,
-          padding: padding,
-          spacing: spacing,
-          fontSize: fontSize,
-          iconSize: iconSize,
-          strokeWidth: strokeWidth,
-        );
+    required super.width,
+    required super.height,
+    super.scale,
+    super.padding,
+    super.spacing,
+    super.fontSize,
+    super.iconSize,
+    super.strokeWidth,
+  });
 }
 
 /// 所有尺寸的默认实例列表

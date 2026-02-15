@@ -27,8 +27,8 @@ void registerConversationSelector(HomeWidgetRegistry registry) {
       description: 'agent_chat_conversationQuickAccessDesc'.tr,
       icon: Icons.chat,
       color: const Color(0xFF2196F3),
-      defaultSize: HomeWidgetSize.medium,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      defaultSize: const MediumSize(),
+      supportedSizes: [const MediumSize(), const LargeSize()],
       category: 'home_categoryTools'.tr,
 
       selectorId: 'agent_chat.conversation',

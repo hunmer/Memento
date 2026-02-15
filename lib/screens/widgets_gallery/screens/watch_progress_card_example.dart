@@ -27,7 +27,7 @@ class WatchProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: WatchProgressCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       userName: 'James',
                       lastWatched: '2 days ago',
                       currentCount: 16,
@@ -57,7 +57,7 @@ class WatchProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: WatchProgressCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       userName: 'James',
                       lastWatched: '2 days ago',
                       currentCount: 16,
@@ -87,7 +87,7 @@ class WatchProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: WatchProgressCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       userName: 'James',
                       lastWatched: '2 days ago',
                       currentCount: 16,

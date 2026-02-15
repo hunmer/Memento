@@ -18,8 +18,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'habits_widgetDescription'.tr,
       icon: Icons.auto_awesome,
       color: Colors.amber,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryRecord'.tr,
       builder: (context, config) => GenericIconWidget(
         icon: Icons.auto_awesome,

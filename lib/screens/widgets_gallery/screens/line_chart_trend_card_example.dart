@@ -27,7 +27,7 @@ class LineChartTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: LineChartTrendCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       value: 2583,
                       label: 'Earned',
                       changePercent: -5.34,
@@ -44,7 +44,7 @@ class LineChartTrendCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: LineChartTrendCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       value: 2583,
                       label: 'Earned',
                       changePercent: -5.34,
@@ -61,7 +61,7 @@ class LineChartTrendCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: LineChartTrendCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       value: 2583,
                       label: 'Earned',
                       changePercent: -5.34,

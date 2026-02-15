@@ -23,8 +23,8 @@ void registerNotesListWidget(HomeWidgetRegistry registry) {
       description: 'notes_listWidgetDescription'.tr,
       icon: Icons.view_list,
       color: notesColor,
-      defaultSize: HomeWidgetSize.large,
-      supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+      defaultSize: const LargeSize(),
+      supportedSizes: [const MediumSize(), const LargeSize()],
       category: 'home_categoryRecord'.tr,
 
       // 选择器配置

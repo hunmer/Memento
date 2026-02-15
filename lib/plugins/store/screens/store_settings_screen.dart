@@ -1,10 +1,10 @@
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:universal_platform/universal_platform.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/widgets/form_fields/event_multi_select_field.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 /// Store 插件设置界面
 class StoreSettingsScreen extends StatefulWidget {
@@ -99,9 +99,11 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
       // 为每个选中事件保存积分值
       for (final eventKey in _selectedEvents) {
         final controller = _controllers[eventKey];
-        final value = controller != null
-            ? (int.tryParse(controller.text) ?? getDefaultPointsForEvent(eventKey))
-            : getDefaultPointsForEvent(eventKey);
+        final value =
+            controller != null
+                ? (int.tryParse(controller.text) ??
+                    getDefaultPointsForEvent(eventKey))
+                : getDefaultPointsForEvent(eventKey);
         newPointAwards[eventKey] = value;
       }
 
@@ -118,7 +120,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   /// 获取事件的默认积分值
   int getDefaultPointsForEvent(String eventKey) {
-    final defaults = StorePlugin.defaultPointSettings['point_awards'] as Map<String, dynamic>?;
+    final defaults =
+        StorePlugin.defaultPointSettings['point_awards']
+            as Map<String, dynamic>?;
     return defaults?[eventKey] as int? ?? 10;
   }
 
@@ -126,11 +130,12 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
   String _getEventDisplayName(String eventKey) {
     final eventOption = kDefaultAvailableEvents.firstWhere(
       (e) => e.eventName == eventKey,
-      orElse: () => EventOption(
-        eventName: eventKey,
-        category: '未知',
-        description: eventKey,
-      ),
+      orElse:
+          () => EventOption(
+            eventName: eventKey,
+            category: '未知',
+            description: eventKey,
+          ),
     );
     return eventOption.description;
   }
@@ -276,7 +281,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 child: Card(
                   child: SwitchListTile(
                     title: Text('store_enableExpiringReminder'.tr),
-                    subtitle: Text('store_enableExpiringReminderDescription'.tr),
+                    subtitle: Text(
+                      'store_enableExpiringReminderDescription'.tr,
+                    ),
                     value: _enableExpiringReminder,
                     onChanged: (value) {
                       setState(() {
@@ -360,58 +367,62 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
-                    children: _selectedEvents.map((eventKey) {
-                      final displayName = _getEventDisplayName(eventKey);
-                      final controller = _controllers[eventKey];
+                    children:
+                        _selectedEvents.map((eventKey) {
+                          final displayName = _getEventDisplayName(eventKey);
+                          final controller = _controllers[eventKey];
 
-                      // 如果没有控制器，创建一个默认的
-                      if (controller == null) {
-                        _controllers[eventKey] = TextEditingController(
-                          text: getDefaultPointsForEvent(eventKey).toString(),
-                        );
-                        _controllers[eventKey]?.addListener(() => _onTextChanged(eventKey));
-                      }
+                          // 如果没有控制器，创建一个默认的
+                          if (controller == null) {
+                            _controllers[eventKey] = TextEditingController(
+                              text:
+                                  getDefaultPointsForEvent(eventKey).toString(),
+                            );
+                            _controllers[eventKey]?.addListener(
+                              () => _onTextChanged(eventKey),
+                            );
+                          }
 
-                      final effectiveController = _controllers[eventKey]!;
+                          final effectiveController = _controllers[eventKey]!;
 
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                displayName,
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: TextFormField(
-                                controller: effectiveController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  labelText: '积分',
-                                  hintText: '0',
-                                  suffix: Text('store_points'.tr),
-                                  border: const OutlineInputBorder(),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Text(
+                                    displayName,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
                                 ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return '请输入积分值';
-                                  }
-                                  final points = int.tryParse(value);
-                                  if (points == null || points < 0) {
-                                    return '必须为非负整数';
-                                  }
-                                  return null;
-                                },
-                              ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: effectiveController,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      labelText: '积分',
+                                      hintText: '0',
+                                      suffix: Text('store_points'.tr),
+                                      border: const OutlineInputBorder(),
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return '请输入积分值';
+                                      }
+                                      final points = int.tryParse(value);
+                                      if (points == null || points < 0) {
+                                        return '必须为非负整数';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          );
+                        }).toList(),
                   ),
                 ),
               ),

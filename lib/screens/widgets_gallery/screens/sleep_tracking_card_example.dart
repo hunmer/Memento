@@ -32,7 +32,7 @@ class VerticalCircularProgressCardExample extends StatelessWidget {
                 CircularProgressItemData(day: 'S', achieved: true, progress: 1.0),
               ],
             ),
-            size: HomeWidgetSize.large,
+            size: const LargeSize(),
           ),
         ),
       ),

@@ -7,7 +7,6 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../../../../core/services/toast_service.dart';
 import '../../../../../../core/services/speech_recognition_config_service.dart';
 import '../../../../../../plugins/openai/services/request_service.dart';
-import '../../../../../../plugins/openai/models/ai_agent.dart';
 
 /// 语音输入对话框
 ///
@@ -115,7 +114,9 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
             final processedText = _applyPunctuationReplacement(text);
 
             setState(() {
-              if (_isAppendMode && _savedText != null && _savedText!.isNotEmpty) {
+              if (_isAppendMode &&
+                  _savedText != null &&
+                  _savedText!.isNotEmpty) {
                 // 追加模式：在保存的文本后添加新识别的文本
                 _textController.text = _savedText! + processedText;
                 // 注意：不清空 _savedText，这样每次识别结果都会追加到原始文本后
@@ -268,14 +269,14 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
 
     // 替换中文标点
     text = text.replaceAll(
-      RegExp(r'[，。！？；：""''（）【】「」『』、]'),
+      RegExp(
+        r'[，。！？；：""'
+        '（）【】「」『』、]',
+      ),
       '',
     );
     // 替换英文标点
-    text = text.replaceAll(
-      RegExp(r"[,.!?;:'''()\[\]{}<>]"),
-      '',
-    );
+    text = text.replaceAll(RegExp(r"[,.!?;:'''()\[\]{}<>]"), '');
     return text;
   }
 
@@ -295,28 +296,27 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
       // 未配置，提示用户跳转到设置界面
       final shouldGoToSettings = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.auto_fix_high),
-              SizedBox(width: 8),
-              Text('AI智能纠错'),
-            ],
-          ),
-          content: const Text(
-            '您还未配置AI纠错助手。是否跳转到设置界面进行配置？',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('取消'),
+        builder:
+            (context) => AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.auto_fix_high),
+                  SizedBox(width: 8),
+                  Text('AI智能纠错'),
+                ],
+              ),
+              content: const Text('您还未配置AI纠错助手。是否跳转到设置界面进行配置？'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('取消'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('去设置'),
+                ),
+              ],
             ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('去设置'),
-            ),
-          ],
-        ),
       );
 
       if (shouldGoToSettings == true && mounted) {
@@ -339,10 +339,7 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
       final correctionPrompt = '请纠正以下文本中的识别错误，只输出纠正后的文本：\n\n$text';
 
       // 调用OpenAI服务进行纠错
-      final correctedText = await RequestService.chat(
-        correctionPrompt,
-        agent,
-      );
+      final correctedText = await RequestService.chat(correctionPrompt, agent);
 
       if (correctedText.startsWith('Error:')) {
         _showErrorSnackBar('AI纠错失败：${correctedText.substring(7)}');
@@ -556,8 +553,11 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
             setState(() {
               _enablePunctuationReplacement = !_enablePunctuationReplacement;
               // 开启时立即应用替换到当前文本
-              if (_enablePunctuationReplacement && _textController.text.isNotEmpty) {
-                _textController.text = _applyPunctuationReplacement(_textController.text);
+              if (_enablePunctuationReplacement &&
+                  _textController.text.isNotEmpty) {
+                _textController.text = _applyPunctuationReplacement(
+                  _textController.text,
+                );
               }
             });
           },
@@ -574,9 +574,7 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
           icon: Icons.auto_fix_high,
           tooltip: 'AI智能纠错',
           isActive: _isCorrecting,
-          onPressed: _isCorrecting
-              ? () {}
-              : () => _performAICorrection(),
+          onPressed: _isCorrecting ? () {} : () => _performAICorrection(),
         ),
       ],
     );
@@ -654,22 +652,25 @@ class _VoiceInputDialogState extends State<VoiceInputDialog>
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isActive
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              color:
+                  isActive
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
               border: Border.all(
-                color: isActive
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
+                color:
+                    isActive
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.transparent,
                 width: 2,
               ),
             ),
             child: Icon(
               icon,
               size: 24,
-              color: isActive
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              color:
+                  isActive
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),

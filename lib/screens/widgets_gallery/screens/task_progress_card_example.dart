@@ -27,7 +27,7 @@ class TaskProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: TaskProgressCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: 'Widgefy UI kit',
                       subtitle: 'Graphics design',
                       completedTasks: 7,
@@ -48,7 +48,7 @@ class TaskProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: TaskProgressCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: 'Widgefy UI kit',
                       subtitle: 'Graphics design',
                       completedTasks: 7,
@@ -69,7 +69,7 @@ class TaskProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: TaskProgressCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: 'Widgefy UI kit',
                       subtitle: 'Graphics design',
                       completedTasks: 7,

@@ -27,7 +27,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ExpenseComparisonChartCardWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       title: '本月支出',
                       currentAmount: 2048.00,
                       unit: '元',
@@ -74,7 +74,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ExpenseComparisonChartCardWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       title: '本月支出',
                       currentAmount: 2048.00,
                       unit: '元',
@@ -121,7 +121,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: ExpenseComparisonChartCardWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       title: '本月支出',
                       currentAmount: 2048.00,
                       unit: '元',

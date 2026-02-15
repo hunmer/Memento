@@ -796,7 +796,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     // 如果有原有配置，合并自定义尺寸等信息
     if (widget.originalConfig != null) {
       // 保留 customWidth 和 customHeight（如果是自定义尺寸）
-      if (widget.originalSize == HomeWidgetSize.custom) {
+      if (widget.originalSize == const CustomSize(width: -1, height: -1)) {
         if (widget.originalConfig!.containsKey('customWidth')) {
           config['customWidth'] = widget.originalConfig!['customWidth'];
         }

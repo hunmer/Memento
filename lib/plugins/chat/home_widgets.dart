@@ -27,8 +27,8 @@ class ChatHomeWidgets {
         description: 'chat_widgetDescription'.tr,
         icon: Icons.chat_bubble,
         color: Colors.indigoAccent,
-        defaultSize: HomeWidgetSize.small,
-        supportedSizes: [HomeWidgetSize.small],
+        defaultSize: const SmallSize(),
+        supportedSizes: [const SmallSize()],
         category: 'home_categoryCommunication'.tr,
         builder:
             (context, config) => GenericIconWidget(
@@ -48,8 +48,8 @@ class ChatHomeWidgets {
         description: 'chat_overviewDescription'.tr,
         icon: Icons.chat_bubble_outline,
         color: Colors.indigoAccent,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const LargeSize()],
         category: 'home_categoryCommunication'.tr,
         builder: (context, config) => _buildOverviewWidget(context, config),
         availableStatsProvider: _getAvailableStats,
@@ -65,8 +65,8 @@ class ChatHomeWidgets {
         description: 'chat_channelQuickAccessDesc'.tr,
         icon: Icons.chat,
         color: Colors.indigoAccent,
-        defaultSize: HomeWidgetSize.large,
-        supportedSizes: [HomeWidgetSize.medium, HomeWidgetSize.large],
+        defaultSize: const LargeSize(),
+        supportedSizes: [const MediumSize(), const LargeSize()],
         category: 'home_categoryCommunication'.tr,
 
         selectorId: 'chat.channel',

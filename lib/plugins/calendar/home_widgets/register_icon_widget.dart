@@ -21,8 +21,8 @@ void registerIconWidget(HomeWidgetRegistry registry) {
       description: 'calendar_widgetDescription'.tr,
       icon: Icons.calendar_month,
       color: _calendarColor,
-      defaultSize: HomeWidgetSize.small,
-      supportedSizes: [HomeWidgetSize.small],
+      defaultSize: const SmallSize(),
+      supportedSizes: [const SmallSize()],
       category: 'home_categoryTools'.tr,
       builder: (context, config) => GenericIconWidget(
         icon: Icons.calendar_month,

@@ -27,7 +27,7 @@ class ExpenseDonutChartExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ExpenseDonutChartWidget(
-                      size: HomeWidgetSize.small,
+                      size: const SmallSize(),
                       badgeLabel: 'Expenses',
                       timePeriod: 'In the past 7 days',
                       totalAmount: 32,
@@ -47,7 +47,7 @@ class ExpenseDonutChartExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ExpenseDonutChartWidget(
-                      size: HomeWidgetSize.medium,
+                      size: const MediumSize(),
                       badgeLabel: 'Expenses',
                       timePeriod: 'In the past 7 days',
                       totalAmount: 32,
@@ -68,7 +68,7 @@ class ExpenseDonutChartExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: ExpenseDonutChartWidget(
-                      size: HomeWidgetSize.large,
+                      size: const LargeSize(),
                       badgeLabel: 'Expenses',
                       timePeriod: 'In the past 7 days',
                       totalAmount: 32,
