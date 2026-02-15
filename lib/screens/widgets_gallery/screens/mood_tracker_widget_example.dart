@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/common/emotion_tracker_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 心情追踪组件示例页面
 class MoodTrackerWidgetExample extends StatefulWidget {
@@ -104,6 +105,7 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
                       weekEmotions: _weekEmotions.take(3).toList(),
                       onDayTapped: _onDayTapped,
                       onHistoryTap: () {},
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -121,6 +123,7 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
                       weekEmotions: _weekEmotions,
                       onDayTapped: _onDayTapped,
                       onHistoryTap: () {},
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -138,7 +141,42 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
                       weekEmotions: _weekEmotions,
                       onDayTapped: _onDayTapped,
                       onHistoryTap: () {},
+                      size: const LargeSize(),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: EmotionTrackerCard(
+                    currentEmotionText: _currentEmotionText,
+                    loggedCount: _loggedCount,
+                    totalCount: _totalCount,
+                    weekEmotions: _weekEmotions,
+                    onDayTapped: _onDayTapped,
+                    onHistoryTap: () {},
+                    size: const WideSize(),
+                    inline: true,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 320,
+                  child: EmotionTrackerCard(
+                    currentEmotionText: _currentEmotionText,
+                    loggedCount: _loggedCount,
+                    totalCount: _totalCount,
+                    weekEmotions: _weekEmotions,
+                    onDayTapped: _onDayTapped,
+                    onHistoryTap: () {},
+                    size: const Wide2Size(),
+                    inline: true,
                   ),
                 ),
               ],
