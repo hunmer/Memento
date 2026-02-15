@@ -14,16 +14,77 @@ class MonthlyBillCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('月度账单卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: MonthlyBillCardWidget(
-            data: MonthlyBillCardData(
-              title: '6月账单',
-              income: 1024.00,
-              expense: 2048.00,
-              balance: -1024.00,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: MonthlyBillCardWidget(
+                      data: const MonthlyBillCardData(
+                        title: '6月账单',
+                        income: 1024.00,
+                        expense: 2048.00,
+                        balance: -1024.00,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: MonthlyBillCardWidget(
+                      data: const MonthlyBillCardData(
+                        title: '6月账单',
+                        income: 1024.00,
+                        expense: 2048.00,
+                        balance: -1024.00,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: MonthlyBillCardWidget(
+                      data: const MonthlyBillCardData(
+                        title: '6月账单',
+                        income: 1024.00,
+                        expense: 2048.00,
+                        balance: -1024.00,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

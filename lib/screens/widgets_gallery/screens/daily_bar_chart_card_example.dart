@@ -13,45 +13,107 @@ class DailyBarChartCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('每日条形图卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: DailyBarChartCardWidget(
-            title: 'Monthly Steps',
-            subtitle: 'January 2025',
-            value: 187297,
-            unit: 'steps',
-            bars: [
-              DailyBarData(height: 0.30, color: DailyBarColor.red),
-              DailyBarData(height: 0.45, color: DailyBarColor.red),
-              DailyBarData(height: 0.65, color: DailyBarColor.teal),
-              DailyBarData(height: 0.25, color: DailyBarColor.red),
-              DailyBarData(height: 0.40, color: DailyBarColor.red),
-              DailyBarData(height: 0.70, color: DailyBarColor.teal),
-              DailyBarData(height: 0.55, color: DailyBarColor.teal),
-              DailyBarData(height: 0.15, color: DailyBarColor.red),
-              DailyBarData(height: 0.85, color: DailyBarColor.teal),
-              DailyBarData(height: 0.35, color: DailyBarColor.red),
-              DailyBarData(height: 0.20, color: DailyBarColor.red),
-              DailyBarData(height: 0.60, color: DailyBarColor.teal),
-              DailyBarData(height: 0.52, color: DailyBarColor.teal),
-              DailyBarData(height: 0.90, color: DailyBarColor.teal),
-              DailyBarData(height: 0.40, color: DailyBarColor.red),
-              DailyBarData(height: 0.32, color: DailyBarColor.red),
-              DailyBarData(height: 0.75, color: DailyBarColor.teal),
-              DailyBarData(height: 0.28, color: DailyBarColor.red),
-              DailyBarData(height: 0.48, color: DailyBarColor.red),
-              DailyBarData(height: 0.62, color: DailyBarColor.teal),
-              DailyBarData(height: 0.88, color: DailyBarColor.teal),
-              DailyBarData(height: 0.72, color: DailyBarColor.teal),
-              DailyBarData(height: 0.38, color: DailyBarColor.red),
-              DailyBarData(height: 0.18, color: DailyBarColor.red),
-              DailyBarData(height: 0.42, color: DailyBarColor.red),
-              DailyBarData(height: 0.58, color: DailyBarColor.teal),
-              DailyBarData(height: 0.82, color: DailyBarColor.teal),
-              DailyBarData(height: 0.68, color: DailyBarColor.teal),
-              DailyBarData(height: 0.55, color: DailyBarColor.teal),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: DailyBarChartCardWidget(
+                      title: 'Monthly Steps',
+                      subtitle: 'January 2025',
+                      value: 187297,
+                      unit: 'steps',
+                      bars: const [
+                        DailyBarData(height: 0.30, color: DailyBarColor.red),
+                        DailyBarData(height: 0.45, color: DailyBarColor.red),
+                        DailyBarData(height: 0.65, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.25, color: DailyBarColor.red),
+                        DailyBarData(height: 0.40, color: DailyBarColor.red),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: DailyBarChartCardWidget(
+                      title: 'Monthly Steps',
+                      subtitle: 'January 2025',
+                      value: 187297,
+                      unit: 'steps',
+                      bars: const [
+                        DailyBarData(height: 0.30, color: DailyBarColor.red),
+                        DailyBarData(height: 0.45, color: DailyBarColor.red),
+                        DailyBarData(height: 0.65, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.25, color: DailyBarColor.red),
+                        DailyBarData(height: 0.40, color: DailyBarColor.red),
+                        DailyBarData(height: 0.70, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.55, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.15, color: DailyBarColor.red),
+                        DailyBarData(height: 0.85, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.35, color: DailyBarColor.red),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: DailyBarChartCardWidget(
+                      title: 'Monthly Steps',
+                      subtitle: 'January 2025',
+                      value: 187297,
+                      unit: 'steps',
+                      bars: const [
+                        DailyBarData(height: 0.30, color: DailyBarColor.red),
+                        DailyBarData(height: 0.45, color: DailyBarColor.red),
+                        DailyBarData(height: 0.65, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.25, color: DailyBarColor.red),
+                        DailyBarData(height: 0.40, color: DailyBarColor.red),
+                        DailyBarData(height: 0.70, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.55, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.15, color: DailyBarColor.red),
+                        DailyBarData(height: 0.85, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.35, color: DailyBarColor.red),
+                        DailyBarData(height: 0.20, color: DailyBarColor.red),
+                        DailyBarData(height: 0.60, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.52, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.90, color: DailyBarColor.teal),
+                        DailyBarData(height: 0.40, color: DailyBarColor.red),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

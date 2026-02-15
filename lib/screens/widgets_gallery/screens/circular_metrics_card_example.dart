@@ -13,41 +13,131 @@ class CircularMetricsCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('环形指标卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: CircularMetricsCardWidget(
-            title: 'Overview',
-            metrics: [
-              MetricData(
-                icon: Icons.person,
-                value: '12d 23hrs',
-                label: 'To complete',
-                progress: 0.75,
-                color: Color(0xFF34D399), // Green
-              ),
-              MetricData(
-                icon: Icons.pets,
-                value: '24',
-                label: 'Team',
-                progress: 0.60,
-                color: Color(0xFFFB7185), // Pink
-              ),
-              MetricData(
-                icon: Icons.savings,
-                value: '20.5k',
-                label: 'Budget left',
-                progress: 0.40,
-                color: Color(0xFFFBBF24), // Orange
-              ),
-              MetricData(
-                icon: Icons.inventory_2,
-                value: '384',
-                label: 'Assigned',
-                progress: 0.80,
-                color: Color(0xFF6366F1), // Blue
-              ),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: CircularMetricsCardWidget(
+                      title: 'Overview',
+                      metrics: const [
+                        MetricData(
+                          icon: Icons.person,
+                          value: '12d 23hrs',
+                          label: 'To complete',
+                          progress: 0.75,
+                          color: Color(0xFF34D399),
+                        ),
+                        MetricData(
+                          icon: Icons.pets,
+                          value: '24',
+                          label: 'Team',
+                          progress: 0.60,
+                          color: Color(0xFFFB7185),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: CircularMetricsCardWidget(
+                      title: 'Overview',
+                      metrics: const [
+                        MetricData(
+                          icon: Icons.person,
+                          value: '12d 23hrs',
+                          label: 'To complete',
+                          progress: 0.75,
+                          color: Color(0xFF34D399),
+                        ),
+                        MetricData(
+                          icon: Icons.pets,
+                          value: '24',
+                          label: 'Team',
+                          progress: 0.60,
+                          color: Color(0xFFFB7185),
+                        ),
+                        MetricData(
+                          icon: Icons.savings,
+                          value: '20.5k',
+                          label: 'Budget left',
+                          progress: 0.40,
+                          color: Color(0xFFFBBF24),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: CircularMetricsCardWidget(
+                      title: 'Overview',
+                      metrics: const [
+                        MetricData(
+                          icon: Icons.person,
+                          value: '12d 23hrs',
+                          label: 'To complete',
+                          progress: 0.75,
+                          color: Color(0xFF34D399),
+                        ),
+                        MetricData(
+                          icon: Icons.pets,
+                          value: '24',
+                          label: 'Team',
+                          progress: 0.60,
+                          color: Color(0xFFFB7185),
+                        ),
+                        MetricData(
+                          icon: Icons.savings,
+                          value: '20.5k',
+                          label: 'Budget left',
+                          progress: 0.40,
+                          color: Color(0xFFFBBF24),
+                        ),
+                        MetricData(
+                          icon: Icons.inventory_2,
+                          value: '384',
+                          label: 'Assigned',
+                          progress: 0.80,
+                          color: Color(0xFF6366F1),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

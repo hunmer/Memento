@@ -13,12 +13,65 @@ class DailyReflectionCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('每日反思卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: DailyReflectionCardWidget(
-            dayOfWeek: 'Monday',
-            question: 'How will you make tomorrow meaningful?',
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: DailyReflectionCardWidget(
+                      dayOfWeek: 'Monday',
+                      question: 'How will you make tomorrow meaningful?',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: DailyReflectionCardWidget(
+                      dayOfWeek: 'Monday',
+                      question: 'How will you make tomorrow meaningful?',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: DailyReflectionCardWidget(
+                      dayOfWeek: 'Monday',
+                      question: 'How will you make tomorrow meaningful?',
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

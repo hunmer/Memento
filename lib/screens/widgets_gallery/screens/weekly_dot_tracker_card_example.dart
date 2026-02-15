@@ -51,18 +51,77 @@ class _WeeklyDotTrackerCardExampleState extends State<WeeklyDotTrackerCardExampl
       ),
       body: Container(
         color: isDark ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
-        child: Center(
-          // 方式1：从数据模型创建组件（推荐用于需要序列化的场景）
-          child: DotTrackerCardWidget.fromData(
-            exampleData,
-            onTap: () {
-              // 点击卡片时的回调
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('点击了点阵追踪卡片')),
-              );
-            },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: DotTrackerCardWidget.fromData(
+                      exampleData,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('点击了点阵追踪卡片')),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: DotTrackerCardWidget.fromData(
+                      exampleData,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('点击了点阵追踪卡片')),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: DotTrackerCardWidget.fromData(
+                      exampleData,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('点击了点阵追踪卡片')),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

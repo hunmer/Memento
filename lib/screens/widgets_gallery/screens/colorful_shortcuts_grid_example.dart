@@ -15,65 +15,153 @@ class ColorfulShortcutsGridExample extends StatelessWidget {
       appBar: AppBar(title: const Text('彩色快捷方式网格')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: Center(
-          child: CommonWidgetBuilder.build(
-            context,
-            CommonWidgetId.colorfulShortcutsGrid,
-            ColorfulShortcutsGridData(
-              columns: 2,
-              itemHeight: 100,
-              spacing: 14,
-              borderRadius: 40,
-              shortcuts: [
-                ShortcutItemData(
-                  iconName: 'event_available',
-                  label: 'Block Off an Hour',
-                  color: 0xFFFF5E63,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: CommonWidgetBuilder.build(
+                      context,
+                      CommonWidgetId.colorfulShortcutsGrid,
+                      ColorfulShortcutsGridData(
+                        columns: 2,
+                        itemHeight: 50,
+                        spacing: 8,
+                        borderRadius: 20,
+                        shortcuts: const [
+                          ShortcutItemData(
+                            iconName: 'event_available',
+                            label: 'Block',
+                            color: 0xFFFF5E63,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'collections',
+                            label: 'GIF',
+                            color: 0xFFFFB74D,
+                          ),
+                        ],
+                      ).toJson(),
+                      HomeWidgetSize.small,
+                    ),
+                  ),
                 ),
-                ShortcutItemData(
-                  iconName: 'collections',
-                  label: 'Make GIF',
-                  color: 0xFFFFB74D,
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 200,
+                    child: CommonWidgetBuilder.build(
+                      context,
+                      CommonWidgetId.colorfulShortcutsGrid,
+                      ColorfulShortcutsGridData(
+                        columns: 2,
+                        itemHeight: 70,
+                        spacing: 10,
+                        borderRadius: 30,
+                        shortcuts: const [
+                          ShortcutItemData(
+                            iconName: 'event_available',
+                            label: 'Block Off',
+                            color: 0xFFFF5E63,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'collections',
+                            label: 'Make GIF',
+                            color: 0xFFFFB74D,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'note_add',
+                            label: 'New Note',
+                            color: 0xFFEBCB0E,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'add_comment',
+                            label: 'Text Image',
+                            color: 0xFF4CD964,
+                          ),
+                        ],
+                      ).toJson(),
+                      HomeWidgetSize.medium,
+                    ),
+                  ),
                 ),
-                ShortcutItemData(
-                  iconName: 'note_add',
-                  label: 'New Note with Date',
-                  color: 0xFFEBCB0E,
-                ),
-                ShortcutItemData(
-                  iconName: 'add_comment',
-                  label: 'Text Last Image',
-                  color: 0xFF4CD964,
-                ),
-                ShortcutItemData(
-                  iconName: 'chat_bubble',
-                  label: 'Text Running Late',
-                  color: 0xFF00C7BE,
-                ),
-                ShortcutItemData(
-                  iconName: 'mail',
-                  label: 'Email Running Late',
-                  color: 0xFF00D1F3,
-                ),
-                ShortcutItemData(
-                  iconName: 'send',
-                  label: 'Email Last Image',
-                  color: 0xFF00B0FF,
-                  iconTransform: _createSendIconTransform(),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 280,
+                    child: CommonWidgetBuilder.build(
+                      context,
+                      CommonWidgetId.colorfulShortcutsGrid,
+                      ColorfulShortcutsGridData(
+                        columns: 2,
+                        itemHeight: 100,
+                        spacing: 14,
+                        borderRadius: 40,
+                        shortcuts: const [
+                          ShortcutItemData(
+                            iconName: 'event_available',
+                            label: 'Block Off an Hour',
+                            color: 0xFFFF5E63,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'collections',
+                            label: 'Make GIF',
+                            color: 0xFFFFB74D,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'note_add',
+                            label: 'New Note with Date',
+                            color: 0xFFEBCB0E,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'add_comment',
+                            label: 'Text Last Image',
+                            color: 0xFF4CD964,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'chat_bubble',
+                            label: 'Text Running Late',
+                            color: 0xFF00C7BE,
+                          ),
+                          ShortcutItemData(
+                            iconName: 'mail',
+                            label: 'Email Running Late',
+                            color: 0xFF00D1F3,
+                          ),
+                        ],
+                      ).toJson(),
+                      HomeWidgetSize.large,
+                    ),
+                  ),
                 ),
               ],
-            ).toJson(),
-            HomeWidgetSize.large,
+            ),
           ),
         ),
       ),
     );
   }
 
-  static List<double> _createSendIconTransform() {
-    // 创建旋转 -45 度的变换矩阵
-    final matrix = Matrix4.rotationZ(-0.785);
-    matrix.translate(0.05, 0.05);
-    return matrix.storage;
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
+      ),
+    );
   }
 }

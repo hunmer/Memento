@@ -13,28 +13,113 @@ class VerticalBarChartExample extends StatelessWidget {
       appBar: AppBar(title: const Text('垂直条形图卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: VerticalBarChartCardWidget(
-            title: 'Weather',
-            subtitle: 'London',
-            dataLabel1: 'Day',
-            dataLabel2: 'Night',
-            bars: [
-              BarData(value1: 20, value2: 12),
-              BarData(value1: 18, value2: 10),
-              BarData(value1: 15, value2: 8),
-              BarData(value1: 12, value2: 6),
-              BarData(value1: 10, value2: 5),
-              BarData(value1: 14, value2: 7),
-              BarData(value1: 16, value2: 9),
-              BarData(value1: 19, value2: 11),
-              BarData(value1: 22, value2: 13),
-              BarData(value1: 25, value2: 15),
-            ],
-            primaryColor: Color(0xFFBAE6FD),
-            secondaryColor: Color(0xFF64748B),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: VerticalBarChartCardWidget(
+                      title: 'Weather',
+                      subtitle: 'London',
+                      dataLabel1: 'Day',
+                      dataLabel2: 'Night',
+                      bars: [
+                        BarData(value1: 20, value2: 12),
+                        BarData(value1: 18, value2: 10),
+                        BarData(value1: 15, value2: 8),
+                        BarData(value1: 12, value2: 6),
+                        BarData(value1: 10, value2: 5),
+                        BarData(value1: 14, value2: 7),
+                        BarData(value1: 16, value2: 9),
+                        BarData(value1: 19, value2: 11),
+                        BarData(value1: 22, value2: 13),
+                        BarData(value1: 25, value2: 15),
+                      ],
+                      primaryColor: const Color(0xFFBAE6FD),
+                      secondaryColor: const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 220,
+                    child: VerticalBarChartCardWidget(
+                      title: 'Weather',
+                      subtitle: 'London',
+                      dataLabel1: 'Day',
+                      dataLabel2: 'Night',
+                      bars: [
+                        BarData(value1: 20, value2: 12),
+                        BarData(value1: 18, value2: 10),
+                        BarData(value1: 15, value2: 8),
+                        BarData(value1: 12, value2: 6),
+                        BarData(value1: 10, value2: 5),
+                        BarData(value1: 14, value2: 7),
+                        BarData(value1: 16, value2: 9),
+                        BarData(value1: 19, value2: 11),
+                        BarData(value1: 22, value2: 13),
+                        BarData(value1: 25, value2: 15),
+                      ],
+                      primaryColor: const Color(0xFFBAE6FD),
+                      secondaryColor: const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: VerticalBarChartCardWidget(
+                      title: 'Weather',
+                      subtitle: 'London',
+                      dataLabel1: 'Day',
+                      dataLabel2: 'Night',
+                      bars: [
+                        BarData(value1: 20, value2: 12),
+                        BarData(value1: 18, value2: 10),
+                        BarData(value1: 15, value2: 8),
+                        BarData(value1: 12, value2: 6),
+                        BarData(value1: 10, value2: 5),
+                        BarData(value1: 14, value2: 7),
+                        BarData(value1: 16, value2: 9),
+                        BarData(value1: 19, value2: 11),
+                        BarData(value1: 22, value2: 13),
+                        BarData(value1: 25, value2: 15),
+                      ],
+                      primaryColor: const Color(0xFFBAE6FD),
+                      secondaryColor: const Color(0xFF64748B),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

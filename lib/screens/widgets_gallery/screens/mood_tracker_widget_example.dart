@@ -42,18 +42,6 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
       emotionType: EmotionType.terrible,
       isLogged: false,
     ),
-    DailyEmotion(
-      day: 'S',
-      icon: Icons.sentiment_neutral,
-      emotionType: EmotionType.neutral,
-      isLogged: false,
-    ),
-    DailyEmotion(
-      day: 'S',
-      icon: Icons.sentiment_satisfied,
-      emotionType: EmotionType.good,
-      isLogged: false,
-    ),
   ];
 
   String _currentEmotionText = 'Happy';
@@ -62,12 +50,9 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
 
   void _onDayTapped(int index) {
     setState(() {
-      // 切换选中状态
       for (int i = 0; i < _weekEmotions.length; i++) {
         _weekEmotions[i] = _weekEmotions[i].copyWith(isLogged: i == index);
       }
-
-      // 更新当前情绪文本
       final tappedDay = _weekEmotions[index];
       _currentEmotionText = _getEmotionText(tappedDay.emotionType);
       _loggedCount = _weekEmotions.where((e) => e.isLogged).length;
@@ -100,20 +85,77 @@ class _MoodTrackerWidgetExampleState extends State<MoodTrackerWidgetExample> {
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.black
             : const Color(0xFFF2F2F7),
-        child: Center(
-          child: EmotionTrackerCard(
-            currentEmotionText: _currentEmotionText,
-            loggedCount: _loggedCount,
-            totalCount: _totalCount,
-            weekEmotions: _weekEmotions,
-            onDayTapped: _onDayTapped,
-            onHistoryTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('查看历史情绪记录')),
-              );
-            },
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: EmotionTrackerCard(
+                      currentEmotionText: _currentEmotionText,
+                      loggedCount: _loggedCount,
+                      totalCount: _totalCount,
+                      weekEmotions: _weekEmotions.take(3).toList(),
+                      onDayTapped: _onDayTapped,
+                      onHistoryTap: () {},
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 200,
+                    child: EmotionTrackerCard(
+                      currentEmotionText: _currentEmotionText,
+                      loggedCount: _loggedCount,
+                      totalCount: _totalCount,
+                      weekEmotions: _weekEmotions,
+                      onDayTapped: _onDayTapped,
+                      onHistoryTap: () {},
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 250,
+                    child: EmotionTrackerCard(
+                      currentEmotionText: _currentEmotionText,
+                      loggedCount: _loggedCount,
+                      totalCount: _totalCount,
+                      weekEmotions: _weekEmotions,
+                      onDayTapped: _onDayTapped,
+                      onHistoryTap: () {},
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

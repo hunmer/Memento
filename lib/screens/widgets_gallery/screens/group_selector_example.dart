@@ -15,45 +15,65 @@ class _GroupSelectorExampleState extends State<GroupSelectorExample> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('组选择器对话框'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'GroupSelectorDialog',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            const Text('这是一个组选择器对话框，支持分组选择、重命名和删除。'),
-            const SizedBox(height: 32),
-            if (selectedGroup != null)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.group_work),
-                      const SizedBox(width: 12),
-                      Text(selectedGroup!),
-                    ],
+      body: Container(
+        color: isDark ? Colors.black : const Color(0xFFF2F2F7),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('组件说明'),
+                const SizedBox(height: 8),
+                const Text('点击按钮打开组选择器对话框，支持分组选择、重命名和删除'),
+                const SizedBox(height: 24),
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: _showGroupSelector,
+                    icon: const Icon(Icons.group_work),
+                    label: const Text('打开组选择器'),
                   ),
                 ),
-              ),
-            const SizedBox(height: 24),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: _showGroupSelector,
-                icon: const Icon(Icons.group_work),
-                label: const Text('选择分组'),
-              ),
+                if (selectedGroup != null) ...[
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.group_work),
+                            const SizedBox(width: 12),
+                            Text('已选择: $selectedGroup',
+                                style: Theme.of(context).textTheme.titleMedium),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }

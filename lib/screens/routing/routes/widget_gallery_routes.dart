@@ -663,9 +663,8 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/weight_trend_chart',
-      handler:
-          (settings) => RouteHelpers.createRoute(
-            CardTrendLineChartExample(),
+          handler: (settings) => RouteHelpers.createRoute(
+            const WeightTrendChartExample(),
             settings: settings,
           ),
           description: '体重趋势图表',
@@ -762,9 +761,8 @@ class WidgetGalleryRoutes implements RouteRegistry {
         ),
         RouteDefinition(
           path: '/widgets_gallery/nutrition_progress_card',
-      handler:
-          (settings) => RouteHelpers.createRoute(
-            SplitColumnProgressBarCardExample(),
+          handler: (settings) => RouteHelpers.createRoute(
+            const NutritionProgressCardExample(),
             settings: settings,
           ),
           description: '营养进度追踪卡片',

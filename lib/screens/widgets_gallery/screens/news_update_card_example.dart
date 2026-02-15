@@ -13,15 +13,74 @@ class NewsUpdateCardExample extends StatelessWidget {
       appBar: AppBar(title: const Text('新闻更新卡片')),
       body: Container(
         color: isDark ? Colors.black : const Color(0xFFF2F2F7),
-        child: const Center(
-          child: NewsUpdateCardWidget(
-            icon: Icons.bolt,
-            title: '"I confess." The Belarusian pro-governmental telegram channel published a video of Roman Protasevich',
-            timestamp: '4 minutes ago',
-            currentIndex: 0,
-            totalItems: 4,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle('小尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: NewsUpdateCardWidget(
+                      icon: Icons.bolt,
+                      title: '"I confess."',
+                      timestamp: '4 minutes ago',
+                      currentIndex: 0,
+                      totalItems: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 220,
+                    height: 200,
+                    child: NewsUpdateCardWidget(
+                      icon: Icons.bolt,
+                      title: '"I confess." The Belarusian pro-governmental',
+                      timestamp: '4 minutes ago',
+                      currentIndex: 0,
+                      totalItems: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大尺寸'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 250,
+                    child: NewsUpdateCardWidget(
+                      icon: Icons.bolt,
+                      title: '"I confess." The Belarusian pro-governmental telegram channel published a video of Roman Protasevich',
+                      timestamp: '4 minutes ago',
+                      currentIndex: 0,
+                      totalItems: 4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }
