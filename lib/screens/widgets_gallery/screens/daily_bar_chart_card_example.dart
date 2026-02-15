@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/daily_bar_chart_card.dart';
 
 /// 每日条形图卡片示例
@@ -26,6 +27,7 @@ class DailyBarChartCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DailyBarChartCardWidget(
+                      size: HomeWidgetSize.small,
                       title: 'Monthly Steps',
                       subtitle: 'January 2025',
                       value: 187297,
@@ -48,6 +50,7 @@ class DailyBarChartCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: DailyBarChartCardWidget(
+                      size: HomeWidgetSize.medium,
                       title: 'Monthly Steps',
                       subtitle: 'January 2025',
                       value: 187297,
@@ -75,6 +78,7 @@ class DailyBarChartCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: DailyBarChartCardWidget(
+                      size: HomeWidgetSize.large,
                       title: 'Monthly Steps',
                       subtitle: 'January 2025',
                       value: 187297,

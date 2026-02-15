@@ -1,3 +1,4 @@
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/daily_event_data.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/daily_events_card.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class DailyEventsCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: DailyEventsCardWidget(
+                      size: HomeWidgetSize.small,
                       weekday: 'Monday',
                       day: 7,
                       events: const [
@@ -53,6 +55,7 @@ class DailyEventsCardExample extends StatelessWidget {
                     width: 220,
                     height: 200,
                     child: DailyEventsCardWidget(
+                      size: HomeWidgetSize.medium,
                       weekday: 'Monday',
                       day: 7,
                       events: const [
@@ -90,6 +93,7 @@ class DailyEventsCardExample extends StatelessWidget {
                     width: 300,
                     height: 280,
                     child: DailyEventsCardWidget(
+                      size: HomeWidgetSize.large,
                       weekday: 'Monday',
                       day: 7,
                       events: const [

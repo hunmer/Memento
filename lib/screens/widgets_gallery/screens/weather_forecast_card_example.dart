@@ -1,6 +1,6 @@
-import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/weather_forecast_card.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/weather_forecast_card.dart';
 
 /// 天气预报卡片示例
 ///
@@ -29,6 +29,7 @@ class WeatherForecastCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: WeatherForecastCard(
+                      size: HomeWidgetSize.small,
                       cityName: 'London',
                       weatherDescription: 'Heavy showers',
                       currentTemp: 12,
@@ -45,6 +46,7 @@ class WeatherForecastCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: WeatherForecastCard(
+                      size: HomeWidgetSize.medium,
                       cityName: 'London',
                       weatherDescription: 'Heavy showers',
                       currentTemp: 12,
@@ -61,6 +63,7 @@ class WeatherForecastCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: WeatherForecastCard(
+                      size: HomeWidgetSize.large,
                       cityName: 'London',
                       weatherDescription: 'Heavy showers',
                       currentTemp: 12,

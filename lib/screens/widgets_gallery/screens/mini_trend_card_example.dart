@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/mini_trend_card.dart';
 
 /// 迷你趋势卡片示例
@@ -26,6 +27,7 @@ class MiniTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MiniTrendCardWidget(
+                      size: HomeWidgetSize.small,
                       title: 'Heart Rate',
                       icon: Icons.monitor_heart,
                       currentValue: 72,
@@ -44,6 +46,7 @@ class MiniTrendCardExample extends StatelessWidget {
                     width: 200,
                     height: 200,
                     child: MiniTrendCardWidget(
+                      size: HomeWidgetSize.medium,
                       title: 'Heart Rate',
                       icon: Icons.monitor_heart,
                       currentValue: 72,
@@ -62,6 +65,7 @@ class MiniTrendCardExample extends StatelessWidget {
                     width: 280,
                     height: 280,
                     child: MiniTrendCardWidget(
+                      size: HomeWidgetSize.large,
                       title: 'Heart Rate',
                       icon: Icons.monitor_heart,
                       currentValue: 72,

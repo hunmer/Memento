@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/monthly_progress_with_dots_card.dart';
 
 /// 月度进度圆点卡片示例
@@ -26,6 +27,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MonthlyProgressWithDotsCardWidget(
+                      size: HomeWidgetSize.small,
                       title: 'September',
                       currentDay: 18,
                       totalDays: 31,
@@ -42,6 +44,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: MonthlyProgressWithDotsCardWidget(
+                      size: HomeWidgetSize.medium,
                       title: 'September',
                       currentDay: 18,
                       totalDays: 31,
@@ -58,6 +61,7 @@ class MonthlyProgressWithDotsCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: MonthlyProgressWithDotsCardWidget(
+                      size: HomeWidgetSize.large,
                       title: 'September',
                       currentDay: 18,
                       totalDays: 31,

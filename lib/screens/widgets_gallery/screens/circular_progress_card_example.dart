@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/circular_progress_card.dart';
 
 /// 圆形进度卡片示例
@@ -26,6 +27,7 @@ class CircularProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: CircularProgressCardWidget(
+                      size: HomeWidgetSize.small,
                       title: '2020 Progress',
                       subtitle: '157d/366d • Passed',
                       percentage: 71.23,
@@ -41,6 +43,7 @@ class CircularProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: CircularProgressCardWidget(
+                      size: HomeWidgetSize.medium,
                       title: '2020 Progress',
                       subtitle: '157d/366d • Passed',
                       percentage: 71.23,
@@ -56,6 +59,7 @@ class CircularProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: CircularProgressCardWidget(
+                      size: HomeWidgetSize.large,
                       title: '2020 Progress',
                       subtitle: '157d/366d • Passed',
                       percentage: 71.23,

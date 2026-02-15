@@ -47,9 +47,10 @@ class CircularProgressCardWidget extends StatefulWidget {
       subtitle: props['subtitle'] as String? ?? '',
       percentage: (props['percentage'] as num?)?.toDouble() ?? 0.0,
       progress: (props['progress'] as num?)?.toDouble() ?? 0.0,
-      progressColor: props['progressColor'] != null
-          ? Color(props['progressColor'] as int)
-          : null,
+      progressColor:
+          props['progressColor'] != null
+              ? Color(props['progressColor'] as int)
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -89,21 +90,25 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final backgroundColor = isDark
-        ? const Color(0xFF151516)
-        : Theme.of(context).colorScheme.surface;
-    final effectiveProgressColor = widget.progressColor ??
+    final backgroundColor =
+        isDark
+            ? const Color(0xFF151516)
+            : Theme.of(context).colorScheme.surface;
+    final effectiveProgressColor =
+        widget.progressColor ??
         (isDark
             ? const Color(0xFFFDE047)
             : Theme.of(context).colorScheme.primary);
     final textColor =
         isDark ? Colors.white : Theme.of(context).colorScheme.onSurface;
-    final subtitleColor = isDark
-        ? Colors.grey.shade400
-        : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
-    final trackColor = isDark
-        ? const Color(0xFF374151)
-        : Theme.of(context).colorScheme.surfaceContainerHighest;
+    final subtitleColor =
+        isDark
+            ? Colors.grey.shade400
+            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+    final trackColor =
+        isDark
+            ? const Color(0xFF374151)
+            : Theme.of(context).colorScheme.surfaceContainerHighest;
 
     return AnimatedBuilder(
       animation: _animation,
@@ -152,7 +157,8 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
       curve: const Interval(0, 0.7, curve: Curves.easeOutCubic),
     );
 
-    final iconSize = widget.size.getIconSize() * 2;
+    final iconSize = widget.size.getIconSize() * 2.5;
+    final strokeWidth = widget.size.getStrokeWidth();
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -167,7 +173,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
                 progress: widget.progress * progressAnimation.value,
                 progressColor: progressColor,
                 trackColor: trackColor,
-                strokeWidth: iconSize * 0.1,
+                strokeWidth: strokeWidth,
               ),
             );
           },
@@ -271,20 +277,22 @@ class _CircularProgressPainter extends CustomPainter {
     final radius = (size.width - strokeWidth) / 2;
 
     // 背景轨道
-    final trackPaint = Paint()
-      ..color = trackColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final trackPaint =
+        Paint()
+          ..color = trackColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, trackPaint);
 
     // 进度条
-    final progressPaint = Paint()
-      ..color = progressColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final progressPaint =
+        Paint()
+          ..color = progressColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     const startAngle = -math.pi / 2;
     final sweepAngle = 2 * math.pi * progress;

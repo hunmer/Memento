@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/expense_comparison_chart_card.dart';
 
 /// 支出对比图表示例
@@ -26,6 +27,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: ExpenseComparisonChartCardWidget(
+                      size: HomeWidgetSize.small,
                       title: '本月支出',
                       currentAmount: 2048.00,
                       unit: '元',
@@ -72,6 +74,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: ExpenseComparisonChartCardWidget(
+                      size: HomeWidgetSize.medium,
                       title: '本月支出',
                       currentAmount: 2048.00,
                       unit: '元',
@@ -118,6 +121,7 @@ class ExpenseComparisonChartExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: ExpenseComparisonChartCardWidget(
+                      size: HomeWidgetSize.large,
                       title: '本月支出',
                       currentAmount: 2048.00,
                       unit: '元',

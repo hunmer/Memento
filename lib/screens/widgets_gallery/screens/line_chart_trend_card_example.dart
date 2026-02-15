@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/line_chart_trend_card.dart';
 
 /// 折线图趋势卡片示例
@@ -26,6 +27,7 @@ class LineChartTrendCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: LineChartTrendCardWidget(
+                      size: HomeWidgetSize.small,
                       value: 2583,
                       label: 'Earned',
                       changePercent: -5.34,
@@ -42,6 +44,7 @@ class LineChartTrendCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: LineChartTrendCardWidget(
+                      size: HomeWidgetSize.medium,
                       value: 2583,
                       label: 'Earned',
                       changePercent: -5.34,
@@ -58,6 +61,7 @@ class LineChartTrendCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: LineChartTrendCardWidget(
+                      size: HomeWidgetSize.large,
                       value: 2583,
                       label: 'Earned',
                       changePercent: -5.34,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/daily_todo_list_widget.dart';
 
 /// 每日待办事项卡片示例
@@ -26,6 +27,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                     width: 150,
                     height: 180,
                     child: DailyTodoListWidget(
+                      size: HomeWidgetSize.small,
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
@@ -48,6 +50,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                     width: 220,
                     height: 250,
                     child: DailyTodoListWidget(
+                      size: HomeWidgetSize.medium,
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
@@ -72,6 +75,7 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                     width: 300,
                     height: 320,
                     child: DailyTodoListWidget(
+                      size: HomeWidgetSize.large,
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/daily_schedule_card.dart';
 
 /// 每日日程卡片示例
@@ -26,6 +27,7 @@ class DailyScheduleCardExample extends StatelessWidget {
                     width: 150,
                     height: 180,
                     child: DailyScheduleCardWidget(
+                      size: HomeWidgetSize.small,
                       todayDate: 'Monday, June 7',
                       todayEvents: const [
                         EventData(
@@ -50,6 +52,7 @@ class DailyScheduleCardExample extends StatelessWidget {
                     width: 220,
                     height: 250,
                     child: DailyScheduleCardWidget(
+                      size: HomeWidgetSize.medium,
                       todayDate: 'Monday, June 7',
                       todayEvents: const [
                         EventData(
@@ -83,6 +86,7 @@ class DailyScheduleCardExample extends StatelessWidget {
                     width: 350,
                     height: 350,
                     child: DailyScheduleCardWidget(
+                      size: HomeWidgetSize.large,
                       todayDate: 'Monday, June 7',
                       todayEvents: const [
                         EventData(

@@ -1,5 +1,6 @@
-import 'package:Memento/screens/widgets_gallery/common_widgets/models/trend_list_card_data.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/models/trend_list_card_data.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/trend_list_card.dart';
 
 /// 趋势列表卡片示例
@@ -27,6 +28,7 @@ class TrendListCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: TrendListCardWidget(
+                      size: HomeWidgetSize.small,
                       data: TrendListCardData(
                         title: 'Stocks',
                         iconName: 'monetization_on',
@@ -72,6 +74,7 @@ class TrendListCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: TrendListCardWidget(
+                      size: HomeWidgetSize.medium,
                       data: TrendListCardData(
                         title: 'Stocks',
                         iconName: 'monetization_on',
@@ -117,6 +120,7 @@ class TrendListCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: TrendListCardWidget(
+                      size: HomeWidgetSize.large,
                       data: TrendListCardData(
                         title: 'Stocks',
                         iconName: 'monetization_on',

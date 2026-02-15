@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/activity_rings_card.dart';
 
 /// 活动圆环卡片示例
@@ -42,6 +43,7 @@ class ActivityRingsCardExample extends StatelessWidget {
                         RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
                         RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
                       ],
+                      size: HomeWidgetSize.small,
                     ),
                   ),
                 ),
@@ -61,6 +63,7 @@ class ActivityRingsCardExample extends StatelessWidget {
                         RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
                         RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
                       ],
+                      size: HomeWidgetSize.medium,
                     ),
                   ),
                 ),
@@ -80,6 +83,7 @@ class ActivityRingsCardExample extends StatelessWidget {
                         RingData(value: 20, color: Color(0xFF2563EB), icon: null, isDiamond: true),
                         RingData(value: 40, color: Color(0xFF6B7280), icon: Icons.directions_run),
                       ],
+                      size: HomeWidgetSize.large,
                     ),
                   ),
                 ),
