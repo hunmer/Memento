@@ -207,6 +207,9 @@ class AppRoutes extends NavigatorObserver {
   // 活动日视图小组件配置路由
   static const String activityDailyConfig = '/activity_daily_config';
 
+  // 活动编辑路由（从活动通知打开）
+  static const String activityEdit = '/activity_edit';
+
   // 习惯计时器对话框路由（从小组件打开）
   static const String habitTimerDialog = '/habit_timer_dialog';
 

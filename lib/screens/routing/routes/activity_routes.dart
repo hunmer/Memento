@@ -5,6 +5,7 @@ import 'package:Memento/screens/routing/route_helpers.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/screens/activity_weekly_config_screen.dart';
 import 'package:Memento/plugins/activity/screens/activity_daily_config_screen.dart';
+import 'package:Memento/plugins/activity/screens/activity_edit_screen.dart';
 import 'package:Memento/plugins/activity/screens/tag_statistics_screen.dart';
 
 /// Activity 插件路由注册表
@@ -15,6 +16,22 @@ class ActivityRoutes implements RouteRegistry {
   @override
   List<RouteDefinition> get routes => [
         // Activity 主页面（已在 plugin_common_routes.dart 中定义，此处只定义子路由）
+
+        // 活动编辑界面（从活动通知打开）
+        RouteDefinition(
+          path: '/activity_edit',
+          handler: (settings) {
+            return RouteHelpers.createRoute(const ActivityEditScreen());
+          },
+          description: '活动编辑界面（从活动通知打开）',
+        ),
+        RouteDefinition(
+          path: 'activity_edit',
+          handler: (settings) {
+            return RouteHelpers.createRoute(const ActivityEditScreen());
+          },
+          description: '活动编辑界面（别名）',
+        ),
 
         // 活动周视图小组件配置界面
         RouteDefinition(
