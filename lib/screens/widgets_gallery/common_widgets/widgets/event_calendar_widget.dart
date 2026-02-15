@@ -271,7 +271,7 @@ class _DateSection extends StatelessWidget {
           duration: const Duration(milliseconds: 800),
           curve: Curves.easeOutCubic,
           textStyle: TextStyle(
-            fontSize: 56,
+            fontSize: size.getLargeFontSize(),
             fontWeight: FontWeight.w500,
             color: primaryColor,
             height: 1.0,
@@ -283,8 +283,8 @@ class _DateSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(weekday, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.2)),
-              Text('$month · $eventCount Events', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.grey.shade400, height: 1.2)),
+              Text(weekday, style: TextStyle(fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.2)),
+              Text('$month · $eventCount Events', style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w500, color: Colors.grey.shade400, height: 1.2)),
             ],
           ),
         ),
@@ -325,7 +325,7 @@ class _WeekCalendar extends StatelessWidget {
             (index) => SizedBox(
               width: 20,
               child: Center(
-                child: Text(weekdays[(weekStartDay + index) % 7], style: TextStyle(fontSize: 9, fontWeight: FontWeight.w400, color: Colors.grey.shade400)),
+                child: Text(weekdays[(weekStartDay + index) % 7], style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w400, color: Colors.grey.shade400)),
               ),
             ),
           ),
@@ -359,13 +359,13 @@ class _WeekCalendar extends StatelessWidget {
                               boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.2), blurRadius: 4)],
                             ),
                             child: Center(
-                              child: Text('$day', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: primaryColor)),
+                              child: Text('$day', style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: primaryColor)),
                             ),
                           )
                         : Text(
                             '$day',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: size.getLegendFontSize(),
                               fontWeight: isPast ? FontWeight.w400 : FontWeight.w500,
                               color: isPast ? Colors.grey.shade400 : (isDark ? Colors.grey.shade200 : Colors.grey.shade900),
                             ),
@@ -402,11 +402,11 @@ class _ReminderItem extends StatelessWidget {
       children: [
         Transform.rotate(
           angle: -0.1,
-          child: Text(emoji, style: const TextStyle(fontSize: 18)),
+          child: Text(emoji, style: TextStyle(fontSize: size.getSubtitleFontSize())),
         ),
         SizedBox(width: size.getItemSpacing() / 2),
         Expanded(
-          child: Text(text, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade200 : Colors.grey.shade800, height: 1.2)),
+          child: Text(text, style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade200 : Colors.grey.shade800, height: 1.2)),
         ),
       ],
     );
@@ -449,13 +449,13 @@ class _EventCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.3)),
+                  Text(event.title, style: TextStyle(fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.3)),
                   SizedBox(height: size.getItemSpacing() / 4),
                   Row(
                     children: [
                       Icon(Icons.calendar_today, size: 14, color: event.iconColor),
                       SizedBox(width: size.getItemSpacing() / 3),
-                      Text('${event.time} · ${event.duration}${event.location != null ? ' · ${event.location}' : ''}', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+                      Text('${event.time} · ${event.duration}${event.location != null ? ' · ${event.location}' : ''}', style: TextStyle(fontSize: size.getLegendFontSize(), color: Colors.grey.shade500)),
                     ],
                   ),
                   if (event.buttonLabel != null) ...[
@@ -468,7 +468,7 @@ class _EventCard extends StatelessWidget {
                           color: isDark ? event.color.withOpacity(0.2) : event.color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(event.buttonLabel!, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: event.color)),
+                        child: Text(event.buttonLabel!, style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: event.color)),
                       ),
                     ),
                   ],

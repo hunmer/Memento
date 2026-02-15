@@ -231,7 +231,7 @@ class _TaskListStatCardWidgetState extends State<TaskListStatCardWidget>
               child: Text(
                 widget.statusLabel,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: widget.size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w500,
                   color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF9CA3AF),
                   height: 1.0,
@@ -332,7 +332,7 @@ class _TaskListItem extends StatelessWidget {
             child: Text(
               task,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: widget.size.getSubtitleFontSize() - 1,
                 fontWeight: FontWeight.w600,
                 color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
                 height: 1.2,
@@ -403,7 +403,7 @@ class _MoreLinkWidget extends StatelessWidget {
           child: Text(
             '+$count more',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: widget.size.getSubtitleFontSize(),
               fontWeight: FontWeight.w700,
               color: primaryColor,
               height: 1.0,

@@ -300,7 +300,7 @@ class _CardTrendLineChartState extends State<CardTrendLineChart>
     Color mutedColor,
   ) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: widget.size.getSmallSpacing(),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1F2937) : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(12),

@@ -103,7 +103,7 @@ class _RoundedTaskProgressWidgetState extends State<RoundedTaskProgressWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: widget.size.getPadding(),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,

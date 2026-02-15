@@ -61,7 +61,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: widget.size.getPadding(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -83,17 +83,17 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: widget.size.getTitleSpacing()),
 
           // 24小时热力图网格
           Expanded(child: _buildHeatmap()),
 
-          const SizedBox(height: 8),
+          SizedBox(height: widget.size.getItemSpacing()),
 
           // 图例
           _buildLegend(),
 
-          const SizedBox(height: 4),
+          SizedBox(height: widget.size.getSmallSpacing()),
 
           // 统计信息
           _buildStats(),
@@ -215,17 +215,17 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: size.getLegendFontSize(),
                       fontWeight: FontWeight.w500,
                       color: _getTextColor(color),
                     ),
                   ),
                 if (isActive) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: widget.size.getSmallSpacing()),
                   Text(
                     _formatMinutes(durationMinutes),
                     style: TextStyle(
-                      fontSize: 8,
+                      fontSize: size.getLegendFontSize() - 2,
                       color: _getTextColor(color),
                     ),
                   ),
@@ -331,7 +331,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
               ),
             ),
             const SizedBox(width: 4),
-            Text(entry.key, style: const TextStyle(fontSize: 9)),
+            Text(entry.key, style: TextStyle(fontSize: size.getLegendFontSize())),
           ],
         );
       }).toList(),
@@ -348,7 +348,7 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
       return Text(
         '今日暂无活动',
         style: TextStyle(
-          fontSize: 10,
+          fontSize: size.getLegendFontSize(),
           color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
         ),
       );
@@ -360,14 +360,14 @@ class _ActivityHeatmapCardWidgetState extends State<ActivityHeatmapCardWidget> {
         Text(
           '总时长: ${_formatMinutes(widget.totalMinutes)}',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: size.getLegendFontSize(),
             color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
           ),
         ),
         Text(
           '活跃: ${widget.activeHours}小时',
           style: TextStyle(
-            fontSize: 10,
+            fontSize: size.getLegendFontSize(),
             color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.7),
           ),
         ),

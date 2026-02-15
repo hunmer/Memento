@@ -231,7 +231,7 @@ class _PeriodSelector extends StatelessWidget {
                         period,
                         style: TextStyle(
                           color: textColor,
-                          fontSize: 12,
+                          fontSize: size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -300,7 +300,7 @@ class _ValueSection extends StatelessWidget {
                         currency,
                         style: TextStyle(
                           color: textColor,
-                          fontSize: 40,
+                          fontSize: size.getLargeFontSize() - 8,
                           fontWeight: FontWeight.bold,
                           height: 1.0,
                         ),
@@ -314,7 +314,7 @@ class _ValueSection extends StatelessWidget {
                         fractionDigits: 2,
                         textStyle: TextStyle(
                           color: textColor,
-                          fontSize: 36,
+                          fontSize: size.getLargeFontSize(),
                           fontWeight: FontWeight.bold,
                           height: 1.0,
                         ),
@@ -331,7 +331,7 @@ class _ValueSection extends StatelessWidget {
                 '+$percentage% compared to last week',
                 style: TextStyle(
                   color: subTextColor,
-                  fontSize: 12,
+                  fontSize: size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -558,7 +558,7 @@ class _DateLabels extends StatelessWidget {
                       dates[index].toString(),
                       style: TextStyle(
                         color: isHighlighted ? primaryColor : textColor,
-                        fontSize: 10,
+                        fontSize: size.getLegendFontSize(),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

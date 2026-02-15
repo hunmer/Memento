@@ -161,7 +161,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                   Text(
                     widget.title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: widget.size.getTitleFontSize() - 8,
                       fontWeight: FontWeight.bold,
                       color: textColor,
                     ),
@@ -197,7 +197,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
               child: Text(
                 '${(percentage * _animation.value).toInt()}%',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: widget.size.getLargeFontSize() - 26,
                   fontWeight: FontWeight.bold,
                   color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                 ),
@@ -251,7 +251,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
               Text(
                 widget.usedLabel ?? 'Used storage',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: widget.size.getLegendFontSize(),
                   fontWeight: FontWeight.w500,
                   color: secondaryTextColor,
                 ),
@@ -289,7 +289,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                     value: widget.usedValue * _animation.value,
                     fractionDigits: 0,
                     textStyle: TextStyle(
-                      fontSize: 22,
+                      fontSize: widget.size.getLargeFontSize() - 26,
                       fontWeight: FontWeight.w900,
                       color: textColor,
                       letterSpacing: -0.5,
@@ -298,7 +298,7 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                   Text(
                     widget.unit,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: widget.size.getSubtitleFontSize(),
                       fontWeight: FontWeight.w700,
                       color: textColor,
                     ),
@@ -346,12 +346,12 @@ class _LegendItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: widget.size.getSmallSpacing()),
                   Expanded(
                     child: Text(
                       label,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: widget.size.getLegendFontSize() - 1,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? Colors.grey.shade200

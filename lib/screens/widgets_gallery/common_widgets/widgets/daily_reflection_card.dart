@@ -162,9 +162,9 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
                     children: [
                       Text(
                         widget.dayOfWeek,
-                        style: const TextStyle(
-                          color: Color(0xFFD1D5DB),
-                          fontSize: 18,
+                        style: TextStyle(
+                          color: const Color(0xFFD1D5DB),
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -190,9 +190,9 @@ class _DailyReflectionCardWidgetState extends State<DailyReflectionCardWidget>
                         },
                         child: Text(
                           widget.question,
-                          style: const TextStyle(
-                            color: Color(0xFF9FA8DA),
-                            fontSize: 32,
+                          style: TextStyle(
+                            color: const Color(0xFF9FA8DA),
+                            fontSize: widget.size.getLargeFontSize() - 16,
                             fontWeight: FontWeight.bold,
                             height: 1.2,
                             letterSpacing: -0.5,
@@ -425,12 +425,12 @@ class _AnimatedButtonState extends State<_AnimatedButton> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(widget.icon, color: Colors.white, size: 20),
-                      const SizedBox(width: 8),
+                      SizedBox(width: widget.size.getItemSpacing()),
                       Text(
                         widget.label!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w600,
                         ),
                       ),

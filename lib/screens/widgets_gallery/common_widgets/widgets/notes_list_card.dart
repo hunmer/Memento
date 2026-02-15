@@ -175,11 +175,11 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
             size: widget.size.getIconSize(),
           ),
           SizedBox(width: widget.size.getItemSpacing()),
-          const Text(
+          Text(
             'Notes',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: widget.size.getTitleFontSize(),
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
             ),

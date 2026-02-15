@@ -138,7 +138,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                       Text(
                         widget.title,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w500,
                           color: secondaryTextColor,
                           height: 1.0,
@@ -153,20 +153,20 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                           Text(
                             '${(widget.currentSpending * _animation.value).toInt()}${widget.unit}',
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: widget.size.getTitleFontSize(),
                               fontWeight: FontWeight.bold,
                               color: textColor,
                               height: 1.0,
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: widget.size.getItemSpacing()),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 4),
                             child: Text(
                               '/ ${widget.budget.toInt()}${widget.unit}',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: widget.size.getTitleFontSize(),
                                 fontWeight: FontWeight.w500,
                                 color: secondaryTextColor,
                                 height: 1.0,
@@ -182,7 +182,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
 
                   // 分段进度条
                   SizedBox(
-                    height: 10,
+                    height: widget.size.getItemSpacing(),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(5),
                       child: Row(
@@ -192,7 +192,7 @@ class _ModernRoundedSpendingWidgetState extends State<ModernRoundedSpendingWidge
                           return Expanded(
                             flex: (category.amount * 100).toInt(),
                             child: Container(
-                              height: 10,
+                              height: widget.size.getItemSpacing(),
                               color: category.color,
                             ),
                           );
@@ -318,7 +318,7 @@ class _CategoryItem extends StatelessWidget {
                       Text(
                         category.name,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: widget.size.getSubtitleFontSize() + 2,
                           fontWeight: FontWeight.w500,
                           color: textColor.withOpacity(0.87),
                         ),
@@ -330,7 +330,7 @@ class _CategoryItem extends StatelessWidget {
                           child: Text(
                             detailItems.map((e) => e.title).join(' · '),
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: widget.size.getSubtitleFontSize(),
                               fontWeight: FontWeight.w400,
                               color: secondaryTextColor,
                             ),
@@ -346,7 +346,7 @@ class _CategoryItem extends StatelessWidget {
                 Text(
                   '${category.amount.toInt()}$unit',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: widget.size.getSubtitleFontSize() + 2,
                     fontWeight: FontWeight.w600,
                     color: textColor,
                     letterSpacing: -0.3,

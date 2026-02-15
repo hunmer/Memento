@@ -142,7 +142,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                           child: Text(
                             widget.title,
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: widget.size.getTitleFontSize(),
                               fontWeight: FontWeight.bold,
                               color: isDark ? Colors.white : const Color(0xFF111827),
                               height: 1.2,
@@ -157,7 +157,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                     Text(
                       widget.contributionCount,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: widget.size.getSubtitleFontSize(),
                         color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                         fontWeight: FontWeight.w500,
                       ),
@@ -181,7 +181,7 @@ class _ContributionHeatmapCardWidgetState extends State<ContributionHeatmapCardW
                     Text(
                       widget.description,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: widget.size.getSubtitleFontSize(),
                         color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
                         height: 1.5,
                       ),
@@ -280,7 +280,7 @@ class _YearButton extends StatelessWidget {
       child: Text(
         year,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: widget.size.getSubtitleFontSize(),
           fontWeight: FontWeight.bold,
           color: isSelected ? Colors.white : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151)),
         ),
@@ -336,7 +336,7 @@ class _ContributionHeatmap extends StatelessWidget {
                   child: Text(
                     month,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: widget.size.getLegendFontSize(),
                       fontWeight: FontWeight.bold,
                       color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937),
                     ),
@@ -420,7 +420,7 @@ class _HeatmapFooter extends StatelessWidget {
           Text(
             'Learn how we\ncount contributions',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: widget.size.getLegendFontSize(),
               color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF374151),
               decoration: TextDecoration.underline,
             ),
@@ -430,7 +430,7 @@ class _HeatmapFooter extends StatelessWidget {
               Text(
                 'Less',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: widget.size.getLegendFontSize(),
                   fontWeight: FontWeight.bold,
                   color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937),
                 ),
@@ -451,7 +451,7 @@ class _HeatmapFooter extends StatelessWidget {
               Text(
                 'More',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: widget.size.getLegendFontSize(),
                   fontWeight: FontWeight.bold,
                   color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF1F2937),
                 ),
@@ -507,7 +507,7 @@ class _ShowMoreButton extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: widget.size.getSubtitleFontSize(),
               fontWeight: FontWeight.w600,
               color: isDark ? const Color(0xFFF3F4F6) : const Color(0xFF1F2937),
             ),

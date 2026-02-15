@@ -276,7 +276,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                   Text(
                     widget.userName,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: widget.size.getTitleFontSize() - 6,
                       fontWeight: FontWeight.w700,
                       color: isDark ? Colors.white : Colors.grey.shade900,
                     ),
@@ -287,7 +287,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                   Text(
                     widget.lastWatched,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: widget.size.getLegendFontSize(),
                       fontWeight: FontWeight.w500,
                       color:
                           isDark ? Colors.grey.shade400 : Colors.grey.shade400,
@@ -330,7 +330,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                 Text(
                   '${widget.currentCount}',
                   style: TextStyle(
-                    fontSize: 36,
+                    fontSize: widget.size.getLargeFontSize() - 12,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     letterSpacing: -1,
@@ -340,7 +340,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                 Text(
                   '/${widget.totalCount}',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: widget.size.getLargeFontSize() - 24,
                     fontWeight: FontWeight.w400,
                     color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                   ),
@@ -351,7 +351,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
             Text(
               widget.progressLabel,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: widget.size.getSubtitleFontSize(),
                 fontWeight: FontWeight.w500,
                 color: isDark ? Colors.grey.shade400 : Colors.grey.shade400,
               ),
@@ -457,7 +457,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                   Text(
                     item.title,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: widget.size.getSubtitleFontSize(),
                       fontWeight: FontWeight.w700,
                       color: isDark ? Colors.white : Colors.grey.shade900,
                     ),
@@ -469,7 +469,7 @@ class _WatchProgressCardWidgetState extends State<WatchProgressCardWidget>
                     Text(
                       item.subtitle!,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: widget.size.getLegendFontSize(),
                         fontWeight: FontWeight.w400,
                         color:
                             isDark
