@@ -25,7 +25,6 @@ import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/hydration_tracker_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weight_tracking_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/blood_pressure_tracker_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/activity_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/habit_streak_tracker_example.dart';
@@ -193,21 +192,23 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
                 fontWeight: FontWeight.bold,
               ),
               unselectedLabelStyle: const TextStyle(fontSize: 12),
-              tabs: widget.widgetItems.map((item) {
-                return Tab(
-                  icon: Icon(item.icon, size: 18),
-                  text: item.title,
-                );
-              }).toList(),
+              tabs:
+                  widget.widgetItems.map((item) {
+                    return Tab(
+                      icon: Icon(item.icon, size: 18),
+                      text: item.title,
+                    );
+                  }).toList(),
             ),
           ),
           // 下方 TabBarView 展示预览
           Expanded(
             child: ExtendedTabBarView(
               controller: _tabController,
-              children: widget.widgetItems.map((item) {
-                return _buildWidgetPreviewContent(item);
-              }).toList(),
+              children:
+                  widget.widgetItems.map((item) {
+                    return _buildWidgetPreviewContent(item);
+                  }).toList(),
             ),
           ),
         ],
@@ -367,7 +368,8 @@ class _WidgetRegistry {
         () => const WatchProgressCardExample(),
     '/widgets_gallery/mood_tracker_widget':
         () => const MoodTrackerWidgetExample(),
-    '/widgets_gallery/mood_chart_card': () => const ChartIconDisplayCardExample(),
+    '/widgets_gallery/mood_chart_card':
+        () => const ChartIconDisplayCardExample(),
     '/widgets_gallery/stress_level_monitor':
         () => const StressLevelMonitorExample(),
     '/widgets_gallery/sleep_tracking_card':
@@ -378,8 +380,6 @@ class _WidgetRegistry {
         () => const ModernFlipCounterCardExample(),
     '/widgets_gallery/hydration_tracker_widget':
         () => const HydrationTrackerWidgetExample(),
-    '/widgets_gallery/weight_tracking_widget':
-        () => const WeightTrackingWidgetExample(),
     '/widgets_gallery/blood_pressure_tracker':
         () => const BloodPressureTrackerExample(),
     '/widgets_gallery/activity_progress_card':
@@ -527,5 +527,4 @@ class _WidgetRegistry {
     final builder = _widgets[route];
     return builder?.call();
   }
-
 }

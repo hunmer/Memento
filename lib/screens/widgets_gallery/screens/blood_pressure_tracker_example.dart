@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/widgets/common/dual_value_tracker_card.dart' show DualValueTrackerCard, WeekData;
 
 /// 血压追踪器组件示例
 class BloodPressureTrackerExample extends StatelessWidget {
@@ -43,6 +44,7 @@ class BloodPressureTrackerExample extends StatelessWidget {
                       unit: 'mmHg',
                       icon: Icons.water_drop,
                       weekData: weekData,
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -61,6 +63,7 @@ class BloodPressureTrackerExample extends StatelessWidget {
                       unit: 'mmHg',
                       icon: Icons.water_drop,
                       weekData: weekData,
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -78,6 +81,7 @@ class BloodPressureTrackerExample extends StatelessWidget {
                     unit: 'mmHg',
                     icon: Icons.water_drop,
                     weekData: weekData,
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -95,6 +99,7 @@ class BloodPressureTrackerExample extends StatelessWidget {
                       unit: 'mmHg',
                       icon: Icons.water_drop,
                       weekData: weekData,
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -112,6 +117,7 @@ class BloodPressureTrackerExample extends StatelessWidget {
                     unit: 'mmHg',
                     icon: Icons.water_drop,
                     weekData: weekData,
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
