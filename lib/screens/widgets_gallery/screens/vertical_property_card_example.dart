@@ -87,6 +87,51 @@ class VerticalPropertyCardExample extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 320,
+                  child: VerticalPropertyCardWidget(
+                    imageUrl:
+                        'https://lh3.googleusercontent.com/aida-public/AB6AXuC7I66qiADm9mcjQGh_wAlfWQP6o_hcJfNgeDqcih2g1QHBlHCKvyr2pKBHtvA7G9qkBB3ZlP8pV7HlhnjfuPHiGjMPGzWh1xuHfO7v8SfNXgAWZovbI2iz72aJb6Hv7xp-OyHsP6g6c9kEUTGIaMPDQGhQcCFX0vPVzVxyO2S1BOu1b7ivc_pI3JZwjIwM_D1pNiIMj9KZJrNr5K2R8eog0iEFsvVF4TJ1GpdtlCyNpfzLI9iGyc-_WhLEcfYEmXF1DGs_QyUxRg',
+                    title: 'A Georgian Masterpiece in the Heart of the City',
+                    metadata: [
+                      PropertyMetadata(icon: Icons.calendar_today, label: '01 Feb 2020'),
+                      PropertyMetadata(icon: Icons.schedule, label: '14:00'),
+                      PropertyMetadata(icon: Icons.cloud_queue, label: '8° F'),
+                      PropertyMetadata(icon: Icons.location_on, label: 'Downtown'),
+                    ],
+                    description:
+                        'When I first got into the advertising business, I was looking for the magical combination that would make my campaigns stand out.',
+                    actionLabel: 'Get directions',
+                    actionIcon: Icons.my_location,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 400,
+                  child: VerticalPropertyCardWidget(
+                    imageUrl:
+                        'https://lh3.googleusercontent.com/aida-public/AB6AXuC7I66qiADm9mcjQGh_wAlfWQP6o_hcJfNgeDqcih2g1QHBlHCKvyr2pKBHtvA7G9qkBB3ZlP8pV7HlhnjfuPHiGjMPGzWh1xuHfO7v8SfNXgAWZovbI2iz72aJb6Hv7xp-OyHsP6g6c9kEUTGIaMPDQGhQcCFX0vPVzVxyO2S1BOu1b7ivc_pI3JZwjIwM_D1pNiIMj9KZJrNr5K2R8eog0iEFsvVF4TJ1GpdtlCyNpfzLI9iGyc-_WhLEcfYEmXF1DGs_QyUxRg',
+                    title: 'A Georgian Masterpiece in the Heart of the City - Premium Property',
+                    metadata: [
+                      PropertyMetadata(icon: Icons.calendar_today, label: '01 Feb 2020'),
+                      PropertyMetadata(icon: Icons.schedule, label: '14:00'),
+                      PropertyMetadata(icon: Icons.cloud_queue, label: '8° F'),
+                      PropertyMetadata(icon: Icons.location_on, label: 'Downtown, Central District'),
+                      PropertyMetadata(icon: Icons.hotel, label: '4 Bedrooms'),
+                    ],
+                    description:
+                        'When I first got into the advertising business, I was looking for the magical combination that would make my campaigns stand out. This beautiful property offers everything you need for luxury living.',
+                    actionLabel: 'Get directions',
+                    actionIcon: Icons.my_location,
+                  ),
+                ),
               ],
             ),
           ),

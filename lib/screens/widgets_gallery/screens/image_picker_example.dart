@@ -227,6 +227,105 @@ class _ImagePickerExampleState extends State<ImagePickerExample> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
+
+            // 5. 中宽尺寸示例
+            _buildSectionTitle('5. 中宽尺寸'),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: ImagePickerField(
+                            labelText: '封面 (中宽)',
+                            currentImage: _flexSelectedImage,
+                            previewWidth: double.infinity,
+                            previewHeight: 120,
+                            borderRadius: 12,
+                            onImageChanged: (result) {
+                              setState(() {
+                                _flexSelectedImage = result['url'] as String;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceVariant,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.image,
+                                  size: 32,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '中宽布局',
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '宽度占满容器',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // 6. 大宽尺寸示例
+            _buildSectionTitle('6. 大宽尺寸'),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    ImagePickerField(
+                      labelText: '封面 (大宽)',
+                      currentImage: _flexSelectedImage,
+                      previewWidth: double.infinity,
+                      previewHeight: 200,
+                      borderRadius: 16,
+                      showShadow: true,
+                      onImageChanged: (result) {
+                        setState(() {
+                          _flexSelectedImage = result['url'] as String;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '大宽尺寸：宽度占满屏幕宽度',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

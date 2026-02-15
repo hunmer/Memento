@@ -147,6 +147,103 @@ class SegmentedProgressCardExample extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 380,
+                  child: SegmentedProgressCardWidget(
+                    title: 'Budget Overview - Medium Wide',
+                    currentValue: 1200,
+                    targetValue: 1500,
+                    segments: const [
+                      SegmentData(
+                        label: '餐饮',
+                        value: 150,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      SegmentData(
+                        label: '健身',
+                        value: 180,
+                        color: Color(0xFF007AFF),
+                      ),
+                      SegmentData(
+                        label: '交通',
+                        value: 120,
+                        color: Color(0xFFFFCC00),
+                      ),
+                      SegmentData(
+                        label: '购物',
+                        value: 250,
+                        color: Color(0xFF34C759),
+                      ),
+                      SegmentData(
+                        label: '娱乐',
+                        value: 150,
+                        color: Color(0xFFAF52DE),
+                      ),
+                      SegmentData(
+                        label: '其他',
+                        value: 350,
+                        color: Color(0xFF8E8E93),
+                      ),
+                    ],
+                    unit: '\$',
+                    size: const WideSize(),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 480,
+                  child: SegmentedProgressCardWidget(
+                    title: 'Complete Budget Analysis - Large Wide',
+                    currentValue: 1500,
+                    targetValue: 2000,
+                    segments: const [
+                      SegmentData(
+                        label: '餐饮',
+                        value: 200,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      SegmentData(
+                        label: '健身',
+                        value: 250,
+                        color: Color(0xFF007AFF),
+                      ),
+                      SegmentData(
+                        label: '交通',
+                        value: 180,
+                        color: Color(0xFFFFCC00),
+                      ),
+                      SegmentData(
+                        label: '购物',
+                        value: 350,
+                        color: Color(0xFF34C759),
+                      ),
+                      SegmentData(
+                        label: '娱乐',
+                        value: 220,
+                        color: Color(0xFFAF52DE),
+                      ),
+                      SegmentData(
+                        label: '旅游',
+                        value: 150,
+                        color: Color(0xFF00C7BE),
+                      ),
+                      SegmentData(
+                        label: '其他',
+                        value: 150,
+                        color: Color(0xFF8E8E93),
+                      ),
+                    ],
+                    unit: '\$',
+                    size: const Wide2Size(),
+                  ),
+                ),
               ],
             ),
           ),

@@ -139,6 +139,63 @@ class ColorTagTaskCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: ColorTagTaskCardWidget(
+                    size: const MediumWideSize(),
+                    data: const ColorTagTaskCardData(
+                      taskCount: 56,
+                      label: 'Upcoming tasks',
+                      tasks: [
+                        ColorTagTaskItem(
+                          title: 'Design mobile UI dashboard for iOS',
+                          color: 0xFF3B82F6,
+                          tag: 'Design',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Calculate budget and contract',
+                          color: 0xFFFB7185,
+                          tag: 'Finance',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Search for a UI kit',
+                          color: 0xFFFBBF24,
+                          tag: 'Research',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Create HTML & CSS for startup',
+                          color: 0xFF3B82F6,
+                          tag: 'Dev',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Design search page for website',
+                          color: 0xFF34D399,
+                          tag: 'Design',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Send an estimate budget for app',
+                          color: 0xFFFB7185,
+                          tag: 'Finance',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Search for a mobile UI kit',
+                          color: 0xFFFBBF24,
+                          tag: 'Research',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Export assets for HTML developer',
+                          color: 0xFF3B82F6,
+                          tag: 'Dev',
+                        ),
+                      ],
+                      moreCount: 10,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 _buildSectionTitle('大尺寸'),
                 const SizedBox(height: 8),
                 Center(
@@ -194,6 +251,63 @@ class ColorTagTaskCardExample extends StatelessWidget {
                         ],
                         moreCount: 10,
                       ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 300,
+                  child: ColorTagTaskCardWidget(
+                    size: const LargeWideSize(),
+                    data: const ColorTagTaskCardData(
+                      taskCount: 56,
+                      label: 'Upcoming tasks',
+                      tasks: [
+                        ColorTagTaskItem(
+                          title: 'Design mobile UI dashboard for iOS',
+                          color: 0xFF3B82F6,
+                          tag: 'Design',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Calculate budget and contract',
+                          color: 0xFFFB7185,
+                          tag: 'Finance',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Search for a UI kit',
+                          color: 0xFFFBBF24,
+                          tag: 'Research',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Create HTML & CSS for startup',
+                          color: 0xFF3B82F6,
+                          tag: 'Dev',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Design search page for website',
+                          color: 0xFF34D399,
+                          tag: 'Design',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Send an estimate budget for app',
+                          color: 0xFFFB7185,
+                          tag: 'Finance',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Search for a mobile UI kit',
+                          color: 0xFFFBBF24,
+                          tag: 'Research',
+                        ),
+                        ColorTagTaskItem(
+                          title: 'Export assets for HTML developer',
+                          color: 0xFF3B82F6,
+                          tag: 'Dev',
+                        ),
+                      ],
+                      moreCount: 10,
                     ),
                   ),
                 ),

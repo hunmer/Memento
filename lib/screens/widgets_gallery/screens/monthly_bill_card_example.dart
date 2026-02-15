@@ -70,6 +70,36 @@ class MonthlyBillCardExample extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 280,
+                  child: MonthlyBillCardWidget(
+                    data: const MonthlyBillCardData(
+                      title: '6月账单 - 详细分析',
+                      income: 1024.00,
+                      expense: 2048.00,
+                      balance: -1024.00,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 350,
+                  child: MonthlyBillCardWidget(
+                    data: const MonthlyBillCardData(
+                      title: '6月账单 - 完整财务报告',
+                      income: 1024.00,
+                      expense: 2048.00,
+                      balance: -1024.00,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

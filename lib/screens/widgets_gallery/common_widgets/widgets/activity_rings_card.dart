@@ -21,9 +21,13 @@ class RingData {
     return RingData(
       value: (json['value'] as num?)?.toDouble() ?? 0.0,
       color: Color(json['color'] as int? ?? 0xFF000000),
-      icon: json['iconCodePoint'] != null
-          ? IconData(json['iconCodePoint'] as int, fontFamily: 'MaterialIcons')
-          : null,
+      icon:
+          json['iconCodePoint'] != null
+              ? IconData(
+                json['iconCodePoint'] as int,
+                fontFamily: 'MaterialIcons',
+              )
+              : null,
       isDiamond: json['isDiamond'] as bool? ?? false,
     );
   }
@@ -67,7 +71,8 @@ class ActivityRingsCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final ringsList = (props['rings'] as List<dynamic>?)
+    final ringsList =
+        (props['rings'] as List<dynamic>?)
             ?.map((e) => RingData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -128,7 +133,9 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                borderRadius: BorderRadius.circular(widget.size.getIconSize() + 12),
+                borderRadius: BorderRadius.circular(
+                  widget.size.getIconSize() + 12,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -147,9 +154,10 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                         style: TextStyle(
                           fontSize: widget.size.getTitleFontSize() - 6,
                           fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? const Color(0xFFF3F4F6)
-                              : const Color(0xFF1F2937),
+                          color:
+                              isDark
+                                  ? const Color(0xFFF3F4F6)
+                                  : const Color(0xFF1F2937),
                         ),
                       ),
                       Row(
@@ -159,18 +167,20 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                             style: TextStyle(
                               fontSize: widget.size.getLegendFontSize() + 2,
                               fontWeight: FontWeight.w500,
-                              color: isDark
-                                  ? const Color(0xFF6B7280)
-                                  : const Color(0xFF6B7280),
+                              color:
+                                  isDark
+                                      ? const Color(0xFF6B7280)
+                                      : const Color(0xFF6B7280),
                             ),
                           ),
                           SizedBox(width: widget.size.getSmallSpacing()),
                           Icon(
                             Icons.chevron_right,
                             size: widget.size.getIconSize(),
-                            color: isDark
-                                ? const Color(0xFF6B7280)
-                                : const Color(0xFF6B7280),
+                            color:
+                                isDark
+                                    ? const Color(0xFF6B7280)
+                                    : const Color(0xFF6B7280),
                           ),
                         ],
                       ),
@@ -197,23 +207,28 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                                   textStyle: TextStyle(
                                     fontSize: widget.size.getLargeFontSize(),
                                     fontWeight: FontWeight.w800,
-                                    color: isDark
-                                        ? Colors.white
-                                        : const Color(0xFF111827),
+                                    color:
+                                        isDark
+                                            ? Colors.white
+                                            : const Color(0xFF111827),
                                     height: 1.0,
                                   ),
                                 ),
                                 SizedBox(width: widget.size.getItemSpacing()),
                                 Padding(
-                                  padding: EdgeInsets.only(bottom: widget.size.getSmallSpacing()),
+                                  padding: EdgeInsets.only(
+                                    bottom: widget.size.getSmallSpacing(),
+                                  ),
                                   child: Text(
                                     'steps',
                                     style: TextStyle(
-                                      fontSize: widget.size.getTitleFontSize() - 6,
+                                      fontSize:
+                                          widget.size.getTitleFontSize() - 6,
                                       fontWeight: FontWeight.w500,
-                                      color: isDark
-                                          ? const Color(0xFF9CA3AF)
-                                          : const Color(0xFF6B7280),
+                                      color:
+                                          isDark
+                                              ? const Color(0xFF9CA3AF)
+                                              : const Color(0xFF6B7280),
                                     ),
                                   ),
                                 ),
@@ -225,20 +240,23 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                             children: [
                               Icon(
                                 Icons.local_fire_department,
-                                color: isDark
-                                    ? const Color(0xFFF97316)
-                                    : const Color(0xFFF97316),
+                                color:
+                                    isDark
+                                        ? const Color(0xFFF97316)
+                                        : const Color(0xFFF97316),
                                 size: widget.size.getIconSize(),
                               ),
                               SizedBox(width: widget.size.getItemSpacing()),
                               Text(
                                 widget.status,
                                 style: TextStyle(
-                                  fontSize: widget.size.getSubtitleFontSize() + 2,
+                                  fontSize:
+                                      widget.size.getSubtitleFontSize() + 2,
                                   fontWeight: FontWeight.w500,
-                                  color: isDark
-                                      ? const Color(0xFFD1D5DB)
-                                      : const Color(0xFF374151),
+                                  color:
+                                      isDark
+                                          ? const Color(0xFFD1D5DB)
+                                          : const Color(0xFF374151),
                                 ),
                               ),
                             ],
@@ -256,7 +274,9 @@ class _ActivityRingsCardWidgetState extends State<ActivityRingsCardWidget>
                             ),
                           );
                           return Padding(
-                            padding: EdgeInsets.only(left: widget.size.getItemSpacing()),
+                            padding: EdgeInsets.only(
+                              left: widget.size.getItemSpacing(),
+                            ),
                             child: _RingWidget(
                               data: widget.rings[index],
                               animation: ringAnimation,
@@ -366,20 +386,22 @@ class _RingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    final backgroundPaint = Paint()
-      ..color = backgroundColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final backgroundPaint =
+        Paint()
+          ..color = backgroundColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, backgroundPaint);
 
     if (progress > 0) {
-      final progressPaint = Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
+      final progressPaint =
+          Paint()
+            ..color = color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = StrokeCap.round;
 
       const startAngle = -90.0 * (3.14159 / 180.0);
       final sweepAngle = 2 * 3.14159 * progress;

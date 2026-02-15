@@ -84,6 +84,40 @@ class _AvatarPickerExampleState extends State<AvatarPickerExample> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 150,
+                  child: AvatarPicker(
+                    username: '用户',
+                    currentAvatarPath: selectedAvatar,
+                    size: 80,
+                    onAvatarChanged: (path) {
+                      setState(() {
+                        selectedAvatar = path;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 200,
+                  child: AvatarPicker(
+                    username: '用户',
+                    currentAvatarPath: selectedAvatar,
+                    size: 120,
+                    onAvatarChanged: (path) {
+                      setState(() {
+                        selectedAvatar = path;
+                      });
+                    },
+                  ),
+                ),
                 if (selectedAvatar != null) ...[
                   const SizedBox(height: 24),
                   Center(

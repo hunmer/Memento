@@ -48,6 +48,18 @@ class DailyReflectionCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: DailyReflectionCardWidget(
+                    dayOfWeek: 'Monday',
+                    question: 'How will you make tomorrow meaningful?',
+                    size: const MediumWideSize(),
+                  ),
+                ),
+                const SizedBox(height: 24),
                 _buildSectionTitle('大尺寸'),
                 const SizedBox(height: 8),
                 Center(
@@ -59,6 +71,18 @@ class DailyReflectionCardExample extends StatelessWidget {
                       question: 'How will you make tomorrow meaningful?',
                       size: const LargeSize(),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 300,
+                  child: DailyReflectionCardWidget(
+                    dayOfWeek: 'Monday',
+                    question: 'How will you make tomorrow meaningful? Take a moment to reflect on your goals and aspirations.',
+                    size: const LargeWideSize(),
                   ),
                 ),
               ],
