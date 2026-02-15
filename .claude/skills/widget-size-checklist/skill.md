@@ -21,33 +21,33 @@ description: 确保小组件组件根据 HomeWidgetSize 正确调整各元素大
 
 ### 尺寸和布局方法
 
-| 方法 | 说明 | Small | Medium | Large |
-|------|------|-------|--------|-------|
-| `getPadding()` | 外层容器内边距 | 8px | 12px | 16px |
-| `getTitleSpacing()` | 标题与内容间距 | 16px | 20px | 24px |
-| `getItemSpacing()` | 列表项之间间距 | 6px | 8px | 12px |
-| `getSmallSpacing()` | 紧密元素间距 | 2px | 4px | 6px |
-| `getHeightConstraints()` | 高度约束 | 150-250 | 200-350 | 250-450 |
+| 方法 | 说明 | Small | Medium | Large | Wide | Wide2 |
+|------|------|-------|--------|-------|------|-------|
+| `getPadding()` | 外层容器内边距 | 8px | 12px | 16px | 12px | 16px |
+| `getTitleSpacing()` | 标题与内容间距 | 16px | 20px | 24px | 20px | 24px |
+| `getItemSpacing()` | 列表项之间间距 | 6px | 8px | 12px | 8px | 12px |
+| `getSmallSpacing()` | 紧密元素间距 | 2px | 4px | 6px | 4px | 6px |
+| `getHeightConstraints()` | 高度约束 | 150-250 | 200-350 | 250-450 | 200-350 | 250-450 |
 
 ### 字体大小方法
 
-| 方法 | 说明 | Small | Medium | Large |
-|------|------|-------|--------|-------|
-| `getLargeFontSize()` | 大标题/数值 | 36px | 48px | 56px |
-| `getTitleFontSize()` | 标题 | 16px | 24px | 28px |
-| `getSubtitleFontSize()` | 副标题/标签 | 12px | 14px | 16px |
-| `getLegendFontSize()` | 图例/小字 | 10px | 12px | 14px |
+| 方法 | 说明 | Small | Medium | Large | Wide | Wide2 |
+|------|------|-------|--------|-------|------|-------|
+| `getLargeFontSize()` | 大标题/数值 | 36px | 48px | 56px | 48px | 56px |
+| `getTitleFontSize()` | 标题 | 16px | 24px | 28px | 24px | 28px |
+| `getSubtitleFontSize()` | 副标题/标签 | 12px | 14px | 16px | 14px | 16px |
+| `getLegendFontSize()` | 图例/小字 | 10px | 12px | 14px | 12px | 14px |
 
 ### 图形元素方法
 
-| 方法 | 说明 | Small | Medium | Large |
-|------|------|-------|--------|-------|
-| `getIconSize()` | 图标大小 | 18px | 24px | 28px |
-| `getStrokeWidth()` | 线条粗细 | 6px | 8px | 10px |
-| `getLegendIndicatorWidth()` | 指示器宽度 | 16px | 24px | 32px |
-| `getLegendIndicatorHeight()` | 指示器高度 | 8px | 12px | 16px |
-| `getBarWidth()` | 柱状图柱宽 | 12px | 16px | 20px |
-| `getBarSpacing()` | 柱间距 | 0.5px | 1px | 1.5px |
+| 方法 | 说明 | Small | Medium | Large | Wide | Wide2 |
+|------|------|-------|--------|-------|------|-------|
+| `getIconSize()` | 图标大小 | 18px | 24px | 28px | 24px | 28px |
+| `getStrokeWidth()` | 线条粗细 | 6px | 8px | 10px | 8px | 10px |
+| `getLegendIndicatorWidth()` | 指示器宽度 | 16px | 24px | 32px | 24px | 32px |
+| `getLegendIndicatorHeight()` | 指示器高度 | 8px | 12px | 16px | 12px | 16px |
+| `getBarWidth()` | 柱状图柱宽 | 12px | 16px | 20px | 16px | 20px |
+| `getBarSpacing()` | 柱间距 | 0.5px | 1px | 1.5px | 1px | 1.5px |
 
 ### 缩放系数（可直接使用）
 
@@ -222,6 +222,7 @@ CustomPaint(
 
 - [ ] 示例文件中为不同尺寸传递对应的 size
 - [ ] 导入 HomeWidgetSize
+- [ ] **Wide/Wide2 尺寸宽度应填满屏幕**，使用 `MediaQuery.of(context).size.width - 32`
 
 ```dart
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
@@ -234,6 +235,20 @@ MyWidget(data: data, size: const MediumSize()),
 
 // 大尺寸
 MyWidget(data: data, size: const LargeSize()),
+
+// 中宽尺寸 (4x1) - 宽度填满屏幕
+SizedBox(
+  width: MediaQuery.of(context).size.width - 32,
+  height: 160,
+  child: MyWidget(data: data, size: const WideSize()),
+),
+
+// 大宽尺寸 (4x2) - 宽度填满屏幕
+SizedBox(
+  width: MediaQuery.of(context).size.width - 32,
+  height: 320,
+  child: MyWidget(data: data, size: const Wide2Size()),
+),
 ```
 
 ## Common Pitfalls
@@ -285,10 +300,12 @@ fontSize: size.getLargeFontSize() * 0.35
 // ❌ 错误 - 所有卡片都使用默认 MediumSize()
 MyWidget(data: data)
 
-// ✅ 正确
+// ✅ 正确 - 传递所有尺寸
 MyWidget(data: data, size: const SmallSize())
 MyWidget(data: data, size: const MediumSize())
 MyWidget(data: data, size: const LargeSize())
+MyWidget(data: data, size: const WideSize())
+MyWidget(data: data, size: const Wide2Size())
 ```
 
 ## Quick Fix Template
@@ -385,7 +402,9 @@ final itemSpacing = size.getSmallSpacing() * 2;  // 4/8/12
 - [ ] SmallSize (1x1) 显示正常，元素不过大
 - [ ] MediumSize (2x1) 显示正常
 - [ ] LargeSize (2x2) 显示正常，元素不过小
+- [ ] WideSize (4x1) 宽度正确填满屏幕（使用 `MediaQuery.of(context).size.width - 32`）
+- [ ] Wide2Size (4x2) 宽度正确填满屏幕，高度足够展示内容
 - [ ] 字体大小在不同尺寸下比例协调
 - [ ] 间距在不同尺寸下合理
 - [ ] 动画效果在不同尺寸下正常
-- [ ] 示例页面展示三种尺寸差异明显
+- [ ] 示例页面展示五种尺寸差异明显
