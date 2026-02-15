@@ -109,7 +109,7 @@ class ArticleListCardWidget extends StatefulWidget {
     super.key,
     required this.featuredArticle,
     required this.articles,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
     this.inline = false,
   });
 

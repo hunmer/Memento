@@ -19,7 +19,7 @@ class ActivityTodayPieChartCardWidget extends StatefulWidget {
     super.key,
     required this.tagStats,
     required this.totalDuration,
-    this.size = HomeWidgetSize.large3,
+    this.size = const LargeSize()3,
   });
 
   /// 从 props 创建实例（用于公共小组件系统）

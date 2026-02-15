@@ -36,7 +36,7 @@ class WeatherForecastCard extends StatefulWidget {
     required this.lowTemp,
     required this.temperatureHistory,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = MediumSize(),
   });
 
   /// 从属性数据创建组件

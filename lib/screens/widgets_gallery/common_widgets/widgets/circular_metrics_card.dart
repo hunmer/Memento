@@ -64,7 +64,7 @@ class CircularMetricsCardWidget extends StatefulWidget {
     required this.title,
     required this.metrics,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

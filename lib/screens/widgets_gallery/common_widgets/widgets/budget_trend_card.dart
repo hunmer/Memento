@@ -56,7 +56,7 @@ class BudgetTrendCardWidget extends StatefulWidget {
     required this.changePercent,
     required this.updateTime,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

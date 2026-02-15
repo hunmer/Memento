@@ -39,7 +39,7 @@ class TaskListCardWidget extends StatefulWidget {
     required this.items,
     required this.moreCount,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

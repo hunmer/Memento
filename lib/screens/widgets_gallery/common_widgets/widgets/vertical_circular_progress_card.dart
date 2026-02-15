@@ -21,7 +21,7 @@ import 'package:Memento/screens/widgets_gallery/common_widgets/models/vertical_c
 ///       // ... 其他6天
 ///     ],
 ///   ),
-///   size: HomeWidgetSize.large,
+///   size: const LargeSize(),
 /// )
 /// ```
 class VerticalCircularProgressCard extends StatefulWidget {

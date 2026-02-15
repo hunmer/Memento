@@ -51,7 +51,7 @@ class CardBarChartMonitor extends StatelessWidget {
     this.onTodayTap,
     this.onBarTap,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

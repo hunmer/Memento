@@ -51,7 +51,7 @@ class CheckinItemCardWidget extends StatelessWidget {
     final actualWidth = props['customWidth'] as int?;
     final actualHeight = props['customHeight'] as int?;
     final showHeatmap = size.isAtLeast(
-      HomeWidgetSize.medium,
+      const MediumSize(),
       actualWidth: actualWidth,
       actualHeight: actualHeight,
     );
@@ -164,7 +164,7 @@ class CheckinItemCardWidget extends StatelessWidget {
     // 根据尺寸决定使用哪个数据
     // large(2,2) 或更高尺寸：优先显示月数据
     if (size.isAtLeast(
-          HomeWidgetSize.large,
+          const LargeSize(),
           actualWidth: actualWidth,
           actualHeight: actualHeight,
         ) &&
@@ -174,7 +174,7 @@ class CheckinItemCardWidget extends StatelessWidget {
     }
     // medium(2,1) 或更高尺寸：显示周数据
     else if (size.isAtLeast(
-          HomeWidgetSize.medium,
+          const MediumSize(),
           actualWidth: actualWidth,
           actualHeight: actualHeight,
         ) &&

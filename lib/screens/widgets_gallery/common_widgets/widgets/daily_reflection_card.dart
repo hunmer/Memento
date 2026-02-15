@@ -34,7 +34,7 @@ class DailyReflectionCardWidget extends StatefulWidget {
     required this.question,
     this.darkBackgroundColor,
     this.primaryColor,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
     this.inline = false,
   });
 

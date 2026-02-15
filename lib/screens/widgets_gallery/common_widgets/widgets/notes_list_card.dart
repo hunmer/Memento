@@ -50,7 +50,7 @@ class NotesListCardWidget extends StatefulWidget {
     super.key,
     required this.notes,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -157,8 +157,8 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
   Widget _buildHeader(BuildContext context, bool isDark) {
     return Container(
       padding: widget.size.getPadding().copyWith(
-        top: widget.size == HomeWidgetSize.small ? 10 : 14,
-        bottom: widget.size == HomeWidgetSize.small ? 10 : 14,
+        top: widget.size == const SmallSize() ? 10 : 14,
+        bottom: widget.size == const SmallSize() ? 10 : 14,
       ),
       decoration: const BoxDecoration(
         color: Color(0xFFFFC107),
@@ -234,8 +234,8 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
             offset: Offset(0, 10 * (1 - itemAnimation.value)),
             child: Container(
               padding: widget.size.getPadding().copyWith(
-                top: widget.size == HomeWidgetSize.small ? 8 : 12,
-                bottom: widget.size == HomeWidgetSize.small ? 8 : 12,
+                top: widget.size == const SmallSize() ? 8 : 12,
+                bottom: widget.size == const SmallSize() ? 8 : 12,
               ),
               decoration: BoxDecoration(
                 border: hasDivider
@@ -265,7 +265,7 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                             note.title,
                             style: TextStyle(
                               color: isDark ? Colors.grey.shade100 : Colors.grey.shade900,
-                              fontSize: widget.size == HomeWidgetSize.small ? 13 : 15,
+                              fontSize: widget.size == const SmallSize() ? 13 : 15,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
                             ),
@@ -277,7 +277,7 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                             '${note.time} ${note.preview}',
                             style: TextStyle(
                               color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                              fontSize: widget.size == HomeWidgetSize.small ? 10 : 12,
+                              fontSize: widget.size == const SmallSize() ? 10 : 12,
                               height: 1.4,
                             ),
                             maxLines: 1,
@@ -292,13 +292,13 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
                           note.imageUrl!,
-                          width: widget.size == HomeWidgetSize.small ? 32 : 40,
-                          height: widget.size == HomeWidgetSize.small ? 32 : 40,
+                          width: widget.size == const SmallSize() ? 32 : 40,
+                          height: widget.size == const SmallSize() ? 32 : 40,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              width: widget.size == HomeWidgetSize.small ? 32 : 40,
-                              height: widget.size == HomeWidgetSize.small ? 32 : 40,
+                              width: widget.size == const SmallSize() ? 32 : 40,
+                              height: widget.size == const SmallSize() ? 32 : 40,
                               decoration: BoxDecoration(
                                 color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(8),

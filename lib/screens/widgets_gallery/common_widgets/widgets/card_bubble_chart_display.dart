@@ -73,7 +73,7 @@ class CardBubbleChartDisplay extends StatefulWidget {
     this.showTooltip = true,
     this.timeLabels = const ['11:00', '12:00', '13:00', '14:00', '15:00'],
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

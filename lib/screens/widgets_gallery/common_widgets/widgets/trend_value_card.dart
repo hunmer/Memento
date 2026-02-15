@@ -84,7 +84,7 @@ class TrendValueCardWidget extends StatefulWidget {
     this.trendLabel = 'vs last week',
     this.primaryColor,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

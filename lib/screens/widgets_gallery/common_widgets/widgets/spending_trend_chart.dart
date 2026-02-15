@@ -72,7 +72,7 @@ class SpendingTrendChartWidget extends StatefulWidget {
     required this.currentPoint,
     required this.maxAmount,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于小组件系统）
@@ -306,7 +306,7 @@ class _LegendItem extends StatelessWidget {
     required this.color,
     required this.label,
     required this.isDashed,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   @override
@@ -409,7 +409,7 @@ class _TrendLineChart extends StatelessWidget {
     required this.startLabel,
     required this.middleLabel,
     required this.endLabel,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   @override

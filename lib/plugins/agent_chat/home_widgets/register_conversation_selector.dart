@@ -58,7 +58,10 @@ Widget _renderConversationData(
   final conversationId = convData['id'] as String?;
 
   if (conversationId == null) {
-    return HomeWidget.buildErrorWidget(context, 'agent_chat_conversationNotFound'.tr);
+    return HomeWidget.buildErrorWidget(
+      context,
+      'agent_chat_conversationNotFound'.tr,
+    );
   }
 
   // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
@@ -80,9 +83,13 @@ Widget _renderConversationData(
 /// 构建会话小组件内容（获取最新数据）
 Widget _buildConversationWidget(BuildContext context, String conversationId) {
   // 从 PluginManager 获取最新的会话数据
-  final plugin = PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
+  final plugin =
+      PluginManager.instance.getPlugin('agent_chat') as AgentChatPlugin?;
   if (plugin == null) {
-    return HomeWidget.buildErrorWidget(context, 'agent_chat_pluginNotAvailable'.tr);
+    return HomeWidget.buildErrorWidget(
+      context,
+      'agent_chat_pluginNotAvailable'.tr,
+    );
   }
 
   // 查找对应会话
@@ -149,10 +156,7 @@ Widget _buildConversationWidget(BuildContext context, String conversationId) {
                 child: Center(
                   child: Text(
                     '暂无消息',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ),
               ),
@@ -188,10 +192,13 @@ Widget _buildConversationWidget(BuildContext context, String conversationId) {
                             const SizedBox(width: 4),
                             Text(
                               snapshot.data!.name,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                              style: Theme.of(
+                                context,
+                              ).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withOpacity(0.5),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -226,10 +233,7 @@ Future<AIAgent?> _getAgentById(String agentId) async {
 }
 
 /// 导航到选中的会话
-void _navigateToConversation(
-  BuildContext context,
-  SelectorResult result,
-) {
+void _navigateToConversation(BuildContext context, SelectorResult result) {
   final convData = result.data as Map<String, dynamic>;
   final conversationId = convData['id'] as String;
 

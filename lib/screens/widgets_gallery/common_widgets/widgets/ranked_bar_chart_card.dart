@@ -48,7 +48,7 @@ class RankedBarChartCardWidget extends StatefulWidget {
     required this.items,
     required this.footer,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   factory RankedBarChartCardWidget.fromProps(Map<String, dynamic> props, HomeWidgetSize size) {

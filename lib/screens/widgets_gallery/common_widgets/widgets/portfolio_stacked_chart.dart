@@ -84,7 +84,7 @@ class PortfolioStackedChartWidget extends StatefulWidget {
     required this.monthlyData,
     required this.monthLabels,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -320,7 +320,7 @@ class _StackedBarChart extends StatelessWidget {
         .map((d) => d.stocks + d.funds + d.bonds)
         .reduce((a, b) => a > b ? a : b);
 
-    final chartHeight = size == HomeWidgetSize.small ? 64.0 : 96.0;
+    final chartHeight = size == const SmallSize() ? 64.0 : 96.0;
 
     return SizedBox(
       height: chartHeight,
@@ -339,7 +339,7 @@ class _StackedBarChart extends StatelessWidget {
 
           return Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: size == HomeWidgetSize.small ? 1.0 : 1.5),
+              padding: EdgeInsets.symmetric(horizontal: size == const SmallSize() ? 1.0 : 1.5),
               child: _StackedBar(
                 data: data,
                 animation: barAnimation,

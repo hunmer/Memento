@@ -40,7 +40,7 @@ class TrendLineChartCardWrapper extends StatelessWidget {
     required this.timeLabels,
     required this.primaryColor,
     this.valueColor,
-    this.size = HomeWidgetSize.large,
+    this.size = const LargeSize(),
   });
 
   /// 从 props 创建实例

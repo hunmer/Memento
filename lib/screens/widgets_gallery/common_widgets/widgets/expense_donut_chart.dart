@@ -57,7 +57,7 @@ class ExpenseDonutChartWidget extends StatefulWidget {
     required this.totalUnit,
     required this.categories,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   factory ExpenseDonutChartWidget.fromProps(

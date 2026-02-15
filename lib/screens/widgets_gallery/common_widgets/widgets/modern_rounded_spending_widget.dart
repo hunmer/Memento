@@ -39,7 +39,7 @@ class ModernRoundedSpendingWidget extends StatefulWidget {
     this.categoryItems = const [],
     this.unit = '',
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）

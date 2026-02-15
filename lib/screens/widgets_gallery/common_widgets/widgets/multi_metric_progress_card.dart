@@ -47,86 +47,6 @@ class MetricProgressData {
     required this.unit,
   });
 
-  /// 根据尺寸获取标题字体大小
-  double getTitleFontSize(HomeWidgetSize size) {
-    switch (size) {
-      case HomeWidgetSize.small:
-        return 11;
-      case HomeWidgetSize.medium:
-        return 13;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 15;
-      case HomeWidgetSize.wide:
-        return 13;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 15;
-      case HomeWidgetSize.custom:
-        return 13;
-    }
-  }
-
-  /// 根据尺寸获取副标题字体大小
-  double getSubtitleFontSize(HomeWidgetSize size) {
-    switch (size) {
-      case HomeWidgetSize.small:
-        return 9;
-      case HomeWidgetSize.medium:
-        return 11;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 12;
-      case HomeWidgetSize.wide:
-        return 11;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 12;
-      case HomeWidgetSize.custom:
-        return 11;
-    }
-  }
-
-  /// 根据尺寸获取数值字体大小
-  double getValueFontSize(HomeWidgetSize size) {
-    switch (size) {
-      case HomeWidgetSize.small:
-        return 14;
-      case HomeWidgetSize.medium:
-        return 18;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 20;
-      case HomeWidgetSize.wide:
-        return 18;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 20;
-      case HomeWidgetSize.custom:
-        return 18;
-    }
-  }
-
-  /// 根据尺寸获取图标容器大小
-  double getIconContainerSize(HomeWidgetSize size) {
-    switch (size) {
-      case HomeWidgetSize.small:
-        return 28;
-      case HomeWidgetSize.medium:
-        return 36;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 44;
-      case HomeWidgetSize.wide:
-        return 36;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 44;
-      case HomeWidgetSize.custom:
-        return 36;
-    }
-  }
-
   /// 从 JSON 创建（用于公共小组件系统）
   factory MetricProgressData.fromJson(Map<String, dynamic> json) {
     return MetricProgressData(
@@ -173,7 +93,7 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
     required this.trackers,
     this.backgroundColor,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -194,6 +114,7 @@ class MultiMetricProgressCardWidget extends StatefulWidget {
       trackers: trackersList,
       backgroundColor: bgColor,
       inline: props['inline'] as bool? ?? false,
+      size: size,
     );
   }
 
@@ -344,7 +265,7 @@ class _MetricProgressItem extends StatelessWidget {
                         data.title,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: data.getTitleFontSize(size),
+                          fontSize: size.getTitleFontSize() * 0.55,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.5,
                         ),
@@ -354,7 +275,7 @@ class _MetricProgressItem extends StatelessWidget {
                         data.subtitle,
                         style: TextStyle(
                           color: Colors.white70,
-                          fontSize: data.getSubtitleFontSize(size),
+                          fontSize: size.getSubtitleFontSize() * 0.75,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -370,7 +291,7 @@ class _MetricProgressItem extends StatelessWidget {
                       fractionDigits: data.value % 1 != 0 ? 2 : 0,
                       textStyle: TextStyle(
                         color: Colors.white,
-                        fontSize: data.getValueFontSize(size),
+                        fontSize: size.getTitleFontSize() * 0.8,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
                         height: 1.0,
@@ -381,7 +302,7 @@ class _MetricProgressItem extends StatelessWidget {
                       data.unit,
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: data.getSubtitleFontSize(size),
+                        fontSize: size.getSubtitleFontSize() * 0.75,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -414,8 +335,9 @@ class _IconWithProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final containerSize = _getContainerSize();
     final iconSize = size.getIconSize();
+    final containerSize = iconSize * 1.2;  // 图标容器 = 图标大小 * 1.2
+    final strokeWidth = size.getStrokeWidth() * 0.4;  // 进度条粗细 = strokeWidth * 0.4
 
     return SizedBox(
       width: containerSize,
@@ -428,51 +350,13 @@ class _IconWithProgress extends StatelessWidget {
               progress: progress / 100 * animation.value,
               progressColor: progressColor,
               backgroundColor: Colors.white.withOpacity(0.2),
-              strokeWidth: _getStrokeWidth(),
+              strokeWidth: strokeWidth,
             ),
             child: Center(child: _renderIcon(emoji, size: iconSize)),
           );
         },
       ),
     );
-  }
-
-  double _getContainerSize() {
-    switch (size) {
-      case HomeWidgetSize.small:
-        return 28;
-      case HomeWidgetSize.medium:
-        return 36;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 44;
-      case HomeWidgetSize.wide:
-        return 36;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 44;
-      case HomeWidgetSize.custom:
-        return 36;
-    }
-  }
-
-  double _getStrokeWidth() {
-    switch (size) {
-      case HomeWidgetSize.small:
-        return 3.0;
-      case HomeWidgetSize.medium:
-        return 3.5;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 4.0;
-      case HomeWidgetSize.wide:
-        return 3.5;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 4.0;
-      case HomeWidgetSize.custom:
-        return 3.5;
-    }
   }
 }
 

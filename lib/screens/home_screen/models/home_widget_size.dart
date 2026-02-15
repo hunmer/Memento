@@ -1,458 +1,492 @@
 import 'package:flutter/material.dart';
 
-/// 主页小组件尺寸枚举
-enum HomeWidgetSize {
-  /// 1x1 小图标组件
-  small(1, 1),
-
-  /// 2x1 横向卡片
-  medium(2, 1),
-
-  /// 2x2 大卡片
-  large(2, 2),
-
-  /// 2x3 高卡片（宽度2，高度3）
-  large3(2, 3),
-
-  /// 4x1 宽屏卡片（占满所有宽度）
-  wide(4, 1),
-
-  /// 4x2 全宽卡片（占满所有宽度，高度2）
-  wide2(4, 2),
-
-  /// 4x3 全宽卡片（占满所有宽度，高度3）
-  wide3(4, 3),
-
-  /// 自定义尺寸（支持任意宽高，通过 customWidth/customHeight 设置）
-  custom(-1, -1);
-
+/// 主页小组件尺寸配置基类
+abstract class HomeWidgetSize {
   /// 宽度（占用的网格列数）
   final int width;
 
   /// 高度（占用的网格行数）
   final int height;
 
-  const HomeWidgetSize(this.width, this.height);
+  /// 整体缩放偏移（百分比，默认为 1.0）
+  final double scale;
 
-  /// 从宽高转换为枚举
+  /// 内边距偏移（百分比）
+  final double padding;
+
+  /// 间距偏移（百分比）
+  final double spacing;
+
+  /// 字体大小偏移（百分比）
+  final double fontSize;
+
+  /// 图标大小偏移（百分比）
+  final double iconSize;
+
+  /// 线条粗细偏移（百分比）
+  final double strokeWidth;
+
+  const HomeWidgetSize({
+    required this.width,
+    required this.height,
+    this.scale = 1.0,
+    this.padding = 1.0,
+    this.spacing = 1.0,
+    this.fontSize = 1.0,
+    this.iconSize = 1.0,
+    this.strokeWidth = 1.0,
+  });
+
+  /// 向后兼容的静态 getter，支持 HomeWidgetSize.small 等访问方式
+  static HomeWidgetSize get small => const SmallSize();
+  static HomeWidgetSize get medium => const MediumSize();
+  static HomeWidgetSize get large => const LargeSize();
+  static HomeWidgetSize get large3 => const Large3Size();
+  static HomeWidgetSize get wide => const WideSize();
+  static HomeWidgetSize get wide2 => const Wide2Size();
+  static HomeWidgetSize get wide3 => const Wide3Size();
+  static HomeWidgetSize get custom => const CustomSize(width: -1, height: -1);
+
+  /// 从宽高转换为尺寸实例
   static HomeWidgetSize fromSize(int width, int height) {
-    return HomeWidgetSize.values.firstWhere(
+    return _allSizes.firstWhere(
       (size) => size.width == width && size.height == height,
-      orElse: () => HomeWidgetSize.large,
+      orElse: () => const LargeSize(),
     );
   }
 
   /// 转换为 JSON
-  ///
-  /// 对于 custom 尺寸，需要传入 [actualWidth] 和 [actualHeight] 参数
-  /// 来保存实际的宽高值（因为 custom 的 width/height 固定为 -1）
-  Map<String, dynamic> toJson({int? actualWidth, int? actualHeight}) {
-    // 如果是 custom 尺寸且提供了实际宽高，保存实际值
-    if (this == HomeWidgetSize.custom) {
-      return {'width': actualWidth ?? width, 'height': actualHeight ?? height};
-    }
+  Map<String, dynamic> toJson() {
     return {'width': width, 'height': height};
   }
 
   /// 从 JSON 加载
-  ///
-  /// 自动检测 custom 尺寸：如果宽高不匹配任何预定义尺寸，
-  /// 且 JSON 中包含有效的宽高值，则返回 HomeWidgetSize.custom，
-  /// 并将实际宽高保存在可选参数中供调用方使用。
-  ///
-  /// 返回值：如果是 custom 尺寸，返回值可能包含额外的实际宽高信息
-  static HomeWidgetSize fromJson(
-    Map<String, dynamic> json, {
-    int? outActualWidth,
-    int? outActualHeight,
-  }) {
+  static HomeWidgetSize fromJson(Map<String, dynamic> json) {
     final width = json['width'] as int;
     final height = json['height'] as int;
 
-    // 尝试匹配预定义尺寸
-    for (final size in HomeWidgetSize.values) {
+    for (final size in _allSizes) {
       if (size.width == width && size.height == height) {
         return size;
       }
     }
-
-    // 不匹配任何预定义尺寸，返回 custom
-    // 注意：由于 enum 的限制，这里仍然返回 custom(-1, -1)
-    // 调用方应该使用 JSON 中的原始宽高值
-    return HomeWidgetSize.custom;
-  }
-
-  /// 从 JSON 加载并返回实际宽高
-  ///
-  /// 这是一个辅助方法，用于从 JSON 中获取尺寸和实际宽高
-  /// 返回一个包含 size 和可选实际宽高的 Map
-  static Map<String, dynamic> fromJsonWithData(Map<String, dynamic> json) {
-    final width = json['width'] as int;
-    final height = json['height'] as int;
-
-    // 尝试匹配预定义尺寸
-    for (final size in HomeWidgetSize.values) {
-      if (size.width == width && size.height == height) {
-        return {'size': size};
-      }
-    }
-
-    // 不匹配任何预定义尺寸，返回 custom 并记录实际宽高
-    return {
-      'size': HomeWidgetSize.custom,
-      'actualWidth': width,
-      'actualHeight': height,
-    };
+    return const LargeSize();
   }
 
   /// 判断当前尺寸是否至少与指定尺寸一样大
-  ///
-  /// 比较逻辑：宽度 >= other.width 且高度 >= other.height
-  ///
-  /// 示例：
-  /// ```dart
-  /// // 普通尺寸比较
-  /// HomeWidgetSize.large.isAtLeast(HomeWidgetSize.medium); // true
-  /// HomeWidgetSize.small.isAtLeast(HomeWidgetSize.medium); // false
-  ///
-  /// // custom 尺寸比较（需要传入实际宽高）
-  /// HomeWidgetSize.custom.isAtLeast(
-  ///   HomeWidgetSize.medium,
-  ///   actualWidth: 3,
-  ///   actualHeight: 2,
-  /// ); // true (3 >= 2 && 2 >= 1)
-  /// ```
-  bool isAtLeast(HomeWidgetSize other, {int? actualWidth, int? actualHeight}) {
-    final thisWidth =
-        this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
-    final thisHeight =
-        this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
-    return thisWidth >= other.width && thisHeight >= other.height;
+  bool isAtLeast(HomeWidgetSize other) {
+    return width >= other.width && height >= other.height;
   }
 
   /// 判断当前尺寸是否大于指定尺寸
-  ///
-  /// 比较逻辑：宽度 > other.width 或高度 > other.height
-  bool isLargerThan(
-    HomeWidgetSize other, {
-    int? actualWidth,
-    int? actualHeight,
-  }) {
-    final thisWidth =
-        this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
-    final thisHeight =
-        this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
-    return thisWidth > other.width || thisHeight > other.height;
+  bool isLargerThan(HomeWidgetSize other) {
+    return width > other.width || height > other.height;
   }
 
   /// 判断当前尺寸是否等于指定尺寸
-  bool isEqualTo(HomeWidgetSize other, {int? actualWidth, int? actualHeight}) {
-    final thisWidth =
-        this == HomeWidgetSize.custom ? (actualWidth ?? width) : width;
-    final thisHeight =
-        this == HomeWidgetSize.custom ? (actualHeight ?? height) : height;
-    return thisWidth == other.width && thisHeight == other.height;
+  bool isEqualTo(HomeWidgetSize other) {
+    return width == other.width && height == other.height;
   }
 
   /// 获取内边距
   EdgeInsets getPadding() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return const EdgeInsets.all(8);
-      case HomeWidgetSize.medium:
-        return const EdgeInsets.all(12);
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return const EdgeInsets.all(16);
-      case HomeWidgetSize.wide:
-        return const EdgeInsets.all(12);
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return const EdgeInsets.all(16);
-      case HomeWidgetSize.custom:
-        return const EdgeInsets.all(12);
+    double basePadding;
+    if (this is SmallSize) {
+      basePadding = 8;
+    } else if (this is MediumSize) {
+      basePadding = 12;
+    } else if (this is WideSize) {
+      basePadding = 12;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      basePadding = 16;
     }
+    return EdgeInsets.all(basePadding * padding);
   }
 
   /// 获取标题和列表之间的间距
   double getTitleSpacing() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 16;
-      case HomeWidgetSize.medium:
-        return 20;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 24;
-      case HomeWidgetSize.wide:
-        return 20;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 24;
-      case HomeWidgetSize.custom:
-        return 20;
+    double baseSpacing;
+    if (this is SmallSize) {
+      baseSpacing = 16;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSpacing = 20;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSpacing = 24;
     }
+    return baseSpacing * spacing;
   }
 
   /// 获取高度约束
   BoxConstraints getHeightConstraints() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return const BoxConstraints(minHeight: 150, maxHeight: 250);
-      case HomeWidgetSize.medium:
-        return const BoxConstraints(minHeight: 200, maxHeight: 350);
-      case HomeWidgetSize.large:
-        return const BoxConstraints(minHeight: 250, maxHeight: 450);
-      case HomeWidgetSize.large3:
-        return const BoxConstraints(minHeight: 350, maxHeight: 600);
-      case HomeWidgetSize.wide:
-        return const BoxConstraints(minHeight: 200, maxHeight: 350);
-      case HomeWidgetSize.wide2:
-        return const BoxConstraints(minHeight: 250, maxHeight: 450);
-      case HomeWidgetSize.wide3:
-        return const BoxConstraints(minHeight: 350, maxHeight: 600);
-      case HomeWidgetSize.custom:
-        return const BoxConstraints(minHeight: 200, maxHeight: 350);
+    double minHeight, maxHeight;
+    if (this is SmallSize) {
+      minHeight = 150;
+      maxHeight = 250;
+    } else if (this is MediumSize || this is WideSize) {
+      minHeight = 200;
+      maxHeight = 350;
+    } else if (this is LargeSize || this is Wide2Size) {
+      minHeight = 250;
+      maxHeight = 450;
+    } else {
+      // Large3, Wide3
+      minHeight = 350;
+      maxHeight = 600;
     }
+    return BoxConstraints(
+      minHeight: minHeight * scale,
+      maxHeight: maxHeight * scale,
+    );
   }
 
   /// 获取列表项之间的间距
   double getItemSpacing() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 6;
-      case HomeWidgetSize.medium:
-        return 8;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 12;
-      case HomeWidgetSize.wide:
-        return 8;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 12;
-      case HomeWidgetSize.custom:
-        return 8;
+    double baseSpacing;
+    if (this is SmallSize) {
+      baseSpacing = 6;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSpacing = 8;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSpacing = 12;
     }
+    return baseSpacing * spacing;
   }
 
   /// 获取图标大小
   double getIconSize() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 18;
-      case HomeWidgetSize.medium:
-        return 24;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 28;
-      case HomeWidgetSize.wide:
-        return 24;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 28;
-      case HomeWidgetSize.custom:
-        return 24;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 18;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 24;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 28;
     }
+    return baseSize * iconSize;
   }
 
   /// 获取大字体大小
   double getLargeFontSize() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 36;
-      case HomeWidgetSize.medium:
-        return 48;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 56;
-      case HomeWidgetSize.wide:
-        return 48;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 56;
-      case HomeWidgetSize.custom:
-        return 48;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 36;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 48;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 56;
     }
+    return baseSize * fontSize;
   }
 
   /// 获取标题字体大小
   double getTitleFontSize() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 16;
-      case HomeWidgetSize.medium:
-        return 24;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 28;
-      case HomeWidgetSize.wide:
-        return 24;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 28;
-      case HomeWidgetSize.custom:
-        return 24;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 16;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 24;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 28;
     }
+    return baseSize * fontSize;
   }
 
   /// 获取副标题字体大小
   double getSubtitleFontSize() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 12;
-      case HomeWidgetSize.medium:
-        return 14;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 16;
-      case HomeWidgetSize.wide:
-        return 14;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 16;
-      case HomeWidgetSize.custom:
-        return 14;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 12;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 14;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 16;
     }
+    return baseSize * fontSize;
   }
 
   /// 获取小间距（用于紧密元素之间）
   double getSmallSpacing() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 2;
-      case HomeWidgetSize.medium:
-        return 4;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 6;
-      case HomeWidgetSize.wide:
-        return 4;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 6;
-      case HomeWidgetSize.custom:
-        return 4;
+    double baseSpacing;
+    if (this is SmallSize) {
+      baseSpacing = 2;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSpacing = 4;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSpacing = 6;
     }
+    return baseSpacing * spacing;
   }
 
   /// 获取图例指示器宽度
   double getLegendIndicatorWidth() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 16;
-      case HomeWidgetSize.medium:
-        return 24;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 32;
-      case HomeWidgetSize.wide:
-        return 24;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 32;
-      case HomeWidgetSize.custom:
-        return 24;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 16;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 24;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 32;
     }
+    return baseSize * scale;
   }
 
   /// 获取图例指示器高度
   double getLegendIndicatorHeight() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 8;
-      case HomeWidgetSize.medium:
-        return 12;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 16;
-      case HomeWidgetSize.wide:
-        return 12;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 16;
-      case HomeWidgetSize.custom:
-        return 12;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 8;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 12;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 16;
     }
+    return baseSize * scale;
   }
 
   /// 获取图例字体大小
   double getLegendFontSize() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 10;
-      case HomeWidgetSize.medium:
-        return 12;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 14;
-      case HomeWidgetSize.wide:
-        return 12;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 14;
-      case HomeWidgetSize.custom:
-        return 12;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 10;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 12;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 14;
     }
+    return baseSize * fontSize;
   }
 
   /// 获取柱状图柱子宽度
   double getBarWidth() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 12;
-      case HomeWidgetSize.medium:
-        return 16;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 20;
-      case HomeWidgetSize.wide:
-        return 16;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 20;
-      case HomeWidgetSize.custom:
-        return 16;
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 12;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 16;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSize = 20;
     }
+    return baseSize * scale;
   }
 
   /// 获取柱子之间的间距
   double getBarSpacing() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 0.5;
-      case HomeWidgetSize.medium:
-        return 1;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 1.5;
-      case HomeWidgetSize.wide:
-        return 1;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 1.5;
-      case HomeWidgetSize.custom:
-        return 1;
+    double baseSpacing;
+    if (this is SmallSize) {
+      baseSpacing = 0.5;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSpacing = 1.0;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseSpacing = 1.5;
     }
+    return baseSpacing * spacing;
   }
 
   /// 获取进度条线条粗细
   double getStrokeWidth() {
-    switch (this) {
-      case HomeWidgetSize.small:
-        return 6.0;
-      case HomeWidgetSize.medium:
-        return 8.0;
-      case HomeWidgetSize.large:
-      case HomeWidgetSize.large3:
-        return 10.0;
-      case HomeWidgetSize.wide:
-        return 8.0;
-      case HomeWidgetSize.wide2:
-      case HomeWidgetSize.wide3:
-        return 10.0;
-      case HomeWidgetSize.custom:
-        return 8.0;
+    double baseWidth;
+    if (this is SmallSize) {
+      baseWidth = 6.0;
+    } else if (this is MediumSize || this is WideSize) {
+      baseWidth = 8.0;
+    } else {
+      // Large, Large3, Wide2, Wide3
+      baseWidth = 10.0;
     }
+    return baseWidth * strokeWidth;
   }
 }
+
+/// 1x1 小图标组件
+class SmallSize extends HomeWidgetSize {
+  const SmallSize({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 1,
+          height: 1,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 2x1 横向卡片
+class MediumSize extends HomeWidgetSize {
+  const MediumSize({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 2,
+          height: 1,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 2x2 大卡片
+class LargeSize extends HomeWidgetSize {
+  const LargeSize({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 2,
+          height: 2,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 2x3 高卡片（宽度2，高度3）
+class Large3Size extends HomeWidgetSize {
+  const Large3Size({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 2,
+          height: 3,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 4x1 宽屏卡片（占满所有宽度）
+class WideSize extends HomeWidgetSize {
+  const WideSize({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 4,
+          height: 1,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 4x2 全宽卡片（占满所有宽度，高度2）
+class Wide2Size extends HomeWidgetSize {
+  const Wide2Size({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 4,
+          height: 2,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 4x3 全宽卡片（占满所有宽度，高度3）
+class Wide3Size extends HomeWidgetSize {
+  const Wide3Size({
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: 4,
+          height: 3,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 自定义尺寸（支持任意宽高）
+class CustomSize extends HomeWidgetSize {
+  const CustomSize({
+    required int width,
+    required int height,
+    double scale = 1.0,
+    double padding = 1.0,
+    double spacing = 1.0,
+    double fontSize = 1.0,
+    double iconSize = 1.0,
+    double strokeWidth = 1.0,
+  }) : super(
+          width: width,
+          height: height,
+          scale: scale,
+          padding: padding,
+          spacing: spacing,
+          fontSize: fontSize,
+          iconSize: iconSize,
+          strokeWidth: strokeWidth,
+        );
+}
+
+/// 所有尺寸的默认实例列表
+final List<HomeWidgetSize> _allSizes = const [
+  SmallSize(),
+  MediumSize(),
+  LargeSize(),
+  Large3Size(),
+  WideSize(),
+  Wide2Size(),
+  Wide3Size(),
+];
