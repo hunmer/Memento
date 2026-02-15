@@ -1145,16 +1145,18 @@ class HomeScreenView extends StatelessWidget {
         return 'screens_mediumSize'.tr;
       case const LargeSize():
         return 'screens_largeSize'.tr;
-      case const LargeSize()3:
+      case const Large3Size():
         return 'screens_large3Size'.tr;
       case const WideSize():
         return 'screens_wideSize'.tr;
-      case const WideSize()2:
+      case const Wide2Size():
         return 'screens_wide2Size'.tr;
-      case const WideSize()3:
+      case const Wide3Size():
         return 'screens_wide3Size'.tr;
       case const CustomSize(width: -1, height: -1):
         return 'screens_customSize'.tr;
+      default:
+        return 'screens_mediumSize'.tr;
     }
   }
 

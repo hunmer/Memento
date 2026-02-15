@@ -3,6 +3,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/routing/route_definition.dart';
 import 'package:Memento/screens/routing/route_helpers.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/activity/screens/activity_edit_screen.dart';
 import 'package:Memento/plugins/activity/screens/activity_weekly_config_screen.dart';
 import 'package:Memento/plugins/activity/screens/activity_daily_config_screen.dart';
 import 'package:Memento/plugins/activity/screens/tag_statistics_screen.dart';

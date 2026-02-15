@@ -70,12 +70,12 @@ class NodesHomeWidgets {
         description: 'nodes_notebookListDescription'.tr,
         icon: Icons.view_list,
         color: Colors.amber,
-        defaultSize: const WideSize()2,
+        defaultSize: const Wide2Size(),
         supportedSizes: [
           const LargeSize(), // 2x2
-          const LargeSize()3, // 2x3
-          const WideSize()2, // 4x2
-          const WideSize()3, // 4x3
+          const Large3Size(), // 2x3
+          const Wide2Size(), // 4x2
+          const Wide3Size(), // 4x3
         ],
         category: 'home_categoryTools'.tr,
         selectorId: 'nodes.notebook',

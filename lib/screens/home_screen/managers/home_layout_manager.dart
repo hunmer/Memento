@@ -6,8 +6,7 @@ import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
 import 'package:Memento/screens/home_screen/models/layout_config.dart';
-import 'package:super_cupertino_navigation_bar/utils/transitionable_navigation_bar.dart'
-    as HomeWidgetSize;
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 主页布局管理器
 ///
@@ -543,13 +542,15 @@ class HomeLayoutManager extends ChangeNotifier {
     if (a.size != b.size) {
       return false;
     }
-    if (a.size != const CustomSize(width: -1, height: -1)) {
+    // 如果不是 CustomSize，直接返回 true
+    if (a.size is! CustomSize) {
       return true;
     }
-    final aw = (a.config['customWidth'] as int?) ?? 2;
-    final ah = (a.config['customHeight'] as int?) ?? 2;
-    final bw = (b.config['customWidth'] as int?) ?? 2;
-    final bh = (b.config['customHeight'] as int?) ?? 2;
+    // 对于 CustomSize，需要检查配置中的宽高
+    final aw = (a.config['customWidth'] as int?) ?? a.size.width;
+    final ah = (a.config['customHeight'] as int?) ?? a.size.height;
+    final bw = (b.config['customWidth'] as int?) ?? b.size.width;
+    final bh = (b.config['customHeight'] as int?) ?? b.size.height;
     return aw == bw && ah == bh;
   }
 
