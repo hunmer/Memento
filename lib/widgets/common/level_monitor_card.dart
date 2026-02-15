@@ -226,13 +226,19 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
 
           // 分数和进度条在同一行
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               // 当前分数和状态
-              _buildScoreSection(isDark, primaryColor),
+              Flexible(
+                flex: 3,
+                child: _buildScoreSection(isDark, primaryColor),
+              ),
+              const SizedBox(width: 8),
               // 每周进度条靠右
-              _buildWeeklyBars(isDark, primaryColor),
+              Flexible(
+                flex: 7,
+                child: _buildWeeklyBars(isDark, primaryColor),
+              ),
             ],
           ),
         ],
@@ -241,35 +247,45 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
   }
 
   Widget _buildHeader(bool isDark, Color primaryColor, Color surfaceColor) {
+    final iconSize = widget.size.getIconSize();
+    final containerSize = iconSize * widget.size.iconContainerScale;
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: surfaceColor,
-                shape: BoxShape.circle,
+        // 左侧图标和标题区域
+        Expanded(
+          child: Row(
+            children: [
+              Container(
+                width: containerSize,
+                height: containerSize,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: primaryColor,
+                  size: iconSize,
+                ),
               ),
-              child: Icon(
-                widget.icon,
-                color: primaryColor,
-                size: 20,
+              SizedBox(width: widget.size.getItemSpacing()),
+              Flexible(
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: widget.size.getTitleFontSize(),
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.grey.shade900,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            SizedBox(width: widget.size.getItemSpacing()),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : Colors.grey.shade900,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+        // Today 按钮
         InkWell(
           onTap: widget.onTodayTap,
           borderRadius: BorderRadius.circular(8),
@@ -283,7 +299,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                 Text(
                   'Today',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: widget.size.getLegendFontSize(),
                     fontWeight: FontWeight.w400,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                   ),
@@ -291,7 +307,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
                 SizedBox(width: widget.size.getItemSpacing()),
                 Icon(
                   Icons.chevron_right,
-                  size: 20,
+                  size: iconSize * 0.8,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                 ),
               ],
@@ -303,77 +319,117 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
   }
 
   Widget _buildScoreSection(bool isDark, Color primaryColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
+    final scoreFontSize = widget.size.getLargeFontSize() * 0.7;
+    final unitFontSize = widget.size.getLargeFontSize() * 0.35;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                AnimatedBuilder(
-                  animation: _scoreAnimation,
-                  builder: (context, child) {
-                    return AnimatedFlipCounter(
-                      value: _scoreAnimation.value,
-                      fractionDigits: 1,
-                      textStyle: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.grey.shade900,
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: widget.size.getItemSpacing()),
-                Padding(
-                  padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
-                  child: Text(
-                    widget.scoreUnit,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? Colors.white : Colors.grey.shade900,
-                    ),
+            AnimatedBuilder(
+              animation: _scoreAnimation,
+              builder: (context, child) {
+                return AnimatedFlipCounter(
+                  value: _scoreAnimation.value,
+                  fractionDigits: 1,
+                  textStyle: TextStyle(
+                    fontSize: scoreFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.grey.shade900,
                   ),
-                ),
-              ],
+                );
+              },
             ),
-            SizedBox(height: widget.size.getItemSpacing()),
-            Text(
-              widget.status,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-                color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            SizedBox(width: widget.size.getItemSpacing()),
+            Padding(
+              padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
+              child: Text(
+                widget.scoreUnit,
+                style: TextStyle(
+                  fontSize: unitFontSize,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white : Colors.grey.shade900,
+                ),
               ),
             ),
           ],
+        ),
+        SizedBox(height: widget.size.getItemSpacing()),
+        Flexible(
+          child: Text(
+            widget.status,
+            style: TextStyle(
+              fontSize: widget.size.getSubtitleFontSize(),
+              fontWeight: FontWeight.w400,
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildWeeklyBars(bool isDark, Color primaryColor) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(widget.weeklyData.length, (index) {
-        final data = widget.weeklyData[index];
-        return _WeeklyBar(
-          day: data.day.substring(0, 1), // 取首字母
-          value: data.value,
-          animation: _barAnimations[index],
-          isSelected: data.isSelected,
-          primaryColor: primaryColor,
-          isDark: isDark,
-          onTap: () => widget.onBarTap?.call(index, data),
-          size: widget.size,
+    // 计算所有柱子的总宽度
+    final barWidth = widget.size.getBarWidth();
+    final barSpacing = widget.size.getItemSpacing();
+    final totalBarWidth = (barWidth + barSpacing) * widget.weeklyData.length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+
+        // 如果总宽度不超过最大宽度，不需要滚动
+        if (totalBarWidth <= maxWidth) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: List.generate(widget.weeklyData.length, (index) {
+              final data = widget.weeklyData[index];
+              return _WeeklyBar(
+                day: data.day.substring(0, 1),
+                value: data.value,
+                animation: _barAnimations[index],
+                isSelected: data.isSelected,
+                primaryColor: primaryColor,
+                isDark: isDark,
+                onTap: () => widget.onBarTap?.call(index, data),
+                size: widget.size,
+              );
+            }),
+          );
+        }
+
+        // 需要滚动，设置固定宽度以触发滚动
+        return SizedBox(
+          width: maxWidth,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(widget.weeklyData.length, (index) {
+                final data = widget.weeklyData[index];
+                return _WeeklyBar(
+                  day: data.day.substring(0, 1),
+                  value: data.value,
+                  animation: _barAnimations[index],
+                  isSelected: data.isSelected,
+                  primaryColor: primaryColor,
+                  isDark: isDark,
+                  onTap: () => widget.onBarTap?.call(index, data),
+                  size: widget.size,
+                );
+              }),
+            ),
+          ),
         );
-      }),
+      },
     );
   }
 }
@@ -405,6 +461,8 @@ class _WeeklyBar extends StatelessWidget {
     final backgroundColor = isDark
         ? const Color(0xFF374151)
         : const Color(0xFFE5E7EB);
+    final barWidth = size.getBarWidth();
+    final barHeight = size.getLargeFontSize() * 1.15;
 
     return AnimatedBuilder(
       animation: animation,
@@ -418,8 +476,8 @@ class _WeeklyBar extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 14,
-                  height: 64,
+                  width: barWidth,
+                  height: barHeight,
                   decoration: BoxDecoration(
                     color: backgroundColor,
                     borderRadius: BorderRadius.circular(12),
@@ -429,7 +487,7 @@ class _WeeklyBar extends StatelessWidget {
                     alignment: Alignment.bottomCenter,
                     child: Container(
                       width: double.infinity,
-                      height: 64 * animation.value,
+                      height: barHeight * animation.value,
                       decoration: BoxDecoration(
                         color: primaryColor,
                         borderRadius: BorderRadius.circular(12),
@@ -441,7 +499,7 @@ class _WeeklyBar extends StatelessWidget {
                 Text(
                   day,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: size.getLegendFontSize(),
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     color: isSelected
                         ? (isDark ? Colors.white : Colors.grey.shade900)
