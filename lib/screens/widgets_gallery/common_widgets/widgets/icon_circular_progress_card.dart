@@ -49,15 +49,17 @@ class IconCircularProgressCardWidget extends StatefulWidget {
   ) {
     return IconCircularProgressCardWidget(
       progress: (props['progress'] as num?)?.toDouble() ?? 0.0,
-      icon: props['icon'] is IconData
-          ? props['icon'] as IconData
-          : Icons.circle_outlined,
+      icon:
+          props['icon'] is IconData
+              ? props['icon'] as IconData
+              : Icons.circle_outlined,
       title: props['title'] as String? ?? '',
       subtitle: props['subtitle'] as String? ?? '',
       showNotification: props['showNotification'] as bool? ?? false,
-      progressColor: props['progressColor'] != null
-          ? Color(props['progressColor'] as int)
-          : null,
+      progressColor:
+          props['progressColor'] != null
+              ? Color(props['progressColor'] as int)
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -113,11 +115,10 @@ class _IconCircularProgressCardWidgetState
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
-    final primaryColor = widget.progressColor ??
-        Theme.of(context).colorScheme.primary;
-    final trackColor = isDark
-        ? const Color(0xFF374151)
-        : const Color(0xFFEBF8FF);
+    final primaryColor =
+        widget.progressColor ?? Theme.of(context).colorScheme.primary;
+    final trackColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFEBF8FF);
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -146,11 +147,7 @@ class _IconCircularProgressCardWidgetState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // 圆形进度条
-                    _buildCircularProgress(
-                      primaryColor,
-                      trackColor,
-                      isDark,
-                    ),
+                    _buildCircularProgress(primaryColor, trackColor, isDark),
                     // 标题和副标题
                     _buildTextInfo(isDark),
                   ],
@@ -169,63 +166,79 @@ class _IconCircularProgressCardWidgetState
     Color trackColor,
     bool isDark,
   ) {
-    return SizedBox(
-      width: 60,
-      height: 60,
-      child: Stack(
-        children: [
-          // 进度圆环
-          Transform.rotate(
-            angle: -90 * math.pi / 180,
-            child: CustomPaint(
-              size: const Size(60, 60),
-              painter: _IconCircularProgressPainter(
-                progress: widget.progress * _progressAnimation.value,
-                progressColor: primaryColor,
-                trackColor: trackColor,
-                strokeWidth: 10,
+    final strokeWidth =
+        widget.size.getStrokeWidth() * widget.size.progressStrokeScale;
+    final iconSize = widget.size.getIconSize() * 0.8;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 根据尺寸类型调整圆环比例
+        final scale =
+            widget.size is WideSize || widget.size is Wide2Size ? 0.3 : 0.6;
+        final availableSize =
+            constraints.maxWidth < constraints.maxHeight
+                ? constraints.maxWidth
+                : constraints.maxHeight;
+        final progressSize = availableSize * scale;
+
+        return SizedBox(
+          width: progressSize,
+          height: progressSize,
+          child: Stack(
+            children: [
+              // 进度圆环
+              Transform.rotate(
+                angle: -90 * math.pi / 180,
+                child: CustomPaint(
+                  size: Size(progressSize, progressSize),
+                  painter: _IconCircularProgressPainter(
+                    progress: widget.progress * _progressAnimation.value,
+                    progressColor: primaryColor,
+                    trackColor: trackColor,
+                    strokeWidth: strokeWidth,
+                  ),
+                ),
               ),
-            ),
+              // 中心图标
+              Center(child: _buildIconWithNotification(isDark, iconSize)),
+            ],
           ),
-          // 中心图标
-          Center(
-            child: _buildIconWithNotification(isDark),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   /// 构建带通知点的图标
-  Widget _buildIconWithNotification(bool isDark) {
+  Widget _buildIconWithNotification(bool isDark, double iconSize) {
     final borderColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final notificationSize = iconSize * 0.4;
 
     return SizedBox(
-      width: 22,
-      height: 22,
+      width: iconSize,
+      height: iconSize,
       child: Stack(
         children: [
           // 图标
           Icon(
             widget.icon,
-            size: 22,
-            color: widget.progressColor ??
-                Theme.of(context).colorScheme.primary,
+            size: iconSize,
+            color:
+                widget.progressColor ?? Theme.of(context).colorScheme.primary,
           ),
           // 通知点
           if (widget.showNotification)
             Positioned(
               top: 0,
-              right: -2,
+              right: -notificationSize * 0.3,
               child: Container(
-                width: 8,
-                height: 8,
+                width: notificationSize,
+                height: notificationSize,
                 decoration: BoxDecoration(
                   color: Colors.red,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: borderColor,
-                    width: 1.5,
+                    width: widget.size.getStrokeWidth() * widget.size.progressStrokeScale * 0.4,
                   ),
                 ),
               ),
@@ -238,9 +251,8 @@ class _IconCircularProgressCardWidgetState
   /// 构建文本信息区域
   Widget _buildTextInfo(bool isDark) {
     final titleColor = isDark ? Colors.white : const Color(0xFF111827);
-    final subtitleColor = isDark
-        ? const Color(0xFF6B7280)
-        : const Color(0xFF9CA3AF);
+    final subtitleColor =
+        isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -296,21 +308,23 @@ class _IconCircularProgressPainter extends CustomPainter {
     final radius = (size.width - strokeWidth) / 2;
 
     // 绘制轨道
-    final trackPaint = Paint()
-      ..color = trackColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
+    final trackPaint =
+        Paint()
+          ..color = trackColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawCircle(center, radius, trackPaint);
 
     // 绘制进度
     if (progress > 0) {
-      final progressPaint = Paint()
-        ..color = progressColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = strokeWidth
-        ..strokeCap = StrokeCap.round;
+      final progressPaint =
+          Paint()
+            ..color = progressColor
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = StrokeCap.round;
 
       final sweepAngle = 2 * math.pi * progress;
       canvas.drawArc(
@@ -327,6 +341,7 @@ class _IconCircularProgressPainter extends CustomPainter {
   bool shouldRepaint(covariant _IconCircularProgressPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.progressColor != progressColor ||
-        oldDelegate.trackColor != trackColor;
+        oldDelegate.trackColor != trackColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

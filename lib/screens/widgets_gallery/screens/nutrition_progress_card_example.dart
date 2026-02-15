@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/split_column_progress_bar_card.dart';
 
 /// 营养进度卡片示例
@@ -26,6 +27,7 @@ class NutritionProgressCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: SplitColumnProgressBarCard(
+                      size: const SmallSize(),
                       leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
                       leftConfig: LeftSectionConfig(
                         icon: '🔥',
@@ -68,6 +70,7 @@ class NutritionProgressCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: SplitColumnProgressBarCard(
+                      size: const MediumSize(),
                       leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
                       leftConfig: LeftSectionConfig(
                         icon: '🔥',
@@ -110,6 +113,7 @@ class NutritionProgressCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: SplitColumnProgressBarCard(
+                      size: const LargeSize(),
                       leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
                       leftConfig: LeftSectionConfig(
                         icon: '🔥',
@@ -145,12 +149,13 @@ class NutritionProgressCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中宽尺寸'),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
                   height: 280,
                   child: SplitColumnProgressBarCard(
+                    size: const WideSize(),
                     leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
                     leftConfig: LeftSectionConfig(
                       icon: '🔥',
@@ -185,12 +190,13 @@ class NutritionProgressCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大宽尺寸'),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
                   height: 350,
                   child: SplitColumnProgressBarCard(
+                    size: const Wide2Size(),
                     leftData: ColumnProgressData(current: 470, total: 1830, unit: 'Cal'),
                     leftConfig: LeftSectionConfig(
                       icon: '🔥',

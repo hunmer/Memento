@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 渲染图标，支持 emoji 字符串和 MaterialIcons codePoint
-Widget _renderIcon(String icon, {double size = 18}) {
+Widget _renderIcon(String icon, {required double size}) {
   // 尝试解析为 MaterialIcons codePoint
   final codePoint = int.tryParse(icon);
   if (codePoint != null) {
@@ -232,7 +232,7 @@ class _SplitColumnProgressBarCardState extends State<SplitColumnProgressBarCard>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF374151) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -297,51 +297,63 @@ class _LeftSection extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
+    // 根据 size 计算各种尺寸
+    final iconSize = size.getIconSize();
+    final labelFontSize = size.getSubtitleFontSize();
+    final valueFontSize = size.getLargeFontSize() * 0.5; // 约 18/24/28
+    final unitFontSize = size.getSubtitleFontSize();
+    final progressBarHeight =
+        size.getStrokeWidth() * size.progressStrokeScale * 2.5; // 约 6/8/10
+    const subtextFontSizeScale = 0.75; // 副文本相对于 subtitleFontSize 的比例
+    final subtextFontSize = labelFontSize * subtextFontSizeScale; // 约 9/10.5/12
+    final smallSpacing = size.getSmallSpacing();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           children: [
-            _renderIcon(config.icon, size: 18),
-            const SizedBox(width: 6),
+            _renderIcon(config.icon, size: iconSize),
+            SizedBox(width: smallSpacing),
             Text(
               config.label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: labelFontSize,
                 fontWeight: FontWeight.w500,
                 color: isDark ? Colors.grey.shade400 : const Color(0xFF9CA3AF),
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
         SizedBox(height: size.getItemSpacing()),
         SizedBox(
-          height: 40,
+          height: valueFontSize * 1.4, // 根据字体大小计算容器高度
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                width: 100,
-                height: 36,
+                height: valueFontSize * 1.3,
                 child: AnimatedFlipCounter(
                   value: data.current * animation.value,
                   fractionDigits: 0,
                   textStyle: TextStyle(
-                    fontSize: 28,
+                    fontSize: valueFontSize,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : const Color(0xFF111827),
                     height: 1.0,
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: smallSpacing * 0.7),
               SizedBox(
-                height: 18,
+                height: unitFontSize * 1.3,
                 child: Text(
                   data.unit,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: unitFontSize,
                     fontWeight: FontWeight.w500,
                     color: isDark ? Colors.white : const Color(0xFF111827),
                     height: 1.0,
@@ -353,13 +365,13 @@ class _LeftSection extends StatelessWidget {
         ),
         SizedBox(height: size.getItemSpacing()),
         Container(
-          height: 10,
+          height: progressBarHeight,
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF4B5563) : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(progressBarHeight / 2),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(progressBarHeight / 2),
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
@@ -369,7 +381,7 @@ class _LeftSection extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: primaryColor,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(progressBarHeight / 2),
                   ),
                 ),
               ),
@@ -379,11 +391,11 @@ class _LeftSection extends StatelessWidget {
         if (config.subtext != null) ...[
           SizedBox(height: size.getItemSpacing()),
           SizedBox(
-            height: 16,
+            height: subtextFontSize * 1.4,
             child: Text(
               config.subtext!,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: subtextFontSize,
                 fontWeight: FontWeight.w600,
                 color: primaryColor,
                 height: 1.0,
@@ -393,15 +405,17 @@ class _LeftSection extends StatelessWidget {
         ] else ...[
           SizedBox(height: size.getItemSpacing()),
           SizedBox(
-            height: 16,
+            height: subtextFontSize * 1.4,
             child: Text(
               '${(data.total - data.current).toInt()} ${data.unit} remaining',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: subtextFontSize,
                 fontWeight: FontWeight.w600,
                 color: primaryColor,
                 height: 1.0,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -465,14 +479,19 @@ class _ProgressItem extends StatelessWidget {
     final end = (0.6 + index * step).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
-      curve: Interval(
-        index * step,
-        end,
-        curve: Curves.easeOutCubic,
-      ),
+      curve: Interval(index * step, end, curve: Curves.easeOutCubic),
     );
 
     final progress = data.total > 0 ? data.current / data.total : 0;
+
+    // 根据 size 计算各种尺寸
+    final iconSize = size.getIconSize() * 0.6; // 约 11/14/17
+    final nameFontSize = size.getSubtitleFontSize() * 0.85; // 约 10/12/14
+    final subtitleFontSize = size.getLegendFontSize(); // 约 10/12/14
+    final valueFontSize = size.getSubtitleFontSize() * 0.85; // 约 10/12/14
+    final progressBarHeight =
+        size.getStrokeWidth() * size.progressStrokeScale * 1.5; // 约 3.6/4.8/6
+    final smallSpacing = size.getSmallSpacing();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -488,13 +507,13 @@ class _ProgressItem extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _renderIcon(data.icon, size: 14),
-                      const SizedBox(width: 6),
+                      _renderIcon(data.icon, size: iconSize),
+                      SizedBox(width: smallSpacing),
                       Expanded(
                         child: Text(
                           data.name,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: nameFontSize,
                             fontWeight: FontWeight.w600,
                             color:
                                 isDark
@@ -510,13 +529,13 @@ class _ProgressItem extends StatelessWidget {
                   if (data.subtitle != null) ...[
                     SizedBox(height: size.getItemSpacing() / 4),
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20,
+                      padding: EdgeInsets.only(
+                        left: iconSize + smallSpacing,
                       ), // Align with name (icon width + spacing)
                       child: Text(
                         data.subtitle!,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: subtitleFontSize,
                           fontWeight: FontWeight.w400,
                           color:
                               isDark
@@ -532,12 +551,12 @@ class _ProgressItem extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 16,
+              height: valueFontSize * 1.4,
               child: AnimatedFlipCounter(
                 value: data.current * itemAnimation.value,
                 fractionDigits: data.current % 1 != 0 ? 1 : 0,
                 textStyle: TextStyle(
-                  fontSize: 12,
+                  fontSize: valueFontSize,
                   fontWeight: FontWeight.w700,
                   color: data.color,
                   height: 1.0,
@@ -548,13 +567,13 @@ class _ProgressItem extends StatelessWidget {
         ),
         SizedBox(height: size.getItemSpacing() / 2),
         Container(
-          height: 6,
+          height: progressBarHeight,
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF4B5563) : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(progressBarHeight / 2),
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(progressBarHeight / 2),
             child: Align(
               alignment: Alignment.centerLeft,
               child: FractionallySizedBox(
@@ -562,7 +581,7 @@ class _ProgressItem extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: data.color,
-                    borderRadius: BorderRadius.circular(3),
+                    borderRadius: BorderRadius.circular(progressBarHeight / 2),
                   ),
                 ),
               ),
