@@ -34,6 +34,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
   final TextEditingController _ttsTextController = TextEditingController(
     text: '已超过 {unrecorded_time} 分钟未记录活动，上次的活动是 {last_activity} ',
   );
+  String? _selectedVariable;
   bool _checkOnlyWorkHours = false;
   int _workHoursStart = 9;
   int _workHoursEnd = 18;
@@ -302,6 +303,16 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
     }
   }
 
+  void _insertVariable(String variable) {
+    final text = _ttsTextController.text;
+    final selection = _ttsTextController.selection;
+    final newText = text.replaceRange(selection.start, selection.end, variable);
+    _ttsTextController.text = newText;
+    _ttsTextController.selection = TextSelection.collapsed(
+      offset: selection.start + variable.length,
+    );
+  }
+
   Future<void> _updateWorkHoursSettings() async {
     try {
       await ActivityPlugin.instance.setWorkHoursSettings(
@@ -373,142 +384,148 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                   'activity_notificationSettings'.tr,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '在通知栏常驻显示最后记录的活动、时间和快捷添加按钮',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.textTheme.bodySmall?.color,
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
+                            const SizedBox(height: 12),
+                            Text(
+                              '在通知栏常驻显示最后记录的活动、时间和快捷添加按钮',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.textTheme.bodySmall?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'activity_enableNotificationBar'.tr,
+                                  style: theme.textTheme.titleSmall,
+                                ),
+                                Switch(
+                                  value: _isNotificationEnabled,
+                                  onChanged: _toggleNotification,
+                                  activeColor: ActivityPlugin.instance.color,
+                                ),
+                              ],
+                            ),
+                            // 通知时间设置
+                            if (_isNotificationEnabled &&
+                                UniversalPlatform.isAndroid) ...[
+                              const SizedBox(height: 24),
+                              const Divider(),
+                              const SizedBox(height: 16),
+
+                              // 最小提醒间隔
                               Text(
-                                'activity_enableNotificationBar'.tr,
+                                'activity_minimumReminderInterval'.tr,
                                 style: theme.textTheme.titleSmall,
                               ),
-                              Switch(
-                                value: _isNotificationEnabled,
-                                onChanged: _toggleNotification,
-                                activeColor: ActivityPlugin.instance.color,
+                              const SizedBox(height: 4),
+                              Text(
+                                'activity_minimumReminderIntervalDesc'.tr,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Slider(
+                                      value:
+                                          _minimumReminderInterval.toDouble(),
+                                      min: 5,
+                                      max: 120,
+                                      divisions: 23,
+                                      label: 'activity_minutesUnit'.trParams({
+                                        'minutes': '$_minimumReminderInterval',
+                                      }),
+                                      activeColor:
+                                          ActivityPlugin.instance.color,
+                                      onChanged: (value) {
+                                        _updateMinimumReminderInterval(
+                                          value.round(),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 80,
+                                    child: Text(
+                                      'activity_minutesUnit'.trParams({
+                                        'minutes': '$_minimumReminderInterval',
+                                      }),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                ActivityPlugin.instance.color,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // 通知更新频率
+                              Text(
+                                'activity_updateInterval'.tr,
+                                style: theme.textTheme.titleSmall,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'activity_updateIntervalDesc'.tr,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Slider(
+                                      value: _updateInterval.toDouble(),
+                                      min: 1,
+                                      max: 10,
+                                      divisions: 9,
+                                      label: 'activity_minutesUnit'.trParams({
+                                        'minutes': '$_updateInterval',
+                                      }),
+                                      activeColor:
+                                          ActivityPlugin.instance.color,
+                                      onChanged: (value) {
+                                        _updateUpdateInterval(value.round());
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 80,
+                                    child: Text(
+                                      'activity_minutesUnit'.trParams({
+                                        'minutes': '$_updateInterval',
+                                      }),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                ActivityPlugin.instance.color,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
-                          ),
-                          // 通知时间设置
-                          if (_isNotificationEnabled &&
-                              UniversalPlatform.isAndroid) ...[
-                            const SizedBox(height: 24),
-                            const Divider(),
-                            const SizedBox(height: 16),
-
-                            // 最小提醒间隔
-                            Text(
-                              'activity_minimumReminderInterval'.tr,
-                              style: theme.textTheme.titleSmall,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'activity_minimumReminderIntervalDesc'.tr,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.textTheme.bodySmall?.color,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Slider(
-                                    value: _minimumReminderInterval.toDouble(),
-                                    min: 5,
-                                    max: 120,
-                                    divisions: 23,
-                                    label: 'activity_minutesUnit'.trParams({
-                                      'minutes': '$_minimumReminderInterval',
-                                    }),
-                                    activeColor: ActivityPlugin.instance.color,
-                                    onChanged: (value) {
-                                      _updateMinimumReminderInterval(
-                                        value.round(),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                    'activity_minutesUnit'.trParams({
-                                      'minutes': '$_minimumReminderInterval',
-                                    }),
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: ActivityPlugin.instance.color,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // 通知更新频率
-                            Text(
-                              'activity_updateInterval'.tr,
-                              style: theme.textTheme.titleSmall,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'activity_updateIntervalDesc'.tr,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.textTheme.bodySmall?.color,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Slider(
-                                    value: _updateInterval.toDouble(),
-                                    min: 1,
-                                    max: 10,
-                                    divisions: 9,
-                                    label: 'activity_minutesUnit'.trParams({
-                                      'minutes': '$_updateInterval',
-                                    }),
-                                    activeColor: ActivityPlugin.instance.color,
-                                    onChanged: (value) {
-                                      _updateUpdateInterval(value.round());
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 80,
-                                  child: Text(
-                                    'activity_minutesUnit'.trParams({
-                                      'minutes': '$_updateInterval',
-                                    }),
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: ActivityPlugin.instance.color,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ],
-                        ],
+                        ),
                       ),
                     ),
-                  ),
 
                   // TTS 播报设置区域
-                  const SizedBox(height: 16),
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -660,15 +677,6 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                             const SizedBox(height: 16),
 
                             // 播报文本
-                            Text('播报文本模板', style: theme.textTheme.titleSmall),
-                            const SizedBox(height: 4),
-                            Text(
-                              '支持的变量：{date} {last_activity} {unrecorded_time} {time} {weekday}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.blue,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
                             TextField(
                               controller: _ttsTextController,
                               maxLines: 3,
@@ -678,28 +686,63 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            ElevatedButton.icon(
-                              onPressed: _updateTTSText,
-                              icon: const Icon(Icons.save),
-                              label: const Text('保存文本'),
-                              style: ElevatedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(36),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            OutlinedButton.icon(
-                              onPressed: _testTTSSpeak,
-                              icon: const Icon(Icons.play_arrow),
-                              label: const Text('测试播报一次'),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(36),
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: DropdownButton<String>(
+                                    isExpanded: true,
+                                    value: _selectedVariable,
+                                    hint: const Text('插入变量'),
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: '{date}',
+                                        child: Text('{date} - 日期'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: '{last_activity}',
+                                        child: Text('{last_activity} - 上次活动'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: '{unrecorded_time}',
+                                        child: Text(
+                                          '{unrecorded_time} - 未记录时间',
+                                        ),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: '{time}',
+                                        child: Text('{time} - 时间'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: '{weekday}',
+                                        child: Text('{weekday} - 星期'),
+                                      ),
+                                    ],
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        _insertVariable(value);
+                                        setState(() {
+                                          _selectedVariable = null;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                ElevatedButton.icon(
+                                  onPressed: _updateTTSText,
+                                  icon: const Icon(Icons.save, size: 18),
+                                  label: const Text('保存'),
+                                ),
+                                const SizedBox(width: 8),
+                                OutlinedButton.icon(
+                                  onPressed: _testTTSSpeak,
+                                  icon: const Icon(Icons.play_arrow, size: 18),
+                                  label: const Text('测试'),
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 24),
-                            const Divider(),
-                            const SizedBox(height: 16),
-
                             // 工作时间限制
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
