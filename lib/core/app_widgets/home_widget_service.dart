@@ -124,6 +124,18 @@ Future<void> setupWidgetClickListener() async {
       if (url != null) {
         handleWidgetClick(url);
       }
+    } else if (call.method == 'onActivityNotificationClicked') {
+      // 处理活动通知点击事件
+      final args = call.arguments as Map?;
+      final action = args?['action'] as String?;
+      final quickAction = args?['quickAction'] as String?;
+
+      debugPrint('收到活动通知点击: action=$action, quickAction=$quickAction');
+
+      // 当 action 为 "open_activity_form" 时，打开活动编辑界面
+      if (action == 'open_activity_form' && quickAction == 'record') {
+        handleActivityNotificationClick();
+      }
     }
   });
 
@@ -660,4 +672,56 @@ void handleWidgetClick(String url) {
     debugPrint('处理小组件点击失败: $e');
     debugPrint('堆栈: $stack');
   }
+}
+
+/// 处理活动通知点击事件
+void handleActivityNotificationClick() {
+  debugPrint('处理活动通知点击：打开活动编辑界面');
+
+  // 延迟导航，确保应用完全启动
+  Future.delayed(const Duration(milliseconds: 100), () {
+    final navigator = navigatorKey.currentState;
+    if (navigator != null) {
+      try {
+        // 从活动通知进入时，重置路由栈为两层：首页 + 活动编辑界面
+        // 1. 先清除所有路由并回到首页
+        navigator.pushNamedAndRemoveUntil('/', (route) => false);
+
+        // 2. 延迟一帧后再推入目标路由，确保首页已经完全加载
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final route = AppRoutes.generateRoute(
+            const RouteSettings(name: AppRoutes.activityEdit),
+          );
+          navigator.push(route);
+          debugPrint('活动通知导航成功：路由栈现在有两层 (/ -> /activity_edit)');
+        });
+      } catch (error, stack) {
+        debugPrint('活动通知路由导航失败: $error');
+        debugPrint('堆栈: $stack');
+      }
+    } else {
+      debugPrint('导航器尚未初始化，延迟500ms后重试');
+      Future.delayed(const Duration(milliseconds: 500), () {
+        final retryNavigator = navigatorKey.currentState;
+        if (retryNavigator != null) {
+          try {
+            // 重试时也使用相同的两层路由栈逻辑
+            retryNavigator.pushNamedAndRemoveUntil('/', (route) => false);
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final route = AppRoutes.generateRoute(
+                const RouteSettings(name: AppRoutes.activityEdit),
+              );
+              retryNavigator.push(route);
+              debugPrint('活动通知重试导航成功');
+            });
+          } catch (e) {
+            debugPrint('活动通知重试导航失败: $e');
+          }
+        } else {
+          debugPrint('导航器初始化失败');
+        }
+      });
+    }
+  });
 }
