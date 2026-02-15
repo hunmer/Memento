@@ -21,7 +21,7 @@ class HalfGaugeCardWidget extends StatefulWidget {
     required this.totalBudget,
     required this.remaining,
     this.currency = 'AED',
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
     this.inline = false,
   });
 

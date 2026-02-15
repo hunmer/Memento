@@ -92,7 +92,7 @@ class ChartIconDisplayCard extends StatefulWidget {
     this.displayType = ChartIconType.emoji,
     this.primaryColor = const Color(0xFF6366F1),
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）

@@ -76,7 +76,7 @@ class CardTrendLineChart extends StatefulWidget {
     this.showDots = true,
     this.showGradient = true,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

@@ -39,7 +39,7 @@ class IconCircularProgressCardWidget extends StatefulWidget {
     this.showNotification = false,
     this.progressColor,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

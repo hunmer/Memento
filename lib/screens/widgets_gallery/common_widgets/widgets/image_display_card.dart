@@ -46,7 +46,7 @@ class ImageDisplayCardWidget extends StatefulWidget {
     this.primaryColor,
     this.accentColor,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

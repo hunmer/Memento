@@ -30,7 +30,7 @@ class DonutChartStatsCardWidget extends StatefulWidget {
     this.totalLabel = 'Total',
     required this.categories,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

@@ -26,7 +26,7 @@ class DarkBarChartCard extends StatefulWidget {
     required this.durationInMinutes,
     this.trend = BarChartTrend.neutral,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

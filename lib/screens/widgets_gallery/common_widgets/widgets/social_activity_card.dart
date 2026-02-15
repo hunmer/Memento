@@ -19,7 +19,7 @@ class SocialActivityCardWidget extends StatefulWidget {
     required this.user,
     required this.posts,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从属性映射创建组件
@@ -79,13 +79,13 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Transform.translate(
-            offset: Offset(0, (widget.size == HomeWidgetSize.small ? 15 : 20) * (1 - _animation.value)),
+            offset: Offset(0, (widget.size == const SmallSize() ? 15 : 20) * (1 - _animation.value)),
             child: child,
           ),
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : (widget.size == HomeWidgetSize.small ? 280 : 375),
+        width: widget.inline ? double.maxFinite : (widget.size == const SmallSize() ? 280 : 375),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -104,7 +104,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
             children: [
               // 顶部背景区域
               Container(
-                height: widget.size == HomeWidgetSize.small ? 72 : 96,
+                height: widget.size == const SmallSize() ? 72 : 96,
                 width: double.infinity,
                 color: isDark ? const Color(0xFF334155) : const Color(0xFFF3F4F9),
               ),
@@ -117,7 +117,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
                   children: [
                     // 头像（负边距上移）
                     Transform.translate(
-                      offset: Offset(0, widget.size == HomeWidgetSize.small ? -36 : -48),
+                      offset: Offset(0, widget.size == const SmallSize() ? -36 : -48),
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -129,7 +129,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
                           ),
                         ),
                         child: CircleAvatar(
-                          radius: widget.size == HomeWidgetSize.small ? 36 : 48,
+                          radius: widget.size == const SmallSize() ? 36 : 48,
                           backgroundImage: NetworkImage(widget.user.avatarUrl),
                         ),
                       ),
@@ -195,7 +195,7 @@ class _UserHeader extends StatelessWidget {
               Text(
                 user.name,
                 style: TextStyle(
-                  fontSize: size == HomeWidgetSize.small ? 18 : 20,
+                  fontSize: size == const SmallSize() ? 18 : 20,
                   fontWeight: FontWeight.w700,
                   color: isDark ? Colors.white : const Color(0xFF111827),
                   height: 1.2,
@@ -205,7 +205,7 @@ class _UserHeader extends StatelessWidget {
               Text(
                 user.username,
                 style: TextStyle(
-                  fontSize: size == HomeWidgetSize.small ? 12 : 14,
+                  fontSize: size == const SmallSize() ? 12 : 14,
                   fontWeight: FontWeight.w500,
                   color: primaryColor,
                   height: 1.0,
@@ -228,7 +228,7 @@ class _UserHeader extends StatelessWidget {
               child: Text(
                 _formatFollowerCount(user.followerCount),
                 style: TextStyle(
-                  fontSize: size == HomeWidgetSize.small ? 12 : 14,
+                  fontSize: size == const SmallSize() ? 12 : 14,
                   color:
                       isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF),
                   height: 1.0,
@@ -283,7 +283,7 @@ class _PostItem extends StatelessWidget {
         return Opacity(
           opacity: itemAnimation.value,
           child: Transform.translate(
-            offset: Offset(0, (size == HomeWidgetSize.small ? 15 : 20) * (1 - itemAnimation.value)),
+            offset: Offset(0, (size == const SmallSize() ? 15 : 20) * (1 - itemAnimation.value)),
             child: child,
           ),
         );
@@ -298,7 +298,7 @@ class _PostItem extends StatelessWidget {
             Text(
               post.hashtag,
               style: TextStyle(
-                fontSize: size == HomeWidgetSize.small ? 13 : 15,
+                fontSize: size == const SmallSize() ? 13 : 15,
                 fontWeight: FontWeight.w600,
                 color: primaryColor,
                 height: 1.0,
@@ -316,7 +316,7 @@ class _PostItem extends StatelessWidget {
                       Text(
                         post.content,
                         style: TextStyle(
-                          fontSize: size == HomeWidgetSize.small ? 13 : 15,
+                          fontSize: size == const SmallSize() ? 13 : 15,
                           color: isDark
                               ? const Color(0xFFE5E7EB)
                               : const Color(0xFF1F2937),
@@ -354,8 +354,8 @@ class _PostItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
                     post.imageUrl,
-                    width: size == HomeWidgetSize.small ? 60 : 80,
-                    height: size == HomeWidgetSize.small ? 60 : 80,
+                    width: size == const SmallSize() ? 60 : 80,
+                    height: size == const SmallSize() ? 60 : 80,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -409,7 +409,7 @@ class _InteractionItem extends StatelessWidget {
             value: count * animation.value,
             fractionDigits: count >= 1000 ? 1 : 0,
             textStyle: TextStyle(
-              fontSize: size == HomeWidgetSize.small ? 10 : 12,
+              fontSize: size == const SmallSize() ? 10 : 12,
               fontWeight: FontWeight.w500,
               color: baseColor,
               height: 1.0,

@@ -29,7 +29,7 @@ class NewsCardWidget extends StatefulWidget {
     required this.category,
     required this.newsItems,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从属性创建（用于动态渲染）

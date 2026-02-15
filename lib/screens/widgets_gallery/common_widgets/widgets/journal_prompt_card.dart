@@ -31,7 +31,7 @@ class JournalPromptCardWidget extends StatefulWidget {
     required this.onNewPressed,
     required this.onSyncPressed,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从属性创建（用于动态渲染）

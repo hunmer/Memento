@@ -52,7 +52,7 @@ class UpcomingTasksWidget extends StatefulWidget {
     this.moreCount = 0,
     this.title = 'Upcoming',
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）

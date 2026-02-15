@@ -25,7 +25,7 @@ class ScoreCardWidget extends StatefulWidget {
     required this.grade,
     required this.actions,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从属性 Map 创建组件（用于公共小组件系统）
@@ -157,7 +157,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                                     fractionDigits: 0,
                                     textStyle: TextStyle(
                                       color: Colors.white,
-                                      fontSize: widget.size == HomeWidgetSize.large ? 56 : 48,
+                                      fontSize: widget.size == const LargeSize() ? 56 : 48,
                                       fontWeight: FontWeight.bold,
                                       height: 1.0,
                                     ),
@@ -173,7 +173,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                                     widget.grade,
                                     style: TextStyle(
                                       color: primaryColor,
-                                      fontSize: widget.size == HomeWidgetSize.large ? 56 : 48,
+                                      fontSize: widget.size == const LargeSize() ? 56 : 48,
                                       fontWeight: FontWeight.bold,
                                       height: 1.0,
                                     ),
@@ -188,7 +188,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                           'Last Actions',
                           style: TextStyle(
                             color: const Color(0xFF71717A),
-                            fontSize: widget.size == HomeWidgetSize.large ? 20 : 18,
+                            fontSize: widget.size == const LargeSize() ? 20 : 18,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -260,7 +260,7 @@ class _ActionItem extends StatelessWidget {
                   action.label,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: size == HomeWidgetSize.large ? 20 : 18,
+                    fontSize: size == const LargeSize() ? 20 : 18,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -274,7 +274,7 @@ class _ActionItem extends StatelessWidget {
                           action.isPositive
                               ? const Color(0xFF22C55E)
                               : const Color(0xFFEF4444),
-                      fontSize: size == HomeWidgetSize.large ? 20 : 18,
+                      fontSize: size == const LargeSize() ? 20 : 18,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 1.0,
                     ),
@@ -282,7 +282,7 @@ class _ActionItem extends StatelessWidget {
                   SizedBox(width: size.getItemSpacing() * 0.25),
                   SizedBox(
                     width: 60,
-                    height: size == HomeWidgetSize.large ? 28 : 24,
+                    height: size == const LargeSize() ? 28 : 24,
                     child: AnimatedFlipCounter(
                       value: displayValue.toDouble(),
                       wholeDigits: 2,
@@ -292,7 +292,7 @@ class _ActionItem extends StatelessWidget {
                             action.isPositive
                                 ? const Color(0xFF22C55E)
                                 : const Color(0xFFEF4444),
-                        fontSize: size == HomeWidgetSize.large ? 20 : 18,
+                        fontSize: size == const LargeSize() ? 20 : 18,
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                         height: 1.0,

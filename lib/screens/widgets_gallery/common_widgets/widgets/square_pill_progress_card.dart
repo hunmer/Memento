@@ -25,7 +25,7 @@ class SquarePillProgressCard extends StatefulWidget {
     this.unit = 'meds',
     required this.progress,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）

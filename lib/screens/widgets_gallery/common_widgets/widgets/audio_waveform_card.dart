@@ -31,7 +31,7 @@ class AudioWaveformCardWidget extends StatefulWidget {
     required this.duration,
     this.primaryColor,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于通用小组件系统）

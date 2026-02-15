@@ -47,7 +47,7 @@ class ExpenseComparisonChartCardWidget extends StatefulWidget {
     this.maxValue = 24.0,
     this.labels = const [],
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于小组件系统）

@@ -36,7 +36,7 @@ class TaskProgressCardWidget extends StatefulWidget {
     this.pendingLabel = '待办',
     this.maxPendingTasks,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

@@ -28,7 +28,7 @@ class CardDotProgressDisplay extends StatefulWidget {
     required this.totalProgress,
     required this.completedProgress,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

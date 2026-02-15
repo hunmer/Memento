@@ -47,7 +47,7 @@ class SocialProfileCardWidget extends StatefulWidget {
     required this.comments,
     required this.shares,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

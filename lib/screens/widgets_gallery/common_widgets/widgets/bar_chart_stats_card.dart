@@ -48,7 +48,7 @@ class BarChartStatsCardWidget extends StatefulWidget {
     required this.labels,
     required this.maxValue,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例

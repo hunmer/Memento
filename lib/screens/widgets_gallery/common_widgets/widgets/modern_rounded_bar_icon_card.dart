@@ -81,7 +81,7 @@ class ModernRoundedBarIconCard extends StatelessWidget {
     super.key,
     required this.weekMoods,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）

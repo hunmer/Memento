@@ -71,7 +71,7 @@ class WatchProgressCardWidget extends StatefulWidget {
     required this.items,
     this.progressColor,
     this.inline = false,
-    this.size = HomeWidgetSize.medium,
+    this.size = const MediumSize(),
     this.enableHeader = true,
     this.progressLabel = 'Watched Items',
   });
