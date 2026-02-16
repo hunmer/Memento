@@ -148,76 +148,89 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
                 ]
                 : null,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 当前连续打卡
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: ClipRect(
+        child: SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                widget.titleText ?? 'Weekly Streak',
-                style: TextStyle(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+              // 当前连续打卡
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.titleText ?? 'Weekly Streak',
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    ),
+                  ),
+                  SizedBox(height: smallSpacing),
+                  AnimatedFlipCounter(
+                    value: widget.currentStreak * _animation.value,
+                    suffix: ' Days',
+                    textStyle: TextStyle(
+                      fontSize: largeFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: largeSpacing),
+
+              // 分隔线
+              Container(
+                height: strokeWidth,
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color:
+                          isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                      width: strokeWidth,
+                    ),
+                  ),
                 ),
               ),
-              SizedBox(height: smallSpacing),
-              AnimatedFlipCounter(
-                value: widget.currentStreak * _animation.value,
-                suffix: ' Days',
-                textStyle: TextStyle(
-                  fontSize: largeFontSize,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.grey.shade900,
-                ),
+              SizedBox(height: largeSpacing),
+
+              // 最长连续打卡
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.longestStreakLabel ?? 'Longest Streak',
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.w500,
+                      color:
+                          isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                    ),
+                  ),
+                  Text(
+                    '${widget.longestStreak} days',
+                    style: TextStyle(
+                      fontSize: titleFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: largeSpacing),
+
+              // 日期网格
+              _buildDaysGrid(
+                isDark,
+                effectivePrimaryColor,
+                dayFontSize,
+                iconSize,
               ),
             ],
           ),
-          SizedBox(height: largeSpacing),
-
-          // 分隔线
-          Container(
-            height: strokeWidth,
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                  width: strokeWidth,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: largeSpacing),
-
-          // 最长连续打卡
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                widget.longestStreakLabel ?? 'Longest Streak',
-                style: TextStyle(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                ),
-              ),
-              Text(
-                '${widget.longestStreak} days',
-                style: TextStyle(
-                  fontSize: titleFontSize,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.grey.shade900,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: largeSpacing),
-
-          // 日期网格
-          _buildDaysGrid(isDark, effectivePrimaryColor, dayFontSize, iconSize),
-        ],
+        ),
       ),
     );
   }
@@ -236,45 +249,51 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
 
     // 根据尺寸计算间距
     final size = widget.size;
-    final crossAxisSpacing = size.getSmallSpacing();
-    final mainAxisSpacing = size.getItemSpacing();
+    final itemSpacing = size.getSmallSpacing();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 5,
-        crossAxisSpacing: crossAxisSpacing,
-        mainAxisSpacing: mainAxisSpacing,
-        childAspectRatio: 1,
+    // 计算每一天圆形的尺寸（基于可用宽度和总天数）
+    final daySize = dayFontSize * 2 + iconSize; // 动态计算大小
+
+    return SizedBox(
+      height: daySize + 8, // 固定高度，确保一行显示
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal, // 横向滚动
+        itemCount: widget.totalDays,
+        itemBuilder: (context, index) {
+          final dayNumber = index + 1;
+          final isCompleted = widget.completedDays.contains(dayNumber);
+          final isCurrent = dayNumber <= widget.currentStreak;
+
+          // 计算每个元素的延迟动画
+          final itemAnimation = CurvedAnimation(
+            parent: _animationController,
+            curve: Interval(
+              index * step,
+              baseEnd + index * step,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+
+          return Padding(
+            padding: EdgeInsets.only(
+              right: index < widget.totalDays - 1 ? itemSpacing : 0,
+            ),
+            child: SizedBox(
+              width: daySize,
+              child: _DayItem(
+                dayNumber: dayNumber,
+                isCompleted: isCompleted,
+                isCurrent: isCurrent,
+                primaryColor: primaryColor,
+                isDark: isDark,
+                animation: itemAnimation,
+                dayFontSize: dayFontSize,
+                iconSize: iconSize,
+              ),
+            ),
+          );
+        },
       ),
-      itemCount: widget.totalDays,
-      itemBuilder: (context, index) {
-        final dayNumber = index + 1;
-        final isCompleted = widget.completedDays.contains(dayNumber);
-        final isCurrent = dayNumber <= widget.currentStreak;
-
-        // 计算每个元素的延迟动画
-        final itemAnimation = CurvedAnimation(
-          parent: _animationController,
-          curve: Interval(
-            index * step,
-            baseEnd + index * step,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-        return _DayItem(
-          dayNumber: dayNumber,
-          isCompleted: isCompleted,
-          isCurrent: isCurrent,
-          primaryColor: primaryColor,
-          isDark: isDark,
-          animation: itemAnimation,
-          dayFontSize: dayFontSize,
-          iconSize: iconSize,
-        );
-      },
     );
   }
 }
