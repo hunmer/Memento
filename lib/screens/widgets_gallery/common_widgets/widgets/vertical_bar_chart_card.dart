@@ -6,10 +6,7 @@ class BarData {
   final double value1;
   final double value2;
 
-  const BarData({
-    required this.value1,
-    required this.value2,
-  });
+  const BarData({required this.value1, required this.value2});
 
   /// 从 JSON 创建（用于公共小组件系统）
   factory BarData.fromJson(Map<String, dynamic> json) {
@@ -21,10 +18,7 @@ class BarData {
 
   /// 转换为 JSON（用于公共小组件系统）
   Map<String, dynamic> toJson() {
-    return {
-      'value1': value1,
-      'value2': value2,
-    };
+    return {'value1': value1, 'value2': value2};
   }
 }
 
@@ -37,8 +31,10 @@ class VerticalBarChartCardWidget extends StatefulWidget {
   final List<BarData> bars;
   final Color? primaryColor;
   final Color? secondaryColor;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
   /// 小组件尺寸
   final HomeWidgetSize size;
 
@@ -60,7 +56,8 @@ class VerticalBarChartCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final barsList = (props['bars'] as List<dynamic>?)
+    final barsList =
+        (props['bars'] as List<dynamic>?)
             ?.map((e) => BarData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -71,12 +68,14 @@ class VerticalBarChartCardWidget extends StatefulWidget {
       dataLabel1: props['dataLabel1'] as String? ?? '',
       dataLabel2: props['dataLabel2'] as String? ?? '',
       bars: barsList,
-      primaryColor: props['primaryColor'] != null
-          ? Color(props['primaryColor'] as int)
-          : null,
-      secondaryColor: props['secondaryColor'] != null
-          ? Color(props['secondaryColor'] as int)
-          : null,
+      primaryColor:
+          props['primaryColor'] != null
+              ? Color(props['primaryColor'] as int)
+              : null,
+      secondaryColor:
+          props['secondaryColor'] != null
+              ? Color(props['secondaryColor'] as int)
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -115,10 +114,8 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor =
-        widget.primaryColor ?? const Color(0xFF0072B5);
-    final secondaryColor =
-        widget.secondaryColor ?? const Color(0xFF00A8CC);
+    final primaryColor = widget.primaryColor ?? const Color(0xFF0072B5);
+    final secondaryColor = widget.secondaryColor ?? const Color(0xFF00A8CC);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -136,7 +133,7 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
         height: widget.inline ? double.maxFinite : 320,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -154,42 +151,41 @@ class _VerticalBarChartCardWidgetState extends State<VerticalBarChartCardWidget>
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          color: isDark
-                              ? const Color(0xFFF3F4F6)
-                              : const Color(0xFF111827),
-                          fontSize: widget.size.getTitleFontSize(),
-                          fontWeight: FontWeight.w700,
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? const Color(0xFFF3F4F6)
+                                    : const Color(0xFF111827),
+                            fontSize: widget.size.getTitleFontSize(),
+                            fontWeight: FontWeight.w700,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                      SizedBox(height: widget.size.getSmallSpacing()),
-                      Text(
-                        widget.subtitle,
-                        style: TextStyle(
-                          color: isDark
-                              ? const Color(0xFF9CA3AF)
-                              : const Color(0xFF6B7280),
-                          fontSize: widget.size.getSubtitleFontSize(),
+                        Text(
+                          widget.subtitle,
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? const Color(0xFF9CA3AF)
+                                    : const Color(0xFF6B7280),
+                            fontSize: widget.size.getSubtitleFontSize(),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert),
-                    color: isDark
-                        ? const Color(0xFFF3F4F6)
-                        : const Color(0xFF111827),
-                    onPressed: () {},
+                      ],
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: widget.size.getTitleSpacing()),
-
+              SizedBox(height: widget.size.getTitleSpacing() * 0.8),
               // 图例
               Row(
                 children: [
@@ -301,60 +297,64 @@ class _BarChart extends StatelessWidget {
         final maxHeight = constraints.maxHeight;
 
         return Stack(
-      children: [
-        // 背景网格线
-        Positioned.fill(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: size.getPadding().right),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(
-                6,
-                (index) => Container(
-                  width: 1,
-                  height: double.infinity,
-                  color: (isDark
-                          ? const Color(0xFF374151)
-                          : const Color(0xFFE5E7EB))
-                      .withOpacity(0.4),
+          children: [
+            // 背景网格线
+            Positioned.fill(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.getPadding().right,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(
+                    6,
+                    (index) => Container(
+                      width: 1,
+                      height: double.infinity,
+                      color: (isDark
+                              ? const Color(0xFF374151)
+                              : const Color(0xFFE5E7EB))
+                          .withOpacity(0.4),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
 
-        // 基准线
-        Positioned(
-          bottom: maxHeight * 0.3,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: 1,
-            color:
-                isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
-          ),
-        ),
-
-        // 柱子
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: List.generate(
-            bars.length,
-            (index) => _Bar(
-              data: bars[index],
-              primaryColor: primaryColor,
-              secondaryColor: secondaryColor,
-              maxValue: maxValue,
-              maxHeight: maxHeight,
-              animation: animation,
-              index: index,
-              size: size,
+            // 基准线
+            Positioned(
+              bottom: maxHeight * 0.3,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 1,
+                color:
+                    isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB),
+              ),
             ),
-          ),
-        ),
-      ],
-    );
+
+            // 柱子
+            ClipRect(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: List.generate(
+                  bars.length,
+                  (index) => _Bar(
+                    data: bars[index],
+                    primaryColor: primaryColor,
+                    secondaryColor: secondaryColor,
+                    maxValue: maxValue,
+                    maxHeight: maxHeight,
+                    animation: animation,
+                    index: index,
+                    size: size,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -393,8 +393,10 @@ class _Bar extends StatelessWidget {
       ),
     );
 
-    final height1 = data.value1 / maxValue * maxHeight;
-    final height2 = data.value2 / maxValue * maxHeight;
+    // 计算可用高度（减去间距）
+    final availableHeight = maxHeight - size.getBarSpacing();
+    final height1 = data.value1 / maxValue * availableHeight;
+    final height2 = data.value2 / maxValue * availableHeight;
 
     return AnimatedBuilder(
       animation: barAnimation,
