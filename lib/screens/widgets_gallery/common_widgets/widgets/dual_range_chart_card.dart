@@ -53,8 +53,12 @@ class DualRangeData {
   factory DualRangeData.fromJson(Map<String, dynamic> json) {
     return DualRangeData(
       day: json['day'] as String? ?? '',
-      primaryRange: RangeData.fromJson(json['primaryRange'] as Map<String, dynamic>? ?? {}),
-      secondaryRange: RangeData.fromJson(json['secondaryRange'] as Map<String, dynamic>? ?? {}),
+      primaryRange: RangeData.fromJson(
+        json['primaryRange'] as Map<String, dynamic>? ?? {},
+      ),
+      secondaryRange: RangeData.fromJson(
+        json['secondaryRange'] as Map<String, dynamic>? ?? {},
+      ),
     );
   }
 
@@ -91,11 +95,7 @@ class RangeSummary {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'min': min,
-      'max': max,
-      'label': label,
-    };
+    return {'min': min, 'max': max, 'label': label};
   }
 }
 
@@ -129,22 +129,32 @@ class DualRangeChartCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final rangesList = (props['ranges'] as List<dynamic>?)?.map((e) => DualRangeData.fromJson(e as Map<String, dynamic>)).toList() ?? const [];
-    final weekDaysList = (props['weekDays'] as List<dynamic>?)?.cast<String>() ?? const [];
+    final rangesList =
+        (props['ranges'] as List<dynamic>?)
+            ?.map((e) => DualRangeData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
+    final weekDaysList =
+        (props['weekDays'] as List<dynamic>?)?.cast<String>() ?? const [];
 
     return DualRangeChartCardWidget(
       date: props['date'] as String? ?? '',
       weekDays: weekDaysList,
       ranges: rangesList,
-      primarySummary: RangeSummary.fromJson(props['primarySummary'] as Map<String, dynamic>? ?? {}),
-      secondarySummary: RangeSummary.fromJson(props['secondarySummary'] as Map<String, dynamic>? ?? {}),
+      primarySummary: RangeSummary.fromJson(
+        props['primarySummary'] as Map<String, dynamic>? ?? {},
+      ),
+      secondarySummary: RangeSummary.fromJson(
+        props['secondarySummary'] as Map<String, dynamic>? ?? {},
+      ),
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
   }
 
   @override
-  State<DualRangeChartCardWidget> createState() => _DualRangeChartCardWidgetState();
+  State<DualRangeChartCardWidget> createState() =>
+      _DualRangeChartCardWidgetState();
 }
 
 class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
@@ -180,9 +190,17 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
     final textColor = isDark ? Colors.white : Colors.grey.shade800;
     final mutedColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final primaryLight = isDark ? primaryColor.withOpacity(0.3) : primaryColor.withOpacity(0.2);
+    final primaryLight =
+        isDark ? primaryColor.withOpacity(0.3) : primaryColor.withOpacity(0.2);
     final secondaryColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
     final secondaryLight = isDark ? Colors.grey.shade700 : Colors.grey.shade200;
+
+    // 根据 size 调整的尺寸
+    final basePadding = widget.inline ? 12.0 : 10.0;
+    final padding = basePadding * widget.size.padding;
+    final borderRadius = 20.0 * widget.size.scale;
+    final sectionSpacing = 8.0 * widget.size.spacing;
+    final bottomSpacing = 10.0 * widget.size.spacing;
 
     return AnimatedBuilder(
       animation: _animation,
@@ -193,17 +211,36 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 300,
-              padding: widget.size.getPadding(),
-              decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(32)),
+              height: 320, // 固定高度
+              padding: EdgeInsets.all(padding),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(borderRadius),
+              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildDateSelector(context, isDark, textColor),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  _buildChart(context, gridColor, primaryColor, primaryLight, secondaryColor, secondaryLight),
-                  const SizedBox(height: 24),
-                  const SizedBox(height: 24),
-                  _buildSummary(context, primaryColor, secondaryColor, textColor, mutedColor),
+                  SizedBox(height: sectionSpacing),
+                  Expanded(
+                    child: Center(
+                      child: _buildChart(
+                        context,
+                        gridColor,
+                        primaryColor,
+                        primaryLight,
+                        secondaryColor,
+                        secondaryLight,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: bottomSpacing * 1.5),
+                  _buildSummary(
+                    context,
+                    primaryColor,
+                    secondaryColor,
+                    textColor,
+                    mutedColor,
+                  ),
                 ],
               ),
             ),
@@ -213,90 +250,216 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
     );
   }
 
-  Widget _buildDateSelector(BuildContext context, bool isDark, Color textColor) {
+  Widget _buildDateSelector(
+    BuildContext context,
+    bool isDark,
+    Color textColor,
+  ) {
+    final baseFontSize = widget.inline ? 14.0 : 16.0;
+    final fontSize = baseFontSize * widget.size.fontSize;
+    final iconSize = 16.0 * widget.size.iconSize;
+    final buttonSize = 28.0 * widget.size.scale;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildNavButton(context, Icons.chevron_left, isDark, textColor),
-        Text(widget.date, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor, letterSpacing: -0.5)),
-        _buildNavButton(context, Icons.chevron_right, isDark, textColor),
-      ],
-    );
-  }
-
-  Widget _buildNavButton(BuildContext context, IconData icon, bool isDark, Color textColor) {
-    return Container(
-      decoration: BoxDecoration(color: isDark ? Colors.grey.shade700.withOpacity(0.3) : Colors.grey.shade100.withOpacity(0.5), shape: BoxShape.circle),
-      child: IconButton(
-        icon: Icon(icon, color: textColor),
-        onPressed: () {},
-        padding: EdgeInsets.all(widget.size.getSmallSpacing()),
-        constraints: widget.size.getHeightConstraints(),
-      ),
-    );
-  }
-
-  Widget _buildChart(BuildContext context, Color gridColor, Color primaryColor, Color primaryLight, Color secondaryColor, Color secondaryLight) {
-    return SizedBox(
-      height: 256,
-      child: Stack(
-        children: [
-          _buildGridLines(gridColor),
-          ...widget.ranges.asMap().entries.map((entry) {
-            final index = entry.key;
-            final data = entry.value;
-            final step = 0.06;
-            final itemAnimation = CurvedAnimation(
-              parent: _animationController,
-              curve: Interval(index * step, 0.6 + index * step, curve: Curves.easeOutCubic),
-            );
-            return _RangeBar(
-              data: data,
-              primaryColor: primaryColor,
-              primaryLight: primaryLight,
-              secondaryColor: secondaryColor,
-              secondaryLight: secondaryLight,
-              animation: itemAnimation,
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGridLines(Color color) {
-    return Column(
-      children: List.generate(4, (index) => Expanded(child: Container(decoration: BoxDecoration(border: Border(top: BorderSide(color: color, width: 1, style: BorderStyle.solid)))))),
-    );
-  }
-
-  Widget _buildSummary(BuildContext context, Color primaryColor, Color secondaryColor, Color textColor, Color mutedColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildSummaryItem(context, primaryColor, '${widget.primarySummary.min}-${widget.primarySummary.max}', widget.primarySummary.label, textColor, mutedColor),
-        _buildSummaryItem(context, secondaryColor, '${widget.secondarySummary.min}-${widget.secondarySummary.max}', widget.secondarySummary.label, textColor, mutedColor),
-      ],
-    );
-  }
-
-  Widget _buildSummaryItem(BuildContext context, Color color, String value, String label, Color textColor, Color mutedColor) {
-    return Row(
-      children: [
-        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
-        SizedBox(width: widget.size.getItemSpacing()),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 30,
-              child: AnimatedFlipCounter(
-                value: double.parse(value.split('-')[0]) * _animation.value,
-                textStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textColor, height: 1.0),
-              ),
+        _buildNavButton(
+          context,
+          Icons.chevron_left,
+          isDark,
+          textColor,
+          iconSize,
+          buttonSize,
+        ),
+        Flexible(
+          child: Text(
+            widget.date,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+              letterSpacing: -0.5,
             ),
-            Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: mutedColor)),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        _buildNavButton(
+          context,
+          Icons.chevron_right,
+          isDark,
+          textColor,
+          iconSize,
+          buttonSize,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavButton(
+    BuildContext context,
+    IconData icon,
+    bool isDark,
+    Color textColor,
+    double iconSize,
+    double buttonSize,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            isDark
+                ? Colors.grey.shade700.withOpacity(0.3)
+                : Colors.grey.shade100.withOpacity(0.5),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: textColor, size: iconSize),
+        onPressed: () {},
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(
+          minWidth: buttonSize,
+          minHeight: buttonSize,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChart(
+    BuildContext context,
+    Color gridColor,
+    Color primaryColor,
+    Color primaryLight,
+    Color secondaryColor,
+    Color secondaryLight,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final chartHeight = constraints.maxHeight;
+        final chartWidth = constraints.maxWidth;
+
+        return Stack(
+          children: [
+            ...widget.ranges.asMap().entries.map((entry) {
+              final index = entry.key;
+              final data = entry.value;
+              final step = 0.06;
+              final itemAnimation = CurvedAnimation(
+                parent: _animationController,
+                curve: Interval(
+                  index * step,
+                  0.6 + index * step,
+                  curve: Curves.easeOutCubic,
+                ),
+              );
+              return _RangeBar(
+                data: data,
+                primaryColor: primaryColor,
+                primaryLight: primaryLight,
+                secondaryColor: secondaryColor,
+                secondaryLight: secondaryLight,
+                animation: itemAnimation,
+                size: widget.size,
+                chartHeight: chartHeight,
+                chartWidth: chartWidth,
+                totalCount: widget.ranges.length,
+              );
+            }),
           ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSummary(
+    BuildContext context,
+    Color primaryColor,
+    Color secondaryColor,
+    Color textColor,
+    Color mutedColor,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: _buildSummaryItem(
+            context,
+            primaryColor,
+            '${widget.primarySummary.min}-${widget.primarySummary.max}',
+            widget.primarySummary.label,
+            textColor,
+            mutedColor,
+          ),
+        ),
+        Flexible(
+          child: _buildSummaryItem(
+            context,
+            secondaryColor,
+            '${widget.secondarySummary.min}-${widget.secondarySummary.max}',
+            widget.secondarySummary.label,
+            textColor,
+            mutedColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSummaryItem(
+    BuildContext context,
+    Color color,
+    String value,
+    String label,
+    Color textColor,
+    Color mutedColor,
+  ) {
+    final baseValueFontSize = widget.inline ? 16.0 : 20.0;
+    final baseLabelFontSize = widget.inline ? 10.0 : 11.0;
+    final valueFontSize = baseValueFontSize * widget.size.fontSize;
+    final labelFontSize = baseLabelFontSize * widget.size.fontSize;
+    final indicatorWidth = 8.0 * widget.size.scale;
+    final indicatorHeight = 5.0 * widget.size.scale;
+    final spacing = 4.0 * widget.size.spacing;
+    final valueHeight = 16.0 * widget.size.scale;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: indicatorWidth,
+          height: indicatorHeight,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(indicatorHeight / 2),
+          ),
+        ),
+        SizedBox(width: spacing),
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: valueHeight,
+                child: AnimatedFlipCounter(
+                  value: double.parse(value.split('-')[0]) * _animation.value,
+                  textStyle: TextStyle(
+                    fontSize: valueFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                    height: 1.0,
+                  ),
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: labelFontSize,
+                  fontWeight: FontWeight.w500,
+                  color: mutedColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -310,6 +473,10 @@ class _RangeBar extends StatelessWidget {
   final Color secondaryColor;
   final Color secondaryLight;
   final Animation<double> animation;
+  final HomeWidgetSize size;
+  final double chartHeight;
+  final double chartWidth;
+  final int totalCount;
 
   const _RangeBar({
     required this.data,
@@ -318,54 +485,94 @@ class _RangeBar extends StatelessWidget {
     required this.secondaryColor,
     required this.secondaryLight,
     required this.animation,
+    required this.size,
+    required this.chartHeight,
+    required this.chartWidth,
+    required this.totalCount,
   });
 
   @override
   Widget build(BuildContext context) {
-    final dayIndex = data.day == 'Wed' ? 0 : data.day == 'Thu' ? 1 : data.day == 'Fri' ? 2 : data.day == 'Sat' ? 3 : data.day == 'Sun' ? 4 : data.day == 'Mon' ? 5 : 6;
+    final dayIndex =
+        data.day == 'Wed'
+            ? 0
+            : data.day == 'Thu'
+            ? 1
+            : data.day == 'Fri'
+            ? 2
+            : data.day == 'Sat'
+            ? 3
+            : data.day == 'Sun'
+            ? 4
+            : data.day == 'Mon'
+            ? 5
+            : 6;
+
+    final strokeWidth = 1.5; // 更细的线条
+    final dayLabelFontSize = 9.0; // 更小的标签字体
+
+    final barSpacing = chartWidth / totalCount; // 基于数据数量计算水平间距
+    final barWidth = barSpacing * 0.6; // 条形宽度为间距的 60%，留出间隙
 
     return Positioned(
-      left: dayIndex * 48.0,
+      left: dayIndex * barSpacing + (barSpacing - barWidth) / 2,
       child: SizedBox(
-        width: 12,
-        height: 256,
+        width: barWidth,
+        height: chartHeight,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             Positioned(
-              top: data.primaryRange.startPercent * 256,
+              top: data.primaryRange.startPercent * (chartHeight - 18),
               left: 0,
               right: 0,
-              height: data.primaryRange.heightPercent * 256 * animation.value,
+              height:
+                  data.primaryRange.heightPercent *
+                  (chartHeight - 18) *
+                  animation.value,
               child: Column(
                 children: [
-                  Container(height: 6, color: primaryColor),
-                  Expanded(child: Container(color: primaryLight.withOpacity(0.8))),
-                  Container(height: 6, color: primaryColor),
+                  Container(height: strokeWidth, color: primaryColor),
+                  Expanded(
+                    child: Container(color: primaryLight.withOpacity(0.8)),
+                  ),
+                  Container(height: strokeWidth, color: primaryColor),
                 ],
               ),
             ),
             Positioned(
-              top: data.secondaryRange.startPercent * 256,
+              top: data.secondaryRange.startPercent * (chartHeight - 18),
               left: 0,
               right: 0,
-              height: data.secondaryRange.heightPercent * 256 * animation.value,
+              height:
+                  data.secondaryRange.heightPercent *
+                  (chartHeight - 18) *
+                  animation.value,
               child: Column(
                 children: [
-                  Container(height: 6, color: secondaryColor),
-                  Expanded(child: Container(color: secondaryLight.withOpacity(0.8))),
-                  Container(height: 6, color: secondaryColor),
+                  Container(height: strokeWidth, color: secondaryColor),
+                  Expanded(
+                    child: Container(color: secondaryLight.withOpacity(0.8)),
+                  ),
+                  Container(height: strokeWidth, color: secondaryColor),
                 ],
               ),
             ),
             Positioned(
-              bottom: -20,
+              bottom: -14,
               left: 0,
               right: 0,
               child: Center(
                 child: Text(
                   data.day,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade500 : Colors.grey.shade400),
+                  style: TextStyle(
+                    fontSize: dayLabelFontSize,
+                    fontWeight: FontWeight.w500,
+                    color:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade500
+                            : Colors.grey.shade400,
+                  ),
                 ),
               ),
             ),
