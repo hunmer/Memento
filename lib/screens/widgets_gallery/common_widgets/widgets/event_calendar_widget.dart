@@ -87,13 +87,13 @@ class EventCalendarWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final eventsList = (props['events'] as List<dynamic>?)
+    final eventsList =
+        (props['events'] as List<dynamic>?)
             ?.map((e) => EventData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
-    final weekDatesList = (props['weekDates'] as List<dynamic>?)
-            ?.map((e) => e as int)
-            .toList() ??
+    final weekDatesList =
+        (props['weekDates'] as List<dynamic>?)?.map((e) => e as int).toList() ??
         [];
 
     return EventCalendarWidget(
@@ -140,10 +140,19 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
     super.dispose();
   }
 
+  /// 判断是否为 large 或更大的尺寸
+  bool get _isLargeSize {
+    return widget.size is LargeSize ||
+        widget.size is Large3Size ||
+        widget.size is Wide2Size ||
+        widget.size is Wide3Size;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark ? const Color(0xFFEF4444) : const Color(0xFFEF4444);
+    final primaryColor =
+        isDark ? const Color(0xFFEF4444) : const Color(0xFFEF4444);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -167,75 +176,140 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
                 ],
               ),
               padding: widget.size.getPadding(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 180,
-                        child: Column(
-                          children: [
-                            _DateSection(
-                              day: widget.day,
-                              weekday: widget.weekday,
-                              month: widget.month,
-                              eventCount: widget.eventCount,
-                              primaryColor: primaryColor,
-                              animation: _animation,
-                              size: widget.size,
-                            ),
-                            SizedBox(height: widget.size.getTitleSpacing()),
-                            _WeekCalendar(
-                              weekDates: widget.weekDates,
-                              currentDay: widget.day,
-                              weekStartDay: widget.weekStartDay,
-                              primaryColor: primaryColor,
-                              isDark: isDark,
-                              size: widget.size,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: widget.size.getItemSpacing()),
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  for (int i = 0; i < widget.events.length; i++) ...[
-                                    if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
-                                    _EventCard(
-                                      event: widget.events[i],
-                                      animation: _animation,
-                                      index: i,
-                                      size: widget.size,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: widget.size.getItemSpacing()),
-                  _ReminderItem(
-                    emoji: widget.reminderEmoji,
-                    text: widget.reminder,
-                    animation: _animation,
-                    size: widget.size,
-                  ),
-                ],
-              ),
+              child:
+                  _isLargeSize
+                      ? _buildLargeLayout(isDark, primaryColor)
+                      : _buildCompactLayout(isDark, primaryColor),
             ),
           ),
         );
       },
+    );
+  }
+
+  /// 大尺寸布局：横向布局，日期+周历在左，事件列表在右
+  Widget _buildLargeLayout(bool isDark, Color primaryColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 160,
+              child: Column(
+                children: [
+                  _DateSection(
+                    day: widget.day,
+                    weekday: widget.weekday,
+                    month: widget.month,
+                    eventCount: widget.eventCount,
+                    primaryColor: primaryColor,
+                    animation: _animation,
+                    size: widget.size,
+                  ),
+                  SizedBox(height: widget.size.getTitleSpacing()),
+                  _WeekCalendar(
+                    weekDates: widget.weekDates,
+                    currentDay: widget.day,
+                    weekStartDay: widget.weekStartDay,
+                    primaryColor: primaryColor,
+                    isDark: isDark,
+                    size: widget.size,
+                    isScrollable: false,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: widget.size.getItemSpacing()),
+            Expanded(
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (int i = 0; i < widget.events.length; i++) ...[
+                          if (i > 0)
+                            SizedBox(height: widget.size.getItemSpacing()),
+                          _EventCard(
+                            event: widget.events[i],
+                            animation: _animation,
+                            index: i,
+                            size: widget.size,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: widget.size.getItemSpacing()),
+        _ReminderItem(
+          emoji: widget.reminderEmoji,
+          text: widget.reminder,
+          animation: _animation,
+          size: widget.size,
+        ),
+      ],
+    );
+  }
+
+  /// 紧凑布局：纵向布局，日期在上方，周历横向滚动，事件列表单独一行
+  Widget _buildCompactLayout(bool isDark, Color primaryColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _DateSection(
+          day: widget.day,
+          weekday: widget.weekday,
+          month: widget.month,
+          eventCount: widget.eventCount,
+          primaryColor: primaryColor,
+          animation: _animation,
+          size: widget.size,
+        ),
+        SizedBox(height: widget.size.getItemSpacing()),
+        _WeekCalendar(
+          weekDates: widget.weekDates,
+          currentDay: widget.day,
+          weekStartDay: widget.weekStartDay,
+          primaryColor: primaryColor,
+          isDark: isDark,
+          size: widget.size,
+          isScrollable: true,
+        ),
+        SizedBox(height: widget.size.getItemSpacing()),
+        // 事件列表单独一行
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int i = 0; i < widget.events.length; i++) ...[
+                  if (i > 0) SizedBox(height: widget.size.getItemSpacing()),
+                  _EventCard(
+                    event: widget.events[i],
+                    animation: _animation,
+                    index: i,
+                    size: widget.size,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: widget.size.getItemSpacing()),
+        _ReminderItem(
+          emoji: widget.reminderEmoji,
+          text: widget.reminder,
+          animation: _animation,
+          size: widget.size,
+        ),
+      ],
     );
   }
 }
@@ -283,8 +357,24 @@ class _DateSection extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(weekday, style: TextStyle(fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.2)),
-              Text('$month · $eventCount Events', style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w500, color: Colors.grey.shade400, height: 1.2)),
+              Text(
+                weekday,
+                style: TextStyle(
+                  fontSize: size.getSubtitleFontSize(),
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.grey.shade900,
+                  height: 1.2,
+                ),
+              ),
+              Text(
+                '$month · $eventCount Events',
+                style: TextStyle(
+                  fontSize: size.getLegendFontSize(),
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade400,
+                  height: 1.2,
+                ),
+              ),
             ],
           ),
         ),
@@ -300,6 +390,7 @@ class _WeekCalendar extends StatelessWidget {
   final Color primaryColor;
   final bool isDark;
   final HomeWidgetSize size;
+  final bool isScrollable;
 
   const _WeekCalendar({
     required this.weekDates,
@@ -308,75 +399,196 @@ class _WeekCalendar extends StatelessWidget {
     required this.primaryColor,
     required this.isDark,
     required this.size,
+    this.isScrollable = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-    const int daysPerRow = 7;
-    final rowCount = (weekDates.length / daysPerRow).ceil();
+    const int columns = 7;
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(
-            7,
-            (index) => SizedBox(
-              width: 20,
-              child: Center(
-                child: Text(weekdays[(weekStartDay + index) % 7], style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w400, color: Colors.grey.shade400)),
+    // 计算行数
+    final rowCount = (weekDates.length / columns).ceil();
+
+    // 构建网格内容
+    List<Widget> rows = [];
+
+    for (int row = 0; row < rowCount; row++) {
+      List<Widget> cells = [];
+      for (int col = 0; col < columns; col++) {
+        final index = row * columns + col;
+        if (index < weekDates.length) {
+          final day = weekDates[index];
+          final isCurrent = day == currentDay;
+          final isPast = day < currentDay;
+
+          cells.add(
+            Expanded(
+              child: SizedBox(
+                height: isScrollable ? 24 : 20,
+                child: Center(
+                  child: _buildDayWidget(
+                    day,
+                    isCurrent,
+                    isPast,
+                    isDark,
+                    primaryColor,
+                    size,
+                  ),
+                ),
               ),
             ),
-          ),
+          );
+        } else {
+          // 空单元格
+          cells.add(Expanded(child: SizedBox(height: isScrollable ? 24 : 20)));
+        }
+      }
+
+      rows.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: row < rowCount - 1 ? 4 : 0),
+          child: Row(children: cells),
+        ),
+      );
+    }
+
+    final calendarContent = Column(
+      children: [
+        // 星期标题行 - 固定7列
+        Row(
+          children: List.generate(columns, (index) {
+            return Expanded(
+              child: Center(
+                child: Text(
+                  weekdays[(weekStartDay + index) % 7],
+                  style: TextStyle(
+                    fontSize: size.getLegendFontSize(),
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+              ),
+            );
+          }),
         ),
         SizedBox(height: size.getItemSpacing() / 4),
-        ...List.generate(rowCount, (rowIndex) {
-          final startIndex = rowIndex * daysPerRow;
-          final endIndex = (startIndex + daysPerRow).clamp(0, weekDates.length);
-          final rowDates = weekDates.sublist(startIndex, endIndex);
+        // 日期网格
+        ...rows,
+      ],
+    );
 
-          return Padding(
-            padding: EdgeInsets.only(bottom: rowIndex < rowCount - 1 ? 4 : 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(rowDates.length, (index) {
-                final day = rowDates[index];
-                final isCurrent = day == currentDay;
-                final isPast = day < currentDay;
+    // 如果需要滚动，包装整个内容
+    if (isScrollable) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: IntrinsicWidth(
+          child: Column(
+            children: [
+              // 星期标题行 - 固定宽度
+              Row(
+                children: List.generate(columns, (index) {
+                  return SizedBox(
+                    width: 28,
+                    child: Center(
+                      child: Text(
+                        weekdays[(weekStartDay + index) % 7],
+                        style: TextStyle(
+                          fontSize: size.getLegendFontSize(),
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              SizedBox(height: size.getItemSpacing() / 4),
+              // 日期网格
+              ...List.generate(rowCount, (row) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: row < rowCount - 1 ? 4 : 0),
+                  child: Row(
+                    children: List.generate(columns, (col) {
+                      final index = row * columns + col;
+                      if (index < weekDates.length) {
+                        final day = weekDates[index];
+                        final isCurrent = day == currentDay;
+                        final isPast = day < currentDay;
 
-                return SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: Center(
-                    child: isCurrent
-                        ? Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: isDark ? primaryColor.withOpacity(0.15) : const Color(0xFFFEE2E2),
-                              shape: BoxShape.circle,
-                              boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.2), blurRadius: 4)],
-                            ),
-                            child: Center(
-                              child: Text('$day', style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: primaryColor)),
-                            ),
-                          )
-                        : Text(
-                            '$day',
-                            style: TextStyle(
-                              fontSize: size.getLegendFontSize(),
-                              fontWeight: isPast ? FontWeight.w400 : FontWeight.w500,
-                              color: isPast ? Colors.grey.shade400 : (isDark ? Colors.grey.shade200 : Colors.grey.shade900),
+                        return SizedBox(
+                          width: 28,
+                          height: 24,
+                          child: Center(
+                            child: _buildDayWidget(
+                              day,
+                              isCurrent,
+                              isPast,
+                              isDark,
+                              primaryColor,
+                              size,
                             ),
                           ),
+                        );
+                      } else {
+                        return SizedBox(width: 28, height: 24);
+                      }
+                    }),
                   ),
                 );
               }),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return calendarContent;
+  }
+
+  Widget _buildDayWidget(
+    int day,
+    bool isCurrent,
+    bool isPast,
+    bool isDark,
+    Color primaryColor,
+    HomeWidgetSize size,
+  ) {
+    if (isCurrent) {
+      return Container(
+        width: isScrollable ? 22 : 20,
+        height: isScrollable ? 22 : 20,
+        decoration: BoxDecoration(
+          color: isDark
+              ? primaryColor.withOpacity(0.15)
+              : const Color(0xFFFEE2E2),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: primaryColor.withOpacity(0.2), blurRadius: 4),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            '$day',
+            style: TextStyle(
+              fontSize: size.getLegendFontSize(),
+              fontWeight: FontWeight.w700,
+              color: primaryColor,
             ),
-          );
-        }),
-      ],
+          ),
+        ),
+      );
+    }
+
+    return Text(
+      '$day',
+      style: TextStyle(
+        fontSize: size.getLegendFontSize(),
+        fontWeight: isPast ? FontWeight.w400 : FontWeight.w500,
+        color: isPast
+            ? Colors.grey.shade400
+            : (isDark ? Colors.grey.shade200 : Colors.grey.shade900),
+      ),
     );
   }
 }
@@ -402,11 +614,22 @@ class _ReminderItem extends StatelessWidget {
       children: [
         Transform.rotate(
           angle: -0.1,
-          child: Text(emoji, style: TextStyle(fontSize: size.getSubtitleFontSize())),
+          child: Text(
+            emoji,
+            style: TextStyle(fontSize: size.getSubtitleFontSize()),
+          ),
         ),
         SizedBox(width: size.getItemSpacing() / 2),
         Expanded(
-          child: Text(text, style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade200 : Colors.grey.shade800, height: 1.2)),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: size.getLegendFontSize(),
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
+              height: 1.2,
+            ),
+          ),
         ),
       ],
     );
@@ -431,7 +654,11 @@ class _EventCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final itemAnimation = CurvedAnimation(
       parent: animation,
-      curve: Interval(0.15 + index * 0.12, 0.6 + index * 0.12, curve: Curves.easeOutCubic),
+      curve: Interval(
+        0.15 + index * 0.12,
+        0.6 + index * 0.12,
+        curve: Curves.easeOutCubic,
+      ),
     );
 
     return AnimatedBuilder(
@@ -449,13 +676,33 @@ class _EventCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.title, style: TextStyle(fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900, height: 1.3)),
+                  Text(
+                    event.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: size.getSubtitleFontSize(),
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                      height: 1.3,
+                    ),
+                  ),
                   SizedBox(height: size.getItemSpacing() / 4),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 14, color: event.iconColor),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: event.iconColor,
+                      ),
                       SizedBox(width: size.getItemSpacing() / 3),
-                      Text('${event.time} · ${event.duration}${event.location != null ? ' · ${event.location}' : ''}', style: TextStyle(fontSize: size.getLegendFontSize(), color: Colors.grey.shade500)),
+                      Text(
+                        '${event.time} · ${event.duration}${event.location != null ? ' · ${event.location}' : ''}',
+                        style: TextStyle(
+                          fontSize: size.getLegendFontSize(),
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
                     ],
                   ),
                   if (event.buttonLabel != null) ...[
@@ -463,12 +710,25 @@ class _EventCard extends StatelessWidget {
                     GestureDetector(
                       onTap: () {},
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? event.color.withOpacity(0.2) : event.color.withOpacity(0.1),
+                          color:
+                              isDark
+                                  ? event.color.withOpacity(0.2)
+                                  : event.color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(event.buttonLabel!, style: TextStyle(fontSize: size.getLegendFontSize(), fontWeight: FontWeight.w700, color: event.color)),
+                        child: Text(
+                          event.buttonLabel!,
+                          style: TextStyle(
+                            fontSize: size.getLegendFontSize(),
+                            fontWeight: FontWeight.w700,
+                            color: event.color,
+                          ),
+                        ),
                       ),
                     ),
                   ],
