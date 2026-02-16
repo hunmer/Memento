@@ -198,19 +198,16 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 ],
               ),
               padding: widget.size.getPadding(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildHeader(isDark, textColor, 0, step),
-                    SizedBox(height: widget.size.getTitleSpacing()),
-                    _buildAverageSection(isDark, 1, step),
-                    SizedBox(height: widget.size.getTitleSpacing()),
-                    _buildChart(gridColor, textColor, step),
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildHeader(isDark, textColor, 0, step),
+                  SizedBox(height: widget.size.getTitleSpacing()),
+                  _buildAverageSection(isDark, 1, step),
+                  SizedBox(height: widget.size.getTitleSpacing()),
+                  _buildChart(gridColor, textColor, step),
+                ],
               ),
             ),
           ),
@@ -236,29 +233,39 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: TextStyle(
-                    fontSize: widget.size.getTitleFontSize() * 0.8,
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? Colors.white : Colors.grey.shade900,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                Flexible(
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      fontSize: widget.size.getTitleFontSize() * 0.8,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : Colors.grey.shade900,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
                 SizedBox(height: widget.size.getItemSpacing()),
-                Text(
-                  widget.dateRange,
-                  style: TextStyle(
-                    fontSize: widget.size.getSubtitleFontSize(),
-                    fontWeight: FontWeight.w500,
-                    color: textColor,
+                Flexible(
+                  child: Text(
+                    widget.dateRange,
+                    style: TextStyle(
+                      fontSize: widget.size.getSubtitleFontSize(),
+                      fontWeight: FontWeight.w500,
+                      color: textColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],
             ),
-            if (widget.size is! SmallSize)
+          ),
+          if (widget.size is! SmallSize)
               Container(
                 width:
                     widget.size.getIconSize() * widget.size.iconContainerScale,
@@ -311,7 +318,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 Text(
                   widget.averageValue.toStringAsFixed(1),
                   style: TextStyle(
-                    fontSize: widget.size.getLargeFontSize(),
+                    fontSize: widget.size.getLargeFontSize() * 0.8,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     letterSpacing: -2,
@@ -327,15 +334,6 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                   ),
                 ),
               ],
-            ),
-            SizedBox(height: widget.size.getItemSpacing()),
-            Text(
-              'Daily average',
-              style: TextStyle(
-                fontSize: widget.size.getSubtitleFontSize() + 2,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-              ),
             ),
           ],
         ),

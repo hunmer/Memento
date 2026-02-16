@@ -163,17 +163,6 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'List of countries',
-                          style: TextStyle(
-                            fontSize: widget.size.getLegendFontSize(),
-                            fontWeight: FontWeight.w500,
-                            color:
-                                isDark
-                                    ? const Color(0xFFE2E8F0)
-                                    : const Color(0xFF0F172A),
-                          ),
-                        ),
-                        Text(
                           widget.itemCount,
                           style: TextStyle(
                             fontSize: widget.size.getLegendFontSize(),
@@ -194,27 +183,28 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget>
                             final maxValue = widget.items.first.value;
                             final maxWidth = constraints.maxWidth;
                             return Column(
-                              children: widget.items.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final item = entry.value;
-                                final step = 0.05;
-                                final itemAnimation = CurvedAnimation(
-                                  parent: _animationController,
-                                  curve: Interval(
-                                    index * step,
-                                    0.6 + index * step,
-                                    curve: Curves.easeOutCubic,
-                                  ),
-                                );
-                                return _RankedBarWidget(
-                                  item: item,
-                                  animation: itemAnimation,
-                                  isLast: index == widget.items.length - 1,
-                                  size: widget.size,
-                                  maxValue: maxValue,
-                                  maxWidth: maxWidth,
-                                );
-                              }).toList(),
+                              children:
+                                  widget.items.asMap().entries.map((entry) {
+                                    final index = entry.key;
+                                    final item = entry.value;
+                                    final step = 0.05;
+                                    final itemAnimation = CurvedAnimation(
+                                      parent: _animationController,
+                                      curve: Interval(
+                                        index * step,
+                                        0.6 + index * step,
+                                        curve: Curves.easeOutCubic,
+                                      ),
+                                    );
+                                    return _RankedBarWidget(
+                                      item: item,
+                                      animation: itemAnimation,
+                                      isLast: index == widget.items.length - 1,
+                                      size: widget.size,
+                                      maxValue: maxValue,
+                                      maxWidth: maxWidth,
+                                    );
+                                  }).toList(),
                             );
                           },
                         ),
@@ -257,7 +247,8 @@ class _RankedBarWidget extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         final animatedValue = item.value * animation.value;
-        final width = maxValue > 0 ? (animatedValue / maxValue) * maxWidth : 0.0;
+        final width =
+            maxValue > 0 ? (animatedValue / maxValue) * maxWidth : 0.0;
 
         return Container(
           margin: EdgeInsets.only(bottom: isLast ? 0 : 1),
@@ -265,53 +256,53 @@ class _RankedBarWidget extends StatelessWidget {
           child: Row(
             children: [
               ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(6),
-                    bottomRight: Radius.circular(6),
-                  ),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: width,
-                    height: size.getRankedBarItemHeight(),
-                    decoration: BoxDecoration(color: item.color),
-                    child: ClipRect(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: size.getPadding().left,
-                        ),
-                        child: Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                item.label,
-                                style: TextStyle(
-                                  fontSize: size.getLegendFontSize(),
-                                  fontWeight: FontWeight.w600,
-                                  color: textColor,
-                                  letterSpacing: 0.5,
-                                ),
-                                overflow: TextOverflow.fade,
-                                softWrap: false,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            AnimatedFlipCounter(
-                              value: item.value * 100.0 * animation.value,
-                              fractionDigits: 0,
-                              textStyle: TextStyle(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(6),
+                  bottomRight: Radius.circular(6),
+                ),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: width,
+                  height: size.getRankedBarItemHeight(),
+                  decoration: BoxDecoration(color: item.color),
+                  child: ClipRect(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size.getPadding().left,
+                      ),
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              item.label,
+                              style: TextStyle(
                                 fontSize: size.getLegendFontSize(),
                                 fontWeight: FontWeight.w600,
                                 color: textColor,
+                                letterSpacing: 0.5,
                               ),
+                              overflow: TextOverflow.fade,
+                              softWrap: false,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 8),
+                          AnimatedFlipCounter(
+                            value: item.value * 100.0 * animation.value,
+                            fractionDigits: 0,
+                            textStyle: TextStyle(
+                              fontSize: size.getLegendFontSize(),
+                              fontWeight: FontWeight.w600,
+                              color: textColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
         );
       },
     );

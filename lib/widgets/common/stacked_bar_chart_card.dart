@@ -349,12 +349,12 @@ class _StackedBarColumn extends StatelessWidget {
         final isFirst = index == 0;
         final weight = (segment.value * 10).round();
 
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: isLast ? 0 : barSpacing,
-          ),
-          child: Flexible(
-            flex: weight > 0 ? weight : 1,
+        return Flexible(
+          flex: weight > 0 ? weight : 1,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: isLast ? 0 : barSpacing,
+            ),
             child: AnimatedBuilder(
               animation: animation,
               builder: (context, child) {
