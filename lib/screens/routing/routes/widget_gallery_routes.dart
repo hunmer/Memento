@@ -89,7 +89,6 @@ import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rounded_task_list_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/chart_icon_display_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_mood_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_spending_widget_example.dart';
@@ -612,11 +611,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '心情图表卡片',
         ),
         RouteDefinition(
-          path: '/widgets_gallery/daily_reflection_card',
-          handler: (settings) => RouteHelpers.createRoute(const DailyReflectionCardExample(), settings: settings),
-          description: '每日反思卡片',
-        ),
-        RouteDefinition(
           path: '/widgets_gallery/modern_rounded_mood_widget',
       handler:
           (settings) => RouteHelpers.createRoute(
@@ -1044,13 +1038,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '日记提示卡片',
     subtitle: 'JournalPromptCard',
     route: '/widgets_gallery/journal_prompt_card',
-  ),
-  WidgetPreviewItem(
-    category: '日历类',
-    icon: Icons.psychology_rounded,
-    title: '每日反思卡片',
-    subtitle: 'DailyReflectionCard',
-    route: '/widgets_gallery/daily_reflection_card',
   ),
   // 图表类
   WidgetPreviewItem(

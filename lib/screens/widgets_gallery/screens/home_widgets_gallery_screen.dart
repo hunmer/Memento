@@ -331,13 +331,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
         subtitle: 'JournalPromptCard - 日记提示问题与快捷操作卡片',
         route: '/widgets_gallery/journal_prompt_card',
       ),
-      _buildListItem(
-        context,
-        icon: Icons.psychology_rounded,
-        title: '每日反思卡片',
-        subtitle: 'DailyReflectionCard - 每日反思引导问题与操作卡片',
-        route: '/widgets_gallery/daily_reflection_card',
-      ),
     ];
   }
 

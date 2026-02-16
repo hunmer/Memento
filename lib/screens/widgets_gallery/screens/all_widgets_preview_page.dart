@@ -36,7 +36,6 @@ import 'package:Memento/screens/widgets_gallery/screens/daily_events_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/daily_schedule_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_schedule_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/daily_reflection_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/line_chart_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/trend_line_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/smooth_line_chart_card_example.dart';
@@ -402,8 +401,6 @@ class _WidgetRegistry {
         () => const TimelineScheduleCardExample(),
     '/widgets_gallery/journal_prompt_card':
         () => const JournalPromptCardExample(),
-    '/widgets_gallery/daily_reflection_card':
-        () => const DailyReflectionCardExample(),
     // 图表类
     '/widgets_gallery/line_chart_trend_card':
         () => const LineChartTrendCardExample(),

@@ -45,7 +45,8 @@ class LineChartTrendCardWidget extends StatefulWidget {
       value: (props['value'] as num?)?.toDouble() ?? 0.0,
       label: props['label'] as String? ?? '',
       changePercent: (props['changePercent'] as num?)?.toDouble() ?? 0.0,
-      dataPoints: (props['dataPoints'] as List<dynamic>?)
+      dataPoints:
+          (props['dataPoints'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [],
@@ -89,12 +90,15 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1F2937) : Colors.white;
-    final primaryColor = isDark ? const Color(0xFFFB7185) : const Color(0xFFF43F5E);
+    final primaryColor =
+        isDark ? const Color(0xFFFB7185) : const Color(0xFFF43F5E);
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final secondaryTextColor =
         isDark ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF);
-    final gridColor = isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
-    final axisColor = isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB);
+    final gridColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
+    final axisColor =
+        isDark ? const Color(0xFF4B5563) : const Color(0xFFD1D5DB);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -104,7 +108,8 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 320,
+              width: widget.inline ? double.maxFinite : null,
+              constraints: widget.size.getHeightConstraints(),
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -117,20 +122,46 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 数值和标签区域
-                  _buildHeader(
-                    textColor,
-                    secondaryTextColor,
-                    primaryColor,
-                    axisColor,
-                  ),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  // 折线图区域
-                  _buildChart(primaryColor, gridColor, axisColor),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  // 计算图表可用高度：总高度 - padding(上下) - header高度 - titleSpacing
+                  final padding = widget.size.getPadding();
+                  final titleSpacing = widget.size.getTitleSpacing();
+                  // 估算 header 高度：数值行高度 + 小间距 + 标签行高度
+                  final valueFontSize = widget.size.getLargeFontSize();
+                  final labelFontSize = widget.size.getLegendFontSize();
+                  final headerHeight =
+                      valueFontSize * 1.2 + // 数值行（含 line height）
+                      widget.size.getSmallSpacing() + // 数值和标签之间
+                      labelFontSize * 1.2; // 标签行
+                  final chartHeight = (constraints.maxHeight -
+                          padding.top -
+                          padding.bottom -
+                          headerHeight -
+                          titleSpacing)
+                      .clamp(40.0, double.infinity);
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 数值和标签区域
+                      _buildHeader(
+                        textColor,
+                        secondaryTextColor,
+                        primaryColor,
+                        axisColor,
+                      ),
+                      SizedBox(height: titleSpacing),
+                      // 折线图区域
+                      _buildChart(
+                        primaryColor,
+                        gridColor,
+                        axisColor,
+                        chartHeight,
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -140,9 +171,20 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
   }
 
   Widget _buildHeader(
-      Color textColor, Color secondaryTextColor, Color primaryColor, Color axisColor) {
+    Color textColor,
+    Color secondaryTextColor,
+    Color primaryColor,
+    Color axisColor,
+  ) {
     final isPositive = widget.changePercent >= 0;
     final changeColor = isPositive ? const Color(0xFF10B981) : primaryColor;
+
+    // 根据尺寸计算字体大小
+    final valueFontSize = widget.size.getLargeFontSize();
+    final unitFontSize = widget.size.getLargeFontSize() * 0.5;
+    final labelFontSize = widget.size.getLegendFontSize();
+    final changeFontSize = widget.size.getSubtitleFontSize();
+    final arrowFontSize = widget.size.getLegendFontSize() * 1.2;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,24 +193,24 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-         
             AnimatedFlipCounter(
               value: widget.value * _animation.value,
               fractionDigits: 0,
               textStyle: TextStyle(
-                fontSize: 36,
+                fontSize: valueFontSize,
                 fontWeight: FontWeight.w700,
                 color: textColor,
                 height: 1.2,
                 letterSpacing: -0.5,
               ),
             ),
-            if (widget.unit.isNotEmpty) const SizedBox(width: 4),
+            if (widget.unit.isNotEmpty)
+              SizedBox(width: widget.size.getSmallSpacing()),
 
             Text(
               widget.unit,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: unitFontSize,
                 fontWeight: FontWeight.w700,
                 color: textColor,
                 height: 1.2,
@@ -176,7 +218,7 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: widget.size.getSmallSpacing()),
         // 标签和变化率
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -184,7 +226,7 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
             Text(
               widget.label.toUpperCase(),
               style: TextStyle(
-                fontSize: 10,
+                fontSize: labelFontSize,
                 fontWeight: FontWeight.w600,
                 color: secondaryTextColor,
                 letterSpacing: 1.5,
@@ -194,20 +236,20 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!isPositive) ...[
-                  const Text(
+                  Text(
                     '▼',
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFFF43F5E),
+                      fontSize: arrowFontSize,
+                      color: const Color(0xFFF43F5E),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(width: 2),
+                  SizedBox(width: widget.size.getSmallSpacing() * 0.5),
                 ],
                 Text(
                   '${isPositive ? '+' : ''}${widget.changePercent.toStringAsFixed(2)}%',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: changeFontSize,
                     fontWeight: FontWeight.w600,
                     color: changeColor,
                   ),
@@ -220,17 +262,31 @@ class _LineChartTrendCardWidgetState extends State<LineChartTrendCardWidget>
     );
   }
 
-  Widget _buildChart(Color primaryColor, Color gridColor, Color axisColor) {
+  Widget _buildChart(
+    Color primaryColor,
+    Color gridColor,
+    Color axisColor,
+    double availableHeight,
+  ) {
+    // 根据尺寸计算线条粗细
+    final lineStrokeWidth = widget.size.getStrokeWidth() * 0.375; // ~2.25-3.75
+    final gridStrokeWidth =
+        widget.size.getStrokeWidth() * 0.1875; // ~1.125-1.875
+    final axisStrokeWidth = widget.size.getStrokeWidth() * 0.25; // ~1.5-2.5
+
     return SizedBox(
-      height: 128,
+      height: availableHeight,
       child: CustomPaint(
-        size: const Size(double.infinity, 128),
+        size: Size(double.infinity, availableHeight),
         painter: _LineChartPainter(
           dataPoints: widget.dataPoints,
           progress: _animation.value,
           lineColor: primaryColor,
           gridColor: gridColor,
           axisColor: axisColor,
+          lineStrokeWidth: lineStrokeWidth,
+          gridStrokeWidth: gridStrokeWidth,
+          axisStrokeWidth: axisStrokeWidth,
         ),
       ),
     );
@@ -244,6 +300,9 @@ class _LineChartPainter extends CustomPainter {
   final Color lineColor;
   final Color gridColor;
   final Color axisColor;
+  final double lineStrokeWidth;
+  final double gridStrokeWidth;
+  final double axisStrokeWidth;
 
   _LineChartPainter({
     required this.dataPoints,
@@ -251,6 +310,9 @@ class _LineChartPainter extends CustomPainter {
     required this.lineColor,
     required this.gridColor,
     required this.axisColor,
+    this.lineStrokeWidth = 3,
+    this.gridStrokeWidth = 1.5,
+    this.axisStrokeWidth = 2,
   });
 
   @override
@@ -259,30 +321,24 @@ class _LineChartPainter extends CustomPainter {
     final height = size.height;
 
     // 绘制Y轴线
-    final axisPaint = Paint()
-      ..color = axisColor
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round;
+    final axisPaint =
+        Paint()
+          ..color = axisColor
+          ..strokeWidth = axisStrokeWidth
+          ..strokeCap = StrokeCap.round;
 
-    canvas.drawLine(
-      Offset(0, 0),
-      Offset(0, height),
-      axisPaint,
-    );
+    canvas.drawLine(Offset(0, 0), Offset(0, height), axisPaint);
 
     // 绘制水平网格线
-    final gridPaint = Paint()
-      ..color = gridColor
-      ..strokeWidth = 1.5;
+    final gridPaint =
+        Paint()
+          ..color = gridColor
+          ..strokeWidth = gridStrokeWidth;
 
     const gridLines = 4;
     for (int i = 1; i <= gridLines; i++) {
       final y = (height / gridLines) * i;
-      canvas.drawLine(
-        Offset(8, y),
-        Offset(width, y),
-        gridPaint,
-      );
+      canvas.drawLine(Offset(8, y), Offset(width, y), gridPaint);
     }
 
     if (dataPoints.length < 2) return;
@@ -333,8 +389,8 @@ class _LineChartPainter extends CustomPainter {
       ],
     );
 
-    final fillPaint = Paint()
-      ..shader = gradient.createShader(fillPath.getBounds());
+    final fillPaint =
+        Paint()..shader = gradient.createShader(fillPath.getBounds());
     canvas.drawPath(fillPath, fillPaint);
 
     // 绘制折线
@@ -355,12 +411,13 @@ class _LineChartPainter extends CustomPainter {
       linePath.lineTo(partialX, partialY);
     }
 
-    final linePaint = Paint()
-      ..color = lineColor
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
+    final linePaint =
+        Paint()
+          ..color = lineColor
+          ..strokeWidth = lineStrokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round;
 
     canvas.drawPath(linePath, linePaint);
   }
@@ -369,6 +426,10 @@ class _LineChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.lineColor != lineColor ||
-        oldDelegate.gridColor != gridColor;
+        oldDelegate.gridColor != gridColor ||
+        oldDelegate.axisColor != axisColor ||
+        oldDelegate.lineStrokeWidth != lineStrokeWidth ||
+        oldDelegate.gridStrokeWidth != gridStrokeWidth ||
+        oldDelegate.axisStrokeWidth != axisStrokeWidth;
   }
 }
