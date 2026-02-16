@@ -85,7 +85,6 @@ import 'widgets/activity_today_pie_chart_card.dart';
 import 'widgets/timeline_schedule_card.dart';
 import 'widgets/trend_line_chart_card_wrapper.dart';
 import 'widgets/bar_chart_stats_card.dart';
-import 'widgets/weekly_bars_card.dart';
 import 'widgets/expense_comparison_chart_card.dart';
 import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
@@ -179,7 +178,6 @@ enum CommonWidgetId {
   trendLineChartCard,
   modernRoundedBalanceCard,
   barChartStatsCard,
-  weeklyBarsCard,
   expenseComparisonChart,
 }
 
@@ -887,14 +885,6 @@ class CommonWidgetsRegistry {
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
     ),
-    CommonWidgetId.weeklyBarsCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.weeklyBarsCard,
-      name: '周柱状图卡片',
-      description: '显示一周7天的数据柱状图，支持渐变效果和动画',
-      icon: Icons.bar_chart,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
-    ),
     CommonWidgetId.expenseComparisonChart: const CommonWidgetMetadata(
       id: CommonWidgetId.expenseComparisonChart,
       name: '支出对比图表',
@@ -1109,8 +1099,6 @@ class CommonWidgetBuilder {
         return ModernRoundedBalanceCard.fromProps(finalProps);
       case CommonWidgetId.barChartStatsCard:
         return BarChartStatsCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.weeklyBarsCard:
-        return WeeklyBarsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.expenseComparisonChart:
         return ExpenseComparisonChartCardWidget.fromProps(finalProps, size);
     }

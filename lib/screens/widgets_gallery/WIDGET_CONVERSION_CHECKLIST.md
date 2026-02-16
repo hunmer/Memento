@@ -34,15 +34,13 @@
 - [x] 支出分类环形图 - `expense_donut_chart` → `categoryDonutChartCard` *(已重命名)*
 - [x] 营养进度卡片 - `nutrition_progress_card` → `nutritionProgressCard`
 - [x] 分类堆叠消费卡片 - `category_stack_widget` → `categoryStackCard`
-- [x] 双柱状图统计卡片 - `dual_bar_chart_card` → `dualBarChartCard`
- - [x] 环形指标卡片 - `circular_metrics_card` → `circularMetricsCard`
+- [x] 环形指标卡片 - `circular_metrics_card` → `circularMetricsCard`
 - [x] 支出对比图表 - `expense_comparison_chart` → `expenseComparisonChart`
 - [x] 支出趋势折线图 - `spending_trend_chart` → `spendingTrendChart`
 - [x] 收入趋势卡片 - `revenue_trend_card` → `revenueTrendCard`
 - [x] 投资组合堆叠图 - `portfolio_stacked_chart`
 - [x] 性能指标柱状图 - `performance_bar_chart`
 - [x] 双范围图表统计卡片 - `dual_range_chart_card`
-- [x] 周柱状图卡片 - `weekly_bars_card`
 - [x] 曲线进度卡片 - `curve_progress_card`
 - [x] 屏幕时间统计图表 - `screen_time_chart`
 - [x] 垂直条形图卡片 - `vertical_bar_chart_widget`

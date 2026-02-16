@@ -460,20 +460,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       _buildListItem(
         context,
         icon: Icons.bar_chart,
-        title: '双柱状图统计卡片',
-        subtitle: 'DualBarChartCard - 双数值柱状图对比展示卡片',
-        route: '/widgets_gallery/dual_bar_chart_card',
-      ),
-      _buildListItem(
-        context,
-        icon: Icons.view_column,
-        title: '周柱状图卡片',
-        subtitle: 'WeeklyBarsCard - 周数据柱状图统计卡片',
-        route: '/widgets_gallery/weekly_bars_card',
-      ),
-      _buildListItem(
-        context,
-        icon: Icons.bar_chart,
         title: '屏幕时间统计图表',
         subtitle: 'ScreenTimeChartWidget - 堆叠柱状图展示屏幕使用时间',
         route: '/widgets_gallery/screen_time_chart',
