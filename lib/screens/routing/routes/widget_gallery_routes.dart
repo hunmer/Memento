@@ -42,7 +42,6 @@ import 'package:Memento/screens/widgets_gallery/screens/stacked_ring_chart_examp
 import 'package:Memento/screens/widgets_gallery/screens/earnings_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/ranked_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/smooth_line_chart_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/contribution_heatmap_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/audio_waveform_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/dual_slider_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/storage_breakdown_widget_example.dart';
@@ -351,11 +350,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/smooth_line_chart_card',
           handler: (settings) => RouteHelpers.createRoute(const SmoothLineChartCardExample(), settings: settings),
           description: '平滑折线图卡片',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/contribution_heatmap_card',
-          handler: (settings) => RouteHelpers.createRoute(const ContributionHeatmapCardExample(), settings: settings),
-          description: '贡献热力图卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/audio_waveform_widget',
@@ -1089,13 +1083,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '排名条形图卡片',
     subtitle: 'RankedBarChartCard',
     route: '/widgets_gallery/ranked_bar_chart_card',
-  ),
-  WidgetPreviewItem(
-    category: '图表类',
-    icon: Icons.grid_on,
-    title: '贡献热力图卡片',
-    subtitle: 'ContributionHeatmapCard',
-    route: '/widgets_gallery/contribution_heatmap_card',
   ),
   WidgetPreviewItem(
     category: '图表类',

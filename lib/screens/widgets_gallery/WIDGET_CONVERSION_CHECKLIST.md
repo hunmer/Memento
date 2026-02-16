@@ -18,7 +18,6 @@
 - [x] 消息列表卡片 - `article_list_card` → `messageListCard` *(已重命名)*
 - [x] 垂直柱状图卡片 - `vertical_bar_chart_card` → `verticalBarChartCard`
 - [x] 平滑折线图卡片 - `smooth_line_chart_card` → `smoothLineChartCard`
-- [x] 贡献热力图卡片 - `contribution_heatmap_card` → `contributionHeatmapCard`
 - [x] 音频波形卡片 - `audio_waveform_widget` → `audioWaveformCard`
 - [x] 双滑块小组件 - `time_zone_slider_widget` → `dualSliderCard` *(已重命名)*
 - [x] 活动进度卡片 - `activity_progress_card` → `activityProgressCard`

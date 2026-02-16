@@ -1072,63 +1072,6 @@
       ]
     },
     {
-      "name": "ContributionHeatmapCardWidget",
-      "displayName": "贡献热力图卡片",
-      "description": "显示贡献热力图、年份选择器和贡献计数",
-      "category": "chart",
-      "file": "contribution_heatmap_card.dart",
-      "parameters": [
-        {
-          "name": "title",
-          "type": "String",
-          "required": true,
-          "description": "卡片标题"
-        },
-        {
-          "name": "contributionCount",
-          "type": "String",
-          "required": true,
-          "description": "贡献计数文本"
-        },
-        {
-          "name": "years",
-          "type": "List<String>",
-          "required": true,
-          "description": "年份列表"
-        },
-        {
-          "name": "selectedYear",
-          "type": "String",
-          "required": true,
-          "description": "选中的年份"
-        },
-        {
-          "name": "months",
-          "type": "List<String>",
-          "required": true,
-          "description": "月份标签列表"
-        },
-        {
-          "name": "heatmapData",
-          "type": "List<List<int>>",
-          "required": true,
-          "description": "热力图数据（二维数组，值0-4表示等级）"
-        },
-        {
-          "name": "description",
-          "type": "String",
-          "required": true,
-          "description": "描述文本"
-        },
-        {
-          "name": "showMoreLabel",
-          "type": "String",
-          "required": true,
-          "description": "显示更多按钮标签"
-        }
-      ]
-    },
-    {
       "name": "LineChartTrendCardWidget",
       "displayName": "折线图趋势卡片",
       "description": "显示数值趋势折线图和变化百分比",

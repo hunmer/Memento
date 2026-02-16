@@ -65,7 +65,9 @@ class BarChartStatsCardWidget extends StatefulWidget {
         try {
           // 支持十六进制颜色格式
           if (colorValue.startsWith('#')) {
-            return Color(int.parse(colorValue.substring(1), radix: 16) + 0xFF000000);
+            return Color(
+              int.parse(colorValue.substring(1), radix: 16) + 0xFF000000,
+            );
           }
           // 支持 0xFF 格式
           if (colorValue.startsWith('0x')) {
@@ -85,11 +87,13 @@ class BarChartStatsCardWidget extends StatefulWidget {
       unit: props['unit'] as String? ?? '',
       icon: _parseIcon(props['icon'] as String?),
       iconColor: parseColor(props['iconColor']),
-      data: (props['data'] as List<dynamic>?)
+      data:
+          (props['data'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [],
-      labels: (props['labels'] as List<dynamic>?)
+      labels:
+          (props['labels'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
@@ -194,16 +198,19 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 ],
               ),
               padding: widget.size.getPadding(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildHeader(isDark, textColor, 0, step),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  _buildAverageSection(isDark, 1, step),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  _buildChart(gridColor, textColor, step),
-                ],
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildHeader(isDark, textColor, 0, step),
+                    SizedBox(height: widget.size.getTitleSpacing()),
+                    _buildAverageSection(isDark, 1, step),
+                    SizedBox(height: widget.size.getTitleSpacing()),
+                    _buildChart(gridColor, textColor, step),
+                  ],
+                ),
               ),
             ),
           ),
@@ -235,7 +242,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: widget.size.getTitleFontSize(),
+                    fontSize: widget.size.getTitleFontSize() * 0.8,
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                   ),
@@ -251,26 +258,29 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 ),
               ],
             ),
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: widget.iconColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.iconColor.withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            if (widget.size is! SmallSize)
+              Container(
+                width:
+                    widget.size.getIconSize() * widget.size.iconContainerScale,
+                height:
+                    widget.size.getIconSize() * widget.size.iconContainerScale,
+                decoration: BoxDecoration(
+                  color: widget.iconColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.iconColor.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: Colors.white,
+                  size: widget.size.getIconSize(),
+                ),
               ),
-              child: Icon(
-                widget.icon,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
           ],
         ),
       ),
@@ -334,15 +344,25 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
   }
 
   Widget _buildChart(Color gridColor, Color textColor, double step) {
+    // 根据尺寸动态计算图表高度
+    final chartHeight =
+        widget.size is SmallSize
+            ? 120.0
+            : widget.size is MediumSize
+            ? 160.0
+            : 192.0;
+    // 根据尺寸动态计算 Y 轴宽度
+    final yAxisWidth = widget.size.getLegendFontSize() * 2.5;
+
     return Column(
       children: [
         SizedBox(
-          height: 192,
+          height: chartHeight,
           child: Row(
             children: [
-              _buildYAxis(textColor, gridColor, step),
+              _buildYAxis(textColor, gridColor, step, yAxisWidth),
               SizedBox(width: widget.size.getItemSpacing()),
-              Expanded(child: _buildBars(gridColor, step)),
+              Expanded(child: _buildBars(gridColor, step, chartHeight)),
             ],
           ),
         ),
@@ -352,20 +372,21 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
     );
   }
 
-  Widget _buildYAxis(Color textColor, Color gridColor, double step) {
+  Widget _buildYAxis(
+    Color textColor,
+    Color gridColor,
+    double step,
+    double yAxisWidth,
+  ) {
     return SizedBox(
-      width: 24,
+      width: yAxisWidth,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(6, (index) {
           final value = (widget.maxValue / 5) * (5 - index);
           final itemAnimation = CurvedAnimation(
             parent: _animationController,
-            curve: Interval(
-              2 * step,
-              1.0,
-              curve: Curves.easeOutCubic,
-            ),
+            curve: Interval(2 * step, 1.0, curve: Curves.easeOutCubic),
           );
           return Opacity(
             opacity: itemAnimation.value,
@@ -384,12 +405,9 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
     );
   }
 
-  Widget _buildBars(Color gridColor, double step) {
+  Widget _buildBars(Color gridColor, double step, double chartHeight) {
     return Stack(
-      children: [
-        _buildGridLines(gridColor),
-        _buildDataBars(step),
-      ],
+      children: [_buildGridLines(gridColor), _buildDataBars(step, chartHeight)],
     );
   }
 
@@ -404,9 +422,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: index < 5
-                        ? gridColor.withOpacity(0.5)
-                        : gridColor,
+                    color: index < 5 ? gridColor.withOpacity(0.5) : gridColor,
                     width: index < 5 ? 1 : 1,
                     style: BorderStyle.solid,
                   ),
@@ -420,7 +436,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
     );
   }
 
-  Widget _buildDataBars(double step) {
+  Widget _buildDataBars(double step, double chartHeight) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -438,16 +454,15 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
 
         return Expanded(
           child: Container(
-            height: 192,
+            height: chartHeight,
             alignment: Alignment.bottomCenter,
             child: Container(
-              width: 12,
-              height: 192 * height * barAnimation.value,
+              width: widget.size.getBarWidth(),
+              height: chartHeight * height * barAnimation.value,
               decoration: BoxDecoration(
                 color: widget.iconColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
+                borderRadius: BorderRadius.circular(
+                  widget.size is SmallSize ? 2 : 4,
                 ),
               ),
             ),
@@ -460,11 +475,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
   Widget _buildXLabels(Color textColor, double step) {
     final labelsAnimation = CurvedAnimation(
       parent: _animationController,
-      curve: Interval(
-        0.5,
-        1.0,
-        curve: Curves.easeOutCubic,
-      ),
+      curve: Interval(0.5, 1.0, curve: Curves.easeOutCubic),
     );
 
     return Opacity(

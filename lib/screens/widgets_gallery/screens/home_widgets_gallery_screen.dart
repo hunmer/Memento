@@ -396,13 +396,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.grid_on,
-        title: '贡献热力图卡片',
-        subtitle: 'ContributionHeatmapCard - 活跃度热力图网格展示卡片',
-        route: '/widgets_gallery/contribution_heatmap_card',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.bar_chart,
         title: '柱状图统计卡片',
         subtitle: 'BarChartStatsCard - 柱状图数据统计展示卡片',
