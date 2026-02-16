@@ -182,35 +182,39 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Flexible(
+                            Expanded(
                               child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.title,
-                                  style: TextStyle(
-                                    fontSize: widget.size.getTitleFontSize(),
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        isDark
-                                            ? Colors.white
-                                            : Colors.grey.shade900,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.title,
+                                    style: TextStyle(
+                                      fontSize: widget.size.getTitleFontSize(),
+                                      fontWeight: FontWeight.w600,
+                                      color:
+                                          isDark
+                                              ? Colors.white
+                                              : Colors.grey.shade900,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                SizedBox(height: widget.size.getSmallSpacing()),
-                                Text(
-                                  widget.subtitle,
-                                  style: TextStyle(
-                                    fontSize: widget.size.getSubtitleFontSize(),
-                                    fontWeight: FontWeight.w500,
-                                    color:
-                                        isDark
-                                            ? Colors.grey.shade400
-                                            : Colors.grey.shade500,
+                                  SizedBox(height: widget.size.getSmallSpacing()),
+                                  Text(
+                                    widget.subtitle,
+                                    style: TextStyle(
+                                      fontSize: widget.size.getSubtitleFontSize(),
+                                      fontWeight: FontWeight.w500,
+                                      color:
+                                          isDark
+                                              ? Colors.grey.shade400
+                                              : Colors.grey.shade500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
                             ),
                             Container(
                               width: widget.size.getIconSize() * 1.6,

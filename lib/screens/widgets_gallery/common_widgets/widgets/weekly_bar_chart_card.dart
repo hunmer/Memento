@@ -137,8 +137,7 @@ class _CommonWeeklyBarChartCardWidgetState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 条形图区域
-                    SizedBox(
-                      height: widget.size.getHeightConstraints().maxHeight * 0.5,
+                    Expanded(
                       child: _WeeklyBars(
                         data: widget.weeklyData,
                         animation: _animation,
@@ -148,54 +147,48 @@ class _CommonWeeklyBarChartCardWidgetState
                     SizedBox(height: widget.size.getItemSpacing()),
                     // 底部信息
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    height: 32,
-                                    child: AnimatedFlipCounter(
-                                      value: widget.percentage.toDouble() *
-                                          _animation.value,
-                                      fractionDigits: 0,
-                                      suffix: '%',
-                                      textStyle: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: isDark
-                                            ? const Color(0xFFF3F4F6)
-                                            : const Color(0xFF111827),
-                                        letterSpacing: -0.5,
-                                        height: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? primaryColor.withOpacity(0.2)
-                                          : const Color(0xFFBFDBFE),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      widget.subtitle,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
-                                        color: primaryColor,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                        SizedBox(
+                          height: widget.size.getLargeFontSize() * 0.8,
+                          child: AnimatedFlipCounter(
+                            value: widget.percentage.toDouble() *
+                                _animation.value,
+                            fractionDigits: 0,
+                            suffix: '%',
+                            textStyle: TextStyle(
+                              fontSize: widget.size.getLargeFontSize() * 0.5,
+                              fontWeight: FontWeight.bold,
+                              color: isDark
+                                  ? const Color(0xFFF3F4F6)
+                                  : const Color(0xFF111827),
+                              letterSpacing: -0.5,
+                              height: 1.0,
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: widget.size.getPadding().right * 0.6,
+                                vertical: widget.size.getSmallSpacing() * 2),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? primaryColor.withOpacity(0.2)
+                                  : const Color(0xFFBFDBFE),
+                              borderRadius: BorderRadius.circular(widget.size.getPadding().right),
+                            ),
+                            child: Text(
+                              widget.subtitle,
+                              style: TextStyle(
+                                fontSize: widget.size.getSubtitleFontSize() * 0.8,
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor,
                               ),
-                            ],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
                         ),
                       ],
@@ -319,18 +312,21 @@ class _WeeklyBars extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                // 标签
-                Text(
-                  item.label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? const Color(0xFF9CA3AF)
-                        : const Color(0xFF6B7280),
+                SizedBox(height: size.getSmallSpacing() * 2),
+                // 标签（small size 下隐藏）
+                if (size is! SmallSize)
+                  Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: size.getLegendFontSize(),
+                      fontWeight: FontWeight.w500,
+                      color: isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
               ],
             ),
           ),
