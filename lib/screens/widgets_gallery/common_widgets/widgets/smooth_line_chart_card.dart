@@ -7,10 +7,7 @@ class DataPoint {
   final double x;
   final double y;
 
-  const DataPoint({
-    required this.x,
-    required this.y,
-  });
+  const DataPoint({required this.x, required this.y});
 
   /// 从 JSON 创建
   factory DataPoint.fromJson(Map<String, dynamic> json) {
@@ -22,10 +19,7 @@ class DataPoint {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'x': x,
-      'y': y,
-    };
+    return {'x': x, 'y': y};
   }
 }
 
@@ -40,8 +34,10 @@ class SmoothLineChartCardWidget extends StatefulWidget {
   final Color primaryColor;
   final double totalDistance;
   final String distanceUnit;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
   /// 组件尺寸
   final HomeWidgetSize size;
 
@@ -65,11 +61,13 @@ class SmoothLineChartCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final pointsList = (props['dataPoints'] as List<dynamic>?)
+    final pointsList =
+        (props['dataPoints'] as List<dynamic>?)
             ?.map((e) => DataPoint.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
-    final labelsList = (props['timeLabels'] as List<dynamic>?)
+    final labelsList =
+        (props['timeLabels'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ??
         const [];
@@ -81,9 +79,10 @@ class SmoothLineChartCardWidget extends StatefulWidget {
       dataPoints: pointsList,
       maxValue: (props['maxValue'] as num?)?.toDouble() ?? 100.0,
       timeLabels: labelsList,
-      primaryColor: props.containsKey('primaryColor')
-          ? Color(props['primaryColor'] as int)
-          : const Color(0xFFFF7F56),
+      primaryColor:
+          props.containsKey('primaryColor')
+              ? Color(props['primaryColor'] as int)
+              : const Color(0xFFFF7F56),
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -135,7 +134,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
               width: widget.inline ? double.maxFinite : 340,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -145,7 +144,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(12),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
@@ -188,6 +187,8 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
                 color: isDark ? Colors.white : Colors.grey.shade900,
                 height: 1.0,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
             SizedBox(width: widget.size.getItemSpacing()),
             Text(
@@ -198,6 +199,8 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
                 color: isDark ? Colors.white : Colors.grey.shade900,
                 height: 1.0,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ],
         ),
@@ -210,6 +213,8 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
             color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
             height: 1.0,
           ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
       ],
     );
@@ -249,28 +254,33 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
       onTap: () => setState(() => _selectedPeriod = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(horizontal: buttonPadding, vertical: widget.size.getSmallSpacing()),
+        padding: EdgeInsets.symmetric(
+          horizontal: buttonPadding,
+          vertical: widget.size.getSmallSpacing(),
+        ),
         decoration: BoxDecoration(
           color: isSelected ? widget.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: widget.primaryColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          boxShadow:
+              isSelected
+                  ? [
+                    BoxShadow(
+                      color: widget.primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : null,
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: fontSize,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected
-                ? Colors.white
-                : (isDark ? Colors.grey.shade400 : Colors.grey.shade400),
+            color:
+                isSelected
+                    ? Colors.white
+                    : (isDark ? Colors.grey.shade400 : Colors.grey.shade400),
             height: 1.0,
           ),
         ),
@@ -280,63 +290,54 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
 
   /// 构建图表和时间标签区域（带横向滚动）
   Widget _buildChartWithLabels(bool isDark) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // 计算最小宽度，确保足够显示所有数据点
-        final minContentWidth = widget.dataPoints.length * 50.0;
-        final chartWidth = constraints.maxWidth > minContentWidth
-            ? constraints.maxWidth
-            : minContentWidth;
-        // 如果约束高度是无限的，使用默认高度
-        final defaultChartHeight = 150.0;
-        final chartHeight = constraints.maxHeight.isFinite
-            ? constraints.maxHeight * 0.85 // 图表占 85%
-            : defaultChartHeight;
-        // 时间标签高度基于字体大小
-        final labelsHeight = widget.size.getLegendFontSize() * 1.5;
+    // 时间标签高度基于字体大小
+    final labelsHeight = widget.size.getLegendFontSize() * 1.5;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 可滚动的图表
-            SizedBox(
-              height: chartHeight,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: chartWidth,
-                  child: _SmoothLineChart(
-                    dataPoints: widget.dataPoints,
-                    maxValue: widget.maxValue,
-                    primaryColor: widget.primaryColor,
-                    animation: _animation,
-                    isDark: isDark,
-                    widgetSize: widget.size,
-                    chartWidth: chartWidth,
+    return Expanded(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // 计算最小宽度，确保足够显示所有数据点
+          final minContentWidth = widget.dataPoints.length * 50.0;
+          final chartWidth =
+              constraints.maxWidth > minContentWidth
+                  ? constraints.maxWidth
+                  : minContentWidth;
+
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: chartWidth,
+              child: Column(
+                children: [
+                  // 图表（使用 Expanded 占据剩余空间）
+                  Expanded(
+                    child: _SmoothLineChart(
+                      dataPoints: widget.dataPoints,
+                      maxValue: widget.maxValue,
+                      primaryColor: widget.primaryColor,
+                      animation: _animation,
+                      isDark: isDark,
+                      widgetSize: widget.size,
+                      chartWidth: chartWidth,
+                    ),
                   ),
-                ),
+                  SizedBox(height: widget.size.getItemSpacing()),
+                  // 时间标签（使用 CustomPaint 绘制）
+                  SizedBox(
+                    width: chartWidth,
+                    height: labelsHeight,
+                    child: _TimeLabels(
+                      labels: widget.timeLabels,
+                      isDark: isDark,
+                      fontSize: widget.size.getLegendFontSize(),
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: widget.size.getItemSpacing()),
-            // 可滚动的时间标签（使用 CustomPaint 绘制）
-            SizedBox(
-              height: labelsHeight,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: chartWidth,
-                  height: labelsHeight,
-                  child: _TimeLabels(
-                    labels: widget.timeLabels,
-                    isDark: isDark,
-                    fontSize: widget.size.getLegendFontSize(),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -401,30 +402,29 @@ class _SmoothLineChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final gridColor = isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
+    final gridColor =
+        isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6);
 
     // 绘制垂直网格线
-    final gridPaint = Paint()
-      ..color = gridColor
-      ..strokeWidth = 1;
+    final gridPaint =
+        Paint()
+          ..color = gridColor
+          ..strokeWidth = 1;
 
     final gridSpacing = size.width / (dataPoints.length - 1);
     for (int i = 0; i < dataPoints.length; i++) {
       final x = i * gridSpacing;
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        gridPaint,
-      );
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), gridPaint);
     }
 
     // 计算缩放后的点
-    final scaledPoints = dataPoints.map((point) {
-      return Offset(
-        point.x / dataPoints.last.x * size.width,
-        size.height - (point.y / maxValue * size.height * progress),
-      );
-    }).toList();
+    final scaledPoints =
+        dataPoints.map((point) {
+          return Offset(
+            point.x / dataPoints.last.x * size.width,
+            size.height - (point.y / maxValue * size.height * progress),
+          );
+        }).toList();
 
     if (scaledPoints.isEmpty) return;
 
@@ -462,8 +462,11 @@ class _SmoothLineChartPainter extends CustomPainter {
         primaryColor.withOpacity(0.0),
       ],
     );
-    final fillPaint = Paint()
-      ..shader = gradient.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    final fillPaint =
+        Paint()
+          ..shader = gradient.createShader(
+            Rect.fromLTWH(0, 0, size.width, size.height),
+          );
     canvas.drawPath(fillPath, fillPaint);
 
     // 绘制曲线
@@ -484,46 +487,55 @@ class _SmoothLineChartPainter extends CustomPainter {
       }
     }
 
-    final linePaint = Paint()
-      ..color = primaryColor
-      ..strokeWidth = widgetSize.getStrokeWidth() * 0.25
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final linePaint =
+        Paint()
+          ..color = primaryColor
+          ..strokeWidth = widgetSize.getStrokeWidth() * 0.25
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
     canvas.drawPath(linePath, linePaint);
 
     // 绘制末端圆点
     final endPoint = scaledPoints.last;
     final dotRadius = widgetSize.getStrokeWidth() * 0.375;
-    final dotPaint = Paint()
-      ..color = primaryColor
-      ..style = PaintingStyle.fill;
+    final dotPaint =
+        Paint()
+          ..color = primaryColor
+          ..style = PaintingStyle.fill;
     canvas.drawCircle(endPoint, dotRadius, dotPaint);
 
-    final dotBorderPaint = Paint()
-      ..color = isDark ? const Color(0xFF1F2937) : Colors.white
-      ..strokeWidth = widgetSize.getStrokeWidth() * 0.25
-      ..style = PaintingStyle.stroke;
+    final dotBorderPaint =
+        Paint()
+          ..color = isDark ? const Color(0xFF1F2937) : Colors.white
+          ..strokeWidth = widgetSize.getStrokeWidth() * 0.25
+          ..style = PaintingStyle.stroke;
     canvas.drawCircle(endPoint, dotRadius, dotBorderPaint);
   }
 
   /// Catmull-Rom 样条曲线插值
-  Offset _catmullRomSpline(Offset p0, Offset p1, Offset p2, Offset p3, double t) {
+  Offset _catmullRomSpline(
+    Offset p0,
+    Offset p1,
+    Offset p2,
+    Offset p3,
+    double t,
+  ) {
     final t2 = t * t;
     final t3 = t2 * t;
 
-    final x = 0.5 * (
-      (2 * p1.dx) +
-      (-p0.dx + p2.dx) * t +
-      (2 * p0.dx - 5 * p1.dx + 4 * p2.dx - p3.dx) * t2 +
-      (-p0.dx + 3 * p1.dx - 3 * p2.dx + p3.dx) * t3
-    );
+    final x =
+        0.5 *
+        ((2 * p1.dx) +
+            (-p0.dx + p2.dx) * t +
+            (2 * p0.dx - 5 * p1.dx + 4 * p2.dx - p3.dx) * t2 +
+            (-p0.dx + 3 * p1.dx - 3 * p2.dx + p3.dx) * t3);
 
-    final y = 0.5 * (
-      (2 * p1.dy) +
-      (-p0.dy + p2.dy) * t +
-      (2 * p0.dy - 5 * p1.dy + 4 * p2.dy - p3.dy) * t2 +
-      (-p0.dy + 3 * p1.dy - 3 * p2.dy + p3.dy) * t3
-    );
+    final y =
+        0.5 *
+        ((2 * p1.dy) +
+            (-p0.dy + p2.dy) * t +
+            (2 * p0.dy - 5 * p1.dy + 4 * p2.dy - p3.dy) * t2 +
+            (-p0.dy + 3 * p1.dy - 3 * p2.dy + p3.dy) * t3);
 
     return Offset(x, y);
   }
