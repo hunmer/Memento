@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/vertical_bar_chart_card.dart';
 
 /// 垂直条形图卡片示例
@@ -44,6 +45,7 @@ class VerticalBarChartExample extends StatelessWidget {
                       ],
                       primaryColor: const Color(0xFFBAE6FD),
                       secondaryColor: const Color(0xFF64748B),
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -73,6 +75,7 @@ class VerticalBarChartExample extends StatelessWidget {
                       ],
                       primaryColor: const Color(0xFFBAE6FD),
                       secondaryColor: const Color(0xFF64748B),
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -102,6 +105,7 @@ class VerticalBarChartExample extends StatelessWidget {
                       ],
                       primaryColor: const Color(0xFFBAE6FD),
                       secondaryColor: const Color(0xFF64748B),
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -130,6 +134,7 @@ class VerticalBarChartExample extends StatelessWidget {
                     ],
                     primaryColor: const Color(0xFFBAE6FD),
                     secondaryColor: const Color(0xFF64748B),
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -159,6 +164,7 @@ class VerticalBarChartExample extends StatelessWidget {
                     ],
                     primaryColor: const Color(0xFFBAE6FD),
                     secondaryColor: const Color(0xFF64748B),
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

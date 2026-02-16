@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 屏幕时间数据分段
 class ScreenTimeSegment {
   final String category;
   final double percentage;
 
-  const ScreenTimeSegment({
-    required this.category,
-    required this.percentage,
-  });
+  const ScreenTimeSegment({required this.category, required this.percentage});
 
   /// 从 JSON 创建
   factory ScreenTimeSegment.fromJson(Map<String, dynamic> json) {
@@ -20,10 +18,7 @@ class ScreenTimeSegment {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'category': category,
-      'percentage': percentage,
-    };
+    return {'category': category, 'percentage': percentage};
   }
 }
 
@@ -43,8 +38,11 @@ class ScreenTimeDataPoint {
   factory ScreenTimeDataPoint.fromJson(Map<String, dynamic> json) {
     return ScreenTimeDataPoint(
       timeLabel: json['timeLabel'] as String? ?? '',
-      segments: (json['segments'] as List<dynamic>?)
-              ?.map((e) => ScreenTimeSegment.fromJson(e as Map<String, dynamic>))
+      segments:
+          (json['segments'] as List<dynamic>?)
+              ?.map(
+                (e) => ScreenTimeSegment.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       heightPercentage: (json['heightPercentage'] as num?)?.toDouble() ?? 0.0,
@@ -75,12 +73,16 @@ class ScreenTimeChartCardWidget extends StatefulWidget {
   /// 数据点列表
   final List<ScreenTimeDataPoint> dataPoints;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ScreenTimeChartCardWidget({
     super.key,
     this.avatarUrl,
     required this.totalHours,
     required this.totalMinutes,
     required this.dataPoints,
+    this.size = const MediumSize(),
   });
 
   @override
@@ -133,6 +135,8 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final padding = widget.size.getPadding();
+    final titleSpacing = widget.size.getTitleSpacing();
 
     return AnimatedBuilder(
       animation: _animation,
@@ -146,8 +150,7 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
         );
       },
       child: Container(
-        width: 320,
-        height: 320,
+        constraints: widget.size.getHeightConstraints(),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           borderRadius: BorderRadius.circular(22),
@@ -160,18 +163,16 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: padding,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // 顶部区域：头像 + 时间
               _buildHeader(isDark),
-              const SizedBox(height: 16),
+              SizedBox(height: titleSpacing),
               // 中间区域：图表
-              Expanded(
-                child: _buildChart(isDark),
-              ),
-              const SizedBox(height: 16),
+              Expanded(child: _buildChart(isDark)),
+              SizedBox(height: titleSpacing * 0.6),
             ],
           ),
         ),
@@ -181,13 +182,18 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
 
   /// 构建头部区域
   Widget _buildHeader(bool isDark) {
+    final iconSize = widget.size.getIconSize();
+    final containerSize = iconSize * widget.size.iconContainerScale;
+    final smallSpacing = widget.size.getSmallSpacing();
+    final valueFontSize = widget.size.getLargeFontSize() * 0.85;
+
     return Row(
       children: [
         // 头像
         if (widget.avatarUrl != null)
           Container(
-            width: 36,
-            height: 36,
+            width: containerSize,
+            height: containerSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -201,22 +207,25 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    color: isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade300,
+                    color:
+                        isDark ? const Color(0xFF2C2C2E) : Colors.grey.shade300,
                     child: Icon(
                       Icons.person,
-                      color: isDark ? Colors.grey.shade600 : Colors.grey.shade500,
+                      size: iconSize * 0.8,
+                      color:
+                          isDark ? Colors.grey.shade600 : Colors.grey.shade500,
                     ),
                   );
                 },
               ),
             ),
           ),
-        const SizedBox(width: 12),
+        SizedBox(width: smallSpacing * 4),
         // 时间显示
         Text(
           '${widget.totalHours}h ${widget.totalMinutes}m',
           style: TextStyle(
-            fontSize: 40,
+            fontSize: valueFontSize * 0.7,
             fontWeight: FontWeight.w400,
             letterSpacing: -0.5,
             color: isDark ? Colors.white : Colors.black,
@@ -231,17 +240,27 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
   Widget _buildChart(bool isDark) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Stack(
-          children: [
-            // 背景网格线
-            _buildGridLines(isDark),
-            // 垂直虚线
-            _buildVerticalDashedLines(isDark, constraints.maxWidth),
-            // 柱状图
-            _buildBars(isDark, constraints.maxHeight),
-            // X轴标签
-            _buildXAxisLabels(isDark, constraints.maxWidth),
-          ],
+        final xLabelHeight = widget.size.getLegendFontSize() * 1.5;
+
+        return SizedBox.expand(
+          child: Stack(
+            children: [
+              // 背景网格线（限制在柱状图区域内）
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: xLabelHeight,
+                child: _buildGridLines(isDark),
+              ),
+              // 垂直虚线
+              _buildVerticalDashedLines(isDark, constraints.maxWidth),
+              // 柱状图
+              _buildBars(isDark, constraints.maxHeight),
+              // X轴标签
+              _buildXAxisLabels(isDark, constraints.maxWidth),
+            ],
+          ),
         );
       },
     );
@@ -260,6 +279,9 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
   }
 
   Widget _buildGridLine(bool isDark, String label, Alignment alignment) {
+    final legendFontSize = widget.size.getLegendFontSize();
+    final cardColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+
     return Stack(
       children: [
         Container(
@@ -269,14 +291,15 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
         Align(
           alignment: alignment,
           child: Container(
-            padding: const EdgeInsets.only(left: 4),
-            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            padding: EdgeInsets.only(left: widget.size.getSmallSpacing() * 2),
+            color: cardColor,
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: legendFontSize,
                 fontWeight: FontWeight.w500,
-                color: isDark ? const Color(0xFF636366) : const Color(0xFF8E8E93),
+                color:
+                    isDark ? const Color(0xFF636366) : const Color(0xFF8E8E93),
               ),
             ),
           ),
@@ -314,10 +337,17 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
 
   /// 构建柱状图
   Widget _buildBars(bool isDark, double maxHeight) {
+    final barWidth = widget.size.getBarWidth();
+    final smallSpacing = widget.size.getSmallSpacing();
+    final xLabelHeight = widget.size.getLegendFontSize() * 1.5;
+    // Y 轴标签宽度（"60m" 等文字 + padding）
+    final yAxisLabelWidth = widget.size.getLegendFontSize() * 3.5 + smallSpacing * 2;
+
     return Positioned(
-      bottom: 0,
-      left: 8,
-      right: 32,
+      left: smallSpacing * 2,
+      right: yAxisLabelWidth,
+      bottom: xLabelHeight,
+      height: maxHeight - xLabelHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -326,9 +356,11 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
           return _Bar(
             segments: dataPoint.segments,
             heightPercentage: dataPoint.heightPercentage,
-            maxHeight: maxHeight,
+            maxHeight: maxHeight - xLabelHeight,
             animation: _animation,
             index: index,
+            size: widget.size,
+            barWidth: barWidth,
           );
         }),
       ),
@@ -337,44 +369,62 @@ class _ScreenTimeChartCardWidgetState extends State<ScreenTimeChartCardWidget>
 
   /// 构建X轴标签
   Widget _buildXAxisLabels(bool isDark, double width) {
+    final legendFontSize = widget.size.getLegendFontSize();
+    final smallSpacing = widget.size.getSmallSpacing();
+    final xLabelHeight = legendFontSize * 1.5;
+    // Y 轴标签宽度（与柱状图保持一致）
+    final yAxisLabelWidth = legendFontSize * 3.5 + smallSpacing * 2;
+
     return Positioned(
-      bottom: -24,
-      left: 0,
-      right: 0,
-      child: SizedBox(
-        height: 12,
-        child: Stack(
-          children: [
-            Positioned(
-              left: 0,
-              child: Transform.translate(
-                offset: const Offset(4, 0),
-                child: Text(
-                  '6 AM',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? const Color(0xFF636366) : const Color(0xFF8E8E93),
-                  ),
-                ),
+      left: smallSpacing * 2,
+      right: yAxisLabelWidth,
+      bottom: 0,
+      height: xLabelHeight,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              '6 AM',
+              style: TextStyle(
+                fontSize: legendFontSize,
+                fontWeight: FontWeight.w500,
+                color:
+                    isDark
+                        ? const Color(0xFF636366)
+                        : const Color(0xFF8E8E93),
               ),
             ),
-            Positioned(
-              left: width * 0.55,
-              child: Transform.translate(
-                offset: const Offset(4, 0),
-                child: Text(
-                  '12 PM',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: isDark ? const Color(0xFF636366) : const Color(0xFF8E8E93),
-                  ),
-                ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Text(
+              '12 PM',
+              style: TextStyle(
+                fontSize: legendFontSize,
+                fontWeight: FontWeight.w500,
+                color:
+                    isDark
+                        ? const Color(0xFF636366)
+                        : const Color(0xFF8E8E93),
               ),
             ),
-          ],
-        ),
+          ),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              '6 PM',
+              style: TextStyle(
+                fontSize: legendFontSize,
+                fontWeight: FontWeight.w500,
+                color:
+                    isDark
+                        ? const Color(0xFF636366)
+                        : const Color(0xFF8E8E93),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -387,6 +437,8 @@ class _Bar extends StatelessWidget {
   final double maxHeight;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
+  final double barWidth;
 
   const _Bar({
     required this.segments,
@@ -394,41 +446,58 @@ class _Bar extends StatelessWidget {
     required this.maxHeight,
     required this.animation,
     required this.index,
+    required this.size,
+    required this.barWidth,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 计算每个柱子的动画区间，确保 start < end 且都在 [0, 1] 范围内
+    final totalBars = 7; // 估计的最大柱子数量
+    final animationDuration = 0.6; // 动画持续时间比例
+    final startDelay = index / totalBars; // 每个柱子的起始延迟
+    final start = startDelay.clamp(0.0, 0.9);
+    final end = (startDelay + animationDuration / totalBars).clamp(0.1, 1.0);
+
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * 0.12,
-        0.6 + index * 0.12,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );
 
-    final barHeight = maxHeight * heightPercentage * itemAnimation.value;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderRadius = size.getSmallSpacing() * 0.5;
 
-    return Container(
-      width: 14,
-      height: barHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(2),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        verticalDirection: VerticalDirection.up,
-        children: segments.map((segment) {
-          final color = _getSegmentColor(segment.category, isDark);
-          final height = barHeight * segment.percentage;
-          return Container(
-            height: height,
-            width: double.infinity,
-            color: color,
-          );
-        }).toList(),
-      ),
+    return AnimatedBuilder(
+      animation: itemAnimation,
+      builder: (context, child) {
+        final barHeight = maxHeight * heightPercentage * itemAnimation.value;
+        return Container(
+          width: barWidth,
+          height: barHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: barHeight > 0
+              ? Column(
+                  verticalDirection: VerticalDirection.up,
+                  children: segments.map((segment) {
+                    final color = _getSegmentColor(segment.category, isDark);
+                    final height = barHeight * segment.percentage;
+                    return Container(
+                      height: height,
+                      width: double.infinity,
+                      color: color,
+                    );
+                  }).toList(),
+                )
+              : null,
+        );
+      },
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 睡眠阶段类型
 ///
@@ -107,12 +108,16 @@ class SleepStageChartCard extends StatefulWidget {
   /// 时间标签列表
   final List<String> timeLabels;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const SleepStageChartCard({
     super.key,
     required this.sleepStages,
     this.selectedTab = 1,
     this.showTooltip = true,
     this.timeLabels = const ['11:00', '12:00', '13:00', '14:00', '15:00'],
+    this.size = const MediumSize(),
   });
 
   @override
@@ -158,7 +163,8 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              padding: const EdgeInsets.all(24),
+              padding: widget.size.getPadding(),
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -177,12 +183,9 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 时间范围选择器
-                  _buildTabSelector(context),
-                  const SizedBox(height: 24),
                   // 睡眠阶段图表
                   _buildChart(context),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing()),
                   // 图例
                   _buildLegend(context),
                 ],
@@ -194,72 +197,13 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
     );
   }
 
-  /// 构建时间范围选择器
-  Widget _buildTabSelector(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tabs = ['1 Day', '1 Week', '1 Month', '1 Year', 'All Time'];
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0xFF3A3A3C).withOpacity(0.5)
-            : const Color(0xFFF8F5F2),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: List.generate(tabs.length, (index) {
-          final isSelected = _selectedTab == index;
-          return Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _selectedTab = index),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? (isDark ? const Color(0xFF3A3A3C) : Colors.white)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Text(
-                  tabs[index],
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected
-                        ? (isDark
-                            ? const Color(0xFF5D4037)
-                            : const Color(0xFF5D4037))
-                        : (isDark
-                            ? Colors.grey.shade600
-                            : const Color(0xFF5D4037).withOpacity(0.6)),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
   /// 构建睡眠阶段图表
   Widget _buildChart(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chartWidth = 280.0;
-    final chartHeight = 200.0;
+
+    // 根据尺寸计算图表宽高
+    final chartWidth = widget.size.getWidthForChart();
+    final chartHeight = widget.size.getHeightForChart();
 
     return SizedBox(
       height: chartHeight,
@@ -272,34 +216,35 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
             return Positioned(
               left: x,
               top: 0,
-              bottom: 24,
+              bottom: widget.size.getLegendFontSize() * 2.5,
               child: Container(
                 width: 1,
-                color: isDark
-                    ? const Color(0xFF404040)
-                    : const Color(0xFFE5E7EB),
+                color:
+                    isDark ? const Color(0xFF404040) : const Color(0xFFE5E7EB),
               ),
             );
           }),
           // 时间标签
           Positioned(
-            left: 4,
-            right: 4,
+            left: widget.size.getSmallSpacing(),
+            right: widget.size.getSmallSpacing(),
             bottom: 0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: widget.timeLabels.map((time) {
-                return Text(
-                  time,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: isDark
-                        ? const Color(0xFF6B7280)
-                        : const Color(0xFF9CA3AF),
-                  ),
-                );
-              }).toList(),
+              children:
+                  widget.timeLabels.map((time) {
+                    return Text(
+                      time,
+                      style: TextStyle(
+                        fontSize: widget.size.getLegendFontSize(),
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isDark
+                                ? const Color(0xFF6B7280)
+                                : const Color(0xFF9CA3AF),
+                      ),
+                    );
+                  }).toList(),
             ),
           ),
           // 睡眠阶段气泡
@@ -318,8 +263,9 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
             return _SleepStageBubble(
               stage: stage,
               chartWidth: chartWidth,
-              chartHeight: chartHeight - 32,
+              chartHeight: chartHeight - widget.size.getLegendFontSize() * 3,
               animation: itemAnimation,
+              size: widget.size,
             );
           }),
         ],
@@ -338,21 +284,25 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
           color: const Color(0xFF9CB573),
           label: 'Core',
           isDark: isDark,
+          size: widget.size,
         ),
         _LegendItem(
           color: const Color(0xFF8D6E63),
           label: 'REM',
           isDark: isDark,
+          size: widget.size,
         ),
         _LegendItem(
           color: const Color(0xFFF4CD26),
           label: 'Post-REM',
           isDark: isDark,
+          size: widget.size,
         ),
         _LegendItem(
           color: const Color(0xFFC8B6F9),
           label: 'Deep',
           isDark: isDark,
+          size: widget.size,
         ),
       ],
     );
@@ -367,12 +317,14 @@ class _SleepStageBubble extends StatelessWidget {
   final double chartWidth;
   final double chartHeight;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _SleepStageBubble({
     required this.stage,
     required this.chartWidth,
     required this.chartHeight,
     required this.animation,
+    required this.size,
   });
 
   /// 获取当前阶段类型的颜色
@@ -430,11 +382,13 @@ class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _LegendItem({
     required this.color,
     required this.label,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -443,15 +397,15 @@ class _LegendItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: size.getLegendIndicatorWidth(),
+          height: size.getLegendIndicatorHeight(),
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: size.getSmallSpacing()),
         Text(
           label,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: size.getLegendFontSize(),
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.grey.shade200 : const Color(0xFF5D4037),
           ),
