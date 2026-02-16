@@ -381,35 +381,45 @@ class _CurveChart extends StatelessWidget {
   }
 }
 
-/// 曲线图画笔
+/// 曲线图画笔（含日期标签）
 class _CurveChartPainter extends CustomPainter {
   final List<double> data;
+  final List<int> dates;
   final double progress;
+  final double labelsProgress;
   final Color primaryColor;
+  final Color textColor;
   final int highlightIndex;
   final bool isDark;
   final double strokeWidth;
   final double glowRadius;
   final double highlightRadius;
+  final double legendFontSize;
 
   _CurveChartPainter({
     required this.data,
+    required this.dates,
     required this.progress,
+    required this.labelsProgress,
     required this.primaryColor,
+    required this.textColor,
     required this.highlightIndex,
     required this.isDark,
     required this.strokeWidth,
     required this.glowRadius,
     required this.highlightRadius,
+    required this.legendFontSize,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     if (data.isEmpty) return;
 
+    // 日期标签区域高度
+    final labelsHeight = legendFontSize + 8;
     final padding = 10.0;
     final chartWidth = size.width;
-    final chartHeight = size.height - padding * 2;
+    final chartHeight = size.height - labelsHeight - padding;
     final stepX = chartWidth / (data.length - 1);
 
     // 计算数据点位置
@@ -472,11 +482,12 @@ class _CurveChartPainter extends CustomPainter {
     );
 
     linePaint.shader = gradient.createShader(
-      Rect.fromLTWH(0, 0, size.width, size.height),
+      Rect.fromLTWH(0, 0, size.width, chartHeight),
     );
 
     // 应用裁剪以实现动画
-    canvas.clipRect(Rect.fromLTWH(0, 0, size.width * progress, size.height));
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width * progress, chartHeight));
 
     canvas.drawPath(linePath, linePaint);
 
@@ -506,14 +517,43 @@ class _CurveChartPainter extends CustomPainter {
             ..strokeWidth = strokeWidth;
       canvas.drawCircle(highlightPoint, highlightRadius, borderPaint);
     }
+
+    canvas.restore();
+
+    // 绘制日期标签
+    final textPainter = TextPainter(
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+
+    for (int i = 0; i < dates.length && i < points.length; i++) {
+      final isHighlighted = i == highlightIndex;
+      final textSpan = TextSpan(
+        text: dates[i].toString(),
+        style: TextStyle(
+          color: isHighlighted ? primaryColor : textColor,
+          fontSize: legendFontSize,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+      textPainter.text = textSpan;
+      textPainter.layout();
+
+      final x = points[i].dx - textPainter.width / 2;
+      final y = size.height - labelsHeight + (labelsHeight - textPainter.height) / 2;
+
+      textPainter.paint(canvas, Offset(x, y));
+    }
   }
 
   @override
   bool shouldRepaint(covariant _CurveChartPainter oldDelegate) {
     return oldDelegate.progress != progress ||
+        oldDelegate.labelsProgress != labelsProgress ||
         oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.glowRadius != glowRadius ||
-        oldDelegate.highlightRadius != highlightRadius;
+        oldDelegate.highlightRadius != highlightRadius ||
+        oldDelegate.legendFontSize != legendFontSize;
   }
 }
 
@@ -546,19 +586,12 @@ class _ScrollableChartSection extends StatelessWidget {
       200.0,
       double.infinity,
     );
-    // 日期标签高度
-    final dateLabelsHeight = size.getLegendFontSize() + 4;
-    // 图表与标签间距
-    final spacing = size.getItemSpacing();
 
     return Expanded(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // 根据可用高度动态计算图表高度
-          // 可用高度 - 日期标签高度 - 间距 - padding
-          final availableHeight = constraints.maxHeight;
-          final chartHeight = (availableHeight - dateLabelsHeight - spacing)
-              .clamp(50.0, 140.0);
+          // 使用全部可用高度
+          final totalHeight = constraints.maxHeight.clamp(60.0, 160.0);
 
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -566,98 +599,23 @@ class _ScrollableChartSection extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: size.getItemSpacing()),
             child: SizedBox(
               width: contentWidth,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 曲线图
-                  SizedBox(
-                    height: chartHeight,
-                    width: contentWidth,
-                    child: _CurveChart(
-                      data: chartData,
-                      animation: animation,
-                      highlightIndex: highlightIndex,
-                      primaryColor: primaryColor,
-                      size: size,
-                      isScrollable: true,
-                      contentWidth: contentWidth,
-                    ),
-                  ),
-
-                  SizedBox(height: spacing),
-
-                  // 日期标签（固定高度）
-                  SizedBox(
-                    height: dateLabelsHeight,
-                    child: _DateLabels(
-                      dates: dates,
-                      highlightIndex: highlightIndex,
-                      primaryColor: primaryColor,
-                      textColor: textColor,
-                      animation: animation,
-                      size: size,
-                    ),
-                  ),
-                ],
+              height: totalHeight,
+              child: _CurveChart(
+                data: chartData,
+                dates: dates,
+                animation: animation,
+                highlightIndex: highlightIndex,
+                primaryColor: primaryColor,
+                textColor: textColor,
+                size: size,
+                isScrollable: true,
+                contentWidth: contentWidth,
+                height: totalHeight,
               ),
             ),
           );
         },
       ),
-    );
-  }
-}
-
-/// 日期标签
-class _DateLabels extends StatelessWidget {
-  final List<int> dates;
-  final int highlightIndex;
-  final Color primaryColor;
-  final Color textColor;
-  final Animation<double> animation;
-  final HomeWidgetSize size;
-
-  const _DateLabels({
-    required this.dates,
-    required this.highlightIndex,
-    required this.primaryColor,
-    required this.textColor,
-    required this.animation,
-    required this.size,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final labelsAnimation = CurvedAnimation(
-      parent: animation,
-      curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
-    );
-
-    return AnimatedBuilder(
-      animation: labelsAnimation,
-      builder: (context, child) {
-        return Opacity(
-          opacity: labelsAnimation.value,
-          child: Row(
-            children: List.generate(dates.length, (index) {
-              final isHighlighted = index == highlightIndex;
-              return SizedBox(
-                width: size.getIconSize() * 1.6,
-                child: Center(
-                  child: Text(
-                    dates[index].toString(),
-                    style: TextStyle(
-                      color: isHighlighted ? primaryColor : textColor,
-                      fontSize: size.getLegendFontSize(),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        );
-      },
     );
   }
 }
