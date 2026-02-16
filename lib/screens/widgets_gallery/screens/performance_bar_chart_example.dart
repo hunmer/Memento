@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/performance_bar_chart.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 性能指标柱状图示例
 class PerformanceBarChartExample extends StatelessWidget {
@@ -26,6 +27,7 @@ class PerformanceBarChartExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: PerformanceBarChartWidget(
+                      size: const SmallSize(),
                       badgeLabel: 'Performance',
                       growthPercentage: 280,
                       timePeriod: 'In the past 30 days',
@@ -46,6 +48,7 @@ class PerformanceBarChartExample extends StatelessWidget {
                     width: 220,
                     height: 200,
                     child: PerformanceBarChartWidget(
+                      size: const MediumSize(),
                       badgeLabel: 'Performance',
                       growthPercentage: 280,
                       timePeriod: 'In the past 30 days',
@@ -68,6 +71,7 @@ class PerformanceBarChartExample extends StatelessWidget {
                     width: 300,
                     height: 280,
                     child: PerformanceBarChartWidget(
+                      size: const LargeSize(),
                       badgeLabel: 'Performance',
                       growthPercentage: 280,
                       timePeriod: 'In the past 30 days',
@@ -90,6 +94,7 @@ class PerformanceBarChartExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 280,
                   child: PerformanceBarChartWidget(
+                    size: const WideSize(),
                     badgeLabel: 'Performance Overview',
                     growthPercentage: 280,
                     timePeriod: 'In the past 30 days performance metrics',
@@ -113,9 +118,11 @@ class PerformanceBarChartExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 350,
                   child: PerformanceBarChartWidget(
+                    size: const Wide2Size(),
                     badgeLabel: 'Performance Overview',
                     growthPercentage: 280,
-                    timePeriod: 'In the past 30 days performance metrics and analysis',
+                    timePeriod:
+                        'In the past 30 days performance metrics and analysis',
                     barData: const [
                       PerformanceBarData(value: 12, label: '12%'),
                       PerformanceBarData(value: 78, label: '78%'),
