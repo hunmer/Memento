@@ -47,7 +47,9 @@ class DonutChartStatsCardWidget extends StatefulWidget {
         try {
           // 支持十六进制颜色格式
           if (colorValue.startsWith('#')) {
-            return Color(int.parse(colorValue.substring(1), radix: 16) + 0xFF000000);
+            return Color(
+              int.parse(colorValue.substring(1), radix: 16) + 0xFF000000,
+            );
           }
           // 支持 0xFF 格式
           if (colorValue.startsWith('0x')) {
@@ -72,11 +74,7 @@ class DonutChartStatsCardWidget extends StatefulWidget {
               color: parseColor(item['color']),
             );
           }
-          return ChartCategoryData(
-            label: '',
-            value: 0.0,
-            color: Colors.blue,
-          );
+          return ChartCategoryData(label: '', value: 0.0, color: Colors.blue);
         }).toList();
       }
       return [];
@@ -93,7 +91,8 @@ class DonutChartStatsCardWidget extends StatefulWidget {
   }
 
   @override
-  State<DonutChartStatsCardWidget> createState() => _DonutChartStatsCardWidgetState();
+  State<DonutChartStatsCardWidget> createState() =>
+      _DonutChartStatsCardWidgetState();
 }
 
 class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
@@ -154,86 +153,172 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
             ),
           ],
         ),
-        child: Row(
-          children: [
-            // 左侧：圆环图 + 总金额
-            Expanded(
-              flex: 45,
-              child: Container(
-                padding: widget.size.getPadding(),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        child:
+            widget.size is SmallSize || widget.size is MediumSize
+                ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 甜甜圈图
+                    // 上方：圆环图 + 总金额（固定高度）
                     SizedBox(
-                      width: 96 * widget.size.scale,
-                      height: 96 * widget.size.scale,
-                      child: CustomPaint(
-                        painter: _DonutChartPainter(
-                          categories: widget.categories,
-                          progress: _animation.value,
-                          isDark: isDark,
-                          scale: widget.size.scale,
+                      child: Padding(
+                        padding: widget.size.getPadding(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // 甜甜圈图
+                            Center(
+                              child: SizedBox(
+                                width: 80 * widget.size.scale,
+                                height: 80 * widget.size.scale,
+                                child: CustomPaint(
+                                  painter: _DonutChartPainter(
+                                    categories: widget.categories,
+                                    progress: _animation.value,
+                                    isDark: isDark,
+                                    scale: widget.size.scale,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Small 尺寸下隐藏总金额，其他尺寸显示
+                            if (widget.size is! SmallSize) ...[
+                              SizedBox(height: widget.size.getTitleSpacing()),
+                              // 总金额
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  AnimatedFlipCounter(
+                                    value: widget.totalValue * _animation.value,
+                                    fractionDigits: 2,
+                                    textStyle: TextStyle(
+                                      color:
+                                          isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A),
+                                      fontSize:
+                                          widget.size.getTitleFontSize() * 0.8,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.0,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: widget.size.getSmallSpacing(),
+                                  ),
+                                  Text(
+                                    widget.totalLabel,
+                                    style: TextStyle(
+                                      color: const Color(0xFF9CA3AF),
+                                      fontSize: widget.size.getLegendFontSize(),
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.0,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ),
-                    SizedBox(height: widget.size.getTitleSpacing()),
-                    // 总金额
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 28 * widget.size.scale,
-                          child: AnimatedFlipCounter(
-                            value: widget.totalValue * _animation.value,
-                            fractionDigits: 2,
-                            textStyle: TextStyle(
-                              color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              fontSize: widget.size.getTitleFontSize() * 0.8,
-                              fontWeight: FontWeight.w700,
-                              height: 1.0,
-                            ),
-                          ),
+                    // 下方：分类列表（可滚动）
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: widget.size.getPadding(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: _buildCategoryItems(isDark),
                         ),
-                        SizedBox(height: widget.size.getSmallSpacing()),
-                        SizedBox(
-                          height: 16 * widget.size.scale,
-                          child: Text(
-                            widget.totalLabel,
-                            style: TextStyle(
-                              color: const Color(0xFF9CA3AF),
-                              fontSize: widget.size.getLegendFontSize(),
-                              fontWeight: FontWeight.w500,
-                              height: 1.0,
+                      ),
+                    ),
+                  ],
+                )
+                : Row(
+                  children: [
+                    // 左侧：圆环图 + 总金额
+                    Expanded(
+                      flex: 45,
+                      child: Container(
+                        padding: widget.size.getPadding(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // 甜甜圈图
+                            SizedBox(
+                              width: 96 * widget.size.scale,
+                              height: 96 * widget.size.scale,
+                              child: CustomPaint(
+                                painter: _DonutChartPainter(
+                                  categories: widget.categories,
+                                  progress: _animation.value,
+                                  isDark: isDark,
+                                  scale: widget.size.scale,
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(height: widget.size.getTitleSpacing()),
+                            // 总金额
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 28 * widget.size.scale,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: AnimatedFlipCounter(
+                                      value: widget.totalValue * _animation.value,
+                                      fractionDigits: 2,
+                                      textStyle: TextStyle(
+                                        color:
+                                            isDark
+                                                ? Colors.white
+                                                : const Color(0xFF0F172A),
+                                        fontSize:
+                                            widget.size.getTitleFontSize() * 0.8,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: widget.size.getSmallSpacing()),
+                                SizedBox(
+                                  height: 16 * widget.size.scale,
+                                  child: Text(
+                                    widget.totalLabel,
+                                    style: TextStyle(
+                                      color: const Color(0xFF9CA3AF),
+                                      fontSize: widget.size.getLegendFontSize(),
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.0,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ),
+                    // 右侧：分类列表
+                    Expanded(
+                      flex: 55,
+                      child: Container(
+                        padding: widget.size.getPadding(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: _buildCategoryItems(isDark),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            // 右侧：分类列表
-            Expanded(
-              flex: 55,
-              child: Container(
-                padding: widget.size.getPadding(),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF334155).withOpacity(0.5) : const Color(0xFFF8FAFC),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(32 * widget.size.scale),
-                    bottomRight: Radius.circular(32 * widget.size.scale),
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: _buildCategoryItems(isDark),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -246,11 +331,7 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
       final category = widget.categories[i];
       final itemAnimation = CurvedAnimation(
         parent: _animationController,
-        curve: Interval(
-          i * step,
-          0.5 + i * step,
-          curve: Curves.easeOutCubic,
-        ),
+        curve: Interval(i * step, 0.5 + i * step, curve: Curves.easeOutCubic),
       );
 
       if (i > 0) {
@@ -264,7 +345,10 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
             return Opacity(
               opacity: itemAnimation.value,
               child: Transform.translate(
-                offset: Offset(10 * widget.size.scale * (1 - itemAnimation.value), 0),
+                offset: Offset(
+                  10 * widget.size.scale * (1 - itemAnimation.value),
+                  0,
+                ),
                 child: _CategoryItem(
                   label: category.label,
                   color: category.color,
@@ -304,10 +388,7 @@ class _CategoryItem extends StatelessWidget {
         Container(
           width: size.getLegendIndicatorWidth() * 0.7,
           height: size.getLegendIndicatorHeight() * 1.2,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           child: Center(
             child: Container(
               width: 4 * size.scale,
@@ -321,8 +402,7 @@ class _CategoryItem extends StatelessWidget {
         ),
         SizedBox(width: 12 * size.scale),
         // 标签文本
-        SizedBox(
-          height: 16 * size.scale,
+        Expanded(
           child: Text(
             label,
             style: TextStyle(
@@ -331,6 +411,8 @@ class _CategoryItem extends StatelessWidget {
               fontWeight: FontWeight.w500,
               height: 1.0,
             ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
       ],
@@ -359,9 +441,10 @@ class _DonutChartPainter extends CustomPainter {
     final innerRadius = radius * 0.56; // 创建环形效果
 
     // 绘制背景圆环
-    final bgPaint = Paint()
-      ..color = isDark ? const Color(0xFF1E293B) : Colors.white
-      ..style = PaintingStyle.fill;
+    final bgPaint =
+        Paint()
+          ..color = isDark ? const Color(0xFF1E293B) : Colors.white
+          ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius, bgPaint);
 
     // 计算总角度（360度）
@@ -377,13 +460,15 @@ class _DonutChartPainter extends CustomPainter {
       if (remainingAngle <= 0) break; // 进度已用完，停止绘制
 
       // 计算本次要绘制的角度（取扇形完整角度和剩余角度的较小值）
-      final sweepAngle = categorySweepAngle < remainingAngle
-          ? categorySweepAngle
-          : remainingAngle;
+      final sweepAngle =
+          categorySweepAngle < remainingAngle
+              ? categorySweepAngle
+              : remainingAngle;
 
-      final paint = Paint()
-        ..color = category.color
-        ..style = PaintingStyle.fill;
+      final paint =
+          Paint()
+            ..color = category.color
+            ..style = PaintingStyle.fill;
 
       // 绘制扇形（使用 useCenter=true 才能正确绘制扇形）
       canvas.drawArc(
@@ -399,9 +484,10 @@ class _DonutChartPainter extends CustomPainter {
     }
 
     // 绘制中心白色圆（创建甜甜圈效果）
-    final centerPaint = Paint()
-      ..color = isDark ? const Color(0xFF1E293B) : Colors.white
-      ..style = PaintingStyle.fill;
+    final centerPaint =
+        Paint()
+          ..color = isDark ? const Color(0xFF1E293B) : Colors.white
+          ..style = PaintingStyle.fill;
     canvas.drawCircle(center, innerRadius, centerPaint);
   }
 
