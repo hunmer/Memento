@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animated_flip_counter/animated_flip_counter.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 趋势折线图小组件
 ///
@@ -56,6 +57,9 @@ class TrendLineChartWidget extends StatefulWidget {
   /// 菜单按钮点击回调
   final VoidCallback? onMenuPressed;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const TrendLineChartWidget({
     super.key,
     required this.title,
@@ -66,6 +70,7 @@ class TrendLineChartWidget extends StatefulWidget {
     required this.primaryColor,
     this.valueColor,
     this.onMenuPressed,
+    this.size = const MediumSize(),
   });
 
   @override
@@ -102,6 +107,15 @@ class _TrendLineChartWidgetState extends State<TrendLineChartWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1F2937) : Colors.white;
 
+    // 根据 size 计算尺寸
+    final iconSize = widget.size.getIconSize();
+    final iconContainerSize = iconSize * widget.size.iconContainerScale;
+    final titleFontSize = widget.size.getTitleFontSize();
+    final valueFontSize = widget.size.getLargeFontSize() * 0.35;
+    final titleSpacing = widget.size.getTitleSpacing();
+    final timeLabelFontSize = widget.size.getLegendFontSize();
+    final borderRadius = widget.size is SmallSize ? 24.0 : 40.0;
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -110,10 +124,9 @@ class _TrendLineChartWidgetState extends State<TrendLineChartWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 380,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(borderRadius),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.08),
@@ -123,92 +136,102 @@ class _TrendLineChartWidgetState extends State<TrendLineChartWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: widget.size.getPadding(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 标题栏
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color: isDark
+                        Container(
+                          width: iconContainerSize,
+                          height: iconContainerSize,
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
                                     ? Colors.grey.shade800
                                     : Colors.grey.shade100,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                widget.icon,
-                                color: isDark
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            widget.icon,
+                            color:
+                                isDark
                                     ? Colors.grey.shade400
                                     : Colors.grey.shade600,
-                                size: 24,
-                              ),
+                            size: iconSize,
+                          ),
+                        ),
+                        SizedBox(width: widget.size.getSmallSpacing() * 2),
+                        Expanded(
+                          child: Text(
+                            widget.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: titleFontSize,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  isDark ? Colors.white : Colors.grey.shade900,
+                              letterSpacing: -0.5,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              widget.title,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.white : Colors.grey.shade900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                         _MenuButton(
                           isDark: isDark,
+                          size: widget.size,
                           onPressed: widget.onMenuPressed,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: widget.size.getSmallSpacing() * 2),
                     // 数值显示
                     AnimatedFlipCounter(
                       value: widget.value * _animation.value,
                       fractionDigits: widget.value % 1 != 0 ? 3 : 0,
                       textStyle: TextStyle(
-                        fontSize: 48,
+                        fontSize: valueFontSize,
                         fontWeight: FontWeight.w700,
                         color: isDark ? Colors.white : Colors.grey.shade900,
                         letterSpacing: -2,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    // 折线图
-                    _LineChart(
-                      dataPoints: widget.dataPoints,
-                      primaryColor: widget.primaryColor,
-                      valueColor: widget.valueColor,
-                      animation: _animation,
-                      isDark: isDark,
+                    SizedBox(height: titleSpacing),
+                    // 折线图 - 使用 Expanded 自动填充剩余高度
+                    Expanded(
+                      child: _LineChart(
+                        dataPoints: widget.dataPoints,
+                        primaryColor: widget.primaryColor,
+                        valueColor: widget.valueColor,
+                        animation: _animation,
+                        isDark: isDark,
+                        size: widget.size,
+                      ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: widget.size.getSmallSpacing()),
                     // 时间轴标签
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: widget.timeLabels.map((label) {
-                        return Expanded(
-                          child: Center(
-                            child: Text(
-                              label,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: isDark
-                                    ? Colors.grey.shade400
-                                    : Colors.grey.shade500,
+                      children:
+                          widget.timeLabels.map((label) {
+                            return Expanded(
+                              child: Center(
+                                child: Text(
+                                  label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: timeLabelFontSize,
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? Colors.grey.shade400
+                                            : Colors.grey.shade500,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                            );
+                          }).toList(),
                     ),
                   ],
                 ),
@@ -225,17 +248,18 @@ class _TrendLineChartWidgetState extends State<TrendLineChartWidget>
 class _MenuButton extends StatelessWidget {
   final bool isDark;
   final VoidCallback? onPressed;
+  final HomeWidgetSize size;
 
-  const _MenuButton({
-    required this.isDark,
-    this.onPressed,
-  });
+  const _MenuButton({required this.isDark, this.onPressed, required this.size});
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = size.getIconSize();
+    final containerSize = iconSize * size.iconContainerScale * 0.5;
+
     return Container(
-      width: 40,
-      height: 40,
+      width: containerSize,
+      height: containerSize,
       decoration: BoxDecoration(
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
         shape: BoxShape.circle,
@@ -248,7 +272,7 @@ class _MenuButton extends StatelessWidget {
           child: Icon(
             Icons.more_vert,
             color: isDark ? Colors.grey.shade300 : Colors.grey.shade600,
-            size: 20,
+            size: iconSize * 0.6,
           ),
         ),
       ),
@@ -263,6 +287,7 @@ class _LineChart extends StatelessWidget {
   final Color? valueColor;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _LineChart({
     required this.dataPoints,
@@ -270,41 +295,45 @@ class _LineChart extends StatelessWidget {
     this.valueColor,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 160,
-      child: Stack(
-        children: [
-          // 背景网格线
-          Positioned.fill(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(
-                5,
-                (index) => Container(
-                  height: 1,
-                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final height = constraints.maxHeight;
+        return Stack(
+          children: [
+            // 背景网格线
+            Positioned.fill(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(
+                  5,
+                  (index) => Container(
+                    height: size is SmallSize ? 0.5 : 1,
+                    color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                  ),
                 ),
               ),
             ),
-          ),
-          // 折线
-          CustomPaint(
-            size: const Size(double.infinity, 160),
-            painter: _LineChartPainter(
-              dataPoints: dataPoints,
-              progress: animation.value,
-              primaryColor: primaryColor,
-              valueColor: valueColor,
-              graphWidth: 320,
-              graphHeight: 120,
+            // 折线
+            CustomPaint(
+              size: Size(constraints.maxWidth, height),
+              painter: _LineChartPainter(
+                dataPoints: dataPoints,
+                progress: animation.value,
+                primaryColor: primaryColor,
+                valueColor: valueColor,
+                strokeWidth: size.getStrokeWidth() * 0.5,
+                graphWidth: 320,
+                graphHeight: 120,
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
@@ -315,6 +344,7 @@ class _LineChartPainter extends CustomPainter {
   final double progress;
   final Color primaryColor;
   final Color? valueColor;
+  final double strokeWidth;
   final double graphWidth;
   final double graphHeight;
 
@@ -323,6 +353,7 @@ class _LineChartPainter extends CustomPainter {
     required this.progress,
     required this.primaryColor,
     this.valueColor,
+    required this.strokeWidth,
     required this.graphWidth,
     required this.graphHeight,
   });
@@ -345,16 +376,15 @@ class _LineChartPainter extends CustomPainter {
         primaryColor.withOpacity(0.8),
       ],
       stops: const [0.0, 0.5, 1.0],
-    ).createShader(
-      Rect.fromLTWH(0, 0, size.width * progress, size.height),
-    );
+    ).createShader(Rect.fromLTWH(0, 0, size.width * progress, size.height));
 
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..shader = gradient;
+    final paint =
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..shader = gradient;
 
     // 构建路径
     final path = Path();
@@ -375,9 +405,11 @@ class _LineChartPainter extends CustomPainter {
     if (currentSegment < totalSegments) {
       final startPoint = dataPoints[currentSegment];
       final endPoint = dataPoints[currentSegment + 1];
-      final currentX = startPoint.dx +
+      final currentX =
+          startPoint.dx +
           (endPoint.dx - startPoint.dx) * segmentProgress * scaleX;
-      final currentY = startPoint.dy +
+      final currentY =
+          startPoint.dy +
           (endPoint.dy - startPoint.dy) * segmentProgress * scaleY;
       path.lineTo(currentX, currentY);
     }
@@ -388,6 +420,7 @@ class _LineChartPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
     return oldDelegate.progress != progress ||
+        oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.dataPoints != dataPoints;
   }
 }

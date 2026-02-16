@@ -151,16 +151,14 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
                   child: Container(
                     padding: widget.size.getPadding(),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildHeader(isDark),
                         SizedBox(height: widget.size.getTitleSpacing()),
                         _buildPeriodToggle(isDark),
                         SizedBox(height: widget.size.getTitleSpacing()),
-                        _buildChart(isDark),
-                        SizedBox(height: widget.size.getItemSpacing()),
-                        _buildTimeLabels(isDark),
+                        _buildChartWithLabels(isDark),
                       ],
                     ),
                   ),
@@ -175,6 +173,8 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
 
   /// 构建标题区域
   Widget _buildHeader(bool isDark) {
+    final titleFontSize = widget.size.getTitleFontSize();
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -183,7 +183,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
             Text(
               widget.title,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.grey.shade900,
                 height: 1.0,
@@ -193,7 +193,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
             Text(
               widget.subtitle,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.w400,
                 color: isDark ? Colors.white : Colors.grey.shade900,
                 height: 1.0,
@@ -205,7 +205,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
         Text(
           widget.date,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: subtitleFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
             height: 1.0,
@@ -217,15 +217,16 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
 
   /// 构建时间段切换按钮
   Widget _buildPeriodToggle(bool isDark) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          padding: EdgeInsets.all(widget.size.getSmallSpacing()),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(20),
-          ),
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        padding: EdgeInsets.all(widget.size.getSmallSpacing()),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF374151) : const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -235,20 +236,23 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildPeriodButton(String label, int index, bool isDark) {
     final isSelected = _selectedPeriod == index;
+    final fontSize = widget.size.getLegendFontSize();
+    final buttonPadding = widget.size.getSmallSpacing() * 4;
+    final borderRadius = buttonPadding * 1.5;
     return GestureDetector(
       onTap: () => setState(() => _selectedPeriod = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: buttonPadding, vertical: widget.size.getSmallSpacing()),
         decoration: BoxDecoration(
           color: isSelected ? widget.primaryColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -262,7 +266,7 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: fontSize,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected
                 ? Colors.white
@@ -274,51 +278,65 @@ class _SmoothLineChartCardWidgetState extends State<SmoothLineChartCardWidget>
     );
   }
 
-  /// 构建图表区域
-  Widget _buildChart(bool isDark) {
-    return SizedBox(
-      height: 192,
-      child: _SmoothLineChart(
-        dataPoints: widget.dataPoints,
-        maxValue: widget.maxValue,
-        primaryColor: widget.primaryColor,
-        animation: _animation,
-        isDark: isDark,
-      ),
-    );
-  }
+  /// 构建图表和时间标签区域（带横向滚动）
+  Widget _buildChartWithLabels(bool isDark) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 计算最小宽度，确保足够显示所有数据点
+        final minContentWidth = widget.dataPoints.length * 50.0;
+        final chartWidth = constraints.maxWidth > minContentWidth
+            ? constraints.maxWidth
+            : minContentWidth;
+        // 如果约束高度是无限的，使用默认高度
+        final defaultChartHeight = 150.0;
+        final chartHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight * 0.85 // 图表占 85%
+            : defaultChartHeight;
+        // 时间标签高度基于字体大小
+        final labelsHeight = widget.size.getLegendFontSize() * 1.5;
 
-  /// 构建时间标签
-  Widget _buildTimeLabels(bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(widget.timeLabels.length, (index) {
-          final alignment = index == 0
-              ? CrossAxisAlignment.start
-              : index == widget.timeLabels.length - 1
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.center;
-          return SizedBox(
-            width: 32,
-            child: Text(
-              widget.timeLabels[index],
-              textAlign: alignment == CrossAxisAlignment.center
-                  ? TextAlign.center
-                  : alignment == CrossAxisAlignment.start
-                      ? TextAlign.left
-                      : TextAlign.right,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                height: 1.0,
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 可滚动的图表
+            SizedBox(
+              height: chartHeight,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: chartWidth,
+                  child: _SmoothLineChart(
+                    dataPoints: widget.dataPoints,
+                    maxValue: widget.maxValue,
+                    primaryColor: widget.primaryColor,
+                    animation: _animation,
+                    isDark: isDark,
+                    widgetSize: widget.size,
+                    chartWidth: chartWidth,
+                  ),
+                ),
               ),
             ),
-          );
-        }),
-      ),
+            SizedBox(height: widget.size.getItemSpacing()),
+            // 可滚动的时间标签（使用 CustomPaint 绘制）
+            SizedBox(
+              height: labelsHeight,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: chartWidth,
+                  height: labelsHeight,
+                  child: _TimeLabels(
+                    labels: widget.timeLabels,
+                    isDark: isDark,
+                    fontSize: widget.size.getLegendFontSize(),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -330,6 +348,8 @@ class _SmoothLineChart extends StatelessWidget {
   final Color primaryColor;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize widgetSize;
+  final double chartWidth;
 
   const _SmoothLineChart({
     required this.dataPoints,
@@ -337,19 +357,26 @@ class _SmoothLineChart extends StatelessWidget {
     required this.primaryColor,
     required this.animation,
     required this.isDark,
+    required this.widgetSize,
+    required this.chartWidth,
   });
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(double.infinity, 192),
-      painter: _SmoothLineChartPainter(
-        dataPoints: dataPoints,
-        maxValue: maxValue,
-        primaryColor: primaryColor,
-        progress: animation.value,
-        isDark: isDark,
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return CustomPaint(
+          size: Size(chartWidth, constraints.maxHeight),
+          painter: _SmoothLineChartPainter(
+            dataPoints: dataPoints,
+            maxValue: maxValue,
+            primaryColor: primaryColor,
+            progress: animation.value,
+            isDark: isDark,
+            widgetSize: widgetSize,
+          ),
+        );
+      },
     );
   }
 }
@@ -361,6 +388,7 @@ class _SmoothLineChartPainter extends CustomPainter {
   final Color primaryColor;
   final double progress;
   final bool isDark;
+  final HomeWidgetSize widgetSize;
 
   _SmoothLineChartPainter({
     required this.dataPoints,
@@ -368,6 +396,7 @@ class _SmoothLineChartPainter extends CustomPainter {
     required this.primaryColor,
     required this.progress,
     required this.isDark,
+    required this.widgetSize,
   });
 
   @override
@@ -457,23 +486,24 @@ class _SmoothLineChartPainter extends CustomPainter {
 
     final linePaint = Paint()
       ..color = primaryColor
-      ..strokeWidth = 2
+      ..strokeWidth = widgetSize.getStrokeWidth() * 0.25
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     canvas.drawPath(linePath, linePaint);
 
     // 绘制末端圆点
     final endPoint = scaledPoints.last;
+    final dotRadius = widgetSize.getStrokeWidth() * 0.375;
     final dotPaint = Paint()
       ..color = primaryColor
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(endPoint, 3, dotPaint);
+    canvas.drawCircle(endPoint, dotRadius, dotPaint);
 
     final dotBorderPaint = Paint()
       ..color = isDark ? const Color(0xFF1F2937) : Colors.white
-      ..strokeWidth = 2
+      ..strokeWidth = widgetSize.getStrokeWidth() * 0.25
       ..style = PaintingStyle.stroke;
-    canvas.drawCircle(endPoint, 3, dotBorderPaint);
+    canvas.drawCircle(endPoint, dotRadius, dotBorderPaint);
   }
 
   /// Catmull-Rom 样条曲线插值
@@ -502,6 +532,111 @@ class _SmoothLineChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _SmoothLineChartPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.primaryColor != primaryColor ||
-        oldDelegate.isDark != isDark;
+        oldDelegate.isDark != isDark ||
+        oldDelegate.widgetSize != widgetSize;
+  }
+}
+
+/// 时间标签绘制组件
+class _TimeLabels extends StatelessWidget {
+  final List<String> labels;
+  final bool isDark;
+  final double fontSize;
+
+  const _TimeLabels({
+    required this.labels,
+    required this.isDark,
+    required this.fontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _TimeLabelsPainter(
+        labels: labels,
+        isDark: isDark,
+        fontSize: fontSize,
+      ),
+    );
+  }
+}
+
+/// 时间标签画笔
+class _TimeLabelsPainter extends CustomPainter {
+  final List<String> labels;
+  final bool isDark;
+  final double fontSize;
+
+  _TimeLabelsPainter({
+    required this.labels,
+    required this.isDark,
+    required this.fontSize,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (labels.isEmpty) return;
+
+    final textColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+    );
+
+    final gridSpacing = size.width / (labels.length - 1);
+
+    for (int i = 0; i < labels.length; i++) {
+      final label = labels[i];
+      final x = i * gridSpacing;
+
+      // 计算文本对齐位置
+      double textX;
+      TextAlign textAlign;
+      if (i == 0) {
+        textX = 0;
+        textAlign = TextAlign.left;
+      } else if (i == labels.length - 1) {
+        textX = size.width;
+        textAlign = TextAlign.right;
+      } else {
+        textX = x;
+        textAlign = TextAlign.center;
+      }
+
+      textPainter.text = TextSpan(
+        text: label,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w500,
+          color: textColor,
+        ),
+      );
+      textPainter.textAlign = textAlign;
+      textPainter.layout();
+
+      // 根据对齐方式计算绘制位置
+      double offsetX;
+      switch (textAlign) {
+        case TextAlign.left:
+          offsetX = textX;
+          break;
+        case TextAlign.right:
+          offsetX = textX - textPainter.width;
+          break;
+        default:
+          offsetX = textX - textPainter.width / 2;
+      }
+
+      // 垂直居中
+      final offsetY = (size.height - textPainter.height) / 2;
+      textPainter.paint(canvas, Offset(offsetX, offsetY));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _TimeLabelsPainter oldDelegate) {
+    return oldDelegate.labels != labels ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.fontSize != fontSize;
   }
 }

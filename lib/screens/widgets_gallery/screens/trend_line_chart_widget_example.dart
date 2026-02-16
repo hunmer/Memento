@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/trend_line_chart_widget/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 趋势折线图示例
 class TrendLineChartWidgetExample extends StatelessWidget {
@@ -29,6 +30,7 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                       title: 'Temperature',
                       icon: Icons.thermostat,
                       value: 4.875,
+                      size: const SmallSize(),
                       dataPoints: [
                         Offset(5, 90),
                         Offset(15, 85),
@@ -63,7 +65,13 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                         Offset(300, 70),
                         Offset(315, 70),
                       ],
-                      timeLabels: ['8:00am', '10:00am', '12:00am', '1:00pm', '3:00pm'],
+                      timeLabels: [
+                        '8:00am',
+                        '10:00am',
+                        '12:00am',
+                        '1:00pm',
+                        '3:00pm',
+                      ],
                       primaryColor: const Color(0xFF0284C7),
                       valueColor: const Color(0xFF2563EB),
                     ),
@@ -80,6 +88,7 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                       title: 'Temperature',
                       icon: Icons.thermostat,
                       value: 4.875,
+                      size: const MediumSize(),
                       dataPoints: [
                         Offset(5, 90),
                         Offset(15, 85),
@@ -114,7 +123,13 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                         Offset(300, 70),
                         Offset(315, 70),
                       ],
-                      timeLabels: ['8:00am', '10:00am', '12:00am', '1:00pm', '3:00pm'],
+                      timeLabels: [
+                        '8:00am',
+                        '10:00am',
+                        '12:00am',
+                        '1:00pm',
+                        '3:00pm',
+                      ],
                       primaryColor: const Color(0xFF0284C7),
                       valueColor: const Color(0xFF2563EB),
                     ),
@@ -131,6 +146,7 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                       title: 'Temperature',
                       icon: Icons.thermostat,
                       value: 4.875,
+                      size: const LargeSize(),
                       dataPoints: [
                         Offset(5, 90),
                         Offset(15, 85),
@@ -165,7 +181,13 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                         Offset(300, 70),
                         Offset(315, 70),
                       ],
-                      timeLabels: ['8:00am', '10:00am', '12:00am', '1:00pm', '3:00pm'],
+                      timeLabels: [
+                        '8:00am',
+                        '10:00am',
+                        '12:00am',
+                        '1:00pm',
+                        '3:00pm',
+                      ],
                       primaryColor: const Color(0xFF0284C7),
                       valueColor: const Color(0xFF2563EB),
                     ),
@@ -181,6 +203,7 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                     title: 'Temperature Trend Overview',
                     icon: Icons.thermostat,
                     value: 4.875,
+                    size: const WideSize(),
                     dataPoints: [
                       Offset(5, 90),
                       Offset(15, 85),
@@ -215,7 +238,13 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                       Offset(300, 70),
                       Offset(315, 70),
                     ],
-                    timeLabels: ['8:00am', '10:00am', '12:00pm', '2:00pm', '4:00pm'],
+                    timeLabels: [
+                      '8:00am',
+                      '10:00am',
+                      '12:00pm',
+                      '2:00pm',
+                      '4:00pm',
+                    ],
                     primaryColor: const Color(0xFF0284C7),
                     valueColor: const Color(0xFF2563EB),
                   ),
@@ -230,6 +259,7 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                     title: 'Complete Temperature Trend Analysis',
                     icon: Icons.thermostat,
                     value: 4.875,
+                    size: const Wide2Size(),
                     dataPoints: [
                       Offset(5, 90),
                       Offset(15, 85),
@@ -264,7 +294,14 @@ class TrendLineChartWidgetExample extends StatelessWidget {
                       Offset(300, 70),
                       Offset(315, 70),
                     ],
-                    timeLabels: ['8:00am', '10:00am', '12:00pm', '2:00pm', '4:00pm', '6:00pm'],
+                    timeLabels: [
+                      '8:00am',
+                      '10:00am',
+                      '12:00pm',
+                      '2:00pm',
+                      '4:00pm',
+                      '6:00pm',
+                    ],
                     primaryColor: const Color(0xFF0284C7),
                     valueColor: const Color(0xFF2563EB),
                   ),
