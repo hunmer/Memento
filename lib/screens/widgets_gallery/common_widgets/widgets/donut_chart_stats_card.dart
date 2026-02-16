@@ -141,16 +141,16 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : 384,
-        height: widget.inline ? double.maxFinite : 200,
+        width: widget.inline ? double.maxFinite : 384 * widget.size.scale,
+        height: widget.inline ? double.maxFinite : 200 * widget.size.scale,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12 * widget.size.scale),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
+              blurRadius: 20 * widget.size.scale,
+              offset: Offset(0, 4 * widget.size.scale),
             ),
           ],
         ),
@@ -166,13 +166,14 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
                   children: [
                     // 甜甜圈图
                     SizedBox(
-                      width: 96,
-                      height: 96,
+                      width: 96 * widget.size.scale,
+                      height: 96 * widget.size.scale,
                       child: CustomPaint(
                         painter: _DonutChartPainter(
                           categories: widget.categories,
                           progress: _animation.value,
                           isDark: isDark,
+                          scale: widget.size.scale,
                         ),
                       ),
                     ),
@@ -181,26 +182,26 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
                     Column(
                       children: [
                         SizedBox(
-                          height: 28,
+                          height: 28 * widget.size.scale,
                           child: AnimatedFlipCounter(
                             value: widget.totalValue * _animation.value,
                             fractionDigits: 2,
                             textStyle: TextStyle(
                               color: isDark ? Colors.white : const Color(0xFF0F172A),
-                              fontSize: 20,
+                              fontSize: widget.size.getTitleFontSize() * 0.8,
                               fontWeight: FontWeight.w700,
                               height: 1.0,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: widget.size.getSmallSpacing()),
                         SizedBox(
-                          height: 16,
+                          height: 16 * widget.size.scale,
                           child: Text(
                             widget.totalLabel,
                             style: TextStyle(
                               color: const Color(0xFF9CA3AF),
-                              fontSize: 12,
+                              fontSize: widget.size.getLegendFontSize(),
                               fontWeight: FontWeight.w500,
                               height: 1.0,
                             ),
@@ -219,9 +220,9 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
                 padding: widget.size.getPadding(),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF334155).withOpacity(0.5) : const Color(0xFFF8FAFC),
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(32),
-                    bottomRight: Radius.circular(32),
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(32 * widget.size.scale),
+                    bottomRight: Radius.circular(32 * widget.size.scale),
                   ),
                 ),
                 child: Column(
@@ -263,11 +264,12 @@ class _DonutChartStatsCardWidgetState extends State<DonutChartStatsCardWidget>
             return Opacity(
               opacity: itemAnimation.value,
               child: Transform.translate(
-                offset: Offset(10 * (1 - itemAnimation.value), 0),
+                offset: Offset(10 * widget.size.scale * (1 - itemAnimation.value), 0),
                 child: _CategoryItem(
                   label: category.label,
                   color: category.color,
                   isDark: isDark,
+                  size: widget.size,
                 ),
               ),
             );
@@ -285,11 +287,13 @@ class _CategoryItem extends StatelessWidget {
   final String label;
   final Color color;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _CategoryItem({
     required this.label,
     required this.color,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -298,16 +302,16 @@ class _CategoryItem extends StatelessWidget {
       children: [
         // 颜色指示点
         Container(
-          width: 14,
-          height: 14,
+          width: size.getLegendIndicatorWidth() * 0.7,
+          height: size.getLegendIndicatorHeight() * 1.2,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: Container(
-              width: 4,
-              height: 4,
+              width: 4 * size.scale,
+              height: 4 * size.scale,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.9),
                 shape: BoxShape.circle,
@@ -315,15 +319,15 @@ class _CategoryItem extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12 * size.scale),
         // 标签文本
         SizedBox(
-          height: 16,
+          height: 16 * size.scale,
           child: Text(
             label,
             style: TextStyle(
               color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
-              fontSize: 12,
+              fontSize: size.getLegendFontSize(),
               fontWeight: FontWeight.w500,
               height: 1.0,
             ),
@@ -339,11 +343,13 @@ class _DonutChartPainter extends CustomPainter {
   final List<ChartCategoryData> categories;
   final double progress;
   final bool isDark;
+  final double scale;
 
   _DonutChartPainter({
     required this.categories,
     required this.progress,
     required this.isDark,
+    this.scale = 1.0,
   });
 
   @override
@@ -403,7 +409,8 @@ class _DonutChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _DonutChartPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         oldDelegate.isDark != isDark ||
-        oldDelegate.categories.length != categories.length;
+        oldDelegate.categories.length != categories.length ||
+        oldDelegate.scale != scale;
   }
 }
 

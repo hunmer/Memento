@@ -208,10 +208,10 @@ class _DualRangeChartCardWidgetState extends State<DualRangeChartCardWidget>
         return Opacity(
           opacity: _animation.value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - _animation.value)),
+            offset: Offset(0, 20 * widget.size.scale * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 300,
-              height: 320, // 固定高度
+              width: widget.inline ? double.maxFinite : 300 * widget.size.scale,
+              height: widget.inline ? double.maxFinite : 320 * widget.size.scale,
               padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
                 color: backgroundColor,
@@ -508,8 +508,8 @@ class _RangeBar extends StatelessWidget {
             ? 5
             : 6;
 
-    final strokeWidth = 1.5; // 更细的线条
-    final dayLabelFontSize = 9.0; // 更小的标签字体
+    final strokeWidth = size.getStrokeWidth() * 0.2; // 根据尺寸调整线条粗细
+    final dayLabelFontSize = size.getLegendFontSize() * 0.8; // 根据尺寸调整标签字体
 
     final barSpacing = chartWidth / totalCount; // 基于数据数量计算水平间距
     final barWidth = barSpacing * 0.6; // 条形宽度为间距的 60%，留出间隙
