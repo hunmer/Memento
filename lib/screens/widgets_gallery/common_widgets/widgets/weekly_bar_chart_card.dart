@@ -119,10 +119,10 @@ class _CommonWeeklyBarChartCardWidgetState
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               height: widget.inline ? double.maxFinite : widget.size.getHeightConstraints().maxHeight,
-              width: widget.inline ? double.maxFinite : widget.size.getHeightConstraints().maxWidth,
+              width: widget.inline ? double.maxFinite : null,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(widget.size.getPadding().right * 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.2 : 0.08),
@@ -240,7 +240,7 @@ class _WeeklyBars extends StatelessWidget {
 
         return Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: index < data.length - 1 ? size.getItemSpacing() : 0),
+            padding: EdgeInsets.symmetric(horizontal: size.getItemSpacing() / 2),
             child: Column(
               children: [
                 // 条形图容器
@@ -250,7 +250,7 @@ class _WeeklyBars extends StatelessWidget {
                       color: isDark
                           ? const Color(0xFF1F2937)
                           : const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(size.getPadding().right * 0.75),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -263,19 +263,19 @@ class _WeeklyBars extends StatelessWidget {
                               height: 100 *
                                   item.upperHeight *
                                   barAnimation.value,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 6),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: size.getSmallSpacing() * 1.5),
                               decoration: BoxDecoration(
                                 color: lightColor,
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(6),
-                                  topRight: Radius.circular(6),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(size.getPadding().right * 0.5),
+                                  topRight: Radius.circular(size.getPadding().right * 0.5),
                                 ),
                               ),
                             );
                           },
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: size.getSmallSpacing()),
                         // 下层主条
                         AnimatedBuilder(
                           animation: barAnimation,
@@ -284,8 +284,8 @@ class _WeeklyBars extends StatelessWidget {
                               height: 100 *
                                   item.lowerHeight *
                                   barAnimation.value,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 5),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: size.getSmallSpacing() * 1.25),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
@@ -295,19 +295,19 @@ class _WeeklyBars extends StatelessWidget {
                                     primaryColor,
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(size.getPadding().right * 0.75),
                                 boxShadow: [
                                   BoxShadow(
                                     color: primaryColor.withOpacity(0.3),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 2),
+                                    blurRadius: size.getSmallSpacing(),
+                                    offset: Offset(0, size.getSmallSpacing() * 0.5),
                                   ),
                                 ],
                               ),
                             );
                           },
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: size.getSmallSpacing()),
                       ],
                     ),
                   ),
