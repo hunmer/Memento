@@ -189,13 +189,14 @@ class _ActivityTodayPieChartCardWidgetState
 
             SizedBox(height: widget.size.getItemSpacing()),
 
-            // 底部占位文字
-            Text(
-              '总时长: 0分钟',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+            // 底部占位文字（只在总时长>0时显示）
+            if (widget.totalDuration > 0)
+              Text(
+                '总时长: ${_formatDuration(widget.totalDuration)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                ),
               ),
-            ),
           ],
         ),
       ),
