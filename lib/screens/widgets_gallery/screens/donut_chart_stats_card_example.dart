@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/donut_chart_stats_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 甜甜圈图统计卡片示例
 class DonutChartStatsCardExample extends StatelessWidget {
@@ -28,6 +29,7 @@ class DonutChartStatsCardExample extends StatelessWidget {
                     child: DonutChartStatsCardWidget(
                       totalValue: 85964.45,
                       unit: '',
+                      size: const SmallSize(),
                       categories: const [
                         ChartCategoryData(
                           label: 'Marketing',
@@ -53,6 +55,7 @@ class DonutChartStatsCardExample extends StatelessWidget {
                     child: DonutChartStatsCardWidget(
                       totalValue: 85964.45,
                       unit: '',
+                      size: const MediumSize(),
                       categories: const [
                         ChartCategoryData(
                           label: 'Marketing Channels',
@@ -82,6 +85,7 @@ class DonutChartStatsCardExample extends StatelessWidget {
                   child: DonutChartStatsCardWidget(
                     totalValue: 85964.45,
                     unit: '',
+                    size: const WideSize(),
                     categories: const [
                       ChartCategoryData(
                         label: 'Marketing Channels',
@@ -121,6 +125,7 @@ class DonutChartStatsCardExample extends StatelessWidget {
                     child: DonutChartStatsCardWidget(
                       totalValue: 85964.45,
                       unit: '',
+                      size: const LargeSize(),
                       categories: const [
                         ChartCategoryData(
                           label: 'Marketing Channels',
@@ -155,6 +160,7 @@ class DonutChartStatsCardExample extends StatelessWidget {
                   child: DonutChartStatsCardWidget(
                     totalValue: 85964.45,
                     unit: '',
+                    size: const Wide2Size(),
                     categories: const [
                       ChartCategoryData(
                         label: 'Marketing Channels',
