@@ -41,7 +41,7 @@ abstract class HomeWidgetSize {
     this.fontSize = 1.0,
     this.iconSize = 1.0,
     this.strokeWidth = 1.0,
-    this.iconContainerScale = 2.0,
+    this.iconContainerScale = 1.5,
     this.progressStrokeScale = 0.4,
   });
 
@@ -315,6 +315,70 @@ abstract class HomeWidgetSize {
       baseWidth = 10.0;
     }
     return baseWidth * strokeWidth;
+  }
+
+  /// 获取条形图列表容器高度
+  double getRankedBarListHeight() {
+    double baseHeight;
+    if (this is SmallSize) {
+      baseHeight = 150;
+    } else if (this is MediumSize || this is WideSize) {
+      baseHeight = 200;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseHeight = 300;
+    } else {
+      // Large3, Wide3
+      baseHeight = 400;
+    }
+    return baseHeight * scale;
+  }
+
+  /// 获取单个条形图条目高度
+  double getRankedBarItemHeight() {
+    double baseHeight;
+    if (this is SmallSize) {
+      baseHeight = 32;
+    } else if (this is MediumSize || this is WideSize) {
+      baseHeight = 40;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseHeight = 48;
+    } else {
+      // Large3, Wide3
+      baseHeight = 56;
+    }
+    return baseHeight * scale;
+  }
+
+  /// 获取条形图最大宽度（基础值，会根据 value 动态调整）
+  double getRankedBarMaxWidth() {
+    double baseWidth;
+    if (this is SmallSize) {
+      baseWidth = 200;
+    } else if (this is MediumSize || this is WideSize) {
+      baseWidth = 280;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseWidth = 360;
+    } else {
+      // Large3, Wide3
+      baseWidth = 440;
+    }
+    return baseWidth * scale;
+  }
+
+  /// 获取热力图高度
+  double getHeatmapHeight() {
+    double baseHeight;
+    if (this is SmallSize) {
+      baseHeight = 60;
+    } else if (this is MediumSize || this is WideSize) {
+      baseHeight = 100;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseHeight = 140;
+    } else {
+      // Large3, Wide3
+      baseHeight = 180;
+    }
+    return baseHeight * scale;
   }
 }
 

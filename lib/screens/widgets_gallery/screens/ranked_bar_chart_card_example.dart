@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/ranked_bar_chart_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 排名条形图卡片示例
 class RankedBarChartCardExample extends StatelessWidget {
@@ -23,13 +24,14 @@ class RankedBarChartCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 300,
+                    width: 150,
+                    height: 150,
                     child: RankedBarChartCardWidget(
                       title: 'Average of the first economies',
                       subtitle:
                           'Minim dolor in amet nulla laboris enim dolore consequatt.',
                       itemCount: '8 countries',
+                      size: const SmallSize(),
                       items: [
                         RankedBarItem(
                           label: 'Noruega',
@@ -52,7 +54,6 @@ class RankedBarChartCardExample extends StatelessWidget {
                           color: Color(0xFF008DB6),
                         ),
                       ],
-                      footer: 'Minim dolor in amet.',
                     ),
                   ),
                 ),
@@ -61,13 +62,14 @@ class RankedBarChartCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 350,
+                    width: 220,
+                    height: 220,
                     child: RankedBarChartCardWidget(
                       title: 'Average of the first economies',
                       subtitle:
                           'Minim dolor in amet nulla laboris enim dolore consequatt.',
                       itemCount: '8 countries',
+                      size: const MediumSize(),
                       items: [
                         RankedBarItem(
                           label: 'Noruega',
@@ -95,7 +97,6 @@ class RankedBarChartCardExample extends StatelessWidget {
                           color: Color(0xFF00B0CE),
                         ),
                       ],
-                      footer: 'Minim dolor in amet.',
                     ),
                   ),
                 ),
@@ -104,13 +105,14 @@ class RankedBarChartCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
-                    height: 420,
+                    width: 300,
+                    height: 300,
                     child: RankedBarChartCardWidget(
                       title: 'Average of the first economies',
                       subtitle:
                           'Minim dolor in amet nulla laboris enim dolore consequatt.',
                       itemCount: '8 countries',
+                      size: const LargeSize(),
                       items: [
                         RankedBarItem(
                           label: 'Noruega',
@@ -153,8 +155,6 @@ class RankedBarChartCardExample extends StatelessWidget {
                           color: Color(0xFFCBF1F7),
                         ),
                       ],
-                      footer:
-                          'Minim dolor in amet nulla laboris enim dolore consequatt.',
                     ),
                   ),
                 ),
@@ -163,12 +163,13 @@ class RankedBarChartCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 380,
+                  height: 280,
                   child: RankedBarChartCardWidget(
                     title: 'Average of the First Economies - Global Ranking',
                     subtitle:
                         'A comprehensive analysis of economic performance across leading nations worldwide.',
                     itemCount: '8 countries',
+                    size: const WideSize(),
                     items: [
                       RankedBarItem(
                         label: 'Noruega',
@@ -211,8 +212,6 @@ class RankedBarChartCardExample extends StatelessWidget {
                         color: Color(0xFFCBF1F7),
                       ),
                     ],
-                    footer:
-                        'Comprehensive economic indicators and performance metrics analysis.',
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -220,13 +219,14 @@ class RankedBarChartCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 480,
+                  height: 350,
                   child: RankedBarChartCardWidget(
                     title:
                         'Average of the First Economies - Complete Global Analysis',
                     subtitle:
                         'A comprehensive analysis of economic performance across leading nations worldwide with detailed metrics.',
                     itemCount: '8 countries',
+                    size: const Wide2Size(),
                     items: [
                       RankedBarItem(
                         label: 'Noruega',
@@ -269,8 +269,6 @@ class RankedBarChartCardExample extends StatelessWidget {
                         color: Color(0xFFCBF1F7),
                       ),
                     ],
-                    footer:
-                        'Comprehensive economic indicators and performance metrics analysis for global comparison.',
                   ),
                 ),
               ],

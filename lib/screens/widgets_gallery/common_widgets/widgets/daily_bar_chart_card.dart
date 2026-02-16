@@ -28,16 +28,15 @@ class DailyBarData {
   factory DailyBarData.fromJson(Map<String, dynamic> json) {
     return DailyBarData(
       height: (json['height'] as num?)?.toDouble() ?? 0.0,
-      color: DailyBarColorExtension.fromJson(json['color'] as String? ?? 'teal'),
+      color: DailyBarColorExtension.fromJson(
+        json['color'] as String? ?? 'teal',
+      ),
     );
   }
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'height': height,
-      'color': color.toJson(),
-    };
+    return {'height': height, 'color': color.toJson()};
   }
 }
 
@@ -71,7 +70,11 @@ class DailyBarChartCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final barsList = (props['bars'] as List<dynamic>?)?.map((e) => DailyBarData.fromJson(e as Map<String, dynamic>)).toList() ?? const [];
+    final barsList =
+        (props['bars'] as List<dynamic>?)
+            ?.map((e) => DailyBarData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
 
     return DailyBarChartCardWidget(
       title: props['title'] as String? ?? '',
@@ -85,7 +88,8 @@ class DailyBarChartCardWidget extends StatefulWidget {
   }
 
   @override
-  State<DailyBarChartCardWidget> createState() => _DailyBarChartCardWidgetState();
+  State<DailyBarChartCardWidget> createState() =>
+      _DailyBarChartCardWidgetState();
 }
 
 class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
@@ -129,7 +133,7 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
               height: widget.inline ? double.maxFinite : 280,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
@@ -138,108 +142,158 @@ class _DailyBarChartCardWidgetState extends State<DailyBarChartCardWidget>
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(40),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: ClipRRect(
-                        borderRadius: const BorderRadius.only(topRight: Radius.circular(40)),
-                        child: ShaderMask(
-                          shaderCallback: (bounds) {
-                            return RadialGradient(
-                              center: Alignment.topRight,
-                              radius: 1.0,
-                              colors: [Colors.black, Colors.transparent],
-                              stops: const [0.0, 0.8],
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.dstIn,
-                          child: CustomPaint(
-                            size: const Size(128, 128),
-                            painter: _DotPatternPainter(
-                              color: Colors.grey.shade600.withOpacity(isDark ? 0.3 : 0.2),
-                              dotSize: 1,
-                              spacing: 6,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(40),
+                      ),
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return RadialGradient(
+                            center: Alignment.topRight,
+                            radius: 1.0,
+                            colors: [Colors.black, Colors.transparent],
+                            stops: const [0.0, 0.8],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: CustomPaint(
+                          size: const Size(128, 128),
+                          painter: _DotPatternPainter(
+                            color: Colors.grey.shade600.withOpacity(
+                              isDark ? 0.3 : 0.2,
                             ),
+                            dotSize: 1,
+                            spacing: 6,
                           ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: widget.size.getPadding(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(widget.title, style: TextStyle(fontSize: widget.size.getTitleFontSize(), fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.grey.shade900)),
-                                  SizedBox(height: widget.size.getSmallSpacing()),
-                                  Text(widget.subtitle, style: TextStyle(fontSize: widget.size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
+                  ),
+                  Padding(
+                    padding: widget.size.getPadding(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.title,
+                                  style: TextStyle(
+                                    fontSize: widget.size.getTitleFontSize(),
+                                    fontWeight: FontWeight.w600,
+                                    color:
+                                        isDark
+                                            ? Colors.white
+                                            : Colors.grey.shade900,
+                                  ),
+                                ),
+                                SizedBox(height: widget.size.getSmallSpacing()),
+                                Text(
+                                  widget.subtitle,
+                                  style: TextStyle(
+                                    fontSize: widget.size.getSubtitleFontSize(),
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? Colors.grey.shade400
+                                            : Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            ),
+                            Container(
+                              width: widget.size.getIconSize() * 1.6,
+                              height: widget.size.getIconSize() * 1.6,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
                                 ],
                               ),
-                              Container(
-                                width: widget.size.getIconSize() * 1.6,
-                                height: widget.size.getIconSize() * 1.6,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(Icons.directions_walk, color: Colors.white, size: widget.size.getIconSize()),
+                              child: Icon(
+                                Icons.directions_walk,
+                                color: Colors.white,
+                                size: widget.size.getIconSize(),
                               ),
-                            ],
-                          ),
-                          SizedBox(height: widget.size.getItemSpacing()),
-                          SizedBox(
-                            height: widget.size.getLargeFontSize(),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: widget.size.getLargeFontSize() * 5,
-                                  height: widget.size.getLargeFontSize(),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: widget.size.getItemSpacing()),
+                        SizedBox(
+                          height: widget.size.getLargeFontSize(),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
                                   child: AnimatedFlipCounter(
-                                    value: widget.value.toDouble() * _animation.value,
+                                    value:
+                                        widget.value.toDouble() *
+                                        _animation.value,
                                     fractionDigits: 0,
                                     textStyle: TextStyle(
                                       fontSize: widget.size.getLargeFontSize(),
                                       fontWeight: FontWeight.bold,
-                                      color: isDark ? Colors.white : Colors.grey.shade900,
+                                      color:
+                                          isDark
+                                              ? Colors.white
+                                              : Colors.grey.shade900,
                                       letterSpacing: -1,
                                       height: 1.0,
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: widget.size.getSmallSpacing()),
-                                SizedBox(
-                                  height: widget.size.getSubtitleFontSize() + 4,
-                                  child: Text(widget.unit, style: TextStyle(fontSize: widget.size.getSubtitleFontSize(), fontWeight: FontWeight.w500, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500)),
+                              ),
+                              SizedBox(width: widget.size.getSmallSpacing()),
+                              SizedBox(
+                                height: widget.size.getSubtitleFontSize() + 4,
+                                child: Text(
+                                  widget.unit,
+                                  style: TextStyle(
+                                    fontSize: widget.size.getSubtitleFontSize(),
+                                    fontWeight: FontWeight.w500,
+                                    color:
+                                        isDark
+                                            ? Colors.grey.shade400
+                                            : Colors.grey.shade500,
+                                  ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: widget.size.getTitleSpacing()),
-                          Expanded(
-                            child: _DailyBars(bars: widget.bars, animation: _animation, size: widget.size),
+                        ),
+                        SizedBox(height: widget.size.getTitleSpacing()),
+                        Expanded(
+                          child: _DailyBars(
+                            bars: widget.bars,
+                            animation: _animation,
+                            size: widget.size,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -254,7 +308,11 @@ class _DailyBars extends StatelessWidget {
   final Animation<double> animation;
   final HomeWidgetSize size;
 
-  const _DailyBars({required this.bars, required this.animation, required this.size});
+  const _DailyBars({
+    required this.bars,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -262,36 +320,54 @@ class _DailyBars extends StatelessWidget {
     final tealColor = const Color(0xFF2DD4BF);
     final redColor = const Color(0xFFFB7185);
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(bars.length, (index) {
-        final bar = bars[index];
-        final step = 0.015;
-        final barAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Interval(index * step, 0.55 + index * step, curve: Curves.easeOutCubic),
-        );
+    final barWidth = size.getBarWidth();
+    final barSpacing = size.getItemSpacing() / 2;
 
-        final baseColor = bar.color == DailyBarColor.teal ? tealColor : redColor;
-        final barColor = baseColor.withOpacity(bar.color == DailyBarColor.teal ? 1.0 : (isDark ? 0.9 : 0.8));
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: List.generate(bars.length, (index) {
+          final bar = bars[index];
+          final step = 0.015;
+          final barAnimation = CurvedAnimation(
+            parent: animation,
+            curve: Interval(
+              index * step,
+              0.55 + index * step,
+              curve: Curves.easeOutCubic,
+            ),
+          );
 
-        return Padding(
-          padding: EdgeInsets.only(right: size.getItemSpacing() / 2),
-          child: AnimatedBuilder(
-            animation: barAnimation,
-            builder: (context, child) {
-              return Container(
-                width: size.getBarWidth(),
-                height: size.getLargeFontSize() * 2 * bar.height * barAnimation.value,
-                decoration: BoxDecoration(
-                  color: barColor,
-                  borderRadius: BorderRadius.circular(size.getBarWidth() / 2),
-                ),
-              );
-            },
-          ),
-        );
-      }),
+          final baseColor =
+              bar.color == DailyBarColor.teal ? tealColor : redColor;
+          final barColor = baseColor.withOpacity(
+            bar.color == DailyBarColor.teal ? 1.0 : (isDark ? 0.9 : 0.8),
+          );
+
+          return Padding(
+            padding: EdgeInsets.only(right: barSpacing),
+            child: AnimatedBuilder(
+              animation: barAnimation,
+              builder: (context, child) {
+                return Container(
+                  width: barWidth,
+                  height:
+                      size.getLargeFontSize() *
+                      2 *
+                      bar.height *
+                      barAnimation.value,
+                  decoration: BoxDecoration(
+                    color: barColor,
+                    borderRadius: BorderRadius.circular(barWidth / 2),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
+      ),
     );
   }
 }
@@ -301,11 +377,18 @@ class _DotPatternPainter extends CustomPainter {
   final double dotSize;
   final double spacing;
 
-  _DotPatternPainter({required this.color, required this.dotSize, required this.spacing});
+  _DotPatternPainter({
+    required this.color,
+    required this.dotSize,
+    required this.spacing,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color..style = PaintingStyle.fill;
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.fill;
 
     for (double x = 0; x < size.width; x += spacing) {
       for (double y = 0; y < size.height; y += spacing) {

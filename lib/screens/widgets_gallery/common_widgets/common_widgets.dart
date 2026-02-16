@@ -24,7 +24,6 @@ import 'package:Memento/widgets/common/rounded_reminders_list_card.dart';
 import 'widgets/monthly_progress_with_dots_card.dart';
 import 'widgets/multi_metric_progress_card.dart';
 import 'widgets/circular_metrics_card.dart';
-import 'widgets/contribution_heatmap_card.dart';
 import 'widgets/smooth_line_chart_card.dart';
 import 'widgets/vertical_bar_chart_card.dart';
 import 'widgets/message_list_card.dart';
@@ -107,7 +106,6 @@ enum CommonWidgetId {
   monthlyProgressDotsCard,
   multiMetricProgressCard,
   circularMetricsCard,
-  contributionHeatmapCard,
   smoothLineChartCard,
   lineChartTrendCard,
   verticalBarChartCard,
@@ -308,14 +306,6 @@ class CommonWidgetsRegistry {
       name: '环形指标卡片',
       description: '显示多个环形指标，带进度环和图标',
       icon: Icons.donut_large,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
-    ),
-    CommonWidgetId.contributionHeatmapCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.contributionHeatmapCard,
-      name: '贡献热力图卡片',
-      description: '活跃度热力图网格展示卡片',
-      icon: Icons.grid_on,
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
     ),
@@ -971,8 +961,6 @@ class CommonWidgetBuilder {
         return MultiMetricProgressCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.circularMetricsCard:
         return CircularMetricsCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.contributionHeatmapCard:
-        return ContributionHeatmapCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.smoothLineChartCard:
         return SmoothLineChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.lineChartTrendCard:
