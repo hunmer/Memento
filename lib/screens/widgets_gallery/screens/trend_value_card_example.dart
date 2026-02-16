@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/trend_value_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 趋势数值卡片示例
 class TrendValueCardExample extends StatelessWidget {
@@ -19,7 +20,7 @@ class TrendValueCardExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (1x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -35,11 +36,12 @@ class TrendValueCardExample extends StatelessWidget {
                       additionalInfo: ['26.1 BMI', 'Overweight'],
                       trendLabel: 'vs last week',
                       primaryColor: const Color(0xFFF59E0B),
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (2x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -55,11 +57,12 @@ class TrendValueCardExample extends StatelessWidget {
                       additionalInfo: ['26.1 BMI', 'Overweight'],
                       trendLabel: 'vs last week',
                       primaryColor: const Color(0xFFF59E0B),
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (2x2)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -75,6 +78,53 @@ class TrendValueCardExample extends StatelessWidget {
                       additionalInfo: ['26.1 BMI', 'Overweight'],
                       trendLabel: 'vs last week',
                       primaryColor: const Color(0xFFF59E0B),
+                      size: const LargeSize(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 220,
+                    child: TrendValueCardWidget(
+                      value: 167.4,
+                      unit: 'lbs',
+                      trendValue: -0.8,
+                      trendUnit: 'lbs',
+                      chartData: [30, 40, 60, 80, 50, 30, 38, 30, 32, 40],
+                      date: 'Jan 12, 2028',
+                      additionalInfo: ['26.1 BMI', 'Overweight'],
+                      trendLabel: 'vs last week',
+                      primaryColor: const Color(0xFFF59E0B),
+                      size: const WideSize(),
+                      inline: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 320,
+                    child: TrendValueCardWidget(
+                      value: 167.4,
+                      unit: 'lbs',
+                      trendValue: -0.8,
+                      trendUnit: 'lbs',
+                      chartData: [30, 40, 60, 80, 50, 30, 38, 30, 32, 40],
+                      date: 'Jan 12, 2028',
+                      additionalInfo: ['26.1 BMI', 'Overweight'],
+                      trendLabel: 'vs last week',
+                      primaryColor: const Color(0xFFF59E0B),
+                      size: const Wide2Size(),
+                      inline: true,
                     ),
                   ),
                 ),
