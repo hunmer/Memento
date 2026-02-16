@@ -206,7 +206,7 @@ class _WeeklyStepsProgressCardState extends State<WeeklyStepsProgressCard>
             child: Container(
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF111827) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
@@ -258,48 +258,65 @@ class _WeeklyStepsProgressCardState extends State<WeeklyStepsProgressCard>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: containerSize,
-              height: containerSize,
-              decoration: BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: containerSize,
+                height: containerSize,
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  widget.icon ?? Icons.directions_walk,
+                  color: Colors.white,
+                  size: iconSize,
+                ),
+              ),
+              SizedBox(width: size.getSmallSpacing() * 3),
+              Flexible(
+                child: Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        isDark
+                            ? const Color(0xFFF3F4F6)
+                            : const Color(0xFF111827),
                   ),
-                ],
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
-              child: Icon(
-                widget.icon ?? Icons.directions_walk,
-                color: Colors.white,
-                size: iconSize,
-              ),
-            ),
-            SizedBox(width: size.getSmallSpacing() * 3),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: titleFontSize,
-                fontWeight: FontWeight.w600,
-                color:
-                    isDark ? const Color(0xFFF3F4F6) : const Color(0xFF111827),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
         Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              widget.dateRange,
-              style: TextStyle(
-                fontSize: labelFontSize,
-                fontWeight: FontWeight.w500,
-                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+            Flexible(
+              child: Text(
+                widget.dateRange,
+                style: TextStyle(
+                  fontSize: labelFontSize,
+                  fontWeight: FontWeight.w500,
+                  color:
+                      isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
             if (widget.onMenuPressed != null) ...[
@@ -307,7 +324,10 @@ class _WeeklyStepsProgressCardState extends State<WeeklyStepsProgressCard>
               IconButton(
                 icon: Icon(
                   Icons.more_horiz,
-                  color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                  color:
+                      isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
                 ),
                 onPressed: widget.onMenuPressed,
               ),
@@ -327,7 +347,6 @@ class _WeeklyStepsProgressCardState extends State<WeeklyStepsProgressCard>
   ) {
     final valueFontSize = size.getLargeFontSize() * 0.75; // 约 27/36/42
     final labelFontSize = size.getSubtitleFontSize();
-    final smallSpacing = size.getSmallSpacing();
 
     return SizedBox(
       height: valueFontSize,
@@ -341,9 +360,7 @@ class _WeeklyStepsProgressCardState extends State<WeeklyStepsProgressCard>
               maxWidth: valueFontSize * 4,
               child: Center(
                 child: AnimatedFlipCounter(
-                  value:
-                      widget.totalSteps.toDouble() *
-                      _counterAnimation.value,
+                  value: widget.totalSteps.toDouble() * _counterAnimation.value,
                   fractionDigits: 0,
                   textStyle: TextStyle(
                     fontSize: valueFontSize,
@@ -359,16 +376,12 @@ class _WeeklyStepsProgressCardState extends State<WeeklyStepsProgressCard>
               ),
             ),
           ),
-          SizedBox(width: smallSpacing * 2),
           Text(
             'steps',
             style: TextStyle(
               fontSize: labelFontSize,
               fontWeight: FontWeight.w500,
-              color:
-                  isDark
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF6B7280),
+              color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
               height: 1.0,
             ),
           ),
@@ -450,108 +463,137 @@ class _StepsBars extends StatelessWidget {
     final showBottomText = size is WideSize || size is Wide2Size;
     // 底部预留空间：间距 + 文本高度
     final bottomSpace = showBottomText ? legendFontSize * 2.5 : 0;
-    final maxHeight = availableHeight - bottomSpace;
+    // 确保柱子最大高度不超过可用空间减去底部空间
+    final maxHeight = (availableHeight - bottomSpace).clamp(
+      0.0,
+      availableHeight,
+    );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
-      children: List.generate(dailyData.length, (index) {
-        final data = dailyData[index];
-        final barHeight = (data.steps / maxSteps) * maxHeight;
-        final isSelected = index == selectedIndex;
-
-        // 错开动画
-        final step = 0.08;
-        final barAnimation = CurvedAnimation(
-          parent: animation,
-          curve: Interval(
-            index * step,
-            0.5 + index * step,
-            curve: Curves.easeOutCubic,
-          ),
-        );
-
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => onTap(index),
-            child: OverflowBox(
-              alignment: Alignment.bottomCenter,
-              maxHeight: availableHeight,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedBuilder(
-                    animation: barAnimation,
-                    builder: (context, child) {
-                      return Container(
-                        constraints: BoxConstraints(maxHeight: maxHeight),
-                        height: barHeight * barAnimation.value,
-                        width: barWidth,
-                        decoration: BoxDecoration(
-                          gradient:
-                              isSelected
-                                  ? null
-                                  : LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors:
-                                        isDark
-                                            ? [
-                                              const Color(0xFFFFD89E),
-                                              const Color(0xFFA66C1E),
-                                            ]
-                                            : [
-                                              const Color(0xFFFFD89E),
-                                              const Color(0xFFFFF0D9),
-                                            ],
-                                  ),
-                          color: isSelected ? primaryColor : null,
-                          // 只保留顶部圆角，避免底部超出
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(barWidth / 2),
-                            topRight: Radius.circular(barWidth / 2),
-                          ),
-                          boxShadow:
-                              isSelected
-                                  ? [
-                                    BoxShadow(
-                                      color: primaryColor.withOpacity(0.3),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ]
-                                  : null,
-                        ),
-                      );
-                    },
-                  ),
-                  // 只在 Wide/Wide2 尺寸时显示底部文本
-                  if (showBottomText) ...[
-                    SizedBox(height: legendFontSize),
-                    Text(
-                      data.day,
-                      maxLines: 1,
-                      overflow: TextOverflow.visible,
-                      style: TextStyle(
-                        fontSize: legendFontSize,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w500,
-                        color:
-                            isSelected
-                                ? isDark
-                                    ? const Color(0xFFF3F4F6)
-                                    : const Color(0xFF111827)
-                                : isDark
-                                ? const Color(0xFF9CA3AF)
-                                : const Color(0xFF6B7280),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+      children: [
+        for (int index = 0; index < dailyData.length; index++) ...[
+          Expanded(
+            child: _buildBar(
+              dailyData[index],
+              index,
+              maxHeight,
+              barWidth,
+              legendFontSize,
+              showBottomText,
+              isDark,
+              primaryColor,
             ),
           ),
-        );
-      }),
+          if (index < dailyData.length - 1) const SizedBox(width: 5),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBar(
+    DailyStepData data,
+    int index,
+    double maxHeight,
+    double barWidth,
+    double legendFontSize,
+    bool showBottomText,
+    bool isDark,
+    Color primaryColor,
+  ) {
+    final barHeight = (data.steps / maxSteps) * maxHeight;
+    final isSelected = index == selectedIndex;
+
+    // 错开动画
+    final step = 0.08;
+    final barAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Interval(
+        index * step,
+        0.5 + index * step,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight + (showBottomText ? legendFontSize * 2 : 0),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 柱子使用 Flexible，会自动适应可用空间
+            Flexible(
+              child: AnimatedBuilder(
+                animation: barAnimation,
+                builder: (context, child) {
+                  return Container(
+                    constraints: BoxConstraints(maxHeight: maxHeight),
+                    height: barHeight * barAnimation.value,
+                    width: barWidth,
+                    decoration: BoxDecoration(
+                      gradient:
+                          isSelected
+                              ? null
+                              : LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors:
+                                    isDark
+                                        ? [
+                                          const Color(0xFFFFD89E),
+                                          const Color(0xFFA66C1E),
+                                        ]
+                                        : [
+                                          const Color(0xFFFFD89E),
+                                          const Color(0xFFFFF0D9),
+                                        ],
+                              ),
+                      color: isSelected ? primaryColor : null,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(barWidth / 2),
+                        topRight: Radius.circular(barWidth / 2),
+                      ),
+                      boxShadow:
+                          isSelected
+                              ? [
+                                BoxShadow(
+                                  color: primaryColor.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                              : null,
+                    ),
+                  );
+                },
+              ),
+            ),
+            // 文本始终在下方，固定显示
+            if (showBottomText) SizedBox(height: legendFontSize * 0.5),
+            if (showBottomText)
+              Text(
+                data.day,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: legendFontSize,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color:
+                      isSelected
+                          ? isDark
+                              ? const Color(0xFFF3F4F6)
+                              : const Color(0xFF111827)
+                          : isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

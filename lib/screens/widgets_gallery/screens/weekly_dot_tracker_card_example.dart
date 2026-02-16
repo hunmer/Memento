@@ -10,10 +10,12 @@ class WeeklyDotTrackerCardExample extends StatefulWidget {
   const WeeklyDotTrackerCardExample({super.key});
 
   @override
-  State<WeeklyDotTrackerCardExample> createState() => _WeeklyDotTrackerCardExampleState();
+  State<WeeklyDotTrackerCardExample> createState() =>
+      _WeeklyDotTrackerCardExampleState();
 }
 
-class _WeeklyDotTrackerCardExampleState extends State<WeeklyDotTrackerCardExample> {
+class _WeeklyDotTrackerCardExampleState
+    extends State<WeeklyDotTrackerCardExample> {
   /// 示例数据（模拟从存储加载）
   static final DotTrackerCardData exampleData = DotTrackerCardData.withIcon(
     title: 'Nutrition',
@@ -136,38 +138,57 @@ class _WeeklyDotTrackerCardExampleState extends State<WeeklyDotTrackerCardExampl
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('JSON 序列化演示'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('原始数据:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(exampleData.toString(), style: const TextStyle(fontSize: 12)),
-              const SizedBox(height: 16),
-              const Text('JSON 字符串:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(jsonString, style: const TextStyle(fontSize: 12, fontFamily: 'monospace')),
-              const SizedBox(height: 16),
-              const Text('反序列化验证:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text('标题: ${restoredData.title}'),
-              Text('数值: ${restoredData.currentValue} ${restoredData.unit}'),
-              Text('状态: ${restoredData.status}'),
-              Text('天数: ${restoredData.weekDays.length}'),
-              Text('点阵数: ${restoredData.dotStates.length}'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('JSON 序列化演示'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '原始数据:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    exampleData.toString(),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'JSON 字符串:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    jsonString,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    '反序列化验证:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('标题: ${restoredData.title}'),
+                  Text('数值: ${restoredData.currentValue} ${restoredData.unit}'),
+                  Text('状态: ${restoredData.status}'),
+                  Text('天数: ${restoredData.weekDays.length}'),
+                  Text('点阵数: ${restoredData.dotStates.length}'),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('关闭'),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('关闭'),
-          ),
-        ],
-      ),
     );
   }
 }
