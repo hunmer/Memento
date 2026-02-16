@@ -319,16 +319,18 @@ class _LineChart extends StatelessWidget {
               ),
             ),
             // 折线
-            CustomPaint(
-              size: Size(constraints.maxWidth, height),
-              painter: _LineChartPainter(
-                dataPoints: dataPoints,
-                progress: animation.value,
-                primaryColor: primaryColor,
-                valueColor: valueColor,
-                strokeWidth: size.getStrokeWidth() * 0.5,
-                graphWidth: 320,
-                graphHeight: 120,
+            ClipRect(
+              child: CustomPaint(
+                size: Size(constraints.maxWidth, height),
+                painter: _LineChartPainter(
+                  dataPoints: dataPoints,
+                  progress: animation.value,
+                  primaryColor: primaryColor,
+                  valueColor: valueColor,
+                  strokeWidth: size.getStrokeWidth() * 0.5,
+                  graphWidth: 320,
+                  graphHeight: 120,
+                ),
               ),
             ),
           ],
@@ -366,7 +368,7 @@ class _LineChartPainter extends CustomPainter {
     final scaleX = size.width / graphWidth;
     final scaleY = size.height / graphHeight;
 
-    // 创建渐变
+    // 创建渐变 - 使用完整画布尺寸，避免动画超出边界
     final gradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
@@ -376,7 +378,7 @@ class _LineChartPainter extends CustomPainter {
         primaryColor.withOpacity(0.8),
       ],
       stops: const [0.0, 0.5, 1.0],
-    ).createShader(Rect.fromLTWH(0, 0, size.width * progress, size.height));
+    ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final paint =
         Paint()
