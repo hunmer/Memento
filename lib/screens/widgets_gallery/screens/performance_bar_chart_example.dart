@@ -28,7 +28,6 @@ class PerformanceBarChartExample extends StatelessWidget {
                     height: 150,
                     child: PerformanceBarChartWidget(
                       size: const SmallSize(),
-                      badgeLabel: 'Performance',
                       growthPercentage: 280,
                       timePeriod: 'In the past 30 days',
                       barData: const [
@@ -49,7 +48,6 @@ class PerformanceBarChartExample extends StatelessWidget {
                     height: 200,
                     child: PerformanceBarChartWidget(
                       size: const MediumSize(),
-                      badgeLabel: 'Performance',
                       growthPercentage: 280,
                       timePeriod: 'In the past 30 days',
                       barData: const [
@@ -72,7 +70,6 @@ class PerformanceBarChartExample extends StatelessWidget {
                     height: 280,
                     child: PerformanceBarChartWidget(
                       size: const LargeSize(),
-                      badgeLabel: 'Performance',
                       growthPercentage: 280,
                       timePeriod: 'In the past 30 days',
                       barData: const [
@@ -95,7 +92,6 @@ class PerformanceBarChartExample extends StatelessWidget {
                   height: 280,
                   child: PerformanceBarChartWidget(
                     size: const WideSize(),
-                    badgeLabel: 'Performance Overview',
                     growthPercentage: 280,
                     timePeriod: 'In the past 30 days performance metrics',
                     barData: const [
@@ -119,7 +115,6 @@ class PerformanceBarChartExample extends StatelessWidget {
                   height: 350,
                   child: PerformanceBarChartWidget(
                     size: const Wide2Size(),
-                    badgeLabel: 'Performance Overview',
                     growthPercentage: 280,
                     timePeriod:
                         'In the past 30 days performance metrics and analysis',

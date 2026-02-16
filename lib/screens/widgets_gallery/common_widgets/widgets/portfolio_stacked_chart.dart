@@ -7,10 +7,7 @@ class AssetType {
   final String label;
   final Color color;
 
-  const AssetType({
-    required this.label,
-    required this.color,
-  });
+  const AssetType({required this.label, required this.color});
 
   /// 从 JSON 创建
   factory AssetType.fromJson(Map<String, dynamic> json) {
@@ -22,10 +19,7 @@ class AssetType {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'label': label,
-      'color': color.value,
-    };
+    return {'label': label, 'color': color.value};
   }
 }
 
@@ -52,11 +46,7 @@ class MonthlyData {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'stocks': stocks,
-      'funds': funds,
-      'bonds': bonds,
-    };
+    return {'stocks': stocks, 'funds': funds, 'bonds': bonds};
   }
 }
 
@@ -92,15 +82,18 @@ class PortfolioStackedChartWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final assetTypesList = (props['assetTypes'] as List<dynamic>?)
+    final assetTypesList =
+        (props['assetTypes'] as List<dynamic>?)
             ?.map((e) => AssetType.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
-    final monthlyDataList = (props['monthlyData'] as List<dynamic>?)
+    final monthlyDataList =
+        (props['monthlyData'] as List<dynamic>?)
             ?.map((e) => MonthlyData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
-    final monthLabelsList = (props['monthLabels'] as List<dynamic>?)?.cast<String>() ?? const [];
+    final monthLabelsList =
+        (props['monthLabels'] as List<dynamic>?)?.cast<String>() ?? const [];
 
     return PortfolioStackedChartWidget(
       title: props['title'] as String? ?? '',
@@ -119,7 +112,8 @@ class PortfolioStackedChartWidget extends StatefulWidget {
       _PortfolioStackedChartWidgetState();
 }
 
-class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidget>
+class _PortfolioStackedChartWidgetState
+    extends State<PortfolioStackedChartWidget>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -161,7 +155,7 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF0A0A0A) : Colors.white,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
@@ -179,54 +173,74 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                       Text(
                         widget.title,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: widget.size.getLegendFontSize(),
                           fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+                          color:
+                              isDark
+                                  ? Colors.grey.shade500
+                                  : Colors.grey.shade400,
                         ),
                       ),
                       SizedBox(height: widget.size.getItemSpacing()),
                       Row(
                         children: [
-                          Flexible(
-                            child: AnimatedFlipCounter(
-                              value: widget.totalAmount * _animation.value,
-                              fractionDigits: 2,
-                              prefix: '\$',
-                              duration: const Duration(milliseconds: 1000),
-                              textStyle: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: isDark ? Colors.white : Colors.grey.shade900,
-                                height: 1.0,
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: AnimatedFlipCounter(
+                                value: widget.totalAmount * _animation.value,
+                                fractionDigits: 2,
+                                prefix: '\$',
+                                duration: const Duration(milliseconds: 1000),
+                                textStyle: TextStyle(
+                                  fontSize: widget.size.getLargeFontSize() * 0.38,
+                                  fontWeight: FontWeight.w700,
+                                  color:
+                                      isDark
+                                          ? Colors.white
+                                          : Colors.grey.shade900,
+                                  height: 1.0,
+                                ),
                               ),
                             ),
                           ),
                           SizedBox(width: widget.size.getItemSpacing()),
                           Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: widget.size.getItemSpacing() - 2,
+                              horizontal: widget.size.getSmallSpacing(),
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.green.shade900.withOpacity(0.3)
-                                  : Colors.green.shade100,
-                              borderRadius: BorderRadius.circular(12),
+                              color:
+                                  isDark
+                                      ? Colors.green.shade900.withOpacity(0.3)
+                                      : Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(
+                                widget.size.getLegendIndicatorWidth() / 2,
+                              ),
                             ),
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.trending_up,
-                                  size: 12,
-                                  color: isDark ? Colors.green.shade400 : Colors.green.shade600,
+                                  size: widget.size.getIconSize() * 0.5,
+                                  color:
+                                      isDark
+                                          ? Colors.green.shade400
+                                          : Colors.green.shade600,
                                 ),
-                                SizedBox(width: widget.size.getItemSpacing() - 6),
+                                SizedBox(
+                                  width: widget.size.getSmallSpacing(),
+                                ),
                                 Text(
                                   '+${widget.growthPercentage.toInt()}%',
                                   style: TextStyle(
-                                    fontSize: 9,
+                                    fontSize: widget.size.getLegendFontSize() - 1,
                                     fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.green.shade400 : Colors.green.shade600,
+                                    color:
+                                        isDark
+                                            ? Colors.green.shade400
+                                            : Colors.green.shade600,
                                   ),
                                 ),
                               ],
@@ -237,33 +251,40 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                       SizedBox(height: widget.size.getItemSpacing()),
                       Wrap(
                         spacing: widget.size.getItemSpacing() * 1.5,
-                        children: widget.assetTypes.map((type) {
-                          final color = type.label == 'Bonds' && isDark
-                              ? const Color(0xFFE5E7EB)
-                              : type.color;
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              SizedBox(width: widget.size.getItemSpacing() - 2),
-                              Text(
-                                type.label,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w400,
-                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                                ),
-                              ),
-                            ],
-                          );
-                        }).toList(),
+                        children:
+                            widget.assetTypes.map((type) {
+                              final color =
+                                  type.label == 'Bonds' && isDark
+                                      ? const Color(0xFFE5E7EB)
+                                      : type.color;
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: widget.size.getLegendIndicatorWidth() * 0.5,
+                                    height: widget.size.getLegendIndicatorHeight() * 0.5,
+                                    decoration: BoxDecoration(
+                                      color: color,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: widget.size.getSmallSpacing(),
+                                  ),
+                                  Text(
+                                    type.label,
+                                    style: TextStyle(
+                                      fontSize: widget.size.getLegendFontSize(),
+                                      fontWeight: FontWeight.w400,
+                                      color:
+                                          isDark
+                                              ? Colors.grey.shade400
+                                              : Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
                       ),
                     ],
                   ),
@@ -278,16 +299,20 @@ class _PortfolioStackedChartWidgetState extends State<PortfolioStackedChartWidge
                   SizedBox(height: widget.size.getItemSpacing()),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: widget.monthLabels.map((label) {
-                      return Text(
-                        label,
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                        ),
-                      );
-                    }).toList(),
+                    children:
+                        widget.monthLabels.map((label) {
+                          return Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: widget.size.getLegendFontSize(),
+                              fontWeight: FontWeight.w500,
+                              color:
+                                  isDark
+                                      ? Colors.grey.shade500
+                                      : Colors.grey.shade400,
+                            ),
+                          );
+                        }).toList(),
                   ),
                 ],
               ),
@@ -320,10 +345,7 @@ class _StackedBarChart extends StatelessWidget {
         .map((d) => d.stocks + d.funds + d.bonds)
         .reduce((a, b) => a > b ? a : b);
 
-    final chartHeight = size == const SmallSize() ? 64.0 : 96.0;
-
-    return SizedBox(
-      height: chartHeight,
+    return Expanded(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(monthlyData.length, (index) {
@@ -339,13 +361,15 @@ class _StackedBarChart extends StatelessWidget {
 
           return Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: size == const SmallSize() ? 1.0 : 1.5),
+              padding: EdgeInsets.symmetric(
+                horizontal: size.getBarSpacing(),
+              ),
               child: _StackedBar(
                 data: data,
                 animation: barAnimation,
                 isDark: isDark,
                 maxTotal: maxTotal,
-                chartHeight: chartHeight,
+                size: size,
               ),
             ),
           );
@@ -360,48 +384,61 @@ class _StackedBar extends StatelessWidget {
   final Animation<double> animation;
   final bool isDark;
   final int maxTotal;
-  final double chartHeight;
+  final HomeWidgetSize size;
 
   const _StackedBar({
     required this.data,
     required this.animation,
     required this.isDark,
     required this.maxTotal,
-    required this.chartHeight,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, child) {
-        final stocksHeight = (data.stocks / maxTotal) * chartHeight * animation.value;
-        final fundsHeight = (data.funds / maxTotal) * chartHeight * animation.value;
-        final bondsHeight = (data.bonds / maxTotal) * chartHeight * animation.value;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableHeight = constraints.maxHeight;
+        final borderRadius = size.getSmallSpacing();
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              height: bondsHeight,
-              color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF000000),
-            ),
-            Container(
-              height: fundsHeight,
-              color: const Color(0xFF2563EB),
-            ),
-            Container(
-              height: stocksHeight,
-              decoration: BoxDecoration(
-                color: const Color(0xFF94B8FF),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(2),
-                  topRight: Radius.circular(2),
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, child) {
+            final stocksHeight =
+                (data.stocks / maxTotal) * availableHeight * animation.value;
+            final fundsHeight =
+                (data.funds / maxTotal) * availableHeight * animation.value;
+            final bondsHeight =
+                (data.bonds / maxTotal) * availableHeight * animation.value;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  height: bondsHeight,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF000000),
+                    borderRadius: BorderRadius.circular(borderRadius),
+                  ),
                 ),
-              ),
-            ),
-          ],
+                Container(
+                  height: fundsHeight,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    borderRadius: BorderRadius.circular(borderRadius),
+                  ),
+                ),
+                Container(
+                  height: stocksHeight,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF94B8FF),
+                    borderRadius: BorderRadius.circular(borderRadius),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
