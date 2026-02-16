@@ -7,27 +7,22 @@ class TrendDataPoint {
   final double value;
   final DateTime? timestamp;
 
-  const TrendDataPoint({
-    required this.value,
-    this.timestamp,
-  });
+  const TrendDataPoint({required this.value, this.timestamp});
 
   /// 从 JSON 创建
   factory TrendDataPoint.fromJson(Map<String, dynamic> json) {
     return TrendDataPoint(
       value: (json['value'] as num).toDouble(),
-      timestamp: json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'] as String)
-          : null,
+      timestamp:
+          json['timestamp'] != null
+              ? DateTime.parse(json['timestamp'] as String)
+              : null,
     );
   }
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'value': value,
-      'timestamp': timestamp?.toIso8601String(),
-    };
+    return {'value': value, 'timestamp': timestamp?.toIso8601String()};
   }
 }
 
@@ -97,19 +92,22 @@ class TrendValueCardWidget extends StatefulWidget {
       unit: props['unit'] as String? ?? '',
       trendValue: (props['trendValue'] as num?)?.toDouble() ?? 0.0,
       trendUnit: props['trendUnit'] as String? ?? '',
-      chartData: (props['chartData'] as List<dynamic>?)
+      chartData:
+          (props['chartData'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [],
       date: props['date'] as String? ?? '',
-      additionalInfo: (props['additionalInfo'] as List<dynamic>?)
+      additionalInfo:
+          (props['additionalInfo'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
       trendLabel: props['trendLabel'] as String? ?? 'vs last week',
-      primaryColor: props['primaryColor'] != null
-          ? Color(int.parse(props['primaryColor'] as String))
-          : null,
+      primaryColor:
+          props['primaryColor'] != null
+              ? Color(int.parse(props['primaryColor'] as String))
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
@@ -151,9 +149,19 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = widget.primaryColor ?? const Color(0xFFF59E0B);
     final backgroundColor = isDark ? const Color(0xFF1F2937) : Colors.white;
-    final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
-    final subTextColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final textColor =
+        isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
+    final subTextColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
     final trendDownColor = const Color(0xFFEF4444);
+
+    // 根据 size 计算各种尺寸
+    final valueFontSize = widget.size.getLargeFontSize() * 0.35;
+    final unitFontSize = widget.size.getSubtitleFontSize();
+    final trendFontSize = widget.size.getSubtitleFontSize();
+    final infoFontSize = widget.size.getLegendFontSize();
+    final chartHeight = widget.size.getHeightConstraints().maxHeight * 0.35;
+    final strokeWidth = widget.size.getStrokeWidth() * 0.3;
 
     return AnimatedBuilder(
       animation: _fadeInAnimation,
@@ -163,8 +171,9 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 384,
+              width: widget.inline ? double.maxFinite : null,
               padding: widget.size.getPadding(),
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
@@ -181,7 +190,13 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 图表区域
-                  _buildChart(context, primaryColor, _fadeInAnimation.value),
+                  _buildChart(
+                    context,
+                    primaryColor,
+                    _fadeInAnimation.value,
+                    chartHeight,
+                    strokeWidth,
+                  ),
                   SizedBox(height: widget.size.getItemSpacing()),
 
                   // 数值显示区域
@@ -191,32 +206,31 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                     children: [
                       // 数值和单位
                       SizedBox(
-                        height: 48,
+                        height: valueFontSize * 1.2,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             SizedBox(
-                              height: 48,
+                              height: valueFontSize * 1.2,
                               child: AnimatedFlipCounter(
                                 value: widget.value * _fadeInAnimation.value,
-                                fractionDigits:
-                                    widget.value % 1 != 0 ? 1 : 0,
+                                fractionDigits: widget.value % 1 != 0 ? 1 : 0,
                                 textStyle: TextStyle(
                                   color: textColor,
-                                  fontSize: 36,
+                                  fontSize: valueFontSize,
                                   fontWeight: FontWeight.w700,
                                   height: 1.0,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: widget.size.getSmallSpacing()),
                             SizedBox(
-                              height: 24,
+                              height: unitFontSize * 1.2,
                               child: Text(
                                 widget.unit,
                                 style: TextStyle(
                                   color: subTextColor,
-                                  fontSize: 20,
+                                  fontSize: unitFontSize,
                                   fontWeight: FontWeight.w500,
                                   height: 1.0,
                                 ),
@@ -236,7 +250,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: widget.size.getSmallSpacing()),
 
                   // 趋势指示
                   _buildTrendIndicator(
@@ -246,17 +260,19 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                     widget.trendLabel,
                     trendDownColor,
                     textColor,
+                    trendFontSize,
                   ),
                   if (widget.additionalInfo.isNotEmpty) ...[
                     SizedBox(height: widget.size.getTitleSpacing()),
                     // 附加信息
-                  _buildAdditionalInfo(
-                    widget.date,
-                    widget.additionalInfo,
-                    textColor,
-                    subTextColor,
-                  ),
-                  ]
+                    _buildAdditionalInfo(
+                      widget.date,
+                      widget.additionalInfo,
+                      textColor,
+                      subTextColor,
+                      infoFontSize,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -271,15 +287,18 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
     BuildContext context,
     Color primaryColor,
     double animationValue,
+    double chartHeight,
+    double strokeWidth,
   ) {
     return SizedBox(
-      height: 100,
+      height: chartHeight,
       child: CustomPaint(
-        size: const Size(double.infinity, 100),
+        size: Size(double.infinity, chartHeight),
         painter: _TrendChartPainter(
           data: widget.chartData,
           primaryColor: primaryColor,
           animationValue: animationValue,
+          strokeWidth: strokeWidth,
         ),
       ),
     );
@@ -293,6 +312,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
     String trendLabel,
     Color trendColor,
     Color textColor,
+    double trendFontSize,
   ) {
     final isTrendDown = trendValue < 0;
 
@@ -315,7 +335,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                     '${isTrendDown ? '' : '+'}${trendValue.toStringAsFixed(1)}$trendUnit ',
                 style: TextStyle(
                   color: trendColor,
-                  fontSize: 16,
+                  fontSize: trendFontSize,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -323,7 +343,7 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                 text: trendLabel,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 16,
+                  fontSize: trendFontSize,
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -340,16 +360,17 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
     List<String> info,
     Color textColor,
     Color subTextColor,
+    double infoFontSize,
   ) {
     return Row(
       children: [
         SizedBox(
-          height: 20,
+          height: infoFontSize * 1.2,
           child: Text(
             date,
             style: TextStyle(
               color: subTextColor,
-              fontSize: 14,
+              fontSize: infoFontSize,
               fontWeight: FontWeight.w500,
               height: 1.0,
             ),
@@ -357,26 +378,28 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
         ),
         for (int i = 0; i < info.length; i++) ...[
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing()),
+            padding: EdgeInsets.symmetric(
+              horizontal: widget.size.getItemSpacing(),
+            ),
             child: SizedBox(
-              height: 20,
+              height: infoFontSize * 1.2,
               child: Text(
                 '•',
                 style: TextStyle(
                   color: subTextColor.withOpacity(0.5),
-                  fontSize: 14,
+                  fontSize: infoFontSize,
                   height: 1.0,
                 ),
               ),
             ),
           ),
           SizedBox(
-            height: 20,
+            height: infoFontSize * 1.2,
             child: Text(
               info[i],
               style: TextStyle(
                 color: textColor,
-                fontSize: 14,
+                fontSize: infoFontSize,
                 fontWeight: FontWeight.w500,
                 height: 1.0,
               ),
@@ -393,11 +416,13 @@ class _TrendChartPainter extends CustomPainter {
   final List<double> data;
   final Color primaryColor;
   final double animationValue;
+  final double strokeWidth;
 
   _TrendChartPainter({
     required this.data,
     required this.primaryColor,
     required this.animationValue,
+    required this.strokeWidth,
   });
 
   @override
@@ -405,6 +430,7 @@ class _TrendChartPainter extends CustomPainter {
     if (data.isEmpty) return;
 
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final pointRadius = strokeWidth * 1.5;
 
     // 绘制渐变填充
     final fillGradient = LinearGradient(
@@ -424,8 +450,7 @@ class _TrendChartPainter extends CustomPainter {
 
     for (int i = 0; i < data.length; i++) {
       final x = i * pointDistance;
-      final y =
-          size.height - (data[i] / 100 * size.height * animationValue);
+      final y = size.height - (data[i] / 100 * size.height * animationValue);
 
       if (i == 0) {
         path.lineTo(x, y);
@@ -444,9 +469,10 @@ class _TrendChartPainter extends CustomPainter {
     path.lineTo(size.width, size.height);
     path.close();
 
-    final fillPaint = Paint()
-      ..shader = fillGradient.createShader(rect)
-      ..style = PaintingStyle.fill;
+    final fillPaint =
+        Paint()
+          ..shader = fillGradient.createShader(rect)
+          ..style = PaintingStyle.fill;
 
     canvas.drawPath(path, fillPaint);
 
@@ -455,8 +481,7 @@ class _TrendChartPainter extends CustomPainter {
 
     for (int i = 0; i < data.length; i++) {
       final x = i * pointDistance;
-      final y =
-          size.height - (data[i] / 100 * size.height * animationValue);
+      final y = size.height - (data[i] / 100 * size.height * animationValue);
 
       if (i == 0) {
         linePath.moveTo(x, y);
@@ -471,38 +496,41 @@ class _TrendChartPainter extends CustomPainter {
       }
     }
 
-    final linePaint = Paint()
-      ..color = primaryColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round;
+    final linePaint =
+        Paint()
+          ..color = primaryColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round;
 
     canvas.drawPath(linePath, linePaint);
 
     // 绘制数据点
     final isDark = primaryColor.computeLuminance() < 0.5;
-    final pointPaint = Paint()
-      ..color = isDark ? const Color(0xFF1F2937) : Colors.white
-      ..style = PaintingStyle.fill;
+    final pointPaint =
+        Paint()
+          ..color = isDark ? const Color(0xFF1F2937) : Colors.white
+          ..style = PaintingStyle.fill;
 
-    final pointStrokePaint = Paint()
-      ..color = primaryColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2;
+    final pointStrokePaint =
+        Paint()
+          ..color = primaryColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = strokeWidth * 0.7;
 
     for (int i = 0; i < data.length; i++) {
       final x = i * pointDistance;
-      final y =
-          size.height - (data[i] / 100 * size.height * animationValue);
+      final y = size.height - (data[i] / 100 * size.height * animationValue);
 
-      canvas.drawCircle(Offset(x, y), 4, pointPaint);
-      canvas.drawCircle(Offset(x, y), 4, pointStrokePaint);
+      canvas.drawCircle(Offset(x, y), pointRadius, pointPaint);
+      canvas.drawCircle(Offset(x, y), pointRadius, pointStrokePaint);
     }
   }
 
   @override
   bool shouldRepaint(covariant _TrendChartPainter oldDelegate) {
     return oldDelegate.animationValue != animationValue ||
-        oldDelegate.primaryColor != primaryColor;
+        oldDelegate.primaryColor != primaryColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
