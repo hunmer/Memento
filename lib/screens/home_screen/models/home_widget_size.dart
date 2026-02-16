@@ -380,6 +380,46 @@ abstract class HomeWidgetSize {
     }
     return baseHeight * scale;
   }
+
+  /// 获取图表宽度
+  double getWidthForChart() {
+    double baseWidth;
+    if (this is SmallSize) {
+      baseWidth = 120;
+    } else if (this is MediumSize) {
+      baseWidth = 240;
+    } else if (this is LargeSize) {
+      baseWidth = 280;
+    } else if (this is WideSize) {
+      baseWidth = 600;
+    } else if (this is Wide2Size) {
+      baseWidth = 700;
+    } else {
+      // Large3, Wide3
+      baseWidth = 280;
+    }
+    return baseWidth * scale;
+  }
+
+  /// 获取图表高度
+  double getHeightForChart() {
+    double baseHeight;
+    if (this is SmallSize) {
+      baseHeight = 100;
+    } else if (this is MediumSize) {
+      baseHeight = 150;
+    } else if (this is LargeSize) {
+      baseHeight = 200;
+    } else if (this is WideSize) {
+      baseHeight = 150;
+    } else if (this is Wide2Size) {
+      baseHeight = 250;
+    } else {
+      // Large3, Wide3
+      baseHeight = 200;
+    }
+    return baseHeight * scale;
+  }
 }
 
 /// 1x1 小图标组件
