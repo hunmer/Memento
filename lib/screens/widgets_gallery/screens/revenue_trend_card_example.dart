@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/revenue_trend_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 收入趋势卡片示例
 class RevenueTrendCardExample extends StatelessWidget {
@@ -23,9 +24,10 @@ class RevenueTrendCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 200,
+                    width: 150,
                     height: 150,
                     child: RevenueTrendCardWidget(
+                      size: const SmallSize(),
                       value: 145.32,
                       currency: '\$',
                       percentage: 12,
@@ -41,9 +43,10 @@ class RevenueTrendCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 180,
+                    width: 220,
+                    height: 200,
                     child: RevenueTrendCardWidget(
+                      size: const MediumSize(),
                       value: 145.32,
                       currency: '\$',
                       percentage: 12,
@@ -59,9 +62,10 @@ class RevenueTrendCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 350,
-                    height: 220,
+                    width: 300,
+                    height: 280,
                     child: RevenueTrendCardWidget(
+                      size: const LargeSize(),
                       value: 145.32,
                       currency: '\$',
                       percentage: 12,
@@ -77,8 +81,9 @@ class RevenueTrendCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 200,
+                  height: 280,
                   child: RevenueTrendCardWidget(
+                    size: const WideSize(),
                     value: 145.32,
                     currency: '\$',
                     percentage: 12,
@@ -93,13 +98,28 @@ class RevenueTrendCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 280,
+                  height: 350,
                   child: RevenueTrendCardWidget(
+                    size: const Wide2Size(),
                     value: 145.32,
                     currency: '\$',
                     percentage: 12,
                     period: 'Weekly',
-                    chartData: [80, 70, 90, 75, 60, 50, 40, 65, 85, 72, 68, 78, 82],
+                    chartData: [
+                      80,
+                      70,
+                      90,
+                      75,
+                      60,
+                      50,
+                      40,
+                      65,
+                      85,
+                      72,
+                      68,
+                      78,
+                      82,
+                    ],
                     dates: [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29],
                     highlightIndex: 4,
                   ),
