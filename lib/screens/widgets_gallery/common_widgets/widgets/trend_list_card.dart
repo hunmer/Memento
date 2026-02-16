@@ -83,9 +83,10 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark
-                        ? Colors.black.withOpacity(0.5)
-                        : Colors.black.withOpacity(0.1),
+                    color:
+                        isDark
+                            ? Colors.black.withOpacity(0.5)
+                            : Colors.black.withOpacity(0.1),
                     offset: const Offset(0, 20),
                     blurRadius: 40,
                     spreadRadius: -10,
@@ -120,49 +121,33 @@ class _TrendListCardWidgetState extends State<TrendListCardWidget>
     final iconData = _getIconData(widget.data.iconName);
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: primaryColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                iconData,
-                size: 20,
-                color: isDark ? Colors.green.shade900 : Colors.green.shade700,
-              ),
-            ),
-            SizedBox(width: widget.size.getItemSpacing()),
-            Text(
-              widget.data.title,
-              style: TextStyle(
-                fontSize: widget.size.getTitleFontSize(),
-                fontWeight: FontWeight.w700,
-                color: isDark ? Colors.white : Colors.grey.shade900,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: primaryColor,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            iconData,
+            size: 20,
+            color: isDark ? Colors.green.shade900 : Colors.green.shade700,
+          ),
         ),
-        Row(
-          children: [
-            Icon(
-              Icons.add,
-              size: 24,
-              color: Colors.grey.shade400,
+        SizedBox(width: widget.size.getItemSpacing()),
+        Flexible(
+          child: Text(
+            widget.data.title,
+            style: TextStyle(
+              fontSize: widget.size.getTitleFontSize(),
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : Colors.grey.shade900,
+              letterSpacing: -0.5,
             ),
-            SizedBox(width: widget.size.getItemSpacing()),
-            Icon(
-              Icons.refresh,
-              size: 20,
-              color: Colors.grey.shade400,
-            ),
-          ],
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
       ],
     );
@@ -239,9 +224,10 @@ class _TrendItemWidget extends StatelessWidget {
       ),
     );
 
-    final trendColor = data.isPositive
-        ? (isDark ? Colors.green.shade400 : Colors.green.shade600)
-        : (isDark ? Colors.red.shade400 : Colors.red.shade500);
+    final trendColor =
+        data.isPositive
+            ? (isDark ? Colors.green.shade400 : Colors.green.shade600)
+            : (isDark ? Colors.red.shade400 : Colors.red.shade500);
 
     return Row(
       children: [
@@ -260,11 +246,13 @@ class _TrendItemWidget extends StatelessWidget {
               Text(
                 data.symbol,
                 style: TextStyle(
-                  fontSize: size.getSubtitleFontSize(),
+                  fontSize: size.getSubtitleFontSize() * 0.8,
                   fontWeight: FontWeight.w600,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                   letterSpacing: 0.5,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
               SizedBox(height: size.getSmallSpacing()),
               SizedBox(
@@ -273,7 +261,7 @@ class _TrendItemWidget extends StatelessWidget {
                   value: data.value * itemAnimation.value,
                   fractionDigits: 2,
                   textStyle: TextStyle(
-                    fontSize: size.getSubtitleFontSize() + 4,
+                    fontSize: size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w700,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     height: 1.0,
@@ -293,6 +281,8 @@ class _TrendItemWidget extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: trendColor,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
             SizedBox(height: size.getSmallSpacing()),
             SizedBox(
@@ -305,6 +295,8 @@ class _TrendItemWidget extends StatelessWidget {
                   color: trendColor.withOpacity(0.8),
                   height: 1.0,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],
