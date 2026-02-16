@@ -158,27 +158,28 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
                   SizedBox(height: widget.size.getTitleSpacing()),
 
                   // 主要内容
-                  if (isWide) ...[
-                    // wide 类型：数值显示 + 趋势图
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        // 数值显示
-                        Flexible(
-                          flex: 6,
-                          child: _buildValueDisplay(isDark),
-                        ),
-                        const SizedBox(width: 8),
-                        // 趋势迷你图靠右
-                        Flexible(
-                          flex: 7,
-                          child: _buildMiniTrendChart(primaryColor),
-                        ),
-                      ],
-                    ),
-                  ] else
-                    // 非 wide 类型：只显示趋势图（占满宽度）
-                    _buildMiniTrendChart(primaryColor),
+                  Expanded(
+                    child: isWide
+                        ? // wide 类型：数值显示 + 趋势图
+                        Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              // 数值显示
+                              Flexible(
+                                flex: 6,
+                                child: _buildValueDisplay(isDark),
+                              ),
+                              const SizedBox(width: 8),
+                              // 趋势迷你图靠右
+                              Flexible(
+                                flex: 7,
+                                child: _buildMiniTrendChart(primaryColor),
+                              ),
+                            ],
+                          )
+                        : // 非 wide 类型：只显示趋势图（占满宽度）
+                        _buildMiniTrendChart(primaryColor),
+                  ),
                 ],
               ),
             ),
@@ -316,8 +317,7 @@ class _MiniTrendCardWidgetState extends State<MiniTrendCardWidget>
 
     return Column(
       children: [
-        SizedBox(
-          height: chartHeight,
+        Expanded(
           child: _AnimatedTrendLine(
             data: widget.trendData,
             color: primaryColor,
@@ -362,13 +362,14 @@ class _AnimatedTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.fromHeight(chartHeight),
-      painter: _TrendLinePainter(
-        data: data,
-        color: color,
-        progress: animation.value,
-        chartHeight: chartHeight,
+    return SizedBox.expand(
+      child: CustomPaint(
+        painter: _TrendLinePainter(
+          data: data,
+          color: color,
+          progress: animation.value,
+          chartHeight: chartHeight,
+        ),
       ),
     );
   }
