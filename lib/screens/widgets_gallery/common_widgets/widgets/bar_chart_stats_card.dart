@@ -198,10 +198,11 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 ],
               ),
               padding: widget.size.getPadding(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   _buildHeader(isDark, textColor, 0, step),
                   SizedBox(height: widget.size.getTitleSpacing()),
                   _buildAverageSection(isDark, 1, step),
@@ -210,6 +211,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                 ],
               ),
             ),
+          ),
           ),
         );
       },
@@ -236,6 +238,7 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                 Flexible(
                   child: Text(
@@ -412,7 +415,6 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
   Widget _buildGridLines(Color gridColor) {
     return Positioned.fill(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(
           6,
           (index) => Expanded(
@@ -426,7 +428,6 @@ class _BarChartStatsCardWidgetState extends State<BarChartStatsCardWidget>
                   ),
                 ),
               ),
-              margin: EdgeInsets.only(bottom: index < 5 ? 0 : 0),
             ),
           ),
         ),
