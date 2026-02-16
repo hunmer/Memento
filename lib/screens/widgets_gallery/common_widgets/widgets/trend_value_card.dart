@@ -30,9 +30,7 @@ class TrendDataPoint {
 ///
 /// 通用的数值展示卡片，支持：
 /// - 数值和单位显示（带翻转动画）
-/// - 趋势指示（上升/下降）
 /// - 曲线图表（带渐变填充）
-/// - 附加信息（日期、BMI等）
 class TrendValueCardWidget extends StatefulWidget {
   /// 当前数值
   final double value;
@@ -40,23 +38,8 @@ class TrendValueCardWidget extends StatefulWidget {
   /// 数值单位
   final String unit;
 
-  /// 趋势变化值（正数上升，负数下降）
-  final double trendValue;
-
-  /// 趋势单位
-  final String trendUnit;
-
   /// 图表数据（Y坐标值，0-100范围）
   final List<double> chartData;
-
-  /// 日期文本
-  final String date;
-
-  /// 附加信息列表
-  final List<String> additionalInfo;
-
-  /// 趋势标签
-  final String trendLabel;
 
   /// 主色调
   final Color? primaryColor;
@@ -71,12 +54,7 @@ class TrendValueCardWidget extends StatefulWidget {
     super.key,
     required this.value,
     required this.unit,
-    required this.trendValue,
-    required this.trendUnit,
     required this.chartData,
-    required this.date,
-    this.additionalInfo = const [],
-    this.trendLabel = 'vs last week',
     this.primaryColor,
     this.inline = false,
     this.size = const MediumSize(),
@@ -90,20 +68,11 @@ class TrendValueCardWidget extends StatefulWidget {
     return TrendValueCardWidget(
       value: (props['value'] as num?)?.toDouble() ?? 0.0,
       unit: props['unit'] as String? ?? '',
-      trendValue: (props['trendValue'] as num?)?.toDouble() ?? 0.0,
-      trendUnit: props['trendUnit'] as String? ?? '',
       chartData:
           (props['chartData'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [],
-      date: props['date'] as String? ?? '',
-      additionalInfo:
-          (props['additionalInfo'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      trendLabel: props['trendLabel'] as String? ?? 'vs last week',
       primaryColor:
           props['primaryColor'] != null
               ? Color(int.parse(props['primaryColor'] as String))
@@ -153,14 +122,10 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
         isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
     final subTextColor =
         isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
-    final trendDownColor = const Color(0xFFEF4444);
 
     // 根据 size 计算各种尺寸
     final valueFontSize = widget.size.getLargeFontSize() * 0.35;
     final unitFontSize = widget.size.getSubtitleFontSize();
-    final trendFontSize = widget.size.getSubtitleFontSize();
-    final infoFontSize = widget.size.getLegendFontSize();
-    final chartHeight = widget.size.getHeightConstraints().maxHeight * 0.35;
     final strokeWidth = widget.size.getStrokeWidth() * 0.3;
 
     return AnimatedBuilder(
@@ -186,16 +151,17 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                 ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 图表区域
-                  _buildChart(
-                    context,
-                    primaryColor,
-                    _fadeInAnimation.value,
-                    chartHeight,
-                    strokeWidth,
+                  Expanded(
+                    child: _buildChart(
+                      context,
+                      primaryColor,
+                      _fadeInAnimation.value,
+                      strokeWidth,
+                    ),
                   ),
                   SizedBox(height: widget.size.getItemSpacing()),
 
@@ -250,29 +216,6 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
                       ),
                     ],
                   ),
-                  SizedBox(height: widget.size.getSmallSpacing()),
-
-                  // 趋势指示
-                  _buildTrendIndicator(
-                    context,
-                    widget.trendValue,
-                    widget.trendUnit,
-                    widget.trendLabel,
-                    trendDownColor,
-                    textColor,
-                    trendFontSize,
-                  ),
-                  if (widget.additionalInfo.isNotEmpty) ...[
-                    SizedBox(height: widget.size.getTitleSpacing()),
-                    // 附加信息
-                    _buildAdditionalInfo(
-                      widget.date,
-                      widget.additionalInfo,
-                      textColor,
-                      subTextColor,
-                      infoFontSize,
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -287,13 +230,11 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
     BuildContext context,
     Color primaryColor,
     double animationValue,
-    double chartHeight,
     double strokeWidth,
   ) {
     return SizedBox(
-      height: chartHeight,
+      width: double.infinity,
       child: CustomPaint(
-        size: Size(double.infinity, chartHeight),
         painter: _TrendChartPainter(
           data: widget.chartData,
           primaryColor: primaryColor,
@@ -301,112 +242,6 @@ class _TrendValueCardWidgetState extends State<TrendValueCardWidget>
           strokeWidth: strokeWidth,
         ),
       ),
-    );
-  }
-
-  /// 构建趋势指示器
-  Widget _buildTrendIndicator(
-    BuildContext context,
-    double trendValue,
-    String trendUnit,
-    String trendLabel,
-    Color trendColor,
-    Color textColor,
-    double trendFontSize,
-  ) {
-    final isTrendDown = trendValue < 0;
-
-    return Row(
-      children: [
-        Transform.rotate(
-          angle: isTrendDown ? -0.785 : 0.785, // 45度旋转
-          child: Icon(
-            isTrendDown ? Icons.arrow_downward : Icons.arrow_upward,
-            color: trendColor,
-            size: widget.size.getIconSize(),
-          ),
-        ),
-        SizedBox(width: widget.size.getItemSpacing()),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text:
-                    '${isTrendDown ? '' : '+'}${trendValue.toStringAsFixed(1)}$trendUnit ',
-                style: TextStyle(
-                  color: trendColor,
-                  fontSize: trendFontSize,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              TextSpan(
-                text: trendLabel,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: trendFontSize,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 构建附加信息
-  Widget _buildAdditionalInfo(
-    String date,
-    List<String> info,
-    Color textColor,
-    Color subTextColor,
-    double infoFontSize,
-  ) {
-    return Row(
-      children: [
-        SizedBox(
-          height: infoFontSize * 1.2,
-          child: Text(
-            date,
-            style: TextStyle(
-              color: subTextColor,
-              fontSize: infoFontSize,
-              fontWeight: FontWeight.w500,
-              height: 1.0,
-            ),
-          ),
-        ),
-        for (int i = 0; i < info.length; i++) ...[
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: widget.size.getItemSpacing(),
-            ),
-            child: SizedBox(
-              height: infoFontSize * 1.2,
-              child: Text(
-                '•',
-                style: TextStyle(
-                  color: subTextColor.withOpacity(0.5),
-                  fontSize: infoFontSize,
-                  height: 1.0,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: infoFontSize * 1.2,
-            child: Text(
-              info[i],
-              style: TextStyle(
-                color: textColor,
-                fontSize: infoFontSize,
-                fontWeight: FontWeight.w500,
-                height: 1.0,
-              ),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }
