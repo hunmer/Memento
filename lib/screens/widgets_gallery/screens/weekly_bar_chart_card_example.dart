@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/weekly_bar_chart_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 周条形图卡片示例
 class WeeklyBarChartCardExample extends StatelessWidget {
@@ -19,13 +20,14 @@ class WeeklyBarChartCardExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (1x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
                     width: 150,
                     height: 150,
                     child: CommonWeeklyBarChartCardWidget(
+                      size: const SmallSize(),
                       title: 'Transactions',
                       subtitle: 'vs last month',
                       percentage: 54,
@@ -70,13 +72,14 @@ class WeeklyBarChartCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (2x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
                     width: 220,
                     height: 220,
                     child: CommonWeeklyBarChartCardWidget(
+                      size: const MediumSize(),
                       title: 'Transactions',
                       subtitle: 'vs last month',
                       percentage: 54,
@@ -121,13 +124,118 @@ class WeeklyBarChartCardExample extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (2x2)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
                     width: 300,
                     height: 300,
                     child: CommonWeeklyBarChartCardWidget(
+                      size: const LargeSize(),
+                      title: 'Transactions',
+                      subtitle: 'vs last month',
+                      percentage: 54,
+                      weeklyData: [
+                        CommonWeeklyBarData(
+                          label: 'Mon',
+                          upperHeight: 0.40,
+                          lowerHeight: 0.35,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Tue',
+                          upperHeight: 0.30,
+                          lowerHeight: 0.55,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Wed',
+                          upperHeight: 0.25,
+                          lowerHeight: 0.35,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Thu',
+                          upperHeight: 0.20,
+                          lowerHeight: 0.48,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Fri',
+                          upperHeight: 0.20,
+                          lowerHeight: 0.60,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Sat',
+                          upperHeight: 0.15,
+                          lowerHeight: 0.25,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Sun',
+                          upperHeight: 0.30,
+                          lowerHeight: 0.45,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width - 32,
+                    height: 220,
+                    child: CommonWeeklyBarChartCardWidget(
+                      size: const WideSize(),
+                      title: 'Transactions',
+                      subtitle: 'vs last month',
+                      percentage: 54,
+                      weeklyData: [
+                        CommonWeeklyBarData(
+                          label: 'Mon',
+                          upperHeight: 0.40,
+                          lowerHeight: 0.35,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Tue',
+                          upperHeight: 0.30,
+                          lowerHeight: 0.55,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Wed',
+                          upperHeight: 0.25,
+                          lowerHeight: 0.35,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Thu',
+                          upperHeight: 0.20,
+                          lowerHeight: 0.48,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Fri',
+                          upperHeight: 0.20,
+                          lowerHeight: 0.60,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Sat',
+                          upperHeight: 0.15,
+                          lowerHeight: 0.25,
+                        ),
+                        CommonWeeklyBarData(
+                          label: 'Sun',
+                          upperHeight: 0.30,
+                          lowerHeight: 0.45,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width - 32,
+                    height: 320,
+                    child: CommonWeeklyBarChartCardWidget(
+                      size: const Wide2Size(),
                       title: 'Transactions',
                       subtitle: 'vs last month',
                       percentage: 54,
