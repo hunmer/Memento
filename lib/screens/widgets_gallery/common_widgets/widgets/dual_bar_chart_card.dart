@@ -7,10 +7,7 @@ class DualBarData {
   final double primary;
   final double secondary;
 
-  const DualBarData({
-    required this.primary,
-    required this.secondary,
-  });
+  const DualBarData({required this.primary, required this.secondary});
 
   /// 从 JSON 创建
   factory DualBarData.fromJson(Map<String, dynamic> json) {
@@ -22,10 +19,7 @@ class DualBarData {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'primary': primary,
-      'secondary': secondary,
-    };
+    return {'primary': primary, 'secondary': secondary};
   }
 }
 
@@ -197,7 +191,8 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
       scrollDirection: Axis.horizontal,
       padding: EdgeInsets.zero,
       itemCount: widget.chartData.length,
-      separatorBuilder: (_, __) => SizedBox(width: widget.size.getItemSpacing()),
+      separatorBuilder:
+          (_, __) => SizedBox(width: widget.size.getItemSpacing()),
       itemBuilder: (context, index) {
         final data = widget.chartData[index];
         // 确保 Interval 的 end 值不超过 1.0
@@ -213,9 +208,10 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
           primaryHeight: data.primary,
           secondaryHeight: data.secondary,
           primaryColor: primaryColor,
-          secondaryColor: isDark
-              ? Colors.grey.shade600.withOpacity(0.3)
-              : Colors.grey.shade400.withOpacity(0.4),
+          secondaryColor:
+              isDark
+                  ? Colors.grey.shade600.withOpacity(0.3)
+                  : Colors.grey.shade400.withOpacity(0.4),
           animation: itemAnimation,
           size: widget.size,
         );
@@ -225,8 +221,10 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
 
   Widget _buildValues(BuildContext context, Color primaryColor) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF1F2937);
-    final subTextColor = isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
+    final textColor =
+        isDark ? const Color(0xFFF9FAFB) : const Color(0xFF1F2937);
+    final subTextColor =
+        isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -334,7 +332,8 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
 
   Widget _buildFooter(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF1F2937);
+    final textColor =
+        isDark ? const Color(0xFFF9FAFB) : const Color(0xFF1F2937);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: widget.size.getItemSpacing()),
@@ -401,9 +400,10 @@ class _DualBarChartCardWidgetState extends State<DualBarChartCardWidget>
             child: Icon(
               Icons.chevron_right,
               size: 28,
-              color: isDark
-                  ? Colors.grey.shade600.withOpacity(0.4)
-                  : Colors.grey.shade400.withOpacity(0.6),
+              color:
+                  isDark
+                      ? Colors.grey.shade600.withOpacity(0.4)
+                      : Colors.grey.shade400.withOpacity(0.6),
             ),
           ),
         ],
