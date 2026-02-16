@@ -43,7 +43,6 @@ import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_card_
 import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_ring_chart_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/monthly_bar_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/ranked_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/contribution_heatmap_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/bar_chart_stats_card_example.dart';
@@ -416,7 +415,6 @@ class _WidgetRegistry {
         () => const StackedBarChartWidgetExample(),
     '/widgets_gallery/stacked_ring_chart':
         () => const StackedRingChartExample(),
-    '/widgets_gallery/monthly_bar_chart': () => const MonthlyBarChartExample(),
     '/widgets_gallery/ranked_bar_chart_card':
         () => const RankedBarChartCardExample(),
     '/widgets_gallery/contribution_heatmap_card':

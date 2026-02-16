@@ -389,13 +389,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.calendar_view_month,
-        title: '月度柱状图统计卡片',
-        subtitle: 'MonthlyBarChartWidget - 12个月数据柱状图展示',
-        route: '/widgets_gallery/monthly_bar_chart',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.bar_chart,
         title: '排名条形图卡片',
         subtitle: 'RankedBarChartCard - 水平排名条形图展示卡片',
