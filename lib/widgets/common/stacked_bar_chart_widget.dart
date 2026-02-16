@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 堆叠条形图小组件
 ///
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 /// - 独立条形延迟动画
 /// - 深色模式适配
 /// - 可配置颜色
+/// - 支持不同尺寸自适应
 class StackedBarChartWidget extends StatefulWidget {
   /// 卡片标题
   final String title;
@@ -34,11 +36,8 @@ class StackedBarChartWidget extends StatefulWidget {
   /// 深色层颜色
   final Color? darkColor;
 
-  /// 卡片宽度
-  final double? width;
-
-  /// 卡片高度
-  final double? height;
+  /// 小组件尺寸
+  final HomeWidgetSize size;
 
   const StackedBarChartWidget({
     super.key,
@@ -49,8 +48,7 @@ class StackedBarChartWidget extends StatefulWidget {
     this.lightColor,
     this.midColor,
     this.darkColor,
-    this.width,
-    this.height,
+    this.size = const MediumSize(),
   });
 
   @override
@@ -90,16 +88,20 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
     final backgroundColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final titleColor = isDark ? Colors.white : Colors.grey.shade900;
     final subtitleColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
-    final growthColor = isDark
-        ? const Color(0xFF38BDF8)
-        : const Color(0xFF0EA5E9); // Sky blue - 使用主题色
+    final growthColor =
+        isDark
+            ? const Color(0xFF38BDF8)
+            : const Color(0xFF0EA5E9); // Sky blue - 使用主题色
 
     // 条形图颜色
-    final barLightColor = widget.lightColor ??
+    final barLightColor =
+        widget.lightColor ??
         (isDark ? const Color(0xFFBAE6FD) : const Color(0xFFCCEFF9));
-    final barMidColor = widget.midColor ??
+    final barMidColor =
+        widget.midColor ??
         (isDark ? const Color(0xFF0284C7) : const Color(0xFF0064A7));
-    final barDarkColor = widget.darkColor ??
+    final barDarkColor =
+        widget.darkColor ??
         (isDark ? const Color(0xFF0C4A6E) : const Color(0xFF000045));
 
     return AnimatedBuilder(
@@ -110,8 +112,7 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: widget.width ?? 320,
-              height: widget.height ?? 360,
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(24),
@@ -124,19 +125,23 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: widget.size.getPadding(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 标题行
                     _buildTitleRow(context, titleColor, growthColor),
-                    const SizedBox(height: 32),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 副标题
                     _buildSubtitle(subtitleColor),
-                    const SizedBox(height: 32),
+                    SizedBox(height: widget.size.getTitleSpacing()),
                     // 条形图
                     Expanded(
-                      child: _buildBars(barLightColor, barMidColor, barDarkColor),
+                      child: _buildBars(
+                        barLightColor,
+                        barMidColor,
+                        barDarkColor,
+                      ),
                     ),
                   ],
                 ),
@@ -149,67 +154,77 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
   }
 
   /// 构建标题行
-  Widget _buildTitleRow(BuildContext context, Color titleColor, Color growthColor) {
+  Widget _buildTitleRow(
+    BuildContext context,
+    Color titleColor,
+    Color growthColor,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconSize = widget.size.getIconSize();
+    final titleFontSize = widget.size.getTitleFontSize();
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    final smallSpacing = widget.size.getSmallSpacing();
 
     return Row(
       children: [
         // 条形图标
         SizedBox(
-          height: 24,
+          height: iconSize,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                width: 6,
-                height: 12,
+                width: iconSize * 0.25,
+                height: iconSize * 0.5,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white : Colors.black,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(iconSize * 0.1),
                 ),
               ),
-              const SizedBox(width: 2),
+              SizedBox(width: smallSpacing),
               Container(
-                width: 6,
-                height: 20,
+                width: iconSize * 0.25,
+                height: iconSize * 0.8,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white : Colors.black,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(iconSize * 0.1),
                 ),
               ),
-              const SizedBox(width: 2),
+              SizedBox(width: smallSpacing),
               Container(
-                width: 6,
-                height: 16,
+                width: iconSize * 0.25,
+                height: iconSize * 0.65,
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white : Colors.black,
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(iconSize * 0.1),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 12),
-        Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: titleColor,
+        SizedBox(width: widget.size.getSmallSpacing() * 3),
+        Expanded(
+          child: Text(
+            widget.title,
+            style: TextStyle(
+              fontSize: titleFontSize,
+              fontWeight: FontWeight.bold,
+              color: titleColor,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         ),
-        const Spacer(),
         // 增长率
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: EdgeInsets.symmetric(
+            horizontal: smallSpacing,
+            vertical: smallSpacing * 0.5,
+          ),
           child: Row(
             children: [
-              Icon(
-                Icons.trending_up,
-                size: 20,
-                color: growthColor,
-              ),
-              const SizedBox(width: 4),
+              Icon(Icons.trending_up, size: iconSize * 0.8, color: growthColor),
+              SizedBox(width: smallSpacing),
               AnimatedFlipCounter(
                 value: widget.growthRate * _animation.value,
                 fractionDigits: 0,
@@ -217,7 +232,7 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
                 suffix: '%',
                 textStyle: TextStyle(
                   color: growthColor,
-                  fontSize: 14,
+                  fontSize: subtitleFontSize,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -233,7 +248,7 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
     return Text(
       widget.subtitle,
       style: TextStyle(
-        fontSize: 14,
+        fontSize: widget.size.getSubtitleFontSize(),
         color: subtitleColor,
         height: 1.5,
       ),
@@ -262,7 +277,10 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
         return Expanded(
           child: Padding(
             padding: EdgeInsets.only(
-              right: index < widget.data.length - 1 ? 4 : 0,
+              right:
+                  index < widget.data.length - 1
+                      ? widget.size.getSmallSpacing()
+                      : 0,
             ),
             child: _StackedBar(
               data: barData,
@@ -270,6 +288,7 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
               lightColor: lightColor,
               midColor: midColor,
               darkColor: darkColor,
+              size: widget.size,
             ),
           ),
         );
@@ -285,6 +304,7 @@ class _StackedBar extends StatelessWidget {
   final Color lightColor;
   final Color midColor;
   final Color darkColor;
+  final HomeWidgetSize size;
 
   const _StackedBar({
     required this.data,
@@ -292,47 +312,62 @@ class _StackedBar extends StatelessWidget {
     required this.lightColor,
     required this.midColor,
     required this.darkColor,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    final barWidth = size.getBarWidth();
+    final barSpacing = size.getSmallSpacing();
+
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
         return Column(
           mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 浅色层
-            Container(
-              height: (data.lightValue / 100) * 180 * animation.value,
-              decoration: BoxDecoration(
-                color: lightColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(4),
-                  topRight: Radius.circular(4),
+            // 浅色层 - 使用 Flexible 按比例分配可用高度
+            if (data.lightValue > 0)
+              Flexible(
+                flex: (data.lightValue * 10).round(),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: lightColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(barWidth * 0.25),
+                      topRight: Radius.circular(barWidth * 0.25),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 2),
+            if (data.lightValue > 0 && data.midValue > 0) SizedBox(height: barSpacing),
             // 中间层
-            Container(
-              height: (data.midValue / 100) * 180 * animation.value,
-              decoration: BoxDecoration(
-                color: midColor,
-              ),
-            ),
-            const SizedBox(height: 2),
-            // 深色层
-            Container(
-              height: (data.darkValue / 100) * 180 * animation.value,
-              decoration: BoxDecoration(
-                color: darkColor,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(4),
-                  bottomRight: Radius.circular(4),
+            if (data.midValue > 0)
+              Flexible(
+                flex: (data.midValue * 10).round(),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(color: midColor),
                 ),
               ),
-            ),
+            if (data.midValue > 0 && data.darkValue > 0) SizedBox(height: barSpacing),
+            // 深色层
+            if (data.darkValue > 0)
+              Flexible(
+                flex: (data.darkValue * 10).round(),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: darkColor,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(barWidth * 0.25),
+                      bottomRight: Radius.circular(barWidth * 0.25),
+                    ),
+                  ),
+                ),
+              ),
           ],
         );
       },
