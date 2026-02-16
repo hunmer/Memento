@@ -128,12 +128,10 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
-  late int _selectedTab;
 
   @override
   void initState() {
     super.initState();
-    _selectedTab = widget.selectedTab;
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -201,75 +199,92 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
   Widget _buildChart(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // 根据尺寸计算图表宽高
-    final chartWidth = widget.size.getWidthForChart();
+    // 根据尺寸计算图表高度
     final chartHeight = widget.size.getHeightForChart();
+    // 使用更大的内容宽度支持横向滚动
+    final contentWidth = widget.size.getWidthForChart() * 1.5;
 
-    return SizedBox(
-      height: chartHeight,
-      width: chartWidth,
-      child: Stack(
-        children: [
-          // 网格线
-          ...List.generate(5, (index) {
-            final x = (chartWidth / 4) * index;
-            return Positioned(
-              left: x,
-              top: 0,
-              bottom: widget.size.getLegendFontSize() * 2.5,
-              child: Container(
-                width: 1,
-                color:
-                    isDark ? const Color(0xFF404040) : const Color(0xFFE5E7EB),
-              ),
-            );
-          }),
-          // 时间标签
-          Positioned(
-            left: widget.size.getSmallSpacing(),
-            right: widget.size.getSmallSpacing(),
-            bottom: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:
-                  widget.timeLabels.map((time) {
-                    return Text(
-                      time,
-                      style: TextStyle(
-                        fontSize: widget.size.getLegendFontSize(),
-                        fontWeight: FontWeight.w600,
-                        color:
-                            isDark
-                                ? const Color(0xFF6B7280)
-                                : const Color(0xFF9CA3AF),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 使用实际可用宽度或最小内容宽度
+        final availableWidth = constraints.maxWidth;
+        final scrollableWidth = contentWidth > availableWidth
+            ? contentWidth
+            : availableWidth;
+
+        return SizedBox(
+          height: chartHeight,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: scrollableWidth,
+              height: chartHeight,
+              child: Stack(
+                children: [
+                  // 网格线
+                  ...List.generate(5, (index) {
+                    final x = (scrollableWidth / 4) * index;
+                    return Positioned(
+                      left: x,
+                      top: 0,
+                      bottom: widget.size.getLegendFontSize() * 2.5,
+                      child: Container(
+                        width: 1,
+                        color: isDark
+                            ? const Color(0xFF404040)
+                            : const Color(0xFFE5E7EB),
                       ),
                     );
-                  }).toList(),
+                  }),
+                  // 时间标签
+                  Positioned(
+                    left: widget.size.getSmallSpacing(),
+                    right: widget.size.getSmallSpacing(),
+                    bottom: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: widget.timeLabels.map((time) {
+                        return Text(
+                          time,
+                          style: TextStyle(
+                            fontSize: widget.size.getLegendFontSize(),
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? const Color(0xFF6B7280)
+                                : const Color(0xFF9CA3AF),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                  // 睡眠阶段气泡
+                  ...widget.sleepStages.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final stage = entry.value;
+                    final step = 0.08;
+                    final start = (index * step).clamp(0.0, 0.92);
+                    final end = (0.5 + index * step).clamp(0.0, 1.0);
+
+                    final itemAnimation = CurvedAnimation(
+                      parent: _animationController,
+                      curve: Interval(start, end, curve: Curves.easeOutCubic),
+                    );
+
+                    return _SleepStageBubble(
+                      stage: stage,
+                      chartWidth: scrollableWidth,
+                      chartHeight:
+                          chartHeight - widget.size.getLegendFontSize() * 3,
+                      animation: itemAnimation,
+                      size: widget.size,
+                    );
+                  }),
+                ],
+              ),
             ),
           ),
-          // 睡眠阶段气泡
-          ...widget.sleepStages.asMap().entries.map((entry) {
-            final index = entry.key;
-            final stage = entry.value;
-            final step = 0.08;
-            final start = (index * step).clamp(0.0, 0.92);
-            final end = (0.5 + index * step).clamp(0.0, 1.0);
-
-            final itemAnimation = CurvedAnimation(
-              parent: _animationController,
-              curve: Interval(start, end, curve: Curves.easeOutCubic),
-            );
-
-            return _SleepStageBubble(
-              stage: stage,
-              chartWidth: chartWidth,
-              chartHeight: chartHeight - widget.size.getLegendFontSize() * 3,
-              animation: itemAnimation,
-              size: widget.size,
-            );
-          }),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -277,34 +292,39 @@ class _SleepStageChartCardState extends State<SleepStageChartCard>
   Widget _buildLegend(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _LegendItem(
-          color: const Color(0xFF9CB573),
-          label: 'Core',
-          isDark: isDark,
-          size: widget.size,
-        ),
-        _LegendItem(
-          color: const Color(0xFF8D6E63),
-          label: 'REM',
-          isDark: isDark,
-          size: widget.size,
-        ),
-        _LegendItem(
-          color: const Color(0xFFF4CD26),
-          label: 'Post-REM',
-          isDark: isDark,
-          size: widget.size,
-        ),
-        _LegendItem(
-          color: const Color(0xFFC8B6F9),
-          label: 'Deep',
-          isDark: isDark,
-          size: widget.size,
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _LegendItem(
+            color: const Color(0xFF9CB573),
+            label: 'Core',
+            isDark: isDark,
+            size: widget.size,
+          ),
+          SizedBox(width: widget.size.getItemSpacing()),
+          _LegendItem(
+            color: const Color(0xFF8D6E63),
+            label: 'REM',
+            isDark: isDark,
+            size: widget.size,
+          ),
+          SizedBox(width: widget.size.getItemSpacing()),
+          _LegendItem(
+            color: const Color(0xFFF4CD26),
+            label: 'Post-REM',
+            isDark: isDark,
+            size: widget.size,
+          ),
+          SizedBox(width: widget.size.getItemSpacing()),
+          _LegendItem(
+            color: const Color(0xFFC8B6F9),
+            label: 'Deep',
+            isDark: isDark,
+            size: widget.size,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -341,15 +361,47 @@ class _SleepStageBubble extends StatelessWidget {
     }
   }
 
+  /// 根据 size 计算气泡高度缩放因子
+  double _getHeightScale() {
+    if (size is SmallSize) {
+      return 0.6;
+    } else if (size is MediumSize || size is WideSize) {
+      return 1.0;
+    } else if (size is LargeSize || size is Wide2Size) {
+      return 1.3;
+    } else {
+      // Large3, Wide3
+      return 1.6;
+    }
+  }
+
+  /// 计算气泡的实际高度，确保不会重叠
+  /// 根据 topPercent 所在的层级计算可用高度
+  double _calculateBubbleHeight(double heightScale) {
+    // 将图表垂直空间分为4层（对应4种睡眠阶段类型）
+    final layerHeight = chartHeight / 4;
+
+    // 计算该层级的可用高度（留出一定间距）
+    final availableHeight = layerHeight * 0.7; // 使用70%的空间，留30%作为间距
+
+    // 计算基础高度（基于 stage.height 和缩放）
+    final baseHeight = stage.height * heightScale;
+
+    // 取实际高度和可用高度的较小值，确保不会溢出到其他层级
+    return baseHeight.clamp(0.0, availableHeight);
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = _getColor();
+    final heightScale = _getHeightScale();
+    final bubbleHeight = _calculateBubbleHeight(heightScale);
 
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
         final width = (chartWidth * stage.widthPercent / 100) * animation.value;
-        final height = stage.height * animation.value;
+        final height = bubbleHeight * animation.value;
 
         return Positioned(
           left: (chartWidth * stage.left / 100),
@@ -359,12 +411,12 @@ class _SleepStageBubble extends StatelessWidget {
             height: height,
             decoration: BoxDecoration(
               color: color,
-              borderRadius: BorderRadius.circular(width / 2),
+              borderRadius: BorderRadius.circular(height / 2),
               boxShadow: [
                 BoxShadow(
                   color: color.withOpacity(0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+                  blurRadius: size is SmallSize ? 4 : 8,
+                  offset: Offset(0, size is SmallSize ? 1 : 2),
                 ),
               ],
             ),
