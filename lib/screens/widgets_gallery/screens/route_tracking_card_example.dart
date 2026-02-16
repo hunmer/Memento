@@ -1,4 +1,5 @@
 import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:flutter/material.dart';
 
 /// 运输追踪路线卡片示例
@@ -38,6 +39,7 @@ class RouteTrackingCardExample extends StatelessWidget {
                         isCompleted: true,
                       ),
                       status: 'Shipped',
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -61,6 +63,7 @@ class RouteTrackingCardExample extends StatelessWidget {
                         isCompleted: true,
                       ),
                       status: 'Shipped',
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -84,6 +87,7 @@ class RouteTrackingCardExample extends StatelessWidget {
                         isCompleted: true,
                       ),
                       status: 'Shipped',
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -106,6 +110,7 @@ class RouteTrackingCardExample extends StatelessWidget {
                       isCompleted: true,
                     ),
                     status: 'Shipped - In Transit',
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -127,6 +132,7 @@ class RouteTrackingCardExample extends StatelessWidget {
                       isCompleted: true,
                     ),
                     status: 'Shipped - Delivered Successfully',
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
