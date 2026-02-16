@@ -160,6 +160,7 @@ class SpecialEvent {
 /// 使用示例：
 /// ```dart
 /// TimelineScheduleCard(
+///   size: const MediumSize(),
 ///   todayWeekday: 'Monday',
 ///   todayDay: 7,
 ///   tomorrowWeekday: 'Tuesday',
@@ -185,6 +186,9 @@ class SpecialEvent {
 /// )
 /// ```
 class TimelineScheduleCard extends StatefulWidget {
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   /// 今天的星期名称
   final String todayWeekday;
 
@@ -223,6 +227,7 @@ class TimelineScheduleCard extends StatefulWidget {
 
   const TimelineScheduleCard({
     super.key,
+    this.size = const MediumSize(),
     required this.todayWeekday,
     required this.todayDay,
     required this.tomorrowWeekday,
@@ -265,6 +270,7 @@ class TimelineScheduleCard extends StatefulWidget {
     }
 
     return TimelineScheduleCard(
+      size: size,
       todayWeekday: props['todayWeekday'] as String? ?? '一',
       todayDay: props['todayDay'] as int? ?? 1,
       tomorrowWeekday: props['tomorrowWeekday'] as String? ?? '二',
@@ -304,6 +310,13 @@ class _TimelineScheduleCardState extends State<TimelineScheduleCard>
     super.dispose();
   }
 
+  /// 判断当前尺寸是否为 wide 尺寸
+  bool _isWideSize() {
+    return widget.size is WideSize ||
+        widget.size is Wide2Size ||
+        widget.size is Wide3Size;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -317,7 +330,9 @@ class _TimelineScheduleCardState extends State<TimelineScheduleCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height: widget.inline ? double.maxFinite : 500,
+              constraints: BoxConstraints(
+                maxHeight: widget.inline ? double.infinity : 500,
+              ),
               width: widget.inline ? double.maxFinite : 500,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -330,41 +345,86 @@ class _TimelineScheduleCardState extends State<TimelineScheduleCard>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 今天的日程
-                  Expanded(
-                    child: _DayColumn(
-                      weekday: widget.todayWeekday,
-                      day: widget.todayDay,
-                      events: widget.todayEvents,
-                      animation: _animation,
-                      primaryColor: primaryColor,
-                      isDark: isDark,
-                      isToday: true,
-                      moreEventsCount: widget.todayMoreEventsCount ?? 0,
-                      moreEventsColors: widget.todayMoreEventsColors ?? [],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // 明天的日程
-                  Expanded(
-                    child: _DayColumn(
-                      weekday: widget.tomorrowWeekday,
-                      day: widget.tomorrowDay,
-                      events: widget.tomorrowEvents,
-                      animation: _animation,
-                      primaryColor: primaryColor,
-                      isDark: isDark,
-                      isToday: false,
-                      specialEvent: widget.tomorrowSpecialEvent,
-                      moreEventsCount: widget.tomorrowMoreEventsCount ?? 0,
-                      moreEventsColors: widget.tomorrowMoreEventsColors ?? [],
-                    ),
-                  ),
-                ],
+              padding: widget.size.getPadding(),
+              child: SingleChildScrollView(
+                child: _isWideSize()
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 今天的日程
+                          Expanded(
+                            child: _DayColumn(
+                              size: widget.size,
+                              weekday: widget.todayWeekday,
+                              day: widget.todayDay,
+                              events: widget.todayEvents,
+                              animation: _animation,
+                              primaryColor: primaryColor,
+                              isDark: isDark,
+                              isToday: true,
+                              moreEventsCount: widget.todayMoreEventsCount ?? 0,
+                              moreEventsColors: widget.todayMoreEventsColors ?? [],
+                            ),
+                          ),
+                          SizedBox(width: widget.size.getItemSpacing()),
+                          // 明天的日程
+                          Expanded(
+                            child: _DayColumn(
+                              size: widget.size,
+                              weekday: widget.tomorrowWeekday,
+                              day: widget.tomorrowDay,
+                              events: widget.tomorrowEvents,
+                              animation: _animation,
+                              primaryColor: primaryColor,
+                              isDark: isDark,
+                              isToday: false,
+                              specialEvent: widget.tomorrowSpecialEvent,
+                              moreEventsCount: widget.tomorrowMoreEventsCount ?? 0,
+                              moreEventsColors:
+                                  widget.tomorrowMoreEventsColors ?? [],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // 今天的日程
+                          Flexible(
+                            child: _DayColumn(
+                              size: widget.size,
+                              weekday: widget.todayWeekday,
+                              day: widget.todayDay,
+                              events: widget.todayEvents,
+                              animation: _animation,
+                              primaryColor: primaryColor,
+                              isDark: isDark,
+                              isToday: true,
+                              moreEventsCount: widget.todayMoreEventsCount ?? 0,
+                              moreEventsColors: widget.todayMoreEventsColors ?? [],
+                            ),
+                          ),
+                          SizedBox(height: widget.size.getItemSpacing()),
+                          // 明天的日程
+                          Flexible(
+                            child: _DayColumn(
+                              size: widget.size,
+                              weekday: widget.tomorrowWeekday,
+                              day: widget.tomorrowDay,
+                              events: widget.tomorrowEvents,
+                              animation: _animation,
+                              primaryColor: primaryColor,
+                              isDark: isDark,
+                              isToday: false,
+                              specialEvent: widget.tomorrowSpecialEvent,
+                              moreEventsCount: widget.tomorrowMoreEventsCount ?? 0,
+                              moreEventsColors:
+                                  widget.tomorrowMoreEventsColors ?? [],
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ),
           ),
@@ -376,6 +436,7 @@ class _TimelineScheduleCardState extends State<TimelineScheduleCard>
 
 /// 日期列组件
 class _DayColumn extends StatelessWidget {
+  final HomeWidgetSize size;
   final String weekday;
   final int day;
   final List<TimelineEvent> events;
@@ -388,6 +449,7 @@ class _DayColumn extends StatelessWidget {
   final List<Color> moreEventsColors;
 
   const _DayColumn({
+    required this.size,
     required this.weekday,
     required this.day,
     required this.events,
@@ -404,8 +466,9 @@ class _DayColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // 星期和日期
+        // 星期和日期（固定头部）
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -413,21 +476,21 @@ class _DayColumn extends StatelessWidget {
               weekday,
               style: TextStyle(
                 color: primaryColor,
-                fontSize: 12,
+                fontSize: size.getSubtitleFontSize(),
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.0,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: size.getSmallSpacing()),
             SizedBox(
-              height: 32,
+              height: size.getLargeFontSize() * 0.8,
               child: AnimatedFlipCounter(
                 value: day.toDouble() * animation.value,
                 wholeDigits: 1,
                 fractionDigits: 0,
                 textStyle: TextStyle(
                   color: isDark ? Colors.white : Colors.black,
-                  fontSize: 32,
+                  fontSize: size.getLargeFontSize() * 0.8,
                   fontWeight: FontWeight.w300,
                   height: 1.0,
                 ),
@@ -435,82 +498,96 @@ class _DayColumn extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
-        // 特殊事件（仅明天）
+        SizedBox(height: size.getSmallSpacing() * 2),
+        // 特殊事件（固定头部）
         if (!isToday && specialEvent != null) ...[
-          SizedBox(
-            height: 56,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isToday ? 'Today' : 'Tomorrow',
-                  style: TextStyle(
-                    color: isDark
-                        ? const Color(0xFF8E8E93)
-                        : const Color(0xFF8E8E93),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                isToday ? 'Today' : 'Tomorrow',
+                style: TextStyle(
+                  color: isDark
+                      ? const Color(0xFF8E8E93)
+                      : const Color(0xFF8E8E93),
+                  fontSize: size.getSubtitleFontSize(),
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
                 ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF3F3F46)
-                        : const Color(0xFFE4E4E7),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        specialEvent!.icon,
-                        size: 14,
-                        color: isDark
-                            ? const Color(0xFFD4D4D8)
-                            : const Color(0xFF71717A),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
+              ),
+              SizedBox(height: size.getSmallSpacing()),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.getSmallSpacing() * 2,
+                  vertical: size.getSmallSpacing(),
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF3F3F46)
+                      : const Color(0xFFE4E4E7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      specialEvent!.icon,
+                      size: size.getIconSize() * 0.6,
+                      color: isDark
+                          ? const Color(0xFFD4D4D8)
+                          : const Color(0xFF71717A),
+                    ),
+                    SizedBox(width: size.getSmallSpacing()),
+                    Flexible(
+                      child: Text(
                         specialEvent!.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: isDark
                               ? const Color(0xFF3F3F46)
                               : const Color(0xFF3A3A3C),
-                          fontSize: 12,
+                          fontSize: size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
+          // 特殊事件与事件列表之间的间距
+          SizedBox(height: size.getSmallSpacing()),
         ],
-        // 时间线事件
-        ...events.map((event) {
-          return _TimelineEventItem(
-            event: event,
-            animation: animation,
-            isDark: isDark,
-          );
-        }),
-        // 更多事件提示
-        if (moreEventsCount > 0)
-          _MoreEventsIndicator(
-            count: moreEventsCount,
-            colors: moreEventsColors,
-            isDark: isDark,
-            animation: animation,
+        // 事件列表区域
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 时间线事件
+              ...events.map((event) {
+                return _TimelineEventItem(
+                  size: size,
+                  event: event,
+                  animation: animation,
+                  isDark: isDark,
+                );
+              }),
+              // 更多事件提示
+              if (moreEventsCount > 0)
+                _MoreEventsIndicator(
+                  size: size,
+                  count: moreEventsCount,
+                  colors: moreEventsColors,
+                  isDark: isDark,
+                  animation: animation,
+                ),
+            ],
           ),
+        ),
       ],
     );
   }
@@ -518,11 +595,13 @@ class _DayColumn extends StatelessWidget {
 
 /// 时间线事件项组件
 class _TimelineEventItem extends StatelessWidget {
+  final HomeWidgetSize size;
   final TimelineEvent event;
   final Animation<double> animation;
   final bool isDark;
 
   const _TimelineEventItem({
+    required this.size,
     required this.event,
     required this.animation,
     required this.isDark,
@@ -531,32 +610,32 @@ class _TimelineEventItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: EdgeInsets.only(bottom: size.getSmallSpacing()),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 时间标签
           SizedBox(
-            width: 20,
+            width: size.getIconSize(),
             child: Text(
               '${event.hour}',
               style: TextStyle(
                 color: isDark
                     ? const Color(0xFF98989D)
                     : const Color(0xFF8E8E93),
-                fontSize: 10,
+                fontSize: size.getLegendFontSize(),
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.right,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: size.getSmallSpacing() * 2),
           // 事件卡片
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
+              padding: EdgeInsets.symmetric(
+                horizontal: size.getSmallSpacing() * 2,
+                vertical: size.getSmallSpacing(),
               ),
               decoration: BoxDecoration(
                 color: isDark
@@ -564,7 +643,10 @@ class _TimelineEventItem extends StatelessWidget {
                     : event.backgroundColorLight,
                 borderRadius: BorderRadius.circular(6),
                 border: Border(
-                  left: BorderSide(color: event.color, width: 3),
+                  left: BorderSide(
+                    color: event.color,
+                    width: size.getStrokeWidth() * 0.3,
+                  ),
                 ),
               ),
               child: Column(
@@ -575,19 +657,19 @@ class _TimelineEventItem extends StatelessWidget {
                     event.title,
                     style: TextStyle(
                       color: isDark ? event.textColorDark : event.textColorLight,
-                      fontSize: 14,
+                      fontSize: size.getSubtitleFontSize(),
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
                   ),
                   if (event.subtextLight != null &&
                       event.subtextDark != null) ...[
-                    const SizedBox(height: 2),
+                    SizedBox(height: size.getSmallSpacing()),
                     Text(
                       event.time,
                       style: TextStyle(
                         color: isDark ? event.subtextDark : event.subtextLight,
-                        fontSize: 10,
+                        fontSize: size.getLegendFontSize(),
                         fontWeight: FontWeight.w500,
                         height: 1.2,
                       ),
@@ -605,12 +687,14 @@ class _TimelineEventItem extends StatelessWidget {
 
 /// 更多事件指示器组件
 class _MoreEventsIndicator extends StatelessWidget {
+  final HomeWidgetSize size;
   final int count;
   final List<Color> colors;
   final bool isDark;
   final Animation<double> animation;
 
   const _MoreEventsIndicator({
+    required this.size,
     required this.count,
     required this.colors,
     required this.isDark,
@@ -620,10 +704,10 @@ class _MoreEventsIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: EdgeInsets.only(top: size.getSmallSpacing()),
       child: Row(
         children: [
-          const SizedBox(width: 28),
+          SizedBox(width: size.getIconSize() * 1.5),
           Row(
             children: [
               Row(
@@ -632,8 +716,8 @@ class _MoreEventsIndicator extends StatelessWidget {
                   (index) => Padding(
                     padding: EdgeInsets.only(left: index > 0 ? 2 : 0),
                     child: Container(
-                      width: 4,
-                      height: 16,
+                      width: size.getStrokeWidth() * 0.5,
+                      height: size.getSubtitleFontSize(),
                       decoration: BoxDecoration(
                         color: colors[index],
                         borderRadius: BorderRadius.circular(2),
@@ -642,14 +726,14 @@ class _MoreEventsIndicator extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: size.getSmallSpacing() * 2),
               Text(
                 '$count more events',
                 style: TextStyle(
                   color: isDark
                       ? const Color(0xFF98989D)
                       : const Color(0xFF8E8E93),
-                  fontSize: 12,
+                  fontSize: size.getSubtitleFontSize(),
                 ),
               ),
             ],

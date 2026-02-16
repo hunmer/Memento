@@ -37,7 +37,11 @@ class DailyEventsCardWidget extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     final eventsList = props['events'] as List<dynamic>?;
-    final events = eventsList?.map((e) => DailyEventData.fromJson(e as Map<String, dynamic>)).toList() ?? const [];
+    final events =
+        eventsList
+            ?.map((e) => DailyEventData.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        const [];
 
     return DailyEventsCardWidget(
       weekday: props['weekday'] as String? ?? 'Monday',
@@ -109,7 +113,9 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                 children: [
                   // 星期和日期
                   Container(
-                    margin: EdgeInsets.only(bottom: widget.size.getTitleSpacing()),
+                    margin: EdgeInsets.only(
+                      bottom: widget.size.getTitleSpacing(),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -137,28 +143,34 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                       ],
                     ),
                   ),
-                  const Spacer(),
                   // 事件列表
-                  ...widget.events.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final event = entry.value;
-                    final itemAnimation = CurvedAnimation(
-                      parent: _animationController,
-                      curve: Interval(
-                        0.2 + index * 0.25,
-                        0.6 + index * 0.2,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    );
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children:
+                            widget.events.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final event = entry.value;
+                              final itemAnimation = CurvedAnimation(
+                                parent: _animationController,
+                                curve: Interval(
+                                  0.2 + index * 0.25,
+                                  0.6 + index * 0.2,
+                                  curve: Curves.easeOutCubic,
+                                ),
+                              );
 
-                    return _EventItem(
-                      event: event,
-                      animation: itemAnimation,
-                      isDark: isDark,
-                      size: widget.size,
-                      events: widget.events,
-                    );
-                  }),
+                              return _EventItem(
+                                event: event,
+                                animation: itemAnimation,
+                                isDark: isDark,
+                                size: widget.size,
+                                events: widget.events,
+                              );
+                            }).toList(),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -195,12 +207,16 @@ class _EventItem extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - animation.value)),
             child: Container(
-              margin: EdgeInsets.only(bottom: events.length > 1 ? size.getItemSpacing() : 0),
+              margin: EdgeInsets.only(
+                bottom: events.length > 1 ? size.getItemSpacing() : 0,
+              ),
               height: size.getSubtitleFontSize() * 3.5,
               decoration: BoxDecoration(
-                color: Color(isDark
-                    ? event.backgroundColorDarkValue
-                    : event.backgroundColorLightValue),
+                color: Color(
+                  isDark
+                      ? event.backgroundColorDarkValue
+                      : event.backgroundColorLightValue,
+                ),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Row(
@@ -225,9 +241,11 @@ class _EventItem extends StatelessWidget {
                           Text(
                             event.title,
                             style: TextStyle(
-                              color: Color(isDark
-                                  ? event.textColorDarkValue
-                                  : event.textColorLightValue),
+                              color: Color(
+                                isDark
+                                    ? event.textColorDarkValue
+                                    : event.textColorLightValue,
+                              ),
                               fontSize: size.getLegendFontSize(),
                               fontWeight: FontWeight.w600,
                               height: 1.2,
@@ -239,9 +257,11 @@ class _EventItem extends StatelessWidget {
                           Text(
                             event.time,
                             style: TextStyle(
-                              color: Color(isDark
-                                  ? event.subtextDarkValue
-                                  : event.subtextLightValue),
+                              color: Color(
+                                isDark
+                                    ? event.subtextDarkValue
+                                    : event.subtextLightValue,
+                              ),
                               fontSize: size.getLegendFontSize() - 2,
                               fontWeight: FontWeight.w500,
                               height: 1.2,

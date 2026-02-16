@@ -91,7 +91,8 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark ? const Color(0xFF1F2937) : const Color(0xFF2A2D45);
+    final backgroundColor =
+        isDark ? const Color(0xFF1F2937) : const Color(0xFF2A2D45);
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -158,7 +159,10 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        _ButterflyIcon(animation: _animationController),
+                        _ButterflyIcon(
+                          animation: _animationController,
+                          size: widget.size,
+                        ),
                       ],
                     ),
 
@@ -167,18 +171,18 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                     // 提示问题
                     Expanded(
                       child: Center(
-                        child: Text(
-                          widget.prompt,
-                          style: TextStyle(
-                            color: const Color(0xFF9FA8DA),
-                            fontSize: widget.size.getLargeFontSize() - 20,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                            letterSpacing: -0.5,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            widget.prompt,
+                            style: TextStyle(
+                              color: const Color(0xFF9FA8DA),
+                              fontSize: widget.size.getLargeFontSize() - 20,
+                              fontWeight: FontWeight.bold,
+                              height: 1.2,
+                              letterSpacing: -0.5,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
@@ -219,8 +223,12 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
 /// 蝴蝶图标
 class _ButterflyIcon extends StatelessWidget {
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _ButterflyIcon({required this.animation});
+  const _ButterflyIcon({
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -231,8 +239,8 @@ class _ButterflyIcon extends StatelessWidget {
         return Transform.scale(
           scale: scale,
           child: SizedBox(
-            width: 32,
-            height: 32,
+            width: size.getIconSize(),
+            height: size.getIconSize(),
             child: CustomPaint(painter: _ButterflyPainter()),
           ),
         );
@@ -262,76 +270,84 @@ class _ButterflyPainter extends CustomPainter {
     );
 
     // 绘制左翅膀
-    final leftWingPath = Path()
-      ..moveTo(center.dx, center.dy)
-      ..lineTo(center.dx - 8, center.dy - 6)
-      ..quadraticBezierTo(
-        center.dx - 12,
-        center.dy,
-        center.dx - 8,
-        center.dy + 4,
-      )
-      ..lineTo(center.dx, center.dy + 2)
-      ..close();
+    final leftWingPath =
+        Path()
+          ..moveTo(center.dx, center.dy)
+          ..lineTo(center.dx - 8, center.dy - 6)
+          ..quadraticBezierTo(
+            center.dx - 12,
+            center.dy,
+            center.dx - 8,
+            center.dy + 4,
+          )
+          ..lineTo(center.dx, center.dy + 2)
+          ..close();
 
-    final leftWingPaint = Paint()
-      ..shader = leftWingGradient
-      ..style = PaintingStyle.fill;
+    final leftWingPaint =
+        Paint()
+          ..shader = leftWingGradient
+          ..style = PaintingStyle.fill;
 
     canvas.drawPath(leftWingPath, leftWingPaint);
 
     // 绘制右翅膀
-    final rightWingPath = Path()
-      ..moveTo(center.dx, center.dy)
-      ..lineTo(center.dx + 8, center.dy - 6)
-      ..quadraticBezierTo(
-        center.dx + 12,
-        center.dy,
-        center.dx + 8,
-        center.dy + 4,
-      )
-      ..lineTo(center.dx, center.dy + 2)
-      ..close();
+    final rightWingPath =
+        Path()
+          ..moveTo(center.dx, center.dy)
+          ..lineTo(center.dx + 8, center.dy - 6)
+          ..quadraticBezierTo(
+            center.dx + 12,
+            center.dy,
+            center.dx + 8,
+            center.dy + 4,
+          )
+          ..lineTo(center.dx, center.dy + 2)
+          ..close();
 
-    final rightWingPaint = Paint()
-      ..shader = rightWingGradient
-      ..style = PaintingStyle.fill;
+    final rightWingPaint =
+        Paint()
+          ..shader = rightWingGradient
+          ..style = PaintingStyle.fill;
 
     canvas.drawPath(rightWingPath, rightWingPaint);
 
     // 绘制左下翅膀
-    final leftBottomPath = Path()
-      ..moveTo(center.dx, center.dy + 2)
-      ..lineTo(center.dx - 6, center.dy + 6)
-      ..quadraticBezierTo(
-        center.dx - 3,
-        center.dy + 8,
-        center.dx,
-        center.dy + 6,
-      )
-      ..close();
+    final leftBottomPath =
+        Path()
+          ..moveTo(center.dx, center.dy + 2)
+          ..lineTo(center.dx - 6, center.dy + 6)
+          ..quadraticBezierTo(
+            center.dx - 3,
+            center.dy + 8,
+            center.dx,
+            center.dy + 6,
+          )
+          ..close();
 
-    final leftBottomPaint = Paint()
-      ..color = const Color(0xFFA5B4FC)
-      ..style = PaintingStyle.fill;
+    final leftBottomPaint =
+        Paint()
+          ..color = const Color(0xFFA5B4FC)
+          ..style = PaintingStyle.fill;
 
     canvas.drawPath(leftBottomPath, leftBottomPaint);
 
     // 绘制右下翅膀
-    final rightBottomPath = Path()
-      ..moveTo(center.dx, center.dy + 2)
-      ..lineTo(center.dx + 6, center.dy + 6)
-      ..quadraticBezierTo(
-        center.dx + 3,
-        center.dy + 8,
-        center.dx,
-        center.dy + 6,
-      )
-      ..close();
+    final rightBottomPath =
+        Path()
+          ..moveTo(center.dx, center.dy + 2)
+          ..lineTo(center.dx + 6, center.dy + 6)
+          ..quadraticBezierTo(
+            center.dx + 3,
+            center.dy + 8,
+            center.dx,
+            center.dy + 6,
+          )
+          ..close();
 
-    final rightBottomPaint = Paint()
-      ..color = const Color(0xFFFCA5A5)
-      ..style = PaintingStyle.fill;
+    final rightBottomPaint =
+        Paint()
+          ..color = const Color(0xFFFCA5A5)
+          ..style = PaintingStyle.fill;
 
     canvas.drawPath(rightBottomPath, rightBottomPaint);
   }
@@ -382,21 +398,12 @@ class _ActionButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(28),
           child: Container(
-            height: 56,
+            height: size.getIconSize() * 2.5,
             alignment: Alignment.center,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: Colors.white, size: 24),
-                SizedBox(width: size.getItemSpacing()),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: size.getSubtitleFontSize(),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                Icon(icon, color: Colors.white, size: size.getIconSize()),
               ],
             ),
           ),
@@ -438,15 +445,15 @@ class _SyncButton extends StatelessWidget {
         );
       },
       child: SizedBox(
-        width: 56,
-        height: 56,
+        width: size.getIconSize() * 2.5,
+        height: size.getIconSize() * 2.5,
         child: Material(
           color: const Color(0xFF626D9E),
           borderRadius: BorderRadius.circular(28),
           child: InkWell(
             onTap: onPressed,
             borderRadius: BorderRadius.circular(28),
-            child: const Icon(Icons.sync, color: Colors.white, size: 28),
+            child: Icon(Icons.sync, color: Colors.white, size: size.getIconSize()),
           ),
         ),
       ),

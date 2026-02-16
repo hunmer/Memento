@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/timeline_schedule_card.dart';
 
 /// 时间线日程卡片示例
@@ -26,6 +27,7 @@ class TimelineScheduleCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: TimelineScheduleCard(
+                      size: const SmallSize(),
                       todayWeekday: 'Monday',
                       todayDay: 7,
                       tomorrowWeekday: 'Tuesday',
@@ -148,6 +150,7 @@ class TimelineScheduleCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: TimelineScheduleCard(
+                      size: const MediumSize(),
                       todayWeekday: 'Monday',
                       todayDay: 7,
                       tomorrowWeekday: 'Tuesday',
@@ -270,6 +273,7 @@ class TimelineScheduleCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: TimelineScheduleCard(
+                      size: const LargeSize(),
                       todayWeekday: 'Monday',
                       todayDay: 7,
                       tomorrowWeekday: 'Tuesday',
@@ -391,6 +395,7 @@ class TimelineScheduleCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 320,
                   child: TimelineScheduleCard(
+                    size: const WideSize(),
                     todayWeekday: 'Monday',
                     todayDay: 7,
                     tomorrowWeekday: 'Tuesday',
@@ -511,6 +516,7 @@ class TimelineScheduleCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 420,
                   child: TimelineScheduleCard(
+                    size: const Wide2Size(),
                     todayWeekday: 'Monday',
                     todayDay: 7,
                     tomorrowWeekday: 'Tuesday',
