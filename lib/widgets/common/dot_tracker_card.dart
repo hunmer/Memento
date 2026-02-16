@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 点阵追踪卡片数据模型
 ///
@@ -129,6 +130,7 @@ class DotTrackerCardData {
 ///
 /// 用于展示周度点阵追踪进度，例如每日目标完成情况、习惯打卡等。
 /// 支持自定义标题、图标、数值、单位和点阵状态。
+/// 根据尺寸自动调整所有元素大小。
 class DotTrackerCardWidget extends StatefulWidget {
   /// 卡片标题
   final String title;
@@ -164,6 +166,9 @@ class DotTrackerCardWidget extends StatefulWidget {
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
 
+  /// 小组件尺寸，用于调整所有元素大小
+  final HomeWidgetSize size;
+
   /// 点击回调
   final VoidCallback? onTap;
 
@@ -180,6 +185,7 @@ class DotTrackerCardWidget extends StatefulWidget {
     this.height,
     this.enableAnimation = true,
     this.inline = false,
+    this.size = const MediumSize(),
     this.onTap,
   });
 
@@ -191,6 +197,7 @@ class DotTrackerCardWidget extends StatefulWidget {
     double? height,
     bool enableAnimation = true,
     bool inline = false,
+    HomeWidgetSize size = const MediumSize(),
     VoidCallback? onTap,
   }) {
     return DotTrackerCardWidget(
@@ -206,6 +213,7 @@ class DotTrackerCardWidget extends StatefulWidget {
       height: height,
       enableAnimation: enableAnimation,
       inline: inline,
+      size: size,
       onTap: onTap,
     );
   }
@@ -283,11 +291,13 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     final primaryLight =
         isDark ? primaryColor.withOpacity(0.3) : primaryColor.withOpacity(0.4);
 
+    final size = widget.size;
+
     // 数值显示（使用 Positioned 定位在右上角）
     final valueDisplay = Positioned(
-      top: 16,
-      right: 24,
-      child: _buildValueDisplay(textColor, mutedColor),
+      top: size.getSmallSpacing() * 4,
+      right: size.getSmallSpacing() * 6,
+      child: _buildValueDisplay(textColor, mutedColor, size),
     );
 
     final animatedChild = AnimatedBuilder(
@@ -309,8 +319,7 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
         children: [
           Container(
             height: widget.inline ? double.maxFinite : (widget.height ?? 250),
-            width: widget.inline ? double.maxFinite : (widget.width ?? 250),
-            padding: const EdgeInsets.all(10),
+            padding: size.getPadding(),
             decoration: BoxDecoration(
               color: backgroundColor,
               borderRadius: BorderRadius.circular(8),
@@ -334,10 +343,13 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
                   primaryColor,
                   textColor,
                   mutedColor,
+                  size,
                 ),
-                const SizedBox(height: 16),
-                // 点阵进度（占满宽度）
-                _buildDotsGrid(primaryColor, primaryLight),
+                SizedBox(height: size.getTitleSpacing()),
+                // 点阵进度（占满剩余空间）
+                Expanded(
+                  child: _buildDotsGrid(primaryColor, primaryLight, size),
+                ),
               ],
             ),
           ),
@@ -364,12 +376,14 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     Color primaryColor,
     Color textColor,
     Color mutedColor,
+    HomeWidgetSize size,
   ) {
+    final titleFontSize = size.getTitleFontSize() * 0.75;
+    final subtitleFontSize = size.getSubtitleFontSize();
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(widget.icon, color: primaryColor, size: 28),
-        const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -377,17 +391,17 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
             Text(
               widget.title,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: titleFontSize,
                 fontWeight: FontWeight.bold,
                 color: textColor,
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: size.getSmallSpacing()),
             Text(
               widget.status,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: subtitleFontSize,
                 fontWeight: FontWeight.w500,
                 color: mutedColor,
               ),
@@ -398,7 +412,14 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     );
   }
 
-  Widget _buildValueDisplay(Color textColor, Color mutedColor) {
+  Widget _buildValueDisplay(
+    Color textColor,
+    Color mutedColor,
+    HomeWidgetSize size,
+  ) {
+    final valueFontSize = size.getLargeFontSize() * 0.6;
+    final unitFontSize = size.getSubtitleFontSize() * 0.7;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -408,18 +429,18 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
           duration: const Duration(milliseconds: 1200),
           curve: Curves.easeOutCubic,
           textStyle: TextStyle(
-            fontSize: 44,
+            fontSize: valueFontSize,
             fontWeight: FontWeight.w800,
             color: textColor,
             height: 1.0,
             letterSpacing: -1,
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: size.getSmallSpacing() * 1.5),
         Text(
           widget.unit,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: unitFontSize,
             fontWeight: FontWeight.w600,
             color: textColor.withOpacity(0.8),
             height: 1.0,
@@ -429,7 +450,11 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     );
   }
 
-  Widget _buildDotsGrid(Color primaryColor, Color primaryLight) {
+  Widget _buildDotsGrid(
+    Color primaryColor,
+    Color primaryLight,
+    HomeWidgetSize size,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final emptyDotColor =
         isDark ? const Color(0xFF374151) : const Color(0xFFE5E7EB);
@@ -442,47 +467,54 @@ class _DotTrackerCardWidgetState extends State<DotTrackerCardWidget>
     // 计算动画步长
     final step = dayCount > 1 ? 0.35 / (dayCount - 1) : 0.0;
 
-    return SizedBox(
-      height: dayCount <= 14 ? 40 : (dayCount <= 30 ? 80 : 120),
-      child: GridView.builder(
-        padding: EdgeInsets.zero,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 4.0,
-          crossAxisSpacing: 2.0,
-          childAspectRatio: 1,
-        ),
-        itemCount: dayCount,
-        itemBuilder: (context, index) {
-          final itemAnimation = CurvedAnimation(
-            parent: _animationController,
-            curve: Interval(
-              index * step,
-              0.65 + index * step,
-              curve: Curves.easeOutCubic,
+    // 根据尺寸计算圆点大小
+    final dotSize =
+        size is SmallSize
+            ? 16.0
+            : (size is MediumSize || size is WideSize ? 26.0 : 30.0);
+    final dotSpacing = size.getSmallSpacing();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scrollbar(
+          thumbVisibility: true,
+          child: GridView.builder(
+            padding: EdgeInsets.zero,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              mainAxisSpacing: 0,
+              crossAxisSpacing: dotSpacing * 0.5,
+              mainAxisExtent: constraints.maxHeight,
             ),
-          );
+            itemCount: dayCount,
+            itemBuilder: (context, index) {
+              final itemAnimation = CurvedAnimation(
+                parent: _animationController,
+                curve: Interval(
+                  index * step,
+                  0.65 + index * step,
+                  curve: Curves.easeOutCubic,
+                ),
+              );
 
-          // 计算圆点大小
-          final dotSize = dayCount <= 14 ? 20.0 : 12.0;
-
-          return _DayDotColumn(
-            day: widget.weekDays[index],
-            dotStates: widget.dotStates[index],
-            primaryColor: primaryColor,
-            primaryLight: primaryLight,
-            emptyDotColor: emptyDotColor,
-            animation:
-                widget.enableAnimation
-                    ? itemAnimation
-                    : AlwaysStoppedAnimation(1.0),
-            totalDays: dayCount,
-            dotSize: dotSize,
-            dotSpacing: 4.0,
-          );
-        },
-      ),
+              return _DayDotColumn(
+                day: widget.weekDays[index],
+                dotStates: widget.dotStates[index],
+                primaryColor: primaryColor,
+                primaryLight: primaryLight,
+                emptyDotColor: emptyDotColor,
+                animation:
+                    widget.enableAnimation
+                        ? itemAnimation
+                        : AlwaysStoppedAnimation(1.0),
+                totalDays: dayCount,
+                dotSize: dotSize,
+                dotSpacing: dotSpacing * 0.5,
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -514,7 +546,8 @@ class _DayDotColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(dotStates.length, (index) {
         final isEnabled = dotStates[index];
         return AnimatedBuilder(
@@ -523,7 +556,6 @@ class _DayDotColumn extends StatelessWidget {
             return Transform.scale(
               scale: isEnabled ? animation.value : 1.0,
               child: Container(
-                margin: EdgeInsets.only(bottom: dotSpacing),
                 width: dotSize,
                 height: dotSize,
                 decoration: BoxDecoration(

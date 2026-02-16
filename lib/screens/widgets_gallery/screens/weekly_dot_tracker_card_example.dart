@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 周点阵追踪卡片示例
 ///
@@ -67,6 +68,7 @@ class _WeeklyDotTrackerCardExampleState
                     height: 150,
                     child: DotTrackerCardWidget.fromData(
                       exampleData,
+                      size: const SmallSize(),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('点击了点阵追踪卡片')),
@@ -84,6 +86,7 @@ class _WeeklyDotTrackerCardExampleState
                     height: 220,
                     child: DotTrackerCardWidget.fromData(
                       exampleData,
+                      size: const MediumSize(),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('点击了点阵追踪卡片')),
@@ -101,12 +104,45 @@ class _WeeklyDotTrackerCardExampleState
                     height: 300,
                     child: DotTrackerCardWidget.fromData(
                       exampleData,
+                      size: const LargeSize(),
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('点击了点阵追踪卡片')),
                         );
                       },
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 200,
+                  child: DotTrackerCardWidget.fromData(
+                    exampleData,
+                    size: const WideSize(),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('点击了点阵追踪卡片')),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 280,
+                  child: DotTrackerCardWidget.fromData(
+                    exampleData,
+                    size: const Wide2Size(),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('点击了点阵追踪卡片')),
+                      );
+                    },
                   ),
                 ),
               ],

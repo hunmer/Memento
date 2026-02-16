@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/event_calendar_widget.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 日历事件卡片示例
 class EventCalendarWidgetExample extends StatelessWidget {
@@ -32,7 +33,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                       eventCount: 3,
                       weekDates: const [12, 13, 14, 15, 16, 17, 18],
                       weekStartDay: 0,
-                      reminder: 'Do not forget the weekly pill',
+                      reminder: 'Do not forget weekly pill',
                       reminderEmoji: '💊',
                       events: const [
                         EventData(
@@ -44,6 +45,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                           buttonLabel: 'Go to Meet',
                         ),
                       ],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -61,7 +63,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                       eventCount: 3,
                       weekDates: const [12, 13, 14, 15, 16, 17, 18, 19, 20],
                       weekStartDay: 0,
-                      reminder: 'Do not forget the weekly pill',
+                      reminder: 'Do not forget weekly pill',
                       reminderEmoji: '💊',
                       events: const [
                         EventData(
@@ -81,6 +83,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                           iconColor: Color(0xFF00AC47),
                         ),
                       ],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -96,13 +99,26 @@ class EventCalendarWidgetExample extends StatelessWidget {
                       weekday: 'Wednesday',
                       month: 'August',
                       eventCount: 3,
-                      weekDates: const [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+                      weekDates: const [
+                        12,
+                        13,
+                        14,
+                        15,
+                        16,
+                        17,
+                        18,
+                        19,
+                        20,
+                        21,
+                        22,
+                      ],
                       weekStartDay: 0,
-                      reminder: 'Do not forget the weekly pill',
+                      reminder: 'Do not forget weekly pill',
                       reminderEmoji: '💊',
                       events: const [
                         EventData(
-                          title: 'Meeting with developers about system design and its problems.',
+                          title:
+                              'Meeting with developers about system design and its problems.',
                           time: '8:15 AM',
                           duration: '45 min',
                           color: Color(0xFF525EAF),
@@ -110,7 +126,8 @@ class EventCalendarWidgetExample extends StatelessWidget {
                           buttonLabel: 'Go to Meet',
                         ),
                         EventData(
-                          title: 'Interview with designers scheduled for the new marketing project.',
+                          title:
+                              'Interview with designers scheduled for the new marketing project.',
                           time: '9:30 AM',
                           duration: '45 min',
                           location: 'Office',
@@ -118,6 +135,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                           iconColor: Color(0xFF00AC47),
                         ),
                       ],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -154,6 +172,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                         iconColor: Color(0xFF00AC47),
                       ),
                     ],
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -167,13 +186,26 @@ class EventCalendarWidgetExample extends StatelessWidget {
                     weekday: 'Wednesday',
                     month: 'August',
                     eventCount: 3,
-                    weekDates: const [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+                    weekDates: const [
+                      12,
+                      13,
+                      14,
+                      15,
+                      16,
+                      17,
+                      18,
+                      19,
+                      20,
+                      21,
+                      22,
+                    ],
                     weekStartDay: 0,
                     reminder: 'Do not forget the weekly pill',
                     reminderEmoji: '💊',
                     events: const [
                       EventData(
-                        title: 'Meeting with developers about system design and its problems.',
+                        title:
+                            'Meeting with developers about system design and its problems.',
                         time: '8:15 AM',
                         duration: '45 min',
                         color: Color(0xFF525EAF),
@@ -181,7 +213,8 @@ class EventCalendarWidgetExample extends StatelessWidget {
                         buttonLabel: 'Go to Meet',
                       ),
                       EventData(
-                        title: 'Interview with designers scheduled for the new marketing project.',
+                        title:
+                            'Interview with designers scheduled for the new marketing project.',
                         time: '9:30 AM',
                         duration: '45 min',
                         location: 'Office',
@@ -189,6 +222,7 @@ class EventCalendarWidgetExample extends StatelessWidget {
                         iconColor: Color(0xFF00AC47),
                       ),
                     ],
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
