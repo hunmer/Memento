@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/index.dart';
 
 /// 堆叠条形图组件示例
@@ -22,7 +23,7 @@ class StackedBarChartWidgetExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (1x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -74,11 +75,12 @@ class StackedBarChartWidgetExample extends StatelessWidget {
                           darkValue: 5,
                         ),
                       ],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (2x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -130,11 +132,12 @@ class StackedBarChartWidgetExample extends StatelessWidget {
                           darkValue: 5,
                         ),
                       ],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (2x2)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
@@ -142,7 +145,8 @@ class StackedBarChartWidgetExample extends StatelessWidget {
                     height: 300,
                     child: StackedBarChartWidget(
                       title: 'Bar chart',
-                      subtitle: 'Minim dolor in amet nulla laboris enim dolore...',
+                      subtitle:
+                          'Minim dolor in amet nulla laboris enim dolore...',
                       growthRate: 86,
                       data: [
                         StackedBarData(
@@ -186,11 +190,12 @@ class StackedBarChartWidgetExample extends StatelessWidget {
                           darkValue: 5,
                         ),
                       ],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中宽尺寸'),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
@@ -241,17 +246,19 @@ class StackedBarChartWidgetExample extends StatelessWidget {
                         darkValue: 5,
                       ),
                     ],
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大宽尺寸'),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
                   height: 350,
                   child: StackedBarChartWidget(
                     title: 'Complete Stacked Bar Chart Analysis',
-                    subtitle: 'Comprehensive Monthly Statistics and Trends Overview',
+                    subtitle:
+                        'Comprehensive Monthly Statistics and Trends Overview',
                     growthRate: 86,
                     data: [
                       StackedBarData(
@@ -295,6 +302,7 @@ class StackedBarChartWidgetExample extends StatelessWidget {
                         darkValue: 5,
                       ),
                     ],
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

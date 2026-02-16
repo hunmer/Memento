@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/common/index.dart';
 
 /// 堆叠柱状图卡片示例
@@ -21,15 +22,14 @@ class StackedBarChartCardExample extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('小尺寸'),
+                _buildSectionTitle('小尺寸 (1x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 300,
-                    height: 200,
+                    width: 150,
+                    height: 150,
                     child: StackedBarChartCard(
                       title: 'America',
-                      description: 'Lorem ipsum dolor.',
                       categories: [
                         ChartCategory(name: '2010', color: Color(0xFF0F4C81)),
                         ChartCategory(name: '2011', color: Color(0xFF48C6E0)),
@@ -49,20 +49,19 @@ class StackedBarChartCardExample extends StatelessWidget {
                           ChartSegmentValue(value: 40, categoryIndex: 1),
                         ],
                       ],
-                      subtitle: 'Population',
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
+                _buildSectionTitle('中尺寸 (2x1)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 350,
-                    height: 280,
+                    width: 220,
+                    height: 220,
                     child: StackedBarChartCard(
                       title: 'America',
-                      description: 'Lorem ipsum dolor sit amet.',
                       categories: [
                         ChartCategory(name: '2010', color: Color(0xFF0F4C81)),
                         ChartCategory(name: '2011', color: Color(0xFF48C6E0)),
@@ -91,20 +90,19 @@ class StackedBarChartCardExample extends StatelessWidget {
                           ChartSegmentValue(value: 17, categoryIndex: 2),
                         ],
                       ],
-                      subtitle: 'Historic Data',
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
+                _buildSectionTitle('大尺寸 (2x2)'),
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 400,
-                    height: 350,
+                    width: 300,
+                    height: 300,
                     child: StackedBarChartCard(
                       title: 'America',
-                      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
                       categories: [
                         ChartCategory(name: '2010', color: Color(0xFF0F4C81)),
                         ChartCategory(name: '2011', color: Color(0xFF48C6E0)),
@@ -138,19 +136,18 @@ class StackedBarChartCardExample extends StatelessWidget {
                           ChartSegmentValue(value: 16, categoryIndex: 2),
                         ],
                       ],
-                      subtitle: 'Historic World Population',
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('中宽尺寸'),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 380,
+                  height: 280,
                   child: StackedBarChartCard(
                     title: 'America - Historical Population Data',
-                    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.',
                     categories: [
                       ChartCategory(name: '2010', color: Color(0xFF0F4C81)),
                       ChartCategory(name: '2011', color: Color(0xFF48C6E0)),
@@ -189,18 +186,17 @@ class StackedBarChartCardExample extends StatelessWidget {
                         ChartSegmentValue(value: 13, categoryIndex: 2),
                       ],
                     ],
-                    subtitle: 'Historic World Population Analysis',
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildSectionTitle('大宽尺寸'),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 480,
+                  height: 350,
                   child: StackedBarChartCard(
                     title: 'America - Complete Historical Population Data',
-                    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                     categories: [
                       ChartCategory(name: '2010', color: Color(0xFF0F4C81)),
                       ChartCategory(name: '2011', color: Color(0xFF48C6E0)),
@@ -249,7 +245,7 @@ class StackedBarChartCardExample extends StatelessWidget {
                         ChartSegmentValue(value: 15, categoryIndex: 2),
                       ],
                     ],
-                    subtitle: 'Historic World Population Comprehensive Analysis',
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
