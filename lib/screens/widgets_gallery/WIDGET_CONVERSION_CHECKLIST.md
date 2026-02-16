@@ -27,7 +27,6 @@
 - [x] 堆叠柱状图卡片 - `stacked_bar_chart_card` → `stackedBarChartCard`
 - [x] 堆叠条形图组件 - `stacked_bar_chart_widget` → `stackedBarChartWidget`
 - [x] 堆叠环形图统计卡片 - `stacked_ring_chart` → `stackedRingChartCard`
-- [x] 月度柱状图统计卡片 - `monthly_bar_chart` → `monthlyBarChartCard`
 - [x] 收益趋势卡片 - `earnings_trend_card` → `earningsTrendCard`
 - [x] 排名条形图卡片 - `ranked_bar_chart_card` → `rankedBarChartCard`
 - [x] 柱状图统计卡片 - `bar_chart_stats_card` → `barChartStatsCard`

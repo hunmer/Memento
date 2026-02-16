@@ -165,7 +165,9 @@ class _StackedRingChartCardWidgetState extends State<StackedRingChartCardWidget>
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
                   // 环形图和图例
-                  _buildChartSection(isDark, percentage),
+                  Expanded(
+                    child: _buildChartSection(isDark, percentage),
+                  ),
                 ],
               ),
             ),

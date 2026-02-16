@@ -7,7 +7,6 @@ export 'dual_range_chart_card.dart';
 export 'dual_value_tracker_card.dart';
 export 'habit_streak_tracker.dart';
 export 'image_preview.dart';
-export 'monthly_bar_chart_card.dart';
 export 'performance_bar_chart_card.dart';
 export 'route_tracking_card.dart';
 export 'rounded_reminders_list_card.dart';

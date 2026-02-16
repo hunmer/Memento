@@ -27,13 +27,30 @@ class RankedBarChartCardExample extends StatelessWidget {
                     height: 300,
                     child: RankedBarChartCardWidget(
                       title: 'Average of the first economies',
-                      subtitle: 'Minim dolor in amet nulla laboris enim dolore consequatt.',
+                      subtitle:
+                          'Minim dolor in amet nulla laboris enim dolore consequatt.',
                       itemCount: '8 countries',
                       items: [
-                        RankedBarItem(label: 'Noruega', value: 1.0, color: Color(0xFF020058)),
-                        RankedBarItem(label: 'Australia', value: 0.9, color: Color(0xFF053876)),
-                        RankedBarItem(label: 'Suiza', value: 0.8, color: Color(0xFF0069A8)),
-                        RankedBarItem(label: 'Países Bajos', value: 0.72, color: Color(0xFF008DB6)),
+                        RankedBarItem(
+                          label: 'Noruega',
+                          value: 1.0,
+                          color: Color(0xFF020058),
+                        ),
+                        RankedBarItem(
+                          label: 'Australia',
+                          value: 0.9,
+                          color: Color(0xFF053876),
+                        ),
+                        RankedBarItem(
+                          label: 'Suiza',
+                          value: 0.8,
+                          color: Color(0xFF0069A8),
+                        ),
+                        RankedBarItem(
+                          label: 'Países Bajos',
+                          value: 0.72,
+                          color: Color(0xFF008DB6),
+                        ),
                       ],
                       footer: 'Minim dolor in amet.',
                     ),
@@ -48,14 +65,35 @@ class RankedBarChartCardExample extends StatelessWidget {
                     height: 350,
                     child: RankedBarChartCardWidget(
                       title: 'Average of the first economies',
-                      subtitle: 'Minim dolor in amet nulla laboris enim dolore consequatt.',
+                      subtitle:
+                          'Minim dolor in amet nulla laboris enim dolore consequatt.',
                       itemCount: '8 countries',
                       items: [
-                        RankedBarItem(label: 'Noruega', value: 1.0, color: Color(0xFF020058)),
-                        RankedBarItem(label: 'Australia', value: 0.9, color: Color(0xFF053876)),
-                        RankedBarItem(label: 'Suiza', value: 0.8, color: Color(0xFF0069A8)),
-                        RankedBarItem(label: 'Países Bajos', value: 0.72, color: Color(0xFF008DB6)),
-                        RankedBarItem(label: 'Estados Unidos', value: 0.64, color: Color(0xFF00B0CE)),
+                        RankedBarItem(
+                          label: 'Noruega',
+                          value: 1.0,
+                          color: Color(0xFF020058),
+                        ),
+                        RankedBarItem(
+                          label: 'Australia',
+                          value: 0.9,
+                          color: Color(0xFF053876),
+                        ),
+                        RankedBarItem(
+                          label: 'Suiza',
+                          value: 0.8,
+                          color: Color(0xFF0069A8),
+                        ),
+                        RankedBarItem(
+                          label: 'Países Bajos',
+                          value: 0.72,
+                          color: Color(0xFF008DB6),
+                        ),
+                        RankedBarItem(
+                          label: 'Estados Unidos',
+                          value: 0.64,
+                          color: Color(0xFF00B0CE),
+                        ),
                       ],
                       footer: 'Minim dolor in amet.',
                     ),
@@ -70,19 +108,53 @@ class RankedBarChartCardExample extends StatelessWidget {
                     height: 420,
                     child: RankedBarChartCardWidget(
                       title: 'Average of the first economies',
-                      subtitle: 'Minim dolor in amet nulla laboris enim dolore consequatt.',
+                      subtitle:
+                          'Minim dolor in amet nulla laboris enim dolore consequatt.',
                       itemCount: '8 countries',
                       items: [
-                        RankedBarItem(label: 'Noruega', value: 1.0, color: Color(0xFF020058)),
-                        RankedBarItem(label: 'Australia', value: 0.9, color: Color(0xFF053876)),
-                        RankedBarItem(label: 'Suiza', value: 0.8, color: Color(0xFF0069A8)),
-                        RankedBarItem(label: 'Países Bajos', value: 0.72, color: Color(0xFF008DB6)),
-                        RankedBarItem(label: 'Estados Unidos', value: 0.64, color: Color(0xFF00B0CE)),
-                        RankedBarItem(label: 'Alemania', value: 0.56, color: Color(0xFF4CCCE3)),
-                        RankedBarItem(label: 'Nueva Zelanda', value: 0.48, color: Color(0xFF8EE1F1)),
-                        RankedBarItem(label: 'Canadá', value: 0.4, color: Color(0xFFCBF1F7)),
+                        RankedBarItem(
+                          label: 'Noruega',
+                          value: 1.0,
+                          color: Color(0xFF020058),
+                        ),
+                        RankedBarItem(
+                          label: 'Australia',
+                          value: 0.9,
+                          color: Color(0xFF053876),
+                        ),
+                        RankedBarItem(
+                          label: 'Suiza',
+                          value: 0.8,
+                          color: Color(0xFF0069A8),
+                        ),
+                        RankedBarItem(
+                          label: 'Países Bajos',
+                          value: 0.72,
+                          color: Color(0xFF008DB6),
+                        ),
+                        RankedBarItem(
+                          label: 'Estados Unidos',
+                          value: 0.64,
+                          color: Color(0xFF00B0CE),
+                        ),
+                        RankedBarItem(
+                          label: 'Alemania',
+                          value: 0.56,
+                          color: Color(0xFF4CCCE3),
+                        ),
+                        RankedBarItem(
+                          label: 'Nueva Zelanda',
+                          value: 0.48,
+                          color: Color(0xFF8EE1F1),
+                        ),
+                        RankedBarItem(
+                          label: 'Canadá',
+                          value: 0.4,
+                          color: Color(0xFFCBF1F7),
+                        ),
                       ],
-                      footer: 'Minim dolor in amet nulla laboris enim dolore consequatt.',
+                      footer:
+                          'Minim dolor in amet nulla laboris enim dolore consequatt.',
                     ),
                   ),
                 ),
@@ -94,19 +166,53 @@ class RankedBarChartCardExample extends StatelessWidget {
                   height: 380,
                   child: RankedBarChartCardWidget(
                     title: 'Average of the First Economies - Global Ranking',
-                    subtitle: 'A comprehensive analysis of economic performance across leading nations worldwide.',
+                    subtitle:
+                        'A comprehensive analysis of economic performance across leading nations worldwide.',
                     itemCount: '8 countries',
                     items: [
-                      RankedBarItem(label: 'Noruega', value: 1.0, color: Color(0xFF020058)),
-                      RankedBarItem(label: 'Australia', value: 0.9, color: Color(0xFF053876)),
-                      RankedBarItem(label: 'Suiza', value: 0.8, color: Color(0xFF0069A8)),
-                      RankedBarItem(label: 'Países Bajos', value: 0.72, color: Color(0xFF008DB6)),
-                      RankedBarItem(label: 'Estados Unidos', value: 0.64, color: Color(0xFF00B0CE)),
-                      RankedBarItem(label: 'Alemania', value: 0.56, color: Color(0xFF4CCCE3)),
-                      RankedBarItem(label: 'Nueva Zelanda', value: 0.48, color: Color(0xFF8EE1F1)),
-                      RankedBarItem(label: 'Canadá', value: 0.4, color: Color(0xFFCBF1F7)),
+                      RankedBarItem(
+                        label: 'Noruega',
+                        value: 1.0,
+                        color: Color(0xFF020058),
+                      ),
+                      RankedBarItem(
+                        label: 'Australia',
+                        value: 0.9,
+                        color: Color(0xFF053876),
+                      ),
+                      RankedBarItem(
+                        label: 'Suiza',
+                        value: 0.8,
+                        color: Color(0xFF0069A8),
+                      ),
+                      RankedBarItem(
+                        label: 'Países Bajos',
+                        value: 0.72,
+                        color: Color(0xFF008DB6),
+                      ),
+                      RankedBarItem(
+                        label: 'Estados Unidos',
+                        value: 0.64,
+                        color: Color(0xFF00B0CE),
+                      ),
+                      RankedBarItem(
+                        label: 'Alemania',
+                        value: 0.56,
+                        color: Color(0xFF4CCCE3),
+                      ),
+                      RankedBarItem(
+                        label: 'Nueva Zelanda',
+                        value: 0.48,
+                        color: Color(0xFF8EE1F1),
+                      ),
+                      RankedBarItem(
+                        label: 'Canadá',
+                        value: 0.4,
+                        color: Color(0xFFCBF1F7),
+                      ),
                     ],
-                    footer: 'Comprehensive economic indicators and performance metrics analysis.',
+                    footer:
+                        'Comprehensive economic indicators and performance metrics analysis.',
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -116,20 +222,55 @@ class RankedBarChartCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 480,
                   child: RankedBarChartCardWidget(
-                    title: 'Average of the First Economies - Complete Global Analysis',
-                    subtitle: 'A comprehensive analysis of economic performance across leading nations worldwide with detailed metrics.',
+                    title:
+                        'Average of the First Economies - Complete Global Analysis',
+                    subtitle:
+                        'A comprehensive analysis of economic performance across leading nations worldwide with detailed metrics.',
                     itemCount: '8 countries',
                     items: [
-                      RankedBarItem(label: 'Noruega', value: 1.0, color: Color(0xFF020058)),
-                      RankedBarItem(label: 'Australia', value: 0.9, color: Color(0xFF053876)),
-                      RankedBarItem(label: 'Suiza', value: 0.8, color: Color(0xFF0069A8)),
-                      RankedBarItem(label: 'Países Bajos', value: 0.72, color: Color(0xFF008DB6)),
-                      RankedBarItem(label: 'Estados Unidos', value: 0.64, color: Color(0xFF00B0CE)),
-                      RankedBarItem(label: 'Alemania', value: 0.56, color: Color(0xFF4CCCE3)),
-                      RankedBarItem(label: 'Nueva Zelanda', value: 0.48, color: Color(0xFF8EE1F1)),
-                      RankedBarItem(label: 'Canadá', value: 0.4, color: Color(0xFFCBF1F7)),
+                      RankedBarItem(
+                        label: 'Noruega',
+                        value: 1.0,
+                        color: Color(0xFF020058),
+                      ),
+                      RankedBarItem(
+                        label: 'Australia',
+                        value: 0.9,
+                        color: Color(0xFF053876),
+                      ),
+                      RankedBarItem(
+                        label: 'Suiza',
+                        value: 0.8,
+                        color: Color(0xFF0069A8),
+                      ),
+                      RankedBarItem(
+                        label: 'Países Bajos',
+                        value: 0.72,
+                        color: Color(0xFF008DB6),
+                      ),
+                      RankedBarItem(
+                        label: 'Estados Unidos',
+                        value: 0.64,
+                        color: Color(0xFF00B0CE),
+                      ),
+                      RankedBarItem(
+                        label: 'Alemania',
+                        value: 0.56,
+                        color: Color(0xFF4CCCE3),
+                      ),
+                      RankedBarItem(
+                        label: 'Nueva Zelanda',
+                        value: 0.48,
+                        color: Color(0xFF8EE1F1),
+                      ),
+                      RankedBarItem(
+                        label: 'Canadá',
+                        value: 0.4,
+                        color: Color(0xFFCBF1F7),
+                      ),
                     ],
-                    footer: 'Comprehensive economic indicators and performance metrics analysis for global comparison.',
+                    footer:
+                        'Comprehensive economic indicators and performance metrics analysis for global comparison.',
                   ),
                 ),
               ],

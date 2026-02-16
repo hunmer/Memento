@@ -39,7 +39,6 @@ import 'package:Memento/screens/widgets_gallery/screens/trend_line_chart_widget_
 import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_bar_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/stacked_ring_chart_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/monthly_bar_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/earnings_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/ranked_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/smooth_line_chart_card_example.dart';
@@ -337,11 +336,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/stacked_ring_chart',
           handler: (settings) => RouteHelpers.createRoute(const StackedRingChartExample(), settings: settings),
           description: '堆叠环形图统计卡片',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/monthly_bar_chart',
-          handler: (settings) => RouteHelpers.createRoute(const MonthlyBarChartExample(), settings: settings),
-          description: '月度柱状图统计卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/earnings_trend_card',
@@ -1088,13 +1082,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '堆叠环形图统计卡片',
     subtitle: 'StackedRingChartWidget',
     route: '/widgets_gallery/stacked_ring_chart',
-  ),
-  WidgetPreviewItem(
-    category: '图表类',
-    icon: Icons.calendar_view_month,
-    title: '月度柱状图统计卡片',
-    subtitle: 'MonthlyBarChartWidget',
-    route: '/widgets_gallery/monthly_bar_chart',
   ),
   WidgetPreviewItem(
     category: '图表类',
