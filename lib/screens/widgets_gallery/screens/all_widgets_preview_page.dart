@@ -53,8 +53,6 @@ import 'package:Memento/screens/widgets_gallery/screens/mini_trend_card_example.
 import 'package:Memento/screens/widgets_gallery/screens/trend_value_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/trend_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weight_trend_chart_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/dual_bar_chart_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weekly_bars_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/screen_time_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_stage_chart_example.dart';
@@ -431,9 +429,6 @@ class _WidgetRegistry {
     '/widgets_gallery/trend_list_card': () => const TrendListCardExample(),
     '/widgets_gallery/weight_trend_chart':
         () => const WeightTrendChartExample(),
-    '/widgets_gallery/dual_bar_chart_card':
-        () => const DualBarChartCardExample(),
-    '/widgets_gallery/weekly_bars_card': () => const WeeklyBarsCardExample(),
     '/widgets_gallery/screen_time_chart': () => const ScreenTimeChartExample(),
     '/widgets_gallery/vertical_bar_chart_widget':
         () => const VerticalBarChartExample(),

@@ -76,10 +76,8 @@ import 'package:Memento/screens/widgets_gallery/screens/message_list_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/daily_schedule_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/expense_comparison_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/activity_rings_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weekly_bars_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/dual_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_status_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_stage_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_example.dart';
@@ -526,11 +524,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           description: '活动圆环卡片',
         ),
         RouteDefinition(
-          path: '/widgets_gallery/weekly_bars_card',
-          handler: (settings) => RouteHelpers.createRoute(const WeeklyBarsCardExample(), settings: settings),
-          description: '周柱状图卡片',
-        ),
-        RouteDefinition(
           path: '/widgets_gallery/modern_egfr_health_widget',
       handler:
           (settings) => RouteHelpers.createRoute(
@@ -543,11 +536,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/modern_rounded_balance_widget',
           handler: (settings) => RouteHelpers.createRoute(const ModernRoundedBalanceWidgetExample(), settings: settings),
           description: '余额卡片',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/dual_bar_chart_card',
-          handler: (settings) => RouteHelpers.createRoute(const DualBarChartCardExample(), settings: settings),
-          description: '双柱状图统计卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/timeline_status_card',
@@ -1146,20 +1134,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '体重趋势图表',
     subtitle: 'WeightTrendChartWidget',
     route: '/widgets_gallery/weight_trend_chart',
-  ),
-  WidgetPreviewItem(
-    category: '图表类',
-    icon: Icons.bar_chart,
-    title: '双柱状图统计卡片',
-    subtitle: 'DualBarChartCard',
-    route: '/widgets_gallery/dual_bar_chart_card',
-  ),
-  WidgetPreviewItem(
-    category: '图表类',
-    icon: Icons.view_column,
-    title: '周柱状图卡片',
-    subtitle: 'WeeklyBarsCard',
-    route: '/widgets_gallery/weekly_bars_card',
   ),
   WidgetPreviewItem(
     category: '图表类',
