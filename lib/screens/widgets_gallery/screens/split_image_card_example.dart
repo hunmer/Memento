@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/split_image_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 图片分割卡片示例
 class SplitImageCardExample extends StatelessWidget {
@@ -23,8 +24,8 @@ class SplitImageCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 200,
+                    width: 150,
+                    height: 150,
                     child: SplitImageCardWidget(
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuCIUN5u7_vXAmPtmC1n8CohO3eS0nZOPxCdcvHkmt1gIycehc3bA86brIYWSrJTWE6Wix61_MBSRyWe1uhT0fDO3PsKCQ3_BWhVESA4KhsovB-7V2yyRmartUzJ7Y-4imptSg_sOYJby5zQl_Nh7CLA6YSu-JvkZlW3V0aF1_x4aq5RKTHGwdFl9qEfHNSpTlpcmytGbAH2zOMnzAPVbgRmf4i8ef0MhxwxconBvFNmKy3QE5BzUvw5s8EDAwiCwlO_MrtTXCrvyA',
@@ -33,6 +34,7 @@ class SplitImageCardExample extends StatelessWidget {
                       title: 'Georgian Masterpiece',
                       bottomIcon: Icons.calendar_today,
                       bottomText: '01 Feb 2020',
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -41,8 +43,8 @@ class SplitImageCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 250,
+                    width: 220,
+                    height: 200,
                     child: SplitImageCardWidget(
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuCIUN5u7_vXAmPtmC1n8CohO3eS0nZOPxCdcvHkmt1gIycehc3bA86brIYWSrJTWE6Wix61_MBSRyWe1uhT0fDO3PsKCQ3_BWhVESA4KhsovB-7V2yyRmartUzJ7Y-4imptSg_sOYJby5zQl_Nh7CLA6YSu-JvkZlW3V0aF1_x4aq5RKTHGwdFl9qEfHNSpTlpcmytGbAH2zOMnzAPVbgRmf4i8ef0MhxwxconBvFNmKy3QE5BzUvw5s8EDAwiCwlO_MrtTXCrvyA',
@@ -51,6 +53,7 @@ class SplitImageCardExample extends StatelessWidget {
                       title: 'A Georgian Masterpiece',
                       bottomIcon: Icons.calendar_today,
                       bottomText: '01 Feb 2020',
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -59,8 +62,8 @@ class SplitImageCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
-                    height: 300,
+                    width: 300,
+                    height: 280,
                     child: SplitImageCardWidget(
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuCIUN5u7_vXAmPtmC1n8CohO3eS0nZOPxCdcvHkmt1gIycehc3bA86brIYWSrJTWE6Wix61_MBSRyWe1uhT0fDO3PsKCQ3_BWhVESA4KhsovB-7V2yyRmartUzJ7Y-4imptSg_sOYJby5zQl_Nh7CLA6YSu-JvkZlW3V0aF1_x4aq5RKTHGwdFl9qEfHNSpTlpcmytGbAH2zOMnzAPVbgRmf4i8ef0MhxwxconBvFNmKy3QE5BzUvw5s8EDAwiCwlO_MrtTXCrvyA',
@@ -69,6 +72,7 @@ class SplitImageCardExample extends StatelessWidget {
                       title: 'A Georgian Masterpiece in the Heart',
                       bottomIcon: Icons.calendar_today,
                       bottomText: '01 Feb 2020',
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -77,7 +81,7 @@ class SplitImageCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 300,
+                  height: 280,
                   child: SplitImageCardWidget(
                     imageUrl:
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuCIUN5u7_vXAmPtmC1n8CohO3eS0nZOPxCdcvHkmt1gIycehc3bA86brIYWSrJTWE6Wix61_MBSRyWe1uhT0fDO3PsKCQ3_BWhVESA4KhsovB-7V2yyRmartUzJ7Y-4imptSg_sOYJby5zQl_Nh7CLA6YSu-JvkZlW3V0aF1_x4aq5RKTHGwdFl9qEfHNSpTlpcmytGbAH2zOMnzAPVbgRmf4i8ef0MhxwxconBvFNmKy3QE5BzUvw5s8EDAwiCwlO_MrtTXCrvyA',
@@ -86,6 +90,7 @@ class SplitImageCardExample extends StatelessWidget {
                     title: 'A Georgian Masterpiece in the Heart of the City',
                     bottomIcon: Icons.calendar_today,
                     bottomText: '01 Feb 2020',
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -93,15 +98,17 @@ class SplitImageCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 380,
+                  height: 350,
                   child: SplitImageCardWidget(
                     imageUrl:
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuCIUN5u7_vXAmPtmC1n8CohO3eS0nZOPxCdcvHkmt1gIycehc3bA86brIYWSrJTWE6Wix61_MBSRyWe1uhT0fDO3PsKCQ3_BWhVESA4KhsovB-7V2yyRmartUzJ7Y-4imptSg_sOYJby5zQl_Nh7CLA6YSu-JvkZlW3V0aF1_x4aq5RKTHGwdFl9qEfHNSpTlpcmytGbAH2zOMnzAPVbgRmf4i8ef0MhxwxconBvFNmKy3QE5BzUvw5s8EDAwiCwlO_MrtTXCrvyA',
                     topIcon: Icons.schedule,
                     topText: '14:00 - 18:00',
-                    title: 'A Georgian Masterpiece in the Heart of the City - Premium Property',
+                    title:
+                        'A Georgian Masterpiece in the Heart of the City - Premium Property',
                     bottomIcon: Icons.calendar_today,
                     bottomText: '01 Feb 2020 - Saturday',
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

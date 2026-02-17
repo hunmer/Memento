@@ -110,7 +110,7 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
               width: widget.inline ? double.maxFinite : double.infinity,
               height: widget.inline ? double.maxFinite : double.infinity,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.4 : 0.15),
@@ -173,7 +173,7 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    height: 150,
+                    height: widget.size.getHeightConstraints().maxHeight * 0.4,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -201,7 +201,10 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                     right: 0,
                     bottom: 0,
                     child: Padding(
-                      padding: widget.size.getPadding(),
+                      padding: widget.size.getPadding().copyWith(
+                        top: widget.size.getPadding().top * 0.75,
+                        bottom: widget.size.getPadding().bottom * 0.75,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -213,14 +216,14 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                             animation: _animation,
                             size: widget.size,
                           ),
-                          SizedBox(height: widget.size.getTitleSpacing()),
+                          SizedBox(height: widget.size.getTitleSpacing() * 0.5),
                           // 简介
                           _BioSection(
                             bio: widget.bio,
                             animation: _animation,
                             size: widget.size,
                           ),
-                          SizedBox(height: widget.size.getItemSpacing()),
+                          SizedBox(height: widget.size.getItemSpacing() * 0.5),
                           // 统计和关注按钮
                           _StatsAndFollowSection(
                             followersCount: widget.followersCount,
@@ -280,7 +283,7 @@ class _NameSection extends StatelessWidget {
                   child: Text(
                     name,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: size.getTitleFontSize(),
                       fontWeight: FontWeight.w700,
                       color: isDark ? Colors.white : Colors.grey.shade900,
                       letterSpacing: -0.5,
@@ -301,7 +304,7 @@ class _NameSection extends StatelessWidget {
                     ),
                     child: Icon(
                       Icons.verified,
-                      size: 14,
+                      size: size.getThumbnailIconSize(),
                       color:
                           isDark
                               ? Colors.green.shade400
@@ -351,7 +354,7 @@ class _BioSection extends StatelessWidget {
               child: Text(
                 bio,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w500,
                   color: isDark ? Colors.grey.shade300 : Colors.grey.shade700,
                   height: 1.4,
@@ -453,7 +456,7 @@ class _StatsAndFollowSection extends StatelessWidget {
                         Text(
                           isFollowing ? 'Following' : 'Follow',
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: size.getLegendFontSize(),
                             fontWeight: FontWeight.w600,
                             color:
                                 isFollowing
@@ -469,7 +472,7 @@ class _StatsAndFollowSection extends StatelessWidget {
                           SizedBox(width: size.getPadding().right * 0.1875),
                           Icon(
                             Icons.add,
-                            size: 14,
+                            size: size.getThumbnailIconSize(),
                             color: isDark ? Colors.grey.shade900 : Colors.white,
                           ),
                         ],
@@ -508,7 +511,7 @@ class _StatItem extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: 16,
+          size: size.getThumbnailIconSize(),
           color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
         ),
         SizedBox(width: size.getPadding().right * 0.25),
@@ -517,7 +520,7 @@ class _StatItem extends StatelessWidget {
           fractionDigits: 0,
           duration: const Duration(milliseconds: 600),
           textStyle: TextStyle(
-            fontSize: 13,
+            fontSize: size.getSubtitleFontSize(),
             fontWeight: FontWeight.w600,
             color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
             height: 1.0,

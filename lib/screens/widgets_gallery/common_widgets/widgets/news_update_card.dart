@@ -89,21 +89,16 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
 
     _animationController.forward();
   }
@@ -118,14 +113,16 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
-    final iconBackgroundColor = isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
+    final iconBackgroundColor =
+        isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF2F2F7);
     final textColor = isDark ? Colors.white : Colors.black;
     final timestampColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
 
     // 适配主题颜色 - 橙色可以保留原型颜色，因为它与其他主题色有差异
-    final primaryColor = isDark
-        ? const Color(0xFFFF9F0A)  // iOS System Orange
-        : Theme.of(context).colorScheme.primary == const Color(0xFFFF9F0A)
+    final primaryColor =
+        isDark
+            ? const Color(0xFFFF9F0A) // iOS System Orange
+            : Theme.of(context).colorScheme.primary == const Color(0xFFFF9F0A)
             ? Theme.of(context).colorScheme.primary
             : const Color(0xFFFF9F0A);
 
@@ -135,7 +132,10 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
         return Opacity(
           opacity: _fadeAnimation.value,
           child: Transform.translate(
-            offset: Offset(0, MediaQuery.of(context).size.height * _slideAnimation.value.dy),
+            offset: Offset(
+              0,
+              MediaQuery.of(context).size.height * _slideAnimation.value.dy,
+            ),
             child: GestureDetector(
               onTap: widget.onTap,
               child: Container(
@@ -143,30 +143,34 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
                 constraints: widget.size.getHeightConstraints(),
                 decoration: BoxDecoration(
                   color: backgroundColor,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: isDark
-                      ? null
-                      : [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow:
+                      isDark
+                          ? null
+                          : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                 ),
                 padding: widget.size.getPadding(),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    // 顶部行：图标和分页指示器
-                    Row(
+                    // 主要内容：图标、标题、时间戳
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // 图标容器
                         Container(
-                          width: 40,
-                          height: 40,
+                          width:
+                              widget.size.getIconSize() *
+                              widget.size.iconContainerScale,
+                          height:
+                              widget.size.getIconSize() *
+                              widget.size.iconContainerScale,
                           decoration: BoxDecoration(
                             color: iconBackgroundColor,
                             shape: BoxShape.circle,
@@ -174,44 +178,54 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
                           child: Icon(
                             widget.icon,
                             color: primaryColor,
-                            size: 20,
+                            size: widget.size.getIconSize(),
                           ),
                         ),
-                        // 分页指示器
-                        Expanded(
-                          child: _buildPaginationIndicator(
-                            currentIndex: widget.currentIndex,
-                            totalItems: widget.totalItems,
-                            activeColor: textColor,
-                            inactiveColor: isDark ? Colors.grey.shade600 : Colors.grey.shade300,
+                        SizedBox(height: widget.size.getTitleSpacing()),
+                        // 标题
+                        SizedBox(
+                          width: double.maxFinite,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: widget.size.getSmallSpacing() * 12,
+                            ),
+                            child: Text(
+                              widget.title,
+                              style: TextStyle(
+                                fontSize: widget.size.getSubtitleFontSize(),
+                                fontWeight: FontWeight.w700,
+                                color: textColor,
+                                height: 1.3,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: widget.size.getItemSpacing()),
+                        // 时间戳
+                        Text(
+                          widget.timestamp,
+                          style: TextStyle(
+                            fontSize: widget.size.getSubtitleFontSize() * 0.85,
+                            fontWeight: FontWeight.w500,
+                            color: timestampColor,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: widget.size.getTitleSpacing()),
-                    // 标题
-                    Padding(
-                      padding: widget.size.getPadding(),
-                      child: Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: textColor,
-                          height: 1.3,
-                        ),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(height: widget.size.getItemSpacing()),
-                    // 时间戳
-                    Text(
-                      widget.timestamp,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: timestampColor,
+                    // 分页指示器 - 使用 Positioned 定位到右上角
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: _buildPaginationIndicator(
+                        currentIndex: widget.currentIndex,
+                        totalItems: widget.totalItems,
+                        activeColor: textColor,
+                        inactiveColor:
+                            isDark
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade300,
                       ),
                     ),
                   ],
@@ -237,11 +251,12 @@ class _NewsUpdateCardWidgetState extends State<NewsUpdateCardWidget>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: List.generate(totalItems, (index) {
+          final dotSize = widget.size.getSmallSpacing() * 2.5;
           return Padding(
             padding: EdgeInsets.only(bottom: widget.size.getItemSpacing()),
             child: Container(
-              width: 6,
-              height: 6,
+              width: dotSize,
+              height: dotSize,
               decoration: BoxDecoration(
                 color: index == currentIndex ? activeColor : inactiveColor,
                 shape: BoxShape.circle,

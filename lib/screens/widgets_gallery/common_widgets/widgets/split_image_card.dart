@@ -29,8 +29,10 @@ class SplitImageCardWidget extends StatefulWidget {
 
   /// 底部图标代码（用于序列化）
   final int? bottomIconCode;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
   /// 小组件尺寸
   final HomeWidgetSize size;
 
@@ -58,12 +60,20 @@ class SplitImageCardWidget extends StatefulWidget {
       topText: props['topText'] as String? ?? '',
       title: props['title'] as String? ?? '',
       bottomText: props['bottomText'] as String? ?? '',
-      topIcon: props['topIconCode'] != null
-          ? IconData(props['topIconCode'] as int, fontFamily: 'MaterialIcons')
-          : null,
-      bottomIcon: props['bottomIconCode'] != null
-          ? IconData(props['bottomIconCode'] as int, fontFamily: 'MaterialIcons')
-          : null,
+      topIcon:
+          props['topIconCode'] != null
+              ? IconData(
+                props['topIconCode'] as int,
+                fontFamily: 'MaterialIcons',
+              )
+              : null,
+      bottomIcon:
+          props['bottomIconCode'] != null
+              ? IconData(
+                props['bottomIconCode'] as int,
+                fontFamily: 'MaterialIcons',
+              )
+              : null,
       topIconCode: props['topIconCode'] as int?,
       bottomIconCode: props['bottomIconCode'] as int?,
       inline: props['inline'] as bool? ?? false,
@@ -131,54 +141,105 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Row(
-            children: [
-              // 左侧图片
-              Expanded(
-                child: _AnimatedImageWidget(
-                  imageUrl: widget.imageUrl,
-                  animation: _animation,
-                ),
-              ),
-              // 右侧信息
-              Expanded(
-                child: Padding(
-                  padding: widget.size.getPadding(),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 顶部信息
-                      if (widget.topIcon != null)
-                        _InfoRowWidget(
-                          icon: widget.topIcon!,
-                          text: widget.topText,
-                          animation: _animation,
-                          index: 0,
-                          size: widget.size,
-                        ),
-                      // 中间标题
-                      _TitleWidget(
-                        title: widget.title,
+          child: widget.size is SmallSize
+              ? Column(
+                  children: [
+                    // 上方图片
+                    Expanded(
+                      child: _AnimatedImageWidget(
+                        imageUrl: widget.imageUrl,
                         animation: _animation,
-                        index: widget.topIcon != null ? 1 : 0,
                         size: widget.size,
                       ),
-                      // 底部信息
-                      if (widget.bottomIcon != null)
-                        _InfoRowWidget(
-                          icon: widget.bottomIcon!,
-                          text: widget.bottomText,
-                          animation: _animation,
-                          index: widget.bottomIcon != null ? 2 : 1,
-                          size: widget.size,
+                    ),
+                    // 下方信息
+                    Expanded(
+                      child: Padding(
+                        padding: widget.size.getPadding(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 顶部信息
+                            if (widget.topIcon != null)
+                              _InfoRowWidget(
+                                icon: widget.topIcon!,
+                                text: widget.topText,
+                                animation: _animation,
+                                index: 0,
+                                size: widget.size,
+                              ),
+                            // 中间标题
+                            _TitleWidget(
+                              title: widget.title,
+                              animation: _animation,
+                              index: widget.topIcon != null ? 1 : 0,
+                              size: widget.size,
+                            ),
+                            // 底部信息
+                            if (widget.bottomIcon != null)
+                              _InfoRowWidget(
+                                icon: widget.bottomIcon!,
+                                text: widget.bottomText,
+                                animation: _animation,
+                                index: widget.bottomIcon != null ? 2 : 1,
+                                size: widget.size,
+                              ),
+                          ],
                         ),
-                    ],
-                  ),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    // 左侧图片
+                    Expanded(
+                      child: _AnimatedImageWidget(
+                        imageUrl: widget.imageUrl,
+                        animation: _animation,
+                        size: widget.size,
+                      ),
+                    ),
+                    // 右侧信息
+                    Expanded(
+                      child: Padding(
+                        padding: widget.size.getPadding(),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 顶部信息
+                            if (widget.topIcon != null)
+                              _InfoRowWidget(
+                                icon: widget.topIcon!,
+                                text: widget.topText,
+                                animation: _animation,
+                                index: 0,
+                                size: widget.size,
+                              ),
+                            // 中间标题
+                            _TitleWidget(
+                              title: widget.title,
+                              animation: _animation,
+                              index: widget.topIcon != null ? 1 : 0,
+                              size: widget.size,
+                            ),
+                            // 底部信息
+                            if (widget.bottomIcon != null)
+                              _InfoRowWidget(
+                                icon: widget.bottomIcon!,
+                                text: widget.bottomText,
+                                animation: _animation,
+                                index: widget.bottomIcon != null ? 2 : 1,
+                                size: widget.size,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -189,10 +250,12 @@ class _SplitImageCardWidgetState extends State<SplitImageCardWidget>
 class _AnimatedImageWidget extends StatelessWidget {
   final String imageUrl;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _AnimatedImageWidget({
     required this.imageUrl,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -205,10 +268,7 @@ class _AnimatedImageWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: imageAnimation,
       builder: (context, child) {
-        return Opacity(
-          opacity: imageAnimation.value,
-          child: child,
-        );
+        return Opacity(opacity: imageAnimation.value, child: child);
       },
       child: Image.network(
         imageUrl,
@@ -218,7 +278,10 @@ class _AnimatedImageWidget extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) {
           return Container(
             color: Colors.grey.shade300,
-            child: const Icon(Icons.broken_image, size: 48),
+            child: Icon(
+              Icons.broken_image,
+              size: size.getLargeFontSize() * 0.85,
+            ),
           );
         },
         loadingBuilder: (context, child, loadingProgress) {
@@ -266,10 +329,7 @@ class _InfoRowWidget extends StatelessWidget {
     return AnimatedBuilder(
       animation: itemAnimation,
       builder: (context, child) {
-        return Opacity(
-          opacity: itemAnimation.value,
-          child: child,
-        );
+        return Opacity(opacity: itemAnimation.value, child: child);
       },
       child: Row(
         children: [
@@ -279,13 +339,17 @@ class _InfoRowWidget extends StatelessWidget {
             color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
           ),
           SizedBox(width: size.getItemSpacing() * 0.5),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: size.getLargeFontSize() * 0.23,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.5,
-              color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: size.getLargeFontSize() * 0.23,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+                color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -324,22 +388,19 @@ class _TitleWidget extends StatelessWidget {
       child: AnimatedBuilder(
         animation: itemAnimation,
         builder: (context, child) {
-          return Opacity(
-            opacity: itemAnimation.value,
-            child: child,
-          );
+          return Opacity(opacity: itemAnimation.value, child: child);
         },
         child: Center(
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: size.getLargeFontSize() * 0.375,
-              fontWeight: FontWeight.w700,
-              height: 1.3,
-              color: isDark ? Colors.white : Colors.grey.shade900,
+          child: SingleChildScrollView(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: size.getLargeFontSize() * 0.375,
+                fontWeight: FontWeight.w700,
+                height: 1.3,
+                color: isDark ? Colors.white : Colors.grey.shade900,
+              ),
             ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
