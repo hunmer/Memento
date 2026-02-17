@@ -30,8 +30,10 @@ class SocialProfileCardWidget extends StatefulWidget {
 
   /// 转发数
   final int shares;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
   /// 小组件尺寸
   final HomeWidgetSize size;
 
@@ -105,9 +107,10 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = isDark
-        ? const Color(0xFF5078E1)
-        : Theme.of(context).colorScheme.primary.withOpacity(0.9);
+    final primaryColor =
+        isDark
+            ? const Color(0xFF5078E1)
+            : Theme.of(context).colorScheme.primary.withOpacity(0.9);
 
     return AnimatedBuilder(
       animation: _fadeInAnimation,
@@ -119,7 +122,7 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
             child: Container(
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -171,11 +174,7 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
                   color: primaryColor.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.person,
-                  size: 28,
-                  color: primaryColor,
-                ),
+                child: Icon(Icons.person, size: 28, color: primaryColor),
               );
             },
           ),
@@ -191,7 +190,10 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   height: 1.2,
-                  color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827),
+                  color:
+                      isDark
+                          ? const Color(0xFFF9FAFB)
+                          : const Color(0xFF111827),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -202,7 +204,10 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   height: 1.2,
-                  color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
+                  color:
+                      isDark
+                          ? const Color(0xFF9CA3AF)
+                          : const Color(0xFF6B7280),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

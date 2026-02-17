@@ -585,13 +585,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.mail,
-        title: '邮件列表卡片',
-        subtitle: 'MessageListCard - 邮件/消息列表展示卡片',
-        route: '/widgets_gallery/message_list_card',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.event_available,
         title: '即将到来的任务小组件',
         subtitle: 'UpcomingTasksWidget - 任务计数与彩色标签列表展示组件',

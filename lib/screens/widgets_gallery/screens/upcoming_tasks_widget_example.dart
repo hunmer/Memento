@@ -30,10 +30,22 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                       size: const SmallSize(),
                       taskCount: 56,
                       tasks: [
-                        TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
-                        TaskItem(title: 'Budget and contract', color: const Color(0xFFEC4899)),
-                        TaskItem(title: 'Search for a UI kit', color: const Color(0xFFFB923C)),
-                        TaskItem(title: 'Prepare HTML & CSS', color: const Color(0xFF34D399)),
+                        TaskItem(
+                          title: 'Design mobile dashboard',
+                          color: const Color(0xFF3B82F6),
+                        ),
+                        TaskItem(
+                          title: 'Budget and contract',
+                          color: const Color(0xFFEC4899),
+                        ),
+                        TaskItem(
+                          title: 'Search for a UI kit',
+                          color: const Color(0xFFFB923C),
+                        ),
+                        TaskItem(
+                          title: 'Prepare HTML & CSS',
+                          color: const Color(0xFF34D399),
+                        ),
                       ],
                       moreCount: 10,
                     ),
@@ -50,10 +62,22 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                       size: const MediumSize(),
                       taskCount: 56,
                       tasks: [
-                        TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
-                        TaskItem(title: 'Budget and contract', color: const Color(0xFFEC4899)),
-                        TaskItem(title: 'Search for a UI kit', color: const Color(0xFFFB923C)),
-                        TaskItem(title: 'Prepare HTML & CSS', color: const Color(0xFF34D399)),
+                        TaskItem(
+                          title: 'Design mobile dashboard',
+                          color: const Color(0xFF3B82F6),
+                        ),
+                        TaskItem(
+                          title: 'Budget and contract',
+                          color: const Color(0xFFEC4899),
+                        ),
+                        TaskItem(
+                          title: 'Search for a UI kit',
+                          color: const Color(0xFFFB923C),
+                        ),
+                        TaskItem(
+                          title: 'Prepare HTML & CSS',
+                          color: const Color(0xFF34D399),
+                        ),
                       ],
                       moreCount: 10,
                     ),
@@ -70,13 +94,109 @@ class UpcomingTasksWidgetExample extends StatelessWidget {
                       size: const LargeSize(),
                       taskCount: 56,
                       tasks: [
-                        TaskItem(title: 'Design mobile dashboard', color: const Color(0xFF3B82F6)),
-                        TaskItem(title: 'Budget and contract', color: const Color(0xFFEC4899)),
-                        TaskItem(title: 'Search for a UI kit', color: const Color(0xFFFB923C)),
-                        TaskItem(title: 'Prepare HTML & CSS', color: const Color(0xFF34D399)),
+                        TaskItem(
+                          title: 'Design mobile dashboard',
+                          color: const Color(0xFF3B82F6),
+                        ),
+                        TaskItem(
+                          title: 'Budget and contract',
+                          color: const Color(0xFFEC4899),
+                        ),
+                        TaskItem(
+                          title: 'Search for a UI kit',
+                          color: const Color(0xFFFB923C),
+                        ),
+                        TaskItem(
+                          title: 'Prepare HTML & CSS',
+                          color: const Color(0xFF34D399),
+                        ),
                       ],
                       moreCount: 10,
                     ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('中宽尺寸 (4x1)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 220,
+                  child: UpcomingTasksWidget(
+                    size: const WideSize(),
+                    taskCount: 56,
+                    tasks: [
+                      TaskItem(
+                        title: 'Design mobile dashboard',
+                        color: const Color(0xFF3B82F6),
+                      ),
+                      TaskItem(
+                        title: 'Budget and contract',
+                        color: const Color(0xFFEC4899),
+                      ),
+                      TaskItem(
+                        title: 'Search for a UI kit',
+                        color: const Color(0xFFFB923C),
+                      ),
+                      TaskItem(
+                        title: 'Prepare HTML & CSS',
+                        color: const Color(0xFF34D399),
+                      ),
+                      TaskItem(
+                        title: 'Review code changes',
+                        color: const Color(0xFF8B5CF6),
+                      ),
+                      TaskItem(
+                        title: 'Update documentation',
+                        color: const Color(0xFF06B6D4),
+                      ),
+                    ],
+                    moreCount: 10,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionTitle('大宽尺寸 (4x2)'),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width - 32,
+                  height: 320,
+                  child: UpcomingTasksWidget(
+                    size: const Wide2Size(),
+                    taskCount: 56,
+                    tasks: [
+                      TaskItem(
+                        title: 'Design mobile dashboard',
+                        color: const Color(0xFF3B82F6),
+                      ),
+                      TaskItem(
+                        title: 'Budget and contract',
+                        color: const Color(0xFFEC4899),
+                      ),
+                      TaskItem(
+                        title: 'Search for a UI kit',
+                        color: const Color(0xFFFB923C),
+                      ),
+                      TaskItem(
+                        title: 'Prepare HTML & CSS',
+                        color: const Color(0xFF34D399),
+                      ),
+                      TaskItem(
+                        title: 'Review code changes',
+                        color: const Color(0xFF8B5CF6),
+                      ),
+                      TaskItem(
+                        title: 'Update documentation',
+                        color: const Color(0xFF06B6D4),
+                      ),
+                      TaskItem(
+                        title: 'Team meeting',
+                        color: const Color(0xFFF59E0B),
+                      ),
+                      TaskItem(
+                        title: 'Client presentation',
+                        color: const Color(0xFF10B981),
+                      ),
+                    ],
+                    moreCount: 10,
                   ),
                 ),
               ],

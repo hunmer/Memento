@@ -72,7 +72,6 @@ import 'package:Memento/screens/widgets_gallery/screens/daily_events_card_exampl
 import 'package:Memento/screens/widgets_gallery/screens/score_card_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/category_stack_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_schedule_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/message_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/daily_schedule_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/expense_comparison_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/activity_rings_card_example.dart';
@@ -502,11 +501,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/timeline_schedule_card',
           handler: (settings) => RouteHelpers.createRoute(const TimelineScheduleCardExample(), settings: settings),
           description: '时间线日程卡片',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/message_list_card',
-          handler: (settings) => RouteHelpers.createRoute(const MessageListCardExample(), settings: settings),
-          description: '邮件列表卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/daily_schedule_card',
@@ -1254,13 +1248,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '收件箱消息卡片',
     subtitle: 'InboxMessageCard',
     route: '/widgets_gallery/inbox_message_card',
-  ),
-  WidgetPreviewItem(
-    category: '内容类',
-    icon: Icons.mail,
-    title: '邮件列表卡片',
-    subtitle: 'MessageListCard',
-    route: '/widgets_gallery/message_list_card',
   ),
   WidgetPreviewItem(
     category: '内容类',

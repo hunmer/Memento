@@ -26,7 +26,6 @@ import 'widgets/multi_metric_progress_card.dart';
 import 'widgets/circular_metrics_card.dart';
 import 'widgets/smooth_line_chart_card.dart';
 import 'widgets/vertical_bar_chart_card.dart';
-import 'widgets/message_list_card.dart';
 import 'widgets/revenue_trend_card.dart';
 import 'widgets/dual_slider_widget.dart';
 import 'widgets/daily_todo_list_widget.dart';
@@ -108,7 +107,6 @@ enum CommonWidgetId {
   smoothLineChartCard,
   lineChartTrendCard,
   verticalBarChartCard,
-  messageListCard,
   inboxMessageCard,
   roundedTaskListCard,
   roundedRemindersList,
@@ -328,14 +326,6 @@ class CommonWidgetsRegistry {
       name: '折线图趋势卡片',
       description: '折线图趋势统计卡片',
       icon: Icons.show_chart,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
-    ),
-    CommonWidgetId.messageListCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.messageListCard,
-      name: '消息列表卡片',
-      description: '消息列表展示卡片，支持置顶消息和消息列表',
-      icon: Icons.message,
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
     ),
@@ -957,8 +947,6 @@ class CommonWidgetBuilder {
         return LineChartTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.verticalBarChartCard:
         return VerticalBarChartCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.messageListCard:
-        return MessageListCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.inboxMessageCard:
         return InboxMessageCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.roundedTaskListCard:
