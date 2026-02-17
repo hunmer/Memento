@@ -87,7 +87,8 @@ class RentalPreviewCardExample extends StatelessWidget {
                     status: '即将到来',
                     rating: 4.1,
                     title: 'Gantiadi Holiday House - Beautiful Retreat',
-                    description: '当我第一次进入广告业务时，我正在寻找神奇的组合，让我的创意能够触达更广泛的受众。这是一个完美的度假胜地。',
+                    description:
+                        '当我第一次进入广告业务时，我正在寻找神奇的组合，让我的创意能够触达更广泛的受众。这是一个完美的度假胜地。',
                     date: '2020年2月1日',
                     duration: '4小时 38分钟',
                   ),
@@ -103,8 +104,10 @@ class RentalPreviewCardExample extends StatelessWidget {
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuCy3FkoYOsBs67DoRSkHacGbAGIW_MrSaQUShJ5cE4hq150_S3cORrNLnScjj_6NAvzQQ7_DRqUhmCQMfI0xNnHtiVuG1mHXIW6W9RyB7_PYEY9BXJmSA4duqZjRBcBid60ho_UZ8NfhC3BZV4AhPbES6hhOklhdA_1PtpNoftcr5YBiA4TWOpNdoVIwijmT5LQ_3r3wMHn4Cl3umkfGgOywaAP5EE7htELBy7uvKtoSqoVNrXyIbhg1szVZo5RYHmcGaKNIEcFyg',
                     status: '即将到来',
                     rating: 4.1,
-                    title: 'Gantiadi Holiday House - Beautiful Retreat in Nature',
-                    description: '当我第一次进入广告业务时，我正在寻找神奇的组合，让我的创意能够触达更广泛的受众。这个度假屋提供了完美的放松体验，拥有宽敞的空间和优美的自然环境。',
+                    title:
+                        'Gantiadi Holiday House - Beautiful Retreat in Nature',
+                    description:
+                        '当我第一次进入广告业务时，我正在寻找神奇的组合，让我的创意能够触达更广泛的受众。这个度假屋提供了完美的放松体验，拥有宽敞的空间和优美的自然环境。',
                     date: '2020年2月1日',
                     duration: '4小时 38分钟',
                   ),
