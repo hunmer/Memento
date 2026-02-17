@@ -7,7 +7,6 @@
 ## ✅ 已转换组件 (95/95)
 
 - [x] 半圆仪表盘 - `half_circle_gauge_widget` → `halfGaugeCard`
-- [x] 预算趋势卡片 - `budget_trend_card` → `budgetTrendCard`
 - [x] 钱包余额概览卡片 - `wallet_balance_card` → `walletBalanceCard`
 - [x] 分段进度条卡片 - `segmented_progress_card` → `segmentedProgressCard`
 - [x] 里程碑追踪卡片 - `milestone_card` → `milestoneCard`

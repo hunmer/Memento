@@ -81,7 +81,6 @@ import 'package:Memento/screens/widgets_gallery/screens/earnings_trend_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/spending_trend_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/expense_comparison_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_spending_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/budget_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/account_balance_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/category_stack_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/wallet_balance_card_example.dart';
@@ -478,7 +477,6 @@ class _WidgetRegistry {
         () => const ExpenseComparisonChartExample(),
     '/widgets_gallery/modern_rounded_spending_widget':
         () => const ModernRoundedSpendingWidgetExample(),
-    '/widgets_gallery/budget_trend_card': () => const BudgetTrendCardExample(),
     '/widgets_gallery/account_balance_card':
         () => const AccountBalanceCardExample(),
     '/widgets_gallery/category_stack_widget':

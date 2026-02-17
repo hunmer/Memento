@@ -32,7 +32,6 @@ import 'widgets/daily_todo_list_widget.dart';
 import 'widgets/upcoming_tasks_widget.dart';
 import 'widgets/social_profile_card.dart';
 import 'widgets/mini_trend_card.dart';
-import 'widgets/budget_trend_card.dart';
 import 'widgets/account_balance_card.dart';
 import 'widgets/modern_rounded_spending_widget.dart';
 import 'widgets/wallet_balance_card.dart';
@@ -125,7 +124,6 @@ enum CommonWidgetId {
   weightTrendChart,
   socialProfileCard,
   miniTrendCard,
-  budgetTrendCard,
   accountBalanceCard,
   modernRoundedSpendingWidget,
   walletBalanceCard,
@@ -456,14 +454,6 @@ class CommonWidgetsRegistry {
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
       supportedSizes: [const MediumSize(), const LargeSize()],
-    ),
-    CommonWidgetId.budgetTrendCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.budgetTrendCard,
-      name: '预算趋势卡片',
-      description: '通用的带迷你曲线图的数值展示卡片，支持标签、数值显示（带翻转动画）、迷你曲线图、变化百分比和更新时间',
-      icon: Icons.trending_up,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
     ),
     CommonWidgetId.accountBalanceCard: const CommonWidgetMetadata(
       id: CommonWidgetId.accountBalanceCard,
@@ -983,8 +973,6 @@ class CommonWidgetBuilder {
         return SocialProfileCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.miniTrendCard:
         return MiniTrendCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.budgetTrendCard:
-        return BudgetTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.accountBalanceCard:
         return AccountBalanceCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.modernRoundedSpendingWidget:
