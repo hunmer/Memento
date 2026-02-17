@@ -141,8 +141,9 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height: widget.inline ? double.maxFinite : 380,
-              width: widget.inline ? double.maxFinite : 380,
+              height: widget.inline ? double.maxFinite : null,
+              width: widget.inline ? double.maxFinite : null,
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
