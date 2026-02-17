@@ -13,7 +13,7 @@ class SpendingTrendChartExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('支出趋势折线图')),
       body: Container(
-        color: isDark ? const Color(0xFF1a1c1a) : const Color(0xFFe2e8e4),
+        color: isDark ? const Color(0xFF18181B) : const Color(0xFFE5E5E5),
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -24,8 +24,8 @@ class SpendingTrendChartExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 200,
+                    width: 150,
+                    height: 150,
                     child: SpendingTrendChartWidget(
                       size: const SmallSize(),
                       dateRange: '1-15 October',
@@ -49,8 +49,8 @@ class SpendingTrendChartExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 250,
+                    width: 220,
+                    height: 200,
                     child: SpendingTrendChartWidget(
                       size: const MediumSize(),
                       dateRange: '1-20 October 2025',
@@ -74,8 +74,8 @@ class SpendingTrendChartExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
-                    height: 300,
+                    width: 300,
+                    height: 280,
                     child: SpendingTrendChartWidget(
                       size: const LargeSize(),
                       dateRange: '1-31 October 2025',
@@ -99,7 +99,7 @@ class SpendingTrendChartExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 300,
+                  height: 280,
                   child: SpendingTrendChartWidget(
                     size: const WideSize(),
                     dateRange: '1-31 October 2025',
@@ -122,7 +122,7 @@ class SpendingTrendChartExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 380,
+                  height: 350,
                   child: SpendingTrendChartWidget(
                     size: const Wide2Size(),
                     dateRange: '1-31 October 2025 - Complete Monthly Analysis',
@@ -134,8 +134,28 @@ class SpendingTrendChartExample extends StatelessWidget {
                     startLabel: 'Oct 1',
                     middleLabel: 'Mid Month',
                     endLabel: 'Oct 31',
-                    currentMonthData: [3200, 2800, 2400, 2000, 1600, 1200, 800, 600, 400],
-                    previousMonthData: [2800, 2400, 2000, 1600, 1200, 800, 400, 300, 200],
+                    currentMonthData: [
+                      3200,
+                      2800,
+                      2400,
+                      2000,
+                      1600,
+                      1200,
+                      800,
+                      600,
+                      400,
+                    ],
+                    previousMonthData: [
+                      2800,
+                      2400,
+                      2000,
+                      1600,
+                      1200,
+                      800,
+                      400,
+                      300,
+                      200,
+                    ],
                     currentPoint: 1600,
                     maxAmount: 4000,
                   ),

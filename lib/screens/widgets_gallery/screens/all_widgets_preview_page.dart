@@ -292,7 +292,7 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
         Expanded(
           child:
               widget != null
-                  ? Padding(padding: const EdgeInsets.all(16), child: widget)
+                  ? widget
                   : Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

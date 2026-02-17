@@ -90,11 +90,13 @@ class SpendingTrendChartWidget extends StatefulWidget {
       startLabel: props['startLabel'] as String? ?? 'Oct 1',
       middleLabel: props['middleLabel'] as String? ?? 'Today',
       endLabel: props['endLabel'] as String? ?? 'Oct 31',
-      currentMonthData: (props['currentMonthData'] as List<dynamic>?)
+      currentMonthData:
+          (props['currentMonthData'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [3200, 2800, 2400, 2000, 1600],
-      previousMonthData: (props['previousMonthData'] as List<dynamic>?)
+      previousMonthData:
+          (props['previousMonthData'] as List<dynamic>?)
               ?.map((e) => (e as num).toDouble())
               .toList() ??
           [2800, 2400, 2000, 1600, 1200],
@@ -160,10 +162,13 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = const Color(0xFFf06431);
-    final headerColor = isDark ? const Color(0xFF2d302e) : const Color(0xFFccd3ce);
+    final headerColor =
+        isDark ? const Color(0xFF2d302e) : const Color(0xFFccd3ce);
     final cardColor = isDark ? const Color(0xFF242624) : Colors.white;
-    final textColor = isDark ? const Color(0xFFe3e3e3) : const Color(0xFF1c1c1c);
-    final mutedColor = isDark ? const Color(0xFFa0a0a0) : const Color(0xFF717171);
+    final textColor =
+        isDark ? const Color(0xFFe3e3e3) : const Color(0xFF1c1c1c);
+    final mutedColor =
+        isDark ? const Color(0xFFa0a0a0) : const Color(0xFF717171);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -177,7 +182,7 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
               height: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: headerColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.2 : 0.08),
@@ -191,7 +196,9 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                   // 顶部标题栏
                   Padding(
                     padding: widget.size.getPadding().copyWith(
-                      bottom: (widget.size.getPadding().bottom * 0.75).roundToDouble(),
+                      bottom:
+                          (widget.size.getPadding().bottom * 0.75)
+                              .roundToDouble(),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -204,11 +211,7 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                             color: textColor,
                           ),
                         ),
-                        Icon(
-                          Icons.calendar_today,
-                          size: 18,
-                          color: textColor,
-                        ),
+                        Icon(Icons.calendar_today, size: 18, color: textColor),
                       ],
                     ),
                   ),
@@ -217,12 +220,7 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                     child: Container(
                       decoration: BoxDecoration(
                         color: cardColor,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(36),
-                          topRight: Radius.circular(36),
-                          bottomLeft: Radius.circular(36),
-                          bottomRight: Radius.circular(36),
-                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       padding: widget.size.getPadding(),
                       child: Column(
@@ -249,7 +247,9 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                                     isDashed: false,
                                     size: widget.size,
                                   ),
-                                  SizedBox(height: widget.size.getItemSpacing()),
+                                  SizedBox(
+                                    height: widget.size.getItemSpacing(),
+                                  ),
                                   _LegendItem(
                                     color: mutedColor,
                                     label: widget.previousMonthLabel,
@@ -321,12 +321,13 @@ class _LegendItem extends StatelessWidget {
             shape: BoxShape.circle,
             border: isDashed ? Border.all(color: color, width: 1) : null,
           ),
-          child: isDashed
-              ? CustomPaint(
-                  size: const Size(10, 10),
-                  painter: _DashedCirclePainter(color: color),
-                )
-              : null,
+          child:
+              isDashed
+                  ? CustomPaint(
+                    size: const Size(10, 10),
+                    painter: _DashedCirclePainter(color: color),
+                  )
+                  : null,
         ),
         SizedBox(width: size.getItemSpacing()),
         Text(
@@ -353,10 +354,11 @@ class _DashedCirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
+    final paint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
 
     const dashCount = 8;
     for (int i = 0; i < dashCount; i++) {
@@ -426,19 +428,20 @@ class _TrendLineChart extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: ['4k', '3k', '2k', '1k'].map((label) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: size.getItemSpacing() / 2),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w500,
-                    color: mutedColor,
-                  ),
-                ),
-              );
-            }).toList(),
+            children:
+                ['4k', '3k', '2k', '1k'].map((label) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: size.getItemSpacing() / 2),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
+                        color: mutedColor,
+                      ),
+                    ),
+                  );
+                }).toList(),
           ),
         ),
         // 预算线标签
@@ -456,9 +459,10 @@ class _TrendLineChart extends StatelessWidget {
                   color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: isDark
-                        ? Colors.white.withOpacity(0.1)
-                        : Colors.black.withOpacity(0.05),
+                    color:
+                        isDark
+                            ? Colors.white.withOpacity(0.1)
+                            : Colors.black.withOpacity(0.05),
                   ),
                 ),
                 child: Text(
@@ -506,15 +510,30 @@ class _TrendLineChart extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(startLabel,
-                    style:
-                        TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: mutedColor)),
-                Text(middleLabel,
-                    style:
-                        TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: textColor)),
-                Text(endLabel,
-                    style:
-                        TextStyle(fontSize: 10, fontWeight: FontWeight.w400, color: mutedColor)),
+                Text(
+                  startLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: mutedColor,
+                  ),
+                ),
+                Text(
+                  middleLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                Text(
+                  endLabel,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                    color: mutedColor,
+                  ),
+                ),
               ],
             ),
           ),
@@ -656,9 +675,10 @@ class _LineChartPainter extends CustomPainter {
     );
 
     // 绘制底线
-    final linePaint = Paint()
-      ..color = const Color(0xFFe5e7eb)
-      ..strokeWidth = 1;
+    final linePaint =
+        Paint()
+          ..color = const Color(0xFFe5e7eb)
+          ..strokeWidth = 1;
 
     final isDark = primaryColor == const Color(0xFFf06431);
     if (!isDark) {
@@ -679,10 +699,11 @@ class _LineChartPainter extends CustomPainter {
     Color color,
     Size canvasSize,
   ) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 1.5
+          ..style = PaintingStyle.stroke;
 
     final path = _createPath(data, width, height, padding, canvasSize);
     final dashPath = _createDashedPath(path);
@@ -710,7 +731,14 @@ class _LineChartPainter extends CustomPainter {
     fillPath.addPath(extractPath, Offset.zero);
 
     // 添加底部闭合
-    final firstPoint = _getPointAtIndex(data, 0, width, height, padding, canvasSize);
+    final firstPoint = _getPointAtIndex(
+      data,
+      0,
+      width,
+      height,
+      padding,
+      canvasSize,
+    );
     final lastPoint = _getPointAtIndex(
       data,
       (data.length - 1 * animation).floor().clamp(0, data.length - 1),
@@ -727,14 +755,14 @@ class _LineChartPainter extends CustomPainter {
     final gradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        color.withOpacity(0.2 * animation),
-        color.withOpacity(0),
-      ],
+      colors: [color.withOpacity(0.2 * animation), color.withOpacity(0)],
     );
 
-    final paint = Paint()
-      ..shader = gradient.createShader(Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height));
+    final paint =
+        Paint()
+          ..shader = gradient.createShader(
+            Rect.fromLTWH(0, 0, canvasSize.width, canvasSize.height),
+          );
 
     canvas.drawPath(fillPath, paint);
   }
@@ -748,11 +776,12 @@ class _LineChartPainter extends CustomPainter {
     Color color,
     Size canvasSize,
   ) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
 
     final path = _createPath(data, width, height, padding, canvasSize);
     final pathMetrics = path.computeMetrics();
@@ -775,35 +804,71 @@ class _LineChartPainter extends CustomPainter {
     if (animation < 0.9) return;
 
     final pointIndex = data.length - 1;
-    final point = _getPointAtIndex(data, pointIndex, width, height, padding, canvasSize);
+    final point = _getPointAtIndex(
+      data,
+      pointIndex,
+      width,
+      height,
+      padding,
+      canvasSize,
+    );
 
     // 计算缩放比例：基于点动画值
     final scale = pointAnimation.clamp(0.0, 1.0);
 
     // 外圈光晕
-    final glowPaint = Paint()
-      ..color = color.withOpacity(0.3 * scale)
-      ..style = PaintingStyle.fill;
+    final glowPaint =
+        Paint()
+          ..color = color.withOpacity(0.3 * scale)
+          ..style = PaintingStyle.fill;
     canvas.drawCircle(point, 8 * scale, glowPaint);
 
     // 内圈实心点
-    final dotPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
+    final dotPaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.fill;
     canvas.drawCircle(point, 5 * scale, dotPaint);
   }
 
-  Path _createPath(List<double> data, double width, double height, double padding, Size canvasSize) {
+  Path _createPath(
+    List<double> data,
+    double width,
+    double height,
+    double padding,
+    Size canvasSize,
+  ) {
     final path = Path();
     if (data.isEmpty) return path;
 
-    final firstPoint = _getPointAtIndex(data, 0, width, height, padding, canvasSize);
+    final firstPoint = _getPointAtIndex(
+      data,
+      0,
+      width,
+      height,
+      padding,
+      canvasSize,
+    );
     path.moveTo(firstPoint.dx, firstPoint.dy);
 
     for (int i = 1; i < data.length; i++) {
-      final point = _getPointAtIndex(data, i, width, height, padding, canvasSize);
+      final point = _getPointAtIndex(
+        data,
+        i,
+        width,
+        height,
+        padding,
+        canvasSize,
+      );
       // 使用二次贝塞尔曲线平滑连接
-      final previousPoint = _getPointAtIndex(data, i - 1, width, height, padding, canvasSize);
+      final previousPoint = _getPointAtIndex(
+        data,
+        i - 1,
+        width,
+        height,
+        padding,
+        canvasSize,
+      );
       final controlPoint1 = Offset(
         previousPoint.dx + (point.dx - previousPoint.dx) / 2,
         previousPoint.dy,

@@ -122,71 +122,81 @@ class _EarningsTrendCardWidgetState extends State<EarningsTrendCardWidget>
                         ),
                       ],
               ),
-              child: Column(
+              child: Stack(
                 children: [
-                  SizedBox(height: widget.size.getTitleSpacing() * 0.6),
-
-                  // Title and value section
-                  Padding(
-                    padding: widget.size.getPadding(),
-                    child: Column(
-                      children: [
-                        Text(
-                          widget.title,
-                          style: TextStyle(
-                            color: titleColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        SizedBox(height: widget.size.getItemSpacing() * 0.75),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                           
-                            AnimatedFlipCounter(
-                              value: widget.value * _animation.value,
-                              fractionDigits: 1,
-                              textStyle: TextStyle(
-                                color: valueColor,
-                                fontSize: 36,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -1,
-                              ),
-                            ),
-                            Text(
-                              widget.currency,
-                              style: TextStyle(
-                                color: valueColor,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -1,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: widget.size.getItemSpacing() * 1.5),
-                        _PercentageBadge(
-                          percentage: widget.percentage,
+                  // Chart section - 固定在底部作为背景
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: SizedBox(
+                        height: widget.size.getStrokeWidth() * 25,
+                        width: double.infinity,
+                        child: _LineChart(
+                          data: widget.chartData,
                           animation: _animation,
+                          isDark: isDark,
                           size: widget.size,
                         ),
-                      ],
+                      ),
                     ),
                   ),
 
-                  const Spacer(),
-
-                  // Chart section
-                  SizedBox(
-                    height: 100,
-                    width: double.infinity,
-                    child: _LineChart(
-                      data: widget.chartData,
-                      animation: _animation,
-                      isDark: isDark,
+                  // Title and value section - 显示在图表上方
+                  Padding(
+                    padding: EdgeInsets.only(
+                      top: widget.size.getTitleSpacing() * 0.6,
+                    ),
+                    child: Padding(
+                      padding: widget.size.getPadding(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            widget.title,
+                            style: TextStyle(
+                              color: titleColor,
+                              fontSize: widget.size.getSubtitleFontSize() * 0.9,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          SizedBox(height: widget.size.getItemSpacing() * 0.75),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AnimatedFlipCounter(
+                                value: widget.value * _animation.value,
+                                fractionDigits: 1,
+                                textStyle: TextStyle(
+                                  color: valueColor,
+                                  fontSize: widget.size.getLargeFontSize() * 0.7,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -1,
+                                ),
+                              ),
+                              Text(
+                                widget.currency,
+                                style: TextStyle(
+                                  color: valueColor,
+                                  fontSize: widget.size.getLargeFontSize() * 0.6,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: widget.size.getItemSpacing() * 1.5),
+                          _PercentageBadge(
+                            percentage: widget.percentage,
+                            animation: _animation,
+                            size: widget.size,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -247,17 +257,17 @@ class _PercentageBadge extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.arrow_upward,
                     color: Colors.white,
-                    size: 14,
+                    size: size.getIconSize() * 0.8,
                   ),
                   SizedBox(width: size.getItemSpacing() * 0.5),
                   Text(
                     '+${percentage.toStringAsFixed(2)}%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: size.getLegendFontSize() * 0.8,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -276,11 +286,13 @@ class _LineChart extends StatelessWidget {
   final List<double> data;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _LineChart({
     required this.data,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -301,6 +313,7 @@ class _LineChart extends StatelessWidget {
             lineColor: const Color(0xFF0284C7),
             gradientStart: const Color(0xFF0284C7).withOpacity(0.1),
             gradientEnd: const Color(0xFF0284C7).withOpacity(0.0),
+            strokeWidth: size.getStrokeWidth() * 0.4,
           ),
         );
       },
@@ -315,6 +328,7 @@ class _LineChartPainter extends CustomPainter {
   final Color lineColor;
   final Color gradientStart;
   final Color gradientEnd;
+  final double strokeWidth;
 
   _LineChartPainter({
     required this.data,
@@ -322,6 +336,7 @@ class _LineChartPainter extends CustomPainter {
     required this.lineColor,
     required this.gradientStart,
     required this.gradientEnd,
+    this.strokeWidth = 3.5,
   });
 
   @override
@@ -373,7 +388,7 @@ class _LineChartPainter extends CustomPainter {
     // 绘制线条
     final linePaint = Paint()
       ..color = lineColor
-      ..strokeWidth = 3.5
+      ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
@@ -425,6 +440,7 @@ class _LineChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _LineChartPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }
