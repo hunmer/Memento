@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/spending_category.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/modern_rounded_spending_widget.dart';
 
@@ -31,9 +32,18 @@ class ModernRoundedSpendingWidgetExample extends StatelessWidget {
                       currentSpending: 322.0,
                       budget: 443.0,
                       categories: const [
-                        SpendingCategory(name: 'Food', amount: 37.0, color: Color(0xFFFF3B30)),
-                        SpendingCategory(name: 'Fitness', amount: 43.0, color: Color(0xFF007AFF)),
+                        SpendingCategory(
+                          name: 'Food',
+                          amount: 37.0,
+                          color: Color(0xFFFF3B30),
+                        ),
+                        SpendingCategory(
+                          name: 'Fitness',
+                          amount: 43.0,
+                          color: Color(0xFF007AFF),
+                        ),
                       ],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -49,10 +59,23 @@ class ModernRoundedSpendingWidgetExample extends StatelessWidget {
                       currentSpending: 322.0,
                       budget: 443.0,
                       categories: const [
-                        SpendingCategory(name: 'Food', amount: 37.0, color: Color(0xFFFF3B30)),
-                        SpendingCategory(name: 'Fitness', amount: 43.0, color: Color(0xFF007AFF)),
-                        SpendingCategory(name: 'Transport', amount: 31.0, color: Color(0xFFFFCC00)),
+                        SpendingCategory(
+                          name: 'Food',
+                          amount: 37.0,
+                          color: Color(0xFFFF3B30),
+                        ),
+                        SpendingCategory(
+                          name: 'Fitness',
+                          amount: 43.0,
+                          color: Color(0xFF007AFF),
+                        ),
+                        SpendingCategory(
+                          name: 'Transport',
+                          amount: 31.0,
+                          color: Color(0xFFFFCC00),
+                        ),
                       ],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -68,11 +91,28 @@ class ModernRoundedSpendingWidgetExample extends StatelessWidget {
                       currentSpending: 322.0,
                       budget: 443.0,
                       categories: const [
-                        SpendingCategory(name: 'Food', amount: 37.0, color: Color(0xFFFF3B30)),
-                        SpendingCategory(name: 'Fitness', amount: 43.0, color: Color(0xFF007AFF)),
-                        SpendingCategory(name: 'Transport', amount: 31.0, color: Color(0xFFFFCC00)),
-                        SpendingCategory(name: 'Other', amount: 11.0, color: Color(0xFF8E8E93)),
+                        SpendingCategory(
+                          name: 'Food',
+                          amount: 37.0,
+                          color: Color(0xFFFF3B30),
+                        ),
+                        SpendingCategory(
+                          name: 'Fitness',
+                          amount: 43.0,
+                          color: Color(0xFF007AFF),
+                        ),
+                        SpendingCategory(
+                          name: 'Transport',
+                          amount: 31.0,
+                          color: Color(0xFFFFCC00),
+                        ),
+                        SpendingCategory(
+                          name: 'Other',
+                          amount: 11.0,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -87,12 +127,33 @@ class ModernRoundedSpendingWidgetExample extends StatelessWidget {
                     currentSpending: 322.0,
                     budget: 443.0,
                     categories: const [
-                      SpendingCategory(name: 'Food', amount: 37.0, color: Color(0xFFFF3B30)),
-                      SpendingCategory(name: 'Fitness', amount: 43.0, color: Color(0xFF007AFF)),
-                      SpendingCategory(name: 'Transport', amount: 31.0, color: Color(0xFFFFCC00)),
-                      SpendingCategory(name: 'Shopping', amount: 28.0, color: Color(0xFF34C759)),
-                      SpendingCategory(name: 'Entertainment', amount: 15.0, color: Color(0xFFAF52DE)),
+                      SpendingCategory(
+                        name: 'Food',
+                        amount: 37.0,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      SpendingCategory(
+                        name: 'Fitness',
+                        amount: 43.0,
+                        color: Color(0xFF007AFF),
+                      ),
+                      SpendingCategory(
+                        name: 'Transport',
+                        amount: 31.0,
+                        color: Color(0xFFFFCC00),
+                      ),
+                      SpendingCategory(
+                        name: 'Shopping',
+                        amount: 28.0,
+                        color: Color(0xFF34C759),
+                      ),
+                      SpendingCategory(
+                        name: 'Entertainment',
+                        amount: 15.0,
+                        color: Color(0xFFAF52DE),
+                      ),
                     ],
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -106,13 +167,38 @@ class ModernRoundedSpendingWidgetExample extends StatelessWidget {
                     currentSpending: 322.0,
                     budget: 443.0,
                     categories: const [
-                      SpendingCategory(name: 'Food', amount: 37.0, color: Color(0xFFFF3B30)),
-                      SpendingCategory(name: 'Fitness', amount: 43.0, color: Color(0xFF007AFF)),
-                      SpendingCategory(name: 'Transport', amount: 31.0, color: Color(0xFFFFCC00)),
-                      SpendingCategory(name: 'Shopping', amount: 28.0, color: Color(0xFF34C759)),
-                      SpendingCategory(name: 'Entertainment', amount: 15.0, color: Color(0xFFAF52DE)),
-                      SpendingCategory(name: 'Healthcare', amount: 22.0, color: Color(0xFFFF9500)),
+                      SpendingCategory(
+                        name: 'Food',
+                        amount: 37.0,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      SpendingCategory(
+                        name: 'Fitness',
+                        amount: 43.0,
+                        color: Color(0xFF007AFF),
+                      ),
+                      SpendingCategory(
+                        name: 'Transport',
+                        amount: 31.0,
+                        color: Color(0xFFFFCC00),
+                      ),
+                      SpendingCategory(
+                        name: 'Shopping',
+                        amount: 28.0,
+                        color: Color(0xFF34C759),
+                      ),
+                      SpendingCategory(
+                        name: 'Entertainment',
+                        amount: 15.0,
+                        color: Color(0xFFAF52DE),
+                      ),
+                      SpendingCategory(
+                        name: 'Healthcare',
+                        amount: 22.0,
+                        color: Color(0xFFFF9500),
+                      ),
                     ],
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
