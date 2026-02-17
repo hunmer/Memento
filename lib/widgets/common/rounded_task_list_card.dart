@@ -80,10 +80,14 @@ class RoundedTaskListCard extends StatefulWidget {
   /// 标题文本
   final String headerText;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const RoundedTaskListCard({
     super.key,
     required this.tasks,
     this.headerText = 'Upcoming',
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -100,6 +104,7 @@ class RoundedTaskListCard extends StatefulWidget {
     return RoundedTaskListCard(
       tasks: tasksList,
       headerText: props['headerText'] as String? ?? 'Upcoming',
+      size: size,
     );
   }
 
@@ -148,10 +153,12 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
             opacity: _animation.value,
             child: Container(
               width: 344,
-              constraints: const BoxConstraints(maxHeight: 400),
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(
+                  widget.size is SmallSize ? 6 : 8,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -160,14 +167,14 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(8),
+              padding: widget.size.getPadding() * 0.67,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 标题栏
                   _buildHeader(context, primaryColor, subtextColor),
-                  const SizedBox(height: 24),
+                  SizedBox(height: widget.size.getTitleSpacing() * 1.2),
                   // 任务列表 - 支持滚动
                   Flexible(
                     child: SingleChildScrollView(
@@ -196,18 +203,18 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: widget.size.getSmallSpacing() * 3,
+          height: widget.size.getSmallSpacing() * 3,
           decoration: BoxDecoration(
             color: primaryColor,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: widget.size.getSmallSpacing() * 2),
         Text(
           widget.headerText.toUpperCase(),
           style: TextStyle(
-            fontSize: 14,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             color: subtextColor,
             letterSpacing: 1.0,
@@ -245,6 +252,8 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
           primaryColor: primaryColor,
           subtextColor: subtextColor,
           isLast: i == widget.tasks.length - 1,
+          isSmallSize: widget.size is SmallSize,
+          size: widget.size,
         ),
       );
     }
@@ -260,6 +269,8 @@ class _TaskListItem extends StatelessWidget {
   final Color primaryColor;
   final Color subtextColor;
   final bool isLast;
+  final bool isSmallSize;
+  final HomeWidgetSize size;
 
   const _TaskListItem({
     required this.task,
@@ -267,6 +278,8 @@ class _TaskListItem extends StatelessWidget {
     required this.primaryColor,
     required this.subtextColor,
     required this.isLast,
+    required this.isSmallSize,
+    required this.size,
   });
 
   @override
@@ -282,64 +295,113 @@ class _TaskListItem extends StatelessWidget {
           child: Opacity(
             opacity: animation.value,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: size.getPadding() * 0.67,
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
                     color: borderColor,
-                    width: 1,
+                    width: size.getSmallSpacing() * 0.25,
                   ),
                 ),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          task.title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : const Color(0xFF111827),
-                            height: 1.3,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          task.subtitle,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: subtextColor,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (task.date != null && task.date.isNotEmpty) ...[
-                    const SizedBox(width: 12),
-                  Text(
-                    task.date,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: primaryColor,
-                      height: 1.2,
-                    ),
-                  ),
-                  ]
-                 
-                ],
-              ),
+              child: isSmallSize
+                  ? _buildSmallSizeLayout(isDark)
+                  : _buildNormalLayout(isDark),
             ),
           ),
         );
       },
+    );
+  }
+
+  /// 小尺寸布局：日期在新行
+  Widget _buildSmallSizeLayout(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 标题和副标题
+        Text(
+          task.title,
+          style: TextStyle(
+            fontSize: size.getSubtitleFontSize() + 1,
+            fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : const Color(0xFF111827),
+            height: 1.3,
+          ),
+        ),
+        SizedBox(height: size.getSmallSpacing()),
+        Text(
+          task.subtitle,
+          style: TextStyle(
+            fontSize: size.getSubtitleFontSize() - 1,
+            fontWeight: FontWeight.w500,
+            color: subtextColor,
+            height: 1.2,
+          ),
+        ),
+        // 日期在单独新行
+        if (task.date.isNotEmpty) ...[
+          SizedBox(height: size.getSmallSpacing() * 1.5),
+          Text(
+            task.date,
+            style: TextStyle(
+              fontSize: size.getSubtitleFontSize() - 1,
+              fontWeight: FontWeight.w700,
+              color: primaryColor,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// 正常布局：日期在右侧
+  Widget _buildNormalLayout(bool isDark) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                task.title,
+                style: TextStyle(
+                  fontSize: size.getSubtitleFontSize() + 1,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : const Color(0xFF111827),
+                  height: 1.3,
+                ),
+              ),
+              SizedBox(height: size.getSmallSpacing()),
+              Text(
+                task.subtitle,
+                style: TextStyle(
+                  fontSize: size.getSubtitleFontSize() - 1,
+                  fontWeight: FontWeight.w500,
+                  color: subtextColor,
+                  height: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (task.date.isNotEmpty) ...[
+          SizedBox(width: size.getSmallSpacing() * 3),
+          Text(
+            task.date,
+            style: TextStyle(
+              fontSize: size.getSubtitleFontSize() - 1,
+              fontWeight: FontWeight.w700,
+              color: primaryColor,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

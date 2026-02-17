@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 圆角任务列表卡片示例
 class RoundedTaskListCardExample extends StatelessWidget {
@@ -12,7 +13,7 @@ class RoundedTaskListCardExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('圆角任务列表卡片')),
       body: Container(
-        color: isDark ? Colors.black : const Color(0xFFF2F2F7),
+        color: isDark ? const Color(0xFF18181B) : const Color(0xFFE5E5E5),
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -23,9 +24,10 @@ class RoundedTaskListCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 200,
+                    width: 150,
+                    height: 150,
                     child: RoundedTaskListCard(
+                      size: const SmallSize(),
                       tasks: [
                         TaskListItem(
                           title: 'Design mobile UI',
@@ -47,17 +49,18 @@ class RoundedTaskListCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 280,
+                    width: 220,
+                    height: 200,
                     child: RoundedTaskListCard(
+                      size: const MediumSize(),
                       tasks: [
                         TaskListItem(
-                          title: 'Design mobile UI dashboard',
+                          title: 'Design mobile UI',
                           subtitle: 'Widgefy UI kit',
                           date: '12 Jan 2021',
                         ),
                         TaskListItem(
-                          title: 'Calculate budget and contract',
+                          title: 'Calculate budget',
                           subtitle: 'BetaCRM',
                           date: '1 Feb 2021',
                         ),
@@ -76,9 +79,10 @@ class RoundedTaskListCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
-                    height: 380,
+                    width: 300,
+                    height: 280,
                     child: RoundedTaskListCard(
+                      size: const LargeSize(),
                       tasks: [
                         TaskListItem(
                           title: 'Design mobile UI dashboard',
@@ -115,8 +119,9 @@ class RoundedTaskListCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 320,
+                  height: 280,
                   child: RoundedTaskListCard(
+                    size: const WideSize(),
                     tasks: [
                       TaskListItem(
                         title: 'Design mobile UI dashboard',
@@ -147,8 +152,9 @@ class RoundedTaskListCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: MediaQuery.of(context).size.width - 32,
-                  height: 450,
+                  height: 350,
                   child: RoundedTaskListCard(
+                    size: const Wide2Size(),
                     tasks: [
                       TaskListItem(
                         title: 'Design mobile UI dashboard',

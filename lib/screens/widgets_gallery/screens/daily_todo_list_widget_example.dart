@@ -31,8 +31,14 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
-                        TodoTask(title: 'Design a new shot', isCompleted: false),
-                        TodoTask(title: 'Make a twitter post', isCompleted: true),
+                        TodoTask(
+                          title: 'Design a new shot',
+                          isCompleted: false,
+                        ),
+                        TodoTask(
+                          title: 'Make a twitter post',
+                          isCompleted: true,
+                        ),
                       ],
                       reminder: const TodoReminder(
                         text: "Don't forget to",
@@ -54,9 +60,18 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
-                        TodoTask(title: 'Design a new shot', isCompleted: false),
-                        TodoTask(title: 'Make a twitter post', isCompleted: true),
-                        TodoTask(title: 'Finish UI updates', isCompleted: false),
+                        TodoTask(
+                          title: 'Design a new shot',
+                          isCompleted: false,
+                        ),
+                        TodoTask(
+                          title: 'Make a twitter post',
+                          isCompleted: true,
+                        ),
+                        TodoTask(
+                          title: 'Finish UI updates',
+                          isCompleted: false,
+                        ),
                         TodoTask(title: 'Drink water', isCompleted: true),
                       ],
                       reminder: const TodoReminder(
@@ -82,7 +97,10 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                       TodoTask(title: 'Make a twitter post', isCompleted: true),
                       TodoTask(title: 'Finish UI updates', isCompleted: false),
                       TodoTask(title: 'Drink water', isCompleted: true),
-                      TodoTask(title: 'Review pull requests', isCompleted: false),
+                      TodoTask(
+                        title: 'Review pull requests',
+                        isCompleted: false,
+                      ),
                     ],
                     reminder: const TodoReminder(
                       text: "Don't forget to",
@@ -103,15 +121,24 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                       date: 'Thu, 2 May 2024',
                       time: '15:30',
                       tasks: const [
-                        TodoTask(title: 'Design a new shot', isCompleted: false),
-                        TodoTask(title: 'Make a twitter post', isCompleted: true),
+                        TodoTask(
+                          title: 'Design a new shot',
+                          isCompleted: false,
+                        ),
+                        TodoTask(
+                          title: 'Make a twitter post',
+                          isCompleted: true,
+                        ),
                         TodoTask(
                           title: 'Finish UI updates on the web app',
                           isCompleted: false,
                         ),
                         TodoTask(title: 'Drink water', isCompleted: true),
                         TodoTask(title: 'Grocery shopping', isCompleted: false),
-                        TodoTask(title: 'Zoom call with Jordan', isCompleted: false),
+                        TodoTask(
+                          title: 'Zoom call with Jordan',
+                          isCompleted: false,
+                        ),
                       ],
                       reminder: TodoReminder(
                         text: "Don't forget to do a",
@@ -140,9 +167,18 @@ class DailyTodoListWidgetExample extends StatelessWidget {
                       ),
                       TodoTask(title: 'Drink water', isCompleted: true),
                       TodoTask(title: 'Grocery shopping', isCompleted: false),
-                      TodoTask(title: 'Zoom call with Jordan', isCompleted: false),
-                      TodoTask(title: 'Review pull requests', isCompleted: false),
-                      TodoTask(title: 'Update documentation', isCompleted: false),
+                      TodoTask(
+                        title: 'Zoom call with Jordan',
+                        isCompleted: false,
+                      ),
+                      TodoTask(
+                        title: 'Review pull requests',
+                        isCompleted: false,
+                      ),
+                      TodoTask(
+                        title: 'Update documentation',
+                        isCompleted: false,
+                      ),
                     ],
                     reminder: TodoReminder(
                       text: "Don't forget to do a",

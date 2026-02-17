@@ -6,10 +6,7 @@ class TodoTask {
   final String title;
   final bool isCompleted;
 
-  const TodoTask({
-    required this.title,
-    required this.isCompleted,
-  });
+  const TodoTask({required this.title, required this.isCompleted});
 
   /// 从 JSON 创建
   factory TodoTask.fromJson(Map<String, dynamic> json) {
@@ -21,16 +18,10 @@ class TodoTask {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'isCompleted': isCompleted,
-    };
+    return {'title': title, 'isCompleted': isCompleted};
   }
 
-  TodoTask copyWith({
-    String? title,
-    bool? isCompleted,
-  }) {
+  TodoTask copyWith({String? title, bool? isCompleted}) {
     return TodoTask(
       title: title ?? this.title,
       isCompleted: isCompleted ?? this.isCompleted,
@@ -61,11 +52,7 @@ class TodoReminder {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'hashtag': hashtag,
-      'hashtagEmoji': hashtagEmoji,
-    };
+    return {'text': text, 'hashtag': hashtag, 'hashtagEmoji': hashtagEmoji};
   }
 }
 
@@ -97,19 +84,17 @@ class DailyTodoListWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final tasksList = (props['tasks'] as List<dynamic>?)
+    final tasksList =
+        (props['tasks'] as List<dynamic>?)
             ?.map((e) => TodoTask.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
 
     final reminderJson = props['reminder'] as Map<String, dynamic>?;
-    final reminder = reminderJson != null
-        ? TodoReminder.fromJson(reminderJson)
-        : const TodoReminder(
-            text: '',
-            hashtag: '',
-            hashtagEmoji: '',
-          );
+    final reminder =
+        reminderJson != null
+            ? TodoReminder.fromJson(reminderJson)
+            : const TodoReminder(text: '', hashtag: '', hashtagEmoji: '');
 
     return DailyTodoListWidget(
       date: props['date'] as String? ?? '',
@@ -142,10 +127,7 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _animationController.forward();
@@ -183,7 +165,9 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
               constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF18181B) : Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(
+                  widget.size is SmallSize ? 16 : 24,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -192,10 +176,11 @@ class _DailyTodoListWidgetState extends State<DailyTodoListWidget>
                   ),
                 ],
                 border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF27272A)
-                      : const Color(0xFFE4E4E7),
-                  width: 1,
+                  color:
+                      isDark
+                          ? const Color(0xFF27272A)
+                          : const Color(0xFFE4E4E7),
+                  width: widget.size.getSmallSpacing() * 0.25,
                 ),
               ),
               child: Column(
@@ -256,9 +241,9 @@ class _HeaderSection extends StatelessWidget {
       padding: size.getPadding(),
       decoration: BoxDecoration(
         color: primaryColor.withOpacity(0.9),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(size is SmallSize ? 16 : 24),
+          topRight: Radius.circular(size is SmallSize ? 16 : 24),
         ),
       ),
       child: Row(
@@ -270,7 +255,7 @@ class _HeaderSection extends StatelessWidget {
                 Text(
                   date,
                   style: TextStyle(
-                    fontSize: size.getTitleFontSize(),
+                    fontSize: size.getTitleFontSize() * 0.8,
                     fontWeight: FontWeight.w500,
                     color: isDark ? Colors.black87 : Colors.black87,
                     height: 1.2,
@@ -284,7 +269,9 @@ class _HeaderSection extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(
+                      size.getSmallSpacing() * 1.5,
+                    ),
                   ),
                   child: Text(
                     time,
@@ -328,9 +315,9 @@ class _TasksSection extends StatelessWidget {
         decoration: BoxDecoration(
           // 点阵网格背景
           color: isDark ? const Color(0xFF18181B) : Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(size is SmallSize ? 20 : 32),
+            topRight: Radius.circular(size is SmallSize ? 20 : 32),
           ),
         ),
         child: Column(
@@ -342,8 +329,8 @@ class _TasksSection extends StatelessWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: tasks.length,
-                separatorBuilder: (context, index) =>
-                    SizedBox(height: size.getItemSpacing()),
+                separatorBuilder:
+                    (context, index) => SizedBox(height: size.getItemSpacing()),
                 itemBuilder: (context, index) {
                   return _TaskItem(
                     task: tasks[index],
@@ -406,24 +393,27 @@ class _TaskItem extends StatelessWidget {
                   _Checkbox(
                     isChecked: task.isCompleted,
                     isDark: isDark,
+                    size: size,
                   ),
                   SizedBox(width: size.getItemSpacing()),
                   Expanded(
                     child: Text(
                       task.title,
                       style: TextStyle(
-                        fontSize: size.getSubtitleFontSize() + 3,
+                        fontSize: size.getSubtitleFontSize(),
                         fontWeight: FontWeight.w400,
-                        color: task.isCompleted
-                            ? (isDark
-                                ? const Color(0xFF71717A)
-                                : const Color(0xFFA1A1AA))
-                            : (isDark
-                                ? const Color(0xFFE4E4E7)
-                                : const Color(0xFF27272A)),
-                        decoration: task.isCompleted
-                            ? TextDecoration.lineThrough
-                            : null,
+                        color:
+                            task.isCompleted
+                                ? (isDark
+                                    ? const Color(0xFF71717A)
+                                    : const Color(0xFFA1A1AA))
+                                : (isDark
+                                    ? const Color(0xFFE4E4E7)
+                                    : const Color(0xFF27272A)),
+                        decoration:
+                            task.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
                         height: 1.2,
                       ),
                     ),
@@ -442,37 +432,50 @@ class _TaskItem extends StatelessWidget {
 class _Checkbox extends StatelessWidget {
   final bool isChecked;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _Checkbox({
     required this.isChecked,
     required this.isDark,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 根据尺寸调整复选框大小和边框
+    final checkboxSize = size.getThumbnailIconSize() * 0.8;
+    final iconSize = checkboxSize * 0.67;
+    final borderRadius = checkboxSize * 0.25;
+    final borderWidth = size.getSmallSpacing() * 0.5;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 24,
-      height: 24,
+      width: checkboxSize,
+      height: checkboxSize,
       decoration: BoxDecoration(
-        color: isChecked
-            ? (isDark ? Colors.white : const Color(0xFF18181B))
-            : (isDark ? const Color(0xFF27272A) : Colors.white),
+        color:
+            isChecked
+                ? (isDark ? Colors.white : const Color(0xFF18181B))
+                : (isDark ? const Color(0xFF27272A) : Colors.white),
         border: Border.all(
-          color: isChecked
-              ? (isDark ? Colors.white : const Color(0xFF18181B))
-              : (isDark ? const Color(0xFF3F3F46) : const Color(0xFFD4D4D8)),
-          width: 2,
+          color:
+              isChecked
+                  ? (isDark ? Colors.white : const Color(0xFF18181B))
+                  : (isDark
+                      ? const Color(0xFF3F3F46)
+                      : const Color(0xFFD4D4D8)),
+          width: borderWidth.clamp(1.0, 3.0),
         ),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
-      child: isChecked
-          ? Icon(
-              Icons.check,
-              size: 16,
-              color: isDark ? const Color(0xFF18181B) : Colors.white,
-            )
-          : null,
+      child:
+          isChecked
+              ? Icon(
+                Icons.check,
+                size: iconSize,
+                color: isDark ? const Color(0xFF18181B) : Colors.white,
+              )
+              : null,
     );
   }
 }
@@ -510,9 +513,10 @@ class _ReminderSection extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: isDark
-                        ? const Color(0xFF27272A)
-                        : const Color(0xFFF4F4F5),
+                    color:
+                        isDark
+                            ? const Color(0xFF27272A)
+                            : const Color(0xFFF4F4F5),
                     width: 1,
                   ),
                 ),
@@ -528,9 +532,10 @@ class _ReminderSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: size.getSubtitleFontSize() + 1,
                             fontWeight: FontWeight.w400,
-                            color: isDark
-                                ? const Color(0xFFE4E4E7)
-                                : const Color(0xFF27272A),
+                            color:
+                                isDark
+                                    ? const Color(0xFFE4E4E7)
+                                    : const Color(0xFF27272A),
                             height: 1.2,
                           ),
                         ),
@@ -541,19 +546,23 @@ class _ReminderSection extends StatelessWidget {
                             vertical: size.getSmallSpacing() * 0.5,
                           ),
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? const Color(0xFF831843).withOpacity(0.4)
-                                : const Color(0xFFFDF2F8),
-                            borderRadius: BorderRadius.circular(size.getSmallSpacing()),
+                            color:
+                                isDark
+                                    ? const Color(0xFF831843).withOpacity(0.4)
+                                    : const Color(0xFFFDF2F8),
+                            borderRadius: BorderRadius.circular(
+                              size.getSmallSpacing() * 1.5,
+                            ),
                           ),
                           child: Text(
                             reminder.hashtag,
                             style: TextStyle(
                               fontSize: size.getSubtitleFontSize() + 1,
                               fontWeight: FontWeight.w500,
-                              color: isDark
-                                  ? const Color(0xFFF472B6)
-                                  : const Color(0xFFDB2777),
+                              color:
+                                  isDark
+                                      ? const Color(0xFFF472B6)
+                                      : const Color(0xFFDB2777),
                             ),
                           ),
                         ),
@@ -563,9 +572,10 @@ class _ReminderSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: size.getSubtitleFontSize() + 1,
                             fontWeight: FontWeight.w400,
-                            color: isDark
-                                ? const Color(0xFFE4E4E7)
-                                : const Color(0xFF27272A),
+                            color:
+                                isDark
+                                    ? const Color(0xFFE4E4E7)
+                                    : const Color(0xFF27272A),
                             height: 1.2,
                           ),
                         ),
