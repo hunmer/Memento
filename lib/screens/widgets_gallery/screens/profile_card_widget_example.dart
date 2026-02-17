@@ -13,7 +13,6 @@ class SocialProfileCardExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('社交资料卡片')),
       body: Container(
-        color: isDark ? Colors.black : const Color(0xFF6B7280),
         child: Center(
           child: SocialProfileCardWidget(
             size: const LargeSize(),
@@ -24,7 +23,8 @@ class SocialProfileCardExample extends StatelessWidget {
             followers: 3600,
             posts: 248,
             tag: '#technology',
-            content: "It's incredible to see art, creativity and technology come together celebration",
+            content:
+                "It's incredible to see art, creativity and technology come together celebration",
             comments: 3600,
             shares: 12000,
           ),

@@ -172,23 +172,42 @@ class _VerticalPropertyCardWidgetState
           ],
         ),
         clipBehavior: Clip.antiAlias,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 顶部图片
-            _buildImageSection(isDark),
-            // 内容区域
-            _buildContentSection(context, isDark, primaryColor),
-          ],
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 顶部图片
+              _buildImageSection(isDark),
+              // 内容区域
+              _buildContentSection(context, isDark, primaryColor),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildImageSection(bool isDark) {
+    // 在 small 尺寸下隐藏图片
+    if (widget.size is SmallSize) {
+      return const SizedBox.shrink();
+    }
+
+    // 根据尺寸动态调整图片高度
+    double imageHeight;
+    if (widget.size is MediumSize || widget.size is WideSize) {
+      imageHeight = 140;
+    } else if (widget.size is LargeSize || widget.size is Wide2Size) {
+      imageHeight = 180;
+    } else {
+      // Large3, Wide3
+      imageHeight = 220;
+    }
+
     return Container(
-      height: 240,
+      height: imageHeight,
       width: double.infinity,
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF0F172A) : const Color(0xFFEEF2FF),
@@ -207,7 +226,7 @@ class _VerticalPropertyCardWidgetState
         child: Image.network(
           widget.imageUrl,
           width: double.infinity,
-          height: 240,
+          height: imageHeight,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return Container(
@@ -274,7 +293,7 @@ class _VerticalPropertyCardWidgetState
       child: Text(
         widget.title,
         style: TextStyle(
-          fontSize: 22,
+          fontSize: widget.size.getTitleFontSize(),
           fontWeight: FontWeight.bold,
           height: 1.2,
           color: isDark ? Colors.white : const Color(0xFF111827),
@@ -313,14 +332,14 @@ class _VerticalPropertyCardWidgetState
       children: [
         Icon(
           meta.icon,
-          size: 16,
+          size: widget.size.getIconSize() * 0.7,
           color: const Color(0xFF9CA3AF),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: widget.size.getSmallSpacing()),
         Text(
           meta.label,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: widget.size.getSubtitleFontSize(),
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,
             color: const Color(0xFF9CA3AF),
@@ -346,7 +365,7 @@ class _VerticalPropertyCardWidgetState
       child: Text(
         widget.description,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: widget.size.getSubtitleFontSize(),
           fontWeight: FontWeight.normal,
           height: 1.6,
           color: isDark ? const Color(0xFFD1D5DB) : const Color(0xFF6B7280),
@@ -383,14 +402,14 @@ class _VerticalPropertyCardWidgetState
           children: [
             Icon(
               widget.actionIcon,
-              size: 20,
+              size: widget.size.getIconSize(),
               color: primaryColor,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: widget.size.getSmallSpacing()),
             Text(
               widget.actionLabel,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: widget.size.getSubtitleFontSize(),
                 fontWeight: FontWeight.w600,
                 color: primaryColor,
               ),

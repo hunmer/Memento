@@ -8,11 +8,7 @@ class TaskItem {
   final Color color;
   final String tag;
 
-  const TaskItem({
-    required this.title,
-    required this.color,
-    this.tag = '',
-  });
+  const TaskItem({required this.title, required this.color, this.tag = ''});
 
   /// 从 JSON 创建（用于公共小组件系统）
   factory TaskItem.fromJson(Map<String, dynamic> json) {
@@ -25,11 +21,7 @@ class TaskItem {
 
   /// 转换为 JSON（用于公共小组件系统）
   Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'color': color.value,
-      'tag': tag,
-    };
+    return {'title': title, 'color': color.value, 'tag': tag};
   }
 }
 
@@ -38,10 +30,13 @@ class UpcomingTasksWidget extends StatefulWidget {
   final int taskCount;
   final List<TaskItem> tasks;
   final int moreCount;
+
   /// 自定义标题（默认为 "Upcoming"）
   final String title;
+
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
+
   /// 小组件尺寸
   final HomeWidgetSize size;
 
@@ -60,7 +55,8 @@ class UpcomingTasksWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final tasksList = (props['tasks'] as List<dynamic>?)
+    final tasksList =
+        (props['tasks'] as List<dynamic>?)
             ?.map((e) => TaskItem.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -116,8 +112,10 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              height: widget.inline ? double.maxFinite : 300,
-              width: widget.inline ? double.maxFinite : 400,
+              constraints: widget.inline
+                  ? null
+                  : widget.size.getHeightConstraints(),
+              width: widget.inline ? double.maxFinite : null,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -137,9 +135,7 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
                   _buildTaskCounter(isDark),
                   SizedBox(width: widget.size.getTitleSpacing()),
                   // 右侧：任务列表
-                  Expanded(
-                    child: _buildTaskList(isDark),
-                  ),
+                  Expanded(child: _buildTaskList(isDark)),
                 ],
               ),
             ),
@@ -160,7 +156,7 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
         AnimatedFlipCounter(
           value: widget.taskCount.toDouble() * _animation.value,
           textStyle: TextStyle(
-            fontSize: 56,
+            fontSize: widget.size.getLargeFontSize(),
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : const Color(0xFF111827),
             height: 1.0,
@@ -168,11 +164,11 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
         ),
         SizedBox(height: widget.size.getItemSpacing()),
         SizedBox(
-          width: 50,
+          width: widget.size.getLargeFontSize() * 1.2,
           child: Text(
             widget.title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: widget.size.getSubtitleFontSize() * 0.85,
               fontWeight: FontWeight.w500,
               color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
               height: 1.2,
@@ -194,7 +190,12 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
           children: [
             ...List.generate(widget.tasks.length, (index) {
               return Padding(
-                padding: EdgeInsets.only(bottom: index < widget.tasks.length - 1 ? widget.size.getItemSpacing() : 0),
+                padding: EdgeInsets.only(
+                  bottom:
+                      index < widget.tasks.length - 1
+                          ? widget.size.getItemSpacing()
+                          : 0,
+                ),
                 child: _TaskItemWidget(
                   task: widget.tasks[index],
                   isDark: isDark,
@@ -219,7 +220,7 @@ class _UpcomingTasksWidgetState extends State<UpcomingTasksWidget>
                 child: Text(
                   '+${widget.moreCount} more',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF3B82F6),
                   ),
@@ -282,8 +283,8 @@ class _TaskItemWidget extends StatelessWidget {
                   children: [
                     // 彩色指示条
                     Container(
-                      width: 3,
-                      height: 14,
+                      width: size.getSmallSpacing() * 1.5,
+                      height: size.getSubtitleFontSize(),
                       decoration: BoxDecoration(
                         color: task.color,
                         borderRadius: BorderRadius.circular(2),
@@ -295,9 +296,12 @@ class _TaskItemWidget extends StatelessWidget {
                       child: Text(
                         task.title,
                         style: TextStyle(
-                          fontSize: 14.4, // 0.9rem ≈ 14.4px
+                          fontSize: size.getSubtitleFontSize() * 1.03,
                           fontWeight: FontWeight.w500,
-                          color: isDark ? const Color(0xFFE5E7EB) : const Color(0xFF374151),
+                          color:
+                              isDark
+                                  ? const Color(0xFFE5E7EB)
+                                  : const Color(0xFF374151),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -309,9 +313,12 @@ class _TaskItemWidget extends StatelessWidget {
                       Text(
                         task.tag,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: size.getSubtitleFontSize() * 0.85,
                           fontWeight: FontWeight.w400,
-                          color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF9CA3AF),
+                          color:
+                              isDark
+                                  ? const Color(0xFF9CA3AF)
+                                  : const Color(0xFF9CA3AF),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

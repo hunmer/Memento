@@ -70,7 +70,6 @@ import 'package:Memento/screens/widgets_gallery/screens/color_tag_task_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/holiday_rental_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rental_preview_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/inbox_message_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/message_list_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/upcoming_tasks_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/social_profile_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/social_activity_card_example.dart';
@@ -456,7 +455,6 @@ class _WidgetRegistry {
         () => const RentalPreviewCardExample(),
     '/widgets_gallery/inbox_message_card':
         () => const InboxMessageCardExample(),
-    '/widgets_gallery/message_list_card': () => const MessageListCardExample(),
     '/widgets_gallery/upcoming_tasks_widget':
         () => const UpcomingTasksWidgetExample(),
     '/widgets_gallery/social_profile_card':
