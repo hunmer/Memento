@@ -95,19 +95,22 @@ class MessageListCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final featuredMessageJson = props['featuredMessage'] as Map<String, dynamic>?;
+    final featuredMessageJson =
+        props['featuredMessage'] as Map<String, dynamic>?;
     final messagesJson = props['messages'] as List<dynamic>?;
 
     return MessageListCardWidget(
-      featuredMessage: featuredMessageJson != null
-          ? FeaturedMessageData.fromJson(featuredMessageJson)
-          : const FeaturedMessageData(
-              sender: '',
-              title: '',
-              summary: '',
-              avatarUrl: '',
-            ),
-      messages: messagesJson
+      featuredMessage:
+          featuredMessageJson != null
+              ? FeaturedMessageData.fromJson(featuredMessageJson)
+              : const FeaturedMessageData(
+                sender: '',
+                title: '',
+                summary: '',
+                avatarUrl: '',
+              ),
+      messages:
+          messagesJson
               ?.map((e) => MessageData.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -152,12 +155,17 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
+        // 在动画值很小时跳过 Transform，避免布局错误
+        final useTransform = _animation.value > 0.01;
+
         return Opacity(
           opacity: _animation.value,
-          child: Transform.translate(
-            offset: Offset(0, 20 * (1 - _animation.value)),
-            child: child,
-          ),
+          child: useTransform
+              ? Transform.translate(
+                  offset: Offset(0, 20 * (1 - _animation.value)),
+                  child: child,
+                )
+              : child,
         );
       },
       child: Container(
@@ -179,7 +187,9 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
           children: [
             SizedBox(height: widget.size.getPadding().top),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: widget.size.getPadding().left),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.size.getPadding().left,
+              ),
               child: _FeaturedSection(
                 data: widget.featuredMessage,
                 animation: _animation,
@@ -188,7 +198,9 @@ class _MessageListCardWidgetState extends State<MessageListCardWidget>
             ),
             SizedBox(height: widget.size.getTitleSpacing()),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: widget.size.getPadding().left),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.size.getPadding().left,
+              ),
               child: _MessageListSection(
                 messages: widget.messages,
                 animation: _animation,
@@ -237,11 +249,7 @@ class _FeaturedSection extends StatelessWidget {
                 offset: Offset(0, 10 * (1 - sectionAnimation.value)),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.push_pin,
-                      color: primaryColor,
-                      size: 18,
-                    ),
+                    Icon(Icons.push_pin, color: primaryColor, size: 18),
                     const SizedBox(width: 6),
                     Text(
                       'PINNED MESSAGE',
