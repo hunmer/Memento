@@ -669,13 +669,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.account_balance_wallet,
-        title: '预算趋势卡片',
-        subtitle: 'BudgetTrendCardWidget - 带迷你曲线图的预算趋势展示卡片',
-        route: '/widgets_gallery/budget_trend_card',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.account_balance,
         title: '账户余额卡片',
         subtitle: 'AccountBalanceCard - 银行账户余额与收支统计卡片',

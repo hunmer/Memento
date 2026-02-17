@@ -92,7 +92,6 @@ import 'package:Memento/screens/widgets_gallery/screens/trend_value_card_example
 import 'package:Memento/screens/widgets_gallery/screens/sleep_duration_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/weight_trend_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/account_balance_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/budget_trend_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/icon_circular_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/color_tag_task_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/holiday_rental_card_example.dart';
@@ -621,11 +620,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/account_balance_card',
           handler: (settings) => RouteHelpers.createRoute(const AccountBalanceCardExample(), settings: settings),
           description: '账户余额卡片',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/budget_trend_card',
-          handler: (settings) => RouteHelpers.createRoute(const BudgetTrendCardExample(), settings: settings),
-          description: '预算趋势卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/multi_metric_progress_card',
@@ -1326,13 +1320,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '消费卡片',
     subtitle: 'ModernRoundedSpendingWidget',
     route: '/widgets_gallery/modern_rounded_spending_widget',
-  ),
-  WidgetPreviewItem(
-    category: '财务类',
-    icon: Icons.account_balance_wallet,
-    title: '预算趋势卡片',
-    subtitle: 'BudgetTrendCardWidget',
-    route: '/widgets_gallery/budget_trend_card',
   ),
   WidgetPreviewItem(
     category: '财务类',

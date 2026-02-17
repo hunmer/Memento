@@ -206,12 +206,12 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                         Text(
                           widget.dateRange,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: widget.size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w600,
                             color: textColor,
                           ),
                         ),
-                        Icon(Icons.calendar_today, size: 18, color: textColor),
+                        Icon(Icons.calendar_today, size: widget.size.getIconSize(), color: textColor),
                       ],
                     ),
                   ),
@@ -230,14 +230,19 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                widget.title,
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w700,
-                                  color: textColor,
+                              Expanded(
+                                child: Text(
+                                  widget.title,
+                                  style: TextStyle(
+                                    fontSize: widget.size.getTitleFontSize(),
+                                    fontWeight: FontWeight.w700,
+                                    color: textColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
+                              SizedBox(width: widget.size.getItemSpacing()),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
@@ -314,8 +319,8 @@ class _LegendItem extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 10,
-          height: 10,
+          width: size.getLegendIndicatorWidth() / 2,
+          height: size.getLegendIndicatorHeight() / 2,
           decoration: BoxDecoration(
             color: isDashed ? Colors.transparent : color,
             shape: BoxShape.circle,
@@ -324,16 +329,16 @@ class _LegendItem extends StatelessWidget {
           child:
               isDashed
                   ? CustomPaint(
-                    size: const Size(10, 10),
+                    size: Size(size.getLegendIndicatorWidth() / 2, size.getLegendIndicatorHeight() / 2),
                     painter: _DashedCirclePainter(color: color),
                   )
                   : null,
         ),
-        SizedBox(width: size.getItemSpacing()),
+        SizedBox(width: size.getSmallSpacing()),
         Text(
           label,
           style: TextStyle(
-            fontSize: 9,
+            fontSize: size.getLegendFontSize(),
             fontWeight: FontWeight.w500,
             color: color,
             letterSpacing: 0.5,
@@ -418,69 +423,49 @@ class _TrendLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // 计算Y轴标签
+    final yLabels = [
+      (maxAmount / 1000).toInt().toString() + 'k',
+      ((maxAmount * 0.75) / 1000).toInt().toString() + 'k',
+      ((maxAmount * 0.5) / 1000).toInt().toString() + 'k',
+      ((maxAmount * 0.25) / 1000).toInt().toString() + 'k',
+    ];
+
     return Stack(
       children: [
-        // Y轴标签
+        // Y轴标签 - 使用自绘
         Positioned(
           left: 0,
           top: 0,
           bottom: 30,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:
-                ['4k', '3k', '2k', '1k'].map((label) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: size.getItemSpacing() / 2),
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: mutedColor,
-                      ),
-                    ),
-                  );
-                }).toList(),
+          child: CustomPaint(
+            size: Size(size.getPadding().left, double.infinity),
+            painter: _YAxisLabelPainter(
+              labels: yLabels,
+              fontSize: size.getLegendFontSize(),
+              color: mutedColor,
+              padding: size.getItemSpacing() / 2,
+            ),
           ),
         ),
-        // 预算线标签
+        // 预算线标签 - 使用自绘
         Positioned(
           left: size.getPadding().left,
           top: 30 * (1 - budgetAmount / maxAmount),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: size.getItemSpacing(),
-                  vertical: size.getItemSpacing() / 4,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color:
-                        isDark
-                            ? Colors.white.withOpacity(0.1)
-                            : Colors.black.withOpacity(0.05),
-                  ),
-                ),
-                child: Text(
-                  '\$${budgetAmount.toInt()} $budgetLabel',
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-              ),
-              SizedBox(width: size.getItemSpacing()),
-              Container(
-                width: 200,
-                height: 1,
-                color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-              ),
-            ],
+          child: CustomPaint(
+            size: Size(300, size.getLegendFontSize() * 2),
+            painter: _BudgetLabelPainter(
+              budgetAmount: budgetAmount,
+              budgetLabel: budgetLabel,
+              fontSize: size.getLegendFontSize(),
+              textColor: textColor,
+              backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+              borderColor: isDark
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.05),
+              itemSpacing: size.getItemSpacing(),
+              lineWidth: 200,
+            ),
           ),
         ),
         // 图表
@@ -500,46 +485,234 @@ class _TrendLineChart extends StatelessWidget {
             size: size,
           ),
         ),
-        // X轴标签
+        // X轴标签 - 使用自绘
         Positioned(
           left: 0,
           right: 0,
           bottom: 0,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: size.getPadding().left),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  startLabel,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: mutedColor,
-                  ),
-                ),
-                Text(
-                  middleLabel,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                Text(
-                  endLabel,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w400,
-                    color: mutedColor,
-                  ),
-                ),
-              ],
+            child: CustomPaint(
+              size: Size(double.infinity, size.getLegendFontSize() * 2),
+              painter: _XAxisLabelPainter(
+                startLabel: startLabel,
+                middleLabel: middleLabel,
+                endLabel: endLabel,
+                fontSize: size.getLegendFontSize(),
+                mutedColor: mutedColor,
+                textColor: textColor,
+              ),
             ),
           ),
         ),
       ],
     );
+  }
+}
+
+/// Y轴标签绘制器
+class _YAxisLabelPainter extends CustomPainter {
+  final List<String> labels;
+  final double fontSize;
+  final Color color;
+  final double padding;
+
+  _YAxisLabelPainter({
+    required this.labels,
+    required this.fontSize,
+    required this.color,
+    required this.padding,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
+    );
+
+    final stepHeight = size.height / (labels.length);
+    for (int i = 0; i < labels.length; i++) {
+      final y = i * stepHeight + stepHeight / 2 - fontSize / 2;
+
+      textPainter.text = TextSpan(
+        text: labels[i],
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w500,
+          color: color,
+        ),
+      );
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(0, y.clamp(0, size.height - fontSize)));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _YAxisLabelPainter oldDelegate) {
+    return oldDelegate.labels != labels ||
+        oldDelegate.fontSize != fontSize ||
+        oldDelegate.color != color ||
+        oldDelegate.padding != padding;
+  }
+}
+
+/// 预算标签绘制器
+class _BudgetLabelPainter extends CustomPainter {
+  final double budgetAmount;
+  final String budgetLabel;
+  final double fontSize;
+  final Color textColor;
+  final Color backgroundColor;
+  final Color borderColor;
+  final double itemSpacing;
+  final double lineWidth;
+
+  _BudgetLabelPainter({
+    required this.budgetAmount,
+    required this.budgetLabel,
+    required this.fontSize,
+    required this.textColor,
+    required this.backgroundColor,
+    required this.borderColor,
+    required this.itemSpacing,
+    required this.lineWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 绘制标签背景
+    final text = '\$${budgetAmount.toInt()} $budgetLabel';
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+
+    final bgWidth = textPainter.width + itemSpacing * 2;
+    final bgHeight = textPainter.height + itemSpacing / 2;
+    final bgRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, bgWidth, bgHeight),
+      const Radius.circular(10),
+    );
+
+    final bgPaint = Paint()..color = backgroundColor;
+    canvas.drawRRect(bgRect, bgPaint);
+
+    final borderPaint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    canvas.drawRRect(bgRect, borderPaint);
+
+    // 绘制文本
+    textPainter.paint(canvas, Offset(itemSpacing, itemSpacing / 4));
+
+    // 绘制线条
+    final linePaint = Paint()
+      ..color = backgroundColor == Colors.grey.shade800
+          ? Colors.grey.shade700
+          : Colors.grey.shade300
+      ..strokeWidth = 1;
+    canvas.drawLine(
+      Offset(bgWidth + itemSpacing, bgHeight / 2),
+      Offset(bgWidth + itemSpacing + lineWidth, bgHeight / 2),
+      linePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _BudgetLabelPainter oldDelegate) {
+    return oldDelegate.budgetAmount != budgetAmount ||
+        oldDelegate.budgetLabel != budgetLabel ||
+        oldDelegate.fontSize != fontSize ||
+        oldDelegate.textColor != textColor ||
+        oldDelegate.backgroundColor != backgroundColor;
+  }
+}
+
+/// X轴标签绘制器
+class _XAxisLabelPainter extends CustomPainter {
+  final String startLabel;
+  final String middleLabel;
+  final String endLabel;
+  final double fontSize;
+  final Color mutedColor;
+  final Color textColor;
+
+  _XAxisLabelPainter({
+    required this.startLabel,
+    required this.middleLabel,
+    required this.endLabel,
+    required this.fontSize,
+    required this.mutedColor,
+    required this.textColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final textPainter = TextPainter(
+      textDirection: TextDirection.ltr,
+    );
+
+    // 绘制开始标签
+    textPainter.text = TextSpan(
+      text: startLabel,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w400,
+        color: mutedColor,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(0, 0));
+
+    // 绘制中间标签
+    textPainter.text = TextSpan(
+      text: middleLabel,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w600,
+        color: textColor,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset((size.width - textPainter.width) / 2, 0),
+    );
+
+    // 绘制结束标签
+    textPainter.text = TextSpan(
+      text: endLabel,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w400,
+        color: mutedColor,
+      ),
+    );
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(size.width - textPainter.width, 0),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _XAxisLabelPainter oldDelegate) {
+    return oldDelegate.startLabel != startLabel ||
+        oldDelegate.middleLabel != middleLabel ||
+        oldDelegate.endLabel != endLabel ||
+        oldDelegate.fontSize != fontSize ||
+        oldDelegate.mutedColor != mutedColor ||
+        oldDelegate.textColor != textColor;
   }
 }
 
@@ -678,7 +851,7 @@ class _LineChartPainter extends CustomPainter {
     final linePaint =
         Paint()
           ..color = const Color(0xFFe5e7eb)
-          ..strokeWidth = 1;
+          ..strokeWidth = size.getStrokeWidth() * 0.1;
 
     final isDark = primaryColor == const Color(0xFFf06431);
     if (!isDark) {
@@ -702,7 +875,7 @@ class _LineChartPainter extends CustomPainter {
     final paint =
         Paint()
           ..color = color
-          ..strokeWidth = 1.5
+          ..strokeWidth = size.getStrokeWidth() * 0.15
           ..style = PaintingStyle.stroke;
 
     final path = _createPath(data, width, height, padding, canvasSize);
@@ -779,7 +952,7 @@ class _LineChartPainter extends CustomPainter {
     final paint =
         Paint()
           ..color = color
-          ..strokeWidth = 2
+          ..strokeWidth = size.getStrokeWidth() * 0.2
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round;
 
@@ -816,19 +989,23 @@ class _LineChartPainter extends CustomPainter {
     // 计算缩放比例：基于点动画值
     final scale = pointAnimation.clamp(0.0, 1.0);
 
+    // 基于尺寸的圆点半径
+    final glowRadius = size.getStrokeWidth() * scale;
+    final dotRadius = size.getStrokeWidth() * 0.6 * scale;
+
     // 外圈光晕
     final glowPaint =
         Paint()
           ..color = color.withOpacity(0.3 * scale)
           ..style = PaintingStyle.fill;
-    canvas.drawCircle(point, 8 * scale, glowPaint);
+    canvas.drawCircle(point, glowRadius, glowPaint);
 
     // 内圈实心点
     final dotPaint =
         Paint()
           ..color = color
           ..style = PaintingStyle.fill;
-    canvas.drawCircle(point, 5 * scale, dotPaint);
+    canvas.drawCircle(point, dotRadius, dotPaint);
   }
 
   Path _createPath(
