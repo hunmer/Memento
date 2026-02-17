@@ -51,6 +51,7 @@ class ReminderItem {
 /// 使用示例：
 /// ```dart
 /// ReminderListCard(
+///   size: const MediumSize(),
 ///   itemCount: 18,
 ///   items: [
 ///     ReminderItem(text: 'Pick up arts & crafts supplies'),
@@ -61,6 +62,9 @@ class ReminderItem {
 /// )
 /// ```
 class ReminderListCard extends StatefulWidget {
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   /// 提醒事项总数
   final int itemCount;
 
@@ -95,6 +99,7 @@ class ReminderListCard extends StatefulWidget {
     this.borderRadius,
     this.onItemTap,
     this.onActionTap,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -108,6 +113,7 @@ class ReminderListCard extends StatefulWidget {
         const [];
 
     return ReminderListCard(
+      size: size,
       itemCount: props['itemCount'] as int? ?? itemsList.length,
       items: itemsList,
       title: props['title'] as String?,
