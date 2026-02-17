@@ -10,16 +10,10 @@ class ReminderItem {
   /// 是否已完成
   final bool isCompleted;
 
-  const ReminderItem({
-    required this.text,
-    this.isCompleted = false,
-  });
+  const ReminderItem({required this.text, this.isCompleted = false});
 
   /// 创建副本
-  ReminderItem copyWith({
-    String? text,
-    bool? isCompleted,
-  }) {
+  ReminderItem copyWith({String? text, bool? isCompleted}) {
     return ReminderItem(
       text: text ?? this.text,
       isCompleted: isCompleted ?? this.isCompleted,
@@ -36,10 +30,7 @@ class ReminderItem {
 
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
-    return {
-      'text': text,
-      'isCompleted': isCompleted,
-    };
+    return {'text': text, 'isCompleted': isCompleted};
   }
 }
 
@@ -80,14 +71,14 @@ class ReminderListCard extends StatefulWidget {
   /// 高度（可选）
   final double? height;
 
-  /// 圆角半径（可选）
-  final double? borderRadius;
-
   /// 项目点击回调（可选）
   final ValueChanged<ReminderItem>? onItemTap;
 
   /// 操作按钮点击回调（可选）
   final VoidCallback? onActionTap;
+
+  /// 复选框状态变更回调（可选）
+  final ValueChanged<int>? onCheckboxChanged;
 
   const ReminderListCard({
     super.key,
@@ -96,9 +87,9 @@ class ReminderListCard extends StatefulWidget {
     this.title,
     this.width,
     this.height,
-    this.borderRadius,
     this.onItemTap,
     this.onActionTap,
+    this.onCheckboxChanged,
     this.size = const MediumSize(),
   });
 
@@ -107,7 +98,8 @@ class ReminderListCard extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final itemsList = (props['items'] as List<dynamic>?)
+    final itemsList =
+        (props['items'] as List<dynamic>?)
             ?.map((e) => ReminderItem.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -160,6 +152,13 @@ class _ReminderListCardState extends State<ReminderListCard>
     final dividerColor =
         isDark ? const Color(0xFF38383A) : const Color(0xFFD1D1D6);
 
+    // 根据 size 计算尺寸
+    final padding = widget.size.getPadding();
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    final largeFontSize = widget.size.getLargeFontSize() * 0.8;
+    final iconSize = widget.size.getIconSize();
+    final smallSpacing = widget.size.getSmallSpacing();
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -168,11 +167,11 @@ class _ReminderListCardState extends State<ReminderListCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.width ?? 380,
-              height: widget.height ?? 520,
+              width: widget.width,
+              height: widget.height,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(widget.borderRadius ?? 32),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.08),
@@ -185,7 +184,7 @@ class _ReminderListCardState extends State<ReminderListCard>
                 children: [
                   // 标题区域
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+                    padding: padding,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,35 +194,33 @@ class _ReminderListCardState extends State<ReminderListCard>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SizedBox(
-                              height: 58,
+                              height: largeFontSize + smallSpacing * 2,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  SizedBox(
-                                    height: 56,
-                                    child: AnimatedFlipCounter(
-                                      value:
-                                          widget.itemCount.toDouble() *
-                                          _animation.value,
-                                      textStyle: TextStyle(
-                                        color: textColor,
-                                        fontSize: 40,
-                                        fontWeight: FontWeight.bold,
-                                        height: 1.0,
-                                      ),
+                                  AnimatedFlipCounter(
+                                    value:
+                                        widget.itemCount.toDouble() *
+                                        _animation.value,
+                                    textStyle: TextStyle(
+                                      color: textColor,
+                                      fontSize: largeFontSize,
+                                      fontWeight: FontWeight.bold,
+                                      height: 1.0,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+                            SizedBox(height: smallSpacing),
                             SizedBox(
-                              height: 22,
+                              height: subtitleFontSize + smallSpacing,
                               child: Text(
                                 widget.title ?? 'Reminders',
                                 style: TextStyle(
                                   color: primaryColor,
-                                  fontSize: 18,
+                                  fontSize: subtitleFontSize,
                                   fontWeight: FontWeight.w600,
                                   height: 1.0,
                                 ),
@@ -233,18 +230,18 @@ class _ReminderListCardState extends State<ReminderListCard>
                         ),
                         Material(
                           color: primaryColor,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(iconSize * 0.8),
                           child: InkWell(
                             onTap: widget.onActionTap,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(iconSize * 0.8),
                             child: Container(
-                              width: 40,
-                              height: 40,
+                              width: iconSize * 1.8,
+                              height: iconSize * 1.8,
                               alignment: Alignment.center,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.format_list_bulleted_rounded,
                                 color: Colors.white,
-                                size: 20,
+                                size: iconSize,
                               ),
                             ),
                           ),
@@ -254,25 +251,33 @@ class _ReminderListCardState extends State<ReminderListCard>
                   ),
                   // 分隔线
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Container(height: 1, color: dividerColor),
+                    padding: EdgeInsets.symmetric(horizontal: padding.left),
+                    child: Container(
+                      height: smallSpacing * 0.5,
+                      color: dividerColor,
+                    ),
                   ),
                   // 列表区域
                   Expanded(
                     child: Stack(
                       children: [
                         ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
+                          padding: EdgeInsets.fromLTRB(
+                            padding.left,
+                            smallSpacing,
+                            padding.right,
+                            smallSpacing,
+                          ),
                           itemCount: widget.items.length,
                           separatorBuilder:
                               (context, index) => Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 42,
+                                padding: EdgeInsets.only(
+                                  left: iconSize * 2 + smallSpacing * 2,
                                   top: 0,
                                   bottom: 0,
                                 ),
                                 child: Container(
-                                  height: 1,
+                                  height: smallSpacing * 0.5,
                                   decoration: BoxDecoration(
                                     border: Border(
                                       bottom: BorderSide(
@@ -310,12 +315,19 @@ class _ReminderListCardState extends State<ReminderListCard>
                                     ),
                                     child: _ReminderItemTile(
                                       item: item,
+                                      size: widget.size,
                                       textColor: textColor,
                                       borderColor: borderColor,
                                       primaryColor: primaryColor,
-                                      onTap: widget.onItemTap != null
-                                          ? () => widget.onItemTap!(item)
-                                          : null,
+                                      onTap:
+                                          widget.onItemTap != null
+                                              ? () => widget.onItemTap!(item)
+                                              : null,
+                                      onCheckboxChanged:
+                                          widget.onCheckboxChanged != null
+                                              ? (completed) => widget
+                                                  .onCheckboxChanged!(index)
+                                              : null,
                                     ),
                                   ),
                                 );
@@ -328,16 +340,22 @@ class _ReminderListCardState extends State<ReminderListCard>
                           bottom: 0,
                           left: 0,
                           right: 0,
-                          child: Container(
-                            height: 32,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  backgroundColor.withOpacity(0),
-                                  backgroundColor,
-                                ],
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(12),
+                              bottomRight: Radius.circular(12),
+                            ),
+                            child: Container(
+                              height: iconSize * 2,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    backgroundColor.withOpacity(0),
+                                    backgroundColor,
+                                  ],
+                                ),
                               ),
                             ),
                           ),
@@ -358,17 +376,21 @@ class _ReminderListCardState extends State<ReminderListCard>
 /// 单个提醒事项项
 class _ReminderItemTile extends StatefulWidget {
   final ReminderItem item;
+  final HomeWidgetSize size;
   final Color textColor;
   final Color borderColor;
   final Color primaryColor;
   final VoidCallback? onTap;
+  final ValueChanged<bool>? onCheckboxChanged;
 
   const _ReminderItemTile({
     required this.item,
+    required this.size,
     required this.textColor,
     required this.borderColor,
     required this.primaryColor,
     this.onTap,
+    this.onCheckboxChanged,
   });
 
   @override
@@ -376,54 +398,89 @@ class _ReminderItemTile extends StatefulWidget {
 }
 
 class _ReminderItemTileState extends State<_ReminderItemTile> {
-  bool _isHovered = false;
+  bool _isHoveringCheckbox = false;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: InkWell(
-        onTap: widget.onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 圆形复选框
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
+    // 根据 size 计算尺寸
+    final iconSize = widget.size.getIconSize();
+    final checkboxSize = iconSize * 0.9;
+    final smallSpacing = widget.size.getSmallSpacing();
+    final fontSize = widget.size.getSubtitleFontSize() + 1;
+    final spacingBetween = iconSize * 0.7;
+    final isCompleted = widget.item.isCompleted;
+
+    return InkWell(
+      onTap: widget.onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: smallSpacing * 2),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 圆形复选框
+            Padding(
+              padding: EdgeInsets.only(top: smallSpacing),
+              child: MouseRegion(
+                onEnter: (_) => setState(() => _isHoveringCheckbox = true),
+                onExit: (_) => setState(() => _isHoveringCheckbox = false),
+                child: GestureDetector(
+                  onTap: () {
+                    if (widget.onCheckboxChanged != null) {
+                      widget.onCheckboxChanged!(!isCompleted);
+                    }
+                  },
+                  child: Container(
+                    width: checkboxSize,
+                    height: checkboxSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color:
-                          _isHovered ? widget.primaryColor : widget.borderColor,
-                      width: 1.5,
+                          isCompleted
+                              ? widget.primaryColor
+                              : Colors.transparent,
+                      border: Border.all(
+                        color:
+                            _isHoveringCheckbox
+                                ? widget.primaryColor
+                                : (isCompleted
+                                    ? widget.primaryColor
+                                    : widget.borderColor),
+                        width: 1.5,
+                      ),
                     ),
+                    child:
+                        isCompleted
+                            ? Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: checkboxSize * 0.6,
+                            )
+                            : null,
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              // 文本内容
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    widget.item.text,
-                    style: TextStyle(
-                      color: widget.textColor,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      height: 1.3,
-                    ),
+            ),
+            SizedBox(width: spacingBetween),
+            // 文本内容
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: smallSpacing * 2),
+                child: Text(
+                  widget.item.text,
+                  style: TextStyle(
+                    color:
+                        isCompleted
+                            ? widget.textColor.withOpacity(0.5)
+                            : widget.textColor,
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w500,
+                    height: 1.3,
+                    decoration: isCompleted ? TextDecoration.lineThrough : null,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
