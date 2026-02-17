@@ -127,46 +127,35 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
     Color secondaryTextColor,
     Color primaryColor,
   ) {
+    final valueFontSize = widget.size.getLargeFontSize();
+    final labelFontSize = widget.size.getSubtitleFontSize();
+    final spacing = widget.size.getSmallSpacing();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 54,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 52,
-                child: AnimatedBuilder(
-                  animation: _countAnimation,
-                  builder: (context, child) {
-                    return AnimatedFlipCounter(
-                      value:
-                          widget.data.taskCount.toDouble() *
-                          _countAnimation.value,
-                      textStyle: TextStyle(
-                        color: textColor,
-                        fontSize: 48,
-                        fontWeight: FontWeight.w500,
-                        height: 1.0,
-                      ),
-                    );
-                  },
-                ),
+        AnimatedBuilder(
+          animation: _countAnimation,
+          builder: (context, child) {
+            return AnimatedFlipCounter(
+              value: widget.data.taskCount.toDouble() * _countAnimation.value,
+              textStyle: TextStyle(
+                color: textColor,
+                fontSize: valueFontSize,
+                fontWeight: FontWeight.w500,
+                height: 1.0,
               ),
-            ],
-          ),
+            );
+          },
         ),
-        SizedBox(
-          height: 20,
-          child: Text(
-            widget.data.label,
-            style: TextStyle(
-              color: secondaryTextColor,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              height: 1.0,
-            ),
+        SizedBox(height: spacing),
+        Text(
+          widget.data.label,
+          style: TextStyle(
+            color: secondaryTextColor,
+            fontSize: labelFontSize,
+            fontWeight: FontWeight.w500,
+            height: 1.0,
           ),
         ),
       ],
@@ -184,6 +173,7 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
               task: widget.data.tasks[i],
               animation: _animation,
               index: i,
+              size: widget.size,
             ),
           ],
         ],
@@ -192,15 +182,17 @@ class _ColorTagTaskCardWidgetState extends State<ColorTagTaskCardWidget>
   }
 
   Widget _buildMoreButton(Color primaryColor) {
+    final fontSize = widget.size.getSubtitleFontSize();
+
     return Padding(
-      padding: const EdgeInsets.only(top: 4),
+      padding: EdgeInsets.only(top: widget.size.getSmallSpacing()),
       child: GestureDetector(
         onTap: () {},
         child: Text(
           '+${widget.data.moreCount} more',
           style: TextStyle(
             color: primaryColor,
-            fontSize: 15,
+            fontSize: fontSize,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -214,17 +206,25 @@ class _ColorTagTaskItemWidget extends StatelessWidget {
   final ColorTagTaskItem task;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _ColorTagTaskItemWidget({
     required this.task,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827);
+
+    final indicatorHeight = size.getLegendIndicatorHeight();
+    final indicatorWidth = size.getLegendIndicatorWidth() * 0.2;
+    final spacing = size.getSmallSpacing() * 3;
+    final titleFontSize = size.getSubtitleFontSize();
+    final tagFontSize = size.getLegendFontSize();
 
     // 确保最后一个元素的 end 不超过 1.0
     final step = 0.05;
@@ -254,21 +254,21 @@ class _ColorTagTaskItemWidget extends StatelessWidget {
           children: [
             // 彩色竖条标签
             Container(
-              width: 4,
-              height: 16,
+              width: indicatorWidth,
+              height: indicatorHeight,
               decoration: BoxDecoration(
                 color: Color(task.color),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: spacing),
             // 任务标题（时间）
             Expanded(
               child: Text(
                 task.title,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 15,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.w500,
                   height: 1.2,
                 ),
@@ -282,7 +282,7 @@ class _ColorTagTaskItemWidget extends StatelessWidget {
                 task.tag,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: 14,
+                  fontSize: tagFontSize,
                   fontWeight: FontWeight.w400,
                   height: 1.2,
                 ),

@@ -112,7 +112,8 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 360,
+              width: widget.inline ? double.maxFinite : null,
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -192,18 +193,19 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
 
   Widget _buildDivider(bool isDark) {
     return Container(
-      height: 2,
+      height: widget.size.getSmallSpacing(),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
             color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-            width: 2,
+            width: widget.size.getSmallSpacing(),
           ),
         ),
       ),
       child: CustomPaint(
         painter: _DashedLinePainter(
           color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+          strokeWidth: widget.size.getSmallSpacing(),
         ),
       ),
     );
@@ -342,19 +344,20 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
 /// 虚线绘制器
 class _DashedLinePainter extends CustomPainter {
   final Color color;
+  final double strokeWidth;
 
-  _DashedLinePainter({required this.color});
+  _DashedLinePainter({required this.color, this.strokeWidth = 2});
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint =
         Paint()
           ..color = color
-          ..strokeWidth = 2
+          ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke;
 
-    const dashWidth = 5.0;
-    const dashSpace = 5.0;
+    final dashWidth = 5.0;
+    final dashSpace = 5.0;
     double startX = 0;
 
     while (startX < size.width) {
@@ -369,6 +372,7 @@ class _DashedLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DashedLinePainter oldDelegate) {
-    return oldDelegate.color != color;
+    return oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/news_card.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/news_card_data.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 新闻卡片示例
 class NewsCardExample extends StatelessWidget {
@@ -28,6 +29,7 @@ class NewsCardExample extends StatelessWidget {
                     height: 150,
                     child: NewsCardWidget(
                       inline: true,
+                      size: const SmallSize(),
                       featuredNews: FeaturedNewsData(
                         imageUrl:
                             'https://lh3.googleusercontent.com/aida-public/AB6AXuDv5gxvSgmJi-EJnx1jpWIpatry-RBKJyPObZyjHGF4-dpstaoze49i8tJFHbm3FOGPd2LNfrxsIt6W5g4qO1YfXAYs6ZVYy2GA78hSeLg1pAm2khF7Z5hO5NCICS2kSwHjgA5diQ8bCI6-IdSKXJxszm4VL2Fq4uCx3rbOzM_OYO_AO6sFN2ew-KJaE3U3xyYbqX-7Z5P7ippdNtDWdpZDfWXETGhR087NeReVoMb6Xf8_Zf-uQ2kXVzCAKZ4wkiflAg-3sYRMbQ',
@@ -63,6 +65,7 @@ class NewsCardExample extends StatelessWidget {
                     height: 220,
                     child: NewsCardWidget(
                       inline: true,
+                      size: const MediumSize(),
                       featuredNews: FeaturedNewsData(
                         imageUrl:
                             'https://lh3.googleusercontent.com/aida-public/AB6AXuDv5gxvSgmJi-EJnx1jpWIpatry-RBKJyPObZyjHGF4-dpstaoze49i8tJFHbm3FOGPd2LNfrxsIt6W5g4qO1YfXAYs6ZVYy2GA78hSeLg1pAm2khF7Z5hO5NCICS2kSwHjgA5diQ8bCI6-IdSKXJxszm4VL2Fq4uCx3rbOzM_OYO_AO6sFN2ew-KJaE3U3xyYbqX-7Z5P7ippdNtDWdpZDfWXETGhR087NeReVoMb6Xf8_Zf-uQ2kXVzCAKZ4wkiflAg-3sYRMbQ',
@@ -98,6 +101,7 @@ class NewsCardExample extends StatelessWidget {
                     height: 300,
                     child: NewsCardWidget(
                       inline: true,
+                      size: const LargeSize(),
                       featuredNews: FeaturedNewsData(
                         imageUrl:
                             'https://lh3.googleusercontent.com/aida-public/AB6AXuDv5gxvSgmJi-EJnx1jpWIpatry-RBKJyPObZyjHGF4-dpstaoze49i8tJFHbm3FOGPd2LNfrxsIt6W5g4qO1YfXAYs6ZVYy2GA78hSeLg1pAm2khF7Z5hO5NCICS2kSwHjgA5diQ8bCI6-IdSKXJxszm4VL2Fq4uCx3rbOzM_OYO_AO6sFN2ew-KJaE3U3xyYbqX-7Z5P7ippdNtDWdpZDfWXETGhR087NeReVoMb6Xf8_Zf-uQ2kXVzCAKZ4wkiflAg-3sYRMbQ',
@@ -132,6 +136,7 @@ class NewsCardExample extends StatelessWidget {
                   height: 320,
                   child: NewsCardWidget(
                     inline: true,
+                    size: const WideSize(),
                     featuredNews: FeaturedNewsData(
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuDv5gxvSgmJi-EJnx1jpWIpatry-RBKJyPObZyjHGF4-dpstaoze49i8tJFHbm3FOGPd2LNfrxsIt6W5g4qO1YfXAYs6ZVYy2GA78hSeLg1pAm2khF7Z5hO5NCICS2kSwHjgA5diQ8bCI6-IdSKXJxszm4VL2Fq4uCx3rbOzM_OYO_AO6sFN2ew-KJaE3U3xyYbqX-7Z5P7ippdNtDWdpZDfWXETGhR087NeReVoMb6Xf8_Zf-uQ2kXVzCAKZ4wkiflAg-3sYRMbQ',
@@ -172,6 +177,7 @@ class NewsCardExample extends StatelessWidget {
                   height: 420,
                   child: NewsCardWidget(
                     inline: true,
+                    size: const Wide2Size(),
                     featuredNews: FeaturedNewsData(
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuDv5gxvSgmJi-EJnx1jpWIpatry-RBKJyPObZyjHGF4-dpstaoze49i8tJFHbm3FOGPd2LNfrxsIt6W5g4qO1YfXAYs6ZVYy2GA78hSeLg1pAm2khF7Z5hO5NCICS2kSwHjgA5diQ8bCI6-IdSKXJxszm4VL2Fq4uCx3rbOzM_OYO_AO6sFN2ew-KJaE3U3xyYbqX-7Z5P7ippdNtDWdpZDfWXETGhR087NeReVoMb6Xf8_Zf-uQ2kXVzCAKZ4wkiflAg-3sYRMbQ',

@@ -129,6 +129,14 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
         ? const Color(0xFFCBD5E1)
         : const Color(0xFF94A3B8); // Slate-300 / Slate-400
 
+    // 根据尺寸计算容器尺寸
+    final containerWidth = widget.inline
+        ? double.maxFinite
+        : (widget.size.width >= 4
+            ? double.maxFinite
+            : 380.0 * widget.size.scale);
+    final imageIconSize = widget.size.getFeaturedIconSize();
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -137,12 +145,14 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
           child: Opacity(
             opacity: _animation.value,
             child: Container(
-              width: widget.inline ? double.maxFinite : 380,
-              height: widget.inline ? double.maxFinite : 200,
+              width: containerWidth,
+              constraints: widget.size.getHeightConstraints(),
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: cardColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(
+                  widget.size is SmallSize ? 12 : 16,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -155,7 +165,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 左侧图片区域
-                  _buildImageArea(isDark: isDark),
+                  _buildImageArea(isDark: isDark, imageSize: imageIconSize),
                   SizedBox(width: widget.size.getItemSpacing() * 2),
 
                   // 右侧信息区域
@@ -179,21 +189,27 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
   }
 
   /// 左侧图片区域
-  Widget _buildImageArea({required bool isDark}) {
+  Widget _buildImageArea({required bool isDark, required double imageSize}) {
+    final imageSizeValue = widget.size.getFeaturedImageSize();
+    final borderRadius = imageSizeValue * 0.2;
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(borderRadius),
       child: Image.network(
         widget.imageUrl,
-        width: 120,
-        height: 120,
+        width: imageSizeValue,
+        height: imageSizeValue,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return Container(
-            width: 120,
-            height: 120,
+            width: imageSizeValue,
+            height: imageSizeValue,
             color: isDark ? const Color(0xFF334155) : const Color(0xFFF3F4F6),
-            child:
-                const Icon(Icons.broken_image, size: 48, color: Colors.grey),
+            child: Icon(
+              Icons.broken_image,
+              size: imageSizeValue * 0.4,
+              color: Colors.grey,
+            ),
           );
         },
       ),
@@ -209,6 +225,14 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
     required Color textMainColor,
     required Color textSubColor,
   }) {
+    final iconSize = widget.size.getThumbnailIconSize();
+    final iconContainerSize = iconSize * 1.3;
+    final labelFontSize = widget.size.getLegendFontSize();
+    final titleFontSize = widget.size.getSubtitleFontSize();
+    const ratingIconSize = 18.0;
+    const ratingTextSize = 13.0;
+    const dateFontSize = 11.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -222,7 +246,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
               child: Text(
                 widget.label.toUpperCase(),
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: labelFontSize,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.15 * 3, // 0.15em ≈ 3px
                   color: accentColor,
@@ -233,15 +257,15 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
             // 图标按钮
             if (widget.icon != null)
               Container(
-                width: 32,
-                height: 32,
+                width: iconContainerSize,
+                height: iconContainerSize,
                 decoration: BoxDecoration(
                   color: surfaceColor,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   widget.icon,
-                  size: 18,
+                  size: iconSize * 0.75,
                   color: const Color(0xFF94A3B8),
                 ),
               ),
@@ -254,7 +278,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
         Text(
           widget.title,
           style: TextStyle(
-            fontSize: 17,
+            fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
             color: textMainColor,
             height: 1.2,
@@ -280,7 +304,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
               child: Text(
                 widget.date,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: dateFontSize,
                   fontWeight: FontWeight.bold,
                   color: textSubColor,
                   letterSpacing: 0.5,
@@ -291,15 +315,19 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
             // 评分
             Row(
               children: [
-                Icon(Icons.star, size: 18, color: primaryColor),
+                Icon(
+                  Icons.star,
+                  size: ratingIconSize,
+                  color: primaryColor,
+                ),
                 SizedBox(width: widget.size.getItemSpacing() / 2),
                 SizedBox(
-                  height: 18,
+                  height: ratingTextSize + 2,
                   child: Center(
                     child: Text(
                       widget.rating.toStringAsFixed(1),
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: ratingTextSize,
                         fontWeight: FontWeight.bold,
                         color: primaryColor,
                         height: 1.0,

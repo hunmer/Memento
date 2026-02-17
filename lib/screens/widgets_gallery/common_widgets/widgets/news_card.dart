@@ -104,11 +104,12 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? 300 : double.maxFinite,
-        height: widget.inline ? 300 : double.maxFinite,
+        width: widget.inline ? double.maxFinite : null,
+        height: widget.inline ? double.maxFinite : null,
+        constraints: widget.size.getHeightConstraints(),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -120,13 +121,14 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 头条新闻图片区域
-            _buildFeaturedNewsSection(
-              context,
-              isDark: isDark,
-              primaryColor: primaryColor,
-              textMainColor: textMainColor,
-            ),
+            // 头条新闻图片区域（小尺寸下隐藏）
+            if (widget.size is! SmallSize)
+              _buildFeaturedNewsSection(
+                context,
+                isDark: isDark,
+                primaryColor: primaryColor,
+                textMainColor: textMainColor,
+              ),
             // 新闻列表区域
             Expanded(
               child: _buildNewsListSection(
@@ -154,16 +156,13 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
     final hasIcon = widget.featuredNews.iconCodePoint != null;
 
     return SizedBox(
-      height: 150,
+      height: widget.size.getHeightConstraints().maxHeight * 0.45,
       child: Stack(
         children: [
           // 背景图片或图标
           Positioned.fill(
             child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(28),
-                topRight: Radius.circular(28),
-              ),
+              borderRadius: BorderRadius.circular(12),
               child:
                   hasImage
                       ? CommonImageBuilder.buildImage(
@@ -183,7 +182,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
                               widget.featuredNews.iconCodePoint!,
                               fontFamily: 'MaterialIcons',
                             ),
-                            size: 80,
+                            size: widget.size.getFeaturedIconSize() * 2,
                             color: Colors.white.withOpacity(0.3),
                           ),
                         ),
@@ -226,7 +225,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
           ),
           // 标题
           Positioned(
-            bottom: 8,
+            bottom: widget.size.getSmallSpacing() * 4,
             left: 0,
             right: 0,
             child: Padding(
@@ -255,14 +254,16 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
   Widget _buildNewsItemThumbnail(NewsItemData item, bool isDark) {
     final hasImage = item.imageUrl.isNotEmpty;
     final hasIcon = item.iconCodePoint != null;
+    final thumbSize = widget.size.getThumbnailImageSize();
+    final iconSize = widget.size.getThumbnailIconSize();
 
     if (hasImage) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: CommonImageBuilder.buildImage(
           imageUrl: item.imageUrl,
-          width: 56,
-          height: 56,
+          width: thumbSize,
+          height: thumbSize,
           fit: BoxFit.cover,
           isDark: isDark,
         ),
@@ -271,8 +272,8 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
 
     if (hasIcon) {
       return Container(
-        width: 56,
-        height: 56,
+        width: thumbSize,
+        height: thumbSize,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Color(item.iconBackgroundColor ?? _defaultGoodsColor.value),
@@ -280,15 +281,15 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
         child: Icon(
           IconData(item.iconCodePoint!, fontFamily: 'MaterialIcons'),
           color: Colors.white,
-          size: 28,
+          size: iconSize,
         ),
       );
     }
 
     // 默认占位符
     return Container(
-      width: 56,
-      height: 56,
+      width: thumbSize,
+      height: thumbSize,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
@@ -296,7 +297,7 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
       child: Icon(
         Icons.article,
         color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-        size: 28,
+        size: iconSize,
       ),
     );
   }
@@ -317,7 +318,11 @@ class _NewsCardWidgetState extends State<NewsCardWidget>
       ),
       child: Padding(
         padding: EdgeInsets.all(widget.size.getSmallSpacing()),
-        child: Icon(Icons.fingerprint_outlined, color: Colors.white, size: 20),
+        child: Icon(
+          Icons.fingerprint_outlined,
+          color: Colors.white,
+          size: widget.size.getIconSize() * 0.83,
+        ),
       ),
     );
   }
