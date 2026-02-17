@@ -273,7 +273,7 @@ class _FeaturedSection extends StatelessWidget {
                     Icon(
                       Icons.local_fire_department,
                       color: primaryColor,
-                      size: 18,
+                      size: size.getIconSize(),
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -454,7 +454,7 @@ class _ArticleListSection extends StatelessWidget {
                           isDark
                               ? const Color(0xFF9CA3AF)
                               : const Color(0xFF6B7280),
-                      size: 16,
+                      size: size.getIconSize(),
                     ),
                     const SizedBox(width: 6),
                     Text(

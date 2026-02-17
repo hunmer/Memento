@@ -348,14 +348,14 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
                   children: [
                     Icon(
                       Icons.check_circle_outline,
-                      size: 32,
+                      size: widget.size.getFeaturedIconSize(),
                       color: textColor.withOpacity(0.3),
                     ),
                     SizedBox(height: widget.size.getItemSpacing()),
                     Text(
                       '暂无已完成项目',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: widget.size.getSubtitleFontSize(),
                         color: textColor.withOpacity(0.5),
                         fontWeight: FontWeight.w500,
                       ),
