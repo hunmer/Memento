@@ -10,8 +10,10 @@ class FeaturedArticleData {
   final String title;
   final String summary;
   final String imageUrl;
+
   /// 图标 codePoint（可选，当没有图片时使用）
   final int? iconCodePoint;
+
   /// 图标背景颜色（可选，配合 iconCodePoint 使用）
   final int? iconBackgroundColor;
 
@@ -44,7 +46,8 @@ class FeaturedArticleData {
       'summary': summary,
       'imageUrl': imageUrl,
       if (iconCodePoint != null) 'iconCodePoint': iconCodePoint,
-      if (iconBackgroundColor != null) 'iconBackgroundColor': iconBackgroundColor,
+      if (iconBackgroundColor != null)
+        'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }
@@ -55,8 +58,10 @@ class ArticleData {
   final String author;
   final String publication;
   final String imageUrl;
+
   /// 图标 codePoint（可选，当没有图片时使用）
   final int? iconCodePoint;
+
   /// 图标背景颜色（可选，配合 iconCodePoint 使用）
   final int? iconBackgroundColor;
 
@@ -89,7 +94,8 @@ class ArticleData {
       'publication': publication,
       'imageUrl': imageUrl,
       if (iconCodePoint != null) 'iconCodePoint': iconCodePoint,
-      if (iconBackgroundColor != null) 'iconBackgroundColor': iconBackgroundColor,
+      if (iconBackgroundColor != null)
+        'iconBackgroundColor': iconBackgroundColor,
     };
   }
 }
@@ -118,16 +124,20 @@ class ArticleListCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final featured = props['featuredArticle'] != null
-        ? FeaturedArticleData.fromJson(props['featuredArticle'] as Map<String, dynamic>)
-        : const FeaturedArticleData(
-            author: 'Darius Foroux',
-            title: 'On the biggest prize in life',
-            summary: 'To desire pleasure is to accept pain...',
-            imageUrl: '',
-          );
+    final featured =
+        props['featuredArticle'] != null
+            ? FeaturedArticleData.fromJson(
+              props['featuredArticle'] as Map<String, dynamic>,
+            )
+            : const FeaturedArticleData(
+              author: 'Darius Foroux',
+              title: 'On the biggest prize in life',
+              summary: 'To desire pleasure is to accept pain...',
+              imageUrl: '',
+            );
 
-    final articlesList = (props['articles'] as List<dynamic>?)
+    final articlesList =
+        (props['articles'] as List<dynamic>?)
             ?.map((e) => ArticleData.fromJson(e as Map<String, dynamic>))
             .toList() ??
         const [];
@@ -185,8 +195,7 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : 375,
-        height: widget.inline ? double.maxFinite : 600,
+        width: widget.inline ? double.maxFinite : null,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -200,9 +209,7 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: widget.size.getTitleSpacing()),
             Padding(
               padding: widget.size.getPadding(),
               child: _FeaturedSection(
@@ -211,14 +218,15 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
                 size: widget.size,
               ),
             ),
-            SizedBox(height: widget.size.getTitleSpacing()),
-            Padding(
-              padding: widget.size.getPadding(),
-              child: _ArticleListSection(
-                articles: widget.articles,
-                animation: _animation,
-                size: widget.size,
-                isInline: widget.inline,
+            Expanded(
+              child: Padding(
+                padding: widget.size.getPadding(),
+                child: _ArticleListSection(
+                  articles: widget.articles,
+                  animation: _animation,
+                  size: widget.size,
+                  isInline: widget.inline,
+                ),
               ),
             ),
             SizedBox(height: widget.size.getTitleSpacing()),
@@ -234,7 +242,11 @@ class _FeaturedSection extends StatelessWidget {
   final Animation<double> animation;
   final HomeWidgetSize size;
 
-  const _FeaturedSection({required this.data, required this.animation, required this.size});
+  const _FeaturedSection({
+    required this.data,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -258,9 +270,21 @@ class _FeaturedSection extends StatelessWidget {
                 offset: Offset(0, 10 * (1 - sectionAnimation.value)),
                 child: Row(
                   children: [
-                    Icon(Icons.local_fire_department, color: primaryColor, size: 18),
+                    Icon(
+                      Icons.local_fire_department,
+                      color: primaryColor,
+                      size: 18,
+                    ),
                     const SizedBox(width: 6),
-                    Text('POPULAR RIGHT NOW', style: TextStyle(color: primaryColor, fontSize: size.getLegendFontSize() - 2, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+                    Text(
+                      'POPULAR RIGHT NOW',
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: size.getLegendFontSize() - 2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -284,11 +308,45 @@ class _FeaturedSection extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(data.author.toUpperCase(), style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize() - 2, fontWeight: FontWeight.w700, letterSpacing: 1)),
+                          Text(
+                            data.author.toUpperCase(),
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? const Color(0xFF9CA3AF)
+                                      : const Color(0xFF6B7280),
+                              fontSize: size.getLegendFontSize() - 2,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1,
+                            ),
+                          ),
                           SizedBox(height: size.getSmallSpacing()),
-                          Text(data.title, style: TextStyle(color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827), fontSize: size.getTitleFontSize(), fontWeight: FontWeight.w700, height: 1.2)),
+                          Text(
+                            data.title,
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? const Color(0xFFF9FAFB)
+                                      : const Color(0xFF111827),
+                              fontSize: size.getTitleFontSize(),
+                              fontWeight: FontWeight.w700,
+                              height: 1.2,
+                            ),
+                          ),
                           SizedBox(height: size.getSmallSpacing()),
-                          Text(data.summary, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize(), height: 1.3)),
+                          Text(
+                            data.summary,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color:
+                                  isDark
+                                      ? const Color(0xFF9CA3AF)
+                                      : const Color(0xFF6B7280),
+                              fontSize: size.getLegendFontSize(),
+                              height: 1.3,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -306,14 +364,16 @@ class _FeaturedSection extends StatelessWidget {
   Widget _buildFeaturedImageOrIcon(FeaturedArticleData data, bool isDark) {
     final hasImage = data.imageUrl.isNotEmpty;
     final hasIcon = data.iconCodePoint != null;
+    final imageSize = size.getFeaturedImageSize();
+    final iconSize = size.getFeaturedIconSize();
 
     if (hasImage) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: CommonImageBuilder.buildImage(
           imageUrl: data.imageUrl,
-          width: 80,
-          height: 80,
+          width: imageSize,
+          height: imageSize,
           fit: BoxFit.cover,
           defaultIcon: Icons.article,
           isDark: isDark,
@@ -323,8 +383,8 @@ class _FeaturedSection extends StatelessWidget {
 
     if (hasIcon) {
       return Container(
-        width: 80,
-        height: 80,
+        width: imageSize,
+        height: imageSize,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Color(data.iconBackgroundColor ?? _defaultGoodsColor.value),
@@ -332,15 +392,15 @@ class _FeaturedSection extends StatelessWidget {
         child: Icon(
           IconData(data.iconCodePoint!, fontFamily: 'MaterialIcons'),
           color: Colors.white,
-          size: 40,
+          size: iconSize,
         ),
       );
     }
 
     // 默认占位符
     return Container(
-      width: 80,
-      height: 80,
+      width: imageSize,
+      height: imageSize,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
@@ -348,7 +408,7 @@ class _FeaturedSection extends StatelessWidget {
       child: Icon(
         Icons.article,
         color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-        size: 40,
+        size: iconSize,
       ),
     );
   }
@@ -360,7 +420,12 @@ class _ArticleListSection extends StatelessWidget {
   final HomeWidgetSize size;
   final bool isInline;
 
-  const _ArticleListSection({required this.articles, required this.animation, required this.size, this.isInline = false});
+  const _ArticleListSection({
+    required this.articles,
+    required this.animation,
+    required this.size,
+    this.isInline = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -383,9 +448,27 @@ class _ArticleListSection extends StatelessWidget {
                 offset: Offset(0, 10 * (1 - headerAnimation.value)),
                 child: Row(
                   children: [
-                    Icon(Icons.feed, color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), size: 16),
+                    Icon(
+                      Icons.feed,
+                      color:
+                          isDark
+                              ? const Color(0xFF9CA3AF)
+                              : const Color(0xFF6B7280),
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
-                    Text('NEW ARTICLES', style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize() - 2, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+                    Text(
+                      'NEW ARTICLES',
+                      style: TextStyle(
+                        color:
+                            isDark
+                                ? const Color(0xFF9CA3AF)
+                                : const Color(0xFF6B7280),
+                        fontSize: size.getLegendFontSize() - 2,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -393,24 +476,38 @@ class _ArticleListSection extends StatelessWidget {
           },
         ),
         SizedBox(height: size.getItemSpacing()),
-        SizedBox(
-          height: isInline ? null : 320,
-          child: isInline
-              ? Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(articles.length, (index) {
-                    return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
-                  }),
-                )
-              : SingleChildScrollView(
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
+        Expanded(
+          child:
+              isInline
+                  ? Column(
                     mainAxisSize: MainAxisSize.min,
                     children: List.generate(articles.length, (index) {
-                      return _ArticleListItem(data: articles[index], animation: animation, index: index, size: size);
+                      return _ArticleListItem(
+                        data: articles[index],
+                        animation: animation,
+                        index: index,
+                        size: size,
+                      );
                     }),
+                  )
+                  : Scrollbar(
+                    thickness: 4,
+                    radius: const Radius.circular(2),
+                    child: SingleChildScrollView(
+                      physics: const ClampingScrollPhysics(),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(articles.length, (index) {
+                          return _ArticleListItem(
+                            data: articles[index],
+                            animation: animation,
+                            index: index,
+                            size: size,
+                          );
+                        }),
+                      ),
+                    ),
                   ),
-                ),
         ),
       ],
     );
@@ -436,7 +533,11 @@ class _ArticleListItem extends StatelessWidget {
 
     final itemAnimation = CurvedAnimation(
       parent: animation,
-      curve: Interval(0.2 + index * 0.1, 0.6 + index * 0.1, curve: Curves.easeOutCubic),
+      curve: Interval(
+        0.2 + index * 0.1,
+        0.6 + index * 0.1,
+        curve: Curves.easeOutCubic,
+      ),
     );
 
     return AnimatedBuilder(
@@ -456,9 +557,32 @@ class _ArticleListItem extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFFF9FAFB) : const Color(0xFF111827), fontSize: size.getSubtitleFontSize(), fontWeight: FontWeight.w700)),
+                        Text(
+                          data.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? const Color(0xFFF9FAFB)
+                                    : const Color(0xFF111827),
+                            fontSize: size.getSubtitleFontSize(),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         SizedBox(height: size.getSmallSpacing()),
-                        Text('${data.author} in ${data.publication}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280), fontSize: size.getLegendFontSize())),
+                        Text(
+                          '${data.author} in ${data.publication}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color:
+                                isDark
+                                    ? const Color(0xFF9CA3AF)
+                                    : const Color(0xFF6B7280),
+                            fontSize: size.getLegendFontSize(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -475,14 +599,16 @@ class _ArticleListItem extends StatelessWidget {
   Widget _buildArticleImageOrIcon(ArticleData data, bool isDark) {
     final hasImage = data.imageUrl.isNotEmpty;
     final hasIcon = data.iconCodePoint != null;
+    final imageSize = size.getThumbnailImageSize();
+    final iconSize = size.getThumbnailIconSize();
 
     if (hasImage) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: CommonImageBuilder.buildImage(
           imageUrl: data.imageUrl,
-          width: 48,
-          height: 48,
+          width: imageSize,
+          height: imageSize,
           fit: BoxFit.cover,
           defaultIcon: Icons.article,
           isDark: isDark,
@@ -492,8 +618,8 @@ class _ArticleListItem extends StatelessWidget {
 
     if (hasIcon) {
       return Container(
-        width: 48,
-        height: 48,
+        width: imageSize,
+        height: imageSize,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: Color(data.iconBackgroundColor ?? _defaultGoodsColor.value),
@@ -501,15 +627,15 @@ class _ArticleListItem extends StatelessWidget {
         child: Icon(
           IconData(data.iconCodePoint!, fontFamily: 'MaterialIcons'),
           color: Colors.white,
-          size: 24,
+          size: iconSize,
         ),
       );
     }
 
     // 默认占位符
     return Container(
-      width: 48,
-      height: 48,
+      width: imageSize,
+      height: imageSize,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
@@ -517,7 +643,7 @@ class _ArticleListItem extends StatelessWidget {
       child: Icon(
         Icons.article,
         color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-        size: 24,
+        size: iconSize,
       ),
     );
   }
