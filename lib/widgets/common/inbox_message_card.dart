@@ -56,6 +56,7 @@ class InboxMessageCardWidget extends StatefulWidget {
   final VoidCallback? onMoreTap;
   final String? title; // 可配置标题
   final Color? primaryColor; // 可配置主色调
+  final HomeWidgetSize size; // 小组件尺寸
 
   const InboxMessageCardWidget({
     super.key,
@@ -65,6 +66,7 @@ class InboxMessageCardWidget extends StatefulWidget {
     this.onMoreTap,
     this.title,
     this.primaryColor,
+    this.size = const MediumSize(),
   });
 
   /// 从 props 创建实例（用于公共小组件系统）
@@ -138,7 +140,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
+              width: 340.0 * widget.size.scale,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(8),
@@ -155,7 +157,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                 children: [
                   // 标题栏
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    padding: widget.size.getPadding(),
                     decoration: BoxDecoration(
                       color: primaryColor,
                       borderRadius: const BorderRadius.only(
@@ -168,17 +170,17 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                       children: [
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.inbox,
                               color: Colors.white,
-                              size: 20,
+                              size: widget.size.getThumbnailIconSize(),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: widget.size.getItemSpacing()),
                             Text(
                               widget.title ?? 'Inbox',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.95),
-                                fontSize: 18,
+                                fontSize: widget.size.getTitleFontSize() * 0.75,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.5,
                               ),
@@ -189,7 +191,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                           widget.totalCount.toString(),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.95),
-                            fontSize: 18,
+                            fontSize: widget.size.getTitleFontSize() * 0.75,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -197,16 +199,17 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                     ),
                   ),
                   // 消息列表（支持滚动）
-                  SizedBox(
-                    height: 240,
+                  Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      padding: widget.size.getPadding().copyWith(
+                        top: widget.size.getItemSpacing(),
+                      ),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             for (int i = 0; i < widget.messages.length; i++) ...[
-                              if (i > 0) const SizedBox(height: 4),
+                              if (i > 0) SizedBox(height: widget.size.getItemSpacing() * 0.5),
                               _MessageItem(
                                 message: widget.messages[i],
                                 textColor: textColor,
@@ -215,9 +218,10 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                                 isLast: i == widget.messages.length - 1,
                                 animation: _animation,
                                 index: i,
+                                size: widget.size,
                               ),
                             ],
-                            const SizedBox(height: 16),
+                            SizedBox(height: widget.size.getItemSpacing() * 2),
                             // 更多按钮
                             GestureDetector(
                               onTap: widget.onMoreTap,
@@ -225,12 +229,12 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                                 '+${widget.remainingCount} more',
                                 style: TextStyle(
                                   color: primaryColor,
-                                  fontSize: 14,
+                                  fontSize: widget.size.getSubtitleFontSize(),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: widget.size.getItemSpacing()),
                           ],
                         ),
                       ),
@@ -255,6 +259,7 @@ class _MessageItem extends StatelessWidget {
   final bool isLast;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _MessageItem({
     required this.message,
@@ -264,6 +269,7 @@ class _MessageItem extends StatelessWidget {
     required this.isLast,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   /// 构建头像或图标
@@ -272,7 +278,7 @@ class _MessageItem extends StatelessWidget {
       imageUrl: message.avatarUrl,
       iconCodePoint: message.iconCodePoint,
       iconBackgroundColor: message.iconBackgroundColor,
-      size: 40,
+      size: size.getThumbnailIconSize() * 1.5,
     );
   }
 
@@ -300,7 +306,7 @@ class _MessageItem extends StatelessWidget {
           child: Transform.translate(
             offset: Offset(0, 10 * (1 - itemAnimation.value)),
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: size.getItemSpacing() * 1.5),
               decoration: BoxDecoration(
                 border: isLast
                     ? null
@@ -317,8 +323,8 @@ class _MessageItem extends StatelessWidget {
                   children: [
                     // 头像或图标
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: size.getThumbnailIconSize() * 1.5,
+                      height: size.getThumbnailIconSize() * 1.5,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
@@ -330,7 +336,7 @@ class _MessageItem extends StatelessWidget {
                         child: _buildAvatarOrIcon(message),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: size.getItemSpacing() * 1.5),
                     // 内容
                     Expanded(
                       child: Column(
@@ -346,29 +352,29 @@ class _MessageItem extends StatelessWidget {
                                   message.name,
                                   style: TextStyle(
                                     color: textColor,
-                                    fontSize: 14,
+                                    fontSize: size.getSubtitleFontSize(),
                                     fontWeight: FontWeight.bold,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: size.getSmallSpacing() * 2),
                               Text(
                                 message.timeAgo,
                                 style: TextStyle(
                                   color: subTextColor,
-                                  fontSize: 12,
+                                  fontSize: size.getLegendFontSize(),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: size.getSmallSpacing()),
                           Text(
                             message.preview,
                             style: TextStyle(
                               color: subTextColor,
-                              fontSize: 12,
+                              fontSize: size.getLegendFontSize(),
                               height: 1.2,
                             ),
                             maxLines: 1,

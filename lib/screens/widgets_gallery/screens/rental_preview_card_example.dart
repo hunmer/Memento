@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/rental_preview_card.dart';
 
 /// 租赁预览卡片示例
@@ -23,9 +24,10 @@ class RentalPreviewCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 200,
+                    width: 150,
+                    height: 150,
                     child: RentalPreviewCardWidget(
+                      size: const SmallSize(),
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuCy3FkoYOsBs67DoRSkHacGbAGIW_MrSaQUShJ5cE4hq150_S3cORrNLnScjj_6NAvzQQ7_DRqUhmCQMfI0xNnHtiVuG1mHXIW6W9RyB7_PYEY9BXJmSA4duqZjRBcBid60ho_UZ8NfhC3BZV4AhPbES6hhOklhdA_1PtpNoftcr5YBiA4TWOpNdoVIwijmT5LQ_3r3wMHn4Cl3umkfGgOywaAP5EE7htELBy7uvKtoSqoVNrXyIbhg1szVZo5RYHmcGaKNIEcFyg',
                       status: '即将到来',
@@ -42,9 +44,10 @@ class RentalPreviewCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 240,
+                    width: 220,
+                    height: 200,
                     child: RentalPreviewCardWidget(
+                      size: const MediumSize(),
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuCy3FkoYOsBs67DoRSkHacGbAGIW_MrSaQUShJ5cE4hq150_S3cORrNLnScjj_6NAvzQQ7_DRqUhmCQMfI0xNnHtiVuG1mHXIW6W9RyB7_PYEY9BXJmSA4duqZjRBcBid60ho_UZ8NfhC3BZV4AhPbES6hhOklhdA_1PtpNoftcr5YBiA4TWOpNdoVIwijmT5LQ_3r3wMHn4Cl3umkfGgOywaAP5EE7htELBy7uvKtoSqoVNrXyIbhg1szVZo5RYHmcGaKNIEcFyg',
                       status: '即将到来',
@@ -61,9 +64,10 @@ class RentalPreviewCardExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
+                    width: 300,
                     height: 280,
                     child: RentalPreviewCardWidget(
+                      size: const LargeSize(),
                       imageUrl:
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuCy3FkoYOsBs67DoRSkHacGbAGIW_MrSaQUShJ5cE4hq150_S3cORrNLnScjj_6NAvzQQ7_DRqUhmCQMfI0xNnHtiVuG1mHXIW6W9RyB7_PYEY9BXJmSA4duqZjRBcBid60ho_UZ8NfhC3BZV4AhPbES6hhOklhdA_1PtpNoftcr5YBiA4TWOpNdoVIwijmT5LQ_3r3wMHn4Cl3umkfGgOywaAP5EE7htELBy7uvKtoSqoVNrXyIbhg1szVZo5RYHmcGaKNIEcFyg',
                       status: '即将到来',
@@ -82,6 +86,8 @@ class RentalPreviewCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 280,
                   child: RentalPreviewCardWidget(
+                    size: const WideSize(),
+                    inline: true,
                     imageUrl:
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuCy3FkoYOsBs67DoRSkHacGbAGIW_MrSaQUShJ5cE4hq150_S3cORrNLnScjj_6NAvzQQ7_DRqUhmCQMfI0xNnHtiVuG1mHXIW6W9RyB7_PYEY9BXJmSA4duqZjRBcBid60ho_UZ8NfhC3BZV4AhPbES6hhOklhdA_1PtpNoftcr5YBiA4TWOpNdoVIwijmT5LQ_3r3wMHn4Cl3umkfGgOywaAP5EE7htELBy7uvKtoSqoVNrXyIbhg1szVZo5RYHmcGaKNIEcFyg',
                     status: '即将到来',
@@ -100,6 +106,8 @@ class RentalPreviewCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 350,
                   child: RentalPreviewCardWidget(
+                    size: const Wide2Size(),
+                    inline: true,
                     imageUrl:
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuCy3FkoYOsBs67DoRSkHacGbAGIW_MrSaQUShJ5cE4hq150_S3cORrNLnScjj_6NAvzQQ7_DRqUhmCQMfI0xNnHtiVuG1mHXIW6W9RyB7_PYEY9BXJmSA4duqZjRBcBid60ho_UZ8NfhC3BZV4AhPbES6hhOklhdA_1PtpNoftcr5YBiA4TWOpNdoVIwijmT5LQ_3r3wMHn4Cl3umkfGgOywaAP5EE7htELBy7uvKtoSqoVNrXyIbhg1szVZo5RYHmcGaKNIEcFyg',
                     status: '即将到来',

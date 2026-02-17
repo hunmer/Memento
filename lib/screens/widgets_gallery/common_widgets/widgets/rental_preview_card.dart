@@ -109,10 +109,14 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : 340,
+        width: widget.inline ? double.maxFinite : (380.0 * widget.size.scale),
+        constraints: BoxConstraints(
+          maxHeight:
+              widget.inline ? double.infinity : (500.0 * widget.size.scale),
+        ),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
@@ -123,15 +127,19 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildImageSection(context, isDark),
-              SizedBox(height: widget.size.getItemSpacing()),
-              _buildInfoSection(context, isDark),
-            ],
+          borderRadius: BorderRadius.circular(12),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: EdgeInsets.zero,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImageSection(context, isDark),
+                SizedBox(height: widget.size.getItemSpacing()),
+                _buildInfoSection(context, isDark),
+              ],
+            ),
           ),
         ),
       ),
@@ -139,33 +147,40 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
   }
 
   Widget _buildImageSection(BuildContext context, bool isDark) {
+    // 根据尺寸计算图片高度
+    double imageHeight;
+    if (widget.size is SmallSize) {
+      imageHeight = 120;
+    } else if (widget.size is MediumSize || widget.size is WideSize) {
+      imageHeight = 160;
+    } else if (widget.size is LargeSize || widget.size is Wide2Size) {
+      imageHeight = 200;
+    } else {
+      imageHeight = 240;
+    }
+    imageHeight *= widget.size.scale;
+
     return SizedBox(
-      height: 192,
+      height: imageHeight,
       child: Stack(
         children: [
           Positioned.fill(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(28),
-                topRight: Radius.circular(28),
-              ),
-              child: Image.network(
-                widget.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color:
-                        isDark
-                            ? const Color(0xFF334155)
-                            : const Color(0xFFE2E8F0),
-                    child: const Icon(
-                      Icons.home_work_outlined,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
+            child: Image.network(
+              widget.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color:
+                      isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFE2E8F0),
+                  child: Icon(
+                    Icons.home_work_outlined,
+                    size: widget.size.getFeaturedIconSize(),
+                    color: Colors.grey,
+                  ),
+                );
+              },
             ),
           ),
           Positioned(
@@ -186,10 +201,10 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.home_work,
-                color: Color(0xFFF43F5E),
-                size: 18,
+                color: const Color(0xFFF43F5E),
+                size: widget.size.getThumbnailIconSize(),
               ),
             ),
           ),
@@ -219,7 +234,11 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
+                  Icon(
+                    Icons.star,
+                    color: const Color(0xFFFBBF24),
+                    size: widget.size.getThumbnailIconSize() * 0.6,
+                  ),
                   SizedBox(width: widget.size.getItemSpacing() * 0.25),
                   Text(
                     widget.rating.toStringAsFixed(1),
@@ -287,10 +306,10 @@ class _RentalPreviewCardWidgetState extends State<RentalPreviewCardWidget>
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.schedule,
-                    color: Color(0xFF9CA3AF),
-                    size: 14,
+                    color: const Color(0xFF9CA3AF),
+                    size: widget.size.getThumbnailIconSize() * 0.6,
                   ),
                   SizedBox(width: widget.size.getItemSpacing() * 0.75),
                   Text(
