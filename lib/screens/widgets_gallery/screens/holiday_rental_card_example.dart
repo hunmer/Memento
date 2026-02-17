@@ -11,14 +11,17 @@ class HolidayRentalCardExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('图片展示卡片')),
       body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSectionTitle('小尺寸'),
-                const SizedBox(height: 8),
-                Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle('小尺寸'),
+              const SizedBox(height: 8),
+              Center(
+                child: SizedBox(
+                  width: 150,
+                  height: 150,
                   child: ImageDisplayCardWidget(
                     size: const SmallSize(),
                     imageUrl:
@@ -30,10 +33,14 @@ class HolidayRentalCardExample extends StatelessWidget {
                     icon: Icons.holiday_village,
                   ),
                 ),
-                const SizedBox(height: 24),
-                _buildSectionTitle('中尺寸'),
-                const SizedBox(height: 8),
-                Center(
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('中尺寸'),
+              const SizedBox(height: 8),
+              Center(
+                child: SizedBox(
+                  width: 220,
+                  height: 200,
                   child: ImageDisplayCardWidget(
                     size: const MediumSize(),
                     imageUrl:
@@ -45,10 +52,14 @@ class HolidayRentalCardExample extends StatelessWidget {
                     icon: Icons.holiday_village,
                   ),
                 ),
-                const SizedBox(height: 24),
-                _buildSectionTitle('大尺寸'),
-                const SizedBox(height: 8),
-                Center(
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('大尺寸'),
+              const SizedBox(height: 8),
+              Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 280,
                   child: ImageDisplayCardWidget(
                     size: const LargeSize(),
                     imageUrl:
@@ -60,10 +71,14 @@ class HolidayRentalCardExample extends StatelessWidget {
                     icon: Icons.holiday_village,
                   ),
                 ),
-                const SizedBox(height: 24),
-                _buildSectionTitle('中宽尺寸'),
-                const SizedBox(height: 8),
-                ImageDisplayCardWidget(
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('中宽尺寸'),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 32,
+                height: 280,
+                child: ImageDisplayCardWidget(
                   size: const WideSize(),
                   inline: true,
                   imageUrl:
@@ -74,10 +89,14 @@ class HolidayRentalCardExample extends StatelessWidget {
                   rating: 4.1,
                   icon: Icons.holiday_village,
                 ),
-                const SizedBox(height: 24),
-                _buildSectionTitle('大宽尺寸'),
-                const SizedBox(height: 8),
-                ImageDisplayCardWidget(
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('大宽尺寸'),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - 32,
+                height: 350,
+                child: ImageDisplayCardWidget(
                   size: const Wide2Size(),
                   inline: true,
                   imageUrl:
@@ -88,8 +107,8 @@ class HolidayRentalCardExample extends StatelessWidget {
                   rating: 4.1,
                   icon: Icons.holiday_village,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

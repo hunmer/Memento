@@ -60,23 +60,25 @@ class ImageDisplayCardWidget extends StatefulWidget {
       label: props['label'] as String? ?? '',
       date: props['date'] as String? ?? '',
       rating: (props['rating'] as num?)?.toDouble() ?? 0.0,
-      icon: props['icon'] != null
-          ? IconData(props['icon'] as int, fontFamily: 'MaterialIcons')
-          : null,
-      primaryColor: props['primaryColor'] != null
-          ? Color(props['primaryColor'] as int)
-          : null,
-      accentColor: props['accentColor'] != null
-          ? Color(props['accentColor'] as int)
-          : null,
+      icon:
+          props['icon'] != null
+              ? IconData(props['icon'] as int, fontFamily: 'MaterialIcons')
+              : null,
+      primaryColor:
+          props['primaryColor'] != null
+              ? Color(props['primaryColor'] as int)
+              : null,
+      accentColor:
+          props['accentColor'] != null
+              ? Color(props['accentColor'] as int)
+              : null,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
   }
 
   @override
-  State<ImageDisplayCardWidget> createState() =>
-      _ImageDisplayCardWidgetState();
+  State<ImageDisplayCardWidget> createState() => _ImageDisplayCardWidgetState();
 }
 
 class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
@@ -109,32 +111,38 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // 主题颜色
-    final primaryColor = widget.primaryColor ??
+    final primaryColor =
+        widget.primaryColor ??
         (isDark
             ? const Color(0xFFFBBF24)
             : const Color(0xFFFBBF24)); // Amber-400
-    final accentColor = widget.accentColor ??
+    final accentColor =
+        widget.accentColor ??
         (isDark
             ? const Color(0xFFFB923C)
             : const Color(0xFFFB923C)); // Orange-400
     final cardColor =
         isDark ? const Color(0xFF1E293B) : Colors.white; // Slate-800 / White
-    final surfaceColor = isDark
-        ? const Color(0xFF334155)
-        : const Color(0xFFF3F4F6); // Slate-700 / Gray-100
-    final textMainColor = isDark
-        ? const Color(0xFFF8FAFC)
-        : const Color(0xFF1E293B); // Slate-50 / Slate-800
-    final textSubColor = isDark
-        ? const Color(0xFFCBD5E1)
-        : const Color(0xFF94A3B8); // Slate-300 / Slate-400
+    final surfaceColor =
+        isDark
+            ? const Color(0xFF334155)
+            : const Color(0xFFF3F4F6); // Slate-700 / Gray-100
+    final textMainColor =
+        isDark
+            ? const Color(0xFFF8FAFC)
+            : const Color(0xFF1E293B); // Slate-50 / Slate-800
+    final textSubColor =
+        isDark
+            ? const Color(0xFFCBD5E1)
+            : const Color(0xFF94A3B8); // Slate-300 / Slate-400
 
     // 根据尺寸计算容器尺寸
-    final containerWidth = widget.inline
-        ? double.maxFinite
-        : (widget.size.width >= 4
+    final containerWidth =
+        widget.inline
             ? double.maxFinite
-            : 380.0 * widget.size.scale);
+            : (widget.size.width >= 4
+                ? double.maxFinite
+                : 380.0 * widget.size.scale);
     final imageIconSize = widget.size.getFeaturedIconSize();
 
     return AnimatedBuilder(
@@ -150,9 +158,7 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: cardColor,
-                borderRadius: BorderRadius.circular(
-                  widget.size is SmallSize ? 12 : 16,
-                ),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -241,15 +247,19 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // 标签
-            Container(
-              margin: EdgeInsets.only(top: widget.size.getItemSpacing() / 2),
-              child: Text(
-                widget.label.toUpperCase(),
-                style: TextStyle(
-                  fontSize: labelFontSize,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.15 * 3, // 0.15em ≈ 3px
-                  color: accentColor,
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(top: widget.size.getItemSpacing() / 2),
+                child: Text(
+                  widget.label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: labelFontSize,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.15 * 3, // 0.15em ≈ 3px
+                    color: accentColor,
+                  ),
                 ),
               ),
             ),
@@ -277,6 +287,8 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
         // 标题
         Text(
           widget.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
@@ -288,57 +300,104 @@ class _ImageDisplayCardWidgetState extends State<ImageDisplayCardWidget>
         const Spacer(),
 
         // 底部：日期 + 评分
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // 日期标签
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.size.getItemSpacing() * 1.5,
-                vertical: widget.size.getItemSpacing() * 0.75,
-              ),
-              decoration: BoxDecoration(
-                color: surfaceColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                widget.date,
-                style: TextStyle(
-                  fontSize: dateFontSize,
-                  fontWeight: FontWeight.bold,
-                  color: textSubColor,
-                  letterSpacing: 0.5,
+        // Small 和 Medium 尺寸下换行展示
+        if (widget.size is SmallSize || widget.size is MediumSize)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 日期标签
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.size.getItemSpacing() * 1.5,
+                  vertical: widget.size.getItemSpacing() * 0.75,
+                ),
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  widget.date,
+                  style: TextStyle(
+                    fontSize: dateFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: textSubColor,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
-            ),
-
-            // 评分
-            Row(
-              children: [
-                Icon(
-                  Icons.star,
-                  size: ratingIconSize,
-                  color: primaryColor,
-                ),
-                SizedBox(width: widget.size.getItemSpacing() / 2),
-                SizedBox(
-                  height: ratingTextSize + 2,
-                  child: Center(
-                    child: Text(
-                      widget.rating.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontSize: ratingTextSize,
-                        fontWeight: FontWeight.bold,
-                        color: primaryColor,
-                        height: 1.0,
+              SizedBox(height: widget.size.getItemSpacing()),
+              // 评分
+              Row(
+                children: [
+                  Icon(Icons.star, size: ratingIconSize, color: primaryColor),
+                  SizedBox(width: widget.size.getItemSpacing() / 2),
+                  SizedBox(
+                    height: ratingTextSize + 2,
+                    child: Center(
+                      child: Text(
+                        widget.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: ratingTextSize,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                          height: 1.0,
+                        ),
                       ),
                     ),
                   ),
+                ],
+              ),
+            ],
+          )
+        else
+          // 大尺寸下同一行展示
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // 日期标签
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.size.getItemSpacing() * 1.5,
+                  vertical: widget.size.getItemSpacing() * 0.75,
                 ),
-              ],
-            ),
-          ],
-        ),
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  widget.date,
+                  style: TextStyle(
+                    fontSize: dateFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: textSubColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+
+              // 评分
+              Row(
+                children: [
+                  Icon(Icons.star, size: ratingIconSize, color: primaryColor),
+                  SizedBox(width: widget.size.getItemSpacing() / 2),
+                  SizedBox(
+                    height: ratingTextSize + 2,
+                    child: Center(
+                      child: Text(
+                        widget.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: ratingTextSize,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
+                          height: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
       ],
     );
   }
