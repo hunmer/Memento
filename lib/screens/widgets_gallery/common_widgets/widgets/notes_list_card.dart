@@ -61,7 +61,8 @@ class NotesListCardWidget extends StatefulWidget {
     final notesJson = props['notes'] as List<dynamic>?;
 
     return NotesListCardWidget(
-      notes: notesJson
+      notes:
+          notesJson
               ?.map((e) => NoteItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
@@ -114,7 +115,7 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
               width: widget.inline ? double.maxFinite : 360,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -163,8 +164,8 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
       decoration: const BoxDecoration(
         color: Color(0xFFFFC107),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
+          topLeft: Radius.circular(12),
+          topRight: Radius.circular(12),
         ),
       ),
       child: Row(
@@ -179,7 +180,7 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
             'Notes',
             style: TextStyle(
               color: Colors.white,
-              fontSize: widget.size.getTitleFontSize(),
+              fontSize: widget.size.getTitleFontSize() * 0.8,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5,
             ),
@@ -238,16 +239,18 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                 bottom: widget.size == const SmallSize() ? 8 : 12,
               ),
               decoration: BoxDecoration(
-                border: hasDivider
-                    ? Border(
-                        bottom: BorderSide(
-                          color: isDark
-                              ? Colors.grey.shade800.withOpacity(0.5)
-                              : Colors.grey.shade200,
-                          width: 1,
-                        ),
-                      )
-                    : null,
+                border:
+                    hasDivider
+                        ? Border(
+                          bottom: BorderSide(
+                            color:
+                                isDark
+                                    ? Colors.grey.shade800.withOpacity(0.5)
+                                    : Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        )
+                        : null,
               ),
               child: InkWell(
                 onTap: () {
@@ -264,8 +267,12 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                           Text(
                             note.title,
                             style: TextStyle(
-                              color: isDark ? Colors.grey.shade100 : Colors.grey.shade900,
-                              fontSize: widget.size == const SmallSize() ? 13 : 15,
+                              color:
+                                  isDark
+                                      ? Colors.grey.shade100
+                                      : Colors.grey.shade900,
+                              fontSize:
+                                  widget.size == const SmallSize() ? 13 : 15,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
                             ),
@@ -276,8 +283,12 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                           Text(
                             '${note.time} ${note.preview}',
                             style: TextStyle(
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                              fontSize: widget.size == const SmallSize() ? 10 : 12,
+                              color:
+                                  isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade500,
+                              fontSize:
+                                  widget.size == const SmallSize() ? 10 : 12,
                               height: 1.4,
                             ),
                             maxLines: 1,
@@ -298,15 +309,22 @@ class _NotesListCardWidgetState extends State<NotesListCardWidget>
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
                               width: widget.size == const SmallSize() ? 32 : 40,
-                              height: widget.size == const SmallSize() ? 32 : 40,
+                              height:
+                                  widget.size == const SmallSize() ? 32 : 40,
                               decoration: BoxDecoration(
-                                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                                color:
+                                    isDark
+                                        ? Colors.grey.shade800
+                                        : Colors.grey.shade200,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 Icons.image,
                                 size: widget.size.getIconSize() - 4,
-                                color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
+                                color:
+                                    isDark
+                                        ? Colors.grey.shade600
+                                        : Colors.grey.shade400,
                               ),
                             );
                           },
@@ -332,10 +350,11 @@ class _DashedLinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+    final paint =
+        Paint()
+          ..color = color
+          ..strokeWidth = 2
+          ..style = PaintingStyle.stroke;
 
     const dashWidth = 5.0;
     const dashSpace = 5.0;

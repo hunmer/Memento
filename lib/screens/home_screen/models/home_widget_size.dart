@@ -420,6 +420,90 @@ abstract class HomeWidgetSize {
     }
     return baseHeight * scale;
   }
+
+  /// 获取特色图片/缩略图尺寸（用于卡片封面）
+  double getFeaturedImageSize() {
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 60;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 80;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseSize = 100;
+    } else {
+      // Large3, Wide3
+      baseSize = 120;
+    }
+    return baseSize * scale;
+  }
+
+  /// 获取列表项缩略图尺寸
+  double getThumbnailImageSize() {
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 36;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 48;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseSize = 56;
+    } else {
+      // Large3, Wide3
+      baseSize = 64;
+    }
+    return baseSize * scale;
+  }
+
+  /// 获取特色图片图标尺寸
+  double getFeaturedIconSize() {
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 28;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 40;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseSize = 48;
+    } else {
+      // Large3, Wide3
+      baseSize = 56;
+    }
+    return baseSize * iconSize;
+  }
+
+  /// 获取列表项图标尺寸
+  double getThumbnailIconSize() {
+    double baseSize;
+    if (this is SmallSize) {
+      baseSize = 18;
+    } else if (this is MediumSize || this is WideSize) {
+      baseSize = 24;
+    } else if (this is LargeSize || this is Wide2Size) {
+      baseSize = 28;
+    } else {
+      // Large3, Wide3
+      baseSize = 32;
+    }
+    return baseSize * iconSize;
+  }
+
+  /// 获取文章列表区域高度
+  double getArticleListHeight() {
+    double baseHeight;
+    if (this is SmallSize) {
+      baseHeight = 200;
+    } else if (this is MediumSize) {
+      baseHeight = 250;
+    } else if (this is WideSize) {
+      baseHeight = 280;
+    } else if (this is LargeSize) {
+      baseHeight = 320;
+    } else if (this is Wide2Size) {
+      baseHeight = 360;
+    } else {
+      // Large3, Wide3
+      baseHeight = 450;
+    }
+    return baseHeight * scale;
+  }
 }
 
 /// 1x1 小图标组件

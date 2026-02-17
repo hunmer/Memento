@@ -133,9 +133,16 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: isDark
-                                  ? [const Color(0xFF1F2937), const Color(0xFF111827)]
-                                  : [const Color(0xFFE5E7EB), const Color(0xFFF3F4F6)],
+                              colors:
+                                  isDark
+                                      ? [
+                                        const Color(0xFF1F2937),
+                                        const Color(0xFF111827),
+                                      ]
+                                      : [
+                                        const Color(0xFFE5E7EB),
+                                        const Color(0xFFF3F4F6),
+                                      ],
                             ),
                           ),
                         );
@@ -172,17 +179,18 @@ class _ProfileCardWidgetState extends State<ProfileCardWidget>
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: isDark
-                              ? [
-                                  Colors.black.withOpacity(0.9),
-                                  Colors.black.withOpacity(0.6),
-                                  Colors.black.withOpacity(0.95),
-                                ]
-                              : [
-                                  Colors.white.withOpacity(0.8),
-                                  Colors.white.withOpacity(0.4),
-                                  Colors.white,
-                                ],
+                          colors:
+                              isDark
+                                  ? [
+                                    Colors.black.withOpacity(0.9),
+                                    Colors.black.withOpacity(0.6),
+                                    Colors.black.withOpacity(0.95),
+                                  ]
+                                  : [
+                                    Colors.white.withOpacity(0.8),
+                                    Colors.white.withOpacity(0.4),
+                                    Colors.white,
+                                  ],
                         ),
                       ),
                     ),
@@ -285,15 +293,19 @@ class _NameSection extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(size.getPadding().right * 0.125),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.green.shade900
-                          : Colors.green.shade100,
+                      color:
+                          isDark
+                              ? Colors.green.shade900
+                              : Colors.green.shade100,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.verified,
                       size: 14,
-                      color: isDark ? Colors.green.shade400 : Colors.green.shade600,
+                      color:
+                          isDark
+                              ? Colors.green.shade400
+                              : Colors.green.shade600,
                     ),
                   ),
                 ],
@@ -423,9 +435,10 @@ class _StatsAndFollowSection extends StatelessWidget {
                       vertical: size.getPadding().bottom * 0.375,
                     ),
                     decoration: BoxDecoration(
-                      color: isFollowing
-                          ? (isDark ? Colors.grey.shade800 : Colors.white)
-                          : (isDark ? Colors.white : Colors.grey.shade900),
+                      color:
+                          isFollowing
+                              ? (isDark ? Colors.grey.shade800 : Colors.white)
+                              : (isDark ? Colors.white : Colors.grey.shade900),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -442,9 +455,14 @@ class _StatsAndFollowSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: isFollowing
-                                ? (isDark ? Colors.white : Colors.grey.shade900)
-                                : (isDark ? Colors.grey.shade900 : Colors.white),
+                            color:
+                                isFollowing
+                                    ? (isDark
+                                        ? Colors.white
+                                        : Colors.grey.shade900)
+                                    : (isDark
+                                        ? Colors.grey.shade900
+                                        : Colors.white),
                           ),
                         ),
                         if (!isFollowing) ...[

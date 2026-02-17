@@ -70,7 +70,8 @@ class ProfileCardWidgetExample extends StatelessWidget {
                           'https://lh3.googleusercontent.com/aida-public/AB6AXuAQa5mwNY07R4lgli2Pgrxz3J9D6F6Plz6c9LGFNt4BYe9qp7wGfu6OnEFI-UAnneZ-qsWObIYUU_LVIN9_RypXCavX3hG7YUVTVgYgYhQiHXBBfy_W5EtO3oCjLBQ2eNlXRXxiKMEcC_tGq7UHLix8Zm7_Zawt0dvlp6ouuGhSkraBr9hjl6hKfAC5CL8rTgObw-xh-DnmtLVs5Msvp8N6dZgasjTEMmwR8or2JI6MCsXD0i43ZVNUATo21RHx95nyAFAf5zJuuDyg',
                       name: 'Sophie Bennett',
                       isVerified: true,
-                      bio: 'Product Designer who focuses on simplicity & usability.',
+                      bio:
+                          'Product Designer who focuses on simplicity & usability.',
                       followersCount: 312,
                       followingCount: 48,
                     ),
@@ -88,7 +89,8 @@ class ProfileCardWidgetExample extends StatelessWidget {
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuAQa5mwNY07R4lgli2Pgrxz3J9D6F6Plz6c9LGFNt4BYe9qp7wGfu6OnEFI-UAnneZ-qsWObIYUU_LVIN9_RypXCavX3hG7YUVTVgYgYhQiHXBBfy_W5EtO3oCjLBQ2eNlXRXxiKMEcC_tGq7UHLix8Zm7_Zawt0dvlp6ouuGhSkraBr9hjl6hKfAC5CL8rTgObw-xh-DnmtLVs5Msvp8N6dZgasjTEMmwR8or2JI6MCsXD0i43ZVNUATo21RHx95nyAFAf5zJuuDyg',
                     name: 'Sophie Bennett - Product Designer',
                     isVerified: true,
-                    bio: 'Product Designer who focuses on simplicity & usability. Creating beautiful user experiences.',
+                    bio:
+                        'Product Designer who focuses on simplicity & usability. Creating beautiful user experiences.',
                     followersCount: 312,
                     followingCount: 48,
                   ),
@@ -105,7 +107,8 @@ class ProfileCardWidgetExample extends StatelessWidget {
                         'https://lh3.googleusercontent.com/aida-public/AB6AXuAQa5mwNY07R4lgli2Pgrxz3J9D6F6Plz6c9LGFNt4BYe9qp7wGfu6OnEFI-UAnneZ-qsWObIYUU_LVIN9_RypXCavX3hG7YUVTVgYgYhQiHXBBfy_W5EtO3oCjLBQ2eNlXRXxiKMEcC_tGq7UHLix8Zm7_Zawt0dvlp6ouuGhSkraBr9hjl6hKfAC5CL8rTgObw-xh-DnmtLVs5Msvp8N6dZgasjTEMmwR8or2JI6MCsXD0i43ZVNUATo21RHx95nyAFAf5zJuuDyg',
                     name: 'Sophie Bennett - Senior Product Designer',
                     isVerified: true,
-                    bio: 'Product Designer who focuses on simplicity & usability. Creating beautiful user experiences that delight users worldwide.',
+                    bio:
+                        'Product Designer who focuses on simplicity & usability. Creating beautiful user experiences that delight users worldwide.',
                     followersCount: 312,
                     followingCount: 48,
                   ),

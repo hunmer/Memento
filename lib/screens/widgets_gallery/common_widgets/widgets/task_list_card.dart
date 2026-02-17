@@ -48,24 +48,28 @@ class TaskListCardWidget extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     final itemsList = props['items'] as List<dynamic>?;
-    final items = itemsList
-            ?.map((item) => item as String)
-            .toList() ??
-        [];
+    final items = itemsList?.map((item) => item as String).toList() ?? [];
 
     // 从 props 中读取 size，如果不存在则使用传入的 size 参数
     HomeWidgetSize widgetSize = size;
     if (props['size'] != null) {
-      widgetSize = HomeWidgetSize.fromJson(props['size'] as Map<String, dynamic>);
+      widgetSize = HomeWidgetSize.fromJson(
+        props['size'] as Map<String, dynamic>,
+      );
     }
 
     return TaskListCardWidget(
-      icon: props['icon'] is String
-          ? IconData(int.parse(props['icon'] as String), fontFamily: 'MaterialIcons')
-          : (props['icon'] as IconData? ?? Icons.format_list_bulleted),
-      iconBackgroundColor: props['iconBackgroundColor'] != null
-          ? Color(props['iconBackgroundColor'] as int)
-          : const Color(0xFF5A72EA),
+      icon:
+          props['icon'] is String
+              ? IconData(
+                int.parse(props['icon'] as String),
+                fontFamily: 'MaterialIcons',
+              )
+              : (props['icon'] as IconData? ?? Icons.format_list_bulleted),
+      iconBackgroundColor:
+          props['iconBackgroundColor'] != null
+              ? Color(props['iconBackgroundColor'] as int)
+              : const Color(0xFF5A72EA),
       count: props['count'] as int? ?? 0,
       countLabel: props['countLabel'] as String? ?? 'Tasks',
       items: items,
@@ -124,8 +128,10 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
     final backgroundColor = isDark ? const Color(0xFF1E293B) : Colors.white;
     final borderColor =
         isDark ? const Color(0xFF334155) : const Color(0xFFF3F4F6);
-    final textColor = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B);
-    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF9CA3AF);
+    final textColor =
+        isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B);
+    final subtitleColor =
+        isDark ? const Color(0xFF94A3B8) : const Color(0xFF9CA3AF);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -186,16 +192,20 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
     Color textColor,
     Color subtitleColor,
   ) {
+    final iconContainerSize =
+        widget.size.getIconSize() * widget.size.iconContainerScale;
+    final leftSectionWidth = iconContainerSize + 8;
+
     return SizedBox(
-      width: 50,
+      width: leftSectionWidth,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 图标
           Container(
-            width: 48,
-            height: 48,
+            width: iconContainerSize,
+            height: iconContainerSize,
             decoration: BoxDecoration(
               color: widget.iconBackgroundColor,
               shape: BoxShape.circle,
@@ -219,11 +229,11 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 56,
+                height: widget.size.getLargeFontSize() * 0.9,
                 child: AnimatedFlipCounter(
                   value: widget.count.toDouble() * _animation.value,
                   textStyle: TextStyle(
-                    fontSize: widget.size.getLargeFontSize(),
+                    fontSize: widget.size.getLargeFontSize() * 0.6,
                     fontWeight: FontWeight.w500,
                     color: textColor,
                     height: 1.0,
@@ -232,11 +242,11 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
               ),
               SizedBox(height: widget.size.getItemSpacing()),
               SizedBox(
-                height: 18,
+                height: widget.size.getSubtitleFontSize(),
                 child: Text(
                   widget.countLabel,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w500,
                     color: subtitleColor,
                     height: 1.0,
@@ -276,7 +286,9 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
                   if (i > 0)
                     Container(
                       height: 1,
-                      margin: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing()),
+                      margin: EdgeInsets.symmetric(
+                        vertical: widget.size.getItemSpacing(),
+                      ),
                       color: borderColor,
                     ),
                   _TaskItemWidget(
@@ -313,11 +325,14 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
         const intervalStart = 0.3;
         const intervalEnd = 0.8;
         final value = _animation.value;
-        final delayedValue = value <= intervalStart
-            ? 0.0
-            : value >= intervalEnd
+        final delayedValue =
+            value <= intervalStart
+                ? 0.0
+                : value >= intervalEnd
                 ? 1.0
-                : Curves.easeOutCubic.transform((value - intervalStart) / (intervalEnd - intervalStart));
+                : Curves.easeOutCubic.transform(
+                  (value - intervalStart) / (intervalEnd - intervalStart),
+                );
 
         return Opacity(
           opacity: delayedValue,
@@ -325,7 +340,9 @@ class _TaskListCardWidgetState extends State<TaskListCardWidget>
             offset: Offset(0, 10 * (1 - delayedValue)),
             child: Center(
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: widget.size.getItemSpacing() * 2),
+                padding: EdgeInsets.symmetric(
+                  vertical: widget.size.getItemSpacing() * 2,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -397,7 +414,7 @@ class _TaskItemWidget extends StatelessWidget {
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w600,
                   color: textColor,
                   height: 1.2,
@@ -456,7 +473,7 @@ class _MoreLinkWidget extends StatelessWidget {
               child: Text(
                 '+$count more',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: size.getSubtitleFontSize(),
                   fontWeight: FontWeight.bold,
                   color: color,
                 ),
