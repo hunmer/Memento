@@ -114,7 +114,10 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
         isDark ? const Color(0xFF2C2C2E) : const Color(0xFFF3F4F6);
 
     // 计算进度比例
-    final progress = (widget.availableBalance / widget.totalBalance).clamp(0.0, 1.0);
+    final progress = (widget.availableBalance / widget.totalBalance).clamp(
+      0.0,
+      1.0,
+    );
 
     // 根据尺寸计算各元素大小
     final iconSize = widget.size.getIconSize();
@@ -126,8 +129,9 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
       horizontal: widget.size.getSmallSpacing() * 2,
       vertical: widget.size.getSmallSpacing(),
     );
-    final progressHeight = widget.size.getStrokeWidth() * 0.4;
+    final progressHeight = widget.size.getStrokeWidth() * 0.5;
     final indicatorSize = widget.size.getIconSize() * 0.8;
+    final indicatorBorderWidth = widget.size.getStrokeWidth() * 0.3;
     final statFontSize = widget.size.getSubtitleFontSize();
     final buttonHeight = iconSize * widget.size.iconContainerScale;
     final buttonFontSize = widget.size.getSubtitleFontSize() * 1.2;
@@ -138,7 +142,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
       padding: widget.size.getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -178,10 +182,13 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                       '\$${widget.availableBalance.toStringAsFixed(2)} Available',
                       style: TextStyle(
                         fontSize: labelFontSize,
-                        color: isDark
-                            ? Colors.grey.shade400
-                            : Colors.grey.shade600,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     SizedBox(height: widget.size.getItemSpacing() / 2),
                     Row(
@@ -200,9 +207,10 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                         Container(
                           padding: changePercentPadding,
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.green.shade900.withOpacity(0.4)
-                                : Colors.green.shade100,
+                            color:
+                                isDark
+                                    ? Colors.green.shade900.withOpacity(0.4)
+                                    : Colors.green.shade100,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -210,9 +218,10 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                             style: TextStyle(
                               fontSize: changePercentFontSize,
                               fontWeight: FontWeight.bold,
-                              color: isDark
-                                  ? Colors.green.shade400
-                                  : Colors.green.shade700,
+                              color:
+                                  isDark
+                                      ? Colors.green.shade400
+                                      : Colors.green.shade700,
                             ),
                           ),
                         ),
@@ -234,6 +243,7 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
             widget.expenses,
             progressHeight,
             indicatorSize,
+            indicatorBorderWidth,
             statFontSize,
           ),
           const Spacer(),
@@ -263,7 +273,12 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
                 ),
               ),
               SizedBox(width: widget.size.getItemSpacing()),
-              _buildAddButton(isDark, btnSecondaryColor, buttonHeight, buttonIconSize),
+              _buildAddButton(
+                isDark,
+                btnSecondaryColor,
+                buttonHeight,
+                buttonIconSize,
+              ),
             ],
           ),
         ],
@@ -279,56 +294,69 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
     double expenses,
     double height,
     double indicatorSize,
+    double indicatorBorderWidth,
     double fontSize,
   ) {
     final isWideMode = widget.size is WideSize || widget.size is Wide2Size;
 
     return Column(
       children: [
-        Stack(
-          children: [
-            Container(
-              height: height,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.grey.shade700
-                    : Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(height / 2),
-              ),
-            ),
-            FractionallySizedBox(
-              widthFactor: progress * _animation.value,
-              child: Container(
-                height: height,
-                decoration: BoxDecoration(
-                  color: primaryColor,
-                  borderRadius: BorderRadius.circular(height / 2),
-                ),
-              ),
-            ),
-            Positioned(
-              left: (progress * 300) - indicatorSize / 2,
-              top: -(indicatorSize - height) / 2,
-              child: Container(
-                width: indicatorSize,
-                height: indicatorSize,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey.shade200 : Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: primaryColor,
-                    width: widget.size.getStrokeWidth() * 0.15,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final progressWidth = constraints.maxWidth;
+            // 限制圆点位置在有效范围内，避免超出边界
+            final clampedProgress = (progress * _animation.value).clamp(
+              indicatorSize / 2 / progressWidth,
+              1 - indicatorSize / 2 / progressWidth,
+            );
+            final indicatorLeft =
+                clampedProgress * progressWidth - indicatorSize / 2;
+
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(height / 2),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
-                    ),
-                  ],
                 ),
-              ),
-            ),
-          ],
+                FractionallySizedBox(
+                  widthFactor: progress * _animation.value,
+                  child: Container(
+                    height: height,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(height / 2),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: indicatorLeft,
+                  top: -(indicatorSize - height) / 2,
+                  child: Container(
+                    width: indicatorSize,
+                    height: indicatorSize,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey.shade200 : Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: primaryColor,
+                        width: indicatorBorderWidth,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
         SizedBox(height: widget.size.getItemSpacing()),
         // 非宽屏模式下换行显示，宽屏模式下并排显示
@@ -353,7 +381,12 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
     );
   }
 
-  Widget _buildStatLabel(bool isDark, String label, String value, double fontSize) {
+  Widget _buildStatLabel(
+    bool isDark,
+    String label,
+    String value,
+    double fontSize,
+  ) {
     return Row(
       children: [
         Text(
@@ -398,19 +431,23 @@ class _WalletBalanceCardWidgetState extends State<WalletBalanceCardWidget>
             fontWeight: FontWeight.w600,
             color: textColor,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
   }
 
-  Widget _buildAddButton(bool isDark, Color bgColor, double height, double iconSize) {
+  Widget _buildAddButton(
+    bool isDark,
+    Color bgColor,
+    double height,
+    double iconSize,
+  ) {
     return Container(
       width: height,
       height: height,
-      decoration: BoxDecoration(
-        color: bgColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: Icon(
         Icons.add,
         color: isDark ? Colors.white : Colors.grey.shade900,

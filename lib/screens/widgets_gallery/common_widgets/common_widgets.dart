@@ -1072,7 +1072,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.trendLineChartCard:
         return TrendLineChartCardWrapper.fromProps(finalProps, size);
       case CommonWidgetId.modernRoundedBalanceCard:
-        return ModernRoundedBalanceCard.fromProps(finalProps);
+        return ModernRoundedBalanceCard.fromProps(finalProps, size);
       case CommonWidgetId.barChartStatsCard:
         return BarChartStatsCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.expenseComparisonChart:

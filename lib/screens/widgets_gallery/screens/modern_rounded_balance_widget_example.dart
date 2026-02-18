@@ -1,4 +1,5 @@
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:flutter/material.dart';
 
 /// 余额卡片示例
@@ -30,6 +31,7 @@ class ModernRoundedBalanceWidgetExample extends StatelessWidget {
                       balance: 1682.55,
                       available: 8317.45,
                       weeklyData: const [0.45, 0.65, 0.35, 0.75],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -45,6 +47,7 @@ class ModernRoundedBalanceWidgetExample extends StatelessWidget {
                       balance: 1682.55,
                       available: 8317.45,
                       weeklyData: const [0.45, 0.65, 0.35, 0.75, 0.70],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -60,6 +63,7 @@ class ModernRoundedBalanceWidgetExample extends StatelessWidget {
                       balance: 1682.55,
                       available: 8317.45,
                       weeklyData: const [0.45, 0.65, 0.35, 0.75, 0.70, 0.90, 0.30],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -74,6 +78,7 @@ class ModernRoundedBalanceWidgetExample extends StatelessWidget {
                     balance: 1682.55,
                     available: 8317.45,
                     weeklyData: const [0.45, 0.65, 0.35, 0.75, 0.70, 0.90, 0.30, 0.50, 0.80],
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -87,6 +92,7 @@ class ModernRoundedBalanceWidgetExample extends StatelessWidget {
                     balance: 1682.55,
                     available: 8317.45,
                     weeklyData: const [0.45, 0.65, 0.35, 0.75, 0.70, 0.90, 0.30, 0.50, 0.80, 0.40, 0.75, 0.60],
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
