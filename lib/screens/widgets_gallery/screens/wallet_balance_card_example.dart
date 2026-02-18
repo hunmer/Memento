@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/wallet_balance_card.dart';
 
 /// 钱包余额概览卡片示例
@@ -33,6 +34,7 @@ class WalletBalanceCardExample extends StatelessWidget {
                       changePercent: 12,
                       income: 24000,
                       expenses: 1720,
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -51,6 +53,7 @@ class WalletBalanceCardExample extends StatelessWidget {
                       changePercent: 12,
                       income: 24000,
                       expenses: 1720,
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -69,6 +72,7 @@ class WalletBalanceCardExample extends StatelessWidget {
                       changePercent: 12,
                       income: 24000,
                       expenses: 1720,
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -86,6 +90,7 @@ class WalletBalanceCardExample extends StatelessWidget {
                     changePercent: 12,
                     income: 24000,
                     expenses: 1720,
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -102,6 +107,7 @@ class WalletBalanceCardExample extends StatelessWidget {
                     changePercent: 12,
                     income: 24000,
                     expenses: 1720,
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

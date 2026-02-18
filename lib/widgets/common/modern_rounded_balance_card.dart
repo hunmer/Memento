@@ -231,7 +231,7 @@ class _ModernRoundedBalanceCardState extends State<ModernRoundedBalanceCard>
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
-                      children: List.generate(7, (index) {
+                      children: List.generate(widget.weeklyData.length, (index) {
                         final value = widget.weeklyData[index];
                         final itemAnimation = CurvedAnimation(
                           parent: _animationController,
@@ -243,7 +243,7 @@ class _ModernRoundedBalanceCardState extends State<ModernRoundedBalanceCard>
                         );
 
                         return _WeeklyBar(
-                          label: weekDays[index],
+                          label: weekDays[index % weekDays.length],
                           value: value * itemAnimation.value,
                           backgroundColor: barBgColor,
                         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/category_stack_widget.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 分类堆叠消费卡片示例
 class CategoryStackWidgetExample extends StatelessWidget {
@@ -30,6 +31,7 @@ class CategoryStackWidgetExample extends StatelessWidget {
                       currentAmount: 322,
                       targetAmount: 443,
                       currency: r'$',
+                      size: const SmallSize(),
                       categories: const [
                         CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
                         CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
@@ -51,6 +53,7 @@ class CategoryStackWidgetExample extends StatelessWidget {
                       currentAmount: 322,
                       targetAmount: 443,
                       currency: r'$',
+                      size: const MediumSize(),
                       categories: const [
                         CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
                         CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
@@ -72,6 +75,7 @@ class CategoryStackWidgetExample extends StatelessWidget {
                       currentAmount: 322,
                       targetAmount: 443,
                       currency: r'$',
+                      size: const LargeSize(),
                       categories: const [
                         CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
                         CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
@@ -92,6 +96,7 @@ class CategoryStackWidgetExample extends StatelessWidget {
                     currentAmount: 322,
                     targetAmount: 443,
                     currency: r'$',
+                    size: const WideSize(),
                     categories: const [
                       CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
                       CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
@@ -111,6 +116,7 @@ class CategoryStackWidgetExample extends StatelessWidget {
                     currentAmount: 322,
                     targetAmount: 443,
                     currency: r'$',
+                    size: const Wide2Size(),
                     categories: const [
                       CategoryData(label: 'House', amount: 31, color: Color(0xFFFFD60A), percentage: 0.45),
                       CategoryData(label: 'Food', amount: 37, color: Color(0xFFFF453A), percentage: 0.25),
