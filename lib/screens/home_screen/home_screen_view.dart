@@ -388,7 +388,10 @@ class HomeScreenView extends StatelessWidget {
           return HomeWidgetItem(
             id: 'skeleton_${UniqueKey().toString()}',
             widgetId: 'skeleton',
-            size: size == const CustomSize(width: -1, height: -1) ? const SmallSize() : size,
+            size:
+                size == const CustomSize(width: -1, height: -1)
+                    ? const SmallSize()
+                    : size,
             config: {},
           );
         }).toList();
@@ -968,7 +971,9 @@ class HomeScreenView extends StatelessWidget {
     }
 
     final supportedSizes = widget.supportedSizes;
-    final hasCustom = supportedSizes.contains(const CustomSize(width: -1, height: -1));
+    final hasCustom = supportedSizes.contains(
+      const CustomSize(width: -1, height: -1),
+    );
 
     if (supportedSizes.length <= 1 && !hasCustom) {
       Toast.warning('该小组件不支持调整大小');
@@ -1016,7 +1021,8 @@ class HomeScreenView extends StatelessWidget {
                           if (newSize != null) {
                             setDialogState(() {
                               selectedSize = newSize;
-                              if (newSize != const CustomSize(width: -1, height: -1)) {
+                              if (newSize !=
+                                  const CustomSize(width: -1, height: -1)) {
                                 // 选择非自定义尺寸时，重置自定义尺寸为默认值
                                 customWidth = 2;
                                 customHeight = 2;
@@ -1026,7 +1032,9 @@ class HomeScreenView extends StatelessWidget {
                         },
                       );
                     }),
-                    if (hasCustom && selectedSize == const CustomSize(width: -1, height: -1)) ...[
+                    if (hasCustom &&
+                        selectedSize ==
+                            const CustomSize(width: -1, height: -1)) ...[
                       const SizedBox(height: 16),
                       const Divider(),
                       const SizedBox(height: 8),
