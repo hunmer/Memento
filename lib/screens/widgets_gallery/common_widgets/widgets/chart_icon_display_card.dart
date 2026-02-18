@@ -158,7 +158,10 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
               width: widget.inline ? double.maxFinite : 320,
-              constraints: const BoxConstraints(minWidth: 280),
+              constraints: BoxConstraints(
+                minWidth: 280,
+                minHeight: widget.size.getHeightConstraints().minHeight,
+              ),
               decoration: BoxDecoration(
                 color: isDark ? Colors.black : Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -177,13 +180,12 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
               ),
               padding: widget.size.getPadding(),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 标题和副标题
                   _buildHeader(isDark),
                   // 心情图表
-                  _buildMoodChart(isDark),
+                  Expanded(child: _buildMoodChart(isDark)),
                 ],
               ),
             ),
@@ -259,98 +261,77 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
         (widget.moods.length * barWidth) +
         ((widget.moods.length - 1) * barSpacing);
 
-    // 判断是否需要滚动（总宽度超过可用宽度）
-    final needsScroll = totalBarsWidth > 400;
-
-    return Column(
-      children: [
-        // Y轴刻度
-        Row(
+    return Scrollbar(
+      thumbVisibility: true,
+      thickness: 4,
+      radius: const Radius.circular(2),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(
+          horizontal: widget.size.getItemSpacing(),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ...List.generate(5, (index) {
-              final value = maxValue * (4 - index) ~/ 4;
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: widget.size.getItemSpacing() / 2,
-                  ),
-                  child: Text(
-                    value.toString(),
-                    style: TextStyle(
-                      color:
-                          isDark ? Colors.grey.shade600 : Colors.grey.shade400,
-                      fontSize: axisFontSize,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+            // Y轴刻度
+            SizedBox(
+              width: totalBarsWidth + widget.size.getItemSpacing() / 2,
+              child: Row(
+                children: [
+                  ...List.generate(5, (index) {
+                    final value = maxValue * (4 - index) ~/ 4;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: widget.size.getItemSpacing() / 2,
+                        ),
+                        child: Text(
+                          value.toString(),
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade400,
+                            fontSize: axisFontSize,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }),
+                  SizedBox(width: widget.size.getItemSpacing() / 2),
+                ],
+              ),
+            ),
+            // 柱状图
+            SizedBox(
+              height: chartHeight,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: _buildMoodBars(
+                  maxValue,
+                  isDark,
+                  barWidth,
+                  barSpacing,
+                  chartHeight,
                 ),
-              );
-            }),
-            SizedBox(width: widget.size.getItemSpacing() / 2),
+              ),
+            ),
+            // X轴标签
+            SizedBox(height: widget.size.getItemSpacing()),
+            SizedBox(
+              height: axisLabelFontSize * 1.5,
+              child: Row(
+                children: _buildAxisLabels(
+                  axisLabelFontSize,
+                  barWidth,
+                  barSpacing,
+                  isDark,
+                ),
+              ),
+            ),
           ],
         ),
-        // 柱状图（支持横向滚动）
-        SizedBox(
-          height: chartHeight,
-          child:
-              needsScroll
-                  ? SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: widget.size.getItemSpacing(),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: _buildMoodBars(
-                        maxValue,
-                        isDark,
-                        barWidth,
-                        barSpacing,
-                        chartHeight,
-                      ),
-                    ),
-                  )
-                  : Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: _buildMoodBars(
-                      maxValue,
-                      isDark,
-                      barWidth,
-                      barSpacing,
-                      chartHeight,
-                    ),
-                  ),
-        ),
-        // X轴标签（支持横向滚动）
-        SizedBox(height: widget.size.getItemSpacing()),
-        SizedBox(
-          height: axisLabelFontSize * 1.5,
-          child:
-              needsScroll
-                  ? SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: widget.size.getItemSpacing(),
-                    ),
-                    child: Row(
-                      children: _buildAxisLabels(
-                        axisLabelFontSize,
-                        barWidth,
-                        barSpacing,
-                        isDark,
-                      ),
-                    ),
-                  )
-                  : Row(
-                    children: _buildAxisLabels(
-                      axisLabelFontSize,
-                      barWidth,
-                      barSpacing,
-                      isDark,
-                    ),
-                  ),
-        ),
-      ],
+      ),
     );
   }
 

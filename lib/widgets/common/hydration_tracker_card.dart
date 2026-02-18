@@ -155,7 +155,7 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
                 ),
                 padding: padding,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // 上部进度环区域
                     Flexible(
@@ -206,25 +206,6 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
                                         size:
                                             waterIconSize *
                                             _scaleAnimation.value,
-                                      ),
-                                      SizedBox(height: smallSpacing),
-                                      SizedBox(
-                                        height: subtitleFontSize * 1.5,
-                                        child: Center(
-                                          child: Text(
-                                            '${remaining.toStringAsFixed(1)} ${widget.unit} Left',
-                                            style: TextStyle(
-                                              fontSize: subtitleFontSize,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1.5,
-                                              letterSpacing: -0.5,
-                                              color:
-                                                  isDark
-                                                      ? Colors.grey.shade500
-                                                      : Colors.grey.shade400,
-                                            ),
-                                          ),
-                                        ),
                                       ),
                                     ],
                                   ),
