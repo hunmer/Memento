@@ -145,38 +145,37 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                           height: widget.size.getHeightConstraints().maxHeight * 0.18,
                           child: Row(
                             children: [
-                              Flexible(
-                                flex: 3,
-                                child: SizedBox(
-                                  height: widget.size.getHeightConstraints().maxHeight * 0.18,
-                                  child: AnimatedFlipCounter(
-                                    value:
-                                        widget.score.toDouble() *
-                                        _animation.value,
-                                    wholeDigits: 3,
-                                    fractionDigits: 0,
-                                    textStyle: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: widget.size == const LargeSize() ? 56 : 48,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.0,
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: SizedBox(
+                                    height: widget.size.getHeightConstraints().maxHeight * 0.18,
+                                    child: AnimatedFlipCounter(
+                                      value:
+                                          widget.score.toDouble() *
+                                          _animation.value,
+                                      wholeDigits: 3,
+                                      fractionDigits: 0,
+                                      textStyle: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: widget.size.getLargeFontSize() * 0.85,
+                                        fontWeight: FontWeight.bold,
+                                        height: 1.0,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                               SizedBox(width: widget.size.getItemSpacing() * 0.5),
-                              Flexible(
-                                flex: 1,
-                                child: SizedBox(
-                                  height: widget.size.getHeightConstraints().maxHeight * 0.18,
-                                  child: Text(
-                                    widget.grade,
-                                    style: TextStyle(
-                                      color: primaryColor,
-                                      fontSize: widget.size == const LargeSize() ? 56 : 48,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.0,
-                                    ),
+                              Expanded(
+                                child: Text(
+                                  widget.grade,
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontSize: widget.size.getLargeFontSize() * 0.85,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.0,
                                   ),
                                 ),
                               ),
@@ -188,18 +187,18 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                           'Last Actions',
                           style: TextStyle(
                             color: const Color(0xFF71717A),
-                            fontSize: widget.size == const LargeSize() ? 20 : 18,
+                            fontSize: widget.size.getSubtitleFontSize(),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         SizedBox(height: widget.size.getItemSpacing()),
                         // 行为列表
                         Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: List.generate(widget.actions.length, (
-                              index,
-                            ) {
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            itemCount: widget.actions.length,
+                            itemBuilder: (context, index) {
                               final action = widget.actions[index];
                               final itemAnimation = CurvedAnimation(
                                 parent: _animationController,
@@ -215,7 +214,7 @@ class _ScoreCardWidgetState extends State<ScoreCardWidget>
                                 animation: itemAnimation,
                                 size: widget.size,
                               );
-                            }),
+                            },
                           ),
                         ),
                       ],
@@ -260,7 +259,7 @@ class _ActionItem extends StatelessWidget {
                   action.label,
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: size == const LargeSize() ? 20 : 18,
+                    fontSize: size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -274,15 +273,15 @@ class _ActionItem extends StatelessWidget {
                           action.isPositive
                               ? const Color(0xFF22C55E)
                               : const Color(0xFFEF4444),
-                      fontSize: size == const LargeSize() ? 20 : 18,
+                      fontSize: size.getSubtitleFontSize(),
                       fontWeight: FontWeight.w500,
                       letterSpacing: 1.0,
                     ),
                   ),
                   SizedBox(width: size.getItemSpacing() * 0.25),
                   SizedBox(
-                    width: 60,
-                    height: size == const LargeSize() ? 28 : 24,
+                    width: size.getLargeFontSize() * 0.8,
+                    height: size.getLargeFontSize() * 0.5,
                     child: AnimatedFlipCounter(
                       value: displayValue.toDouble(),
                       wholeDigits: 2,
@@ -292,7 +291,7 @@ class _ActionItem extends StatelessWidget {
                             action.isPositive
                                 ? const Color(0xFF22C55E)
                                 : const Color(0xFFEF4444),
-                        fontSize: size == const LargeSize() ? 20 : 18,
+                        fontSize: size.getSubtitleFontSize(),
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.0,
                         height: 1.0,

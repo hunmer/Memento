@@ -35,7 +35,6 @@ import 'widgets/mini_trend_card.dart';
 import 'widgets/account_balance_card.dart';
 import 'widgets/modern_rounded_spending_widget.dart';
 import 'widgets/wallet_balance_card.dart';
-import 'widgets/music_player_card.dart';
 import 'widgets/score_card_widget.dart';
 import 'widgets/trend_value_card.dart';
 import 'widgets/trend_list_card.dart';
@@ -51,7 +50,6 @@ import 'widgets/social_activity_card.dart';
 import 'widgets/icon_circular_progress_card.dart';
 import 'widgets/monthly_bill_card.dart';
 import 'widgets/color_tag_task_card.dart';
-import 'widgets/weather_forecast_card.dart';
 import 'widgets/timeline_status_card.dart';
 import 'widgets/spending_trend_chart.dart';
 import 'widgets/modern_rounded_bar_icon_card.dart';
@@ -126,7 +124,6 @@ enum CommonWidgetId {
   accountBalanceCard,
   modernRoundedSpendingWidget,
   walletBalanceCard,
-  musicPlayerCard,
   scoreCardWidget,
   trendValueCard,
   trendListCard,
@@ -139,7 +136,6 @@ enum CommonWidgetId {
   colorfulShortcutsGrid,
   journalPromptCard,
   monthlyBillCard,
-  weatherForecastCard,
   timelineStatusCard,
   spendingTrendChart,
   modernRoundedMoodWidget,
@@ -477,14 +473,6 @@ class CommonWidgetsRegistry {
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
     ),
-    CommonWidgetId.musicPlayerCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.musicPlayerCard,
-      name: '音乐播放器卡片',
-      description: '显示专辑封面、歌词、播放进度和控制按钮，支持动画效果',
-      icon: Icons.music_note,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
-    ),
     CommonWidgetId.scoreCardWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.scoreCardWidget,
       name: '分数卡片',
@@ -588,14 +576,6 @@ class CommonWidgetsRegistry {
       name: '月度账单卡片',
       description: '显示月度账单信息，包括收入、支出和结余，支持翻转计数动画和入场效果',
       icon: Icons.receipt_long,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
-    ),
-    CommonWidgetId.weatherForecastCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.weatherForecastCard,
-      name: '天气预报卡片',
-      description: '显示城市天气、温度信息和温度趋势图，支持翻转计数动画和入场效果',
-      icon: Icons.cloud,
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
     ),
@@ -969,8 +949,6 @@ class CommonWidgetBuilder {
         return ModernRoundedSpendingWidget.fromProps(finalProps, size);
       case CommonWidgetId.walletBalanceCard:
         return WalletBalanceCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.musicPlayerCard:
-        return MusicPlayerCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.scoreCardWidget:
         return ScoreCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.trendValueCard:
@@ -997,8 +975,6 @@ class CommonWidgetBuilder {
         return SocialActivityCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.monthlyBillCard:
         return MonthlyBillCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.weatherForecastCard:
-        return WeatherForecastCard.fromProps(finalProps, size);
       case CommonWidgetId.timelineStatusCard:
         return TimelineStatusCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.spendingTrendChart:

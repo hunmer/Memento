@@ -87,11 +87,9 @@ import 'package:Memento/screens/widgets_gallery/screens/wallet_balance_card_exam
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/audio_waveform_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/music_player_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/dual_slider_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/score_card_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/colorful_shortcuts_grid_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weather_forecast_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_status_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/storage_breakdown_widget_example.dart';
 
@@ -488,15 +486,12 @@ class _WidgetRegistry {
     // 媒体类
     '/widgets_gallery/audio_waveform_widget':
         () => const AudioWaveformWidgetExample(),
-    '/widgets_gallery/music_player_card': () => const MusicPlayerCardExample(),
     // 工具类
     '/widgets_gallery/dual_slider_widget':
         () => const DualSliderWidgetExample(),
     '/widgets_gallery/score_card_widget': () => const ScoreCardWidgetExample(),
     '/widgets_gallery/colorful_shortcuts_grid':
         () => const ColorfulShortcutsGridExample(),
-    '/widgets_gallery/weather_forecast_card':
-        () => const WeatherForecastCardExample(),
     '/widgets_gallery/timeline_status_card':
         () => const TimelineStatusCardExample(),
     '/widgets_gallery/storage_breakdown_widget':

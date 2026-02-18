@@ -43,52 +43,6 @@
       ]
     },
     {
-      "name": "MusicPlayerCardWidget",
-      "displayName": "音乐播放器卡片",
-      "description": "显示专辑封面、歌词、播放进度和控制按钮",
-      "category": "media",
-      "file": "music_player_card.dart",
-      "parameters": [
-        {
-          "name": "albumArtUrl",
-          "type": "String",
-          "required": true,
-          "description": "专辑封面 URL"
-        },
-        {
-          "name": "title",
-          "type": "String",
-          "required": true,
-          "description": "歌曲标题"
-        },
-        {
-          "name": "lyrics",
-          "type": "List<String>",
-          "required": true,
-          "description": "歌词列表"
-        },
-        {
-          "name": "currentPosition",
-          "type": "int",
-          "required": true,
-          "description": "当前播放位置（秒）"
-        },
-        {
-          "name": "totalDuration",
-          "type": "int",
-          "required": true,
-          "description": "总时长（秒）"
-        },
-        {
-          "name": "isPlaying",
-          "type": "bool",
-          "required": false,
-          "default": "true",
-          "description": "是否正在播放"
-        }
-      ]
-    },
-    {
       "name": "AudioWaveformCardWidget",
       "displayName": "音频波形卡片",
       "description": "显示音频录制信息和波形可视化",

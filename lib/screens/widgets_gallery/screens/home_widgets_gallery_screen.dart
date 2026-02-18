@@ -716,13 +716,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
         subtitle: 'AudioWaveformWidget - 音频播放波形动画展示组件',
         route: '/widgets_gallery/audio_waveform_widget',
       ),
-      _buildListItem(
-        context,
-        icon: Icons.music_note,
-        title: '音乐播放器卡片',
-        subtitle: 'MusicPlayerCard - 音乐播放控制与歌词展示卡片',
-        route: '/widgets_gallery/music_player_card',
-      ),
     ];
   }
 
@@ -750,13 +743,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
         title: '彩色快捷方式网格',
         subtitle: 'ColorfulShortcutsGrid - 多色彩快捷方式网格展示组件',
         route: '/widgets_gallery/colorful_shortcuts_grid',
-      ),
-      _buildListItem(
-        context,
-        icon: Icons.wb_sunny,
-        title: '天气预报卡片',
-        subtitle: 'WeatherForecastCard - 天气预报与温度趋势展示卡片',
-        route: '/widgets_gallery/weather_forecast_card',
       ),
       _buildListItem(
         context,

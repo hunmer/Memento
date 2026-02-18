@@ -175,45 +175,6 @@
       ]
     },
     {
-      "name": "WeatherForecastCard",
-      "displayName": "天气预报卡片",
-      "description": "展示城市天气信息和温度趋势的卡片",
-      "category": "utility",
-      "file": "weather_forecast_card.dart",
-      "parameters": [
-        {
-          "name": "cityName",
-          "type": "String",
-          "required": true,
-          "description": "城市名称"
-        },
-        {
-          "name": "weatherDescription",
-          "type": "String",
-          "required": true,
-          "description": "天气描述"
-        },
-        {
-          "name": "currentTemp",
-          "type": "double",
-          "required": true,
-          "description": "当前温度"
-        },
-        {
-          "name": "lowTemp",
-          "type": "double",
-          "required": true,
-          "description": "最低温度"
-        },
-        {
-          "name": "temperatureHistory",
-          "type": "List<double>",
-          "required": true,
-          "description": "温度历史数据（用于绘制柱状图）"
-        }
-      ]
-    },
-    {
       "name": "TimelineStatusCardWidget",
       "displayName": "时间线状态卡片",
       "description": "用于显示时间线进度和状态信息",
