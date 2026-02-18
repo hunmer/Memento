@@ -217,7 +217,8 @@ class _HomeGridState extends State<HomeGrid> {
     int mainAxisCellCount = 1;
 
     if (item is HomeWidgetItem) {
-      if (item.size == const CustomSize(width: -1, height: -1)) {
+      // 使用 width 和 height 值比较，而不是对象引用比较
+      if (item.size.width == -1 && item.size.height == -1) {
         crossAxisCellCount = item.config['customWidth'] as int? ?? 2;
         mainAxisCellCount = item.config['customHeight'] as int? ?? 2;
       } else {
@@ -225,7 +226,8 @@ class _HomeGridState extends State<HomeGrid> {
         mainAxisCellCount = item.size.height;
       }
     } else if (item is HomeStackItem) {
-      if (item.size == const CustomSize(width: -1, height: -1)) {
+      // 使用 width 和 height 值比较，而不是对象引用比较
+      if (item.size.width == -1 && item.size.height == -1) {
         if (item.children.isNotEmpty) {
           crossAxisCellCount =
               item.children.first.config['customWidth'] as int? ?? 2;

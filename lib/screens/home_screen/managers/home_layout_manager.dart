@@ -266,8 +266,11 @@ class HomeLayoutManager extends ChangeNotifier {
           hasChanged = true;
         } else if (oldItem is HomeWidgetItem && newItem is HomeWidgetItem) {
           // 对于小组件,比较 widgetId、size 和 config
+          // 注意：size 没有实现 == 运算符，所以需要比较 width 和 height
+          final sizeChanged = oldItem.size.width != newItem.size.width ||
+              oldItem.size.height != newItem.size.height;
           if (oldItem.widgetId != newItem.widgetId ||
-              oldItem.size != newItem.size ||
+              sizeChanged ||
               !_mapsAreEqual(oldItem.config, newItem.config)) {
             hasChanged = true;
           }

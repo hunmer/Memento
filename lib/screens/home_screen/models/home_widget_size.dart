@@ -45,6 +45,11 @@ abstract class HomeWidgetSize {
     this.progressStrokeScale = 0.4,
   });
 
+  /// 相等性比较：基于 width 和 height
+  bool isEqualToSize(HomeWidgetSize other) {
+    return width == other.width && height == other.height;
+  }
+
   /// 向后兼容的静态 getter，支持 const SmallSize() 等访问方式
   static HomeWidgetSize get small => const SmallSize();
   static HomeWidgetSize get medium => const MediumSize();
@@ -78,7 +83,8 @@ abstract class HomeWidgetSize {
         return size;
       }
     }
-    return const LargeSize();
+    // 如果没有匹配的预设尺寸，返回 CustomSize
+    return CustomSize(width: width, height: height);
   }
 
   /// 判断当前尺寸是否至少与指定尺寸一样大
@@ -618,6 +624,17 @@ class CustomSize extends HomeWidgetSize {
     super.iconContainerScale,
     super.progressStrokeScale,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CustomSize &&
+        other.width == width &&
+        other.height == height;
+  }
+
+  @override
+  int get hashCode => Object.hash(width, height);
 }
 
 /// 所有尺寸的默认实例列表
