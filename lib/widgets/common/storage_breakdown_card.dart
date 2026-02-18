@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 分段分类数据模型
 ///
@@ -99,13 +100,39 @@ class StorageBreakdownCard extends StatefulWidget {
   /// 分类列表
   final List<SegmentedCategory> categories;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
+  /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
+  final bool inline;
+
   const StorageBreakdownCard({
     super.key,
     required this.title,
     required this.used,
     required this.total,
     required this.categories,
+    this.size = const MediumSize(),
+    this.inline = false,
   });
+
+  /// 从 props 创建实例
+  factory StorageBreakdownCard.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final categories = (props['categories'] as List<dynamic>?)
+            ?.map((e) => SegmentedCategory.fromJson(e as Map<String, dynamic>))
+            .toList() ??
+        <SegmentedCategory>[];
+    return StorageBreakdownCard(
+      title: props['title'] as String? ?? '',
+      used: (props['used'] as num?)?.toDouble() ?? 0,
+      total: (props['total'] as num?)?.toDouble() ?? 1,
+      categories: categories,
+      size: size,
+    );
+  }
 
   @override
   State<StorageBreakdownCard> createState() => _StorageBreakdownCardState();
@@ -142,6 +169,10 @@ class _StorageBreakdownCardState extends State<StorageBreakdownCard>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
+    final borderRadius = widget.size.getThumbnailImageSize() * 0.2;
+    final padding = widget.size.getPadding();
+    final titleSpacing = widget.size.getTitleSpacing();
+    final itemSpacing = widget.size.getItemSpacing();
 
     return AnimatedBuilder(
       animation: _animation,
@@ -151,15 +182,15 @@ class _StorageBreakdownCardState extends State<StorageBreakdownCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
-              constraints: const BoxConstraints(maxHeight: 500),
+              width: widget.inline ? double.maxFinite : widget.size.getWidthForChart(),
+              constraints: widget.size.getHeightConstraints(),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(borderRadius),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                    blurRadius: 16,
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -170,9 +201,10 @@ class _StorageBreakdownCardState extends State<StorageBreakdownCard>
                   width: 1,
                 ),
               ),
-              padding: const EdgeInsets.all(24),
+              padding: padding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // 标题和容量显示
                   _HeaderSection(
@@ -181,8 +213,9 @@ class _StorageBreakdownCardState extends State<StorageBreakdownCard>
                     total: widget.total,
                     animation: _animation,
                     isDark: isDark,
+                    size: widget.size,
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: titleSpacing),
 
                   // 分段进度条
                   _StorageBar(
@@ -190,14 +223,18 @@ class _StorageBreakdownCardState extends State<StorageBreakdownCard>
                     total: widget.total,
                     isDark: isDark,
                     animation: _animation,
+                    size: widget.size,
                   ),
-                  const SizedBox(height: 28),
+                  SizedBox(height: itemSpacing),
 
                   // 图例
-                  _LegendSection(
-                    categories: widget.categories,
-                    animation: _animation,
-                    isDark: isDark,
+                  Expanded(
+                    child: _LegendSection(
+                      categories: widget.categories,
+                      animation: _animation,
+                      isDark: isDark,
+                      size: widget.size,
+                    ),
                   ),
                 ],
               ),
@@ -216,6 +253,7 @@ class _HeaderSection extends StatelessWidget {
   final double total;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _HeaderSection({
     required this.title,
@@ -223,6 +261,7 @@ class _HeaderSection extends StatelessWidget {
     required this.total,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -231,6 +270,12 @@ class _HeaderSection extends StatelessWidget {
       parent: animation,
       curve: const Interval(0, 0.5, curve: Curves.easeOutCubic),
     );
+
+    // 根据 size 计算字体大小
+    final titleFontSize = size.getSubtitleFontSize();
+    final valueFontSize = size.getLargeFontSize() * 0.35; // 约 13-20px
+    final unitFontSize = size.getSubtitleFontSize() * 0.85;
+    final smallSpacing = size.getSmallSpacing();
 
     return AnimatedBuilder(
       animation: itemAnimation,
@@ -245,32 +290,32 @@ class _HeaderSection extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: titleFontSize,
                     fontWeight: FontWeight.w500,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: smallSpacing),
                 Row(
                   children: [
                     AnimatedFlipCounter(
                       value: used * itemAnimation.value,
                       fractionDigits: 0,
                       textStyle: TextStyle(
-                        fontSize: 36,
+                        fontSize: valueFontSize,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : Colors.grey.shade900,
                         letterSpacing: -1,
                       ),
                       padding: EdgeInsets.zero,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: smallSpacing),
                     Padding(
-                      padding: const EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.only(top: smallSpacing),
                       child: Text(
                         'GB',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: unitFontSize,
                           fontWeight: FontWeight.w500,
                           color: isDark
                               ? Colors.grey.shade400
@@ -278,12 +323,13 @@ class _HeaderSection extends StatelessWidget {
                         ),
                       ),
                     ),
+                    SizedBox(width: smallSpacing),
                     Padding(
-                      padding: const EdgeInsets.only(left: 6, top: 6),
+                      padding: EdgeInsets.only(left: smallSpacing, top: smallSpacing),
                       child: Text(
                         '/ $total GB',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: unitFontSize,
                           fontWeight: FontWeight.w500,
                           color: isDark
                               ? Colors.grey.shade500
@@ -308,12 +354,14 @@ class _StorageBar extends StatelessWidget {
   final double total;
   final bool isDark;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _StorageBar({
     required this.categories,
     required this.total,
     required this.isDark,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -323,6 +371,11 @@ class _StorageBar extends StatelessWidget {
       curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
     );
 
+    // 根据 size 计算高度和圆角
+    final barHeight = size.getLegendIndicatorHeight() * 3;
+    final borderRadius = size.getBarWidth() / 2;
+    final gap = size.getBarSpacing();
+
     return AnimatedBuilder(
       animation: itemAnimation,
       builder: (context, child) {
@@ -331,7 +384,6 @@ class _StorageBar extends StatelessWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final barWidth = constraints.maxWidth;
-              const gap = 4.0; // 段之间的间隙
 
               // 计算每段的累积位置
               double currentLeft = 0;
@@ -369,7 +421,7 @@ class _StorageBar extends StatelessWidget {
                             (isDark
                                 ? Colors.grey.shade700
                                 : Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(borderRadius),
                       ),
                     ),
                   ),
@@ -379,7 +431,7 @@ class _StorageBar extends StatelessWidget {
               }
 
               return SizedBox(
-                height: 48,
+                height: barHeight,
                 width: barWidth,
                 child: Stack(children: segments),
               );
@@ -396,11 +448,13 @@ class _LegendSection extends StatelessWidget {
   final List<SegmentedCategory> categories;
   final Animation<double> animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   const _LegendSection({
     required this.categories,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
@@ -410,6 +464,10 @@ class _LegendSection extends StatelessWidget {
       curve: const Interval(0.5, 1.0, curve: Curves.easeOutCubic),
     );
 
+    // 根据 size 计算间距
+    final mainAxisSpacing = size.getSmallSpacing();
+    final crossAxisSpacing = size.getSmallSpacing() * 0.5;
+
     return AnimatedBuilder(
       animation: itemAnimation,
       builder: (context, child) {
@@ -417,11 +475,10 @@ class _LegendSection extends StatelessWidget {
           opacity: itemAnimation.value,
           child: GridView.count(
             crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 6,
-            crossAxisSpacing: 4,
-            childAspectRatio: 3.5,
+            physics: const ClampingScrollPhysics(),
+            mainAxisSpacing: mainAxisSpacing,
+            crossAxisSpacing: crossAxisSpacing,
+            childAspectRatio: size is SmallSize ? 4.0 : 4.5,
             children: List.generate(categories.length, (index) {
               final category = categories[index];
               const step = 0.1;
@@ -437,6 +494,7 @@ class _LegendSection extends StatelessWidget {
                 color: category.color ??
                     (isDark ? Colors.grey.shade600 : Colors.grey.shade200),
                 animation: legendAnimation,
+                size: size,
               );
             }),
           ),
@@ -451,15 +509,23 @@ class _LegendItem extends StatelessWidget {
   final String name;
   final Color color;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _LegendItem({
     required this.name,
     required this.color,
     required this.animation,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 根据 size 计算尺寸
+    final indicatorSize = size.getLegendIndicatorWidth() * 0.75;
+    final indicatorHeight = size.getLegendIndicatorHeight() * 0.75;
+    final fontSize = size.getLegendFontSize();
+    final spacing = size.getSmallSpacing() * 0.75;
+
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
@@ -470,28 +536,28 @@ class _LegendItem extends StatelessWidget {
             children: [
               Center(
                 child: Container(
-                  width: 8,
-                  height: 8,
+                  width: indicatorSize,
+                  height: indicatorHeight,
                   decoration: BoxDecoration(
                     color: color,
                     shape: BoxShape.circle,
                     boxShadow: [
-                      BoxShadow(color: color.withOpacity(0.3), blurRadius: 2),
+                      BoxShadow(color: color.withOpacity(0.3), blurRadius: 1.5),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: spacing),
               Expanded(
                 child: Align(
                   alignment: Alignment.center,
                   child: Text(
                     name,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontSize: fontSize,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF6B7280),
+                      color: const Color(0xFF6B7280),
                     ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,

@@ -65,6 +65,8 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final containerWidth = widget.inline ? double.maxFinite : widget.size.getWidthForChart() * 0.7;
+    final containerHeight = widget.inline ? double.maxFinite : containerWidth;
 
     return AnimatedBuilder(
       animation: _animation,
@@ -78,11 +80,11 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
         );
       },
       child: Container(
-        width: widget.inline ? double.maxFinite : 170,
-        height: widget.inline ? double.maxFinite : 170,
+        width: containerWidth,
+        height: containerHeight,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(widget.size.getThumbnailImageSize() * 0.2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
@@ -95,12 +97,14 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
           padding: widget.size.getPadding(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // 标题区域
-              _buildHeader(context),
+              Expanded(
+                child: _buildHeader(context),
+              ),
               // 时间线区域
-              _buildTimeline(context),
+              _buildTimeline(context, containerWidth),
             ],
           ),
         ),
@@ -114,19 +118,20 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
     final subTextColor = isDark ? const Color(0xFF98989D) : const Color(0xFF8E8E93);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         // 位置和方向图标
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
-              height: 17,
+              height: widget.size.getSubtitleFontSize(),
               child: Center(
                 child: Text(
                   widget.data.location,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: widget.size.getSubtitleFontSize() * 0.9,
                     fontWeight: FontWeight.w600,
                     color: textColor,
                     letterSpacing: -0.2,
@@ -135,103 +140,113 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
                 ),
               ),
             ),
-            SizedBox(width: widget.size.getItemSpacing() / 2),
+            SizedBox(width: widget.size.getSmallSpacing()),
             Transform.rotate(
               angle: 45 * 3.14159 / 180,
               child: Icon(
                 Icons.navigation,
-                size: 14,
+                size: widget.size.getSubtitleFontSize(),
                 color: textColor,
               ),
             ),
           ],
         ),
-        SizedBox(height: widget.size.getItemSpacing() / 4),
-        // 主标题
-        SizedBox(
-          height: 25,
-          child: Center(
-            child: Text(
-              widget.data.title,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-                height: 1.0,
-                letterSpacing: -0.3,
+        SizedBox(height: widget.size.getSmallSpacing()),
+        // 主标题和副标题（垂直居中对齐）
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 主标题
+              Text(
+                widget.data.title,
+                style: TextStyle(
+                  fontSize: widget.size.getTitleFontSize(),
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                  height: 1.0,
+                  letterSpacing: -0.3,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.left,
-            ),
-          ),
-        ),
-        SizedBox(height: widget.size.getItemSpacing() / 2),
-        // 描述文本
-        SizedBox(
-          height: 15,
-          child: Text(
-            widget.data.description,
-            style: TextStyle(
-              fontSize: 11,
-              color: subTextColor,
-              height: 1.3,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+              SizedBox(height: widget.size.getSmallSpacing()),
+              // 描述文本
+              Text(
+                widget.data.description,
+                style: TextStyle(
+                  fontSize: widget.size.getSubtitleFontSize() * 0.75,
+                  color: subTextColor,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTimeline(BuildContext context) {
+  Widget _buildTimeline(BuildContext context, double containerWidth) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final subTextColor = isDark ? const Color(0xFF98989D) : const Color(0xFF8E8E93);
     final gridColor = isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA);
+    final barHeight = widget.size.getLegendIndicatorHeight() * 2.5;
+    final barPadding = widget.size.getSmallSpacing();
+    final indicatorWidth = widget.size.getBarWidth();
+    final labelFontSize = widget.size.getSubtitleFontSize() * 0.7;
+    final gridStrokeWidth = widget.size.getStrokeWidth() * widget.size.progressStrokeScale;
 
     return SizedBox(
-      height: 48,
+      height: barHeight + labelFontSize + widget.size.getSmallSpacing(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           // 进度条区域
           SizedBox(
-            height: 32,
+            height: barHeight,
             child: Stack(
               children: [
                 // 网格线背景
                 Positioned.fill(
                   child: CustomPaint(
-                    painter: _TimelineGridPainter(color: gridColor),
+                    painter: _TimelineGridPainter(
+                      color: gridColor,
+                      strokeWidth: gridStrokeWidth,
+                    ),
                   ),
                 ),
                 // 当前进度指示器（橙色小点）
                 Positioned(
-                  left: 4,
-                  top: 4,
-                  bottom: 4,
+                  left: barPadding,
+                  top: barPadding,
+                  bottom: barPadding,
                   child: Container(
-                    width: 4,
+                    width: indicatorWidth,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFF9F0A),
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(indicatorWidth / 2),
                     ),
                   ),
                 ),
                 // 绿色进度条
                 Positioned(
-                  left: 4,
-                  top: 4,
-                  bottom: 4,
+                  left: barPadding,
+                  top: barPadding,
+                  bottom: barPadding,
                   child: AnimatedBuilder(
                     animation: _animation,
                     builder: (context, child) {
                       return Container(
-                        width: (170 - 32 - 4) * widget.data.progressPercent * _animation.value,
+                        width: (containerWidth - barPadding * 2) * widget.data.progressPercent * _animation.value,
                         decoration: BoxDecoration(
                           color: const Color(0xFF00E076),
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(8),
-                            bottomRight: Radius.circular(8),
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(widget.size.getBarWidth() / 2),
+                            bottomRight: Radius.circular(widget.size.getBarWidth() / 2),
                           ),
                         ),
                       );
@@ -241,21 +256,21 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
               ],
             ),
           ),
-          SizedBox(height: widget.size.getItemSpacing() / 2),
+          SizedBox(height: widget.size.getSmallSpacing()),
           // 时间标签
           SizedBox(
-            height: 12,
+            height: labelFontSize,
             child: Stack(
               children: [
                 Positioned(
                   left: 0,
                   child: SizedBox(
-                    height: 12,
+                    height: labelFontSize,
                     child: Center(
                       child: Text(
                         widget.data.currentTimeLabel,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: labelFontSize,
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.black,
                           letterSpacing: 0.5,
@@ -267,14 +282,14 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
                 ),
                 if (widget.data.timeLabels.isNotEmpty)
                   Positioned(
-                    left: 170 * 0.33 - 16,
+                    left: containerWidth * 0.33 - widget.size.getSubtitleFontSize() * 1.2,
                     child: SizedBox(
-                      height: 12,
+                      height: labelFontSize,
                       child: Center(
                         child: Text(
                           widget.data.timeLabels[0],
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: labelFontSize,
                             fontWeight: FontWeight.w500,
                             color: subTextColor,
                             height: 1.0,
@@ -285,14 +300,14 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
                   ),
                 if (widget.data.timeLabels.length > 1)
                   Positioned(
-                    left: 170 * 0.66 - 16,
+                    left: containerWidth * 0.66 - widget.size.getSubtitleFontSize() * 1.2,
                     child: SizedBox(
-                      height: 12,
+                      height: labelFontSize,
                       child: Center(
                         child: Text(
                           widget.data.timeLabels[1],
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: labelFontSize,
                             fontWeight: FontWeight.w500,
                             color: subTextColor,
                             height: 1.0,
@@ -313,14 +328,18 @@ class _TimelineStatusCardWidgetState extends State<TimelineStatusCardWidget>
 /// 时间线网格绘制器
 class _TimelineGridPainter extends CustomPainter {
   final Color color;
+  final double strokeWidth;
 
-  _TimelineGridPainter({required this.color});
+  _TimelineGridPainter({
+    required this.color,
+    this.strokeWidth = 1.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 1;
+      ..strokeWidth = strokeWidth;
 
     final width = size.width;
     final sectionWidth = width / 3;
@@ -338,6 +357,6 @@ class _TimelineGridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TimelineGridPainter oldDelegate) {
-    return oldDelegate.color != color;
+    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/common/index.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 存储分段小组件示例
 class StorageBreakdownWidgetExample extends StatelessWidget {
@@ -23,12 +24,13 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 280,
-                    height: 180,
+                    width: 150,
+                    height: 150,
                     child: StorageBreakdownCard(
                       title: 'Device Storage',
                       used: 150,
                       total: 256,
+                      size: const SmallSize(),
                       categories: [
                         SegmentedCategory(
                           name: 'Apps',
@@ -49,12 +51,13 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 320,
-                    height: 220,
+                    width: 220,
+                    height: 200,
                     child: StorageBreakdownCard(
                       title: 'Device Storage',
                       used: 250,
                       total: 512,
+                      size: const MediumSize(),
                       categories: [
                         SegmentedCategory(
                           name: 'Apps',
@@ -80,12 +83,13 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                 const SizedBox(height: 8),
                 Center(
                   child: SizedBox(
-                    width: 380,
+                    width: 300,
                     height: 280,
                     child: StorageBreakdownCard(
                       title: 'Device Storage',
                       used: 345,
                       total: 512,
+                      size: const LargeSize(),
                       categories: [
                         SegmentedCategory(
                           name: 'Apps',
@@ -102,7 +106,11 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                           value: 41,
                           color: Color(0xFFFF9500),
                         ),
-                        SegmentedCategory(name: 'System', value: 146, color: null),
+                        SegmentedCategory(
+                          name: 'System',
+                          value: 146,
+                          color: null,
+                        ),
                       ],
                     ),
                   ),
@@ -117,6 +125,7 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                     title: 'Device Storage Overview',
                     used: 400,
                     total: 512,
+                    size: const WideSize(),
                     categories: [
                       SegmentedCategory(
                         name: 'Applications',
@@ -138,7 +147,11 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                         value: 50,
                         color: Color(0xFF007AFF),
                       ),
-                      SegmentedCategory(name: 'System Data', value: 70, color: null),
+                      SegmentedCategory(
+                        name: 'System Data',
+                        value: 70,
+                        color: null,
+                      ),
                     ],
                   ),
                 ),
@@ -152,6 +165,7 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                     title: 'Complete Device Storage Analysis',
                     used: 480,
                     total: 512,
+                    size: const Wide2Size(),
                     categories: [
                       SegmentedCategory(
                         name: 'Applications',
@@ -178,7 +192,11 @@ class StorageBreakdownWidgetExample extends StatelessWidget {
                         value: 40,
                         color: Color(0xFFAF52DE),
                       ),
-                      SegmentedCategory(name: 'System Data', value: 40, color: null),
+                      SegmentedCategory(
+                        name: 'System Data',
+                        value: 40,
+                        color: null,
+                      ),
                     ],
                   ),
                 ),
