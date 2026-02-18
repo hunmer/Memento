@@ -31,9 +31,10 @@ class AccountBalanceCardWidget extends StatefulWidget {
     HomeWidgetSize size,
   ) {
     final accountsList = props['accounts'] as String?;
-    final accounts = accountsList != null && accountsList.isNotEmpty
-        ? AccountBalanceCardData.listFromJson(accountsList)
-        : _getDefaultAccounts();
+    final accounts =
+        accountsList != null && accountsList.isNotEmpty
+            ? AccountBalanceCardData.listFromJson(accountsList)
+            : _getDefaultAccounts();
 
     return AccountBalanceCardWidget(
       accounts: accounts,
@@ -63,7 +64,8 @@ class AccountBalanceCardWidget extends StatefulWidget {
   }
 
   @override
-  State<AccountBalanceCardWidget> createState() => _AccountBalanceCardWidgetState();
+  State<AccountBalanceCardWidget> createState() =>
+      _AccountBalanceCardWidgetState();
 }
 
 class _AccountBalanceCardWidgetState extends State<AccountBalanceCardWidget>
@@ -170,21 +172,27 @@ class _AccountItemWidget extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // 图标
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: data.iconColorObject.withOpacity(isDark ? 0.2 : 0.1),
-                      shape: BoxShape.circle,
+                  // 图标（在 Small 和 Medium 尺寸下隐藏）
+                  if (size is! SmallSize &&
+                      size is! MediumSize &&
+                      size is! LargeSize) ...[
+                    Container(
+                      width: size.getIconSize() * 2,
+                      height: size.getIconSize() * 2,
+                      decoration: BoxDecoration(
+                        color: data.iconColorObject.withOpacity(
+                          isDark ? 0.2 : 0.1,
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        data.iconData,
+                        size: size.getIconSize(),
+                        color: data.iconColorObject,
+                      ),
                     ),
-                    child: Icon(
-                      data.iconData,
-                      size: 28,
-                      color: data.iconColorObject,
-                    ),
-                  ),
-                  SizedBox(width: size.getItemSpacing()),
+                    SizedBox(width: size.getItemSpacing()),
+                  ],
                   // 账户信息
                   Expanded(
                     child: Column(
@@ -193,17 +201,20 @@ class _AccountItemWidget extends StatelessWidget {
                         Text(
                           data.name,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: size.getSubtitleFontSize() + 2,
                             fontWeight: FontWeight.w600,
                             color: isDark ? Colors.white : Colors.grey.shade900,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: size.getSmallSpacing()),
                         Text(
                           '${data.billCount} 笔账单',
                           style: TextStyle(
-                            fontSize: 14,
-                            color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                            fontSize: size.getSubtitleFontSize(),
+                            color:
+                                isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade500,
                           ),
                         ),
                       ],
@@ -211,17 +222,17 @@ class _AccountItemWidget extends StatelessWidget {
                   ),
                   // 余额
                   SizedBox(
-                    height: 28,
+                    height: size.getSubtitleFontSize() * 2,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (isNegative)
                           SizedBox(
-                            height: 20,
+                            height: size.getSubtitleFontSize() * 1.5,
                             child: Text(
                               '-',
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: size.getSubtitleFontSize() + 2,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFFE74C3C),
                                 height: 1.0,
@@ -229,19 +240,25 @@ class _AccountItemWidget extends StatelessWidget {
                             ),
                           ),
                         SizedBox(
-                          width: 100,
-                          height: 28,
-                          child: AnimatedFlipCounter(
-                            value: data.balance.abs() * itemAnimation.value,
-                            fractionDigits: 2,
-                            prefix: isNegative ? '' : '¥',
-                            textStyle: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isNegative
-                                  ? const Color(0xFFE74C3C)
-                                  : (isDark ? Colors.white : Colors.grey.shade900),
-                              height: 1.0,
+                          height: size.getSubtitleFontSize() * 2,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerRight,
+                            child: AnimatedFlipCounter(
+                              value: data.balance.abs() * itemAnimation.value,
+                              fractionDigits: 2,
+                              prefix: isNegative ? '' : '¥',
+                              textStyle: TextStyle(
+                                fontSize: size.getSubtitleFontSize() + 2,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    isNegative
+                                        ? const Color(0xFFE74C3C)
+                                        : (isDark
+                                            ? Colors.white
+                                            : Colors.grey.shade900),
+                                height: 1.0,
+                              ),
                             ),
                           ),
                         ),

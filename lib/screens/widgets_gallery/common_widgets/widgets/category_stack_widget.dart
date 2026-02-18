@@ -31,9 +31,8 @@ class CategoryData {
     }
 
     // 确保 totalAmount 是有效的数字
-    final safeTotalAmount = totalAmount.isNaN || totalAmount.isInfinite
-        ? 0.0
-        : totalAmount;
+    final safeTotalAmount =
+        totalAmount.isNaN || totalAmount.isInfinite ? 0.0 : totalAmount;
 
     // 安全获取 percentage
     final percentageValue = json['percentage'];
@@ -128,7 +127,8 @@ class CategoryStackWidget extends StatefulWidget {
       currentAmount = 0.0;
     }
 
-    final categoriesList = (props['categories'] as List<dynamic>?)
+    final categoriesList =
+        (props['categories'] as List<dynamic>?)
             ?.map(
               (e) => CategoryData.fromJson(
                 e as Map<String, dynamic>,
@@ -212,106 +212,212 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
                     children: [
                       Text(
                         widget.title,
-                        style: const TextStyle(
-                          color: Color(0xFF8E8E93),
-                          fontSize: 14,
+                        style: TextStyle(
+                          color: const Color(0xFF8E8E93),
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.5,
                         ),
                       ),
                       SizedBox(height: widget.size.getSmallSpacing()),
                       SizedBox(
-                        height: 40,
-                        child: Row(
-                          children: [
-                            Text(
-                              widget.currency,
-                              style: TextStyle(
-                                color: isDark ? Colors.white : Colors.black,
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: widget.size.getSmallSpacing()),
-                            SizedBox(
-                              width: 80,
-                              height: 40,
-                              child: AnimatedFlipCounter(
-                                value: widget.currentAmount * _animation.value,
-                                wholeDigits: 3,
-                                fractionDigits: 0,
-                                textStyle: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black,
-                                  fontSize: 36,
-                                  fontWeight: FontWeight.bold,
-                                  height: 1.0,
+                        height:
+                            widget.size.isAtLeast(const LargeSize())
+                                ? widget.size.getLargeFontSize() * 1.2
+                                : null,
+                        child:
+                            widget.size.isAtLeast(const LargeSize())
+                                ? Row(
+                                  children: [
+                                    Text(
+                                      widget.currency,
+                                      style: TextStyle(
+                                        color:
+                                            isDark
+                                                ? Colors.white
+                                                : Colors.black,
+                                        fontSize:
+                                            widget.size.getLargeFontSize(),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: widget.size.getSmallSpacing(),
+                                    ),
+                                    SizedBox(
+                                      width:
+                                          widget.size.getLargeFontSize() * 2.2,
+                                      height:
+                                          widget.size.getLargeFontSize() * 1.2,
+                                      child: AnimatedFlipCounter(
+                                        value:
+                                            widget.currentAmount *
+                                            _animation.value,
+                                        wholeDigits: 3,
+                                        fractionDigits: 0,
+                                        textStyle: TextStyle(
+                                          color:
+                                              isDark
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                          fontSize:
+                                              widget.size.getLargeFontSize(),
+                                          fontWeight: FontWeight.bold,
+                                          height: 1.0,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: widget.size.getItemSpacing(),
+                                    ),
+                                    SizedBox(
+                                      height:
+                                          widget.size.getLargeFontSize() * 1.2,
+                                      child: Text(
+                                        '${widget.currency}${widget.targetAmount}',
+                                        style: TextStyle(
+                                          color: const Color(0xFF8E8E93),
+                                          fontSize:
+                                              widget.size.getTitleFontSize() *
+                                              0.75,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          widget.currency,
+                                          style: TextStyle(
+                                            color:
+                                                isDark
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                            fontSize:
+                                                widget.size.getLargeFontSize(),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: widget.size.getSmallSpacing(),
+                                        ),
+                                        SizedBox(
+                                          width:
+                                              widget.size.getLargeFontSize() *
+                                              2.2,
+                                          height:
+                                              widget.size.getLargeFontSize() *
+                                              1.2,
+                                          child: AnimatedFlipCounter(
+                                            value:
+                                                widget.currentAmount *
+                                                _animation.value,
+                                            wholeDigits: 3,
+                                            fractionDigits: 0,
+                                            textStyle: TextStyle(
+                                              color:
+                                                  isDark
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                              fontSize:
+                                                  widget.size
+                                                      .getLargeFontSize(),
+                                              fontWeight: FontWeight.bold,
+                                              height: 1.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      '${widget.currency}${widget.targetAmount}',
+                                      style: TextStyle(
+                                        color: const Color(0xFF8E8E93),
+                                        fontSize:
+                                            widget.size.getTitleFontSize() *
+                                            0.75,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                            SizedBox(width: widget.size.getItemSpacing()),
-                            SizedBox(
-                              height: 40,
-                              child: Text(
-                                '${widget.currency}${widget.targetAmount}',
-                                style: const TextStyle(
-                                  color: Color(0xFF8E8E93),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _StackedBarChart(
-                        categories: widget.categories,
-                        animation: _animation,
-                      ),
-                      SizedBox(width: widget.size.getItemSpacing()),
-                      Expanded(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 96),
-                          child: SingleChildScrollView(
-                            physics: const ClampingScrollPhysics(),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(
-                                widget.categories.length,
-                                (index) {
-                                  final category = widget.categories[index];
-                                  // 均匀分配动画区间
-                                  final count = widget.categories.length;
-                                  final step = count > 0 ? 1.0 / count : 1.0;
-                                  final start = index * step;
-                                  final end = ((index + 1) * step).clamp(0.0, 1.0);
-                                  final itemAnimation = CurvedAnimation(
-                                    parent: _animationController,
-                                    curve: Interval(
-                                      start,
-                                      end,
-                                      curve: Curves.easeOutCubic,
+                  SizedBox(height: widget.size.getItemSpacing()),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SizedBox(
+                          width: 40,
+                          child: _StackedBarChart(
+                            categories: widget.categories,
+                            animation: _animation,
+                            size: widget.size,
+                          ),
+                        ),
+                        SizedBox(width: widget.size.getItemSpacing()),
+                        Expanded(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  widget.size.getRankedBarListHeight() * 0.8,
+                            ),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return SingleChildScrollView(
+                                  physics: const ClampingScrollPhysics(),
+                                  child: SizedBox(
+                                    width: constraints.maxWidth,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(
+                                        widget.categories.length,
+                                        (index) {
+                                          final category =
+                                              widget.categories[index];
+                                          // 均匀分配动画区间
+                                          final count =
+                                              widget.categories.length;
+                                          final step =
+                                              count > 0 ? 1.0 / count : 1.0;
+                                          final start = index * step;
+                                          final end = ((index + 1) * step)
+                                              .clamp(0.0, 1.0);
+                                          final itemAnimation = CurvedAnimation(
+                                            parent: _animationController,
+                                            curve: Interval(
+                                              start,
+                                              end,
+                                              curve: Curves.easeOutCubic,
+                                            ),
+                                          );
+                                          return _CategoryItem(
+                                            category: category,
+                                            animation: itemAnimation,
+                                            currency: widget.currency,
+                                            size: widget.size,
+                                          );
+                                        },
+                                      ),
                                     ),
-                                  );
-                                  return _CategoryItem(
-                                    category: category,
-                                    animation: itemAnimation,
-                                    currency: widget.currency,
-                                    size: widget.size,
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -326,46 +432,50 @@ class _CategoryStackWidgetState extends State<CategoryStackWidget>
 class _StackedBarChart extends StatelessWidget {
   final List<CategoryData> categories;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
-  const _StackedBarChart({required this.categories, required this.animation});
+  const _StackedBarChart({
+    required this.categories,
+    required this.animation,
+    required this.size,
+  });
 
   @override
   Widget build(BuildContext context) {
     // 计算所有类别的总金额，用于计算相对占比
-    final totalAmount = categories.isEmpty
-        ? 1.0
-        : categories.fold<double>(0.0, (sum, c) => sum + c.amount);
+    final totalAmount =
+        categories.isEmpty
+            ? 1.0
+            : categories.fold<double>(0.0, (sum, c) => sum + c.amount);
 
-    return SizedBox(
-      width: 40,
-      height: 96,
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: categories.map((category) {
-            // 使用相对占比（金额占总金额的比例）
-            final ratio = totalAmount > 0 ? category.amount / totalAmount : 0.0;
-            return Expanded(
-              flex: (ratio * 1000).toInt(),
-              child: AnimatedBuilder(
-                animation: animation,
-                builder: (context, child) {
-                  return FractionallySizedBox(
-                    heightFactor: animation.value,
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      decoration: BoxDecoration(color: category.color),
-                    ),
-                  );
-                },
-              ),
-            );
-          }).toList(),
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(size.getStrokeWidth() / 2),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children:
+            categories.map((category) {
+              // 使用相对占比（金额占总金额的比例）
+              final ratio =
+                  totalAmount > 0 ? category.amount / totalAmount : 0.0;
+              return Expanded(
+                flex: (ratio * 1000).toInt(),
+                child: AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    return FractionallySizedBox(
+                      heightFactor: animation.value,
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        decoration: BoxDecoration(color: category.color),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -390,30 +500,50 @@ class _CategoryItem extends StatelessWidget {
       animation: animation,
       builder: (context, child) {
         return Padding(
-          padding: EdgeInsets.only(bottom: category != _lastCategory ? size.getItemSpacing() : 0),
+          padding: EdgeInsets.only(
+            bottom: category != _lastCategory ? size.getItemSpacing() : 0,
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(color: category.color, borderRadius: BorderRadius.circular(2)),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(category.label, style: const TextStyle(color: Color(0xFF3F3F46), fontSize: 13, fontWeight: FontWeight.w500)),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: size.getLegendIndicatorWidth() * 0.5,
+                      height: size.getLegendIndicatorHeight() * 0.75,
+                      decoration: BoxDecoration(
+                        color: category.color,
+                        borderRadius: BorderRadius.circular(
+                          size.getStrokeWidth() / 4,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: size.getSmallSpacing() * 2),
+                    Text(
+                      category.label,
+                      style: TextStyle(
+                        color: const Color(0xFF3F3F46),
+                        fontSize: size.getLegendFontSize(),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
-                width: 50,
-                height: 16,
+                width: size.getLegendFontSize() * 4,
+                height: size.getLegendFontSize() * 1.2,
                 child: AnimatedFlipCounter(
                   value: category.amount * animation.value,
                   wholeDigits: 2,
                   fractionDigits: 0,
                   prefix: currency,
-                  textStyle: const TextStyle(color: Colors.black, fontSize: 13, fontWeight: FontWeight.w600, height: 1.0),
+                  textStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: size.getLegendFontSize(),
+                    fontWeight: FontWeight.w600,
+                    height: 1.0,
+                  ),
                 ),
               ),
             ],
