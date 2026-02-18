@@ -1,5 +1,6 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 余额卡片数据模型
 ///
@@ -30,9 +31,10 @@ class BalanceCardData {
       title: json['title'] as String,
       balance: (json['balance'] as num).toDouble(),
       available: (json['available'] as num).toDouble(),
-      weeklyData: (json['weeklyData'] as List<dynamic>)
-          .map((e) => (e as num).toDouble())
-          .toList(),
+      weeklyData:
+          (json['weeklyData'] as List<dynamic>)
+              .map((e) => (e as num).toDouble())
+              .toList(),
     );
   }
 
@@ -78,36 +80,48 @@ class ModernRoundedBalanceCard extends StatefulWidget {
   /// 每周数据 (7天，0.0-1.0)
   final List<double> weeklyData;
 
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
   const ModernRoundedBalanceCard({
     super.key,
     required this.title,
     required this.balance,
     required this.available,
     required this.weeklyData,
+    this.size = const MediumSize(),
   });
 
   /// 从数据模型创建
-  factory ModernRoundedBalanceCard.fromData(BalanceCardData data) {
+  factory ModernRoundedBalanceCard.fromData(
+    BalanceCardData data, {
+    HomeWidgetSize size = const MediumSize(),
+  }) {
     return ModernRoundedBalanceCard(
       title: data.title,
       balance: data.balance,
       available: data.available,
       weeklyData: data.weeklyData,
+      size: size,
     );
   }
 
   /// 从 props 创建实例（用于公共小组件系统）
   factory ModernRoundedBalanceCard.fromProps(
     Map<String, dynamic> props,
+    HomeWidgetSize size,
   ) {
     final weeklyDataList = props['weeklyData'] as List?;
-    final weeklyData = weeklyDataList?.map((e) => (e as num).toDouble()).toList() ?? <double>[];
+    final weeklyData =
+        weeklyDataList?.map((e) => (e as num).toDouble()).toList() ??
+        <double>[];
 
     return ModernRoundedBalanceCard(
       title: props['title'] as String? ?? '余额',
       balance: (props['balance'] as num?)?.toDouble() ?? 0.0,
       available: (props['available'] as num?)?.toDouble() ?? 0.0,
       weeklyData: weeklyData,
+      size: size,
     );
   }
 
@@ -153,6 +167,15 @@ class _ModernRoundedBalanceCardState extends State<ModernRoundedBalanceCard>
 
     final weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
+    // 根据 size 计算尺寸
+    final padding = widget.size.getPadding();
+    final titleFontSize = widget.size.getTitleFontSize();
+    final valueFontSize = widget.size.getLargeFontSize() * 0.35; // 约 13-20px
+    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    final smallSpacing = widget.size.getSmallSpacing();
+    final titleSpacing = widget.size.getTitleSpacing();
+    final barWidth = widget.size.getBarWidth();
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -161,11 +184,9 @@ class _ModernRoundedBalanceCardState extends State<ModernRoundedBalanceCard>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: 340,
-              height: 250,
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -174,7 +195,8 @@ class _ModernRoundedBalanceCardState extends State<ModernRoundedBalanceCard>
                   ),
                 ],
               ),
-              padding: const EdgeInsets.all(24),
+              padding: padding,
+              constraints: widget.size.getHeightConstraints(),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,68 +208,109 @@ class _ModernRoundedBalanceCardState extends State<ModernRoundedBalanceCard>
                       Text(
                         widget.title,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: titleFontSize * 0.45, // 约 7-13px
                           fontWeight: FontWeight.w500,
                           color: textColor,
                           height: 1.0,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: smallSpacing * 2),
                       SizedBox(
-                        height: 44,
+                        height: valueFontSize * 1.2,
                         child: AnimatedFlipCounter(
                           value: widget.balance * _animation.value,
                           prefix: '\$',
                           fractionDigits: 2,
                           thousandSeparator: ',',
                           textStyle: TextStyle(
-                            fontSize: 36,
+                            fontSize: valueFontSize,
                             fontWeight: FontWeight.bold,
                             color: textColor,
                             height: 1.0,
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 24,
-                        child: Text(
-                          '\$${widget.available.toStringAsFixed(2)} Available',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: secondaryTextColor,
-                            height: 1.0,
-                          ),
+                      SizedBox(height: smallSpacing),
+                      Text(
+                        '\$${widget.available.toStringAsFixed(2)} Available',
+                        style: TextStyle(
+                          fontSize: subtitleFontSize,
+                          fontWeight: FontWeight.w500,
+                          color: secondaryTextColor,
+                          height: 1.0,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: titleSpacing * 0.8),
 
-                  // 每周柱状图
-                  SizedBox(
-                    height: 80,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: List.generate(widget.weeklyData.length, (index) {
-                        final value = widget.weeklyData[index];
-                        final itemAnimation = CurvedAnimation(
-                          parent: _animationController,
-                          curve: Interval(
-                            index * 0.06,
-                            0.58 + index * 0.06,
-                            curve: Curves.easeOutCubic,
+                  // 每周柱状图 - 支持横向滚动
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final availableHeight = constraints.maxHeight;
+                        final labelHeight =
+                            widget.size.getLegendFontSize() * 1.2 +
+                            smallSpacing * 3;
+                        final barHeight = (availableHeight - labelHeight).clamp(
+                          0.0,
+                          availableHeight,
+                        );
+
+                        return Align(
+                          alignment: Alignment.topCenter,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: smallSpacing,
+                            ),
+                            child: SizedBox(
+                              height: barHeight + labelHeight,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: List.generate(
+                                  widget.weeklyData.length,
+                                  (index) {
+                                  final value = widget.weeklyData[index];
+                                  // 计算动画区间，确保 end 不超过 1.0
+                                  final totalItems = widget.weeklyData.length;
+                                  final animationStart =
+                                      index / totalItems * 0.5;
+                                  final animationEnd =
+                                      (index + 1) / totalItems * 0.9;
+                                  final itemAnimation = CurvedAnimation(
+                                    parent: _animationController,
+                                    curve: Interval(
+                                      animationStart.clamp(0.0, 1.0),
+                                      animationEnd.clamp(0.0, 1.0),
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                                  );
+
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                      right:
+                                          index < widget.weeklyData.length - 1
+                                              ? barWidth * 0.5
+                                              : 0,
+                                    ),
+                                    child: _WeeklyBar(
+                                      label: weekDays[index % weekDays.length],
+                                      value: value * itemAnimation.value,
+                                      backgroundColor: barBgColor,
+                                      size: widget.size,
+                                      barWidth: barWidth,
+                                      barHeight: barHeight,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            ),
                           ),
                         );
-
-                        return _WeeklyBar(
-                          label: weekDays[index % weekDays.length],
-                          value: value * itemAnimation.value,
-                          backgroundColor: barBgColor,
-                        );
-                      }),
+                      },
                     ),
                   ),
                 ],
@@ -265,11 +328,17 @@ class _WeeklyBar extends StatelessWidget {
   final String label;
   final double value;
   final Color backgroundColor;
+  final HomeWidgetSize size;
+  final double barWidth;
+  final double barHeight;
 
   const _WeeklyBar({
     required this.label,
     required this.value,
     required this.backgroundColor,
+    required this.size,
+    required this.barWidth,
+    required this.barHeight,
   });
 
   // 渐变色配置
@@ -300,22 +369,32 @@ class _WeeklyBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 根据 size 计算尺寸
+    final legendFontSize = size.getLegendFontSize();
+    final smallSpacing = size.getSmallSpacing();
+
+    // 圆角为 barWidth 的一半
+    final borderRadius = barWidth / 2;
+
+    // 填充高度基于 barHeight
+    final filledHeight = barHeight * value.clamp(0.0, 1.0);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Container(
-          width: 18,
-          height: 50,
+          width: barWidth,
+          height: barHeight,
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(borderRadius),
           ),
           clipBehavior: Clip.antiAlias,
           child: Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              width: 18,
-              height: 56 * value.clamp(0.0, 1.0),
+              width: barWidth,
+              height: filledHeight,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
@@ -323,24 +402,25 @@ class _WeeklyBar extends StatelessWidget {
                   colors: _gradients,
                 ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(9),
-                  bottomRight: Radius.circular(9),
+                  bottomLeft: Radius.circular(borderRadius),
+                  bottomRight: Radius.circular(borderRadius),
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: smallSpacing * 3),
         SizedBox(
-          height: 18,
+          height: legendFontSize * 1.2,
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: legendFontSize,
               fontWeight: FontWeight.w500,
-              color: backgroundColor == const Color(0xFF3A3A3C)
-                  ? const Color(0xFFAEAEB2)
-                  : const Color(0xFF8E8E93),
+              color:
+                  backgroundColor == const Color(0xFF3A3A3C)
+                      ? const Color(0xFFAEAEB2)
+                      : const Color(0xFF8E8E93),
             ),
           ),
         ),
