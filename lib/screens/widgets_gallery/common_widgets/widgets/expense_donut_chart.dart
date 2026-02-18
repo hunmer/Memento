@@ -125,8 +125,8 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 340,
-              height: widget.inline ? double.maxFinite : 500,
+              width: widget.inline ? double.maxFinite : widget.size.getWidthForChart() * 1.4,
+              height: widget.inline ? double.maxFinite : widget.size.getHeightForChart() * 3.3,
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
@@ -156,8 +156,8 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
                         ),
                         child: Text(
                           widget.badgeLabel,
-                          style: const TextStyle(
-                            fontSize: 9,
+                          style: TextStyle(
+                            fontSize: widget.size.getSubtitleFontSize() * 0.75,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
                             color: Colors.black,
@@ -168,7 +168,7 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
                       Text(
                         widget.timePeriod,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: widget.size.getSubtitleFontSize(),
                           fontWeight: FontWeight.w500,
                           color: Colors.grey.shade500,
                         ),
@@ -178,13 +178,14 @@ class _ExpenseDonutChartWidgetState extends State<ExpenseDonutChartWidget>
                   SizedBox(height: widget.size.getTitleSpacing()),
                   Center(
                     child: SizedBox(
-                      width: 150,
-                      height: 150,
+                      width: widget.size.getWidthForChart() * 0.6,
+                      height: widget.size.getWidthForChart() * 0.6,
                       child: _DonutChart(
                         categories: widget.categories,
                         totalAmount: widget.totalAmount,
                         totalUnit: widget.totalUnit,
                         animation: _animation,
+                        size: widget.size,
                       ),
                     ),
                   ),
@@ -229,12 +230,14 @@ class _DonutChart extends StatelessWidget {
   final double totalAmount;
   final String totalUnit;
   final Animation<double> animation;
+  final HomeWidgetSize size;
 
   const _DonutChart({
     required this.categories,
     required this.totalAmount,
     required this.totalUnit,
     required this.animation,
+    required this.size,
   });
 
   @override
@@ -244,12 +247,14 @@ class _DonutChart extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
+        final chartSize = size.getWidthForChart() * 0.6;
         return CustomPaint(
-          size: const Size(150, 150),
+          size: Size(chartSize, chartSize),
           painter: _DonutChartPainter(
             categories: categories,
             animation: animation.value,
             isDark: isDark,
+            size: size,
           ),
           child: Center(
             child: AnimatedFlipCounter(
@@ -258,7 +263,7 @@ class _DonutChart extends StatelessWidget {
               suffix: totalUnit,
               duration: const Duration(milliseconds: 800),
               textStyle: TextStyle(
-                fontSize: 20,
+                fontSize: size.getLargeFontSize() * 0.35,
                 fontWeight: FontWeight.w700,
                 color: isDark ? Colors.white : Colors.grey.shade900,
                 height: 1.0,
@@ -275,18 +280,20 @@ class _DonutChartPainter extends CustomPainter {
   final List<ExpenseCategoryData> categories;
   final double animation;
   final bool isDark;
+  final HomeWidgetSize size;
 
   _DonutChartPainter({
     required this.categories,
     required this.animation,
     required this.isDark,
+    required this.size,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 20;
-    final strokeWidth = 8.0;
+    final radius = size.width / 2 - 20 * this.size.scale;
+    final strokeWidth = 8.0 * this.size.scale;
 
     double startAngle = -math.pi / 2;
 
@@ -360,8 +367,8 @@ class _CategoryItem extends StatelessWidget {
                   child: Row(
                     children: [
                       Container(
-                        width: 10,
-                        height: 10,
+                        width: size.getLegendIndicatorHeight(),
+                        height: size.getLegendIndicatorHeight(),
                         decoration: BoxDecoration(
                           color: color,
                           shape: BoxShape.circle,
@@ -378,7 +385,7 @@ class _CategoryItem extends StatelessWidget {
                                     Text(
                                       label,
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: size.getLegendFontSize(),
                                         fontWeight: FontWeight.w500,
                                         color:
                                             isDark
@@ -391,7 +398,7 @@ class _CategoryItem extends StatelessWidget {
                                     Text(
                                       subtitle!,
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: size.getLegendFontSize() * 0.85,
                                         color:
                                             isDark
                                                 ? Colors.grey.shade500
@@ -405,7 +412,7 @@ class _CategoryItem extends StatelessWidget {
                                 : Text(
                                   label,
                                   style: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: size.getLegendFontSize(),
                                     fontWeight: FontWeight.w500,
                                     color:
                                         isDark
@@ -425,7 +432,7 @@ class _CategoryItem extends StatelessWidget {
                   suffix: '%',
                   duration: const Duration(milliseconds: 600),
                   textStyle: TextStyle(
-                    fontSize: 13,
+                    fontSize: size.getLegendFontSize(),
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     height: 1.0,

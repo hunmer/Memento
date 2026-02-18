@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/models/monthly_bill_card_data.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/monthly_bill_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 月度账单卡片示例
 class MonthlyBillCardExample extends StatelessWidget {
@@ -33,6 +34,7 @@ class MonthlyBillCardExample extends StatelessWidget {
                         expense: 2048.00,
                         balance: -1024.00,
                       ),
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -50,6 +52,7 @@ class MonthlyBillCardExample extends StatelessWidget {
                         expense: 2048.00,
                         balance: -1024.00,
                       ),
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -67,6 +70,7 @@ class MonthlyBillCardExample extends StatelessWidget {
                         expense: 2048.00,
                         balance: -1024.00,
                       ),
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -83,6 +87,7 @@ class MonthlyBillCardExample extends StatelessWidget {
                       expense: 2048.00,
                       balance: -1024.00,
                     ),
+                    size: const Wide2Size(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -98,6 +103,7 @@ class MonthlyBillCardExample extends StatelessWidget {
                       expense: 2048.00,
                       balance: -1024.00,
                     ),
+                    size: const Wide3Size(),
                   ),
                 ),
               ],

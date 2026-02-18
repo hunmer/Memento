@@ -103,7 +103,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
               padding: widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -113,14 +113,13 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                 ],
               ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 标题
+                  // 顶部：标题
                   Text(
                     widget.data.title,
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: widget.size.getTitleFontSize() * 0.8,
                       fontWeight: FontWeight.bold,
                       color: titleColor,
                       letterSpacing: -0.5,
@@ -128,41 +127,62 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                   ),
                   SizedBox(height: widget.size.getTitleSpacing()),
 
-                  // 收入
-                  _BillItemWidget(
-                    label: '收入',
-                    value: widget.data.income,
-                    valueColor: incomeColor,
-                    showPlus: true,
-                    animation: _fadeInAnimation,
-                    index: 0,
+                  // 中间：收入和支出
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 收入
+                      _BillItemWidget(
+                        label: '收入',
+                        value: widget.data.income,
+                        valueColor: incomeColor,
+                        showPlus: true,
+                        animation: _fadeInAnimation,
+                        index: 0,
+                        size: widget.size,
+                      ),
+                      SizedBox(height: widget.size.getItemSpacing()),
+
+                      // 支出
+                      _BillItemWidget(
+                        label: '支出',
+                        value: widget.data.expense,
+                        valueColor: expenseColor,
+                        showPlus: false,
+                        animation: _fadeInAnimation,
+                        index: 1,
+                        size: widget.size,
+                      ),
+                    ],
                   ),
-                  SizedBox(height: widget.size.getItemSpacing()),
 
-                  // 支出
-                  _BillItemWidget(
-                    label: '支出',
-                    value: widget.data.expense,
-                    valueColor: expenseColor,
-                    showPlus: false,
-                    animation: _fadeInAnimation,
-                    index: 1,
-                  ),
-                  SizedBox(height: widget.size.getItemSpacing()),
+                  const Spacer(),
 
-                  // 分隔线
-                  Container(height: 1, color: dividerColor),
-                  SizedBox(height: widget.size.getTitleSpacing()),
+                  // 底部：分隔线和结余
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 分隔线
+                      Container(height: 1, color: dividerColor),
+                      SizedBox(
+                        height:
+                            widget.size is SmallSize
+                                ? 0
+                                : widget.size.getTitleSpacing(),
+                      ),
 
-                  // 结余
-                  _BillItemWidget(
-                    label: '结余',
-                    value: widget.data.balance,
-                    valueColor: incomeColor,
-                    showPlus: true,
-                    isLarge: true,
-                    animation: _fadeInAnimation,
-                    index: 2,
+                      // 结余
+                      _BillItemWidget(
+                        label: '结余',
+                        value: widget.data.balance,
+                        valueColor: incomeColor,
+                        showPlus: true,
+                        isLarge: true,
+                        animation: _fadeInAnimation,
+                        index: 2,
+                        size: widget.size,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -183,6 +203,7 @@ class _BillItemWidget extends StatelessWidget {
   final bool isLarge;
   final Animation<double> animation;
   final int index;
+  final HomeWidgetSize size;
 
   const _BillItemWidget({
     required this.label,
@@ -192,6 +213,7 @@ class _BillItemWidget extends StatelessWidget {
     this.isLarge = false,
     required this.animation,
     required this.index,
+    required this.size,
   });
 
   @override
@@ -210,13 +232,17 @@ class _BillItemWidget extends StatelessWidget {
       ),
     );
 
-    final fontSize = isLarge ? 28.0 : 18.0;
-    final labelFontSize = isLarge ? 14.0 : 14.0;
+    // 根据 size 计算字体大小
+    final fontSize =
+        isLarge
+            ? size.getTitleFontSize() *
+                1.0 // 约 16-28px
+            : size.getSubtitleFontSize() * 1.2; // 约 17-19px
+    final labelFontSize = size.getSubtitleFontSize(); // 约 12-16px
     final counterHeight = fontSize * 1.1;
-    final rowHeight = counterHeight + 4;
+    final rowHeight = counterHeight + size.getSmallSpacing();
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
@@ -226,39 +252,34 @@ class _BillItemWidget extends StatelessWidget {
             color: labelColor,
           ),
         ),
+        const Spacer(),
         SizedBox(
           height: rowHeight,
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (showPlus && value >= 0)
-                SizedBox(
-                  height: fontSize * 0.8,
-                  child: Text(
-                    '+',
-                    style: TextStyle(
-                      color: valueColor,
-                      fontSize: fontSize * 0.8,
-                      fontWeight: FontWeight.w500,
-                      height: 1.0,
-                    ),
+                Text(
+                  '+',
+                  style: TextStyle(
+                    color: valueColor,
+                    fontSize: fontSize * 0.8,
+                    fontWeight: FontWeight.w500,
+                    height: 1.0,
                   ),
                 ),
-              SizedBox(
-                width: isLarge ? 140 : 100,
-                height: counterHeight,
-                child: AnimatedFlipCounter(
-                  value: value.abs() * itemAnimation.value,
-                  fractionDigits: 2,
-                  prefix: '',
-                  textStyle: TextStyle(
-                    color: valueColor,
-                    fontSize: fontSize,
-                    fontWeight: isLarge ? FontWeight.bold : FontWeight.w500,
-                    fontFamily: 'monospace',
-                    height: 1.0,
-                    letterSpacing: isLarge ? -1.0 : -0.5,
-                  ),
+              AnimatedFlipCounter(
+                value: value.abs() * itemAnimation.value,
+                fractionDigits: 2,
+                prefix: '',
+                textStyle: TextStyle(
+                  color: valueColor,
+                  fontSize: fontSize,
+                  fontWeight: isLarge ? FontWeight.bold : FontWeight.w500,
+                  fontFamily: 'monospace',
+                  height: 1.0,
+                  letterSpacing: isLarge ? -1.0 : -0.5,
                 ),
               ),
             ],
