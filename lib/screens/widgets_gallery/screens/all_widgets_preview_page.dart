@@ -86,7 +86,6 @@ import 'package:Memento/screens/widgets_gallery/screens/category_stack_widget_ex
 import 'package:Memento/screens/widgets_gallery/screens/wallet_balance_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/expense_donut_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/audio_waveform_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/music_player_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/dual_slider_widget_example.dart';
@@ -486,8 +485,6 @@ class _WidgetRegistry {
     '/widgets_gallery/modern_rounded_balance_widget':
         () => const ModernRoundedBalanceWidgetExample(),
     '/widgets_gallery/monthly_bill_card': () => const MonthlyBillCardExample(),
-    '/widgets_gallery/expense_donut_chart':
-        () => const ExpenseDonutChartExample(),
     // 媒体类
     '/widgets_gallery/audio_waveform_widget':
         () => const AudioWaveformWidgetExample(),

@@ -150,7 +150,7 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
               Text(
                 widget.title,
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: widget.size.getTitleFontSize(),
                   fontWeight: FontWeight.w600,
                   color: isDark ? Colors.white : Colors.grey.shade900,
                   letterSpacing: -0.5,
@@ -158,11 +158,11 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: widget.size.getItemSpacing()),
+              SizedBox(height: widget.size.getSmallSpacing()),
               Text(
                 widget.date,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: widget.size.getSubtitleFontSize(),
                   fontWeight: FontWeight.w500,
                   color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                 ),
@@ -181,12 +181,16 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
       curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
     );
 
+    // 波形高度根据 size 计算
+    final waveformHeight = widget.size.getHeightConstraints().maxHeight * 0.3;
+
     return SizedBox(
-      height: 96,
+      height: waveformHeight,
       child: AnimatedBuilder(
         animation: waveformAnimation,
         builder: (context, child) {
           return _WaveformBars(
+            size: widget.size,
             primaryColor: primaryColor,
             isDark: isDark,
             animation: waveformAnimation,
@@ -230,11 +234,13 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
 
 /// 波形条组件
 class _WaveformBars extends StatelessWidget {
+  final HomeWidgetSize size;
   final Color primaryColor;
   final bool isDark;
   final Animation<double> animation;
 
   const _WaveformBars({
+    required this.size,
     required this.primaryColor,
     required this.isDark,
     required this.animation,

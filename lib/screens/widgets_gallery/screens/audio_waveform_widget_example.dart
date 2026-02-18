@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/audio_waveform_card.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 音频波形小组件示例
 class AudioWaveformWidgetExample extends StatelessWidget {
@@ -29,6 +30,7 @@ class AudioWaveformWidgetExample extends StatelessWidget {
                       title: 'New Audio',
                       date: '12.8.24',
                       duration: Duration(hours: 1, minutes: 12, seconds: 25),
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -43,6 +45,7 @@ class AudioWaveformWidgetExample extends StatelessWidget {
                       title: 'New Audio',
                       date: '12.8.24',
                       duration: Duration(hours: 1, minutes: 12, seconds: 25),
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -57,6 +60,7 @@ class AudioWaveformWidgetExample extends StatelessWidget {
                       title: 'New Audio',
                       date: '12.8.24',
                       duration: Duration(hours: 1, minutes: 12, seconds: 25),
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -70,6 +74,7 @@ class AudioWaveformWidgetExample extends StatelessWidget {
                     title: 'New Audio Recording',
                     date: '12.8.24',
                     duration: Duration(hours: 1, minutes: 12, seconds: 25),
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -82,6 +87,7 @@ class AudioWaveformWidgetExample extends StatelessWidget {
                     title: 'Complete New Audio Recording Session',
                     date: '12.8.24',
                     duration: Duration(hours: 1, minutes: 12, seconds: 25),
+                    size: const Wide2Size(),
                   ),
                 ),
               ],
