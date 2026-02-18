@@ -55,20 +55,14 @@ class _ColorfulShortcutsGridWidgetState
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.05),
       end: Offset.zero,
     ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutCubic,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _animationController.forward();
@@ -83,9 +77,10 @@ class _ColorfulShortcutsGridWidgetState
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final backgroundColor = isDark
-        ? const Color(0xFF282828).withOpacity(0.8)
-        : Colors.white.withOpacity(0.8);
+    final backgroundColor =
+        isDark
+            ? const Color(0xFF282828).withOpacity(0.8)
+            : Colors.white.withOpacity(0.8);
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -94,11 +89,13 @@ class _ColorfulShortcutsGridWidgetState
           opacity: _fadeAnimation.value,
           child: Transform.translate(
             offset: Offset(
-                0, MediaQuery.of(context).size.height * _slideAnimation.value.dy),
+              0,
+              MediaQuery.of(context).size.height * _slideAnimation.value.dy,
+            ),
             child: Container(
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(widget.data.borderRadius),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -107,9 +104,10 @@ class _ColorfulShortcutsGridWidgetState
                   ),
                 ],
                 border: Border.all(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.white.withOpacity(0.4),
+                  color:
+                      isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : Colors.white.withOpacity(0.4),
                   width: 1,
                 ),
               ),
@@ -125,11 +123,11 @@ class _ColorfulShortcutsGridWidgetState
   Widget _buildGrid(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: widget.data.columns,
-        crossAxisSpacing: widget.data.spacing,
-        mainAxisSpacing: widget.data.spacing,
+        crossAxisSpacing: widget.size.getSmallSpacing() * 3,
+        mainAxisSpacing: widget.size.getSmallSpacing() * 3,
         childAspectRatio: 1.0,
       ),
       itemCount: widget.data.shortcuts.length,
@@ -188,6 +186,13 @@ class _ShortcutItemWidget extends StatelessWidget {
   }
 
   Widget _buildButton(BuildContext context) {
+    // 计算按钮高度：基于图标大小
+    final iconSize = size.getIconSize();
+    final buttonHeight = iconSize * size.iconContainerScale;
+
+    // 计算边框圆角：基于按钮高度的一半
+    final buttonRadius = buttonHeight * 0.5;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -199,14 +204,14 @@ class _ShortcutItemWidget extends StatelessWidget {
           // 处理长按事件
           HapticFeedback.mediumImpact();
         },
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(buttonRadius),
         splashColor: Colors.white.withOpacity(0.3),
         highlightColor: Colors.white.withOpacity(0.2),
         child: Container(
-          height: 100,
+          height: buttonHeight,
           decoration: BoxDecoration(
             color: Color(shortcut.color),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(buttonRadius),
             boxShadow: [
               BoxShadow(
                 color: Color(shortcut.color).withOpacity(0.3),
@@ -221,14 +226,15 @@ class _ShortcutItemWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (shortcut.iconTransform != null && shortcut.iconTransform!.length == 16)
+                if (shortcut.iconTransform != null &&
+                    shortcut.iconTransform!.length == 16)
                   Transform(
                     transform: Matrix4.fromList(shortcut.iconTransform!),
                     alignment: Alignment.center,
                     child: Icon(
                       _getIconData(shortcut.iconName),
                       color: Colors.white,
-                      size: 24,
+                      size: size.getIconSize(),
                       shadows: [
                         Shadow(
                           color: Colors.black.withOpacity(0.1),
@@ -241,7 +247,7 @@ class _ShortcutItemWidget extends StatelessWidget {
                   Icon(
                     _getIconData(shortcut.iconName),
                     color: Colors.white.withOpacity(0.9),
-                    size: 24,
+                    size: size.getIconSize(),
                     shadows: [
                       Shadow(
                         color: Colors.black.withOpacity(0.1),
@@ -256,12 +262,7 @@ class _ShortcutItemWidget extends StatelessWidget {
                     fontSize: size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w600,
                     height: 1.2,
-                    shadows: [
-                      Shadow(
-                        color: Color(0x10000000),
-                        blurRadius: 4,
-                      ),
-                    ],
+                    shadows: [Shadow(color: Color(0x10000000), blurRadius: 4)],
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

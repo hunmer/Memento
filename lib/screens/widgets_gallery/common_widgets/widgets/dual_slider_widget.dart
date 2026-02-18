@@ -158,24 +158,31 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
         return Opacity(
           opacity: _animation.value,
           child: Transform.translate(
-            offset: Offset(0, 20 * (1 - _animation.value)),
+            offset: Offset(0, 20 * widget.size.scale * (1 - _animation.value)),
             child: Container(
-              width: widget.inline ? double.maxFinite : 320,
-              height: widget.inline ? double.maxFinite : 320,
+              width: widget.inline ? double.maxFinite : 320 * widget.size.scale,
+              height: widget.inline ? double.maxFinite : null,
+              constraints:
+                  widget.inline
+                      ? null
+                      : BoxConstraints(
+                        minHeight: 280 * widget.size.scale,
+                        maxHeight: 320 * widget.size.scale,
+                      ),
               decoration: BoxDecoration(
                 color: backgroundColor,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
+                    blurRadius: 20 * widget.size.scale,
+                    offset: Offset(0, 4 * widget.size.scale),
                   ),
                 ],
               ),
               padding: widget.size.getPadding(),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 顶部：标签信息
                   _LabelInfo(
@@ -195,6 +202,8 @@ class _DualSliderWidgetState extends State<DualSliderWidget>
                     animation: _animation,
                     size: widget.size,
                   ),
+
+                  const Spacer(),
 
                   // 底部：数值和徽章标签
                   Row(
@@ -256,14 +265,14 @@ class _LabelInfo extends StatelessWidget {
         return Opacity(
           opacity: itemAnimation.value,
           child: Transform.translate(
-            offset: Offset(0, 10 * (1 - itemAnimation.value)),
+            offset: Offset(0, 10 * size.scale * (1 - itemAnimation.value)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   label1,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: size.getTitleFontSize() * 0.9,
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : Colors.grey.shade900,
                     letterSpacing: -0.5,
@@ -275,18 +284,24 @@ class _LabelInfo extends StatelessWidget {
                     Text(
                       label2,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: size.getSubtitleFontSize() * 0.9,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade500,
                       ),
                     ),
                     SizedBox(width: size.getItemSpacing()),
                     Text(
                       label3,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: size.getSubtitleFontSize() * 0.9,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                        color:
+                            isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade500,
                       ),
                     ),
                   ],
@@ -329,82 +344,115 @@ class _SliderTrack extends StatelessWidget {
         return Opacity(
           opacity: itemAnimation.value,
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: size.getTitleSpacing()),
+            padding: EdgeInsets.symmetric(vertical: size.getSmallSpacing()),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final trackWidth = constraints.maxWidth;
+                // 根据不同尺寸调整滑块大小
+                double baseSliderSize;
+                if (size is SmallSize) {
+                  baseSliderSize = 20;
+                } else if (size is MediumSize || size is WideSize) {
+                  baseSliderSize = 24;
+                } else if (size is LargeSize || size is Wide2Size) {
+                  baseSliderSize = 28;
+                } else {
+                  // Large3Size, Wide3Size
+                  baseSliderSize = 32;
+                }
+                final sliderSize = baseSliderSize * size.scale;
 
                 return SizedBox(
-                  height: 6,
+                  height: sliderSize, // 容器高度等于滑块高度
                   width: trackWidth,
                   child: Stack(
+                    clipBehavior: Clip.none, // 允许滑块超出轨道
                     children: [
-                      // 背景轨道
-                      Positioned.fill(
+                      // 背景轨道（垂直居中）
+                      Positioned(
+                        top: (sliderSize - size.getStrokeWidth() * 0.6) / 2,
+                        left: 0,
+                        right: 0,
+                        height: size.getStrokeWidth() * 0.6,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(3),
+                            color:
+                                isDark
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(4 * size.scale),
                           ),
                         ),
                       ),
-                      // 进度条
-                      FractionallySizedBox(
-                        widthFactor: progress * itemAnimation.value,
-                        alignment: Alignment.centerLeft,
+                      // 进度条（垂直居中）
+                      Positioned(
+                        top: (sliderSize - size.getStrokeWidth() * 0.6) / 2,
+                        left: 0,
+                        width: trackWidth * progress * itemAnimation.value,
+                        height: size.getStrokeWidth() * 0.6,
                         child: Container(
                           decoration: BoxDecoration(
                             color: primaryColor,
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(4 * size.scale),
                           ),
                         ),
                       ),
-                      // 左滑块
+                      // 左滑块（垂直居中，可以超出轨道）
                       Positioned(
                         left: 0,
                         top: 0,
                         bottom: 0,
                         child: Center(
                           child: Container(
-                            width: 12,
-                            height: 12,
+                            width: sliderSize,
+                            height: sliderSize,
                             decoration: BoxDecoration(
                               color: primaryColor,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isDark ? Colors.grey.shade800 : Colors.white,
-                                width: 2,
+                                color:
+                                    isDark
+                                        ? Colors.grey.shade800
+                                        : Colors.white,
+                                width: sliderSize * 0.15, // 描边宽度与滑块成比例
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 2,
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: sliderSize * 0.25, // 阴影与滑块成比例
+                                  offset: Offset(0, sliderSize * 0.08),
                                 ),
                               ],
                             ),
                           ),
                         ),
                       ),
-                      // 右滑块
+                      // 右滑块（垂直居中，可以超出轨道）
                       Positioned(
-                        left: (progress - 0.02).clamp(0.0, 1.0) * trackWidth,
+                        left:
+                            (progress).clamp(0.0, 1.0) * trackWidth -
+                            sliderSize / 2,
                         top: 0,
                         bottom: 0,
                         child: Center(
                           child: Container(
-                            width: 12,
-                            height: 12,
+                            width: sliderSize,
+                            height: sliderSize,
                             decoration: BoxDecoration(
                               color: primaryColor,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isDark ? Colors.grey.shade800 : Colors.white,
-                                width: 2,
+                                color:
+                                    isDark
+                                        ? Colors.grey.shade800
+                                        : Colors.white,
+                                width: sliderSize * 0.15, // 描边宽度与滑块成比例
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 2,
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: sliderSize * 0.25, // 阴影与滑块成比例
+                                  offset: Offset(0, sliderSize * 0.08),
                                 ),
                               ],
                             ),
@@ -454,14 +502,14 @@ class _ValueDisplay extends StatelessWidget {
         return Opacity(
           opacity: itemAnimation.value,
           child: Transform.translate(
-            offset: Offset(0, 10 * (1 - itemAnimation.value)),
+            offset: Offset(0, 10 * size.scale * (1 - itemAnimation.value)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   isPM ? 'PM' : 'AM',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: size.getSubtitleFontSize() * 0.9,
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
                   ),
@@ -473,7 +521,7 @@ class _ValueDisplay extends StatelessWidget {
                     AnimatedFlipCounter(
                       value: value1 * itemAnimation.value,
                       textStyle: TextStyle(
-                        fontSize: 48,
+                        fontSize: size.getLargeFontSize() * 0.75,
                         fontWeight: FontWeight.bold,
                         color: isDark ? Colors.white : Colors.grey.shade900,
                         letterSpacing: -2,
@@ -481,26 +529,26 @@ class _ValueDisplay extends StatelessWidget {
                       ),
                       padding: EdgeInsets.zero,
                     ),
-                    SizedBox(width: size.getItemSpacing()),
+                    SizedBox(width: size.getSmallSpacing()),
                     Padding(
-                      padding: const EdgeInsets.only(top: 4),
+                      padding: EdgeInsets.only(top: 4 * size.scale),
                       child: Text(
                         ':',
                         style: TextStyle(
-                          fontSize: 40,
+                          fontSize: size.getLargeFontSize() * 0.6,
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.grey.shade900,
                           height: 1.0,
                         ),
                       ),
                     ),
-                    SizedBox(width: size.getItemSpacing()),
+                    SizedBox(width: size.getSmallSpacing()),
                     Padding(
-                      padding: const EdgeInsets.only(top: 4),
+                      padding: EdgeInsets.only(top: 4 * size.scale),
                       child: AnimatedFlipCounter(
                         value: value2 * itemAnimation.value,
                         textStyle: TextStyle(
-                          fontSize: 40,
+                          fontSize: size.getLargeFontSize() * 0.6,
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.grey.shade900,
                           letterSpacing: -2,
@@ -545,21 +593,24 @@ class _Badge extends StatelessWidget {
         return Transform.scale(
           scale: itemAnimation.value,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: 10 * size.scale,
+              vertical: 4 * size.scale,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFF34C759),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16 * size.scale),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFF34C759).withOpacity(0.3),
-                  blurRadius: 4,
+                  blurRadius: 3 * size.scale,
                 ),
               ],
             ),
             child: Text(
               badgeText,
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: size.getSubtitleFontSize() * 0.85,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),

@@ -53,7 +53,6 @@ import 'package:Memento/screens/widgets_gallery/screens/daily_bar_chart_card_exa
 import 'package:Memento/screens/widgets_gallery/screens/weekly_bar_chart_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/wallet_balance_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/habit_streak_tracker_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/music_player_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/event_calendar_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/performance_bar_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/profile_card_widget_example.dart';
@@ -116,7 +115,6 @@ import 'package:Memento/screens/widgets_gallery/screens/task_progress_list_card_
 import 'package:Memento/screens/widgets_gallery/screens/task_progress_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/rounded_task_progress_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/vertical_bar_chart_widget_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/weather_forecast_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_stat_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/memento_sf_calendar_example.dart';
 
@@ -404,11 +402,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/habit_streak_tracker',
           handler: (settings) => RouteHelpers.createRoute(const HabitStreakTrackerExample(), settings: settings),
           description: '连续打卡追踪器',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/music_player_card',
-          handler: (settings) => RouteHelpers.createRoute(const MusicPlayerCardExample(), settings: settings),
-          description: '音乐播放器卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/event_calendar_widget',
@@ -737,11 +730,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/rounded_task_progress_widget',
           handler: (settings) => RouteHelpers.createRoute(const RoundedTaskProgressWidgetExample(), settings: settings),
           description: '圆角任务进度小组件',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/weather_forecast_card',
-          handler: (settings) => RouteHelpers.createRoute(const WeatherForecastCardExample(), settings: settings),
-          description: '天气预报卡片',
         ),
         RouteDefinition(
           path: '/widgets_gallery/task_progress_card',
@@ -1358,13 +1346,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     subtitle: 'AudioWaveformWidget',
     route: '/widgets_gallery/audio_waveform_widget',
   ),
-  WidgetPreviewItem(
-    category: '媒体类',
-    icon: Icons.music_note,
-    title: '音乐播放器卡片',
-    subtitle: 'MusicPlayerCard',
-    route: '/widgets_gallery/music_player_card',
-  ),
   // 工具类
   WidgetPreviewItem(
     category: '工具类',
@@ -1386,13 +1367,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '彩色快捷方式网格',
     subtitle: 'ColorfulShortcutsGrid',
     route: '/widgets_gallery/colorful_shortcuts_grid',
-  ),
-  WidgetPreviewItem(
-    category: '工具类',
-    icon: Icons.wb_sunny,
-    title: '天气预报卡片',
-    subtitle: 'WeatherForecastCard',
-    route: '/widgets_gallery/weather_forecast_card',
   ),
   WidgetPreviewItem(
     category: '工具类',

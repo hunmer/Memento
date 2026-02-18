@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/score_card_widget.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
 /// 分数卡片示例
 class ScoreCardWidgetExample extends StatelessWidget {
@@ -29,15 +30,28 @@ class ScoreCardWidgetExample extends StatelessWidget {
                       score: 912,
                       grade: 'A',
                       actions: [
-                        ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                        ActionData(
+                          label: 'Charity Pay',
+                          value: 16,
+                          isPositive: true,
+                        ),
                         ActionData(
                           label: 'Traffic Violation',
                           value: 24,
                           isPositive: false,
                         ),
-                        ActionData(label: 'Blood Donation', value: 42, isPositive: true),
-                        ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                        ActionData(
+                          label: 'Blood Donation',
+                          value: 42,
+                          isPositive: true,
+                        ),
+                        ActionData(
+                          label: 'Volunteering',
+                          value: 32,
+                          isPositive: true,
+                        ),
                       ],
+                      size: const SmallSize(),
                     ),
                   ),
                 ),
@@ -52,15 +66,28 @@ class ScoreCardWidgetExample extends StatelessWidget {
                       score: 912,
                       grade: 'A',
                       actions: [
-                        ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                        ActionData(
+                          label: 'Charity Pay',
+                          value: 16,
+                          isPositive: true,
+                        ),
                         ActionData(
                           label: 'Traffic Violation',
                           value: 24,
                           isPositive: false,
                         ),
-                        ActionData(label: 'Blood Donation', value: 42, isPositive: true),
-                        ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                        ActionData(
+                          label: 'Blood Donation',
+                          value: 42,
+                          isPositive: true,
+                        ),
+                        ActionData(
+                          label: 'Volunteering',
+                          value: 32,
+                          isPositive: true,
+                        ),
                       ],
+                      size: const MediumSize(),
                     ),
                   ),
                 ),
@@ -75,15 +102,28 @@ class ScoreCardWidgetExample extends StatelessWidget {
                       score: 912,
                       grade: 'A',
                       actions: [
-                        ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                        ActionData(
+                          label: 'Charity Pay',
+                          value: 16,
+                          isPositive: true,
+                        ),
                         ActionData(
                           label: 'Traffic Violation',
                           value: 24,
                           isPositive: false,
                         ),
-                        ActionData(label: 'Blood Donation', value: 42, isPositive: true),
-                        ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                        ActionData(
+                          label: 'Blood Donation',
+                          value: 42,
+                          isPositive: true,
+                        ),
+                        ActionData(
+                          label: 'Volunteering',
+                          value: 32,
+                          isPositive: true,
+                        ),
                       ],
+                      size: const LargeSize(),
                     ),
                   ),
                 ),
@@ -97,15 +137,28 @@ class ScoreCardWidgetExample extends StatelessWidget {
                     score: 912,
                     grade: 'A',
                     actions: [
-                      ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                      ActionData(
+                        label: 'Charity Pay',
+                        value: 16,
+                        isPositive: true,
+                      ),
                       ActionData(
                         label: 'Traffic Violation',
                         value: 24,
                         isPositive: false,
                       ),
-                      ActionData(label: 'Blood Donation', value: 42, isPositive: true),
-                      ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                      ActionData(
+                        label: 'Blood Donation',
+                        value: 42,
+                        isPositive: true,
+                      ),
+                      ActionData(
+                        label: 'Volunteering',
+                        value: 32,
+                        isPositive: true,
+                      ),
                     ],
+                    size: const WideSize(),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -118,15 +171,28 @@ class ScoreCardWidgetExample extends StatelessWidget {
                     score: 912,
                     grade: 'A',
                     actions: [
-                      ActionData(label: 'Charity Pay', value: 16, isPositive: true),
+                      ActionData(
+                        label: 'Charity Pay',
+                        value: 16,
+                        isPositive: true,
+                      ),
                       ActionData(
                         label: 'Traffic Violation',
                         value: 24,
                         isPositive: false,
                       ),
-                      ActionData(label: 'Blood Donation', value: 42, isPositive: true),
-                      ActionData(label: 'Volunteering', value: 32, isPositive: true),
+                      ActionData(
+                        label: 'Blood Donation',
+                        value: 42,
+                        isPositive: true,
+                      ),
+                      ActionData(
+                        label: 'Volunteering',
+                        value: 32,
+                        isPositive: true,
+                      ),
                     ],
+                    size: const Wide2Size(),
                   ),
                 ),
               ],

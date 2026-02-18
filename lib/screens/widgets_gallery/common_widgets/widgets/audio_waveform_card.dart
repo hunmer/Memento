@@ -113,13 +113,14 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
               ),
               padding: widget.size.getPadding(),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // 顶部：标题和设置按钮
                   _buildHeader(isDark),
 
                   // 中间：波形动画
-                  _buildWaveform(effectivePrimaryColor, isDark),
+                  Expanded(
+                    child: _buildWaveform(effectivePrimaryColor, isDark),
+                  ),
 
                   // 底部：时间和播放按钮
                   _buildFooter(effectivePrimaryColor, isDark),
@@ -145,7 +146,7 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
         return Opacity(
           opacity: titleAnimation.value,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 widget.title,
@@ -181,22 +182,16 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
       curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
     );
 
-    // 波形高度根据 size 计算
-    final waveformHeight = widget.size.getHeightConstraints().maxHeight * 0.3;
-
-    return SizedBox(
-      height: waveformHeight,
-      child: AnimatedBuilder(
-        animation: waveformAnimation,
-        builder: (context, child) {
-          return _WaveformBars(
-            size: widget.size,
-            primaryColor: primaryColor,
-            isDark: isDark,
-            animation: waveformAnimation,
-          );
-        },
-      ),
+    return AnimatedBuilder(
+      animation: waveformAnimation,
+      builder: (context, child) {
+        return _WaveformBars(
+          size: widget.size,
+          primaryColor: primaryColor,
+          isDark: isDark,
+          animation: waveformAnimation,
+        );
+      },
     );
   }
 
@@ -216,11 +211,13 @@ class _AudioWaveformCardWidgetState extends State<AudioWaveformCardWidget>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _TimeDisplay(
+                size: widget.size,
                 duration: widget.duration,
                 animation: footerAnimation,
                 isDark: isDark,
               ),
               _PlayPauseButton(
+                size: widget.size,
                 primaryColor: primaryColor,
                 animation: footerAnimation,
               ),
@@ -276,6 +273,11 @@ class _WaveformBars extends StatelessWidget {
       12.0,
     ];
 
+    // 根据 size 计算波形条宽度和间距
+    final barWidth = size.getBarWidth() * 0.3; // 约 3.6/4.8/6
+    final barSpacing = size.getBarSpacing(); // 约 0.5/1.0/1.5
+    final playingBarWidth = barWidth * 1.5; // 播放位置的条更宽
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -294,7 +296,7 @@ class _WaveformBars extends StatelessWidget {
         );
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 1.5),
+          padding: EdgeInsets.symmetric(horizontal: barSpacing),
           child: _WaveformBar(
             height: baseHeight * itemAnimation.value,
             color: isPlayingPosition
@@ -304,7 +306,7 @@ class _WaveformBars extends StatelessWidget {
                     : (isDark
                         ? Colors.white.withOpacity(0.1)
                         : Colors.grey.shade300),
-            width: isPlayingPosition ? 6 : 4,
+            width: isPlayingPosition ? playingBarWidth : barWidth,
             isPlayingPosition: isPlayingPosition,
             primaryColor: primaryColor,
           ),
@@ -345,11 +347,13 @@ class _WaveformBar extends StatelessWidget {
 
 /// 时间显示组件
 class _TimeDisplay extends StatelessWidget {
+  final HomeWidgetSize size;
   final Duration duration;
   final Animation<double> animation;
   final bool isDark;
 
   const _TimeDisplay({
+    required this.size,
     required this.duration,
     required this.animation,
     required this.isDark,
@@ -361,22 +365,25 @@ class _TimeDisplay extends StatelessWidget {
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
 
+    // 根据 size 计算时间字体大小
+    final timeFontSize = size.getLargeFontSize() * 0.5; // 约 18/24/28
+
     return Row(
       children: [
         AnimatedFlipCounter(
           value: hours * animation.value,
           textStyle: TextStyle(
-            fontSize: 24,
+            fontSize: timeFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? Colors.white : Colors.grey.shade900,
             letterSpacing: 1,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: EdgeInsets.symmetric(horizontal: size.getSmallSpacing()),
         ),
         Text(
           ':',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: timeFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? Colors.white : Colors.grey.shade900,
           ),
@@ -384,17 +391,17 @@ class _TimeDisplay extends StatelessWidget {
         AnimatedFlipCounter(
           value: minutes * animation.value,
           textStyle: TextStyle(
-            fontSize: 24,
+            fontSize: timeFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? Colors.white : Colors.grey.shade900,
             letterSpacing: 1,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: EdgeInsets.symmetric(horizontal: size.getSmallSpacing()),
         ),
         Text(
           ':',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: timeFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? Colors.white : Colors.grey.shade900,
           ),
@@ -402,12 +409,12 @@ class _TimeDisplay extends StatelessWidget {
         AnimatedFlipCounter(
           value: seconds * animation.value,
           textStyle: TextStyle(
-            fontSize: 24,
+            fontSize: timeFontSize,
             fontWeight: FontWeight.w500,
             color: isDark ? Colors.white : Colors.grey.shade900,
             letterSpacing: 1,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: EdgeInsets.symmetric(horizontal: size.getSmallSpacing()),
         ),
       ],
     );
@@ -416,10 +423,12 @@ class _TimeDisplay extends StatelessWidget {
 
 /// 播放/暂停按钮组件
 class _PlayPauseButton extends StatefulWidget {
+  final HomeWidgetSize size;
   final Color primaryColor;
   final Animation<double> animation;
 
   const _PlayPauseButton({
+    required this.size,
     required this.primaryColor,
     required this.animation,
   });
@@ -434,6 +443,10 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
 
   @override
   Widget build(BuildContext context) {
+    // 根据 size 计算按钮大小和图标大小
+    final iconSize = widget.size.getIconSize();
+    final buttonSize = iconSize * widget.size.iconContainerScale;
+
     return Transform.scale(
       scale: widget.animation.value * (_isPressed ? 0.95 : 1.0),
       child: GestureDetector(
@@ -442,8 +455,8 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
         onTapCancel: () => setState(() => _isPressed = false),
         onTap: () => setState(() => _isPlaying = !_isPlaying),
         child: Container(
-          width: 56,
-          height: 56,
+          width: buttonSize,
+          height: buttonSize,
           decoration: BoxDecoration(
             color: widget.primaryColor,
             shape: BoxShape.circle,
@@ -457,7 +470,7 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
           ),
           child: Icon(
             _isPlaying ? Icons.pause : Icons.play_arrow,
-            size: 28,
+            size: iconSize,
             color: Colors.white,
           ),
         ),
