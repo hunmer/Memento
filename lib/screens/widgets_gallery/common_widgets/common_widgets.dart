@@ -66,7 +66,6 @@ import 'widgets/portfolio_stacked_chart.dart';
 import 'widgets/activity_rings_card.dart';
 import 'widgets/category_stack_widget.dart';
 import 'widgets/performance_bar_chart.dart';
-import 'widgets/expense_donut_chart.dart';
 import 'widgets/ranked_bar_chart_card.dart';
 import 'widgets/rental_preview_card.dart';
 import 'widgets/rounded_property_card.dart';
@@ -155,7 +154,6 @@ enum CommonWidgetId {
   activityRingsCard,
   categoryStackWidget,
   performanceBarChart,
-  expenseDonutChart,
   rankedBarChartCard,
   rentalPreviewCard,
   roundedPropertyCard,
@@ -713,14 +711,6 @@ class CommonWidgetsRegistry {
       defaultSize: Large3Size(),
       supportedSizes: const [const LargeSize()],
     ),
-    CommonWidgetId.expenseDonutChart: const CommonWidgetMetadata(
-      id: CommonWidgetId.expenseDonutChart,
-      name: '支出分类环形图',
-      description: '显示支出分类的环形图和分类列表，支持总额显示和翻转计数动画',
-      icon: Icons.pie_chart,
-      defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
-    ),
     CommonWidgetId.rankedBarChartCard: CommonWidgetMetadata(
       id: CommonWidgetId.rankedBarChartCard,
       name: '排名条形图卡片',
@@ -1037,8 +1027,6 @@ class CommonWidgetBuilder {
         return CategoryStackWidget.fromProps(finalProps, size);
       case CommonWidgetId.performanceBarChart:
         return PerformanceBarChartWidget.fromProps(finalProps, size);
-      case CommonWidgetId.expenseDonutChart:
-        return ExpenseDonutChartWidget.fromProps(finalProps, size);
       case CommonWidgetId.rankedBarChartCard:
         return RankedBarChartCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.rentalPreviewCard:

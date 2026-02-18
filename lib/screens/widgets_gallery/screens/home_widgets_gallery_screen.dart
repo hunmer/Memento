@@ -702,13 +702,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
         subtitle: 'MonthlyBillCard - 收入支出结余统计卡片',
         route: '/widgets_gallery/monthly_bill_card',
       ),
-      _buildListItem(
-        context,
-        icon: Icons.donut_large,
-        title: '支出分类环形图',
-        subtitle: 'ExpenseDonutChart - 支出类别环形统计图',
-        route: '/widgets_gallery/expense_donut_chart',
-      ),
     ];
   }
 

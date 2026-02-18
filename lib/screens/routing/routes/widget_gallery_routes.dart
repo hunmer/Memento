@@ -56,7 +56,6 @@ import 'package:Memento/screens/widgets_gallery/screens/habit_streak_tracker_exa
 import 'package:Memento/screens/widgets_gallery/screens/music_player_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/event_calendar_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/performance_bar_chart_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/expense_donut_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/profile_card_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/portfolio_stacked_chart_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/spending_trend_chart_example.dart';
@@ -420,11 +419,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           path: '/widgets_gallery/performance_bar_chart',
           handler: (settings) => RouteHelpers.createRoute(const PerformanceBarChartExample(), settings: settings),
           description: '性能指标柱状图',
-        ),
-        RouteDefinition(
-          path: '/widgets_gallery/expense_donut_chart',
-          handler: (settings) => RouteHelpers.createRoute(const ExpenseDonutChartExample(), settings: settings),
-          description: '支出分类环形图',
         ),
         RouteDefinition(
           path: '/widgets_gallery/profile_card_widget',
@@ -1355,13 +1349,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '月度账单卡片',
     subtitle: 'MonthlyBillCard',
     route: '/widgets_gallery/monthly_bill_card',
-  ),
-  WidgetPreviewItem(
-    category: '财务类',
-    icon: Icons.donut_large,
-    title: '支出分类环形图',
-    subtitle: 'ExpenseDonutChart',
-    route: '/widgets_gallery/expense_donut_chart',
   ),
   // 媒体类
   WidgetPreviewItem(
