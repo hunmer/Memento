@@ -347,245 +347,181 @@ abstract class HomeWidgetSize {
 
   /// 获取图例字体大小
   double getLegendFontSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 10;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 12;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 14;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 8.0,
+      SizeCategory.small => 10.0,
+      SizeCategory.medium => 12.0,
+      SizeCategory.large => 14.0,
+      SizeCategory.xlarge => 16.0,
+    };
     return baseSize * fontSize;
   }
 
   /// 获取柱状图柱子宽度
   double getBarWidth() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 12;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 16;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 20;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 8.0,
+      SizeCategory.small => 12.0,
+      SizeCategory.medium => 16.0,
+      SizeCategory.large => 20.0,
+      SizeCategory.xlarge => 24.0,
+    };
     return baseSize * scale;
   }
 
   /// 获取柱子之间的间距
   double getBarSpacing() {
-    double baseSpacing;
-    if (this is SmallSize) {
-      baseSpacing = 0.5;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSpacing = 1.0;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSpacing = 1.5;
-    }
+    final baseSpacing = switch (category) {
+      SizeCategory.mini => 0.3,
+      SizeCategory.small => 0.5,
+      SizeCategory.medium => 1.0,
+      SizeCategory.large => 1.5,
+      SizeCategory.xlarge => 2.0,
+    };
     return baseSpacing * spacing;
   }
 
   /// 获取进度条线条粗细
   double getStrokeWidth() {
-    double baseWidth;
-    if (this is SmallSize) {
-      baseWidth = 6.0;
-    } else if (this is MediumSize || this is WideSize) {
-      baseWidth = 8.0;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseWidth = 10.0;
-    }
+    final baseWidth = switch (category) {
+      SizeCategory.mini => 4.0,
+      SizeCategory.small => 6.0,
+      SizeCategory.medium => 8.0,
+      SizeCategory.large => 10.0,
+      SizeCategory.xlarge => 12.0,
+    };
     return baseWidth * strokeWidth;
   }
 
   /// 获取条形图列表容器高度
   double getRankedBarListHeight() {
-    double baseHeight;
-    if (this is SmallSize) {
-      baseHeight = 150;
-    } else if (this is MediumSize || this is WideSize) {
-      baseHeight = 200;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseHeight = 300;
-    } else {
-      // Large3, Wide3
-      baseHeight = 400;
-    }
+    final baseHeight = switch (category) {
+      SizeCategory.mini => 80.0,
+      SizeCategory.small => 150.0,
+      SizeCategory.medium => 220.0,
+      SizeCategory.large => 300.0,
+      SizeCategory.xlarge => 400.0,
+    };
     return baseHeight * scale;
   }
 
   /// 获取单个条形图条目高度
   double getRankedBarItemHeight() {
-    double baseHeight;
-    if (this is SmallSize) {
-      baseHeight = 32;
-    } else if (this is MediumSize || this is WideSize) {
-      baseHeight = 40;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseHeight = 48;
-    } else {
-      // Large3, Wide3
-      baseHeight = 56;
-    }
+    final baseHeight = switch (category) {
+      SizeCategory.mini => 24.0,
+      SizeCategory.small => 32.0,
+      SizeCategory.medium => 40.0,
+      SizeCategory.large => 48.0,
+      SizeCategory.xlarge => 56.0,
+    };
     return baseHeight * scale;
   }
 
   /// 获取条形图最大宽度（基础值，会根据 value 动态调整）
   double getRankedBarMaxWidth() {
-    double baseWidth;
-    if (this is SmallSize) {
-      baseWidth = 200;
-    } else if (this is MediumSize || this is WideSize) {
-      baseWidth = 280;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseWidth = 360;
-    } else {
-      // Large3, Wide3
-      baseWidth = 440;
-    }
+    final baseWidth = switch (category) {
+      SizeCategory.mini => 120.0,
+      SizeCategory.small => 200.0,
+      SizeCategory.medium => 280.0,
+      SizeCategory.large => 360.0,
+      SizeCategory.xlarge => 440.0,
+    };
     return baseWidth * scale;
   }
 
   /// 获取热力图高度
   double getHeatmapHeight() {
-    double baseHeight;
-    if (this is SmallSize) {
-      baseHeight = 60;
-    } else if (this is MediumSize || this is WideSize) {
-      baseHeight = 100;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseHeight = 140;
-    } else {
-      // Large3, Wide3
-      baseHeight = 180;
-    }
+    final baseHeight = switch (category) {
+      SizeCategory.mini => 40.0,
+      SizeCategory.small => 60.0,
+      SizeCategory.medium => 100.0,
+      SizeCategory.large => 140.0,
+      SizeCategory.xlarge => 180.0,
+    };
     return baseHeight * scale;
   }
 
-  /// 获取图表宽度
+  /// 获取图表宽度（基于实际布局需求）
   double getWidthForChart() {
-    double baseWidth;
-    if (this is SmallSize) {
-      baseWidth = 120;
-    } else if (this is MediumSize) {
-      baseWidth = 240;
-    } else if (this is LargeSize) {
-      baseWidth = 280;
-    } else if (this is WideSize) {
-      baseWidth = 600;
-    } else if (this is Wide2Size) {
-      baseWidth = 700;
-    } else {
-      // Large3, Wide3
-      baseWidth = 280;
-    }
+    final baseWidth = switch (category) {
+      SizeCategory.mini => 100.0,
+      SizeCategory.small => 180.0,
+      SizeCategory.medium => 260.0,
+      SizeCategory.large => 340.0,
+      SizeCategory.xlarge => 420.0,
+    };
     return baseWidth * scale;
   }
 
   /// 获取图表高度
   double getHeightForChart() {
-    double baseHeight;
-    if (this is SmallSize) {
-      baseHeight = 100;
-    } else if (this is MediumSize) {
-      baseHeight = 150;
-    } else if (this is LargeSize) {
-      baseHeight = 200;
-    } else if (this is WideSize) {
-      baseHeight = 150;
-    } else if (this is Wide2Size) {
-      baseHeight = 250;
-    } else {
-      // Large3, Wide3
-      baseHeight = 200;
-    }
+    final baseHeight = switch (category) {
+      SizeCategory.mini => 60.0,
+      SizeCategory.small => 100.0,
+      SizeCategory.medium => 150.0,
+      SizeCategory.large => 200.0,
+      SizeCategory.xlarge => 250.0,
+    };
     return baseHeight * scale;
   }
 
   /// 获取特色图片/缩略图尺寸（用于卡片封面）
   double getFeaturedImageSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 60;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 80;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseSize = 100;
-    } else {
-      // Large3, Wide3
-      baseSize = 120;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 40.0,
+      SizeCategory.small => 60.0,
+      SizeCategory.medium => 80.0,
+      SizeCategory.large => 100.0,
+      SizeCategory.xlarge => 120.0,
+    };
     return baseSize * scale;
   }
 
   /// 获取列表项缩略图尺寸
   double getThumbnailImageSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 36;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 48;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseSize = 56;
-    } else {
-      // Large3, Wide3
-      baseSize = 64;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 24.0,
+      SizeCategory.small => 36.0,
+      SizeCategory.medium => 48.0,
+      SizeCategory.large => 56.0,
+      SizeCategory.xlarge => 64.0,
+    };
     return baseSize * scale;
   }
 
   /// 获取特色图片图标尺寸
   double getFeaturedIconSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 28;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 40;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseSize = 48;
-    } else {
-      // Large3, Wide3
-      baseSize = 56;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 20.0,
+      SizeCategory.small => 28.0,
+      SizeCategory.medium => 40.0,
+      SizeCategory.large => 48.0,
+      SizeCategory.xlarge => 56.0,
+    };
     return baseSize * iconSize;
   }
 
   /// 获取列表项图标尺寸
   double getThumbnailIconSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 18;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 24;
-    } else if (this is LargeSize || this is Wide2Size) {
-      baseSize = 28;
-    } else {
-      // Large3, Wide3
-      baseSize = 32;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 14.0,
+      SizeCategory.small => 18.0,
+      SizeCategory.medium => 24.0,
+      SizeCategory.large => 28.0,
+      SizeCategory.xlarge => 32.0,
+    };
     return baseSize * iconSize;
   }
 
   /// 获取文章列表区域高度
   double getArticleListHeight() {
-    double baseHeight;
-    if (this is SmallSize) {
-      baseHeight = 200;
-    } else if (this is MediumSize) {
-      baseHeight = 250;
-    } else if (this is WideSize) {
-      baseHeight = 280;
-    } else if (this is LargeSize) {
-      baseHeight = 320;
-    } else if (this is Wide2Size) {
-      baseHeight = 360;
-    } else {
-      // Large3, Wide3
-      baseHeight = 450;
-    }
+    final baseHeight = switch (category) {
+      SizeCategory.mini => 120.0,
+      SizeCategory.small => 200.0,
+      SizeCategory.medium => 280.0,
+      SizeCategory.large => 360.0,
+      SizeCategory.xlarge => 450.0,
+    };
     return baseHeight * scale;
   }
 }
