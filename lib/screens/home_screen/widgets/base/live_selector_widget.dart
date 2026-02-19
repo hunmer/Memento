@@ -241,6 +241,16 @@ class _LiveSelectorWidgetState extends State<LiveSelectorWidget> {
       finalProps['customHeight'] = widget.config['customHeight'] as int?;
     }
 
+    // 传递 _pixelCategory 以支持响应式布局
+    // 从 widget.config 中获取 _pixelCategory（由 HomeCard 注入）
+    final pixelCategory = widget.config['_pixelCategory'] as SizeCategory?;
+    if (pixelCategory != null) {
+      finalProps['_pixelCategory'] = pixelCategory;
+      debugPrint('[LiveSelectorWidget] 📐 传递像素类别: '
+          'widgetId=$commonWidgetId, '
+          'pixelCategory=${pixelCategory.name}');
+    }
+
     return widget.buildCommonWidget(
       context,
       commonWidgetIdEnum,

@@ -9,10 +9,12 @@ import 'package:Memento/screens/home_screen/models/home_item.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
+import 'package:Memento/screens/home_screen/models/widget_grid_metrics.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/widget_grid_scope.dart';
 import 'package:Memento/plugins/diary/utils/diary_utils.dart';
 import 'package:Memento/plugins/diary/screens/diary_editor_screen.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
@@ -50,6 +52,12 @@ class _HomeCardState extends State<HomeCard> {
   /// 用于 OpenContainer 动画的 GlobalKey
   final GlobalKey _cardKey = GlobalKey();
 
+  /// 缓存上一次的网格尺寸，用于检测变化
+  WidgetGridMetrics? _lastMetrics;
+
+  /// 标记是否已经初始化
+  bool _initialized = false;
+
   HomeItem get item => widget.item;
   VoidCallback? get onTap => widget.onTap;
   VoidCallback? get onLongPress => widget.onLongPress;
@@ -57,6 +65,35 @@ class _HomeCardState extends State<HomeCard> {
   bool get isEditMode => widget.isEditMode;
   bool get isBatchMode => widget.isBatchMode;
   Widget? get dragHandle => widget.dragHandle;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 检查网格尺寸是否变化
+    final metrics = WidgetGridScope.maybeOf(context);
+
+    // 第一次初始化时，只缓存 metrics，不触发重建
+    if (!_initialized) {
+      _lastMetrics = metrics;
+      _initialized = true;
+      if (metrics != null) {
+        debugPrint('[HomeCard] 🔄 首次初始化: itemId=${widget.item.id.substring(0, 8)}..., '
+            'cellWidth=${metrics.cellWidth.toStringAsFixed(1)}');
+      }
+      return;
+    }
+
+    // 后续变化时，如果 metrics 变化了，触发重建
+    if (metrics != _lastMetrics) {
+      debugPrint('[HomeCard] 🔄 检测到网格尺寸变化: itemId=${widget.item.id.substring(0, 8)}...');
+      if (metrics != null && _lastMetrics != null) {
+        debugPrint('[HomeCard]    旧: cellWidth=${_lastMetrics!.cellWidth.toStringAsFixed(1)}');
+        debugPrint('[HomeCard]    新: cellWidth=${metrics.cellWidth.toStringAsFixed(1)}');
+      }
+      _lastMetrics = metrics;
+      setState(() {});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,16 +240,39 @@ class _HomeCardState extends State<HomeCard> {
       final backgroundImagePath =
           widgetItem.config['backgroundImage'] as String?;
 
-      // 将 widgetItem.id 注入到 config 中，以便小组件可以使用它作为 key
+      // 获取网格尺寸信息
+      final metrics = WidgetGridScope.maybeOf(context);
+
+      // 计算实际像素尺寸
+      final pixelSize = widgetItem.size.getPixelSize(metrics);
+
+      // 计算基于像素尺寸的有效尺寸类别
+      final pixelCategory = widgetItem.size.getEffectiveCategory(metrics);
+
+      // 调试输出
+      debugPrint('[HomeCard] 📦 构建小组件: '
+          'widgetId=${widgetItem.widgetId}, '
+          'gridSize=${widgetItem.size.width}x${widgetItem.size.height}, '
+          'pixelSize=${pixelSize.width.toStringAsFixed(1)}x${pixelSize.height.toStringAsFixed(1)}, '
+          'gridCategory=${widgetItem.size.category.name}, '
+          'pixelCategory=${pixelCategory.name}, '
+          'hasMetrics=${metrics != null}');
+
+      // 将 widgetItem.id 和像素尺寸注入到 config 中
       // 这确保当小组件被添加或替换时，会创建新的组件实例并触发 initState
-      final configWithId = {
+      // 同时小组件可以获取实际的像素尺寸用于响应式布局
+      final configWithIdAndSize = {
         ...widgetItem.config,
         '_widgetItemId': widgetItem.id,
+        '_pixelWidth': pixelSize.width,
+        '_pixelHeight': pixelSize.height,
+        '_gridMetrics': metrics,
+        '_pixelCategory': pixelCategory, // 基于像素尺寸的有效类别
       };
 
       Widget content = widgetDef.build(
         context,
-        configWithId,
+        configWithIdAndSize,
         widgetItem.size,
       );
 
