@@ -540,7 +540,7 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
                           final metadata = CommonWidgetsRegistry.getMetadata(
                             matchingWidget,
                           );
-                          return _buildCommonWidgetPreview(metadata, widgetId);
+                          return _buildCommonWidgetPreviews(metadata, widgetId);
                         }).toList(),
                   ),
                 ),
@@ -552,8 +552,8 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     );
   }
 
-  /// 构建公共小组件预览
-  Widget _buildCommonWidgetPreview(
+  /// 构建公共小组件预览（多个尺寸）
+  Widget _buildCommonWidgetPreviews(
     CommonWidgetMetadata metadata,
     String widgetId,
   ) {
@@ -589,16 +589,84 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
       matchingWidget = CommonWidgetId.circularProgressCard;
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Center(
+    // 构建小组件预览的辅助方法
+    Widget buildWidgetPreview(HomeWidgetSize size) {
+      return Center(
         child: CommonWidgetBuilder.build(
           context,
           matchingWidget,
           props,
-          metadata.defaultSize,
+          size,
           inline: false,
         ),
+      );
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle('小尺寸 (1x1)'),
+            const SizedBox(height: 8),
+            Center(
+              child: SizedBox(
+                width: 150,
+                height: 150,
+                child: buildWidgetPreview(const SmallSize()),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('中尺寸 (2x1)'),
+            const SizedBox(height: 8),
+            Center(
+              child: SizedBox(
+                width: 220,
+                height: 200,
+                child: buildWidgetPreview(const MediumSize()),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('大尺寸 (2x2)'),
+            const SizedBox(height: 8),
+            Center(
+              child: SizedBox(
+                width: 300,
+                height: 280,
+                child: buildWidgetPreview(const LargeSize()),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('中宽尺寸 (4x1)'),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 32,
+              height: 280,
+              child: buildWidgetPreview(const WideSize()),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('大宽尺寸 (4x2)'),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 32,
+              height: 350,
+              child: buildWidgetPreview(const Wide2Size()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建章节标题
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey,
       ),
     );
   }
