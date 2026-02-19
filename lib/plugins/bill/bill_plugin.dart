@@ -301,7 +301,34 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
 
 /// 账单插件主视图
 class BillMainView extends StatefulWidget {
-  const BillMainView({super.key});
+  const BillMainView({
+    super.key,
+    this.showBillListTab = false,
+    this.showStatsTab = false,
+    this.selectedMonth,
+    this.statsType,
+    this.statsStartDate,
+    this.statsEndDate,
+  });
+
+  /// 是否显示账单列表标签页
+  final bool showBillListTab;
+
+  /// 是否显示统计标签页
+  final bool showStatsTab;
+
+  /// 选中的月份（yyyy-MM）
+  final String? selectedMonth;
+
+  /// 统计类型（income/expense/balance）
+  final String? statsType;
+
+  /// 统计开始日期
+  final String? statsStartDate;
+
+  /// 统计结束日期
+  final String? statsEndDate;
+
   @override
   State<BillMainView> createState() => _BillMainViewState();
 }
@@ -311,6 +338,9 @@ class _BillMainViewState extends State<BillMainView>
   final BillPlugin billPlugin = PluginManager().getPlugin('bill') as BillPlugin;
   late TabController _tabController;
   late int _currentPage;
+
+  DateTime? _statsStartDate;
+  DateTime? _statsEndDate;
   final List<Color> _colors = [
     Colors.green,
     Colors.blue,
@@ -320,8 +350,39 @@ class _BillMainViewState extends State<BillMainView>
   @override
   void initState() {
     super.initState();
+    // 根据参数设置初始标签页
     _currentPage = 0;
+    if (widget.showStatsTab) {
+      _currentPage = 1;
+    } else if (widget.showBillListTab) {
+      _currentPage = 0;
+    }
     _tabController = TabController(length: 2, vsync: this);
+
+    // 延迟跳转到指定标签页
+    if (_currentPage != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _tabController.animateTo(_currentPage);
+        }
+      });
+    }
+
+    // 解析统计日期范围
+    if (widget.statsStartDate != null) {
+      try {
+        _statsStartDate = DateTime.parse(widget.statsStartDate!);
+      } catch (e) {
+        debugPrint('[BillMainView] 解析 statsStartDate 失败: $e');
+      }
+    }
+    if (widget.statsEndDate != null) {
+      try {
+        _statsEndDate = DateTime.parse(widget.statsEndDate!);
+      } catch (e) {
+        debugPrint('[BillMainView] 解析 statsEndDate 失败: $e');
+      }
+    }
     _tabController.animation?.addListener(() {
       final value = _tabController.animation!.value.round();
       if (value != _currentPage && mounted) {
@@ -405,10 +466,11 @@ class _BillMainViewState extends State<BillMainView>
           BillStatsScreenSupercupertino(
             billPlugin: billPlugin,
             accountId: billPlugin.selectedAccount?.id ?? '',
-            startDate: DateTime.now().subtract(
+            // 使用路由参数中的日期范围，如果不存在则使用默认值
+            startDate: _statsStartDate ?? DateTime.now().subtract(
               const Duration(days: 30),
-            ), // 默认显示最近30天
-            endDate: DateTime.now(),
+            ),
+            endDate: _statsEndDate ?? DateTime.now(),
           ),
         ],
       ),
