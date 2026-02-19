@@ -9,7 +9,8 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:Memento/plugins/chat/home_widgets/home_widgets.dart'
     as ChatHomeWidgets;
-import 'package:Memento/plugins/diary/home_widgets.dart';
+import 'package:Memento/plugins/diary/home_widgets/home_widgets.dart'
+    as DiaryHomeWidgets;
 import 'package:Memento/plugins/agent_chat/home_widgets/home_widgets.dart'
     as AgentChatHomeWidgets;
 import 'package:Memento/plugins/openai/home_widgets/home_widgets.dart'
