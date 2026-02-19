@@ -9,6 +9,24 @@ import 'package:Memento/plugins/habits/sample_data.dart';
 
 typedef TimerModeListener = void Function(String habitId, bool isCountdown);
 
+/// 习惯缓存更新事件参数（携带数据，性能优化）
+class HabitCacheUpdatedEventArgs extends EventArgs {
+  /// 所有习惯列表
+  final List<Habit> habits;
+
+  /// 习惯数量
+  final int count;
+
+  /// 缓存日期
+  final DateTime cacheDate;
+
+  HabitCacheUpdatedEventArgs({
+    required this.habits,
+    required this.cacheDate,
+  }) : count = habits.length,
+       super('habits_cache_updated');
+}
+
 class HabitController {
   final List<TimerModeListener> _timerModeListeners = [];
   final StorageManager storage;
@@ -127,6 +145,15 @@ class HabitController {
     // 广播习惯数据变更事件，同步小组件
     EventManager.instance.broadcast('habit_data_changed', Value({'habit': habit}));
 
+    // 广播缓存更新事件（携带数据，性能优化）
+    EventManager.instance.broadcast(
+      'habits_cache_updated',
+      HabitCacheUpdatedEventArgs(
+        habits: List.from(habits),
+        cacheDate: DateTime.now(),
+      ),
+    );
+
     // 同步到小组件
     await _syncWidget();
   }
@@ -138,6 +165,15 @@ class HabitController {
 
     // 广播习惯数据变更事件，同步小组件
     EventManager.instance.broadcast('habit_data_changed', Value({'habitId': id}));
+
+    // 广播缓存更新事件（携带数据，性能优化）
+    EventManager.instance.broadcast(
+      'habits_cache_updated',
+      HabitCacheUpdatedEventArgs(
+        habits: List.from(habits),
+        cacheDate: DateTime.now(),
+      ),
+    );
 
     // 同步到小组件
     await _syncWidget();
@@ -190,6 +226,15 @@ class HabitController {
 
       // 广播习惯数据变更事件
       EventManager.instance.broadcast('habit_data_changed', Value({'habit': updatedHabit}));
+
+      // 广播缓存更新事件（携带数据，性能优化）
+      EventManager.instance.broadcast(
+        'habits_cache_updated',
+        HabitCacheUpdatedEventArgs(
+          habits: List.from(habits),
+          cacheDate: DateTime.now(),
+        ),
+      );
     }
   }
 }
