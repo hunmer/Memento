@@ -311,18 +311,63 @@ class HomeWidget {
 }
 ```
 
-### HomeWidgetSize (尺寸枚举)
+### HomeWidgetSize (尺寸系统)
 
 **文件**: `models/home_widget_size.dart`
 
-```dart
-enum HomeWidgetSize {
-  small(1, 1),   // 1x1 图标组件
-  medium(2, 1),  // 2x1 横向卡片
-  large(2, 2);   // 2x2 大卡片
+**迁移指南**: [MIGRATION_GUIDE.md](models/MIGRATION_GUIDE.md)
 
-  final int width;
-  final int height;
+#### 尺寸类型
+
+| 类型 | 网格 | 说明 |
+|------|------|------|
+| `SmallSize` | 1x1 | 图标组件 |
+| `MediumSize` | 2x1 | 横向卡片 |
+| `LargeSize` | 2x2 | 大卡片 |
+| `Large3Size` | 2x3 | 高卡片 |
+| `WideSize` | 4x1 | 全宽卡片 |
+| `Wide2Size` | 4x2 | 全宽大卡片 |
+| `Wide3Size` | 4x3 | 全宽超大卡片 |
+| `CustomSize` | 自定义 | 任意尺寸 |
+
+#### 语义化 API（推荐使用）
+
+```dart
+// 布局方向判断
+size.isWide      // 宽度 > 高度
+size.isTall      // 高度 > 宽度
+size.isSquare    // 宽度 == 高度
+
+// 尺寸类别
+size.category    // SizeCategory.mini/small/medium/large/xlarge
+
+// 网格适配
+size.getWidthRatio(gridColumns)   // 0.0 - 1.0
+size.isFullWidth(gridColumns)     // 是否占满整行
+
+// 便捷方法
+size.isIconSized  // 1x1
+size.isCardSized  // ≥2格
+size.aspectRatio  // 宽高比
+```
+
+#### 使用示例
+
+```dart
+builder: (context, config) {
+  final size = config['widgetSize'] as HomeWidgetSize;
+
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // 结合语义 + 实际像素
+      if (size.isWide && constraints.maxWidth > 300) {
+        return _buildFullLayout(constraints);
+      } else if (size.category == SizeCategory.mini) {
+        return _buildIconLayout(constraints);
+      }
+      return _buildStandardLayout(constraints);
+    },
+  );
 }
 ```
 
