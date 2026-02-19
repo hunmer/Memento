@@ -193,12 +193,21 @@ class _VerticalCircularProgressCardState
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _animation.value)),
             child: Container(
-              height: widget.inline ? double.maxFinite : (widget.height ?? 200),
-              width: widget.inline ? double.maxFinite : (widget.width ?? 450),
+              height:
+                  widget.inline
+                      ? double.maxFinite
+                      : (widget.height ??
+                          widget.size.getHeightConstraints().maxHeight),
+              width:
+                  widget.inline
+                      ? double.maxFinite
+                      : (widget.width ?? widget.size.getWidthForChart()),
               padding: widget.padding ?? widget.size.getPadding(),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(
+                  widget.size.getPadding().left,
+                ),
                 boxShadow:
                     (widget.showShadow ?? (!isDark))
                         ? [
@@ -210,14 +219,30 @@ class _VerticalCircularProgressCardState
                         ]
                         : null,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+              child: Stack(
                 children: [
-                  // 标题栏
-                  _buildHeader(context, isDark, primaryColor),
-                  SizedBox(height: widget.size.getTitleSpacing()),
-                  // 主内容区
-                  _buildContent(context, isDark, primaryColor),
+                  // 主内容：标题栏 + 周日程进度
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 标题栏
+                      _buildHeader(context, isDark, primaryColor),
+                      SizedBox(height: widget.size.getTitleSpacing()),
+                      // 周日程进度 - 固定在底部
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
+                          child: _buildWeeklyProgress(isDark, primaryColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // 右上角：睡眠时长
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: _buildSleepDuration(isDark),
+                  ),
                 ],
               ),
             ),
@@ -242,48 +267,66 @@ class _VerticalCircularProgressCardState
 
   Widget _buildHeader(BuildContext context, bool isDark, Color primaryColor) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(
-          child: Row(
-            children: [
-              Container(
-                padding: widget.size.getPadding(),
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  widget.icon ?? Icons.bedtime_rounded,
-                  color: primaryColor,
-                  size: widget.size.getIconSize(),
-                ),
-              ),
-              SizedBox(width: widget.size.getItemSpacing()),
-              Flexible(
-                child: Text(
-                  widget.data.title,
-                  style: TextStyle(
-                    fontSize: widget.size.getTitleFontSize(),
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : const Color(0xFF111827),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
+        Container(
+          padding: widget.size.getPadding(),
+          decoration: BoxDecoration(
+            color: primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            widget.icon ?? Icons.bedtime_rounded,
+            color: primaryColor,
+            size: widget.size.getIconSize(),
           ),
         ),
-        InkWell(
-          onTap: widget.onActionTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(
-            padding: widget.size.getPadding(),
-            child: Row(
-              children: [
-                Text(
-                  widget.data.actionLabel,
+        SizedBox(width: widget.size.getItemSpacing()),
+        Flexible(
+          child: Text(
+            widget.data.title,
+            style: TextStyle(
+              fontSize: widget.size.getTitleFontSize(),
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : const Color(0xFF111827),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建睡眠时长显示（固定在右上角）
+  Widget _buildSleepDuration(bool isDark) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        SizedBox(
+          height: widget.size.getLargeFontSize(),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            textDirection: TextDirection.rtl,
+            children: [
+              SizedBox(
+                height: widget.size.getLargeFontSize(),
+                child: AnimatedFlipCounter(
+                  value: widget.data.mainValue * _animation.value,
+                  fractionDigits: 0,
+                  textStyle: TextStyle(
+                    fontSize: widget.size.getLargeFontSize(),
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : const Color(0xFF111827),
+                    height: 1.0,
+                  ),
+                ),
+              ),
+              SizedBox(width: widget.size.getSmallSpacing()),
+              SizedBox(
+                height: widget.size.getLargeFontSize(),
+                child: Text(
+                  widget.data.unit,
                   style: TextStyle(
                     fontSize: widget.size.getSubtitleFontSize(),
                     fontWeight: FontWeight.w500,
@@ -291,146 +334,63 @@ class _VerticalCircularProgressCardState
                         isDark
                             ? const Color(0xFF9CA3AF)
                             : const Color(0xFF6B7280),
+                    height: 1.0,
                   ),
                 ),
-                SizedBox(width: widget.size.getSmallSpacing()),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: widget.size.getIconSize(),
-                  color:
-                      isDark
-                          ? const Color(0xFF9CA3AF)
-                          : const Color(0xFF6B7280),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: widget.size.getSmallSpacing()),
+        Text(
+          widget.data.statusLabel,
+          style: TextStyle(
+            fontSize: widget.size.getSubtitleFontSize(),
+            fontWeight: FontWeight.w500,
+            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildContent(BuildContext context, bool isDark, Color primaryColor) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // 左侧：睡眠时长
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 48,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: widget.size.getLargeFontSize(),
-                    child: AnimatedFlipCounter(
-                      value: widget.data.mainValue * _animation.value,
-                      fractionDigits: 0,
-                      textStyle: TextStyle(
-                        fontSize: widget.size.getLargeFontSize(),
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF111827),
-                        height: 1.0,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: widget.size.getSmallSpacing()),
-                  SizedBox(
-                    height: widget.size.getLargeFontSize(),
-                    child: Text(
-                      widget.data.unit,
-                      style: TextStyle(
-                        fontSize: widget.size.getSubtitleFontSize(),
-                        fontWeight: FontWeight.w500,
-                        color:
-                            isDark
-                                ? const Color(0xFF9CA3AF)
-                                : const Color(0xFF6B7280),
-                        height: 1.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: widget.size.getSmallSpacing()),
-            Text(
-              widget.data.statusLabel,
-              style: TextStyle(
-                fontSize: widget.size.getSubtitleFontSize(),
-                fontWeight: FontWeight.w500,
-                color:
-                    isDark ? const Color(0xFF9CA3AF) : const Color(0xFF6B7280),
-              ),
-            ),
-          ],
-        ),
-        // 右侧：周日程进度
-        Flexible(child: _buildWeeklyProgress(isDark, primaryColor)),
-      ],
-    );
-  }
-
-  /// 构建周日程进度，支持横向滚动
+  /// 构建周日程进度，始终支持横向滚动
   Widget _buildWeeklyProgress(bool isDark, Color primaryColor) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
+    final spacing = widget.size.getItemSpacing();
 
-        // 预计算所需宽度：n 个指示器宽度 + (n-1) 个间距
-        final indicatorWidth = widget.size.getLegendIndicatorWidth();
-        final itemCount = widget.data.weeklyProgress.length;
-        final spacing = widget.size.getItemSpacing();
-        final estimatedWidth =
-            (indicatorWidth * itemCount) + (spacing * (itemCount - 1));
+    final contentRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: widget.data.weeklyProgress.asMap().entries.map((entry) {
+        final index = entry.key;
+        final data = entry.value;
 
-        // 构建内容 Row
-        final contentRow = Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children:
-              widget.data.weeklyProgress.asMap().entries.map((entry) {
-                final index = entry.key;
-                final data = entry.value;
-
-                // 计算动画延迟
-                final itemAnimation = CurvedAnimation(
-                  parent: _animationController,
-                  curve: Interval(
-                    index * 0.08,
-                    0.5 + index * 0.08,
-                    curve: Curves.easeOutCubic,
-                  ),
-                );
-
-                return Padding(
-                  padding: EdgeInsets.only(left: index == 0 ? 0 : spacing),
-                  child: _DaySleepIndicator(
-                    dayData: data,
-                    primaryColor: primaryColor,
-                    isDark: isDark,
-                    animation: itemAnimation,
-                    size: widget.size,
-                  ),
-                );
-              }).toList(),
+        // 计算动画延迟
+        final itemAnimation = CurvedAnimation(
+          parent: _animationController,
+          curve: Interval(
+            index * 0.08,
+            0.5 + index * 0.08,
+            curve: Curves.easeOutCubic,
+          ),
         );
 
-        // 如果估计宽度不超过最大宽度，居中显示
-        if (estimatedWidth <= maxWidth) {
-          return Center(child: contentRow);
-        }
-
-        // 需要滚动，使用 SingleChildScrollView
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: contentRow,
+        return Padding(
+          padding: EdgeInsets.only(left: index == 0 ? 0 : spacing),
+          child: _DaySleepIndicator(
+            dayData: data,
+            primaryColor: primaryColor,
+            isDark: isDark,
+            animation: itemAnimation,
+            size: widget.size,
+          ),
         );
-      },
+      }).toList(),
+    );
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: contentRow,
     );
   }
 }
@@ -442,6 +402,7 @@ class _DaySleepIndicator extends StatelessWidget {
   final bool isDark;
   final Animation<double> animation;
   final HomeWidgetSize size;
+  final double scale; // 缩放因子，默认 1.2 增大指示器
 
   const _DaySleepIndicator({
     required this.dayData,
@@ -449,6 +410,7 @@ class _DaySleepIndicator extends StatelessWidget {
     required this.isDark,
     required this.animation,
     required this.size,
+    this.scale = 1.3,
   });
 
   @override
@@ -463,7 +425,7 @@ class _DaySleepIndicator extends StatelessWidget {
           children: [
             Icon(
               dayData.achieved ? Icons.check_rounded : Icons.close_rounded,
-              size: size.getIconSize(),
+              size: size.getIconSize() * scale,
               color:
                   dayData.achieved
                       ? (isDark ? Colors.white : const Color(0xFF111827))
@@ -471,10 +433,10 @@ class _DaySleepIndicator extends StatelessWidget {
                           ? const Color(0xFF4B5563)
                           : const Color(0xFFD1D5DB)),
             ),
-            SizedBox(height: size.getSmallSpacing()),
+            SizedBox(height: size.getSmallSpacing() * scale),
             SizedBox(
-              width: size.getLegendIndicatorWidth(),
-              height: size.getLegendIndicatorHeight(),
+              width: size.getLegendIndicatorWidth() * scale,
+              height: size.getLegendIndicatorHeight() * scale,
               child: CustomPaint(
                 painter: _CircleProgressPainter(
                   progress: animatedProgress,
@@ -483,15 +445,15 @@ class _DaySleepIndicator extends StatelessWidget {
                       isDark
                           ? const Color(0xFF4B5563)
                           : const Color(0xFFE5E7EB),
-                  strokeWidth: size.getStrokeWidth() * size.progressStrokeScale,
+                  strokeWidth: size.getStrokeWidth() * size.progressStrokeScale * scale,
                 ),
               ),
             ),
-            SizedBox(height: size.getSmallSpacing()),
+            SizedBox(height: size.getSmallSpacing() * scale),
             Text(
               dayData.day,
               style: TextStyle(
-                fontSize: size.getLegendFontSize(),
+                fontSize: size.getLegendFontSize() * scale,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.5,
                 color:
