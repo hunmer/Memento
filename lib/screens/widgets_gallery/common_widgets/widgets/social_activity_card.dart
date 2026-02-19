@@ -86,6 +86,7 @@ class _SocialActivityCardWidgetState extends State<SocialActivityCardWidget>
       },
       child: Container(
         width: widget.inline ? double.maxFinite : (widget.size == const SmallSize() ? 280 : 375),
+        height: widget.inline ? double.maxFinite : (widget.size == const SmallSize() ? 280 : 480),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(12),

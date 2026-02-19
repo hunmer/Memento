@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/widgets/event_listener_container.dart';
 import 'providers.dart';
 
 /// 注册公共小组件（活动小组件 - 支持公共小组件样式）
@@ -23,21 +22,9 @@ void registerCommonWidgets(HomeWidgetRegistry registry) {
       supportedSizes: [const LargeSize(), const CustomSize(width: -1, height: -1)],
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideCommonWidgets,
+      // 注意：事件监听现在由内部的 _ActivityCommonWidgetsStatefulWidget 处理（使用 onEventWithData）
       builder: (context, config) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return EventListenerContainer(
-              events: const [
-                'activity_added',
-                'activity_updated',
-                'activity_deleted',
-                'activity_cache_updated', // 缓存刷新完成事件
-              ],
-              onEvent: () => setState(() {}),
-              child: buildCommonWidgetsWidget(context, config),
-            );
-          },
-        );
+        return buildCommonWidgetsWidget(context, config);
       },
     ),
   );

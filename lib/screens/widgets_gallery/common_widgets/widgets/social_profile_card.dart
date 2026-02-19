@@ -120,6 +120,8 @@ class _SocialProfileCardWidgetState extends State<SocialProfileCardWidget>
           child: Transform.translate(
             offset: Offset(0, 20 * (1 - _fadeInAnimation.value)),
             child: Container(
+              width: widget.inline ? double.maxFinite : 340,
+              height: widget.inline ? double.maxFinite : 280,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1F2937) : Colors.white,
                 borderRadius: BorderRadius.circular(12),

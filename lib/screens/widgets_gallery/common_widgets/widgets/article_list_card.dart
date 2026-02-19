@@ -196,6 +196,7 @@ class _ArticleListCardWidgetState extends State<ArticleListCardWidget>
       },
       child: Container(
         width: widget.inline ? double.maxFinite : null,
+        height: widget.inline ? double.maxFinite : 500,
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1F2937) : Colors.white,
           borderRadius: BorderRadius.circular(12),

@@ -31,6 +31,32 @@ import 'package:Memento/plugins/tts/tts_plugin.dart';
 part 'activity_js_api.dart';
 part 'activity_data_selectors.dart';
 
+/// 活动缓存更新事件参数（携带数据，性能优化）
+class ActivityCacheUpdatedEventArgs extends EventArgs {
+  /// 今日活动列表
+  final List<ActivityRecord> todayActivities;
+
+  /// 今日活动数
+  final int todayActivityCount;
+
+  /// 今日活动总时长（分钟）
+  final int todayActivityDuration;
+
+  /// 缓存日期
+  final DateTime cacheDate;
+
+  /// 活动数量
+  final int count;
+
+  ActivityCacheUpdatedEventArgs({
+    required this.todayActivities,
+    required this.todayActivityCount,
+    required this.todayActivityDuration,
+    required this.cacheDate,
+  }) : count = todayActivities.length,
+       super('activity_cache_updated');
+}
+
 class ActivityPlugin extends BasePlugin with JSBridgePlugin {
   static ActivityPlugin? _instance;
   static ActivityPlugin get instance {
@@ -319,8 +345,16 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       _cachedTodayActivityDuration =
           activities.fold<int>(0, (sum, a) => sum + a.durationInMinutes);
 
-      // 缓存刷新完成后通知监听器
-      eventManager.broadcast('activity_cache_updated', EventArgs());
+      // 缓存刷新完成后通知监听器（携带数据，性能优化）
+      eventManager.broadcast(
+        'activity_cache_updated',
+        ActivityCacheUpdatedEventArgs(
+          todayActivities: activities,
+          todayActivityCount: activities.length,
+          todayActivityDuration: _cachedTodayActivityDuration,
+          cacheDate: today,
+        ),
+      );
     } catch (e) {
       debugPrint('[ActivityPlugin] 刷新今日活动缓存失败: $e');
     }

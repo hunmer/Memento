@@ -16,14 +16,29 @@ import 'data.dart';
 import 'utils.dart';
 
 /// 获取可用的统计项
-List<StatItemData> getAvailableStats(BuildContext context) {
+/// [cachedTodayActivities] 事件携带的缓存数据（性能优化），为 null 时从插件获取
+List<StatItemData> getAvailableStats(
+  BuildContext context, {
+  List<ActivityRecord>? cachedTodayActivities,
+}) {
   try {
     final plugin =
         PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
     if (plugin == null) return [];
 
-    final activityCount = plugin.getTodayActivityCountSync();
-    final activityDuration = plugin.getTodayActivityDurationSync();
+    // 优先使用事件携带的缓存数据（性能优化）
+    int activityCount;
+    int activityDuration;
+    if (cachedTodayActivities != null) {
+      activityCount = cachedTodayActivities.length;
+      activityDuration = cachedTodayActivities.fold<int>(
+        0,
+        (sum, a) => sum + a.durationInMinutes,
+      );
+    } else {
+      activityCount = plugin.getTodayActivityCountSync();
+      activityDuration = plugin.getTodayActivityDurationSync();
+    }
     final remainingTime = plugin.getTodayRemainingTime();
 
     return [
@@ -70,32 +85,22 @@ Widget buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
       widgetConfig = PluginWidgetConfig();
     }
 
-    // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return EventListenerContainer(
-          events: const [
-            'activity_added',
-            'activity_updated',
-            'activity_deleted',
-          ],
-          onEvent: () => setState(() {}),
-          child: buildOverviewContent(context, widgetConfig),
-        );
-      },
-    );
+    // 使用专用的 StatefulWidget 持有事件携带的缓存数据（性能优化）
+    return _ActivityOverviewStatefulWidget(widgetConfig: widgetConfig);
   } catch (e) {
     return HomeWidget.buildErrorWidget(context, e.toString());
   }
 }
 
-/// 构建概览小组件内容（获取最新数据）
+/// 构建概览小组件内容
+/// [cachedTodayActivities] 事件携带的缓存数据（性能优化），为 null 时从插件获取
 Widget buildOverviewContent(
   BuildContext context,
   PluginWidgetConfig widgetConfig,
+  List<ActivityRecord>? cachedTodayActivities,
 ) {
-  // 获取可用的统计项数据（每次重建时重新获取）
-  final availableItems = getAvailableStats(context);
+  // 优先使用事件携带的缓存数据（性能优化），为 null 时从插件获取
+  final availableItems = getAvailableStats(context, cachedTodayActivities: cachedTodayActivities);
 
   // 使用通用小组件
   return GenericPluginWidget(
@@ -120,43 +125,32 @@ Widget buildCommonWidgetsWidget(
   }
 
   final commonWidgetId = selectorConfig['commonWidgetId'] as String?;
-  final commonWidgetProps =
-      selectorConfig['commonWidgetProps'] as Map<String, dynamic>?;
+  final selectorData = selectorConfig['data'] as Map<String, dynamic>?;
 
-  if (commonWidgetId == null || commonWidgetProps == null) {
+  if (commonWidgetId == null) {
     return HomeWidget.buildErrorWidget(
       context,
-      '配置错误：缺少 commonWidgetId 或 commonWidgetProps',
+      '配置错误：缺少 commonWidgetId',
     );
   }
 
-  // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-  return StatefulBuilder(
-    builder: (context, setState) {
-      return EventListenerContainer(
-        events: const [
-          'activity_added',
-          'activity_updated',
-          'activity_deleted',
-        ],
-        onEvent: () => setState(() {}),
-        child: _buildCommonWidgetsContent(
-          context,
-          config,
-          commonWidgetId,
-          commonWidgetProps,
-        ),
-      );
-    },
+  // 使用专用的 StatefulWidget 持有事件携带的缓存数据（性能优化）
+  return _ActivityCommonWidgetsStatefulWidget(
+    config: config,
+    commonWidgetId: commonWidgetId,
+    selectorData: selectorData,
   );
 }
 
-/// 构建公共小组件内容（获取最新数据）
+/// 构建公共小组件内容
+/// [cachedTodayActivities] 事件携带的缓存数据（性能优化），为 null 时从插件获取
+/// [selectorData] 选择器配置数据（用于热力图等需要额外配置的小组件）
 Widget _buildCommonWidgetsContent(
   BuildContext context,
   Map<String, dynamic> config,
   String commonWidgetId,
-  Map<String, dynamic> commonWidgetProps,
+  Map<String, dynamic>? selectorData,
+  List<ActivityRecord>? cachedTodayActivities,
 ) {
   // 查找对应的 CommonWidgetId 枚举
   final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
@@ -167,32 +161,54 @@ Widget _buildCommonWidgetsContent(
   // 获取元数据以确定默认尺寸
   final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
 
-  // 每次重建时使用同步方法重新获取最新数据
-  final latestProps = _getCommonWidgetDataSync(commonWidgetId);
+  // 优先使用事件携带的缓存数据（性能优化），为 null 时从插件获取
+  final latestProps = _getCommonWidgetDataSync(
+    commonWidgetId,
+    cachedTodayActivities: cachedTodayActivities,
+    selectorData: selectorData,
+  );
+
+  // 如果实时数据为空，返回空状态
+  if (latestProps == null) {
+    return HomeWidget.buildErrorWidget(context, '未知的公共小组件类型: $commonWidgetId');
+  }
 
   return CommonWidgetBuilder.build(
     context,
     widgetIdEnum,
-    latestProps ?? commonWidgetProps,
+    latestProps,
     metadata.defaultSize,
     inline: true,
   );
 }
 
 /// 同步获取公共小组件数据
-Map<String, dynamic>? _getCommonWidgetDataSync(String commonWidgetId) {
+/// [cachedTodayActivities] 事件携带的缓存数据（性能优化），为 null 时从插件获取
+/// [selectorData] 选择器配置数据（用于热力图等需要额外配置的小组件）
+Map<String, dynamic>? _getCommonWidgetDataSync(
+  String commonWidgetId, {
+  List<ActivityRecord>? cachedTodayActivities,
+  Map<String, dynamic>? selectorData,
+}) {
   final plugin =
       PluginManager.instance.getPlugin('activity') as ActivityPlugin?;
   if (plugin == null) return null;
 
-  // 同步获取今日活动（使用缓存）
-  final todayActivities = plugin.getTodayActivitiesSync();
+  final now = DateTime.now();
+
+  // 优先使用事件携带的缓存数据（性能优化），为 null 时从插件获取
+  final todayActivities = cachedTodayActivities ?? plugin.getTodayActivitiesSync();
+
+  // 同步获取昨日活动（使用缓存）
+  final yesterdayActivities = plugin.getYesterdayActivitiesSync();
 
   // 计算今日统计数据
+  final todayActivityCount = todayActivities.length;
   final todayDurationMinutes = todayActivities.fold<int>(
     0,
     (sum, a) => sum + a.durationInMinutes,
   );
+  final remainingMinutes = plugin.getTodayRemainingTime();
 
   // 按标签统计
   final tagStats = <String, int>{};
@@ -202,16 +218,297 @@ Map<String, dynamic>? _getCommonWidgetDataSync(String commonWidgetId) {
     }
   }
 
+  // 按标签分类活动
+  final activitiesByTag = <String, List<ActivityRecord>>{};
+  for (final activity in todayActivities) {
+    for (final tag in activity.tags) {
+      activitiesByTag.putIfAbsent(tag, () => []).add(activity);
+    }
+  }
+
+  // 计算今日活动中的最长时长
+  final maxDurationMinutes =
+      todayActivities.isEmpty
+          ? 60.0
+          : todayActivities
+              .map((a) => a.durationInMinutes.toDouble())
+              .reduce((a, b) => a > b ? a : b);
+
   // 根据 commonWidgetId 返回对应的数据
   switch (commonWidgetId) {
+    case 'segmentedProgressCard':
+      return {
+        'title': '今日活动',
+        'subtitle': '$todayActivityCount个活动',
+        'currentValue': todayDurationMinutes.toDouble(),
+        'targetValue': (12 * 60).toDouble(),
+        'unit': '分钟',
+        'segments':
+            tagStats.entries
+                .map(
+                  (e) => {
+                    'label': e.key,
+                    'value': e.value.toDouble(),
+                    'display': formatDurationForDisplay(e.value),
+                    'color': getColorFromTag(e.key).value,
+                  },
+                )
+                .toList(),
+      };
+
+    case 'taskProgressCard':
+      return {
+        'title': '今日活动',
+        'subtitle': '$todayActivityCount个记录',
+        'completedTasks': now.hour,
+        'totalTasks': 24,
+        'progressLabel': '今日时间',
+        'pendingLabel': '活动列表',
+        'maxPendingTasks': null,
+        'pendingTasks':
+            todayActivities
+                .map(
+                  (a) =>
+                      '${a.title.isEmpty ? '未命名活动' : a.title} · ${formatTimeRangeStatic(a.startTime, a.endTime)}',
+                )
+                .toList(),
+      };
+
+    case 'nutritionProgressCard':
+      return {
+        'leftData': {
+          'current': (24 * 60 - remainingMinutes).toDouble(),
+          'total': (24 * 60).toDouble(),
+          'unit': '分钟',
+        },
+        'leftConfig': {
+          'icon': '⏰',
+          'label': '今日剩余',
+          'subtext': '${(remainingMinutes / 60).toStringAsFixed(1)}小时',
+        },
+        'rightItems':
+            todayActivities
+                .take(4)
+                .map(
+                  (a) => {
+                    'icon': '📝',
+                    'name': a.title.isEmpty ? '未命名活动' : a.title,
+                    'current': a.durationInMinutes.toDouble(),
+                    'total': maxDurationMinutes,
+                    'color': Colors.blue.value,
+                    'subtitle':
+                        '${formatTimeStatic(a.startTime)} - ${formatTimeStatic(a.endTime)}',
+                  },
+                )
+                .toList(),
+      };
+
+    case 'watchProgressCard':
+      return {
+        'userName': '今日活动',
+        'lastWatched': '',
+        'enableHeader': false,
+        'progressLabel': '已用时间',
+        'currentCount': now.hour,
+        'totalCount': 24,
+        'items':
+            todayActivities
+                .map(
+                  (a) => {
+                    'title': a.title.isEmpty ? '未命名活动' : a.title,
+                    'subtitle':
+                        '${formatTimeStatic(a.startTime)} - ${formatTimeStatic(a.endTime)}',
+                    'thumbnailUrl': null,
+                  },
+                )
+                .toList(),
+      };
+
+    case 'dailyScheduleCard':
+      return {
+        'todayDate': '${now.month}月${now.day}日',
+        'todayEvents':
+            todayActivities.map((a) => convertActivityToEventData(a)).toList(),
+        'tomorrowEvents':
+            yesterdayActivities
+                .map((a) => convertActivityToEventData(a))
+                .toList(),
+      };
+
+    case 'expenseDonutChart':
+      return {
+        'badgeLabel': '活动',
+        'timePeriod': '${now.month}月${now.day}日',
+        'totalAmount': todayDurationMinutes.toDouble() / 60,
+        'totalUnit': '小时',
+        'categories':
+            tagStats.entries
+                .map(
+                  (e) => {
+                    'label': e.key,
+                    'percentage':
+                        todayDurationMinutes > 0
+                            ? (e.value / todayDurationMinutes * 100)
+                            : 0.0,
+                    'color': getColorFromTag(e.key).value,
+                    'subtitle': formatActivitiesTimeRange(
+                      activitiesByTag[e.key] ?? [],
+                    ),
+                  },
+                )
+                .toList(),
+      };
+
+    case 'taskListCard':
+      return {
+        'title': '今日活动',
+        'count': todayActivityCount,
+        'countLabel': '个活动',
+        'items':
+            todayActivities.map((a) => a.title.isEmpty ? '未命名活动' : a.title).toList(),
+        'moreCount': 0,
+      };
+
+    case 'colorTagTaskCard':
+      return {
+        'taskCount': todayActivityCount,
+        'label': '今日活动',
+        'tasks':
+            todayActivities.map((a) {
+              final primaryTag = a.tags.isNotEmpty ? a.tags.first : '默认';
+              final timeRange = formatTimeRangeStatic(a.startTime, a.endTime);
+              return {
+                'title': '($timeRange)',
+                'color': getColorFromTag(primaryTag).value,
+                'tag': a.title.isEmpty ? '未命名活动' : a.title,
+              };
+            }).toList(),
+        'moreCount': 0,
+      };
+
+    case 'upcomingTasksWidget':
+      return {
+        'title': '活动',
+        'taskCount': todayActivityCount,
+        'moreCount': 0,
+        'tasks':
+            todayActivities
+                .take(4)
+                .map(
+                  (a) => {
+                    'title': a.title.isEmpty ? '未命名活动' : a.title,
+                    'color':
+                        a.tags.isNotEmpty
+                            ? getColorFromTag(a.tags.first).value
+                            : Colors.pink.value,
+                    'tag': formatTimeRangeStatic(a.startTime, a.endTime),
+                  },
+                )
+                .toList(),
+      };
+
+    case 'roundedTaskListCard':
+      return {
+        'headerText': '今日活动',
+        'tasks':
+            todayActivities
+                .map(
+                  (a) => {
+                    'title': a.title.isEmpty ? '未命名活动' : a.title,
+                    'subtitle': formatTimeRangeStatic(a.startTime, a.endTime),
+                    'date': '${now.month}月${now.day}日',
+                  },
+                )
+                .toList(),
+      };
+
+    case 'roundedRemindersList':
+      return {
+        'title': '今日活动',
+        'count': todayActivityCount,
+        'items':
+            todayActivities
+                .map(
+                  (a) => {
+                    'text': a.title.isEmpty ? '未命名活动' : a.title,
+                    'isCompleted': true,
+                  },
+                )
+                .toList(),
+      };
+
+    case 'modernRoundedSpendingWidget':
+      return {
+        'title': '今日活动',
+        'currentAmount': todayDurationMinutes.toDouble(),
+        'budgetAmount': (12 * 60).toDouble(),
+        'unit': '分钟',
+        'categories':
+            tagStats.entries
+                .map(
+                  (e) => {
+                    'name': e.key,
+                    'amount': e.value.toDouble(),
+                    'color': getColorFromTag(e.key).value,
+                  },
+                )
+                .toList(),
+        'categoryItems':
+            activitiesByTag.entries
+                .map(
+                  (e) => {
+                    'categoryName': e.key,
+                    'items':
+                        e.value
+                            .take(5)
+                            .map(
+                              (a) => {
+                                'title': a.title.isEmpty ? '未命名活动' : a.title,
+                                'subtitle': '${a.durationInMinutes}分钟',
+                              },
+                            )
+                            .toList(),
+                  },
+                )
+                .toList(),
+      };
+
+    case 'categoryStackWidget':
+      return {
+        'title': '今日活动分布',
+        'currentAmount': todayDurationMinutes.toDouble(),
+        'targetAmount': (12 * 60).toDouble(),
+        'categories':
+            tagStats.entries
+                .map(
+                  (e) => {
+                    'name': e.key,
+                    'amount': e.value.toDouble(),
+                    'color': getColorFromTag(e.key).value,
+                  },
+                )
+                .toList(),
+      };
+
+    case 'timelineScheduleCard':
+      return buildTimelineScheduleCardData(
+        todayActivities,
+        yesterdayActivities,
+        now,
+      );
+
     case 'activityHeatmapCard':
-      return buildHeatmapCardData(todayActivities, {});
+      return buildHeatmapCardData(
+        todayActivities,
+        selectorData ?? {},
+      );
+
     case 'activityTodayPieChartCard':
       return {
         'tagStats': tagStats,
         'totalDuration': todayDurationMinutes,
       };
-    // 其他公共小组件数据可以在这里扩展
+
     default:
       return null;
   }
@@ -1056,4 +1353,84 @@ Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
 /// 构建标签周统计通用小组件（根据配置渲染选中的公共小组件）
 Widget buildTagCommonWidget(BuildContext context, Map<String, dynamic> config) {
   return buildCommonWidgetsWidget(context, config);
+}
+
+/// 内部 StatefulWidget 用于持有事件携带的缓存数据（性能优化）
+class _ActivityCommonWidgetsStatefulWidget extends StatefulWidget {
+  final Map<String, dynamic> config;
+  final String commonWidgetId;
+  final Map<String, dynamic>? selectorData;
+
+  const _ActivityCommonWidgetsStatefulWidget({
+    required this.config,
+    required this.commonWidgetId,
+    this.selectorData,
+  });
+
+  @override
+  State<_ActivityCommonWidgetsStatefulWidget> createState() => _ActivityCommonWidgetsStatefulWidgetState();
+}
+
+class _ActivityCommonWidgetsStatefulWidgetState extends State<_ActivityCommonWidgetsStatefulWidget> {
+  /// 缓存的事件数据（性能优化：直接使用事件携带的数据）
+  List<ActivityRecord>? _cachedTodayActivities;
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const [
+        'activity_cache_updated', // 监听缓存更新事件（携带数据）
+      ],
+      onEventWithData: (args) {
+        if (args is ActivityCacheUpdatedEventArgs) {
+          setState(() {
+            _cachedTodayActivities = args.todayActivities; // 直接使用事件数据
+          });
+        }
+      },
+      child: _buildCommonWidgetsContent(
+        context,
+        widget.config,
+        widget.commonWidgetId,
+        widget.selectorData,
+        _cachedTodayActivities,
+      ),
+    );
+  }
+}
+
+/// 内部 StatefulWidget 用于持有概览小组件的缓存数据（性能优化）
+class _ActivityOverviewStatefulWidget extends StatefulWidget {
+  final PluginWidgetConfig widgetConfig;
+
+  const _ActivityOverviewStatefulWidget({required this.widgetConfig});
+
+  @override
+  State<_ActivityOverviewStatefulWidget> createState() => _ActivityOverviewStatefulWidgetState();
+}
+
+class _ActivityOverviewStatefulWidgetState extends State<_ActivityOverviewStatefulWidget> {
+  /// 缓存的事件数据（性能优化：直接使用事件携带的数据）
+  List<ActivityRecord>? _cachedTodayActivities;
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const [
+        'activity_cache_updated', // 监听缓存更新事件（携带数据）
+      ],
+      onEventWithData: (args) {
+        if (args is ActivityCacheUpdatedEventArgs) {
+          setState(() {
+            _cachedTodayActivities = args.todayActivities; // 直接使用事件数据
+          });
+        }
+      },
+      child: buildOverviewContent(
+        context,
+        widget.widgetConfig,
+        _cachedTodayActivities,
+      ),
+    );
+  }
 }
