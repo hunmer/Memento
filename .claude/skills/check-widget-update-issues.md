@@ -313,6 +313,198 @@ grep -r "events: const" lib/plugins/<plugin-id>/home_widgets/ | \
 diff <(grep ...) <(grep ...)
 ```
 
+### Issue: 使用 GenericSelectorWidget 但数据不更新
+
+**症状：**
+- 添加了 `EventListenerContainer` 并监听了正确的事件
+- `setState(() {})` 被正确调用
+- 但小组件仍然显示旧数据
+
+**原因分析：**
+`GenericSelectorWidget` 使用配置时保存的静态数据快照（`selectorConfig.toSelectorResult()`），即使外层 `EventListenerContainer` 触发了重建，仍然显示配置时保存的旧数据。
+
+**诊断方法：**
+```dart
+// 检查是否直接使用 GenericSelectorWidget 但没有实时数据获取机制
+builder: (context, config) {
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return EventListenerContainer(
+        events: const ['xxx_updated'],
+        onEvent: () => setState(() {}),  // ← setState 触发了，但...
+        child: GenericSelectorWidget(    // ← 这里仍然使用静态数据！
+          widgetDefinition: registry.getWidget('xxx')!,
+          config: config,                // ← config 中的数据是旧的
+        ),
+      );
+    },
+  );
+},
+```
+
+**解决方案：实时数据获取模式**
+
+参考 `activity` 插件的实现，不直接使用 `GenericSelectorWidget`，而是在 `EventListenerContainer` 的 `child` 中创建一个**每次重建时从插件获取最新数据**的函数：
+
+```dart
+// lib/plugins/<plugin-id>/home_widgets.dart
+
+builder: (context, config) {
+  // 解析选择器配置
+  SelectorWidgetConfig? selectorConfig;
+  try {
+    if (config.containsKey('selectorWidgetConfig')) {
+      selectorConfig = SelectorWidgetConfig.fromJson(
+        config['selectorWidgetConfig'] as Map<String, dynamic>,
+      );
+    }
+  } catch (e) {
+    debugPrint('[Plugin] 解析配置失败: $e');
+  }
+
+  // 未配置状态
+  if (selectorConfig == null || !selectorConfig.isConfigured) {
+    return _buildUnconfiguredWidget(context);
+  }
+
+  // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
+  return StatefulBuilder(
+    builder: (context, setState) {
+      return EventListenerContainer(
+        events: const [
+          '<plugin>_added',
+          '<plugin>_updated',
+          '<plugin>_deleted',
+        ],
+        onEvent: () => setState(() {}),
+        child: _buildSelectorContent(context, config, selectorConfig!),
+      );
+    },
+  );
+},
+
+/// 构建选择器内容（每次重建时获取最新数据）
+static Widget _buildSelectorContent(
+  BuildContext context,
+  Map<String, dynamic> config,
+  SelectorWidgetConfig selectorConfig,
+) {
+  // 从配置中获取数据ID
+  final selectedData = selectorConfig.selectedData;
+  final dataId = selectedData?['data']?['id'] as String?;
+
+  if (dataId == null) {
+    return HomeWidget.buildErrorWidget(context, '配置数据无效');
+  }
+
+  // 检查是否使用公共小组件
+  if (selectorConfig.usesCommonWidget) {
+    return _buildCommonWidgetWithLiveData(
+      context,
+      config,
+      dataId,
+      selectorConfig.commonWidgetId!,
+      selectorConfig.commonWidgetProps ?? {},
+    );
+  }
+
+  // 使用自定义渲染器（如果有的话）
+  // ...
+  return _buildDefaultWidget(context, dataId);
+},
+
+/// 使用实时数据构建公共小组件
+static Widget _buildCommonWidgetWithLiveData(
+  BuildContext context,
+  Map<String, dynamic> config,
+  String dataId,
+  String commonWidgetId,
+  Map<String, dynamic> savedProps,
+) {
+  // 关键：每次重建时获取实时数据
+  final liveData = _getLiveDataFromPlugin(dataId);
+  if (liveData == null) {
+    return HomeWidget.buildErrorWidget(context, '数据不存在');
+  }
+
+  // 转换为枚举
+  final widgetIdEnum = CommonWidgetsRegistry.fromString(commonWidgetId);
+  if (widgetIdEnum == null) {
+    return HomeWidget.buildErrorWidget(context, '未知的公共组件: $commonWidgetId');
+  }
+
+  // 获取元数据
+  final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
+  final size = config['widgetSize'] as HomeWidgetSize? ?? metadata.defaultSize;
+
+  // 使用实时数据更新 props
+  final liveProps = _getLiveCommonWidgetProps(commonWidgetId, liveData, savedProps);
+
+  return CommonWidgetBuilder.build(
+    context,
+    widgetIdEnum,
+    liveProps,
+    size,
+    inline: true,
+  );
+},
+
+/// 从插件获取实时数据（关键方法）
+static Map<String, dynamic>? _getLiveDataFromPlugin(String dataId) {
+  try {
+    final plugin = PluginManager.instance.getPlugin('<plugin-id>') as MyPlugin?;
+    if (plugin == null) return null;
+
+    // 从插件获取最新数据
+    final item = plugin.service.getItemById(dataId);
+    if (item == null) return null;
+
+    return {
+      'id': item.id,
+      'title': item.title,
+      // ... 其他实时字段
+    };
+  } catch (e) {
+    debugPrint('[Plugin] 获取数据失败: $e');
+    return null;
+  }
+},
+
+/// 获取公共小组件的实时 Props
+static Map<String, dynamic> _getLiveCommonWidgetProps(
+  String commonWidgetId,
+  Map<String, dynamic> liveData,
+  Map<String, dynamic> savedProps,
+) {
+  // 根据 commonWidgetId 返回对应的实时数据格式
+  switch (commonWidgetId) {
+    case 'circularProgressCard':
+      return {
+        'title': liveData['title'],
+        'subtitle': '${liveData['count']} 条记录',
+        'percentage': (liveData['count'] / 100 * 100).clamp(0, 100).toDouble(),
+        'progress': (liveData['count'] / 100).clamp(0.0, 1.0),
+      };
+    // ... 其他小组件类型
+    default:
+      return {
+        ...savedProps,
+        ...liveData,
+      };
+  }
+},
+```
+
+**检查清单：**
+- [ ] builder 中不直接使用 `GenericSelectorWidget`（除非不需要实时更新）
+- [ ] 创建了 `_getLiveDataFromPlugin` 方法从插件获取最新数据
+- [ ] 公共小组件使用 `CommonWidgetBuilder.build` 直接渲染
+- [ ] 每次重建时都会调用数据获取方法（不是在 initState 中）
+
+**参考实现：**
+- `lib/plugins/activity/home_widgets/providers.dart` - `buildCommonWidgetsWidget` 方法
+- `lib/plugins/chat/home_widgets.dart` - `_buildSelectorContent` 方法
+
 ## 完整示例：修复 Activity 插件
 
 ### 修复前问题
@@ -412,7 +604,32 @@ EventListenerContainer(
 - [ ] 缓存刷新方法在完成后发送了 `*_cache_updated` 事件
 - [ ] 事件名称在插件发送方和小组件监听方一致
 - [ ] 如果有多个缓存，确保在事件触发时都刷新
+- [ ] **如果使用 `GenericSelectorWidget`，确保每次重建时从插件获取实时数据**（不是使用静态配置数据）
 - [ ] 运行 `flutter analyze` 无错误
+
+## 诊断流程图
+
+```
+小组件数据不更新
+    │
+    ├─→ 是否使用了 EventListenerContainer？
+    │       ├─ 否 → 添加 EventListenerContainer
+    │       └─ 是 ↓
+    │
+    ├─→ 事件列表是否完整？
+    │       ├─ 否 → 补全事件（*_added, *_updated, *_deleted, *_cache_updated）
+    │       └─ 是 ↓
+    │
+    ├─→ onEvent 是否调用了 setState？
+    │       ├─ 否 → 添加 setState(() {})
+    │       └─ 是 ↓
+    │
+    ├─→ 是否直接使用 GenericSelectorWidget？
+    │       ├─ 是 → 改用实时数据获取模式（见上文 Issue）
+    │       └─ 否 ↓
+    │
+    └─→ 检查插件是否正确发送事件
+            └─ 使用 grep 搜索 eventManager.broadcast
 
 ## 相关文件
 
