@@ -146,6 +146,7 @@ class _SegmentedProgressCardWidgetState
       },
       child: Container(
         width: widget.inline ? double.maxFinite : 340,
+        height: widget.inline ? double.maxFinite : 340,
         decoration: BoxDecoration(
           color: isDark ? Colors.black : Colors.white,
           borderRadius: BorderRadius.circular(12),
