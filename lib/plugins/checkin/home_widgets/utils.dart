@@ -1,7 +1,10 @@
-part of 'home_widgets.dart';
+/// 打卡插件主页小组件工具函数
+library;
+
+import '../models/checkin_item.dart';
 
 /// 获取当月签到天数
-int _getMonthlyCheckinCount(CheckinItem? item) {
+int getMonthlyCheckinCount(CheckinItem? item) {
   if (item == null) return 0;
 
   final today = DateTime.now();
@@ -21,7 +24,7 @@ int _getMonthlyCheckinCount(CheckinItem? item) {
 }
 
 /// 生成月度点数据
-List<Map<String, dynamic>> _generateMonthlyDotsData(
+List<Map<String, dynamic>> generateMonthlyDotsData(
   CheckinItem? item,
 ) {
   final today = DateTime.now();
@@ -46,7 +49,7 @@ List<Map<String, dynamic>> _generateMonthlyDotsData(
 }
 
 /// 获取最佳连续天数
-int _getBestStreak(CheckinItem? item) {
+int getBestStreak(CheckinItem? item) {
   if (item == null || item.checkInRecords.isEmpty) return 0;
 
   final sortedDates = item.checkInRecords.keys.toList()..sort();
@@ -82,7 +85,7 @@ int _getBestStreak(CheckinItem? item) {
 }
 
 /// 生成里程碑数据
-List<Map<String, dynamic>> _generateMilestones(int currentStreak) {
+List<Map<String, dynamic>> generateMilestones(int currentStreak) {
   final milestones = [7, 21, 30, 60, 100, 365];
   final result = <Map<String, dynamic>>[];
 
@@ -101,7 +104,7 @@ List<Map<String, dynamic>> _generateMilestones(int currentStreak) {
 }
 
 /// 生成从周一开始的周进度数据（用于 sleepTrackingCard）
-List<Map<String, dynamic>> _generateWeekProgressFromMonday(
+List<Map<String, dynamic>> generateWeekProgressFromMonday(
   CheckinItem? item,
 ) {
   final today = DateTime.now();
@@ -131,7 +134,7 @@ List<Map<String, dynamic>> _generateWeekProgressFromMonday(
 }
 
 /// 从选择器数据数组中提取小组件需要的数据 - 单个项目
-Map<String, dynamic> _extractCheckinItemData(List<dynamic> dataArray) {
+Map<String, dynamic> extractCheckinItemData(List<dynamic> dataArray) {
   // 处理 CheckinItem 对象或 Map
   Map<String, dynamic> itemData = {};
   final rawData = dataArray[0];
@@ -156,7 +159,7 @@ Map<String, dynamic> _extractCheckinItemData(List<dynamic> dataArray) {
 }
 
 /// 从选择器数据数组中提取多个签到项目的数据
-Map<String, dynamic> _extractCheckinsData(List<dynamic> dataArray) {
+Map<String, dynamic> extractCheckinsData(List<dynamic> dataArray) {
   // 将多个项目数据转换为列表格式
   final items = <Map<String, dynamic>>[];
 
@@ -185,112 +188,14 @@ Map<String, dynamic> _extractCheckinsData(List<dynamic> dataArray) {
   return {'items': items};
 }
 
-/// 获取可用的统计项
-List<StatItemData> _getAvailableStats(BuildContext context) {
-  try {
-    final plugin =
-        PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
-    if (plugin == null) return [];
-
-    final todayCheckins = plugin.getTodayCheckins();
-    final totalItems = plugin.checkinItems.length;
-    final totalCheckins = plugin.getTotalCheckins();
-
-    return [
-      StatItemData(
-        id: 'today_checkin',
-        label: 'checkin_todayCheckin'.tr,
-        value: '$todayCheckins/$totalItems',
-        highlight: todayCheckins > 0,
-        color: Colors.teal,
-      ),
-      StatItemData(
-        id: 'total_count',
-        label: 'checkin_totalCheckinCount'.tr,
-        value: '$totalCheckins',
-        highlight: false,
-      ),
-    ];
-  } catch (e) {
-    return [];
-  }
-}
-
-/// 构建 2x2 详细卡片组件
-Widget _buildOverviewWidget(
-  BuildContext context,
-  Map<String, dynamic> config,
-) {
-  try {
-    // 解析插件配置
-    PluginWidgetConfig widgetConfig;
-    try {
-      if (config.containsKey('pluginWidgetConfig')) {
-        widgetConfig = PluginWidgetConfig.fromJson(
-          config['pluginWidgetConfig'] as Map<String, dynamic>,
-        );
-      } else {
-        widgetConfig = PluginWidgetConfig();
-      }
-    } catch (e) {
-      widgetConfig = PluginWidgetConfig();
-    }
-
-    // 获取可用的统计项数据
-    final availableItems = _getAvailableStats(context);
-
-    // 使用通用小组件
-    return GenericPluginWidget(
-      pluginId: 'checkin',
-      pluginName: 'checkin_name'.tr,
-      pluginIcon: Icons.checklist,
-      pluginDefaultColor: Colors.teal,
-      availableItems: availableItems,
-      config: widgetConfig,
-    );
-  } catch (e) {
-    return HomeWidget.buildErrorWidget(context, e.toString());
-  }
-}
-
-/// 导航到签到项目详情
-void _navigateToCheckinItem(
-  BuildContext context,
-  SelectorResult result,
-) {
-  // 从 result.data 获取已转换的数据（由 dataSelector 处理）
-  final data =
-      result.data is Map<String, dynamic>
-          ? result.data as Map<String, dynamic>
-          : {};
-  final itemId = data['id'] as String?;
-
-  if (itemId != null) {
-    NavigationHelper.pushNamed(
-      context,
-      '/checkin/item',
-      arguments: {'itemId': itemId},
-    );
-  }
-}
-
-/// 导航到签到项目列表（多选模式）
-void _navigateToCheckinItems(
-  BuildContext context,
-  SelectorResult result,
-) {
-  // 多选模式默认导航到签到主列表
-  NavigationHelper.pushNamed(context, '/checkin');
-}
-
 /// 获取星期名称
-String _getWeekdayName(int weekday) {
+String getWeekdayName(int weekday) {
   const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   return names[weekday - 1];
 }
 
 /// 获取月份名称
-String _getMonthName(int month) {
+String getMonthName(int month) {
   const names = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
