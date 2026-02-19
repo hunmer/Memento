@@ -151,6 +151,7 @@ class _BaseSelectorWidgetState extends State<BaseSelectorWidget> {
     if (selectorConfig.commonWidgetProps != null) {
       final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
       _addCustomSizeProps(props, size);
+      _addPixelCategory(props);
       return CommonWidgetBuilder.build(
         context,
         widgetIdEnum,
@@ -193,6 +194,7 @@ class _BaseSelectorWidgetState extends State<BaseSelectorWidget> {
 
           final props = Map<String, dynamic>.from(latestProps);
           _addCustomSizeProps(props, size);
+          _addPixelCategory(props);
           return CommonWidgetBuilder.build(
             context,
             widgetIdEnum,
@@ -243,6 +245,14 @@ class _BaseSelectorWidgetState extends State<BaseSelectorWidget> {
     if (size == const CustomSize(width: -1, height: -1)) {
       props['customWidth'] = widget.config['customWidth'] as int?;
       props['customHeight'] = widget.config['customHeight'] as int?;
+    }
+  }
+
+  /// 添加像素尺寸类别（用于响应式布局）
+  void _addPixelCategory(Map<String, dynamic> props) {
+    final pixelCategory = widget.config['_pixelCategory'] as SizeCategory?;
+    if (pixelCategory != null) {
+      props['_pixelCategory'] = pixelCategory;
     }
   }
 }

@@ -875,14 +875,6 @@ class CommonWidgetBuilder {
         ? HomeWidgetSize.fromCategory(pixelCategory)
         : size;
 
-    // 调试输出
-    if (pixelCategory != null && pixelCategory != size.category) {
-      debugPrint('[CommonWidgetBuilder] 📐 使用像素尺寸类别: '
-          'widgetId=$widgetId, '
-          'gridCategory=${size.category.name}, '
-          'pixelCategory=${pixelCategory.name}');
-    }
-
     switch (widgetId) {
       case CommonWidgetId.circularProgressCard:
         return CircularProgressCardWidget.fromProps(finalProps, effectiveSize);

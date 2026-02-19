@@ -246,9 +246,6 @@ class _LiveSelectorWidgetState extends State<LiveSelectorWidget> {
     final pixelCategory = widget.config['_pixelCategory'] as SizeCategory?;
     if (pixelCategory != null) {
       finalProps['_pixelCategory'] = pixelCategory;
-      debugPrint('[LiveSelectorWidget] 📐 传递像素类别: '
-          'widgetId=$commonWidgetId, '
-          'pixelCategory=${pixelCategory.name}');
     }
 
     return widget.buildCommonWidget(

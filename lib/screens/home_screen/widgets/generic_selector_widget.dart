@@ -159,6 +159,12 @@ class GenericSelectorWidget extends StatelessWidget {
         props['customHeight'] = config['customHeight'] as int?;
       }
 
+      // 传递像素尺寸类别（用于响应式布局）
+      final pixelCategory = config['_pixelCategory'] as SizeCategory?;
+      if (pixelCategory != null) {
+        props['_pixelCategory'] = pixelCategory;
+      }
+
       final child = CommonWidgetBuilder.build(
         context,
         commonWidgetId,
