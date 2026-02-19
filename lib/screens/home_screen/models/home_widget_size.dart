@@ -97,10 +97,10 @@ abstract class HomeWidgetSize {
   /// 从 SizeCategory 创建对应的尺寸实例
   ///
   /// 用于根据像素尺寸动态创建有效的 HomeWidgetSize
-  /// - mini/small -> SmallSize (1x1)
-  /// - medium -> MediumSize (2x1)
-  /// - large -> LargeSize (2x2)
-  /// - xlarge -> Wide2Size (4x2)
+  /// - mini/small -> SmallSize (1x1, category=small)
+  /// - medium -> MediumSize (2x1, category=medium)
+  /// - large -> Wide2Size (4x2, category=large) 修改：返回 Wide2Size 使 category=large
+  /// - xlarge -> Wide2Size (4x2, category=xlarge)
   static HomeWidgetSize fromCategory(SizeCategory category) {
     switch (category) {
       case SizeCategory.mini:
@@ -109,7 +109,8 @@ abstract class HomeWidgetSize {
       case SizeCategory.medium:
         return const MediumSize();
       case SizeCategory.large:
-        return const LargeSize();
+        // 返回 Wide2Size 使 category=large，而不是 LargeSize(category=small)
+        return const Wide2Size();
       case SizeCategory.xlarge:
         return const Wide2Size();
     }

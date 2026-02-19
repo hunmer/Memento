@@ -140,14 +140,6 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
     super.dispose();
   }
 
-  /// 判断是否为 large 或更大的尺寸
-  bool get _isLargeSize {
-    return widget.size is LargeSize ||
-        widget.size is Large3Size ||
-        widget.size is Wide2Size ||
-        widget.size is Wide3Size;
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -177,7 +169,8 @@ class _EventCalendarWidgetState extends State<EventCalendarWidget>
               ),
               padding: widget.size.getPadding(),
               child:
-                  _isLargeSize
+                  widget.size.category == SizeCategory.large ||
+                          widget.size.category == SizeCategory.xlarge
                       ? _buildLargeLayout(isDark, primaryColor)
                       : _buildCompactLayout(isDark, primaryColor),
             ),
