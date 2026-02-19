@@ -625,8 +625,8 @@ class _EventCard extends StatelessWidget {
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        0.15 + index * 0.12,
-        0.6 + index * 0.12,
+        (0.15 + index * 0.12).clamp(0.0, 1.0),
+        (0.6 + index * 0.12).clamp(0.0, 1.0),
         curve: Curves.easeOutCubic,
       ),
     );
