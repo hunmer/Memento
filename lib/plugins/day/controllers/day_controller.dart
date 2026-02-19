@@ -7,6 +7,23 @@ import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/day/sample_data.dart';
 
+/// 纪念日缓存更新事件参数
+///
+/// 携带最新的纪念日列表数据，小组件可直接使用
+class MemorialDayCacheUpdatedEventArgs extends EventArgs {
+  /// 所有纪念日列表
+  final List<MemorialDay> items;
+
+  /// 更新时间
+  final DateTime timestamp;
+
+  MemorialDayCacheUpdatedEventArgs({
+    required this.items,
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now(),
+       super('memorial_day_cache_updated');
+}
+
 enum SortMode {
   upcoming, // 即将发生
   recent, // 最近添加
@@ -284,6 +301,7 @@ class DayController extends ChangeNotifier {
 
   // 触发事件
   void _notifyEvent(String action, MemorialDay memorialDay) {
+    // 1. 广播单个项目的事件（保持兼容性）
     final eventName = 'memorial_day_$action';
     debugPrint('[DayController] Broadcasting event: $eventName, itemId: ${memorialDay.id}');
     final eventArgs = ItemEventArgs(
@@ -293,5 +311,12 @@ class DayController extends ChangeNotifier {
       action: action,
     );
     EventManager.instance.broadcast(eventName, eventArgs);
+
+    // 2. 广播缓存更新事件（携带所有纪念日数据）
+    debugPrint('[DayController] Broadcasting cache_updated with ${_memorialDays.length} items');
+    EventManager.instance.broadcast(
+      'memorial_day_cache_updated',
+      MemorialDayCacheUpdatedEventArgs(items: List.from(_memorialDays)),
+    );
   }
 }
