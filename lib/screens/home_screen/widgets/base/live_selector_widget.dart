@@ -128,6 +128,19 @@ abstract class LiveSelectorWidget extends StatefulWidget {
 }
 
 class _LiveSelectorWidgetState extends State<LiveSelectorWidget> {
+  /// 缓存上一次的 config，用于检测变化
+  Map<String, dynamic>? _lastConfig;
+
+  @override
+  void didUpdateWidget(covariant LiveSelectorWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 当 config 改变时（例如 _pixelCategory 改变），需要触发重建
+    if (widget.config != oldWidget.config) {
+      _lastConfig = widget.config;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // 使用 StatefulBuilder + EventListenerContainer + FutureBuilder 模式
