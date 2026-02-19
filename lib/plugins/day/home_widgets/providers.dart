@@ -202,6 +202,9 @@ Future<Map<String, Map<String, dynamic>>> provideDateRangeCommonWidgets(
   Map<String, dynamic> data,
 ) async {
   // data 包含：startDay, endDay, dateRangeLabel, daysList, totalCount, todayCount, upcomingCount, expiredCount
+  debugPrint('[provideDateRangeCommonWidgets] Received data: dateRangeLabel=${data['dateRangeLabel']}, totalCount=${data['totalCount']}');
+  debugPrint('[provideDateRangeCommonWidgets] Days in list: ${(data['daysList'] as List<dynamic>?)?.length ?? 0}');
+
   final dateRangeLabel = data['dateRangeLabel'] as String? ?? '未来7天';
   final daysList = data['daysList'] as List<dynamic>? ?? [];
   final totalCount = data['totalCount'] as int? ?? 0;

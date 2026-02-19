@@ -178,6 +178,7 @@ class DayController extends ChangeNotifier {
     }
     await _saveMemorialDays();
     notifyListeners();
+    debugPrint('[DayController] Added memorial day: ${memorialDay.title}, total: ${_memorialDays.length}');
     _notifyEvent('added', memorialDay);
   }
 
@@ -201,7 +202,10 @@ class DayController extends ChangeNotifier {
       _memorialDays.removeWhere((day) => day.id == id);
       await _saveMemorialDays();
       notifyListeners();
+      debugPrint('[DayController] Deleted memorial day: ${removedDay.title}, total remaining: ${_memorialDays.length}');
       _notifyEvent('deleted', removedDay);
+    } else {
+      debugPrint('[DayController] Failed to find memorial day with id: $id');
     }
   }
 
@@ -280,12 +284,14 @@ class DayController extends ChangeNotifier {
 
   // 触发事件
   void _notifyEvent(String action, MemorialDay memorialDay) {
+    final eventName = 'memorial_day_$action';
+    debugPrint('[DayController] Broadcasting event: $eventName, itemId: ${memorialDay.id}');
     final eventArgs = ItemEventArgs(
-      eventName: 'memorial_day_$action',
+      eventName: eventName,
       itemId: memorialDay.id,
       title: memorialDay.title,
       action: action,
     );
-    EventManager.instance.broadcast('memorial_day_$action', eventArgs);
+    EventManager.instance.broadcast(eventName, eventArgs);
   }
 }

@@ -3,10 +3,12 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/base/live_selector_widget.dart';
+import '../day_plugin.dart';
 import 'providers.dart';
 
 /// 注册纪念日快捷入口 - 选择纪念日后显示倒计时
@@ -54,9 +56,58 @@ class _MemorialSelectorWidget extends LiveSelectorWidget {
 
   @override
   Future<Map<String, dynamic>> getLiveData(Map<String, dynamic> config) async {
-    // 从配置中提取纪念日数据
-    final data = _extractMemorialDayData(config);
-    return await provideMemorialDayCommonWidgets(data);
+    try {
+      final selectorConfig =
+          config['selectorWidgetConfig'] as Map<String, dynamic>?;
+      if (selectorConfig != null) {
+        final selectedData =
+            selectorConfig['selectedData'] as Map<String, dynamic>?;
+        if (selectedData != null && selectedData.containsKey('data')) {
+          final dataArray = selectedData['data'] as List<dynamic>?;
+          if (dataArray != null && dataArray.isNotEmpty) {
+            // 从 dataArray 中获取纪念日的 ID
+            final firstItem = dataArray[0];
+            String? memorialDayId;
+
+            if (firstItem is Map<String, dynamic>) {
+              memorialDayId = firstItem['id'] as String?;
+            } else if (firstItem is Map) {
+              memorialDayId = firstItem['id'] as String?;
+            }
+
+            // 从 plugin 重新获取最新的纪念日数据
+            if (memorialDayId != null) {
+              final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
+              debugPrint('[${widgetTag}] Plugin instance hash: ${plugin.hashCode}');
+              if (plugin != null) {
+                final memorialDay = plugin.getMemorialDayById(memorialDayId);
+                if (memorialDay != null) {
+                  // 将最新的 MemorialDay 对象转换为 Map 数据格式
+                  final data = {
+                    'id': memorialDay.id,
+                    'title': memorialDay.title,
+                    'targetDate': memorialDay.targetDate.toIso8601String(),
+                    'backgroundImageUrl': memorialDay.backgroundImageUrl,
+                    'backgroundColor': memorialDay.backgroundColor.value,
+                    'daysRemaining': memorialDay.daysRemaining,
+                    'daysPassed': memorialDay.daysPassed,
+                    'isToday': memorialDay.isToday,
+                    'isExpired': memorialDay.isExpired,
+                  };
+                  debugPrint('[${widgetTag}] Refreshed memorial day: ${memorialDay.title}, daysRemaining: ${memorialDay.daysRemaining}');
+                  return await provideMemorialDayCommonWidgets(data);
+                } else {
+                  debugPrint('[${widgetTag}] Memorial day not found: $memorialDayId (may have been deleted)');
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[${widgetTag}] getLiveData error: $e');
+    }
+    return {};
   }
 
   @override

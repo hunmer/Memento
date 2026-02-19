@@ -158,6 +158,7 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
   /// 根据 ID 获取纪念日（供小组件使用）
   MemorialDay? getMemorialDayById(String id) {
     if (!_isInitialized) return null;
+    debugPrint('[DayPlugin] getMemorialDayById: $id, total memorial days: ${_controller.memorialDays.length}');
     try {
       return _controller.memorialDays.firstWhere((day) => day.id == id);
     } catch (e) {
@@ -167,7 +168,11 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
   /// 获取所有纪念日（供小组件使用）
   List<MemorialDay> getAllMemorialDays() {
-    if (!_isInitialized) return [];
+    if (!_isInitialized) {
+      debugPrint('[DayPlugin] getAllMemorialDays: plugin not initialized yet!');
+      return [];
+    }
+    debugPrint('[DayPlugin] getAllMemorialDays: returning ${_controller.memorialDays.length} memorial days, memorial days: ${_controller.memorialDays.map((d) => d.title).toList()}');
     return List.from(_controller.memorialDays);
   }
 
