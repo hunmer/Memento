@@ -154,6 +154,7 @@ class _RoundedPropertyCardWidgetState extends State<RoundedPropertyCardWidget>
             offset: Offset(0, _slideAnimation.value),
             child: Container(
               width: widget.inline ? double.maxFinite : 340,
+              height: widget.inline ? double.maxFinite : 520,
               decoration: BoxDecoration(
                 color: cardBackgroundColor,
                 borderRadius: BorderRadius.circular(28),

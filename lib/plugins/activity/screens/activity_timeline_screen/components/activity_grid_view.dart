@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
@@ -401,14 +402,18 @@ class _ActivityGridViewState extends State<ActivityGridView> {
         // 允许用户自由选择，包括重叠区域
         // 时间调整会在拖拽结束时自动进行
         if (_lastEnteredTime != currentTime) {
+          // 先获取将要设置的值，避免 setState 后立即读取的问题
+          final newSelectionStart = _selectionStart;
+          final newSelectionEnd = currentTime;
+
           setState(() {
             _lastEnteredTime = currentTime;
             _selectionEnd = currentTime;
           });
 
-          // 通知选择范围变化
+          // 通知选择范围变化（使用局部变量避免读取不稳定的状态）
           if (widget.onSelectionChanged != null) {
-            widget.onSelectionChanged!(_selectionStart, _selectionEnd);
+            widget.onSelectionChanged!(newSelectionStart, newSelectionEnd);
           }
         }
       }
@@ -451,9 +456,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
       },
       onPointerUp: (PointerUpEvent event) {
         if (_isMouseDown) {
-          setState(() {
-            _isMouseDown = false;
-          });
+          // _onGridDragEnd 内部已经处理了状态重置，包括 _isMouseDown
           _onGridDragEnd();
         }
       },
@@ -527,7 +530,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                                         child: MetaData(
                                           metaData: time,
                                           child: Container(
-                                            height: hourHeight - 2,
+                                            height: (hourHeight - 2).clamp(0.0, double.infinity),
                                             margin: const EdgeInsets.all(1.0),
                                             decoration: BoxDecoration(
                                               color: _getGridColor(time),
@@ -632,7 +635,7 @@ class _ActivityGridViewState extends State<ActivityGridView> {
                                   }
 
                                   return SizedBox(
-                                    height: hourHeight,
+                                    height: math.max(0.0, hourHeight),
                                     child: Stack(children: bars),
                                   );
                                 }),
