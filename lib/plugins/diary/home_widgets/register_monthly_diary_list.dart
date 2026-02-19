@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/widgets/event_listener_container.dart';
 import 'providers.dart';
 
 /// 注册本月日记列表小组件
@@ -27,17 +26,7 @@ void registerMonthlyDiaryListWidget(HomeWidgetRegistry registry) {
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideMonthlyDiaryListWidgets,
       builder: (context, config) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return EventListenerContainer(
-              events: const [
-                'diary_cache_updated', // 监听缓存更新事件，确保数据已刷新
-              ],
-              onEvent: () => setState(() {}),
-              child: buildMonthlyDiaryListWidget(context, config),
-            );
-          },
-        );
+        return buildMonthlyDiaryListWidget(context, config);
       },
     ),
   );
