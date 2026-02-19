@@ -361,7 +361,10 @@ class _DateSection extends StatelessWidget {
             children: [
               Text(
                 weekday,
-                textAlign: textAlignment == CrossAxisAlignment.end ? TextAlign.end : TextAlign.start,
+                textAlign:
+                    textAlignment == CrossAxisAlignment.end
+                        ? TextAlign.end
+                        : TextAlign.start,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -373,7 +376,10 @@ class _DateSection extends StatelessWidget {
               ),
               Text(
                 '$month · $eventCount Events',
-                textAlign: textAlignment == CrossAxisAlignment.end ? TextAlign.end : TextAlign.start,
+                textAlign:
+                    textAlignment == CrossAxisAlignment.end
+                        ? TextAlign.end
+                        : TextAlign.start,
                 style: TextStyle(
                   fontSize: size.getLegendFontSize(),
                   fontWeight: FontWeight.w500,
@@ -429,9 +435,7 @@ class _WeekCalendar extends StatelessWidget {
             // 星期标题行
             SizedBox(
               height: cellHeight * 0.7,
-              child: Row(
-                children: _buildWeekdayHeaders(columns, fontSize),
-              ),
+              child: Row(children: _buildWeekdayHeaders(columns, fontSize)),
             ),
             SizedBox(height: size.getItemSpacing() / 4),
             // 日期网格
@@ -532,9 +536,8 @@ class _WeekCalendar extends StatelessWidget {
         width: circleSize,
         height: circleSize,
         decoration: BoxDecoration(
-          color: isDark
-              ? primaryColor.withOpacity(0.15)
-              : const Color(0xFFFEE2E2),
+          color:
+              isDark ? primaryColor.withOpacity(0.15) : const Color(0xFFFEE2E2),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(color: primaryColor.withOpacity(0.2), blurRadius: 4),
@@ -558,9 +561,10 @@ class _WeekCalendar extends StatelessWidget {
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: isPast ? FontWeight.w400 : FontWeight.w500,
-        color: isPast
-            ? Colors.grey.shade400
-            : (isDark ? Colors.grey.shade200 : Colors.grey.shade900),
+        color:
+            isPast
+                ? Colors.grey.shade400
+                : (isDark ? Colors.grey.shade200 : Colors.grey.shade900),
       ),
     );
   }
