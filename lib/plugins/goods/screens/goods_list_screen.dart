@@ -12,9 +12,18 @@ import 'package:Memento/plugins/goods/widgets/goods_item_list_tile.dart';
 import 'package:Memento/plugins/goods/widgets/goods_item_form/goods_item_form.dart';
 
 class GoodsListScreen extends StatefulWidget {
-  const GoodsListScreen({super.key, this.initialFilterWarehouseId});
+  const GoodsListScreen({
+    super.key,
+    this.initialFilterWarehouseId,
+    this.initialFilterTags,
+    this.initialFilterStartDate,
+    this.initialFilterEndDate,
+  });
 
   final String? initialFilterWarehouseId;
+  final List<dynamic>? initialFilterTags;
+  final String? initialFilterStartDate;
+  final String? initialFilterEndDate;
 
   @override
   State<GoodsListScreen> createState() => _GoodsListScreenState();
@@ -38,6 +47,28 @@ class _GoodsListScreenState extends State<GoodsListScreen> {
     // 如果有初始仓库筛选，同步到多条件过滤状态
     if (_filterWarehouseId != null) {
       _multiFilters['warehouse'] = _filterWarehouseId;
+    }
+
+    // 如果有初始标签筛选
+    if (widget.initialFilterTags != null && widget.initialFilterTags!.isNotEmpty) {
+      _multiFilters['tags'] = widget.initialFilterTags;
+    }
+
+    // 如果有初始日期筛选
+    if (widget.initialFilterStartDate != null) {
+      try {
+        _multiFilters['startDate'] = DateTime.parse(widget.initialFilterStartDate!);
+      } catch (e) {
+        debugPrint('[GoodsListScreen] 解析 startDate 失败: $e');
+      }
+    }
+
+    if (widget.initialFilterEndDate != null) {
+      try {
+        _multiFilters['endDate'] = DateTime.parse(widget.initialFilterEndDate!);
+      } catch (e) {
+        debugPrint('[GoodsListScreen] 解析 endDate 失败: $e');
+      }
     }
 
     // 设置路由上下文

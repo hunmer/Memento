@@ -4,21 +4,54 @@ import 'warehouse_list_screen.dart';
 import 'goods_list_screen.dart';
 
 class GoodsMainScreen extends StatefulWidget {
-  const GoodsMainScreen({super.key});
+  const GoodsMainScreen({
+    super.key,
+    this.showGoodsTab = false,
+    this.initialFilterWarehouseId,
+    this.filterTags,
+    this.filterStartDate,
+    this.filterEndDate,
+  });
+
+  /// 是否直接显示物品标签页
+  final bool showGoodsTab;
+
+  /// 初始仓库筛选ID
+  final String? initialFilterWarehouseId;
+
+  /// 标签筛选列表
+  final List<dynamic>? filterTags;
+
+  /// 开始日期筛选
+  final String? filterStartDate;
+
+  /// 结束日期筛选
+  final String? filterEndDate;
 
   @override
   State<GoodsMainScreen> createState() => _GoodsMainScreenState();
 }
 
 class _GoodsMainScreenState extends State<GoodsMainScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   String? _filterWarehouseId;
+
+  @override
+  void initState() {
+    super.initState();
+    // 根据参数设置初始标签页
+    _currentIndex = widget.showGoodsTab ? 1 : 0;
+    _filterWarehouseId = widget.initialFilterWarehouseId;
+  }
 
   List<Widget> get _screens => [
     WarehouseListScreen(onWarehouseTap: _handleWarehouseTap),
     GoodsListScreen(
       key: ValueKey('goods_list_${_filterWarehouseId ?? "all"}'),
       initialFilterWarehouseId: _filterWarehouseId,
+      initialFilterTags: widget.filterTags,
+      initialFilterStartDate: widget.filterStartDate,
+      initialFilterEndDate: widget.filterEndDate,
     ),
   ];
 
