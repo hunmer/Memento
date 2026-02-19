@@ -8,6 +8,7 @@ import 'package:Memento/utils/color_extensions.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
+import 'widget_config.dart';
 
 /// 获取可用的统计项
 List<StatItemData> getAvailableStats(BuildContext context) {
@@ -433,42 +434,8 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   final dynamic plugin = PluginManager.instance.getPlugin('habits');
   if (plugin == null) return {};
 
-  // 尝试从多种格式中提取 habitId
-  String? habitId;
-
-  // 格式1: 从 selectedData.data 数组中提取（保存的配置结构）
-  if (config.containsKey('selectedData') && config['selectedData'] is Map) {
-    final selectedData = config['selectedData'] as Map;
-    if (selectedData.containsKey('data') && selectedData['data'] is List) {
-      final dataList = selectedData['data'] as List;
-      if (dataList.isNotEmpty && dataList[0] is Map) {
-        habitId = (dataList[0] as Map)['habitId']?.toString() ??
-            (dataList[0] as Map)['id']?.toString();
-      }
-    }
-  }
-  // 格式2: 从 data 数组中提取（来自选择器）
-  else if (config.containsKey('data') && config['data'] is List) {
-    final dataList = config['data'] as List;
-    if (dataList.isNotEmpty && dataList[0] is Map) {
-      habitId = (dataList[0] as Map)['habitId']?.toString() ??
-          (dataList[0] as Map)['id']?.toString();
-    }
-  }
-  // 格式3: 直接包含 habitId（来自自定义表单）
-  else if (config.containsKey('habitId')) {
-    habitId = config['habitId'] as String?;
-  }
-  // 格式4: 包含 id 字段（直接从 Habit 对象或 Map 转换来的）
-  else if (config.containsKey('id')) {
-    habitId = config['id'] as String?;
-  }
-  // 格式5: 从 rawData 中提取（有些选择器会把原始数据放在 rawData 中）
-  else if (config.containsKey('rawData') && config['rawData'] is Map) {
-    final rawData = config['rawData'] as Map;
-    habitId = rawData['id']?.toString() ?? rawData['habitId']?.toString();
-  }
-
+  // 使用统一的配置模型提取 habitId
+  final habitId = HabitStatsWidgetConfig.extractHabitId(config);
   if (habitId == null || habitId.isEmpty) {
     debugPrint('[provideHabitStatsWidgets] 无法从配置中提取 habitId: $config');
     return {};
