@@ -7,7 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:universal_platform/universal_platform.dart';
 
-import 'package:Memento/plugins/chat/home_widgets.dart';
+import 'package:Memento/plugins/chat/home_widgets/home_widgets.dart'
+    as ChatHomeWidgets;
 import 'package:Memento/plugins/diary/home_widgets.dart';
 import 'package:Memento/plugins/agent_chat/home_widgets/home_widgets.dart'
     as AgentChatHomeWidgets;
