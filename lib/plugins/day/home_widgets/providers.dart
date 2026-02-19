@@ -87,9 +87,10 @@ Map<String, dynamic> extractDateRangeData(List<dynamic> dataArray) {
     rangeData = selectedItem;
   }
 
-  // 默认值：未来7天
-  final startDay = rangeData?['startDay'] as int? ?? 0;
-  final endDay = rangeData?['endDay'] as int? ?? 7;
+  // 获取 startDay、endDay 和 title，不使用默认值
+  // 当 startDay 和 endDay 都为 null 时，filterMemorialDaysByDaysRange 会返回全部
+  final startDay = rangeData?['startDay'] as int?;
+  final endDay = rangeData?['endDay'] as int?;
   final title = rangeData?['title'] as String? ?? '未来7天';
 
   // 获取纪念日列表数据
