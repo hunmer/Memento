@@ -66,7 +66,6 @@ class ChatHomeWidgets {
         icon: Icons.chat,
         color: Colors.indigoAccent,
         defaultSize: const LargeSize(),
-        supportedSizes: [const MediumSize(), const LargeSize()],
         category: 'home_categoryCommunication'.tr,
 
         selectorId: 'chat.channel',
@@ -323,23 +322,23 @@ class ChatHomeWidgets {
                   child: SizedBox(
                     width: double.infinity,
                     child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      lastMessage,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
+                      child: Text(
+                        lastMessage,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
-                )
                 )
               else
                 Expanded(

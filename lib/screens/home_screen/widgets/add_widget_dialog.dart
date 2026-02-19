@@ -97,7 +97,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
     final selectedSizes = _filterValues['sizes'] as List<String>?;
     if (selectedSizes != null && selectedSizes.isNotEmpty) {
       widgets = widgets.where((widget) {
-        return widget.supportedSizes.any((size) {
+        return widget.effectiveSupportedSizes.any((size) {
           final sizeKey = '${size.width}×${size.height}';
           return selectedSizes.contains(sizeKey);
         });
@@ -463,7 +463,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
             Positioned(
               top: 4,
               right: 4,
-              child: widget.supportedSizes.length > 2
+              child: widget.effectiveSupportedSizes.length > 2
                   ? Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -474,7 +474,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        '${widget.supportedSizes.length}个可用大小',
+                        '${widget.effectiveSupportedSizes.length}个可用大小',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
@@ -484,7 +484,7 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
                   : Wrap(
                       spacing: 4,
                       runSpacing: 4,
-                      children: widget.supportedSizes
+                      children: widget.effectiveSupportedSizes
                           .map(
                             (size) => Container(
                               padding: const EdgeInsets.symmetric(

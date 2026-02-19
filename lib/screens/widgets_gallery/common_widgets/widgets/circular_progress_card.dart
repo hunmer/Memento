@@ -117,6 +117,7 @@ class _CircularProgressCardWidgetState extends State<CircularProgressCardWidget>
           opacity: _animation.value,
           child: Container(
             width: widget.inline ? double.maxFinite : 150,
+            height: widget.inline ? double.maxFinite : 150,
             padding: widget.size.getPadding(),
             decoration: BoxDecoration(
               color: backgroundColor,

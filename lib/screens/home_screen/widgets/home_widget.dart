@@ -114,7 +114,7 @@ class HomeWidget {
   /// 默认尺寸
   final HomeWidgetSize defaultSize;
 
-  /// 支持的尺寸列表
+  /// 支持的尺寸列表（可选，默认为所有支持的尺寸）
   final List<HomeWidgetSize> supportedSizes;
 
   /// 分类（用于对话框分组显示）
@@ -176,7 +176,7 @@ class HomeWidget {
     required this.icon,
     this.color,
     required this.defaultSize,
-    required this.supportedSizes,
+    this.supportedSizes = const [],
     required this.category,
     required this.builder,
     this.availableStatsProvider,
@@ -199,9 +199,18 @@ class HomeWidget {
   }
 
   /// 是否支持指定尺寸
+  ///
+  /// 如果 supportedSizes 为空，则检查所有支持的尺寸
   bool supportsSize(HomeWidgetSize size) {
-    return supportedSizes.contains(size);
+    return effectiveSupportedSizes.contains(size) ||
+        (size is CustomSize && supportedSizes.isEmpty);  // 空列表时支持任何自定义尺寸
   }
+
+  /// 获取有效的支持的尺寸列表
+  ///
+  /// 如果 supportedSizes 为空，返回所有支持的尺寸（包括自定义尺寸）
+  List<HomeWidgetSize> get effectiveSupportedSizes =>
+      supportedSizes.isEmpty ? HomeWidgetSize.allSupportedSizes : supportedSizes;
 
   /// 是否为选择器小组件
   bool get isSelectorWidget => selectorId != null;
