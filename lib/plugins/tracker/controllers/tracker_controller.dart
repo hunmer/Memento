@@ -216,6 +216,15 @@ class TrackerController with ChangeNotifier {
       await _saveGoals();
       notifyListeners();
 
+      // 广播缓存更新事件（携带数据，性能优化）
+      eventManager.broadcast(
+        'tracker_cache_updated',
+        TrackerCacheUpdatedEventArgs(
+          goals: _goals,
+          cacheDate: DateTime.now(),
+        ),
+      );
+
       // 同步小组件数据
       await PluginWidgetSyncHelper.instance.syncTracker();
     }

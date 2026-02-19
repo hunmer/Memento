@@ -7,6 +7,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/plugins/tracker/models/goal.dart';
 import 'package:Memento/plugins/tracker/screens/goal_detail_screen.dart';
 import 'package:Memento/plugins/tracker/screens/search_results_screen.dart';
@@ -31,6 +32,24 @@ export 'utils/tracker_notification_utils.dart';
 
 part 'tracker_js_api.dart';
 part 'tracker_data_selectors.dart';
+
+/// 目标缓存更新事件参数（携带数据，性能优化）
+class TrackerCacheUpdatedEventArgs extends EventArgs {
+  /// 所有目标列表
+  final List<Goal> goals;
+
+  /// 目标数量
+  final int count;
+
+  /// 缓存日期
+  final DateTime cacheDate;
+
+  TrackerCacheUpdatedEventArgs({
+    required this.goals,
+    required this.cacheDate,
+  }) : count = goals.length,
+       super('tracker_cache_updated');
+}
 
 
 class TrackerMainView extends StatefulWidget {

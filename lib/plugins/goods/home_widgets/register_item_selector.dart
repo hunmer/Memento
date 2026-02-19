@@ -7,14 +7,85 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'widgets/goods_item_widget.dart';
 import 'utils.dart';
 
 const Color _goodsColor = Color.fromARGB(255, 207, 77, 116);
+
+/// 物品选择器小组件 - 使用事件携带数据模式
+class _ItemSelectorWidget extends StatefulWidget {
+  final String itemId;
+
+  const _ItemSelectorWidget({required this.itemId});
+
+  @override
+  State<_ItemSelectorWidget> createState() => _ItemSelectorWidgetState();
+}
+
+class _ItemSelectorWidgetState extends State<_ItemSelectorWidget> {
+  // 缓存的事件数据
+  Map<String, dynamic>? _itemData;
+  String? _warehouseId;
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const ['goods_cache_updated'],
+      onEventWithData: (EventArgs args) {
+        if (args is GoodsCacheUpdatedEventArgs) {
+          setState(() {
+            // 从缓存的事件数据中查找物品
+            _itemData = null;
+            _warehouseId = null;
+            for (final warehouse in args.warehouses) {
+              final item = _findItemInWarehouse(warehouse['items'] as List, widget.itemId);
+              if (item != null) {
+                _itemData = item;
+                _warehouseId = warehouse['id'] as String;
+                break;
+              }
+            }
+          });
+        }
+      },
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (_itemData == null) {
+      return HomeWidget.buildErrorWidget(context, '物品未找到');
+    }
+
+    final config = <String, dynamic>{
+      'itemId': widget.itemId,
+      'warehouseId': _warehouseId,
+    };
+
+    return GoodsItemWidget(itemId: widget.itemId, config: config);
+  }
+
+  /// 递归查找物品
+  Map<String, dynamic>? _findItemInWarehouse(List items, String itemId) {
+    for (final item in items) {
+      if (item['id'] == itemId) {
+        return item as Map<String, dynamic>;
+      }
+      final subItems = item['subItems'] as List?;
+      if (subItems != null && subItems.isNotEmpty) {
+        final result = _findItemInWarehouse(subItems, itemId);
+        if (result != null) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }
+}
 
 /// 注册物品选择器小组件
 void registerItemSelectorWidget(HomeWidgetRegistry registry) {
@@ -33,10 +104,14 @@ void registerItemSelectorWidget(HomeWidgetRegistry registry) {
       dataRenderer: _renderItemData,
       navigationHandler: _navigateToItem,
       dataSelector: extractItemData,
-      builder: (context, config) => GenericSelectorWidget(
-        widgetDefinition: registry.getWidget('goods_item_selector')!,
-        config: config,
-      ),
+      builder: (context, config) {
+        final data = config['selectedData'] as Map<String, dynamic>? ?? {};
+        final itemId = data['id'] as String?;
+        if (itemId == null) {
+          return HomeWidget.buildErrorWidget(context, '物品ID为空');
+        }
+        return _ItemSelectorWidget(itemId: itemId);
+      },
     ),
   );
 }

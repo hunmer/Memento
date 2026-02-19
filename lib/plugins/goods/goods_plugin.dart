@@ -47,6 +47,23 @@ class GoodsItemDeletedEventArgs extends GoodsEventArgs {
     : super('goods_item_deleted', warehouseId);
 }
 
+/// Goods 缓存更新事件参数
+class GoodsCacheUpdatedEventArgs extends EventArgs {
+  final List<Map<String, dynamic>> warehouses;
+  final int totalItemsCount;
+  final double totalItemsValue;
+  final int unusedItemsCount;
+  final DateTime cacheDate;
+
+  GoodsCacheUpdatedEventArgs({
+    required this.warehouses,
+    required this.totalItemsCount,
+    required this.totalItemsValue,
+    required this.unusedItemsCount,
+    required this.cacheDate,
+  }) : super('goods_cache_updated');
+}
+
 /// 用于递归查找物品及其父物品的结果类
 class _ItemSearchResult {
   final GoodsItem? item;
@@ -354,6 +371,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       }
       await saveWarehouse(warehouse);
 
+      // 触发缓存更新事件
+      _notifyCacheUpdatedEvent();
+
       // 同步小组件数据
       await _syncWidget();
     } catch (e) {
@@ -401,6 +421,9 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
       );
 
       await saveWarehouse(warehouse);
+
+      // 触发缓存更新事件
+      _notifyCacheUpdatedEvent();
 
       // 同步小组件数据
       await _syncWidget();
@@ -652,6 +675,18 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   // 同步小组件数据
   Future<void> _syncWidget() async {
     await PluginWidgetSyncHelper.instance.syncGoods();
+  }
+
+  /// 触发缓存更新事件（携带最新数据）
+  void _notifyCacheUpdatedEvent() {
+    final eventArgs = GoodsCacheUpdatedEventArgs(
+      warehouses: _warehouses.map((w) => w.toJson()).toList(),
+      totalItemsCount: getTotalItemsCount(),
+      totalItemsValue: getTotalItemsValue(),
+      unusedItemsCount: getUnusedItemsCount(),
+      cacheDate: DateTime.now(),
+    );
+    EventManager.instance.broadcast('goods_cache_updated', eventArgs);
   }
 
   @override

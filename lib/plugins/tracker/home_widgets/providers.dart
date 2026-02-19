@@ -39,7 +39,8 @@ Map<String, dynamic> extractGoalData(List<dynamic> dataArray) {
 /// 获取可用的统计项
 List<StatItemData> getAvailableStats(BuildContext context) {
   try {
-    final plugin = PluginManager.instance.getPlugin('tracker') as TrackerPlugin?;
+    final plugin =
+        PluginManager.instance.getPlugin('tracker') as TrackerPlugin?;
     if (plugin == null) return [];
 
     final controller = plugin.controller;
@@ -75,8 +76,10 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
   final currentValue = (data['currentValue'] as double?) ?? 0.0;
   final targetValue = (data['targetValue'] as double?) ?? 1.0;
   final unitType = (data['unitType'] as String?) ?? '';
-  final progress =
-      (targetValue > 0 ? (currentValue / targetValue) : 0).clamp(0.0, 1.0);
+  final progress = (targetValue > 0 ? (currentValue / targetValue) : 0).clamp(
+    0.0,
+    1.0,
+  );
   final percentage = (progress * 100).toInt();
 
   return {
@@ -139,7 +142,7 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
 
 /// 导航到目标详情页面
 void navigateToGoalDetail(BuildContext context, SelectorResult result) {
-  final goalData = result.data[0] as Map<String, dynamic>;
+  final goalData = result.data as Map<String, dynamic>;
   // id 可能是 int 或 String，需要统一处理
   final goalId = goalData['id']?.toString();
 
