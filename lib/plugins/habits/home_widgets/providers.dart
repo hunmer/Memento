@@ -75,9 +75,7 @@ Map<String, dynamic> extractHabitHeatmapData(List<dynamic> dataArray) {
   if (rawData is Map<String, dynamic>) {
     final title = rawData['title']?.toString() ?? '';
     final id = rawData['id']?.toString() ?? '';
-    final color = ColorGenerator.fromString(
-      title.isNotEmpty ? title : id,
-    );
+    final color = ColorGenerator.fromString(title.isNotEmpty ? title : id);
     return {
       'id': id,
       'title': title,
@@ -304,7 +302,10 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
 
     for (var i = 0; i < rankedData.length; i++) {
       // 第一个为 100%，其他的相对于第一个
-      final ratio = baseMinutes > 0 ? (topStats[i].totalMinutes / baseMinutes).clamp(0.0, 1.0) : 0.0;
+      final ratio =
+          baseMinutes > 0
+              ? (topStats[i].totalMinutes / baseMinutes).clamp(0.0, 1.0)
+              : 0.0;
       rankedData[i]['value'] = ratio;
       rankedData[i]['color'] = rankColors[i % rankColors.length];
     }
@@ -332,16 +333,17 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
         'label': '$dateRangeLabel总时长',
         'subtext': '已完成$totalCompletions次',
       },
-      'rightItems': trackersData.map((t) {
-        return {
-          'icon': t['emoji'],
-          'name': t['title'],
-          'current': t['value'],
-          'total': (maxCount * 60).toDouble(),
-          'color': t['progressColor'],
-          'subtitle': t['unit'],
-        };
-      }).toList(),
+      'rightItems':
+          trackersData.map((t) {
+            return {
+              'icon': t['emoji'],
+              'name': t['title'],
+              'current': t['value'],
+              'total': (maxCount * 60).toDouble(),
+              'color': t['progressColor'],
+              'subtitle': t['unit'],
+            };
+          }).toList(),
     },
 
     // expenseDonutChart
@@ -370,7 +372,10 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
       'barData':
           rankedData.take(5).map((item) {
             // value 需要转换为 0-100 之间的百分比
-            return {'value': (item['value'] as double) * 100, 'label': item['label']};
+            return {
+              'value': (item['value'] as double) * 100,
+              'label': item['label'],
+            };
           }).toList(),
       'footerLabel': '总时长',
     },
@@ -491,9 +496,10 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
           .toList();
 
   // 计算平均时长
-  final avgMinutes = weeklyMinutes.isEmpty
-      ? 0.0
-      : weeklyMinutes.reduce((a, b) => a + b) / weeklyMinutes.length;
+  final avgMinutes =
+      weeklyMinutes.isEmpty
+          ? 0.0
+          : weeklyMinutes.reduce((a, b) => a + b) / weeklyMinutes.length;
 
   // 星期标签
   final weekDays = ['一', '二', '三', '四', '五', '六', '日'];
@@ -511,21 +517,20 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     // StressLevelMonitor (复用为习惯强度监测)
     'stressLevelMonitor': {
       'title': habit.title,
-      'currentScore': weeklyMinutes.isEmpty
-          ? 0.0
-          : weeklyMinutes.reduce((a, b) => a + b) / weeklyMinutes.length,
-      'status':
-          avgMinutes > 30
-              ? '完成良好'
-              : (avgMinutes > 0 ? '继续加油' : '记得打卡'),
+      'currentScore':
+          weeklyMinutes.isEmpty
+              ? 0.0
+              : weeklyMinutes.reduce((a, b) => a + b) / weeklyMinutes.length,
+      'status': avgMinutes > 30 ? '完成良好' : (avgMinutes > 0 ? '继续加油' : '记得打卡'),
       'scoreUnit': '分钟',
-      'weeklyData': weekDays.asMap().entries.map((entry) {
-        return {
-          'day': weekDays[entry.key],
-          'value': weeklyValues[entry.key],
-          'isSelected': entry.key == 6, // 选中最后一天（今天）
-        };
-      }).toList(),
+      'weeklyData':
+          weekDays.asMap().entries.map((entry) {
+            return {
+              'day': weekDays[entry.key],
+              'value': weeklyValues[entry.key],
+              'isSelected': entry.key == 6, // 选中最后一天（今天）
+            };
+          }).toList(),
     },
 
     // SleepTrackingCard (复用为习惯追踪卡片)
@@ -534,22 +539,26 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
       'mainValue': avgMinutes.toDouble() / 60, // 转换为小时
       'statusLabel': skillName ?? habit.group ?? '习惯',
       'unit': 'hr',
-      'weeklyProgress': weekDays.asMap().entries.map((entry) {
-        final minutes = weeklyMinutes[entry.key];
-        return {
-          'day': weekDays[entry.key],
-          'achieved': minutes > 0,
-          'progress': maxWeeklyMinutes > 0 ? minutes / maxWeeklyMinutes : 0.0,
-        };
-      }).toList(),
+      'weeklyProgress':
+          weekDays.asMap().entries.map((entry) {
+            final minutes = weeklyMinutes[entry.key];
+            return {
+              'day': weekDays[entry.key],
+              'achieved': minutes > 0,
+              'progress':
+                  maxWeeklyMinutes > 0 ? minutes / maxWeeklyMinutes : 0.0,
+            };
+          }).toList(),
     },
 
     // SleepDurationCard (复用为习惯时长卡片)
     'sleepDurationCard': {
       'durationInMinutes': totalMinutes.toInt(),
-      'trend': weeklyMinutes.isNotEmpty && weeklyMinutes.last > weeklyMinutes[weeklyMinutes.length - 2]
-          ? 'up'
-          : 'down',
+      'trend':
+          weeklyMinutes.isNotEmpty &&
+                  weeklyMinutes.last > weeklyMinutes[weeklyMinutes.length - 2]
+              ? 'up'
+              : 'down',
     },
 
     // BarChartStatsCard - 柱状图统计卡片
@@ -583,27 +592,16 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
     'trendValueCard': {
       'value': totalMinutes.toDouble(),
       'unit': '分钟',
-      'trendValue': weeklyMinutes.isNotEmpty && weeklyMinutes[weeklyMinutes.length - 2] > 0
-          ? (weeklyMinutes.last - weeklyMinutes[weeklyMinutes.length - 2]).toDouble()
-          : 0,
+      'trendValue':
+          weeklyMinutes.isNotEmpty &&
+                  weeklyMinutes[weeklyMinutes.length - 2] > 0
+              ? (weeklyMinutes.last - weeklyMinutes[weeklyMinutes.length - 2])
+                  .toDouble()
+              : 0,
       'trendUnit': '分钟',
       'chartData': weeklyMinutes.map((m) => m.toDouble()).toList(),
       'date': '累计$totalMinutes分钟',
       'trendLabel': 'vs 昨天',
-    },
-
-    // WeeklyBarsCard - 周柱状图卡片
-    'weeklyBarsCard': {
-      'title': habit.title,
-      'icon':
-          habit.icon != null
-              ? int.parse(habit.icon!)
-              : Icons.auto_awesome.codePoint,
-      'currentValue': avgMinutes.toDouble(),
-      'unit': '分钟',
-      'status': skillName ?? '本周完成',
-      'dailyValues': weeklyValues,
-      'primaryColor': habitColor.value,
     },
 
     // ModernRoundedBalanceCard - 现代圆角余额卡片
