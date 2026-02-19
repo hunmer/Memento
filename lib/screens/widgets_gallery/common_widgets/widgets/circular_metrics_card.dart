@@ -217,11 +217,13 @@ class _MetricItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final start = index * 0.1;
+    final end = (0.6 + index * 0.1).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * 0.1,
-        0.6 + index * 0.1,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );

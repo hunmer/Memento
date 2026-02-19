@@ -147,12 +147,14 @@ class _AccountItemWidget extends StatelessWidget {
     final isNegative = data.balance < 0;
 
     // 计算每个元素的延迟动画
-    final step = 0.12; // 确保不超过 1.0
+    final step = 0.12;
+    final start = index * step;
+    final end = (0.6 + index * step).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * step,
-        0.6 + index * step,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );

@@ -359,11 +359,13 @@ class _WeeklySleepTrackerCardState extends State<WeeklySleepTrackerCard>
       children: List.generate(widget.weeklyData.length, (index) {
         final dayData = widget.weeklyData[index];
         // 为每一天创建独立的动画
+        final start = index * 0.12;
+        final end = (0.6 + index * 0.12).clamp(0.0, 1.0);
         final itemAnimation = CurvedAnimation(
           parent: _animationController,
           curve: Interval(
-            index * 0.12,
-            0.6 + index * 0.12,
+            start,
+            end,
             curve: Curves.easeOutCubic,
           ),
         );

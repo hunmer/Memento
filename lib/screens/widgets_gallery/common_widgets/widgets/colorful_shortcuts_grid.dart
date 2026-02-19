@@ -161,12 +161,14 @@ class _ShortcutItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // 使用更小的 step 确保 end <= 1.0
     const safeStep = 0.05;
+    final start = index * safeStep;
+    final end = (0.6 + index * safeStep).clamp(0.0, 1.0);
 
     final itemAnimation = CurvedAnimation(
       parent: animationController,
       curve: Interval(
-        index * safeStep,
-        0.6 + index * safeStep,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );

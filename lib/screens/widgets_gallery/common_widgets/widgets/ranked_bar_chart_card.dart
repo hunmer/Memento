@@ -188,11 +188,13 @@ class _RankedBarChartCardWidgetState extends State<RankedBarChartCardWidget>
                                     final index = entry.key;
                                     final item = entry.value;
                                     final step = 0.05;
+                                    final start = index * step;
+                                    final end = (0.6 + index * step).clamp(0.0, 1.0);
                                     final itemAnimation = CurvedAnimation(
                                       parent: _animationController,
                                       curve: Interval(
-                                        index * step,
-                                        0.6 + index * step,
+                                        start,
+                                        end,
                                         curve: Curves.easeOutCubic,
                                       ),
                                     );

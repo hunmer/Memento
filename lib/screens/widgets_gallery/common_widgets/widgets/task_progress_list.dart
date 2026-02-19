@@ -222,12 +222,14 @@ class _TaskProgressItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 计算每个元素的延迟动画
+    // 计算每个元素的延迟动画，确保 end <= 1.0
+    final start = index * 0.12;
+    final end = (0.6 + index * 0.12).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * 0.12,
-        0.6 + index * 0.12,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );

@@ -268,12 +268,14 @@ class _PostItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final start = index * 0.15;
+    final end = (0.6 + index * 0.15).clamp(0.0, 1.0);
 
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * 0.15,
-        0.6 + index * 0.15,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );

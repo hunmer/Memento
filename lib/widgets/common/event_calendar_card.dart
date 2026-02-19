@@ -434,11 +434,13 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final start = 0.15 + index * 0.12;
+    final end = (0.6 + index * 0.12).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        0.15 + index * 0.12,
-        0.6 + index * 0.12,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );

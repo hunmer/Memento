@@ -284,13 +284,15 @@ class _MessageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 为每个列表项创建延迟动画
+    // 为每个列表项创建延迟动画，确保 end <= 1.0
     final step = 0.08;
+    final start = index * step;
+    final end = (0.6 + index * step).clamp(0.0, 1.0);
     final itemAnimation = CurvedAnimation(
       parent: animation,
       curve: Interval(
-        index * step,
-        0.6 + index * step,
+        start,
+        end,
         curve: Curves.easeOutCubic,
       ),
     );
