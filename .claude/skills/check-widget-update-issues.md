@@ -1,11 +1,11 @@
 ---
 name: check-widget-update-issues
-description: 检查小组件更新问题，诊断首次加载显示"暂无数据"、数据变化后UI不更新等问题。检查事件监听、缓存刷新通知、事件名称匹配等。
+description: 检查小组件更新问题，诊断首次加载显示"暂无数据"、数据变化后UI不更新、事件未触发等问题。检查事件监听、缓存刷新通知、事件名称匹配、事件携带数据等。
 ---
 
 # Check Widget Update Issues
 
-检查和诊断小组件更新相关问题，包括首次加载显示"暂无数据"、数据变化后UI不更新等。
+检查和诊断小组件更新相关问题，包括首次加载显示"暂无数据"、数据变化后UI不更新、事件未触发等。
 
 ## Usage
 
@@ -42,25 +42,47 @@ ls lib/plugins/<plugin-id>/<plugin-id>_plugin.dart
 
 ### 2. 检查事件监听
 
-在 `register_*.dart` 文件中检查小组件是否正确监听了数据变化事件：
+在 `register_*.dart` 或 `providers.dart` 文件中检查小组件是否正确监听了数据变化事件：
 
-**正确模式：**
+**传统模式（向后兼容）：**
 ```dart
 EventListenerContainer(
   events: const [
     '<plugin>_<action>',
     '<plugin>_<action>',
-    // ... 其他数据变化事件
   ],
   onEvent: () => setState(() {}),
   child: buildWidget(...),
 )
 ```
 
+**优化模式（事件携带数据，推荐）：**
+```dart
+class _WidgetState extends State<_Widget> {
+  List<DataItem>? _cachedItems;
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const ['xxx_cache_updated'],
+      onEventWithData: (args) {
+        if (args is XxxCacheUpdatedEventArgs) {
+          setState(() {
+            _cachedItems = args.items; // 直接使用事件数据
+          });
+        }
+      },
+      child: _buildContent(context, _cachedItems),
+    );
+  }
+}
+```
+
 **检查清单：**
 - [ ] 使用了 `EventListenerContainer` 包裹小组件
 - [ ] `events` 列表包含所有相关的数据变化事件
-- [ ] `onEvent` 回调调用了 `setState(() {})`
+- [ ] `onEvent` 回调调用了 `setState(() {})` 或 `onEventWithData` 正确更新状态
+- [ ] 如果使用 `onEventWithData`，缓存变量必须是 StatefulWidget 的状态变量（不是 builder 闭包中的局部变量）
 
 **常见问题：**
 1. ❌ 缺少 `EventListenerContainer`
@@ -86,11 +108,81 @@ EventListenerContainer(
    )
    ```
 
-### 3. 检查缓存刷新通知
+4. ❌ 缓存变量是局部变量（使用 `onEventWithData` 时）
+   ```dart
+   // 错误 - cachedItems 是 builder 闭包中的局部变量
+   return StatefulBuilder(
+     builder: (context, setState) {
+       List<DataItem>? cachedItems;  // ❌ 每次重建都会重置为 null
+       return EventListenerContainer(
+         onEventWithData: (args) {
+           setState(() {
+             cachedItems = args.items;  // ❌ 设置后下次重建又变回 null
+           });
+         },
+         child: ...,
+       );
+     },
+   );
+   ```
+
+### 3. 检查事件是否触发
+
+**关键诊断方法：添加调试日志**
+
+在插件中添加：
+```dart
+Future<void> _refreshCache() async {
+  debugPrint('[Plugin] _refreshCache called, _isInitialized=$_isInitialized');
+  if (!_isInitialized) return;
+
+  try {
+    final items = await getData();
+    debugPrint('[Plugin] Broadcasting xxx_cache_updated with ${items.length} items');
+
+    eventManager.broadcast(
+      'xxx_cache_updated',
+      XxxCacheUpdatedEventArgs(items: items, period: DateTime.now()),
+    );
+  } catch (e) {
+    debugPrint('[Plugin] 刷新缓存失败: $e');
+  }
+}
+```
+
+在 `EventListenerContainer` 中添加（临时调试）：
+```dart
+// 设置调试开关
+const _kDebugEventListener = true;
+
+void _registerEventListeners() {
+  for (final event in widget.events) {
+    void handler(EventArgs args) {
+      if (_kDebugEventListener) {
+        debugPrint('[EventListenerContainer] Received event: $event, args type: ${args.runtimeType}');
+      }
+      // ...
+    }
+    EventManager.instance.subscribe(event, handler);
+    if (_kDebugEventListener) {
+      debugPrint('[EventListenerContainer] Subscribed to: $event');
+    }
+  }
+}
+```
+
+**检查日志输出：**
+1. `[EventListenerContainer] Subscribed to: xxx_cache_updated` - 订阅成功
+2. `[Plugin] _refreshCache called` - 刷新方法被调用
+3. `[Plugin] Broadcasting xxx_cache_updated with X items` - 广播执行
+4. `[EventListenerContainer] Received event: xxx_cache_updated` - 事件接收
+5. `[EventListenerContainer] Calling onEventWithData` - 回调执行
+
+### 4. 检查缓存刷新通知
 
 在插件主文件 `<plugin-id>_plugin.dart` 中检查缓存刷新方法：
 
-**正确模式：**
+**传统模式：**
 ```dart
 Future<void> refreshCache() async {
   if (!_isInitialized) return;
@@ -108,10 +200,35 @@ Future<void> refreshCache() async {
 }
 ```
 
+**优化模式（事件携带数据，推荐）：**
+```dart
+Future<void> refreshCache() async {
+  if (!_isInitialized) return;
+
+  try {
+    final data = await _service.getData();
+    _cachedData = data;
+    _cacheValid = true;
+
+    // 广播时携带数据（性能优化：小组件可直接使用，无需再次获取）
+    eventManager.broadcast(
+      '<plugin>_cache_updated',
+      XxxCacheUpdatedEventArgs(
+        items: data,
+        period: DateTime.now(),
+      ),
+    );
+  } catch (e) {
+    debugPrint('[$Plugin] 刷新缓存失败: $e');
+  }
+}
+```
+
 **检查清单：**
 - [ ] 缓存刷新完成后发送了 `*_cache_updated` 事件
 - [ ] 事件名称符合命名规范 `{plugin}_cache_updated`
 - [ ] 在所有缓存刷新路径都发送了事件
+- [ ] （推荐）事件携带数据，减少小组件重复获取
 
 **常见问题：**
 1. ❌ 缓存刷新后没有发送事件
@@ -135,7 +252,17 @@ Future<void> refreshCache() async {
    }
    ```
 
-### 4. 检查事件名称匹配
+3. ❌ 触发事件链断裂
+   ```dart
+   // 错误 - _refreshCache 没有被调用
+   void _setupEventListeners() {
+     eventManager.subscribe('xxx_added', (_) => _refreshCache());
+     // 但 xxx_added 事件从未被广播！
+   }
+   ```
+   检查数据操作（如 saveItem、deleteItem）是否广播了相应的事件。
+
+### 5. 检查事件名称匹配
 
 确保插件发送的事件和小组件监听的事件名称一致：
 
@@ -730,6 +857,7 @@ EventListenerContainer(
 
 完成以下检查确保小组件更新正常：
 
+### 基础检查
 - [ ] 小组件使用了 `EventListenerContainer` 包裹
 - [ ] `events` 列表包含所有数据变化事件（`*_added`, `*_updated`, `*_deleted`）
 - [ ] `events` 列表包含缓存更新事件（`*_cache_updated`）
@@ -737,9 +865,25 @@ EventListenerContainer(
 - [ ] 缓存刷新方法在完成后发送了 `*_cache_updated` 事件
 - [ ] 事件名称在插件发送方和小组件监听方一致
 - [ ] 如果有多个缓存，确保在事件触发时都刷新
+
+### 数据流检查
 - [ ] **如果使用 `GenericSelectorWidget`，确保每次重建时从插件获取实时数据**（不是使用静态配置数据）
 - [ ] **事件广播在数据保存**之后**（`saveItem` 中的 `eventManager.broadcast` 在 `writeJson/writeFile` 之后）**
 - [ ] 索引更新（如果有）在事件广播**之前**完成
+- [ ] 数据操作（saveItem、deleteItem 等）正确广播了事件
+
+### 事件携带数据优化（推荐）
+- [ ] 创建了 `{Plugin}CacheUpdatedEventArgs` 事件参数类
+- [ ] 缓存刷新方法在广播时携带数据
+- [ ] 小组件使用 `onEventWithData` 接收事件数据
+- [ ] 缓存变量是 StatefulWidget 的状态变量（不是 builder 闭包中的局部变量）
+- [ ] 在 `onEventWithData` 回调中进行了类型检查
+- [ ] 处理了首次构建时缓存数据为 null 的情况
+
+### 调试验证
+- [ ] 添加调试日志验证事件订阅成功
+- [ ] 添加调试日志验证事件广播执行
+- [ ] 添加调试日志验证事件接收和回调执行
 - [ ] 运行 `flutter analyze` 无错误
 
 ## 诊断流程图
@@ -751,12 +895,24 @@ EventListenerContainer(
     │       ├─ 否 → 添加 EventListenerContainer
     │       └─ 是 ↓
     │
+    ├─→ 事件是否触发？
+    │       ├─ 检查方法：添加调试日志
+    │       ├─ 日志显示订阅成功但未收到事件？
+    │       │       ├─ 是 → 检查数据操作是否广播事件
+    │       │       │       └─ 检查事件名称是否匹配
+    │       │       └─ 否 ↓
+    │       └─ 是 ↓
+    │
     ├─→ 事件列表是否完整？
     │       ├─ 否 → 补全事件（*_added, *_updated, *_deleted, *_cache_updated）
     │       └─ 是 ↓
     │
-    ├─→ onEvent 是否调用了 setState？
-    │       ├─ 否 → 添加 setState(() {})
+    ├─→ onEvent/onEventWithData 是否正确？
+    │       ├─ onEvent: 检查是否调用了 setState(() {})
+    │       ├─ onEventWithData:
+    │       │       ├─ 缓存变量是否为 StatefulWidget 的状态变量？
+    │       │       ├─ 是否进行了类型检查？
+    │       │       └─ 是否处理了 null 情况？
     │       └─ 是 ↓
     │
     ├─→ 是否直接使用 GenericSelectorWidget？
@@ -771,6 +927,13 @@ EventListenerContainer(
     │
     └─→ 检查插件是否正确发送事件
             └─ 使用 grep 搜索 eventManager.broadcast
+
+## 相关技能
+
+| 技能 | 说明 |
+|------|------|
+| [migrate-event-data-optimization](migrate-event-data-optimization/SKILL.md) | 迁移小组件到事件携带数据模式 |
+| [event-listener-container](event-listener-container/SKILL.md) | EventListenerContainer 使用指南 |
 
 ## 相关文件
 

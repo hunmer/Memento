@@ -1,9 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:Memento/core/event/event_manager.dart';
 
-// 调试开关
-const _kDebugEventListener = true;
-
 /// 事件监听容器组件
 /// 传入事件名称列表并监听，触发时通知父组件更新UI
 ///
@@ -72,15 +69,9 @@ class _EventListenerContainerState extends State<EventListenerContainer> {
   void _registerEventListeners() {
     for (final event in widget.events) {
       void handler(EventArgs args) {
-        if (_kDebugEventListener) {
-          debugPrint('[EventListenerContainer] Received event: $event, args type: ${args.runtimeType}');
-        }
         if (mounted) {
           // 优先使用 onEventWithData（性能优化，直接使用事件数据）
           if (widget.onEventWithData != null) {
-            if (_kDebugEventListener) {
-              debugPrint('[EventListenerContainer] Calling onEventWithData');
-            }
             widget.onEventWithData!(args);
           } else if (widget.onEvent != null) {
             // 向后兼容
@@ -90,9 +81,6 @@ class _EventListenerContainerState extends State<EventListenerContainer> {
       }
       EventManager.instance.subscribe(event, handler);
       _subscriptions.add((event, handler));
-      if (_kDebugEventListener) {
-        debugPrint('[EventListenerContainer] Subscribed to: $event');
-      }
     }
   }
 
