@@ -208,9 +208,44 @@ class _HabitStatsStatefulWidgetState extends State<_HabitStatsStatefulWidget> {
       }
 
       // 从选择器配置中获取习惯ID
-      final habitId = selectorConfig['habitId'] as String?;
-      if (habitId == null) {
-        debugPrint('[HabitStatsWidget] No habitId in selector config');
+      // 支持多种数据格式：
+      // 格式1: {selectedData: {data: [{habitId: xxx}]}} - 来自保存的配置
+      // 格式2: {data: [{habitId: xxx}]} - 来自选择器
+      // 格式3: {habitId: xxx} - 直接包含 habitId
+      // 格式4: {id: xxx} - 直接包含 id
+      String? habitId;
+
+      // 尝试从 selectedData.data 数组中提取（保存的配置结构）
+      if (selectorConfig.containsKey('selectedData') &&
+          selectorConfig['selectedData'] is Map) {
+        final selectedData = selectorConfig['selectedData'] as Map;
+        if (selectedData.containsKey('data') && selectedData['data'] is List) {
+          final dataList = selectedData['data'] as List;
+          if (dataList.isNotEmpty && dataList[0] is Map) {
+            habitId = (dataList[0] as Map)['habitId']?.toString() ??
+                (dataList[0] as Map)['id']?.toString();
+          }
+        }
+      }
+      // 尝试从 data 数组中提取
+      else if (selectorConfig.containsKey('data') && selectorConfig['data'] is List) {
+        final dataList = selectorConfig['data'] as List;
+        if (dataList.isNotEmpty && dataList[0] is Map) {
+          habitId = (dataList[0] as Map)['habitId']?.toString() ??
+              (dataList[0] as Map)['id']?.toString();
+        }
+      }
+      // 尝试直接从 habitId 获取
+      else if (selectorConfig.containsKey('habitId')) {
+        habitId = selectorConfig['habitId']?.toString();
+      }
+      // 尝试从 id 获取
+      else if (selectorConfig.containsKey('id')) {
+        habitId = selectorConfig['id']?.toString();
+      }
+
+      if (habitId == null || habitId.isEmpty) {
+        debugPrint('[HabitStatsWidget] No habitId in selector config: $selectorConfig');
         return {};
       }
 
