@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/models/monthly_bill_card_data.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/monthly_bill_card.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 
@@ -28,12 +27,12 @@ class MonthlyBillCardExample extends StatelessWidget {
                     width: 150,
                     height: 150,
                     child: MonthlyBillCardWidget(
-                      data: const MonthlyBillCardData(
-                        title: '6月账单',
-                        income: 1024.00,
-                        expense: 2048.00,
-                        balance: -1024.00,
-                      ),
+                      data: const {
+                        'title': '6月账单',
+                        'income': 1024.00,
+                        'expense': 2048.00,
+                        'balance': -1024.00,
+                      },
                       size: const SmallSize(),
                     ),
                   ),
@@ -46,12 +45,12 @@ class MonthlyBillCardExample extends StatelessWidget {
                     width: 220,
                     height: 220,
                     child: MonthlyBillCardWidget(
-                      data: const MonthlyBillCardData(
-                        title: '6月账单',
-                        income: 1024.00,
-                        expense: 2048.00,
-                        balance: -1024.00,
-                      ),
+                      data: const {
+                        'title': '6月账单',
+                        'income': 1024.00,
+                        'expense': 2048.00,
+                        'balance': -1024.00,
+                      },
                       size: const MediumSize(),
                     ),
                   ),
@@ -64,12 +63,12 @@ class MonthlyBillCardExample extends StatelessWidget {
                     width: 300,
                     height: 300,
                     child: MonthlyBillCardWidget(
-                      data: const MonthlyBillCardData(
-                        title: '6月账单',
-                        income: 1024.00,
-                        expense: 2048.00,
-                        balance: -1024.00,
-                      ),
+                      data: const {
+                        'title': '6月账单',
+                        'income': 1024.00,
+                        'expense': 2048.00,
+                        'balance': -1024.00,
+                      },
                       size: const LargeSize(),
                     ),
                   ),
@@ -81,12 +80,12 @@ class MonthlyBillCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 280,
                   child: MonthlyBillCardWidget(
-                    data: const MonthlyBillCardData(
-                      title: '6月账单 - 详细分析',
-                      income: 1024.00,
-                      expense: 2048.00,
-                      balance: -1024.00,
-                    ),
+                    data: const {
+                      'title': '6月账单 - 详细分析',
+                      'income': 1024.00,
+                      'expense': 2048.00,
+                      'balance': -1024.00,
+                    },
                     size: const Wide2Size(),
                   ),
                 ),
@@ -97,12 +96,12 @@ class MonthlyBillCardExample extends StatelessWidget {
                   width: MediaQuery.of(context).size.width - 32,
                   height: 350,
                   child: MonthlyBillCardWidget(
-                    data: const MonthlyBillCardData(
-                      title: '6月账单 - 完整财务报告',
-                      income: 1024.00,
-                      expense: 2048.00,
-                      balance: -1024.00,
-                    ),
+                    data: const {
+                      'title': '6月账单 - 完整财务报告',
+                      'income': 1024.00,
+                      'expense': 2048.00,
+                      'balance': -1024.00,
+                    },
                     size: const Wide3Size(),
                   ),
                 ),

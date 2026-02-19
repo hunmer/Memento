@@ -9,7 +9,6 @@ import 'package:Memento/core/services/plugin_data_selector/models/selector_resul
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
@@ -147,29 +146,19 @@ class _BillStatsWidgetBuilder extends StatelessWidget {
     Map<String, dynamic> config,
     SelectorWidgetConfig selectorConfig,
   ) {
-    // 检查是否使用公共小组件
-    if (selectorConfig.usesCommonWidget) {
-      return _buildCommonWidgetWithLiveData(
-        context,
-        config,
-        selectorConfig.commonWidgetId!,
-        selectorConfig.commonWidgetProps ?? {},
-      );
-    }
-
-    // 默认视图（使用 dataRenderer）
-    return GenericSelectorWidget(
-      widgetDefinition: widgetDefinition,
-      config: config,
+    // 始终使用实时数据，无论是否使用公共小组件
+    return _buildContentWithLiveData(
+      context,
+      config,
+      selectorConfig,
     );
   }
 
-  /// 使用实时数据构建公共小组件
-  Widget _buildCommonWidgetWithLiveData(
+  /// 使用实时数据构建内容
+  Widget _buildContentWithLiveData(
     BuildContext context,
     Map<String, dynamic> config,
-    String commonWidgetId,
-    Map<String, dynamic> savedProps,
+    SelectorWidgetConfig selectorConfig,
   ) {
     // 每次重建时异步获取实时数据
     return FutureBuilder<Map<String, dynamic>>(
@@ -191,36 +180,78 @@ class _BillStatsWidgetBuilder extends StatelessWidget {
         final size = config['widgetSize'] as HomeWidgetSize? ??
             widgetDefinition.defaultSize;
 
-        // 将字符串 ID 转换为枚举值
-        final commonWidgetIdEnum = CommonWidgetsRegistry.fromString(commonWidgetId);
-        if (commonWidgetIdEnum == null) {
-          return HomeWidget.buildErrorWidget(context, '未知的公共组件: $commonWidgetId');
+        // 检查是否使用公共小组件
+        if (selectorConfig.usesCommonWidget) {
+          final commonWidgetId = selectorConfig.commonWidgetId!;
+
+          // 将字符串 ID 转换为枚举值
+          final commonWidgetIdEnum = CommonWidgetsRegistry.fromString(commonWidgetId);
+          if (commonWidgetIdEnum == null) {
+            return HomeWidget.buildErrorWidget(context, '未知的公共组件: $commonWidgetId');
+          }
+
+          // 使用实时数据（从 provider 返回的数据中获取对应的小组件数据）
+          final liveData = snapshot.data![commonWidgetId] as Map<String, dynamic>?;
+
+          if (liveData == null) {
+            return HomeWidget.buildErrorWidget(context, '数据不存在');
+          }
+
+          // 合并保存的配置和实时数据
+          final liveProps = _mergeProps(selectorConfig.commonWidgetProps ?? {}, liveData);
+
+          // 添加 custom 尺寸的实际宽高到 props 中
+          final finalProps = Map<String, dynamic>.from(liveProps);
+          if (size == const CustomSize(width: -1, height: -1)) {
+            finalProps['customWidth'] = config['customWidth'] as int?;
+            finalProps['customHeight'] = config['customHeight'] as int?;
+          }
+
+          return CommonWidgetBuilder.build(
+            context,
+            commonWidgetIdEnum,
+            finalProps,
+            size,
+            inline: true,
+          );
         }
 
-        // 使用实时数据（从 provider 返回的数据中获取对应的小组件数据）
-        final liveData = snapshot.data![commonWidgetId] as Map<String, dynamic>?;
+        // 使用 dataRenderer 渲染
+        if (widgetDefinition.dataRenderer != null) {
+          final originalResult = selectorConfig.toSelectorResult();
+          if (originalResult == null) {
+            return HomeWidget.buildErrorWidget(context, '无法解析选择的数据');
+          }
 
-        if (liveData == null) {
-          return HomeWidget.buildErrorWidget(context, '数据不存在');
+          // 如果有 dataSelector，使用它转换数据
+          var result = originalResult;
+          if (widgetDefinition.dataSelector != null && originalResult.data is List) {
+            final dataArray = originalResult.data as List<dynamic>;
+            final transformedData = widgetDefinition.dataSelector!(dataArray);
+            result = SelectorResult(
+              pluginId: originalResult.pluginId,
+              selectorId: originalResult.selectorId,
+              path: originalResult.path,
+              data: transformedData,
+            );
+          }
+
+          // 将 widgetSize 注入 config
+          final effectiveConfig = {
+            ...config,
+            'widgetSize': size,
+          };
+
+          try {
+            return widgetDefinition.dataRenderer!(context, result, effectiveConfig);
+          } catch (e) {
+            debugPrint('[BillStatsWidget] dataRenderer 失败: $e');
+            return HomeWidget.buildErrorWidget(context, '渲染失败');
+          }
         }
 
-        // 合并保存的配置和实时数据
-        final liveProps = _mergeProps(savedProps, liveData);
-
-        // 添加 custom 尺寸的实际宽高到 props 中
-        final finalProps = Map<String, dynamic>.from(liveProps);
-        if (size == const CustomSize(width: -1, height: -1)) {
-          finalProps['customWidth'] = config['customWidth'] as int?;
-          finalProps['customHeight'] = config['customHeight'] as int?;
-        }
-
-        return CommonWidgetBuilder.build(
-          context,
-          commonWidgetIdEnum,
-          finalProps,
-          size,
-          inline: true,
-        );
+        // 没有公共小组件也没有 dataRenderer，显示错误
+        return HomeWidget.buildErrorWidget(context, '未配置渲染方式');
       },
     );
   }

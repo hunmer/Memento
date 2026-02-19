@@ -130,7 +130,7 @@
 - [x] 社交活动动态卡片 - `social_activity_card` → `socialActivityCard` (使用 `SocialUser` 和 `SocialPost` 数据模型，支持 JSON 序列化)
 - [x] 彩色快捷方式网格 - `colorful_shortcuts_grid` → `colorfulShortcutsGrid` (使用 `ColorfulShortcutsGridData` 和 `ShortcutItemData` 数据模型，支持 JSON 序列化)
 - [x] 图标圆形进度卡片 - `icon_circular_progress_card` → `iconCircularProgressCard` (使用 `IconCircularProgressCardWidget` 组件，支持动画效果和自定义颜色)
-- [x] 月度账单卡片 - `monthly_bill_card` → `monthlyBillCard` (使用 `MonthlyBillCardData` 数据模型，支持 JSON 序列化)
+- [x] 月度账单卡片 - `monthly_bill_card` → `monthlyBillCard` (使用 `Map<String, dynamic>` 数据格式)
 - [x] 彩色标签任务列表卡片 - `color_tag_task_card` → `colorTagTaskCard` (使用 `ColorTagTaskCardData` 和 `ColorTagTaskItem` 数据模型，支持 JSON 序列化)
 
 ---
