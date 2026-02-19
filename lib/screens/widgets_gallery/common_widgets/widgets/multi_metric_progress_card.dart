@@ -157,6 +157,7 @@ class _MultiMetricProgressCardWidgetState
 
     return Container(
       width: widget.inline ? double.maxFinite : 380,
+      height: widget.inline ? double.maxFinite : 380,
       constraints: widget.inline ? null : const BoxConstraints(minWidth: 280),
       decoration: BoxDecoration(
         color: bgColor,
