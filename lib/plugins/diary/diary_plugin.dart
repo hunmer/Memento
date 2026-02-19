@@ -39,6 +39,24 @@ class DiaryEntryDeletedEventArgs extends EventArgs {
   DiaryEntryDeletedEventArgs(this.date) : super('diary_entry_deleted');
 }
 
+/// 日记缓存更新事件参数（携带数据，性能优化）
+class DiaryCacheUpdatedEventArgs extends EventArgs {
+  /// 本月日记条目列表（日期, 条目）
+  final List<(DateTime, DiaryEntry)> entries;
+
+  /// 当前月份
+  final DateTime month;
+
+  /// 条目数量
+  final int count;
+
+  DiaryCacheUpdatedEventArgs({
+    required this.entries,
+    required this.month,
+  }) : count = entries.length,
+       super('diary_cache_updated');
+}
+
 /// 日记插件主视图
 class DiaryMainView extends StatefulWidget {
   final DateTime? initialDate;
@@ -442,12 +460,23 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   // 刷新本月日记缓存
   Future<void> _refreshMonthlyEntriesCache() async {
+    debugPrint('[DiaryPlugin] _refreshMonthlyEntriesCache called, _isInitialized=$_isInitialized');
     if (!_isInitialized) return;
 
     try {
-      await getMonthlyDiaryEntries();
-      // 缓存刷新完成后通知监听器
-      eventManager.broadcast('diary_cache_updated', EventArgs());
+      final entries = await getMonthlyDiaryEntries();
+      final now = DateTime.now();
+
+      debugPrint('[DiaryPlugin] Broadcasting diary_cache_updated with ${entries.length} entries');
+
+      // 广播时携带数据（性能优化：小组件可直接使用，无需再次获取）
+      eventManager.broadcast(
+        'diary_cache_updated',
+        DiaryCacheUpdatedEventArgs(
+          entries: entries,
+          month: DateTime(now.year, now.month),
+        ),
+      );
     } catch (e) {
       debugPrint('[DiaryPlugin] 刷新本月日记缓存失败: $e');
     }

@@ -295,25 +295,61 @@ Widget buildMonthlyDiaryListWidget(
     return HomeWidget.buildErrorWidget(context, '未知的公共小组件类型: $commonWidgetId');
   }
 
-  // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-  return StatefulBuilder(
-    builder: (context, setState) {
-      return EventListenerContainer(
-        events: const [
-          'diary_cache_updated', // 监听缓存更新事件，确保数据已刷新
-        ],
-        onEvent: () => setState(() {}),
-        child: _buildMonthlyDiaryListContent(context, config, commonWidgetId),
-      );
-    },
+  // 使用专用的 StatefulWidget 来持有缓存数据
+  return _MonthlyDiaryListStatefulWidget(
+    config: config,
+    commonWidgetId: commonWidgetId,
   );
 }
 
-/// 构建本月日记列表内容（每次重建时获取最新数据）
+/// 内部 StatefulWidget 用于持有缓存的事件数据
+class _MonthlyDiaryListStatefulWidget extends StatefulWidget {
+  final Map<String, dynamic> config;
+  final String commonWidgetId;
+
+  const _MonthlyDiaryListStatefulWidget({
+    required this.config,
+    required this.commonWidgetId,
+  });
+
+  @override
+  State<_MonthlyDiaryListStatefulWidget> createState() => _MonthlyDiaryListStatefulWidgetState();
+}
+
+class _MonthlyDiaryListStatefulWidgetState extends State<_MonthlyDiaryListStatefulWidget> {
+  /// 缓存的事件数据（性能优化：直接使用事件携带的数据）
+  List<(DateTime, DiaryEntry)>? _cachedEntries;
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const [
+        'diary_cache_updated', // 监听缓存更新事件
+      ],
+      onEventWithData: (args) {
+        if (args is DiaryCacheUpdatedEventArgs) {
+          setState(() {
+            _cachedEntries = args.entries; // 直接使用事件数据
+          });
+        }
+      },
+      child: _buildMonthlyDiaryListContent(
+        context,
+        widget.config,
+        widget.commonWidgetId,
+        _cachedEntries,
+      ),
+    );
+  }
+}
+
+/// 构建本月日记列表内容
+/// [cachedEntries] 事件携带的缓存数据（性能优化），为 null 时从插件获取
 Widget _buildMonthlyDiaryListContent(
   BuildContext context,
   Map<String, dynamic> config,
   String commonWidgetId,
+  List<(DateTime, DiaryEntry)>? cachedEntries,
 ) {
   // 查找对应的 CommonWidgetId 枚举
   final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
@@ -325,8 +361,8 @@ Widget _buildMonthlyDiaryListContent(
   final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
   final size = config['widgetSize'] as HomeWidgetSize? ?? metadata.defaultSize;
 
-  // 每次重建时使用同步方法重新获取最新数据
-  final latestProps = _getMonthlyDiaryListDataSync(commonWidgetId);
+  // 优先使用事件携带的缓存数据（性能优化），否则从插件获取
+  final latestProps = _getMonthlyDiaryListDataSync(commonWidgetId, cachedEntries);
 
   return CommonWidgetBuilder.build(
     context,
@@ -338,13 +374,23 @@ Widget _buildMonthlyDiaryListContent(
 }
 
 /// 同步获取本月日记列表小组件数据
-Map<String, dynamic>? _getMonthlyDiaryListDataSync(String commonWidgetId) {
+/// [cachedEntries] 事件携带的缓存数据（性能优化），为 null 时从插件获取
+Map<String, dynamic>? _getMonthlyDiaryListDataSync(
+  String commonWidgetId,
+  List<(DateTime, DiaryEntry)>? cachedEntries,
+) {
   try {
-    final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
-    if (plugin == null) return null;
+    // 优先使用事件携带的缓存数据（性能优化）
+    List<(DateTime, DiaryEntry)> monthlyEntries;
 
-    // 同步获取本月日记（使用缓存）
-    final monthlyEntries = plugin.getMonthlyDiaryEntriesSync();
+    if (cachedEntries != null) {
+      monthlyEntries = cachedEntries;
+    } else {
+      // 回退：从插件同步获取（首次构建或向后兼容）
+      final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
+      if (plugin == null) return null;
+      monthlyEntries = plugin.getMonthlyDiaryEntriesSync();
+    }
 
     final now = DateTime.now();
     final year = now.year;
