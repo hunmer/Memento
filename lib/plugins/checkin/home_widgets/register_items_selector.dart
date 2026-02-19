@@ -151,7 +151,7 @@ class _CheckinItemsSelectorWidgetState
     );
   }
 
-  /// 构建公共小组件内容（每次重建时获取实时数据）
+  /// 构建公共小组件内容（使用保存的 props，不依赖 provider）
   Widget _buildCommonWidgetContent(
     BuildContext context,
     SelectorWidgetConfig selectorConfig,
@@ -159,7 +159,26 @@ class _CheckinItemsSelectorWidgetState
     HomeWidgetSize size,
     CommonWidgetMetadata metadata,
   ) {
-    // 从 selectorConfig.selectedData 获取数据
+    // 优先使用保存的 commonWidgetProps（用户在选择器对话框中选择的数据）
+    if (selectorConfig.commonWidgetProps != null) {
+      final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
+
+      // 添加 custom 尺寸的实际宽高到 props 中
+      if (size == const CustomSize(width: -1, height: -1)) {
+        props['customWidth'] = widget.config['customWidth'] as int?;
+        props['customHeight'] = widget.config['customHeight'] as int?;
+      }
+
+      return CommonWidgetBuilder.build(
+        context,
+        widgetIdEnum,
+        props,
+        size,
+        inline: true,
+      );
+    }
+
+    // 如果没有保存的 props，尝试动态获取（兼容旧数据）
     final selectedData = selectorConfig.selectedData;
     if (selectedData == null) {
       return HomeWidget.buildErrorWidget(context, '无法获取选择的数据');
@@ -170,17 +189,11 @@ class _CheckinItemsSelectorWidgetState
     if (selectedData.containsKey('data')) {
       final dataArray = selectedData['data'];
       if (dataArray is List && dataArray.isNotEmpty) {
-        final rawData = dataArray[0];
-        if (rawData is Map<String, dynamic>) {
-          data = rawData;
-        } else if (rawData != null && rawData is Map) {
-          data = Map<String, dynamic>.from(rawData);
-        }
+        // 对于多选情况，使用 items 格式
+        data = {'items': List<Map<String, dynamic>>.from(dataArray)};
       }
     }
 
-    // 每次重建时获取实时数据（调用 commonWidgetsProvider）
-    // 注意：这里我们不使用 savedProps，而是每次调用 provider 获取最新数据
     if (widget.widgetDefinition.commonWidgetsProvider != null) {
       return FutureBuilder<Map<String, Map<String, dynamic>>>(
         future: widget.widgetDefinition.commonWidgetsProvider!(data),

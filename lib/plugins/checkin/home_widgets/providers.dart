@@ -14,11 +14,11 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
   final name = (data['name'] as String?) ?? '签到项目';
   final group = (data['group'] as String?) ?? '';
   final colorValue = (data['color'] as int?) ?? 0xFF007AFF;
-  final iconCode = (data['icon'] as int?) ?? 0xe23f; // Icons.checklist.codePoint
+  final iconCode =
+      (data['icon'] as int?) ?? 0xe23f; // Icons.checklist.codePoint
 
   // 获取插件实例以获取实时数据
-  final plugin =
-      PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+  final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
   CheckinItem? item;
   int consecutiveDays = 0;
   bool isCheckedToday = false;
@@ -69,7 +69,8 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
     // 月度进度带点卡片：显示当月签到进度
     'monthlyProgressDotsCard': {
       'title': name,
-      'subtitle': '${DateTime.now().month}月 • ${getMonthlyCheckinCount(item)}d/${DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day}d',
+      'subtitle':
+          '${DateTime.now().month}月 • ${getMonthlyCheckinCount(item)}d/${DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day}d',
       'currentDay': getMonthlyCheckinCount(item),
       'totalDays':
           DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
@@ -155,8 +156,7 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
   }
 
   // 获取插件实例以获取实时数据
-  final plugin =
-      PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
+  final plugin = PluginManager.instance.getPlugin('checkin') as CheckinPlugin?;
 
   // 构建每个项目的数据
   final List<Map<String, dynamic>> checkinItemCards = [];
@@ -170,7 +170,8 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
     final name = (itemData['name'] as String?) ?? '签到项目';
     final group = (itemData['group'] as String?) ?? '';
     final colorValue = (itemData['color'] as int?) ?? 0xFF007AFF;
-    final iconCode = (itemData['icon'] as int?) ?? 0xe23f; // Icons.checklist.codePoint
+    final iconCode =
+        (itemData['icon'] as int?) ?? 0xe23f; // Icons.checklist.codePoint
 
     CheckinItem? item;
     bool isCheckedToday = false;
@@ -294,23 +295,28 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
   return {
     // MultiMetricProgressCard - 多指标进度卡片
     'multiMetricProgressCard': {
-      'trackers': checkinItemCards.map((card) {
-        final consecutiveDays = card['isCheckedToday']
-            ? (plugin?.checkinItems.firstWhere(
-                  (i) => i.id == card['id'],
-                  orElse: () => throw Exception(''),
-                ).getConsecutiveDays() ?? 0)
-            : 0;
-        return {
-          'emoji': String.fromCharCode(card['iconCodePoint'] as int),
-          'progress': (consecutiveDays / 30 * 100).clamp(0, 100).toDouble(),
-          'progressColor': card['color'],
-          'title': card['title'],
-          'subtitle': card['subtitle'],
-          'value': consecutiveDays.toDouble(),
-          'unit': '天',
-        };
-      }).toList(),
+      'trackers':
+          checkinItemCards.map((card) {
+            final consecutiveDays =
+                card['isCheckedToday']
+                    ? (plugin?.checkinItems
+                            .firstWhere(
+                              (i) => i.id == card['id'],
+                              orElse: () => throw Exception(''),
+                            )
+                            .getConsecutiveDays() ??
+                        0)
+                    : 0;
+            return {
+              'emoji': String.fromCharCode(card['iconCodePoint'] as int),
+              'progress': (consecutiveDays / 30 * 100).clamp(0, 100).toDouble(),
+              'progressColor': card['color'],
+              'title': card['title'],
+              'subtitle': card['subtitle'],
+              'value': consecutiveDays.toDouble(),
+              'unit': '天',
+            };
+          }).toList(),
     },
 
     // TaskProgressCard - 任务进度卡片
@@ -319,30 +325,36 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
       'subtitle': '本月完成度',
       'completedTasks': todayCheckedCount,
       'totalTasks': itemsList.length,
-      'pendingTasks': checkinItemCards
-          .where((card) => !(card['isCheckedToday'] as bool))
-          .map((card) => card['title'] as String)
-          .toList(),
+      'pendingTasks':
+          checkinItemCards
+              .where((card) => !(card['isCheckedToday'] as bool))
+              .map((card) => card['title'] as String)
+              .toList(),
     },
 
     // CircularMetricsCard - 环形指标卡片
     'circularMetricsCard': {
       'title': '打卡概览',
-      'metrics': checkinItemCards.map((card) {
-        final consecutiveDays = card['isCheckedToday']
-            ? (plugin?.checkinItems.firstWhere(
-                  (i) => i.id == card['id'],
-                  orElse: () => throw Exception(''),
-                ).getConsecutiveDays() ?? 0)
-            : 0;
-        return {
-          'icon': card['iconCodePoint'],
-          'value': card['isCheckedToday'] ? '已打卡' : '未打卡',
-          'label': card['title'],
-          'progress': (consecutiveDays / 30).clamp(0, 1).toDouble(),
-          'color': card['color'],
-        };
-      }).toList(),
+      'metrics':
+          checkinItemCards.map((card) {
+            final consecutiveDays =
+                card['isCheckedToday']
+                    ? (plugin?.checkinItems
+                            .firstWhere(
+                              (i) => i.id == card['id'],
+                              orElse: () => throw Exception(''),
+                            )
+                            .getConsecutiveDays() ??
+                        0)
+                    : 0;
+            return {
+              'icon': card['iconCodePoint'],
+              'value': card['isCheckedToday'] ? '已打卡' : '未打卡',
+              'label': card['title'],
+              'progress': (consecutiveDays / 30).clamp(0, 1).toDouble(),
+              'color': card['color'],
+            };
+          }).toList(),
     },
 
     // WatchProgressCard - 观看进度卡片（复用为打卡进度）
@@ -350,12 +362,13 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
       'enableHeader': false,
       'currentCount': monthlyCheckinCount,
       'totalCount': daysInMonth,
-      'items': checkinItemCards.map((card) {
-        return {
-          'title': card['title'],
-          'thumbnailUrl': null, // 签到项目没有缩略图
-        };
-      }).toList(),
+      'items':
+          checkinItemCards.map((card) {
+            return {
+              'title': card['title'],
+              'thumbnailUrl': null, // 签到项目没有缩略图
+            };
+          }).toList(),
     },
 
     // TaskListCard - 任务列表卡片
@@ -364,116 +377,228 @@ Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
       'iconBackgroundColor': 0xFF14B8A6,
       'count': todayCheckedCount,
       'countLabel': '今日已完成',
-      'items': checkinItemCards
-          .where((card) => card['isCheckedToday'] as bool)
-          .map((card) => card['title'] as String)
-          .take(4)
-          .toList(),
-      'moreCount': checkinItemCards
-          .where((card) => !(card['isCheckedToday'] as bool))
-          .length,
+      'items':
+          checkinItemCards
+              .where((card) => card['isCheckedToday'] as bool)
+              .map((card) => card['title'] as String)
+              .take(4)
+              .toList(),
+      'moreCount':
+          checkinItemCards
+              .where((card) => !(card['isCheckedToday'] as bool))
+              .length,
     },
 
     // ColorTagTaskCard - 彩色标签任务卡片
     'colorTagTaskCard': {
       'taskCount': itemsList.length,
       'label': '打卡项目',
-      'tasks': checkinItemCards.map((card) {
-        return {
-          'title': card['title'],
-          'color': card['color'],
-          'isCheckedToday': card['isCheckedToday'],
-        };
-      }).toList(),
+      'tasks':
+          checkinItemCards.map((card) {
+            return {
+              'title': card['title'],
+              'color': card['color'],
+              'isCheckedToday': card['isCheckedToday'],
+            };
+          }).toList(),
       'moreCount': 0,
     },
 
     // InboxMessageCard - 收件箱消息卡片（复用为最近打卡项目）
     'inboxMessageCard': {
-      'title': '签到习惯',  // 自定义小组件标题
-      'messages': checkinItemCards.take(5).map((card) {
-        // 获取最后打卡时间
-        final itemId = card['id'] as String?;
-        String timeAgo = '未打卡';
-        if (plugin != null && itemId != null) {
-          try {
-            final item = plugin.checkinItems.firstWhere(
-              (i) => i.id == itemId,
-              orElse: () => throw Exception(''),
-            );
-            final lastDate = item.lastCheckinDate;
-            if (lastDate != null) {
-              final daysAgo = DateTime.now().difference(lastDate).inDays;
-              if (daysAgo == 0) {
-                timeAgo = '今天';
-              } else if (daysAgo == 1) {
-                timeAgo = '昨天';
-              } else {
-                timeAgo = '$daysAgo天前';
-              }
+      'title': '签到习惯', // 自定义小组件标题
+      'messages':
+          checkinItemCards.take(5).map((card) {
+            // 获取最后打卡时间
+            final itemId = card['id'] as String?;
+            String timeAgo = '未打卡';
+            if (plugin != null && itemId != null) {
+              try {
+                final item = plugin.checkinItems.firstWhere(
+                  (i) => i.id == itemId,
+                  orElse: () => throw Exception(''),
+                );
+                final lastDate = item.lastCheckinDate;
+                if (lastDate != null) {
+                  final daysAgo = DateTime.now().difference(lastDate).inDays;
+                  if (daysAgo == 0) {
+                    timeAgo = '今天';
+                  } else if (daysAgo == 1) {
+                    timeAgo = '昨天';
+                  } else {
+                    timeAgo = '$daysAgo天前';
+                  }
+                }
+              } catch (_) {}
             }
-          } catch (_) {}
-        }
 
-        return {
-          'name': card['title'] as String? ?? '签到项目',
-          'avatarUrl': '',  // 空字符串，使用图标代替
-          'iconCodePoint': card['iconCodePoint'] as int?,
-          'iconBackgroundColor': card['color'] as int?,
-          'preview': card['subtitle'] as String? ?? '签到',
-          'timeAgo': timeAgo,
-        };
-      }).toList(),
+            return {
+              'name': card['title'] as String? ?? '签到项目',
+              'avatarUrl': '', // 空字符串，使用图标代替
+              'iconCodePoint': card['iconCodePoint'] as int?,
+              'iconBackgroundColor': card['color'] as int?,
+              'preview': card['subtitle'] as String? ?? '签到',
+              'timeAgo': timeAgo,
+            };
+          }).toList(),
       'totalCount': checkinItemCards.length,
       'remainingCount': (checkinItemCards.length - 5).clamp(0, 999),
-      'primaryColor': 0xFF14B8A6,  // 标题栏背景色（青色）
+      'primaryColor': 0xFF14B8A6, // 标题栏背景色（青色）
     },
 
     // RoundedTaskListCard - 圆角任务列表卡片
     'roundedTaskListCard': {
-      'tasks': checkinItemCards.map((card) {
-        final consecutiveDays = card['isCheckedToday']
-            ? (plugin?.checkinItems.firstWhere(
-                  (i) => i.id == card['id'],
-                  orElse: () => throw Exception(''),
-                ).getConsecutiveDays() ?? 0)
-            : 0;
-        return {
-          'title': card['title'],
-          'subtitle': card['subtitle'],
-          'date': '连续$consecutiveDays天',
-        };
-      }).toList(),
+      'tasks':
+          checkinItemCards.map((card) {
+            final consecutiveDays =
+                card['isCheckedToday']
+                    ? (plugin?.checkinItems
+                            .firstWhere(
+                              (i) => i.id == card['id'],
+                              orElse: () => throw Exception(''),
+                            )
+                            .getConsecutiveDays() ??
+                        0)
+                    : 0;
+            return {
+              'title': card['title'],
+              'subtitle': card['subtitle'],
+              'date': '连续$consecutiveDays天',
+            };
+          }).toList(),
       'headerText': '打卡项目',
     },
 
     // DailyTodoListWidget - 每日待办事项卡片（枚举名是 dailyTodoListCard）
     'dailyTodoListCard': {
-      'date': '${getWeekdayName(today.weekday)}, ${today.day} ${getMonthName(today.month)} ${today.year}',
-      'time': '${today.hour.toString().padLeft(2, '0')}:${today.minute.toString().padLeft(2, '0')}',
-      'tasks': checkinItemCards.map((card) {
-        return {
-          'title': card['title'],
-          'isCompleted': card['isCheckedToday'],
-        };
-      }).toList(),
-      'reminder': {
-        'text': '今日打卡目标',
-        'hashtag': '#习惯养成',
-        'hashtagEmoji': '💪',
-      },
+      'date':
+          '${getWeekdayName(today.weekday)}, ${today.day} ${getMonthName(today.month)} ${today.year}',
+      'time':
+          '${today.hour.toString().padLeft(2, '0')}:${today.minute.toString().padLeft(2, '0')}',
+      'tasks':
+          checkinItemCards.map((card) {
+            return {
+              'title': card['title'],
+              'isCompleted': card['isCheckedToday'],
+            };
+          }).toList(),
+      'reminder': {'text': '今日打卡目标', 'hashtag': '#习惯养成', 'hashtagEmoji': '💪'},
     },
 
     // RoundedRemindersList - 圆角提醒事项列表
     'roundedRemindersList': {
       'itemCount': itemsList.length,
-      'items': checkinItemCards.map((card) {
-        final status = card['isCheckedToday'] ? '✅ ' : '⏰ ';
-        return {
-          'text': '$status${card['title']}',
-          'isCompleted': card['isCheckedToday'],
-        };
-      }).toList(),
+      'items':
+          checkinItemCards.map((card) {
+            final status = card['isCheckedToday'] ? '✅ ' : '⏰ ';
+            return {
+              'text': '$status${card['title']}',
+              'isCompleted': card['isCheckedToday'],
+            };
+          }).toList(),
+    },
+
+    // ActivityProgressCard - 活动进度卡片（多个项目的连续天数总和）
+    'activityProgressCard': {
+      'title': '连续签到',
+      'subtitle': checkinItemCards.length > 1 ? '总连续天数' : '连续天数',
+      'value': bestConsecutiveDays.toDouble(),
+      'unit': '天',
+      'activities': todayCheckedCount,
+      'totalProgress': checkinItemCards.length,
+      'completedProgress': todayCheckedCount,
+    },
+
+    // MonthlyProgressDotsCard - 月度进度带点卡片（复用）
+    'monthlyProgressDotsCard': {
+      'title': '本月进度',
+      'subtitle': '$monthlyCheckinCount/$daysInMonth 天',
+      'currentDay': monthlyCheckinCount,
+      'totalDays': daysInMonth,
+      'percentage':
+          ((monthlyCheckinCount / daysInMonth) * 100).clamp(0, 100).toInt(),
+    },
+
+    // SleepTrackingCard - 睡眠追踪卡片（复用为连续签到）
+    'sleepTrackingCard': {
+      'title': '连续签到',
+      'mainValue': bestConsecutiveDays.toDouble(),
+      'statusLabel': bestConsecutiveDays >= 30 ? '习惯养成' : '持续打卡',
+      'unit': '天',
+      'weeklyProgress': _getWeeklyProgressFromDates(allMonthlyRecords),
+    },
+
+    // HabitStreakTrackerCard - 习惯连续追踪（最佳连续天数）
+    'habitStreakTrackerCard': {
+      'title': '连续签到',
+      'currentStreak': _getCurrentStreak(allMonthlyRecords),
+      'bestStreak': bestConsecutiveDays,
+      'totalCheckins': allMonthlyRecords.length,
+      'milestones': generateMilestones(bestConsecutiveDays),
+      'todayChecked': todayCheckedCount > 0,
+      'weekProgress': todayCheckedCount,
+    },
+
+    // MonthlyDotTrackerCard - 月度点追踪卡片
+    'monthlyDotTrackerCard': {
+      'title': '本月签到',
+      'subtitle': '$monthlyCheckinCount/$daysInMonth',
+      'currentValue': monthlyCheckinCount,
+      'totalDays': daysInMonth,
+      'daysData': _generateMonthlyDotsData(allMonthlyRecords, daysInMonth),
     },
   };
+}
+
+/// 从日期列表生成本月数据点
+List<Map<String, dynamic>> _generateMonthlyDotsData(
+  List<String> checkinDates,
+  int daysInMonth,
+) {
+  final today = DateTime.now();
+  return List.generate(daysInMonth, (index) {
+    final day = index + 1;
+    final dateStr =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+    return {'day': day, 'isChecked': checkinDates.contains(dateStr)};
+  });
+}
+
+/// 计算当前连续签到天数（从今天倒推）
+int _getCurrentStreak(List<String> allRecords) {
+  int streak = 0;
+  final today = DateTime.now();
+
+  for (int i = 0; i < 365; i++) {
+    final date = today.subtract(Duration(days: i));
+    final dateStr =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    if (allRecords.contains(dateStr)) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+/// 从日期列表生成周进度（从周一到今天）
+List<bool> _getWeeklyProgressFromDates(List<String> allRecords) {
+  final today = DateTime.now();
+  final monday = today.subtract(Duration(days: today.weekday - 1));
+  final result = <bool>[];
+
+  for (int i = 0; i < 7; i++) {
+    final date = monday.add(Duration(days: i));
+    if (date.isAfter(today)) {
+      result.add(false);
+    } else {
+      final dateStr =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      result.add(allRecords.contains(dateStr));
+    }
+  }
+
+  return result;
 }
