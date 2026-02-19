@@ -1,7 +1,7 @@
 import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
-import '../models/monthly_bill_card_data.dart';
+import 'dart:convert';
 
 /// 月度账单统计小组件
 ///
@@ -10,7 +10,7 @@ import '../models/monthly_bill_card_data.dart';
 /// 包含入场动画效果和数字翻转动画
 class MonthlyBillCardWidget extends StatefulWidget {
   /// 账单数据
-  final MonthlyBillCardData data;
+  final Map<String, dynamic> data;
 
   /// 是否为内联模式（内联模式使用 double.maxFinite，非内联模式使用固定尺寸）
   final bool inline;
@@ -30,17 +30,54 @@ class MonthlyBillCardWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final dataString = props['data'] as String?;
-    final data =
-        dataString != null && dataString.isNotEmpty
-            ? MonthlyBillCardData.fromJsonString(dataString)
-            : MonthlyBillCardData.defaults();
+    Map<String, dynamic> data;
+
+    // 优先从 data 字段获取（JSON 字符串格式）
+    final dataValue = props['data'];
+    if (dataValue is String && dataValue.isNotEmpty) {
+      try {
+        data = jsonDecode(dataValue) as Map<String, dynamic>;
+      } catch (e) {
+        data = _getDefaultData();
+      }
+    } else if (dataValue is Map<String, dynamic>) {
+      // 直接从 props 中获取数据字段（用于实时数据传递）
+      data = {
+        'title': props['title'] as String? ?? dataValue['title'] as String?,
+        'income': (props['income'] as num?)?.toDouble() ?? (dataValue['income'] as num?)?.toDouble(),
+        'expense': (props['expense'] as num?)?.toDouble() ?? (dataValue['expense'] as num?)?.toDouble(),
+        'balance': (props['balance'] as num?)?.toDouble() ?? (dataValue['balance'] as num?)?.toDouble(),
+      };
+      // 确保没有 null 值
+      if (data['title'] == null) data['title'] = '月度账单';
+      if (data['income'] == null) data['income'] = 0.0;
+      if (data['expense'] == null) data['expense'] = 0.0;
+      if (data['balance'] == null) data['balance'] = 0.0;
+    } else {
+      // 直接从 props 中获取数据（实时数据格式）
+      data = {
+        'title': props['title'] as String? ?? '月度账单',
+        'income': (props['income'] as num?)?.toDouble() ?? 0.0,
+        'expense': (props['expense'] as num?)?.toDouble() ?? 0.0,
+        'balance': (props['balance'] as num?)?.toDouble() ?? 0.0,
+      };
+    }
 
     return MonthlyBillCardWidget(
       data: data,
       inline: props['inline'] as bool? ?? false,
       size: size,
     );
+  }
+
+  /// 获取默认数据
+  static Map<String, dynamic> _getDefaultData() {
+    return const {
+      'title': '6月账单',
+      'income': 1024.00,
+      'expense': 2048.00,
+      'balance': -1024.00,
+    };
   }
 
   @override
@@ -117,7 +154,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                 children: [
                   // 顶部：标题
                   Text(
-                    widget.data.title,
+                    widget.data['title'] as String,
                     style: TextStyle(
                       fontSize: widget.size.getTitleFontSize() * 0.8,
                       fontWeight: FontWeight.bold,
@@ -134,7 +171,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                       // 收入
                       _BillItemWidget(
                         label: '收入',
-                        value: widget.data.income,
+                        value: (widget.data['income'] as num).toDouble(),
                         valueColor: incomeColor,
                         showPlus: true,
                         animation: _fadeInAnimation,
@@ -146,7 +183,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                       // 支出
                       _BillItemWidget(
                         label: '支出',
-                        value: widget.data.expense,
+                        value: (widget.data['expense'] as num).toDouble(),
                         valueColor: expenseColor,
                         showPlus: false,
                         animation: _fadeInAnimation,
@@ -174,7 +211,7 @@ class _MonthlyBillCardWidgetState extends State<MonthlyBillCardWidget>
                       // 结余
                       _BillItemWidget(
                         label: '结余',
-                        value: widget.data.balance,
+                        value: (widget.data['balance'] as num).toDouble(),
                         valueColor: incomeColor,
                         showPlus: true,
                         isLarge: true,

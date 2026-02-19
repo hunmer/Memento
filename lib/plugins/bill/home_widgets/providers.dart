@@ -286,11 +286,12 @@ Future<Map<String, Map<String, dynamic>>> provideMonthlyBillWidgets(
   final balance = totalIncome - totalExpense;
 
   // 返回月度账单卡片数据
+  final monthFormatted = DateFormat('yyyy-MM').format(month);
   return {
     'monthlyBillCard': {
-      'month': DateFormat('yyyy-MM').format(month),
-      'totalIncome': totalIncome,
-      'totalExpense': totalExpense,
+      'title': '$monthFormatted月账单',
+      'income': totalIncome,
+      'expense': totalExpense,
       'balance': balance,
       'bills': billRecords.take(10).toList(),
       'moreCount': billRecords.length > 10 ? billRecords.length - 10 : 0,
