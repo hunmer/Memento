@@ -80,7 +80,27 @@ class SelectableItem {
         'title': title,
         'subtitle': subtitle,
         'metadata': metadata,
+        'rawData': _serializeRawData(rawData),
       };
+
+  /// 序列化 rawData，确保可 JSON 化
+  dynamic _serializeRawData(dynamic data) {
+    if (data == null) return null;
+    // 基本类型直接返回
+    if (data is String || data is num || data is bool) {
+      return data;
+    }
+    // Map 类型，递归序列化每个值
+    if (data is Map) {
+      return data.map((key, value) => MapEntry(key, _serializeRawData(value)));
+    }
+    // List 类型，递归序列化每个元素
+    if (data is List) {
+      return data.map((item) => _serializeRawData(item)).toList();
+    }
+    // 其他类型尝试转为字符串
+    return data.toString();
+  }
 
   @override
   bool operator ==(Object other) =>

@@ -7,23 +7,24 @@ import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 
 /// 小组件构建器函数类型
-typedef HomeWidgetBuilder = Widget Function(BuildContext context, Map<String, dynamic> config);
+typedef HomeWidgetBuilder =
+    Widget Function(BuildContext context, Map<String, dynamic> config);
 
 /// 可用统计项提供者函数类型
-typedef AvailableStatsProvider = List<StatItemData> Function(BuildContext context);
+typedef AvailableStatsProvider =
+    List<StatItemData> Function(BuildContext context);
 
 /// 数据渲染器：将选择器结果渲染为Widget
-typedef SelectorDataRenderer = Widget Function(
-  BuildContext context,
-  SelectorResult result,
-  Map<String, dynamic> config,
-);
+typedef SelectorDataRenderer =
+    Widget Function(
+      BuildContext context,
+      SelectorResult result,
+      Map<String, dynamic> config,
+    );
 
 /// 导航处理器：处理点击后的跳转逻辑
-typedef SelectorNavigationHandler = void Function(
-  BuildContext context,
-  SelectorResult result,
-);
+typedef SelectorNavigationHandler =
+    void Function(BuildContext context, SelectorResult result);
 
 /// 数据选择器结果处理器（可选）
 ///
@@ -50,7 +51,8 @@ typedef SelectorNavigationHandler = void Function(
 ///   };
 /// }
 /// ```
-typedef SelectorDataSelector = Map<String, dynamic> Function(List<dynamic> dataArray);
+typedef SelectorDataSelector =
+    Map<String, dynamic> Function(List<dynamic> dataArray);
 
 /// 公共小组件提供者函数类型
 ///
@@ -84,9 +86,10 @@ typedef SelectorDataSelector = Map<String, dynamic> Function(List<dynamic> dataA
 ///   };
 /// }
 /// ```
-typedef CommonWidgetsProvider = Future<Map<String, Map<String, dynamic>>> Function(
-  Map<String, dynamic> data,
-);
+typedef CommonWidgetsProvider =
+    Future<Map<String, Map<String, dynamic>>> Function(
+      Map<String, dynamic> data,
+    );
 
 /// 主页小组件定义
 ///
@@ -192,9 +195,14 @@ class HomeWidget {
   /// 构建小组件
   ///
   /// 注意：config 中会自动注入 'widgetSize' 字段，表示当前小组件尺寸
-  Widget build(BuildContext context, Map<String, dynamic> config, [HomeWidgetSize? size]) {
+  Widget build(
+    BuildContext context,
+    Map<String, dynamic> config, [
+    HomeWidgetSize? size,
+  ]) {
     // 将尺寸信息注入 config，供 builder 使用
-    final effectiveConfig = size != null ? {...config, 'widgetSize': size} : config;
+    final effectiveConfig =
+        size != null ? {...config, 'widgetSize': size} : config;
     return builder(context, effectiveConfig);
   }
 
@@ -203,14 +211,16 @@ class HomeWidget {
   /// 如果 supportedSizes 为空，则检查所有支持的尺寸
   bool supportsSize(HomeWidgetSize size) {
     return effectiveSupportedSizes.contains(size) ||
-        (size is CustomSize && supportedSizes.isEmpty);  // 空列表时支持任何自定义尺寸
+        (size is CustomSize && supportedSizes.isEmpty); // 空列表时支持任何自定义尺寸
   }
 
   /// 获取有效的支持的尺寸列表
   ///
   /// 如果 supportedSizes 为空，返回所有支持的尺寸（包括自定义尺寸）
   List<HomeWidgetSize> get effectiveSupportedSizes =>
-      supportedSizes.isEmpty ? HomeWidgetSize.allSupportedSizes : supportedSizes;
+      supportedSizes.isEmpty
+          ? HomeWidgetSize.allSupportedSizes
+          : supportedSizes;
 
   /// 是否为选择器小组件
   bool get isSelectorWidget => selectorId != null;
@@ -222,6 +232,7 @@ class HomeWidget {
 
   /// 构建错误提示组件
   static Widget buildErrorWidget(BuildContext context, String error) {
+    debugPrint('Error loading widget: $error');
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -379,7 +390,9 @@ class HomeWidget {
       if (selectorConfig.commonWidgetProps != null) {
         // 使用用户在【公共组件样式】对话框中选择并保存的数据
         // 添加 custom 尺寸的实际宽高到 props 中
-        final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
+        final props = Map<String, dynamic>.from(
+          selectorConfig.commonWidgetProps!,
+        );
         if (size == const CustomSize(width: -1, height: -1)) {
           props['customWidth'] = config['customWidth'] as int?;
           props['customHeight'] = config['customHeight'] as int?;
@@ -400,9 +413,7 @@ class HomeWidget {
           future: widgetDefinition.commonWidgetsProvider!(data),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (snapshot.hasError) {

@@ -212,14 +212,23 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     // 转换数据格式
     Map<String, dynamic> data;
     final resultData = _originalSelectorResult!.data;
-    if (resultData is Map) {
+    if (resultData is SelectableItem) {
+      // 单选：SelectableItem 对象，调用 toMap() 序列化
+      data = resultData.toMap();
+    } else if (resultData is Map) {
       final rawMap = resultData;
       data = {};
       rawMap.forEach((key, value) {
         data[key.toString()] = value;
       });
-    } else if (widget.pluginWidget.dataSelector != null && resultData is List) {
-      data = widget.pluginWidget.dataSelector!(resultData);
+    } else if (resultData is List) {
+      if (widget.pluginWidget.dataSelector != null) {
+        // 使用自定义数据选择器
+        data = widget.pluginWidget.dataSelector!(resultData);
+      } else {
+        // 传入原始数据，让 commonWidgetsProvider 处理
+        data = {'data': resultData};
+      }
     } else {
       data = {'data': resultData};
     }
@@ -702,7 +711,10 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
 
     // 转换数据格式
     Map<String, dynamic> data;
-    if (result.data is Map) {
+    if (result.data is SelectableItem) {
+      // 单选：SelectableItem 对象，调用 toMap() 序列化
+      data = (result.data as SelectableItem).toMap();
+    } else if (result.data is Map) {
       // 安全地转换 Map，确保键为 String 类型
       final rawMap = result.data as Map;
       data = {};
@@ -710,24 +722,12 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
         data[key.toString()] = value;
       });
     } else if (result.data is List) {
-      final dataList = result.data as List<dynamic>;
       if (widget.pluginWidget.dataSelector != null) {
         // 使用自定义数据选择器
-        data = widget.pluginWidget.dataSelector!(dataList);
-      } else if (dataList.isNotEmpty) {
-        // 对于列表数据（如 customForm 的结果），提取第一个元素
-        final firstItem = dataList.first;
-        if (firstItem is Map) {
-          data = {};
-          (firstItem).forEach((key, value) {
-            data[key.toString()] = value;
-          });
-        } else {
-          data = {'data': firstItem};
-        }
+        data = widget.pluginWidget.dataSelector!(result.data);
       } else {
-        // 空列表
-        data = {};
+        // 传入原始数据，让 commonWidgetsProvider 处理
+        data = {'data': result.data};
       }
     } else {
       data = {'data': result.data};

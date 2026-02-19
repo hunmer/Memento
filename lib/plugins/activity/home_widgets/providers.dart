@@ -100,7 +100,10 @@ Widget buildOverviewContent(
   List<ActivityRecord>? cachedTodayActivities,
 ) {
   // 优先使用事件携带的缓存数据（性能优化），为 null 时从插件获取
-  final availableItems = getAvailableStats(context, cachedTodayActivities: cachedTodayActivities);
+  final availableItems = getAvailableStats(
+    context,
+    cachedTodayActivities: cachedTodayActivities,
+  );
 
   // 使用通用小组件
   return GenericPluginWidget(
@@ -128,10 +131,7 @@ Widget buildCommonWidgetsWidget(
   final selectorData = selectorConfig['data'] as Map<String, dynamic>?;
 
   if (commonWidgetId == null) {
-    return HomeWidget.buildErrorWidget(
-      context,
-      '配置错误：缺少 commonWidgetId',
-    );
+    return HomeWidget.buildErrorWidget(context, '配置错误：缺少 commonWidgetId');
   }
 
   // 使用专用的 StatefulWidget 持有事件携带的缓存数据（性能优化）
@@ -197,7 +197,8 @@ Map<String, dynamic>? _getCommonWidgetDataSync(
   final now = DateTime.now();
 
   // 优先使用事件携带的缓存数据（性能优化），为 null 时从插件获取
-  final todayActivities = cachedTodayActivities ?? plugin.getTodayActivitiesSync();
+  final todayActivities =
+      cachedTodayActivities ?? plugin.getTodayActivitiesSync();
 
   // 同步获取昨日活动（使用缓存）
   final yesterdayActivities = plugin.getYesterdayActivitiesSync();
@@ -365,7 +366,9 @@ Map<String, dynamic>? _getCommonWidgetDataSync(
         'count': todayActivityCount,
         'countLabel': '个活动',
         'items':
-            todayActivities.map((a) => a.title.isEmpty ? '未命名活动' : a.title).toList(),
+            todayActivities
+                .map((a) => a.title.isEmpty ? '未命名活动' : a.title)
+                .toList(),
         'moreCount': 0,
       };
 
@@ -498,23 +501,16 @@ Map<String, dynamic>? _getCommonWidgetDataSync(
       );
 
     case 'activityHeatmapCard':
-      return buildHeatmapCardData(
-        todayActivities,
-        selectorData ?? {},
-      );
+      return buildHeatmapCardData(todayActivities, selectorData ?? {});
 
     case 'activityTodayPieChartCard':
-      return {
-        'tagStats': tagStats,
-        'totalDuration': todayDurationMinutes,
-      };
+      return {'tagStats': tagStats, 'totalDuration': todayDurationMinutes};
 
     // 周图表支持（使用过去7天数据）
     case 'stressLevelMonitor':
     case 'lineChartTrendCard':
     case 'smoothLineChartCard':
     case 'barChartStatsCard':
-    case 'weeklyBarsCard':
     case 'expenseComparisonChart':
     case 'bloodPressureTracker':
       return _getWeeklyChartData(
@@ -1119,19 +1115,6 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
       'maxValue': maxMinutes / 60, // 转换为小时
     },
 
-    // WeeklyBarsCard - 周柱状图卡片
-    'weeklyBarsCard': {
-      'title': '周活动统计',
-      'icon': 'bar_chart',
-      'currentValue': avgMinutes / 60, // 转为小时
-      'unit': '小时',
-      'status': '日均',
-      'dailyValues':
-          maxMinutes > 0
-              ? sevenDaysData.map((d) => d.totalMinutes / maxMinutes).toList()
-              : List.filled(7, 0.0),
-    },
-
     // ExpenseComparisonChart - 支出对比图表
     'expenseComparisonChart': {
       'title': '活动对比',
@@ -1222,16 +1205,15 @@ Future<Map<String, Map<String, dynamic>>> provideWeeklyChartWidgets(
 Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
   Map<String, dynamic> config,
 ) async {
-  // 从 config['data'] 数组中提取 tag
+  // 数据格式: {'data': [{'tag': '跑步'}]}
+  // 由 data_selector_sheet._completeSelection() 从 SelectableItem.rawData 提取
   final dataArray = config['data'] as List<dynamic>?;
-  String? tag;
-
-  if (dataArray != null && dataArray.isNotEmpty) {
-    final firstItem = dataArray[0];
-    if (firstItem is Map<String, dynamic>) {
-      tag = firstItem['tag'] as String?;
-    }
+  if (dataArray == null || dataArray.isEmpty) {
+    return {};
   }
+
+  final firstItem = dataArray[0] as Map<String, dynamic>?;
+  final tag = firstItem?['tag'] as String?;
 
   // 如果没有标签数据，返回空数据（这会显示未选择标签的提示）
   if (tag == null) {
@@ -1325,15 +1307,6 @@ Future<Map<String, Map<String, dynamic>>> provideTagWeeklyChartWidgets(
       'chartData': chartDataForCards.map((v) => v * 100).toList(),
       'dateRange': '$startDate - $endDate',
     },
-    'weeklyBarsCard': {
-      'title': '$tag 周统计',
-      'tag': tag,
-      'primaryColor': primaryColorValue,
-      'currentValue': avgMinutes,
-      'unit': '分钟',
-      'dailyValues': chartDataForCards,
-      'weekDayLabels': ['一', '二', '三', '四', '五', '六', '日'],
-    },
     'earningsTrendCard': {
       'title': '$tag 总时长',
       'tag': tag,
@@ -1383,10 +1356,12 @@ class _ActivityCommonWidgetsStatefulWidget extends StatefulWidget {
   });
 
   @override
-  State<_ActivityCommonWidgetsStatefulWidget> createState() => _ActivityCommonWidgetsStatefulWidgetState();
+  State<_ActivityCommonWidgetsStatefulWidget> createState() =>
+      _ActivityCommonWidgetsStatefulWidgetState();
 }
 
-class _ActivityCommonWidgetsStatefulWidgetState extends State<_ActivityCommonWidgetsStatefulWidget> {
+class _ActivityCommonWidgetsStatefulWidgetState
+    extends State<_ActivityCommonWidgetsStatefulWidget> {
   /// 缓存的事件数据（性能优化：直接使用事件携带的数据）
   List<ActivityRecord>? _cachedTodayActivities;
 
@@ -1421,10 +1396,12 @@ class _ActivityOverviewStatefulWidget extends StatefulWidget {
   const _ActivityOverviewStatefulWidget({required this.widgetConfig});
 
   @override
-  State<_ActivityOverviewStatefulWidget> createState() => _ActivityOverviewStatefulWidgetState();
+  State<_ActivityOverviewStatefulWidget> createState() =>
+      _ActivityOverviewStatefulWidgetState();
 }
 
-class _ActivityOverviewStatefulWidgetState extends State<_ActivityOverviewStatefulWidget> {
+class _ActivityOverviewStatefulWidgetState
+    extends State<_ActivityOverviewStatefulWidget> {
   /// 缓存的事件数据（性能优化：直接使用事件携带的数据）
   List<ActivityRecord>? _cachedTodayActivities;
 
@@ -1449,6 +1426,7 @@ class _ActivityOverviewStatefulWidgetState extends State<_ActivityOverviewStatef
     );
   }
 }
+
 
 /// 获取周图表数据（使用过去7天数据）
 Map<String, dynamic> _getWeeklyChartData(
@@ -1581,19 +1559,6 @@ Map<String, dynamic> _getWeeklyChartData(
           return weekDayLabels[(date.weekday - 1) % 7];
         }),
         'maxValue': maxMinutes / 60,
-      };
-
-    case 'weeklyBarsCard':
-      return {
-        'title': '周活动统计',
-        'icon': 'bar_chart',
-        'currentValue': avgMinutes / 60,
-        'unit': '小时',
-        'status': '日均',
-        'dailyValues':
-            maxMinutes > 0
-                ? sevenDaysData.map((d) => d.totalMinutes / maxMinutes).toList()
-                : List.filled(7, 0.0),
       };
 
     case 'expenseComparisonChart':
