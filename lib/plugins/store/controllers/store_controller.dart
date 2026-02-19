@@ -14,6 +14,25 @@ import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/core/event/item_event_args.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
+/// Store 缓存更新事件参数
+class StoreCacheUpdatedEventArgs extends EventArgs {
+  final List<Map<String, dynamic>> products;
+  final List<Map<String, dynamic>> archivedProducts;
+  final List<Map<String, dynamic>> userItems;
+  final List<Map<String, dynamic>> pointsLogs;
+  final int userPoints;
+  final DateTime cacheDate;
+
+  StoreCacheUpdatedEventArgs({
+    required this.products,
+    required this.archivedProducts,
+    required this.userItems,
+    required this.pointsLogs,
+    required this.userPoints,
+    required this.cacheDate,
+  }) : super('store_cache_updated');
+}
+
 class StoreController with ChangeNotifier {
   List<Product> _products = [];
   final List<Product> _archivedProducts = [];
@@ -89,6 +108,19 @@ class StoreController with ChangeNotifier {
       action: 'changed',
     );
     EventManager.instance.broadcast('store_points_changed', eventArgs);
+  }
+
+  /// 触发缓存更新事件（携带最新数据）
+  void _notifyCacheUpdatedEvent() {
+    final eventArgs = StoreCacheUpdatedEventArgs(
+      products: productsJson,
+      archivedProducts: archivedProductsJson,
+      userItems: _userItems.map((item) => item.toJson()).toList(),
+      pointsLogs: _pointsLogs.map((log) => log.toJson()).toList(),
+      userPoints: _userPoints,
+      cacheDate: DateTime.now(),
+    );
+    EventManager.instance.broadcast('store_cache_updated', eventArgs);
   }
 
   // 更新所有流
@@ -191,6 +223,9 @@ class StoreController with ChangeNotifier {
     // 触发商品添加事件
     _notifyProductEvent('added', product);
 
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
+
     // 同步小组件数据
     await _syncWidget();
   }
@@ -260,6 +295,9 @@ class StoreController with ChangeNotifier {
     // 触发用户物品添加事件
     _notifyUserItemEvent('added', newItem);
 
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
+
     // 同步小组件数据
     await _syncWidget();
 
@@ -293,6 +331,9 @@ class StoreController with ChangeNotifier {
     // 触发用户物品使用事件
     _notifyUserItemEvent('used', item);
 
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
+
     return true;
   }
 
@@ -305,6 +346,9 @@ class StoreController with ChangeNotifier {
 
     // 触发用户物品删除事件
     _notifyUserItemEvent('deleted', item);
+
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
   }
 
   // 保存已使用物品
@@ -349,6 +393,9 @@ class StoreController with ChangeNotifier {
 
     // 触发积分变化事件（始终触发，供其他插件监听）
     _notifyPointsEvent(value, reason);
+
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
 
     // 检查是否启用积分变动通知（toast 提示）
     final enablePointsNotification =
@@ -420,6 +467,9 @@ class StoreController with ChangeNotifier {
 
     // 触发商品归档事件
     _notifyProductEvent('archived', product);
+
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
   }
 
   // 恢复存档产品
@@ -434,6 +484,9 @@ class StoreController with ChangeNotifier {
 
     // 触发商品恢复事件
     _notifyProductEvent('restored', product);
+
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
   }
 
   // 从存储加载数据

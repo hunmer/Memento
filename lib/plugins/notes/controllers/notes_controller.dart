@@ -9,6 +9,19 @@ import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
 import 'package:Memento/plugins/notes/data/notes_sample_data.dart';
 
+/// Notes 缓存更新事件参数
+class NotesCacheUpdatedEventArgs extends EventArgs {
+  final List<Map<String, dynamic>> folders;
+  final List<String> noteIds;
+  final DateTime cacheDate;
+
+  NotesCacheUpdatedEventArgs({
+    required this.folders,
+    required this.noteIds,
+    required this.cacheDate,
+  }) : super('notes_cache_updated');
+}
+
 class NotesController {
   final StorageManager _storage;
   final Map<String, Folder> _folders = {};
@@ -130,6 +143,9 @@ class NotesController {
   Future<void> _saveNoteIndex(List<String> noteIds) async {
     final jsonString = json.encode(noteIds);
     await _storage.writePluginFile('notes', 'notes/index.json', jsonString);
+
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
   }
 
   /// 保存单个笔记到文件
@@ -148,6 +164,9 @@ class NotesController {
       final jsonList = _folders.values.map((f) => f.toJson()).toList();
       final jsonString = json.encode(jsonList);
       await _storage.writePluginFile('notes', 'folders.json', jsonString);
+
+      // 触发缓存更新事件
+      _notifyCacheUpdatedEvent();
     } catch (e) {
       debugPrint('Error saving folders: $e');
       rethrow;
@@ -427,5 +446,15 @@ class NotesController {
   // 同步小组件数据
   Future<void> _syncWidget() async {
     await PluginWidgetSyncHelper.instance.syncNotes();
+  }
+
+  /// 触发缓存更新事件（携带最新数据）
+  void _notifyCacheUpdatedEvent() {
+    final eventArgs = NotesCacheUpdatedEventArgs(
+      folders: _folders.values.map((f) => f.toJson()).toList(),
+      noteIds: _noteIds.toList(),
+      cacheDate: DateTime.now(),
+    );
+    EventManager.instance.broadcast('notes_cache_updated', eventArgs);
   }
 }
