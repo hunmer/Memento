@@ -155,7 +155,7 @@ class _DailyEventsCardWidgetState extends State<DailyEventsCardWidget>
                                 parent: _animationController,
                                 curve: Interval(
                                   0.2 + index * 0.25,
-                                  0.6 + index * 0.2,
+        (0.6 + index * 0.2).clamp(0.0, 1.0),
                                   curve: Curves.easeOutCubic,
                                 ),
                               );

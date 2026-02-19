@@ -174,11 +174,36 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       _handleNotificationTapped,
     );
 
-    // 监听活动变化事件，同时刷新周缓存和今日缓存
-    void refreshAllCaches() {
-      _refreshWeeklyActivitiesCache();
-      refreshTodayActivitiesCache();
-      _refreshYesterdayActivitiesCache();
+    // 监听活动变化事件，同时刷新所有缓存
+    Future<void> refreshAllCaches() async {
+      // 并行刷新所有缓存
+      await Future.wait([
+        _refreshWeeklyActivitiesCache(),
+        _refreshTodayActivitiesCacheInternal(),
+        _refreshYesterdayActivitiesCache(),
+      ]);
+
+      // 所有缓存刷新完成后，发送一次通知事件
+      if (_isInitialized) {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+
+        try {
+          final activities = await _activityService.getActivitiesForDate(now);
+
+          eventManager.broadcast(
+            'activity_cache_updated',
+            ActivityCacheUpdatedEventArgs(
+              todayActivities: activities,
+              todayActivityCount: activities.length,
+              todayActivityDuration: activities.fold<int>(0, (sum, a) => sum + a.durationInMinutes),
+              cacheDate: today,
+            ),
+          );
+        } catch (e) {
+          debugPrint('[ActivityPlugin] 发送缓存更新事件失败: $e');
+        }
+      }
     }
 
     eventManager.subscribe('activity_added', (_) => refreshAllCaches());
@@ -327,8 +352,8 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     if (duration != null) _cachedTodayActivityDuration = duration;
   }
 
-  /// 异步刷新今日活动缓存
-  Future<void> refreshTodayActivitiesCache() async {
+  /// 内部刷新今日活动缓存（不发送事件，用于批量刷新）
+  Future<void> _refreshTodayActivitiesCacheInternal() async {
     if (!_isInitialized) return;
 
     try {
@@ -344,19 +369,34 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       _cachedTodayActivityCount = activities.length;
       _cachedTodayActivityDuration =
           activities.fold<int>(0, (sum, a) => sum + a.durationInMinutes);
-
-      // 缓存刷新完成后通知监听器（携带数据，性能优化）
-      eventManager.broadcast(
-        'activity_cache_updated',
-        ActivityCacheUpdatedEventArgs(
-          todayActivities: activities,
-          todayActivityCount: activities.length,
-          todayActivityDuration: _cachedTodayActivityDuration,
-          cacheDate: today,
-        ),
-      );
     } catch (e) {
       debugPrint('[ActivityPlugin] 刷新今日活动缓存失败: $e');
+    }
+  }
+
+  /// 异步刷新今日活动缓存（公开方法，发送事件）
+  Future<void> refreshTodayActivitiesCache() async {
+    await _refreshTodayActivitiesCacheInternal();
+
+    if (_isInitialized) {
+      try {
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+
+        final activities = await _activityService.getActivitiesForDate(now);
+
+        eventManager.broadcast(
+          'activity_cache_updated',
+          ActivityCacheUpdatedEventArgs(
+            todayActivities: activities,
+            todayActivityCount: activities.length,
+            todayActivityDuration: _cachedTodayActivityDuration,
+            cacheDate: today,
+          ),
+        );
+      } catch (e) {
+        debugPrint('[ActivityPlugin] 发送缓存更新事件失败: $e');
+      }
     }
   }
 
@@ -385,7 +425,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     return _cachedTodayActivities;
   }
 
-  /// 刷新昨日活动缓存
+  /// 刷新昨日活动缓存（不发送事件，用于批量刷新）
   Future<void> _refreshYesterdayActivitiesCache() async {
     if (!_isInitialized) return;
 
@@ -452,7 +492,7 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
     return [];
   }
 
-  /// 刷新7天活动数据缓存
+  /// 刷新7天活动数据缓存（不发送事件，用于批量刷新）
   Future<void> _refreshWeeklyActivitiesCache() async {
     if (!_isInitialized) return;
 

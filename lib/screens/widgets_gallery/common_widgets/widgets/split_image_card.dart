@@ -321,7 +321,7 @@ class _InfoRowWidget extends StatelessWidget {
       parent: animation,
       curve: Interval(
         0.15 + index * 0.15,
-        0.6 + index * 0.15,
+        (0.6 + index * 0.15).clamp(0.0, 1.0),
         curve: Curves.easeOutCubic,
       ),
     );
@@ -379,7 +379,7 @@ class _TitleWidget extends StatelessWidget {
       parent: animation,
       curve: Interval(
         0.15 + index * 0.15,
-        0.6 + index * 0.15,
+        (0.6 + index * 0.15).clamp(0.0, 1.0),
         curve: Curves.easeOutCubic,
       ),
     );

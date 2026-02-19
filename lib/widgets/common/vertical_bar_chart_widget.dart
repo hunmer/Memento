@@ -347,11 +347,13 @@ class _VerticalBarChartWidgetState extends State<VerticalBarChartWidget>
 
             // 为每个柱形创建延迟动画
             final step = 0.05;
+            final start = index * step;
+            final end = (0.6 + index * step).clamp(0.0, 1.0);
             final barAnimation = CurvedAnimation(
               parent: _animationController,
               curve: Interval(
-                index * step,
-                0.6 + index * step,
+                start,
+                end,
                 curve: Curves.easeOutCubic,
               ),
             );

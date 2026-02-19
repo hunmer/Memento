@@ -206,11 +206,13 @@ class _PerformanceBarChartCardState extends State<PerformanceBarChartCard>
                                 widget.barData.length,
                                 (index) {
                                   final bar = widget.barData[index];
+                                  final start = index * 0.1;
+                                  final end = (0.6 + index * 0.08).clamp(0.0, 1.0);
                                   final barAnimation = CurvedAnimation(
                                     parent: _animationController,
                                     curve: Interval(
-                                      index * 0.1,
-                                      0.6 + index * 0.08,
+                                      start,
+                                      end,
                                       curve: Curves.easeOutCubic,
                                     ),
                                   );

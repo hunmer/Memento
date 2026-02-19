@@ -264,12 +264,14 @@ class _StackedBarChartWidgetState extends State<StackedBarChartWidget>
         final barData = widget.data[index];
 
         // 为每个条形创建延迟动画，确保 end <= 1.0
-        final step = 0.05; // 延迟步长，最大 end = 0.6 + 7 * 0.05 = 0.95
+        final step = 0.05;
+        final start = index * step;
+        final end = (0.6 + index * step).clamp(0.0, 1.0);
         final barAnimation = CurvedAnimation(
           parent: _animationController,
           curve: Interval(
-            index * step,
-            0.6 + index * step,
+            start,
+            end,
             curve: Curves.easeOutCubic,
           ),
         );
