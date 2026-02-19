@@ -62,7 +62,6 @@
 - [x] 圆角任务进度小组件 - `rounded_task_progress_widget` → `RoundedTaskProgressWidget` (支持任务进度和团队成员头像)
 - [x] 即将到来的任务小组件 - `upcoming_tasks_widget` → `UpcomingTasksWidget` (使用 `TaskItem` 数据模型，支持 JSON 序列化)
 - [x] 周睡眠追踪小组件 - `weekly_sleep_tracker` → `weeklySleepTrackerCard`
-- [x] 睡眠追踪卡片 - `sleep_tracking_card` → `sleepTrackingCard` (使用 `SleepTrackingCardData` 和 `DaySleepData` 数据模型，支持 JSON 序列化)
 - [x] 睡眠时长统计卡片 - `sleep_duration_card`
 - [x] 饮水追踪器 - `hydration_tracker_widget` → `hydrationTrackerCard`
 - [x] 个人资料卡片 - `profile_card_widget` → `profileCardCard`
@@ -96,7 +95,6 @@
 ### 追踪/健康类（需重命名为通用名称）
 - [x] 习惯连续打卡追踪器 - `habit_streak_tracker` → 已重命名为：连续打卡追踪器
 - [x] 睡眠阶段图表 - `sleep_stage_chart` → `sleepStageChartCard`
-- [x] 睡眠追踪卡片 - `sleep_tracking_card` → `sleepTrackingCard`
 - [x] 体重趋势图表 - `weight_trend_chart` → `weightTrendChart`
 
 ### 资料卡片类（需重命名）

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 /// 小组件尺寸类别枚举
 ///
 /// 基于 min(width, height) 判断组件的基础尺寸级别：
-/// - mini: 1x1, 1x2, 2x1 等（最小边为 1）
-/// - small: 2x2, 2x3, 3x2 等（最小边为 2）
-/// - medium: 3x3, 3x4, 4x3 等（最小边为 3）
-/// - large: 4x4, 4x5, 5x4 等（最小边为 4）
+/// - mini: 1x1 等（最小边为 1）
+/// - small: 1x2, 2x1, 2x2, 2x3, 3x2 等（最小边为 1 但为长条型，或最小边为 2）
+/// - medium: 1x3, 3x1, 2x3, 3x2, 3x3, 3x4, 4x3 等（最小边为 2 但为长条型，或最小边为 3）
+/// - large: 1x4, 4x1, 2x4, 4x2, 3x4, 4x3, 4x4, 4x5, 5x4 等（最小边为 3 但为长条型，或最小边为 4）
 /// - xlarge: 更大
 enum SizeCategory {
   /// 最小尺寸 - 最小边为 1（如 1x1, 1x2, 2x1）
@@ -153,25 +153,54 @@ abstract class HomeWidgetSize {
   /// 获取尺寸类别
   ///
   /// 基于 min(width, height) 判断基础尺寸级别：
-  /// - mini: 最小边为 1（1x1, 1x2, 2x1 等）
-  /// - small: 最小边为 2（2x2, 2x3, 3x2, 4x1, 4x2 等）
+  /// - mini: 最小边为 1（1x1 等）
+  /// - small: 最小边为 2（2x2, 2x3, 3x2, 4x2 等）
   /// - medium: 最小边为 3（3x3, 3x4, 4x3 等）
   /// - large: 最小边为 4（4x4, 4x5, 5x4 等）
   /// - xlarge: 最小边 ≥5
+  ///
+  /// 注意：长条型组件（如 1x2, 2x1, 4x1）会向上提升一级 category，以适配更大的可用空间
   SizeCategory get category {
+    // 特殊处理 4x1：虽然是 1x 最小边，但作为全宽组件应该使用 small
+    if (width == 4 && height == 1) return SizeCategory.small;
+
     final minSide = width < height ? width : height;
+    final maxSide = width > height ? width : height;
+
+    // 对于长条型组件（长边是短边的 2 倍或更多），向上提升一级 category
+    // 这样可以让内容更充分地利用可用空间
+    bool isLongStrip = maxSide >= minSide * 2;
+
+    SizeCategory baseCategory;
     switch (minSide) {
       case 1:
-        return SizeCategory.mini;
+        baseCategory = SizeCategory.mini;
+        break;
       case 2:
-        return SizeCategory.small;
+        baseCategory = SizeCategory.small;
+        break;
       case 3:
-        return SizeCategory.medium;
+        baseCategory = SizeCategory.medium;
+        break;
       case 4:
-        return SizeCategory.large;
+        baseCategory = SizeCategory.large;
+        break;
       default:
-        return SizeCategory.xlarge;
+        baseCategory = SizeCategory.xlarge;
     }
+
+    // 长条型组件向上提升一级（但不超过 large）
+    if (isLongStrip) {
+      return switch (baseCategory) {
+        SizeCategory.mini => SizeCategory.small,
+        SizeCategory.small => SizeCategory.medium,
+        SizeCategory.medium => SizeCategory.large,
+        SizeCategory.large => SizeCategory.large,  // 不超过 large
+        SizeCategory.xlarge => SizeCategory.xlarge,
+      };
+    }
+
+    return baseCategory;
   }
 
   /// 计算相对于网格总列数的宽度比例（0.0 - 1.0）

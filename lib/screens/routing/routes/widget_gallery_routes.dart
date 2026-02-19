@@ -77,7 +77,6 @@ import 'package:Memento/screens/widgets_gallery/screens/modern_egfr_health_widge
 import 'package:Memento/screens/widgets_gallery/screens/modern_rounded_balance_widget_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/timeline_status_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/sleep_stage_chart_example.dart';
-import 'package:Memento/screens/widgets_gallery/screens/sleep_tracking_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/monthly_bill_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/journal_prompt_card_example.dart';
 import 'package:Memento/screens/widgets_gallery/screens/task_list_card_example.dart';
@@ -552,15 +551,6 @@ class WidgetGalleryRoutes implements RouteRegistry {
           handler: (settings) => RouteHelpers.createRoute(const JournalPromptCardExample(), settings: settings),
           description: '日记提示卡片',
         ),
-        RouteDefinition(
-          path: '/widgets_gallery/sleep_tracking_card',
-      handler:
-          (settings) => RouteHelpers.createRoute(
-            VerticalCircularProgressCardExample(),
-            settings: settings,
-          ),
-          description: '睡眠追踪卡片',
-        ),
     RouteDefinition(
           path: '/widgets_gallery/mood_chart_card',
           handler: (settings) => RouteHelpers.createRoute(const ChartIconDisplayCardExample(), settings: settings),
@@ -878,13 +868,6 @@ final List<WidgetPreviewItem> _defaultWidgetItems = [
     title: '压力水平监测卡片',
     subtitle: 'StressLevelMonitor',
     route: '/widgets_gallery/stress_level_monitor',
-  ),
-  WidgetPreviewItem(
-    category: '追踪类',
-    icon: Icons.bedtime_outlined,
-    title: '睡眠追踪卡片',
-    subtitle: 'SleepTrackingCard',
-    route: '/widgets_gallery/sleep_tracking_card',
   ),
   WidgetPreviewItem(
     category: '追踪类',

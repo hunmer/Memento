@@ -11,7 +11,6 @@ export 'performance_bar_chart_card.dart';
 export 'route_tracking_card.dart';
 export 'rounded_reminders_list_card.dart';
 export 'screen_time_chart_card.dart' show ScreenTimeChartCardWidget, ScreenTimeDataPoint, ScreenTimeSegment;
-export 'sleep_tracking_card.dart';
 export 'stacked_bar_chart_card.dart';
 export 'stacked_bar_chart_widget.dart';
 export 'storage_breakdown_card.dart';
