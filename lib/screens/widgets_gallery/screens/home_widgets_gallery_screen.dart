@@ -221,13 +221,6 @@ class _HomeWidgetsGalleryScreenState extends State<HomeWidgetsGalleryScreen>
       ),
       _buildListItem(
         context,
-        icon: Icons.bedtime_outlined,
-        title: '睡眠追踪卡片',
-        subtitle: 'SleepTrackingCard - 睡眠时长与周日程追踪卡片',
-        route: '/widgets_gallery/sleep_tracking_card',
-      ),
-      _buildListItem(
-        context,
         icon: Icons.bed,
         title: '睡眠时长统计卡片',
         subtitle: 'SleepDurationCard - 睡眠时长与周期可视化展示卡片',

@@ -9,7 +9,6 @@ import 'widgets/audio_waveform_card.dart';
 import 'widgets/line_chart_trend_card.dart';
 import 'widgets/earnings_trend_card.dart';
 import 'widgets/watch_progress_card.dart';
-import 'widgets/vertical_circular_progress_card.dart';
 import 'widgets/card_bar_chart_monitor.dart';
 import 'widgets/card_bubble_chart_display.dart';
 import 'widgets/card_trend_line_chart.dart';
@@ -111,7 +110,6 @@ enum CommonWidgetId {
   revenueTrendCard,
   watchProgressCard,
   stressLevelMonitor,
-  sleepTrackingCard,
   dailyTodoListCard,
   upcomingTasksWidget,
   profileCardCard,
@@ -384,14 +382,6 @@ class CommonWidgetsRegistry {
       icon: Icons.psychology_outlined,
       defaultSize: Large3Size(),
       supportedSizes: [const LargeSize()],
-    ),
-    CommonWidgetId.sleepTrackingCard: const CommonWidgetMetadata(
-      id: CommonWidgetId.sleepTrackingCard,
-      name: '睡眠追踪卡片',
-      description: '显示睡眠时长、标签和每周7天的进度环，支持动画效果',
-      icon: Icons.bedtime_outlined,
-      defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
     ),
     CommonWidgetId.dailyTodoListCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dailyTodoListCard,
@@ -921,8 +911,6 @@ class CommonWidgetBuilder {
         return RevenueTrendCardWidget.fromProps(finalProps, size);
       case CommonWidgetId.watchProgressCard:
         return WatchProgressCardWidget.fromProps(finalProps, size);
-      case CommonWidgetId.sleepTrackingCard:
-        return VerticalCircularProgressCard.fromProps(finalProps, size);
       case CommonWidgetId.stressLevelMonitor:
         return CardBarChartMonitor.fromProps(finalProps, size);
       case CommonWidgetId.dailyTodoListCard:
