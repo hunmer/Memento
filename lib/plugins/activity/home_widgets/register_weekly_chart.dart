@@ -7,6 +7,7 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
+import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'providers.dart';
 
 /// 注册七天活动统计图表小组件
@@ -24,20 +25,36 @@ void registerWeeklyChartWidget(HomeWidgetRegistry registry) {
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideWeeklyChartWidgets,
       builder: (context, config) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return EventListenerContainer(
-              events: const [
-                'activity_added',
-                'activity_updated',
-                'activity_deleted',
-              ],
-              onEvent: () => setState(() {}),
-              child: buildCommonWidgetsWidget(context, config),
-            );
-          },
-        );
+        return _WeeklyChartStatefulWidget(config: config);
       },
     ),
   );
+}
+
+/// 周图表专用 StatefulWidget，监听 activity_cache_updated 事件（携带数据）
+class _WeeklyChartStatefulWidget extends StatefulWidget {
+  final Map<String, dynamic> config;
+
+  const _WeeklyChartStatefulWidget({required this.config});
+
+  @override
+  State<_WeeklyChartStatefulWidget> createState() => _WeeklyChartStatefulWidgetState();
+}
+
+class _WeeklyChartStatefulWidgetState extends State<_WeeklyChartStatefulWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const [
+        'activity_cache_updated', // 监听缓存更新事件
+      ],
+      onEventWithData: (args) {
+        // 事件触发时重建组件，获取最新数据
+        if (args is ActivityCacheUpdatedEventArgs) {
+          setState(() {});
+        }
+      },
+      child: buildCommonWidgetsWidget(context, widget.config),
+    );
+  }
 }

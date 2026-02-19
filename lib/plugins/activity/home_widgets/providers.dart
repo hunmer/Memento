@@ -509,6 +509,21 @@ Map<String, dynamic>? _getCommonWidgetDataSync(
         'totalDuration': todayDurationMinutes,
       };
 
+    // 周图表支持（使用过去7天数据）
+    case 'stressLevelMonitor':
+    case 'lineChartTrendCard':
+    case 'smoothLineChartCard':
+    case 'barChartStatsCard':
+    case 'weeklyBarsCard':
+    case 'expenseComparisonChart':
+    case 'bloodPressureTracker':
+      return _getWeeklyChartData(
+        commonWidgetId,
+        plugin,
+        now,
+        todayDurationMinutes,
+      );
+
     default:
       return null;
   }
@@ -1432,5 +1447,189 @@ class _ActivityOverviewStatefulWidgetState extends State<_ActivityOverviewStatef
         _cachedTodayActivities,
       ),
     );
+  }
+}
+
+/// 获取周图表数据（使用过去7天数据）
+Map<String, dynamic> _getWeeklyChartData(
+  String commonWidgetId,
+  ActivityPlugin plugin,
+  DateTime now,
+  int todayDurationMinutes,
+) {
+  final weekDayLabels = ['一', '二', '三', '四', '五', '六', '日'];
+  final weekDayLabelsEn = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  // 获取过去7天的活动数据
+  final sevenDaysData = <DayActivityData>[];
+  for (int i = 6; i >= 0; i--) {
+    final date = now.subtract(Duration(days: i));
+    final activities = plugin.getActivitiesForDateSync(date);
+    final totalMinutes = activities.fold<int>(
+      0,
+      (sum, a) => sum + a.durationInMinutes,
+    );
+    sevenDaysData.add(
+      DayActivityData(
+        date: date,
+        totalMinutes: totalMinutes,
+        activityCount: activities.length,
+      ),
+    );
+  }
+
+  // 计算统计数据
+  final totalWeekMinutes = sevenDaysData.fold<int>(
+    0,
+    (sum, d) => sum + d.totalMinutes,
+  );
+  final avgMinutes = totalWeekMinutes / 7;
+  final maxMinutes = sevenDaysData
+      .map((d) => d.totalMinutes)
+      .reduce((a, b) => a > b ? a : b);
+
+  // 格式化日期范围
+  final startDate = DateFormat('MM月dd日').format(sevenDaysData.first.date);
+  final endDate = DateFormat('MM月dd日').format(sevenDaysData.last.date);
+
+  // 获取今天和昨天的数据用于对比
+  final todayMinutes = sevenDaysData.last.totalMinutes.toDouble();
+  final yesterdayMinutes =
+      sevenDaysData[sevenDaysData.length - 2].totalMinutes.toDouble();
+  final changePercent =
+      yesterdayMinutes > 0
+          ? ((todayMinutes - yesterdayMinutes) / yesterdayMinutes * 100).floor()
+          : 0.0;
+
+  // 根据组件类型返回对应的数据
+  switch (commonWidgetId) {
+    case 'stressLevelMonitor':
+      return {
+        'title': '活动时长',
+        'icon': 'timeline',
+        'currentScore': avgMinutes / 60,
+        'status': getActivityStatus(avgMinutes),
+        'scoreUnit': '小时/天',
+        'weeklyData':
+            sevenDaysData.asMap().entries.map((entry) {
+              final index = entry.key;
+              final data = entry.value;
+              return {
+                'day':
+                    weekDayLabelsEn[(now
+                                .subtract(Duration(days: 6 - index))
+                                .weekday -
+                            1) %
+                        7],
+                'value': maxMinutes > 0 ? data.totalMinutes / maxMinutes : 0.0,
+                'isSelected': index == 6,
+              };
+            }).toList(),
+      };
+
+    case 'lineChartTrendCard':
+      return {
+        'title': '活动时长趋势',
+        'subtitle': '$startDate - $endDate',
+        'date': DateFormat('yyyy-MM-dd').format(now),
+        'totalValue': totalWeekMinutes,
+        'changePercent': changePercent,
+        'value': avgMinutes / 60,
+        'label': '日均活动',
+        'unit': '小时',
+        'inline': false,
+        'dataPoints':
+            sevenDaysData.map((d) {
+              final normalized =
+                  maxMinutes > 0 ? d.totalMinutes / maxMinutes : 0.0;
+              return normalized * 100;
+            }).toList(),
+      };
+
+    case 'smoothLineChartCard':
+      return {
+        'title': '活动时长',
+        'subtitle': '近7天统计',
+        'date': DateFormat('MM月dd日').format(now),
+        'currentValue': avgMinutes.toStringAsFixed(1),
+        'targetValue': (12 * 60).toStringAsFixed(0),
+        'unit': '分钟',
+        'maxValue': 120.0,
+        'timeLabels': weekDayLabels,
+        'dataPoints':
+            sevenDaysData.asMap().entries.map((entry) {
+              final value = entry.value.totalMinutes;
+              final normalized = maxMinutes > 0 ? value / maxMinutes : 0.0;
+              return {
+                'x': (entry.key * 53.33).clamp(0.0, 320.0),
+                'y': (120 - normalized * 100).clamp(0.0, 120.0),
+              };
+            }).toList(),
+      };
+
+    case 'barChartStatsCard':
+      return {
+        'title': '活动统计',
+        'dateRange': '$startDate - $endDate',
+        'averageValue': avgMinutes / 60,
+        'unit': '小时',
+        'icon': 'timeline',
+        'iconColor': Colors.pink.value,
+        'data': sevenDaysData.map((d) => d.totalMinutes / 60).toList(),
+        'labels': List.generate(7, (index) {
+          final date = now.subtract(Duration(days: 6 - index));
+          return weekDayLabels[(date.weekday - 1) % 7];
+        }),
+        'maxValue': maxMinutes / 60,
+      };
+
+    case 'weeklyBarsCard':
+      return {
+        'title': '周活动统计',
+        'icon': 'bar_chart',
+        'currentValue': avgMinutes / 60,
+        'unit': '小时',
+        'status': '日均',
+        'dailyValues':
+            maxMinutes > 0
+                ? sevenDaysData.map((d) => d.totalMinutes / maxMinutes).toList()
+                : List.filled(7, 0.0),
+      };
+
+    case 'expenseComparisonChart':
+      return {
+        'title': '活动对比',
+        'currentAmount': todayMinutes / 60,
+        'unit': '小时',
+        'changePercent': changePercent,
+        'maxValue': 24.0,
+        'labels': List.generate(7, (index) {
+          final date = now.subtract(Duration(days: 6 - index));
+          return DateFormat('dd').format(date);
+        }),
+        'dailyData':
+            sevenDaysData.asMap().entries.map((entry) {
+              return {
+                'lastMonth':
+                    entry.key > 0
+                        ? sevenDaysData[entry.key - 1].totalMinutes / 60
+                        : 0.0,
+                'currentMonth': entry.value.totalMinutes / 60,
+              };
+            }).toList(),
+      };
+
+    case 'bloodPressureTracker':
+      return {
+        'title': '活动统计',
+        'primaryValue': (todayMinutes / 60).toInt(),
+        'secondaryValue': (avgMinutes / 60).toInt(),
+        'status': getActivityStatus(avgMinutes),
+        'unit': '小时',
+        'lastUpdated': '今日',
+      };
+
+    default:
+      return {};
   }
 }

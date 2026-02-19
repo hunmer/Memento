@@ -197,6 +197,7 @@ class _LevelMonitorCardState extends State<LevelMonitorCard>
 
     return Container(
       width: widget.inline ? double.maxFinite : 380,
+      height: widget.inline ? double.maxFinite : 380,
       padding: widget.size.getPadding(),
       decoration: BoxDecoration(
         color: backgroundColor,
