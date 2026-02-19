@@ -10,6 +10,10 @@ import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import 'package:Memento/core/plugin_manager.dart';
+import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/core/event/event.dart';
+import 'package:Memento/core/event/event_args.dart' as event_args;
+import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import '../activity_plugin.dart';
 import 'data.dart';
 import 'utils.dart';
@@ -26,9 +30,14 @@ void registerTagWeeklyChartWidget(HomeWidgetRegistry registry) {
       icon: Icons.tag,
       color: Colors.pink,
       defaultSize: const LargeSize(),
-      supportedSizes: [const LargeSize(), const CustomSize(width: -1, height: -1)],
+      supportedSizes: [
+        const LargeSize(),
+        const CustomSize(width: -1, height: -1),
+      ],
       category: 'home_categoryRecord'.tr,
       selectorId: 'activity.tag',
+      dataSelector: _extractTagData,
+      navigationHandler: _navigateToActivityWithTag,
       commonWidgetsProvider: provideTagWeeklyChartWidgets,
       builder: (context, config) {
         // 使用专用的 StatefulWidget 处理标签周统计小组件
@@ -36,6 +45,43 @@ void registerTagWeeklyChartWidget(HomeWidgetRegistry registry) {
       },
     ),
   );
+}
+
+/// 提取标签数据（从选择器结果中提取）
+Map<String, dynamic> _extractTagData(List<dynamic> dataArray) {
+  if (dataArray.isEmpty) return {};
+  final firstItem = dataArray[0] as Map<String, dynamic>;
+  return {'tag': firstItem['tag'] as String};
+}
+
+/// 导航到活动插件（带有标签筛选）
+void _navigateToActivityWithTag(BuildContext context, SelectorResult result) {
+  final data = result.data as Map<String, dynamic>?;
+  if (data == null) return;
+
+  final tag = data['tag'] as String?;
+  if (tag == null) return;
+
+  final plugin = PluginManager.instance.getPlugin('activity');
+  if (plugin != null) {
+    // 记录插件打开历史
+    PluginManager.instance.recordPluginOpen(plugin);
+    // 跳转到活动插件
+    NavigationHelper.openContainerWithHero(
+      context,
+      (_) => plugin.buildMainView(context),
+      heroTag: 'activity_with_tag_$tag',
+      transitionDuration: const Duration(milliseconds: 300),
+    );
+
+    // 通过事件通知 TimelineScreen 设置标签筛选
+    Future.delayed(const Duration(milliseconds: 350), () {
+      eventManager.broadcast(
+        'activity_set_tag_filter',
+        event_args.Value<String>(tag),
+      );
+    });
+  }
 }
 
 /// 标签周统计小组件专用 StatefulWidget
@@ -52,12 +98,7 @@ class _TagWeeklyChartWidgetState extends State<_TagWeeklyChartWidget> {
   @override
   Widget build(BuildContext context) {
     return EventListenerContainer(
-      events: const [
-        'activity_added',
-        'activity_updated',
-        'activity_deleted',
-        'activity_cache_updated',
-      ],
+      events: const ['activity_cache_updated'],
       onEvent: () => setState(() {}),
       child: _buildContent(context),
     );
@@ -68,11 +109,15 @@ class _TagWeeklyChartWidgetState extends State<_TagWeeklyChartWidget> {
     final selectorConfig =
         widget.config['selectorWidgetConfig'] as Map<String, dynamic>?;
     if (selectorConfig == null) {
-      return HomeWidget.buildErrorWidget(context, '配置错误：缺少 selectorWidgetConfig');
+      return HomeWidget.buildErrorWidget(
+        context,
+        '配置错误：缺少 selectorWidgetConfig',
+      );
     }
 
     final commonWidgetId = selectorConfig['commonWidgetId'] as String?;
-    final commonWidgetProps = selectorConfig['commonWidgetProps'] as Map<String, dynamic>?;
+    final commonWidgetProps =
+        selectorConfig['commonWidgetProps'] as Map<String, dynamic>?;
     final selectorData = selectorConfig['data'] as List<dynamic>?;
 
     if (commonWidgetId == null) {
@@ -82,12 +127,16 @@ class _TagWeeklyChartWidgetState extends State<_TagWeeklyChartWidget> {
     // 查找对应的 CommonWidgetId 枚举
     final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
     if (widgetIdEnum == null) {
-      return HomeWidget.buildErrorWidget(context, '未知的公共小组件类型: $commonWidgetId');
+      return HomeWidget.buildErrorWidget(
+        context,
+        '未知的公共小组件类型: $commonWidgetId',
+      );
     }
 
     // 获取元数据以确定默认尺寸
     final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
-    final size = widget.config['widgetSize'] as HomeWidgetSize? ?? metadata.defaultSize;
+    final size =
+        widget.config['widgetSize'] as HomeWidgetSize? ?? metadata.defaultSize;
 
     // 获取标签周统计数据（每次重建时获取最新数据）
     final latestProps = _getTagWeeklyWidgetDataSync(
@@ -135,11 +184,7 @@ class _TagWeeklyChartWidgetState extends State<_TagWeeklyChartWidget> {
 
       if (tag == null) return null;
 
-      return _getTagWeeklyChartDataSync(
-        commonWidgetId,
-        tag,
-        plugin,
-      );
+      return _getTagWeeklyChartDataSync(commonWidgetId, tag, plugin);
     } catch (e) {
       debugPrint('[TagWeeklyChartWidget] 获取数据失败: $e');
       return null;
