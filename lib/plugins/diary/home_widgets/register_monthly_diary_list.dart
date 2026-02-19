@@ -20,7 +20,10 @@ void registerMonthlyDiaryListWidget(HomeWidgetRegistry registry) {
       icon: Icons.calendar_month,
       color: Colors.indigo,
       defaultSize: const LargeSize(),
-      supportedSizes: [const LargeSize(), const CustomSize(width: -1, height: -1)],
+      supportedSizes: [
+        const LargeSize(),
+        const CustomSize(width: -1, height: -1),
+      ],
       category: 'home_categoryRecord'.tr,
       commonWidgetsProvider: provideMonthlyDiaryListWidgets,
       builder: (context, config) {

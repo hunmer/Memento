@@ -505,6 +505,139 @@ static Map<String, dynamic> _getLiveCommonWidgetProps(
 - `lib/plugins/activity/home_widgets/providers.dart` - `buildCommonWidgetsWidget` 方法
 - `lib/plugins/chat/home_widgets.dart` - `_buildSelectorContent` 方法
 
+### Issue: 事件广播时序问题导致最新数据缺失
+
+**症状：**
+- 添加数据后，小组件更新但总是缺少最新添加的一条
+- 修改数据后，小组件显示的是旧数据
+- 删除数据后，小组件仍然显示已删除的数据
+
+**原因分析：**
+数据保存方法（如 `saveItem()`、`updateItem()`、`deleteItem()`）中，事件广播在数据保存**之前**执行。当事件触发时，异步刷新缓存开始读取文件，但此时新数据还未保存完成，导致缓存中不包含最新数据。
+
+**错误示例：**
+```dart
+// ❌ 错误顺序：先广播事件，再保存数据
+static Future<void> saveItem(Item item) async {
+  // 1. 先广播事件（数据还没保存！）
+  eventManager.broadcast('item_created', ItemCreatedEventArgs(item));
+
+  // 2. 然后才保存数据
+  await storage.writeJson(itemPath, item.toJson());
+  await _updateIndex(item.id);
+}
+```
+
+**正确示例：**
+```dart
+// ✅ 正确顺序：先保存数据，再广播事件
+static Future<void> saveItem(Item item) async {
+  // 1. 保存数据
+  await storage.writeJson(itemPath, item.toJson());
+  await _updateIndex(item.id);
+
+  // 2. 数据保存完成后再广播事件
+  eventManager.broadcast('item_created', ItemCreatedEventArgs(item));
+}
+```
+
+**检查方法：**
+```bash
+# 查找所有数据保存/更新/删除方法
+grep -n "Future.*save\|Future.*update\|Future.*delete" \
+  lib/plugins/<plugin-id>/utils/*.dart \
+  lib/plugins/<plugin-id>/services/*.dart
+
+# 检查事件广播是否在数据保存之前
+# 手动检查每个方法中的事件广播位置
+```
+
+**检查清单：**
+- [ ] 在 `saveItem` 中，事件广播在 `writeJson/writeFile` **之后**
+- [ ] 在 `updateItem` 中，事件广播在数据写入**之后**
+- [ ] 在 `deleteItem` 中，事件广播在 `deleteFile` **之后**
+- [ ] 索引更新（如果有）在事件广播**之前**完成
+- [ ] 事件广播是操作的**最后一步**
+
+**修复示例：**
+```dart
+static Future<void> saveDiaryEntry(
+  DateTime date,
+  String content, {
+  String title = '',
+  String? mood,
+}) async {
+  final storage = _storage;
+  try {
+    final normalizedDate = _normalizeDate(date);
+    final dateStr = _formatDate(normalizedDate);
+    final now = DateTime.now();
+    final entryPath = _getEntryPath(normalizedDate);
+
+    DiaryEntry newEntry;
+
+    // 检查是否存在现有条目（保存前检查，保存时用变量）
+    final isUpdate = await storage.fileExists(entryPath);
+
+    if (isUpdate) {
+      // 更新现有条目
+      final existingData = await storage.readJson(entryPath);
+      if (existingData == null) {
+        throw Exception('Failed to read existing diary entry');
+      }
+      final existingEntry = DiaryEntry.fromJson(existingData);
+
+      newEntry = existingEntry.copyWith(
+        title: title,
+        content: content,
+        mood: mood,
+        updatedAt: now,
+      );
+    } else {
+      // 创建新条目
+      newEntry = DiaryEntry(
+        date: normalizedDate,
+        title: title,
+        content: content,
+        mood: mood,
+        createdAt: now,
+        updatedAt: now,
+      );
+    }
+
+    // 确保目录存在
+    await storage.createDirectory(_pluginDir);
+
+    // 保存日记条目（在广播事件之前保存）
+    await storage.writeJson(entryPath, newEntry.toJson());
+
+    // 更新索引文件
+    await _updateDiaryIndex(dateStr);
+
+    // 同步到小组件
+    await _syncWidget();
+
+    // 在数据保存完成后再广播事件
+    if (isUpdate) {
+      EventManager.instance.broadcast(
+        'diary_entry_updated',
+        DiaryEntryUpdatedEventArgs(newEntry),
+      );
+    } else {
+      EventManager.instance.broadcast(
+        'diary_entry_created',
+        DiaryEntryCreatedEventArgs(newEntry),
+      );
+    }
+
+    debugPrint('Saved diary entry for $dateStr');
+  } catch (e) {
+    debugPrint('Error saving diary entry: $e');
+    throw Exception('Failed to save diary entry: $e');
+  }
+}
+```
+
 ## 完整示例：修复 Activity 插件
 
 ### 修复前问题
@@ -605,6 +738,8 @@ EventListenerContainer(
 - [ ] 事件名称在插件发送方和小组件监听方一致
 - [ ] 如果有多个缓存，确保在事件触发时都刷新
 - [ ] **如果使用 `GenericSelectorWidget`，确保每次重建时从插件获取实时数据**（不是使用静态配置数据）
+- [ ] **事件广播在数据保存**之后**（`saveItem` 中的 `eventManager.broadcast` 在 `writeJson/writeFile` 之后）**
+- [ ] 索引更新（如果有）在事件广播**之前**完成
 - [ ] 运行 `flutter analyze` 无错误
 
 ## 诊断流程图
@@ -626,6 +761,12 @@ EventListenerContainer(
     │
     ├─→ 是否直接使用 GenericSelectorWidget？
     │       ├─ 是 → 改用实时数据获取模式（见上文 Issue）
+    │       └─ 否 ↓
+    │
+    ├─→ 缺少最新数据？
+    │       ├─ 是 → 检查事件广播时序（见 Issue: 事件广播时序问题）
+    │       │         ├─ 事件是否在数据保存**之前**广播？
+    │       │         └─ 是 → 将事件广播移到保存**之后**
     │       └─ 否 ↓
     │
     └─→ 检查插件是否正确发送事件

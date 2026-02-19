@@ -82,12 +82,20 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
   // UseCase 实例
   late final DiaryUseCase _diaryUseCase;
 
+  // 初始化标志
+  bool _isInitialized = false;
+
   // 缓存统计数据（用于同步访问）
   int _cachedTodayWordCount = 0;
   int _cachedMonthWordCount = 0;
   (int, int) _cachedMonthProgress = (0, 0);
   DateTime? _cacheDateToday;
   DateTime? _cacheDateMonth;
+
+  // 缓存本月日记列表（用于同步访问）
+  List<(DateTime, DiaryEntry)> _cachedMonthlyDiaryEntries = [];
+  DateTime? _cacheDateMonthlyEntries;
+  bool _monthlyEntriesCacheValid = false;
 
   @override
   String get id => 'diary';
@@ -187,6 +195,79 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     _updateMonthCache(now, null, progress);
 
     return progress;
+  }
+
+  // 获取本月日记列表（异步，用于缓存刷新）
+  Future<List<(DateTime, DiaryEntry)>> getMonthlyDiaryEntries() async {
+    final now = DateTime.now();
+    final year = now.year;
+    final month = now.month;
+
+    try {
+      // 使用 DiaryUtils 加载所有日记条目
+      final allEntries = await DiaryUtils.loadDiaryEntries();
+
+      // 过滤本月的日记
+      final monthlyEntries = <(DateTime, DiaryEntry)>[];
+      for (final entry in allEntries.entries) {
+        if (entry.key.year == year && entry.key.month == month) {
+          monthlyEntries.add((entry.key, entry.value));
+        }
+      }
+
+      // 按日期排序（倒序）
+      monthlyEntries.sort((a, b) => b.$1.compareTo(a.$1));
+
+      // 更新缓存
+      _updateMonthlyEntriesCache(now, monthlyEntries);
+
+      return monthlyEntries;
+    } catch (e) {
+      debugPrint('[DiaryPlugin] 获取本月日记失败: $e');
+      return [];
+    }
+  }
+
+  // 同步获取本月日记列表（从缓存）
+  List<(DateTime, DiaryEntry)> getMonthlyDiaryEntriesSync() {
+    // 如果缓存无效，返回空列表并异步刷新
+    if (!_monthlyEntriesCacheValid) {
+      getMonthlyDiaryEntries();
+      return [];
+    }
+
+    final now = DateTime.now();
+    final month = DateTime(now.year, now.month);
+    final cachedMonth = _cacheDateMonthlyEntries != null
+        ? DateTime(_cacheDateMonthlyEntries!.year, _cacheDateMonthlyEntries!.month)
+        : null;
+
+    if (cachedMonth == null || !cachedMonth.isAtSameMomentAs(month)) {
+      // 日期不匹配，异步刷新并返回空列表
+      getMonthlyDiaryEntries();
+      return [];
+    }
+
+    return _cachedMonthlyDiaryEntries;
+  }
+
+  // 更新本月缓存
+  void _updateMonthlyEntriesCache(DateTime date, List<(DateTime, DiaryEntry)> entries) {
+    final month = DateTime(date.year, date.month);
+    final cachedMonth = _cacheDateMonthlyEntries != null
+        ? DateTime(_cacheDateMonthlyEntries!.year, _cacheDateMonthlyEntries!.month)
+        : null;
+
+    // 如果是新的月份，重置缓存
+    if (cachedMonth == null || !cachedMonth.isAtSameMomentAs(month)) {
+      _cachedMonthlyDiaryEntries = [];
+      _cacheDateMonthlyEntries = month;
+      _monthlyEntriesCacheValid = false;
+    }
+
+    // 更新缓存值
+    _cachedMonthlyDiaryEntries = entries;
+    _monthlyEntriesCacheValid = true;
   }
 
   // 更新今日缓存
@@ -339,8 +420,34 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
     // 注册数据选择器
     _registerDataSelectors();
 
+    // 订阅日记事件以刷新缓存
+    _setupEventListeners();
+
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 标记为已初始化
+    _isInitialized = true;
+  }
+
+  // 设置事件监听器
+  void _setupEventListeners() {
+    eventManager.subscribe('diary_entry_created', (_) => _refreshMonthlyEntriesCache());
+    eventManager.subscribe('diary_entry_updated', (_) => _refreshMonthlyEntriesCache());
+    eventManager.subscribe('diary_entry_deleted', (_) => _refreshMonthlyEntriesCache());
+  }
+
+  // 刷新本月日记缓存
+  Future<void> _refreshMonthlyEntriesCache() async {
+    if (!_isInitialized) return;
+
+    try {
+      await getMonthlyDiaryEntries();
+      // 缓存刷新完成后通知监听器
+      eventManager.broadcast('diary_cache_updated', EventArgs());
+    } catch (e) {
+      debugPrint('[DiaryPlugin] 刷新本月日记缓存失败: $e');
+    }
   }
 
   @override
