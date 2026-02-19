@@ -65,10 +65,10 @@ class _CheckinItemsSelectorWidget extends LiveSelectorWidget {
   ];
 
   @override
-  Future<Map<String, dynamic>> getLiveData(Map<String, dynamic> config) {
+  Future<Map<String, dynamic>> getLiveData(Map<String, dynamic> config) async {
     // 从配置中提取多个签到项目数据
     final data = _extractCheckinsData(config);
-    return provideCommonWidgetsForMultiple(data);
+    return await provideCommonWidgetsForMultiple(data);
   }
 
   @override
@@ -77,14 +77,16 @@ class _CheckinItemsSelectorWidget extends LiveSelectorWidget {
   /// 从配置中提取多个签到项目数据
   Map<String, dynamic> _extractCheckinsData(Map<String, dynamic> config) {
     try {
-      final selectorConfig = config['selectorWidgetConfig'] as Map<String, dynamic>?;
+      final selectorConfig =
+          config['selectorWidgetConfig'] as Map<String, dynamic>?;
       if (selectorConfig != null) {
-        final selectedData = selectorConfig['selectedData'] as Map<String, dynamic>?;
+        final selectedData =
+            selectorConfig['selectedData'] as Map<String, dynamic>?;
         if (selectedData != null && selectedData.containsKey('data')) {
           final dataArray = selectedData['data'] as List<dynamic>?;
           if (dataArray != null && dataArray.isNotEmpty) {
-            // 多选模式，返回 {'items': dataArray}
-            return {'items': List<Map<String, dynamic>>.from(dataArray)};
+            // 使用 extractCheckinsData 处理 CheckinItem 对象和 Map 的转换
+            return extractCheckinsData(dataArray);
           }
         }
       }
