@@ -23,7 +23,8 @@ import 'package:Memento/plugins/bill/home_widgets.dart'
     as BillHomeWidgets;
 import 'package:Memento/plugins/todo/home_widgets/home_widgets.dart'
     as TodoHomeWidgets;
-import 'package:Memento/plugins/checkin/home_widgets.dart';
+import 'package:Memento/plugins/checkin/home_widgets/home_widgets.dart'
+    as CheckinHomeWidgets;
 import 'package:Memento/plugins/calendar/home_widgets/home_widgets.dart'
     as CalendarHomeWidgets;
 import 'package:Memento/plugins/timer/home_widgets.dart';

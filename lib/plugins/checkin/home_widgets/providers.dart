@@ -1,17 +1,20 @@
-part of 'home_widgets.dart';
-
 /// 打卡插件主页小组件数据提供者
-/// 提供单个签到项目和多个签到项目的公共小组件数据
+library;
+
+import 'package:Memento/core/plugin_manager.dart';
+import '../checkin_plugin.dart';
+import '../models/checkin_item.dart';
+import 'utils.dart';
 
 /// 公共小组件提供者函数 - 单个签到项目
-Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
+Future<Map<String, Map<String, dynamic>>> provideCommonWidgets(
   Map<String, dynamic> data,
 ) async {
   // data 包含：id, name, group, icon, color
   final name = (data['name'] as String?) ?? '签到项目';
   final group = (data['group'] as String?) ?? '';
   final colorValue = (data['color'] as int?) ?? 0xFF007AFF;
-  final iconCode = (data['icon'] as int?) ?? Icons.checklist.codePoint;
+  final iconCode = (data['icon'] as int?) ?? 0xe23f; // Icons.checklist.codePoint
 
   // 获取插件实例以获取实时数据
   final plugin =
@@ -66,12 +69,12 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
     // 月度进度带点卡片：显示当月签到进度
     'monthlyProgressDotsCard': {
       'title': name,
-      'subtitle': '${DateTime.now().month}月 • ${_getMonthlyCheckinCount(item)}d/${DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day}d',
-      'currentDay': _getMonthlyCheckinCount(item),
+      'subtitle': '${DateTime.now().month}月 • ${getMonthlyCheckinCount(item)}d/${DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day}d',
+      'currentDay': getMonthlyCheckinCount(item),
       'totalDays':
           DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
       'percentage':
-          ((_getMonthlyCheckinCount(item) /
+          ((getMonthlyCheckinCount(item) /
                       DateTime(
                         DateTime.now().year,
                         DateTime.now().month + 1,
@@ -88,16 +91,16 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
       'statusLabel': consecutiveDays >= 30 ? '习惯养成' : '持续打卡',
       'unit': '次',
       'icon': iconCode,
-      'weeklyProgress': _generateWeekProgressFromMonday(item),
+      'weeklyProgress': generateWeekProgressFromMonday(item),
     },
 
     // 习惯连续追踪：显示连续签到和里程碑
     'habitStreakTrackerCard': {
       'title': name,
       'currentStreak': consecutiveDays,
-      'bestStreak': _getBestStreak(item),
+      'bestStreak': getBestStreak(item),
       'totalCheckins': item?.checkInRecords.length ?? 0,
-      'milestones': _generateMilestones(consecutiveDays),
+      'milestones': generateMilestones(consecutiveDays),
       'todayChecked': isCheckedToday,
       'weekProgress': weeklyCheckins,
     },
@@ -107,10 +110,10 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
       'title': name,
       'subtitle': group.isNotEmpty ? group : '签到',
       'iconCodePoint': iconCode,
-      'currentValue': _getMonthlyCheckinCount(item),
+      'currentValue': getMonthlyCheckinCount(item),
       'totalDays':
           DateTime(DateTime.now().year, DateTime.now().month + 1, 0).day,
-      'daysData': _generateMonthlyDotsData(item),
+      'daysData': generateMonthlyDotsData(item),
     },
 
     // 签到项目卡片：显示项目图标、名称、今日状态和热力图
@@ -136,13 +139,13 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
         };
       }),
       // 月度数据（用于 large 尺寸）
-      'daysData': _generateMonthlyDotsData(item),
+      'daysData': generateMonthlyDotsData(item),
     },
   };
 }
 
 /// 为多个签到项目提供公共小组件数据
-Future<Map<String, Map<String, dynamic>>> _provideCommonWidgetsForMultiple(
+Future<Map<String, Map<String, dynamic>>> provideCommonWidgetsForMultiple(
   Map<String, dynamic> data,
 ) async {
   // data 格式: {'items': [{'id': ..., 'name': ..., 'group': ..., 'icon': ..., 'color': ...}, ...]}
@@ -167,7 +170,7 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgetsForMultiple(
     final name = (itemData['name'] as String?) ?? '签到项目';
     final group = (itemData['group'] as String?) ?? '';
     final colorValue = (itemData['color'] as int?) ?? 0xFF007AFF;
-    final iconCode = (itemData['icon'] as int?) ?? Icons.checklist.codePoint;
+    final iconCode = (itemData['icon'] as int?) ?? 0xe23f; // Icons.checklist.codePoint
 
     CheckinItem? item;
     bool isCheckedToday = false;
@@ -280,7 +283,7 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgetsForMultiple(
           (i) => i.id == itemId,
           orElse: () => throw Exception('项目不存在'),
         );
-        final itemBest = _getBestStreak(item);
+        final itemBest = getBestStreak(item);
         if (itemBest > bestConsecutiveDays) {
           bestConsecutiveDays = itemBest;
         }
@@ -446,7 +449,7 @@ Future<Map<String, Map<String, dynamic>>> _provideCommonWidgetsForMultiple(
 
     // DailyTodoListWidget - 每日待办事项卡片（枚举名是 dailyTodoListCard）
     'dailyTodoListCard': {
-      'date': '${_getWeekdayName(today.weekday)}, ${today.day} ${_getMonthName(today.month)} ${today.year}',
+      'date': '${getWeekdayName(today.weekday)}, ${today.day} ${getMonthName(today.month)} ${today.year}',
       'time': '${today.hour.toString().padLeft(2, '0')}:${today.minute.toString().padLeft(2, '0')}',
       'tasks': checkinItemCards.map((card) {
         return {
