@@ -23,7 +23,8 @@ import 'register_item_selector.dart';
 import 'register_items_selector.dart';
 
 /// 注册所有打卡插件的小组件
-void register(HomeWidgetRegistry registry) {
+void register() {
+  final registry = HomeWidgetRegistry();
   registerIconWidget(registry);
   registerOverviewWidget(registry);
   registerItemSelectorWidget(registry);
