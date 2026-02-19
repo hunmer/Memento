@@ -30,7 +30,8 @@ import 'package:Memento/plugins/calendar/home_widgets/home_widgets.dart'
 import 'package:Memento/plugins/timer/home_widgets.dart';
 import 'package:Memento/plugins/day/home_widgets/home_widgets.dart'
     as DayHomeWidgets;
-import 'package:Memento/plugins/tracker/home_widgets.dart';
+import 'package:Memento/plugins/tracker/home_widgets/home_widgets.dart'
+    as TrackerHomeWidgets;
 import 'package:Memento/plugins/store/home_widgets.dart';
 import 'package:Memento/plugins/nodes/home_widgets.dart';
 import 'package:Memento/plugins/contact/home_widgets.dart';
