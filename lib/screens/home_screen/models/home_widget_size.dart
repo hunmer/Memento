@@ -93,6 +93,12 @@ abstract class HomeWidgetSize {
     );
   }
 
+  /// 获取所有预设尺寸（不包括 CustomSize）
+  static List<HomeWidgetSize> get allSizes => _allSizes;
+
+  /// 获取所有支持的尺寸（包括 CustomSize）
+  static List<HomeWidgetSize> get allSupportedSizes => [..._allSizes, const CustomSize(width: -1, height: -1)];
+
   /// 转换为 JSON
   Map<String, dynamic> toJson() {
     return {'width': width, 'height': height};

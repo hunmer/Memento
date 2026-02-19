@@ -562,7 +562,7 @@ class HomeScreenView extends StatelessWidget {
     final allWidgets = registry.getAllWidgets();
     final widgets =
         allWidgets
-            .where((widget) => widget.supportedSizes.contains(size))
+            .where((widget) => widget.effectiveSupportedSizes.contains(size))
             .toList();
 
     for (final widget in widgets) {
@@ -970,7 +970,7 @@ class HomeScreenView extends StatelessWidget {
       return;
     }
 
-    final supportedSizes = widget.supportedSizes;
+    final supportedSizes = widget.effectiveSupportedSizes;
     final hasCustom = supportedSizes.contains(
       const CustomSize(width: -1, height: -1),
     );
