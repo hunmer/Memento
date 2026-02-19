@@ -460,14 +460,11 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   // 刷新本月日记缓存
   Future<void> _refreshMonthlyEntriesCache() async {
-    debugPrint('[DiaryPlugin] _refreshMonthlyEntriesCache called, _isInitialized=$_isInitialized');
     if (!_isInitialized) return;
 
     try {
       final entries = await getMonthlyDiaryEntries();
       final now = DateTime.now();
-
-      debugPrint('[DiaryPlugin] Broadcasting diary_cache_updated with ${entries.length} entries');
 
       // 广播时携带数据（性能优化：小组件可直接使用，无需再次获取）
       eventManager.broadcast(
