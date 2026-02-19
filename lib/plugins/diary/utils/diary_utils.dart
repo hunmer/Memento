@@ -87,8 +87,10 @@ class DiaryUtils {
 
       DiaryEntry newEntry;
 
-      // 检查是否存在现有条目
-      if (await storage.fileExists(entryPath)) {
+      // 检查是否存在现有条目（保存前检查）
+      final isUpdate = await storage.fileExists(entryPath);
+
+      if (isUpdate) {
         // 更新现有条目
         final existingData = await storage.readJson(entryPath);
         if (existingData == null) {
@@ -114,8 +116,20 @@ class DiaryUtils {
         );
       }
 
-      // 广播事件
-      if (await storage.fileExists(entryPath)) {
+      // 确保目录存在
+      await storage.createDirectory(_pluginDir);
+
+      // 保存日记条目（在广播事件之前保存）
+      await storage.writeJson(entryPath, newEntry.toJson());
+
+      // 更新索引文件
+      await _updateDiaryIndex(dateStr);
+
+      // 同步到小组件
+      await _syncWidget();
+
+      // 在数据保存完成后再广播事件
+      if (isUpdate) {
         EventManager.instance.broadcast(
           'diary_entry_updated',
           DiaryEntryUpdatedEventArgs(newEntry),
@@ -126,18 +140,6 @@ class DiaryUtils {
           DiaryEntryCreatedEventArgs(newEntry),
         );
       }
-
-      // 确保目录存在
-      await storage.createDirectory(_pluginDir);
-
-      // 保存日记条目
-      await storage.writeJson(entryPath, newEntry.toJson());
-
-      // 更新索引文件
-      await _updateDiaryIndex(dateStr);
-
-      // 同步到小组件
-      await _syncWidget();
 
       debugPrint('Saved diary entry for $dateStr');
     } catch (e) {
