@@ -397,6 +397,11 @@ class HomeWidget {
           props['customWidth'] = config['customWidth'] as int?;
           props['customHeight'] = config['customHeight'] as int?;
         }
+        // 传递像素尺寸类别（用于响应式布局）
+        final pixelCategory = config['_pixelCategory'] as SizeCategory?;
+        if (pixelCategory != null) {
+          props['_pixelCategory'] = pixelCategory;
+        }
         return CommonWidgetBuilder.build(
           context,
           commonWidgetId,
@@ -429,6 +434,11 @@ class HomeWidget {
               if (size == const CustomSize(width: -1, height: -1)) {
                 props['customWidth'] = config['customWidth'] as int?;
                 props['customHeight'] = config['customHeight'] as int?;
+              }
+              // 传递像素尺寸类别（用于响应式布局）
+              final pixelCategory = config['_pixelCategory'] as SizeCategory?;
+              if (pixelCategory != null) {
+                props['_pixelCategory'] = pixelCategory;
               }
               return CommonWidgetBuilder.build(
                 context,

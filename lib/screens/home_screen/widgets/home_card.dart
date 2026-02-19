@@ -76,20 +76,11 @@ class _HomeCardState extends State<HomeCard> {
     if (!_initialized) {
       _lastMetrics = metrics;
       _initialized = true;
-      if (metrics != null) {
-        debugPrint('[HomeCard] 🔄 首次初始化: itemId=${widget.item.id.substring(0, 8)}..., '
-            'cellWidth=${metrics.cellWidth.toStringAsFixed(1)}');
-      }
       return;
     }
 
     // 后续变化时，如果 metrics 变化了，触发重建
     if (metrics != _lastMetrics) {
-      debugPrint('[HomeCard] 🔄 检测到网格尺寸变化: itemId=${widget.item.id.substring(0, 8)}...');
-      if (metrics != null && _lastMetrics != null) {
-        debugPrint('[HomeCard]    旧: cellWidth=${_lastMetrics!.cellWidth.toStringAsFixed(1)}');
-        debugPrint('[HomeCard]    新: cellWidth=${metrics.cellWidth.toStringAsFixed(1)}');
-      }
       _lastMetrics = metrics;
       setState(() {});
     }
@@ -248,15 +239,6 @@ class _HomeCardState extends State<HomeCard> {
 
       // 计算基于像素尺寸的有效尺寸类别
       final pixelCategory = widgetItem.size.getEffectiveCategory(metrics);
-
-      // 调试输出
-      debugPrint('[HomeCard] 📦 构建小组件: '
-          'widgetId=${widgetItem.widgetId}, '
-          'gridSize=${widgetItem.size.width}x${widgetItem.size.height}, '
-          'pixelSize=${pixelSize.width.toStringAsFixed(1)}x${pixelSize.height.toStringAsFixed(1)}, '
-          'gridCategory=${widgetItem.size.category.name}, '
-          'pixelCategory=${pixelCategory.name}, '
-          'hasMetrics=${metrics != null}');
 
       // 将 widgetItem.id 和像素尺寸注入到 config 中
       // 这确保当小组件被添加或替换时，会创建新的组件实例并触发 initState

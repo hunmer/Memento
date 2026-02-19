@@ -237,13 +237,6 @@ class _HomeGridState extends State<HomeGrid> {
       padding: _gridPadding,
     );
 
-    // 调试输出
-    debugPrint('[HomeGrid] 📐 网格尺寸更新: '
-        'gridWidth=${constraints.maxWidth.toStringAsFixed(1)}, '
-        'cellWidth=${cellWidth.toStringAsFixed(1)}, '
-        'cellHeight=${cellHeight.toStringAsFixed(1)}, '
-        'crossAxisCount=${widget.crossAxisCount}');
-
     return metrics;
   }
 

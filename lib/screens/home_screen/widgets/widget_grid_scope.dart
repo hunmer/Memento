@@ -50,12 +50,6 @@ class WidgetGridScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(WidgetGridScope oldWidget) {
-    final shouldNotify = metrics != oldWidget.metrics;
-    if (shouldNotify) {
-      debugPrint('[WidgetGridScope] 🔔 通知子组件更新: '
-          'oldCellWidth=${oldWidget.metrics.cellWidth.toStringAsFixed(1)}, '
-          'newCellWidth=${metrics.cellWidth.toStringAsFixed(1)}');
-    }
-    return shouldNotify;
+    return metrics != oldWidget.metrics;
   }
 }
