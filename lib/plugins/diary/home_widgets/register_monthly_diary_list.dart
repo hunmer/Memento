@@ -31,9 +31,7 @@ void registerMonthlyDiaryListWidget(HomeWidgetRegistry registry) {
           builder: (context, setState) {
             return EventListenerContainer(
               events: const [
-                'diary_entry_created',
-                'diary_entry_updated',
-                'diary_entry_deleted',
+                'diary_cache_updated', // 监听缓存更新事件，确保数据已刷新
               ],
               onEvent: () => setState(() {}),
               child: buildMonthlyDiaryListWidget(context, config),

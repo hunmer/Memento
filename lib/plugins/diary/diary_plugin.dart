@@ -428,6 +428,9 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
     // 标记为已初始化
     _isInitialized = true;
+
+    // 初始化完成后主动刷新缓存，确保首次加载有数据
+    getMonthlyDiaryEntries();
   }
 
   // 设置事件监听器
