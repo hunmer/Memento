@@ -128,51 +128,63 @@ abstract class LiveSelectorWidget extends StatefulWidget {
 }
 
 class _LiveSelectorWidgetState extends State<LiveSelectorWidget> {
-  /// 缓存上一次的 config，用于检测变化
-  Map<String, dynamic>? _lastConfig;
+  /// 缓存的 Future 对象，用于强制刷新数据
+  Future<Map<String, dynamic>>? _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshData();
+  }
 
   @override
   void didUpdateWidget(covariant LiveSelectorWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // 当 config 改变时（例如 _pixelCategory 改变），需要触发重建
+    // 当 config 改变时，需要刷新数据
     if (widget.config != oldWidget.config) {
-      _lastConfig = widget.config;
+      _refreshData();
     }
+  }
+
+  /// 刷新数据（创建新的 Future 强制 FutureBuilder 重新执行）
+  void _refreshData() {
+    _future = widget.getLiveData(widget.config);
   }
 
   @override
   Widget build(BuildContext context) {
-    // 使用 StatefulBuilder + EventListenerContainer + FutureBuilder 模式
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return EventListenerContainer(
-          events: widget.eventListeners,
-          onEvent: () => setState(() {}),
-          child: FutureBuilder<Map<String, dynamic>>(
-            future: widget.getLiveData(widget.config),
-            builder: (context, snapshot) {
-              // 加载状态
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return widget.buildLoading(context);
-              }
-
-              // 错误状态
-              if (snapshot.hasError) {
-                return widget.buildError(context, snapshot.error.toString());
-              }
-
-              // 空数据状态
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return widget.buildEmpty(context);
-              }
-
-              // 使用实时数据渲染
-              return _buildWithLiveData(context, snapshot.data!);
-            },
-          ),
-        );
+    // 使用 EventListenerContainer 监听数据变化事件
+    return EventListenerContainer(
+      events: widget.eventListeners,
+      onEvent: () {
+        // 事件触发时，创建新的 Future 强制刷新数据
+        setState(() {
+          _refreshData();
+        });
       },
+      child: FutureBuilder<Map<String, dynamic>>(
+        future: _future,
+        builder: (context, snapshot) {
+          // 加载状态
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return widget.buildLoading(context);
+          }
+
+          // 错误状态
+          if (snapshot.hasError) {
+            return widget.buildError(context, snapshot.error.toString());
+          }
+
+          // 空数据状态
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return widget.buildEmpty(context);
+          }
+
+          // 使用实时数据渲染
+          return _buildWithLiveData(context, snapshot.data!);
+        },
+      ),
     );
   }
 

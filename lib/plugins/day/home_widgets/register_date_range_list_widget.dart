@@ -3,14 +3,15 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/base/live_selector_widget.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
+import 'package:Memento/widgets/event_listener_container.dart';
 import '../day_plugin.dart';
+import '../controllers/day_controller.dart';
+import '../models/memorial_day.dart';
 import 'providers.dart';
-// 导入 utils 以使用 filterMemorialDaysByDaysRange 和 memorialDayToListItemData
 import 'utils.dart';
 
 /// 注册纪念日列表小组件 - 显示指定日期范围内的纪念日
@@ -33,7 +34,6 @@ void registerDateRangeListWidget(HomeWidgetRegistry registry) {
       // 使用公共小组件提供者
       commonWidgetsProvider: provideDateRangeCommonWidgets,
       builder: (context, config) {
-        // 使用 LiveSelectorWidget 实现实时数据获取
         return _DateRangeListWidget(
           config: config,
           widgetDefinition: registry.getWidget('day_date_range_list')!,
@@ -43,33 +43,69 @@ void registerDateRangeListWidget(HomeWidgetRegistry registry) {
   );
 }
 
-/// 内部 StatefulWidget 使用 LiveSelectorWidget 实现实时数据获取
-class _DateRangeListWidget extends LiveSelectorWidget {
+/// 纪念日列表小组件 - 使用事件携带数据模式
+class _DateRangeListWidget extends StatefulWidget {
+  final Map<String, dynamic> config;
+  final HomeWidget widgetDefinition;
+
   const _DateRangeListWidget({
-    required super.config,
-    required super.widgetDefinition,
+    required this.config,
+    required this.widgetDefinition,
   });
 
   @override
-  List<String> get eventListeners => const [
-    'memorial_day_added',
-    'memorial_day_updated',
-    'memorial_day_deleted',
-  ];
+  State<_DateRangeListWidget> createState() => _DateRangeListWidgetState();
+}
+
+class _DateRangeListWidgetState extends State<_DateRangeListWidget> {
+  /// 缓存的纪念日列表数据（从事件中获取）
+  List<MemorialDay>? _cachedMemorialDays;
 
   @override
-  Future<Map<String, dynamic>> getLiveData(Map<String, dynamic> config) async {
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
+  /// 加载初始数据
+  void _loadInitialData() {
+    final plugin = DayPlugin.instance;
+    _cachedMemorialDays = plugin.getAllMemorialDays();
+    debugPrint('[DateRangeList] Initial load: ${_cachedMemorialDays?.length ?? 0} items');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const ['memorial_day_cache_updated'],
+      onEventWithData: (args) {
+        if (args is MemorialDayCacheUpdatedEventArgs) {
+          debugPrint('[DateRangeList] Received cache_updated: ${args.items.length} items');
+          setState(() {
+            _cachedMemorialDays = args.items;
+          });
+        }
+      },
+      child: _buildContent(),
+    );
+  }
+
+  /// 构建内容
+  Widget _buildContent() {
+    final config = widget.config;
+
+    // 解析选择器配置获取日期范围
+    int? startDay;
+    int? endDay;
+    String title = '未来7天';
+
     try {
-      // 从配置中提取日期范围参数
-      final selectorConfig =
-          config['selectorWidgetConfig'] as Map<String, dynamic>?;
+      final selectorConfig = config['selectorWidgetConfig'] as Map<String, dynamic>?;
       if (selectorConfig != null) {
-        final selectedData =
-            selectorConfig['selectedData'] as Map<String, dynamic>?;
+        final selectedData = selectorConfig['selectedData'] as Map<String, dynamic>?;
         if (selectedData != null && selectedData.containsKey('data')) {
           final dataArray = selectedData['data'] as List<dynamic>?;
           if (dataArray != null && dataArray.isNotEmpty) {
-            // 从 dataArray 中获取日期范围参数
             final selectedItem = dataArray[0];
             Map<String, dynamic>? rangeData;
 
@@ -80,80 +116,138 @@ class _DateRangeListWidget extends LiveSelectorWidget {
             }
 
             if (rangeData != null) {
-              // 获取 startDay、endDay 和 title
-              final startDay = rangeData['startDay'] as int?;
-              final endDay = rangeData['endDay'] as int?;
-              final title = rangeData['title'] as String? ?? '未来7天';
-
-              debugPrint('[${widgetTag}] Refreshing date range: $title, startDay: $startDay, endDay: $endDay');
-
-              // 从 plugin 重新获取最新的纪念日列表数据
-              final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
-              debugPrint('[${widgetTag}] Plugin instance hash: ${plugin.hashCode}');
-              final allDays = plugin?.getAllMemorialDays() ?? [];
-              final filteredDays = filterMemorialDaysByDaysRange(
-                allDays,
-                startDay,
-                endDay,
-              );
-
-              debugPrint('[${widgetTag}] Filtered ${filteredDays.length} memorial days from ${allDays.length} total');
-
-              // 将纪念日列表转换为 Map 数组
-              final daysList =
-                  filteredDays.map(memorialDayToListItemData).map((d) => d.toJson()).toList();
-
-              final data = {
-                'startDay': startDay,
-                'endDay': endDay,
-                'dateRangeLabel': title,
-                'daysList': daysList,
-                'totalCount': filteredDays.length,
-                'todayCount': filteredDays.where((d) => d.isToday).length,
-                'upcomingCount':
-                    filteredDays.where((d) => !d.isExpired && !d.isToday).length,
-                'expiredCount': filteredDays.where((d) => d.isExpired).length,
-              };
-
-              return await provideDateRangeCommonWidgets(data);
+              startDay = rangeData['startDay'] as int?;
+              endDay = rangeData['endDay'] as int?;
+              title = rangeData['title'] as String? ?? '未来7天';
             }
           }
         }
       }
     } catch (e) {
-      debugPrint('[${widgetTag}] getLiveData error: $e');
+      debugPrint('[DateRangeList] 解析配置失败: $e');
     }
-    return {};
+
+    debugPrint('[DateRangeList] Building with startDay: $startDay, endDay: $endDay, cached: ${_cachedMemorialDays?.length ?? 0} items');
+
+    // 使用缓存的纪念日数据
+    final allDays = _cachedMemorialDays ?? [];
+    if (allDays.isEmpty) {
+      return _buildEmpty(context);
+    }
+
+    // 过滤纪念日
+    final filteredDays = filterMemorialDaysByDaysRange(allDays, startDay, endDay);
+
+    debugPrint('[DateRangeList] Filtered ${filteredDays.length} from ${allDays.length} total');
+
+    // 构建数据
+    final daysList = filteredDays.map(memorialDayToListItemData).map((d) => d.toJson()).toList();
+    final data = {
+      'startDay': startDay,
+      'endDay': endDay,
+      'dateRangeLabel': title,
+      'daysList': daysList,
+      'totalCount': filteredDays.length,
+      'todayCount': filteredDays.where((d) => d.isToday).length,
+      'upcomingCount': filteredDays.where((d) => !d.isExpired && !d.isToday).length,
+      'expiredCount': filteredDays.where((d) => d.isExpired).length,
+    };
+
+    // 使用 FutureBuilder 异步获取公共小组件
+    return FutureBuilder<Map<String, dynamic>>(
+      future: provideDateRangeCommonWidgets(data),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoading(context);
+        }
+
+        if (snapshot.hasError) {
+          return HomeWidget.buildErrorWidget(context, snapshot.error.toString());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return _buildEmpty(context);
+        }
+
+        return _buildWithLiveData(context, snapshot.data!);
+      },
+    );
   }
 
-  @override
-  String get widgetTag => 'DateRangeList';
+  /// 使用实时数据构建组件
+  Widget _buildWithLiveData(BuildContext context, Map<String, dynamic> liveData) {
+    final config = widget.config;
+    final widgetDefinition = widget.widgetDefinition;
 
-  /// 从配置中提取日期范围数据
-  Map<String, dynamic> _extractDateRangeData(Map<String, dynamic> config) {
+    // 解析选择器配置
+    Map<String, dynamic>? selectorConfig;
     try {
-      final selectorConfig =
-          config['selectorWidgetConfig'] as Map<String, dynamic>?;
-      if (selectorConfig != null) {
-        final selectedData =
-            selectorConfig['selectedData'] as Map<String, dynamic>?;
-        if (selectedData != null && selectedData.containsKey('data')) {
-          final dataArray = selectedData['data'] as List<dynamic>?;
-          if (dataArray != null && dataArray.isNotEmpty) {
-            // 使用 extractDateRangeData 处理日期范围数据
-            return extractDateRangeData(dataArray);
-          }
-        }
+      if (config.containsKey('selectorWidgetConfig')) {
+        selectorConfig = config['selectorWidgetConfig'] as Map<String, dynamic>;
       }
     } catch (e) {
-      debugPrint('[DateRangeList] 提取数据失败: $e');
+      debugPrint('[DateRangeList] 解析配置失败: $e');
     }
-    return {};
+
+    // 获取小组件尺寸
+    final size = config['widgetSize'] as HomeWidgetSize? ?? widgetDefinition.defaultSize;
+
+    // 检查是否使用公共小组件
+    final commonWidgetId = selectorConfig?['commonWidgetId'] as String?;
+    if (commonWidgetId != null) {
+      final widgetData = liveData[commonWidgetId] as Map<String, dynamic>?;
+      if (widgetData == null) {
+        return HomeWidget.buildErrorWidget(context, '数据不存在');
+      }
+
+      // 合并配置
+      final savedProps = selectorConfig?['commonWidgetProps'] as Map<String, dynamic>? ?? {};
+      final mergedProps = {...savedProps, ...widgetData};
+
+      // 处理 custom 尺寸
+      final finalProps = Map<String, dynamic>.from(mergedProps);
+      if (size == const CustomSize(width: -1, height: -1)) {
+        finalProps['customWidth'] = config['customWidth'] as int?;
+        finalProps['customHeight'] = config['customHeight'] as int?;
+      }
+
+      // 传递 _pixelCategory
+      final pixelCategory = config['_pixelCategory'];
+      if (pixelCategory != null) {
+        finalProps['_pixelCategory'] = pixelCategory;
+      }
+
+      // 将字符串 ID 转换为枚举值
+      final commonWidgetIdEnum = CommonWidgetsRegistry.fromString(commonWidgetId);
+      if (commonWidgetIdEnum == null) {
+        return HomeWidget.buildErrorWidget(context, '未知的公共组件: $commonWidgetId');
+      }
+
+      // 使用公共小组件构建器
+      return CommonWidgetBuilder.build(context, commonWidgetIdEnum, finalProps, size, inline: true);
+    }
+
+    return HomeWidget.buildErrorWidget(context, '未配置渲染方式');
   }
 
-  /// 自定义空状态（显示"暂无纪念日"）
-  @override
-  Widget buildEmpty(BuildContext context) {
+  /// 构建加载状态
+  Widget _buildLoading(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox.expand(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Center(
+          child: CircularProgressIndicator(color: theme.colorScheme.primary),
+        ),
+      ),
+    );
+  }
+
+  /// 构建空状态
+  Widget _buildEmpty(BuildContext context) {
     final theme = Theme.of(context);
     return SizedBox.expand(
       child: Container(
@@ -165,18 +259,9 @@ class _DateRangeListWidget extends LiveSelectorWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.calendar_month,
-              size: 48,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            Icon(Icons.calendar_month, size: 48, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(height: 8),
-            Text(
-              '暂无纪念日',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
+            Text('暂无纪念日', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],
         ),
       ),
