@@ -205,7 +205,8 @@ class _SegmentedProgressCardWidgetState
         ),
         SizedBox(height: widget.size.getSmallSpacing() * 2),
         SizedBox(
-          height: widget.size.getLargeFontSize() + widget.size.getSmallSpacing(),
+          height:
+              widget.size.getLargeFontSize() + widget.size.getSmallSpacing(),
           child: AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {
@@ -254,10 +255,14 @@ class _SegmentedProgressCardWidgetState
       height: widget.size.getLegendIndicatorHeight(),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
+        borderRadius: BorderRadius.circular(
+          widget.size.getLegendIndicatorHeight() / 2,
+        ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(widget.size.getLegendIndicatorHeight() / 2),
+        borderRadius: BorderRadius.circular(
+          widget.size.getLegendIndicatorHeight() / 2,
+        ),
         child: Row(
           children:
               widget.segments.map((segment) {

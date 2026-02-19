@@ -47,14 +47,13 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
   /// 加载配置
   Future<void> _loadConfig() async {
     try {
-      final configMap = await globalConfigManager.getPluginConfig(_configPluginId);
-      debugPrint('🎤 [语音识别配置服务] 读取到的配置: $configMap');
-
+      final configMap = await globalConfigManager.getPluginConfig(
+        _configPluginId,
+      );
       if (configMap != null && configMap.isNotEmpty) {
         final asrConfigMap = configMap['asrConfig'] as Map<String, dynamic>?;
         if (asrConfigMap != null) {
           _cachedConfig = TencentASRConfig.fromJson(asrConfigMap);
-          debugPrint('🎤 [语音识别配置服务] 加载配置成功: appId=${_cachedConfig?.appId}');
         }
 
         // 加载AI纠错Agent（完整配置）
@@ -62,15 +61,12 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
         if (agentMap != null) {
           try {
             _correctionAgent = AIAgent.fromJson(agentMap);
-            debugPrint('🎤 [语音识别配置服务] 加载AI纠错Agent: ${_correctionAgent?.name}');
           } catch (e) {
-            debugPrint('🎤 [语音识别配置服务] 解析AI纠错Agent失败: $e');
             _correctionAgent = null;
           }
         }
       }
     } catch (e) {
-      debugPrint('🎤 [语音识别配置服务] 加载配置失败: $e');
       _cachedConfig = null;
       _correctionAgent = null;
     }
@@ -86,7 +82,6 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
       });
 
       _cachedConfig = config;
-      debugPrint('🎤 [语音识别配置服务] 保存配置成功: appId=${config.appId}');
 
       notifyListeners();
     } catch (e) {
@@ -113,8 +108,6 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
         });
       }
 
-      debugPrint('🎤 [语音识别配置服务] 保存AI纠错Agent成功: ${agent?.name}');
-
       notifyListeners();
     } catch (e) {
       debugPrint('🎤 [语音识别配置服务] 保存AI纠错Agent失败: $e');
@@ -128,7 +121,6 @@ class SpeechRecognitionConfigService extends ChangeNotifier {
       await globalConfigManager.savePluginConfig(_configPluginId, {});
       _cachedConfig = null;
       _correctionAgent = null;
-      debugPrint('🎤 [语音识别配置服务] 配置已清除');
       notifyListeners();
     } catch (e) {
       debugPrint('🎤 [语音识别配置服务] 清除配置失败: $e');

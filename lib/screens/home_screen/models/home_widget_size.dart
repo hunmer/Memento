@@ -1,5 +1,30 @@
 import 'package:flutter/material.dart';
 
+/// 小组件尺寸类别枚举
+///
+/// 基于 min(width, height) 判断组件的基础尺寸级别：
+/// - mini: 1x1, 1x2, 2x1 等（最小边为 1）
+/// - small: 2x2, 2x3, 3x2 等（最小边为 2）
+/// - medium: 3x3, 3x4, 4x3 等（最小边为 3）
+/// - large: 4x4, 4x5, 5x4 等（最小边为 4）
+/// - xlarge: 更大
+enum SizeCategory {
+  /// 最小尺寸 - 最小边为 1（如 1x1, 1x2, 2x1）
+  mini,
+
+  /// 小尺寸 - 最小边为 2（如 2x2, 2x3, 3x2, 4x1）
+  small,
+
+  /// 中等尺寸 - 最小边为 3（如 3x3, 3x4, 4x3）
+  medium,
+
+  /// 大尺寸 - 最小边为 4（如 4x4, 4x5, 5x4）
+  large,
+
+  /// 超大尺寸 - 最小边 ≥5
+  xlarge,
+}
+
 /// 主页小组件尺寸配置基类
 abstract class HomeWidgetSize {
   /// 宽度（占用的网格列数）
@@ -102,53 +127,122 @@ abstract class HomeWidgetSize {
     return width == other.width && height == other.height;
   }
 
-  /// 获取内边距
-  EdgeInsets getPadding() {
-    double basePadding;
-    if (this is SmallSize) {
-      basePadding = 8;
-    } else if (this is MediumSize) {
-      basePadding = 12;
-    } else if (this is WideSize) {
-      basePadding = 12;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      basePadding = 16;
+  // ===== 语义化辅助方法 =====
+
+  /// 是否为宽型组件（宽度 > 高度）
+  ///
+  /// 用于判断是否使用水平布局
+  bool get isWide => width > height;
+
+  /// 是否为高型组件（高度 > 宽度）
+  ///
+  /// 用于判断是否使用垂直布局
+  bool get isTall => height > width;
+
+  /// 是否为正方形组件（宽度 == 高度）
+  ///
+  /// 如 1x1, 2x2, 3x3 等
+  bool get isSquare => width == height;
+
+  /// 获取尺寸类别
+  ///
+  /// 基于 min(width, height) 判断基础尺寸级别：
+  /// - mini: 最小边为 1（1x1, 1x2, 2x1 等）
+  /// - small: 最小边为 2（2x2, 2x3, 3x2, 4x1, 4x2 等）
+  /// - medium: 最小边为 3（3x3, 3x4, 4x3 等）
+  /// - large: 最小边为 4（4x4, 4x5, 5x4 等）
+  /// - xlarge: 最小边 ≥5
+  SizeCategory get category {
+    final minSide = width < height ? width : height;
+    switch (minSide) {
+      case 1:
+        return SizeCategory.mini;
+      case 2:
+        return SizeCategory.small;
+      case 3:
+        return SizeCategory.medium;
+      case 4:
+        return SizeCategory.large;
+      default:
+        return SizeCategory.xlarge;
     }
+  }
+
+  /// 计算相对于网格总列数的宽度比例（0.0 - 1.0）
+  ///
+  /// 用于判断组件在当前网格配置下占据多少水平空间
+  /// 例如：在 4 列网格中，width=2 的组件占比 0.5
+  double getWidthRatio(int gridCrossAxisCount) {
+    return (width / gridCrossAxisCount).clamp(0.0, 1.0);
+  }
+
+  /// 计算相对于网格总行数的高度比例（0.0 - 1.0）
+  ///
+  /// [gridMainAxisCount] 网格的主轴（垂直）方向的总行数
+  double getHeightRatio(int gridMainAxisCount) {
+    if (gridMainAxisCount <= 0) return 1.0;
+    return (height / gridMainAxisCount).clamp(0.0, 1.0);
+  }
+
+  /// 判断是否占满整行
+  ///
+  /// 当组件宽度 >= 网格列数时返回 true
+  bool isFullWidth(int gridCrossAxisCount) {
+    return width >= gridCrossAxisCount;
+  }
+
+  /// 判断是否为"图标型"小组件
+  ///
+  /// 通常用于 1x1 的小型组件，只显示图标或简单信息
+  bool get isIconSized => width == 1 && height == 1;
+
+  /// 判断是否为"卡片型"小组件
+  ///
+  /// 通常用于 2x1 或更大的组件，可以显示更多内容
+  bool get isCardSized => width >= 2 || height >= 2;
+
+  /// 获取宽高比
+  ///
+  /// 用于判断内容应该水平排列还是垂直排列
+  double get aspectRatio => height == 0 ? 1.0 : width / height;
+
+  // ===== 基于 category 的尺寸方法 =====
+
+  /// 获取内边距
+  ///
+  /// 基于 [category] 自动调整
+  EdgeInsets getPadding() {
+    final basePadding = switch (category) {
+      SizeCategory.mini => 8.0,
+      SizeCategory.small => 12.0,
+      SizeCategory.medium => 14.0,
+      SizeCategory.large => 16.0,
+      SizeCategory.xlarge => 18.0,
+    };
     return EdgeInsets.all(basePadding * padding);
   }
 
   /// 获取标题和列表之间的间距
   double getTitleSpacing() {
-    double baseSpacing;
-    if (this is SmallSize) {
-      baseSpacing = 16;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSpacing = 20;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSpacing = 24;
-    }
+    final baseSpacing = switch (category) {
+      SizeCategory.mini => 12.0,
+      SizeCategory.small => 16.0,
+      SizeCategory.medium => 20.0,
+      SizeCategory.large => 24.0,
+      SizeCategory.xlarge => 28.0,
+    };
     return baseSpacing * spacing;
   }
 
   /// 获取高度约束
   BoxConstraints getHeightConstraints() {
-    double minHeight, maxHeight;
-    if (this is SmallSize) {
-      minHeight = 150;
-      maxHeight = 250;
-    } else if (this is MediumSize || this is WideSize) {
-      minHeight = 200;
-      maxHeight = 350;
-    } else if (this is LargeSize || this is Wide2Size) {
-      minHeight = 250;
-      maxHeight = 450;
-    } else {
-      // Large3, Wide3
-      minHeight = 350;
-      maxHeight = 600;
-    }
+    final (minHeight, maxHeight) = switch (category) {
+      SizeCategory.mini => (80.0, 150.0),
+      SizeCategory.small => (150.0, 280.0),
+      SizeCategory.medium => (220.0, 380.0),
+      SizeCategory.large => (300.0, 500.0),
+      SizeCategory.xlarge => (400.0, 650.0),
+    };
     return BoxConstraints(
       minHeight: minHeight * scale,
       maxHeight: maxHeight * scale,
@@ -157,113 +251,97 @@ abstract class HomeWidgetSize {
 
   /// 获取列表项之间的间距
   double getItemSpacing() {
-    double baseSpacing;
-    if (this is SmallSize) {
-      baseSpacing = 6;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSpacing = 8;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSpacing = 12;
-    }
+    final baseSpacing = switch (category) {
+      SizeCategory.mini => 4.0,
+      SizeCategory.small => 6.0,
+      SizeCategory.medium => 8.0,
+      SizeCategory.large => 10.0,
+      SizeCategory.xlarge => 12.0,
+    };
     return baseSpacing * spacing;
   }
 
   /// 获取图标大小
   double getIconSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 18;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 24;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 28;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 16.0,
+      SizeCategory.small => 20.0,
+      SizeCategory.medium => 24.0,
+      SizeCategory.large => 28.0,
+      SizeCategory.xlarge => 32.0,
+    };
     return baseSize * iconSize;
   }
 
   /// 获取大字体大小
   double getLargeFontSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 36;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 48;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 56;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 24.0,
+      SizeCategory.small => 32.0,
+      SizeCategory.medium => 40.0,
+      SizeCategory.large => 48.0,
+      SizeCategory.xlarge => 56.0,
+    };
     return baseSize * fontSize;
   }
 
   /// 获取标题字体大小
   double getTitleFontSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 16;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 24;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 28;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 14.0,
+      SizeCategory.small => 16.0,
+      SizeCategory.medium => 20.0,
+      SizeCategory.large => 24.0,
+      SizeCategory.xlarge => 28.0,
+    };
     return baseSize * fontSize;
   }
 
   /// 获取副标题字体大小
   double getSubtitleFontSize() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 12;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 14;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 16;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 10.0,
+      SizeCategory.small => 12.0,
+      SizeCategory.medium => 14.0,
+      SizeCategory.large => 16.0,
+      SizeCategory.xlarge => 18.0,
+    };
     return baseSize * fontSize;
   }
 
   /// 获取小间距（用于紧密元素之间）
   double getSmallSpacing() {
-    double baseSpacing;
-    if (this is SmallSize) {
-      baseSpacing = 2;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSpacing = 4;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSpacing = 6;
-    }
+    final baseSpacing = switch (category) {
+      SizeCategory.mini => 2.0,
+      SizeCategory.small => 3.0,
+      SizeCategory.medium => 4.0,
+      SizeCategory.large => 5.0,
+      SizeCategory.xlarge => 6.0,
+    };
     return baseSpacing * spacing;
   }
 
   /// 获取图例指示器宽度
   double getLegendIndicatorWidth() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 16;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 24;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 32;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 12.0,
+      SizeCategory.small => 16.0,
+      SizeCategory.medium => 20.0,
+      SizeCategory.large => 24.0,
+      SizeCategory.xlarge => 28.0,
+    };
     return baseSize * scale;
   }
 
   /// 获取图例指示器高度
   double getLegendIndicatorHeight() {
-    double baseSize;
-    if (this is SmallSize) {
-      baseSize = 8;
-    } else if (this is MediumSize || this is WideSize) {
-      baseSize = 12;
-    } else {
-      // Large, Large3, Wide2, Wide3
-      baseSize = 16;
-    }
+    final baseSize = switch (category) {
+      SizeCategory.mini => 6.0,
+      SizeCategory.small => 8.0,
+      SizeCategory.medium => 10.0,
+      SizeCategory.large => 12.0,
+      SizeCategory.xlarge => 14.0,
+    };
     return baseSize * scale;
   }
 
