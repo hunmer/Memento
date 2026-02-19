@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widget_grid_metrics.dart';
 
 /// 小组件尺寸类别枚举
 ///
@@ -91,6 +92,27 @@ abstract class HomeWidgetSize {
       (size) => size.width == width && size.height == height,
       orElse: () => const LargeSize(),
     );
+  }
+
+  /// 从 SizeCategory 创建对应的尺寸实例
+  ///
+  /// 用于根据像素尺寸动态创建有效的 HomeWidgetSize
+  /// - mini/small -> SmallSize (1x1)
+  /// - medium -> MediumSize (2x1)
+  /// - large -> LargeSize (2x2)
+  /// - xlarge -> Wide2Size (4x2)
+  static HomeWidgetSize fromCategory(SizeCategory category) {
+    switch (category) {
+      case SizeCategory.mini:
+      case SizeCategory.small:
+        return const SmallSize();
+      case SizeCategory.medium:
+        return const MediumSize();
+      case SizeCategory.large:
+        return const LargeSize();
+      case SizeCategory.xlarge:
+        return const Wide2Size();
+    }
   }
 
   /// 获取所有预设尺寸（不包括 CustomSize）
@@ -558,6 +580,125 @@ abstract class HomeWidgetSize {
       SizeCategory.xlarge => 450.0,
     };
     return baseHeight * scale;
+  }
+
+  // ===== 像素尺寸计算方法（响应式）=====
+
+  /// 根据网格信息计算实际像素宽度
+  ///
+  /// [metrics] 网格尺寸信息（从 WidgetGridScope 获取）
+  ///
+  /// 如果 metrics 为 null，返回估算值
+  double getPixelWidth(WidgetGridMetrics? metrics) {
+    if (metrics == null) {
+      return _getEstimatedPixelWidth();
+    }
+    return metrics.getPixelWidth(width);
+  }
+
+  /// 根据网格信息计算实际像素高度
+  ///
+  /// [metrics] 网格尺寸信息（从 WidgetGridScope 获取）
+  ///
+  /// 如果 metrics 为 null，返回估算值
+  double getPixelHeight(WidgetGridMetrics? metrics) {
+    if (metrics == null) {
+      return _getEstimatedPixelHeight();
+    }
+    return metrics.getPixelHeight(height);
+  }
+
+  /// 获取像素尺寸（Size 对象）
+  ///
+  /// [metrics] 网格尺寸信息（从 WidgetGridScope 获取）
+  ///
+  /// 返回包含宽度和高度的 Size 对象
+  Size getPixelSize(WidgetGridMetrics? metrics) {
+    return Size(getPixelWidth(metrics), getPixelHeight(metrics));
+  }
+
+  /// 估算的像素宽度（无网格信息时的回退值）
+  ///
+  /// 基于常见的 4 列网格，每格约 85 像素
+  double _getEstimatedPixelWidth() {
+    // 基于常见的 4 列网格，每格约 80-100 像素
+    const estimatedCellWidth = 85.0;
+    const estimatedSpacing = 8.0;
+    final totalSpacing = (width - 1) * estimatedSpacing;
+    return width * estimatedCellWidth + totalSpacing;
+  }
+
+  /// 估算的像素高度（无网格信息时的回退值）
+  ///
+  /// 基于常见的 4 列网格，每格约 85 像素
+  double _getEstimatedPixelHeight() {
+    const estimatedCellHeight = 85.0;
+    const estimatedSpacing = 8.0;
+    final totalSpacing = (height - 1) * estimatedSpacing;
+    return height * estimatedCellHeight + totalSpacing;
+  }
+
+  /// 获取参考像素尺寸（基于 category）
+  ///
+  /// 这些值参考 revenue_trend_card_example.dart 中的固定尺寸：
+  /// - mini/small: 150x150
+  /// - medium: 220x200
+  /// - large/xlarge: 300x280
+  Size getReferencePixelSize() {
+    switch (category) {
+      case SizeCategory.mini:
+      case SizeCategory.small:
+        return const Size(150, 150);
+      case SizeCategory.medium:
+        return const Size(220, 200);
+      case SizeCategory.large:
+      case SizeCategory.xlarge:
+        return const Size(300, 280);
+    }
+  }
+
+  /// 根据像素尺寸计算有效的尺寸类别
+  ///
+  /// 这允许小组件根据实际渲染的像素尺寸来调整布局，
+  /// 而不是仅依赖网格占比。
+  ///
+  /// 参考阈值（基于 min(width, height)）：
+  /// - < 120: mini
+  /// - < 180: small
+  /// - < 260: medium
+  /// - < 360: large
+  /// - >= 360: xlarge
+  static SizeCategory getCategoryFromPixelSize(double pixelWidth, double pixelHeight) {
+    final minSide = pixelWidth < pixelHeight ? pixelWidth : pixelHeight;
+
+    if (minSide < 120) {
+      return SizeCategory.mini;
+    } else if (minSide < 180) {
+      return SizeCategory.small;
+    } else if (minSide < 260) {
+      return SizeCategory.medium;
+    } else if (minSide < 360) {
+      return SizeCategory.large;
+    } else {
+      return SizeCategory.xlarge;
+    }
+  }
+
+  /// 获取基于像素尺寸的有效尺寸类别
+  ///
+  /// [metrics] 网格尺寸信息（从 WidgetGridScope 获取）
+  ///
+  /// 返回基于实际像素尺寸计算的 SizeCategory，
+  /// 如果 metrics 为 null，返回基于网格占比的 category
+  SizeCategory getEffectiveCategory(WidgetGridMetrics? metrics) {
+    if (metrics == null) {
+      return category;
+    }
+    final pixelSize = getPixelSize(metrics);
+    return HomeWidgetSize.getCategoryFromPixelSize(
+      pixelSize.width,
+      pixelSize.height,
+    );
   }
 }
 

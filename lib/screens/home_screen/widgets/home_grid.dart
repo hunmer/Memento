@@ -6,11 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/screens/home_screen/models/home_item.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_item.dart';
 import 'package:Memento/screens/home_screen/models/home_folder_item.dart';
 import 'package:Memento/screens/home_screen/models/home_stack_item.dart';
+import 'package:Memento/screens/home_screen/models/widget_grid_metrics.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'widget_grid_scope.dart';
 import 'home_card.dart';
 
 /// 主页网格布局组件
@@ -91,6 +92,11 @@ class _HomeGridState extends State<HomeGrid> {
   // 防止 _handleCenterDrop 被重复调用
   bool _isDropping = false;
 
+  // 网格配置常量
+  static const double _mainAxisSpacing = 8.0;
+  static const double _crossAxisSpacing = 8.0;
+  static const EdgeInsets _gridPadding = EdgeInsets.all(8);
+
   @override
   void initState() {
     super.initState();
@@ -166,18 +172,6 @@ class _HomeGridState extends State<HomeGrid> {
       return _buildEmptyState(context);
     }
 
-    final gridWidget = Padding(
-      padding: const EdgeInsets.all(8),
-      child: StaggeredGrid.count(
-        crossAxisCount: widget.crossAxisCount,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        children: List.generate(orderedItems.length, (index) {
-          return _buildDraggableTile(context, orderedItems[index], index);
-        }),
-      ),
-    );
-
     // 根据对齐方式选择不同的布局，并用 Listener 包裹以捕获真正的指针位置
     return Listener(
       onPointerMove: (event) {
@@ -188,13 +182,18 @@ class _HomeGridState extends State<HomeGrid> {
       },
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // 计算网格尺寸信息
+          final metrics = _calculateGridMetrics(constraints);
+
           if (widget.alignment == Alignment.center) {
             // 居中模式：内容在可用空间中垂直居中
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Center(child: gridWidget),
+                child: Center(
+                  child: _buildGridWithMetrics(orderedItems, metrics),
+                ),
               ),
             );
           }
@@ -203,10 +202,68 @@ class _HomeGridState extends State<HomeGrid> {
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: Align(alignment: Alignment.topCenter, child: gridWidget),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: _buildGridWithMetrics(orderedItems, metrics),
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+
+  /// 计算网格尺寸信息
+  WidgetGridMetrics _calculateGridMetrics(BoxConstraints constraints) {
+    final availableWidth =
+        constraints.maxWidth - _gridPadding.left - _gridPadding.right;
+
+    // 计算单个单元格宽度
+    final totalCrossSpacing =
+        (widget.crossAxisCount - 1) * _crossAxisSpacing;
+    final cellWidth =
+        (availableWidth - totalCrossSpacing) / widget.crossAxisCount;
+
+    // 使用 1:1 宽高比计算单元格高度
+    final cellHeight = cellWidth;
+
+    final metrics = WidgetGridMetrics(
+      gridWidth: constraints.maxWidth,
+      cellWidth: cellWidth,
+      cellHeight: cellHeight,
+      crossAxisCount: widget.crossAxisCount,
+      mainAxisSpacing: _mainAxisSpacing,
+      crossAxisSpacing: _crossAxisSpacing,
+      padding: _gridPadding,
+    );
+
+    // 调试输出
+    debugPrint('[HomeGrid] 📐 网格尺寸更新: '
+        'gridWidth=${constraints.maxWidth.toStringAsFixed(1)}, '
+        'cellWidth=${cellWidth.toStringAsFixed(1)}, '
+        'cellHeight=${cellHeight.toStringAsFixed(1)}, '
+        'crossAxisCount=${widget.crossAxisCount}');
+
+    return metrics;
+  }
+
+  /// 构建带有网格尺寸信息的网格组件
+  Widget _buildGridWithMetrics(
+    List<HomeItem> orderedItems,
+    WidgetGridMetrics metrics,
+  ) {
+    return Padding(
+      padding: _gridPadding,
+      child: WidgetGridScope(
+        metrics: metrics,
+        child: StaggeredGrid.count(
+          crossAxisCount: widget.crossAxisCount,
+          mainAxisSpacing: _mainAxisSpacing,
+          crossAxisSpacing: _crossAxisSpacing,
+          children: List.generate(orderedItems.length, (index) {
+            return _buildDraggableTile(context, orderedItems[index], index);
+          }),
+        ),
       ),
     );
   }
