@@ -82,6 +82,7 @@ import 'widgets/timeline_schedule_card.dart';
 import 'widgets/trend_line_chart_card_wrapper.dart';
 import 'widgets/bar_chart_stats_card.dart';
 import 'widgets/expense_comparison_chart_card.dart';
+import 'widgets/weekly_diary_widget.dart';
 import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
 
@@ -169,6 +170,7 @@ enum CommonWidgetId {
   modernRoundedBalanceCard,
   barChartStatsCard,
   expenseComparisonChart,
+  weeklyDiaryWidget,
 }
 
 /// 公共小组件元数据
@@ -835,6 +837,14 @@ class CommonWidgetsRegistry {
       defaultSize: Large3Size(),
       supportedSizes: [LargeSize()],
     ),
+    CommonWidgetId.weeklyDiaryWidget: CommonWidgetMetadata(
+      id: CommonWidgetId.weeklyDiaryWidget,
+      name: '七日周报小组件',
+      description: '显示本周七天日记的概览，包括日期、心情和标题',
+      icon: Icons.calendar_view_week,
+      defaultSize: Wide2Size(),
+      supportedSizes: [const WideSize(), const Wide2Size()],
+    ),
   };
 
   /// 获取元数据
@@ -1061,6 +1071,8 @@ class CommonWidgetBuilder {
           finalProps,
           effectiveSize,
         );
+      case CommonWidgetId.weeklyDiaryWidget:
+        return WeeklyDiaryWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }

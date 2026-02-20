@@ -261,6 +261,9 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
         (widget.moods.length * barWidth) +
         ((widget.moods.length - 1) * barSpacing);
 
+    // 确保最小宽度至少为 barWidth（避免空数据或单个数据时的负宽度）
+    final safeTotalWidth = totalBarsWidth.clamp(barWidth, double.maxFinite);
+
     return Scrollbar(
       thumbVisibility: true,
       thickness: 4,
@@ -276,7 +279,7 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
           children: [
             // Y轴刻度
             SizedBox(
-              width: totalBarsWidth + widget.size.getItemSpacing() / 2,
+              width: safeTotalWidth + widget.size.getItemSpacing() / 2,
               child: Row(
                 children: [
                   ...List.generate(5, (index) {

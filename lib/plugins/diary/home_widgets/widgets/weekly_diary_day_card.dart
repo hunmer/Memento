@@ -2,9 +2,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../data.dart';
-import '../../models/diary_entry.dart';
 import '../utils.dart';
 
 /// 构建周报中的单日卡片组件
@@ -78,19 +76,4 @@ Widget buildDayCard(
   );
 }
 
-/// 根据日记条目创建周报卡片数据
-WeekDiaryCardData createWeekCardData(
-  DateTime date,
-  DiaryEntry? entry,
-) {
-  final now = DateTime.now();
-  return WeekDiaryCardData(
-    date: date,
-    isToday: DateUtils.isSameDay(date, now),
-    weekday: DateFormat('E').format(date),
-    dayNumber: DateFormat('d').format(date),
-    mood: entry?.mood,
-    title: entry?.title,
-    hasEntry: entry != null,
-  );
-}
+// 注意: createWeekCardData 函数已移至 utils.dart，这里不再重复定义
