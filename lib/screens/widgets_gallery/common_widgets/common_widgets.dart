@@ -85,6 +85,7 @@ import 'widgets/expense_comparison_chart_card.dart';
 import 'widgets/weekly_diary_widget.dart';
 import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
+import 'package:Memento/plugins/activity/home_widgets/widgets/activity_last_activity.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -171,6 +172,7 @@ enum CommonWidgetId {
   barChartStatsCard,
   expenseComparisonChart,
   weeklyDiaryWidget,
+  activityLastActivity,
 }
 
 /// 公共小组件元数据
@@ -845,6 +847,14 @@ class CommonWidgetsRegistry {
       defaultSize: Wide2Size(),
       supportedSizes: [const WideSize(), const Wide2Size()],
     ),
+    CommonWidgetId.activityLastActivity: CommonWidgetMetadata(
+      id: CommonWidgetId.activityLastActivity,
+      name: '上次活动小组件',
+      description: '显示距离上次活动经过的时间和上次活动的时间',
+      icon: Icons.history,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1073,6 +1083,8 @@ class CommonWidgetBuilder {
         );
       case CommonWidgetId.weeklyDiaryWidget:
         return WeeklyDiaryWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.activityLastActivity:
+        return ActivityLastActivityWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }

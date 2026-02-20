@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import '../../models/activity_record.dart';
 import '../../screens/activity_edit_screen.dart';
@@ -13,6 +14,14 @@ import '../../activity_plugin.dart';
 
 class ActivityLastActivityWidget extends StatefulWidget {
   const ActivityLastActivityWidget({super.key});
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory ActivityLastActivityWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return const ActivityLastActivityWidget();
+  }
 
   @override
   State<ActivityLastActivityWidget> createState() =>
