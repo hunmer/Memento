@@ -328,6 +328,21 @@ class _NotesListStatefulWidgetState extends State<_NotesListStatefulWidget> {
             'primaryColor': notesColor.value,
           };
 
+        case 'folderNotesCard':
+          return {
+            'folderName': folderName,
+            'folderPath': folderName,
+            'iconCodePoint': folder?.icon.codePoint ?? Icons.folder.codePoint,
+            'colorValue': folder?.color.value ?? notesColor.value,
+            'notesCount': notesCount,
+            'notes': displayNotes
+                .map((note) => {
+                      'title': note.title,
+                      'updatedAt': note.updatedAt.toIso8601String(),
+                    })
+                .toList(),
+          };
+
         default:
           return {
             'count': notesCount,
