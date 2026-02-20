@@ -31,16 +31,25 @@ Map<String, dynamic> extractWarehouseData(List<dynamic> dataArray) {
 
 /// 从选择器数据数组中提取物品数据
 ///
-/// 支持两种数据类型：
-/// - 物品数据：包含 warehouseId 字段
-/// - 仓库数据：包含 items 字段，仓库的 id 就是 warehouseId
+/// goods.item 选择器是两级选择（仓库 → 物品）， dataArray 包含：
+/// - dataArray[0]: 仓库数据
+/// - dataArray[1]: 物品数据（最终选择）
+///
+/// 只返回物品数据，必须包含 warehouseId 字段
 Map<String, dynamic> extractItemData(List<dynamic> dataArray) {
-  Map<String, dynamic> itemData = {};
-  final rawData = dataArray[0];
+  if (dataArray.isEmpty) {
+    debugPrint('[extractItemData] 数据数组为空');
+    return {};
+  }
+
+  // goods.item 是两级选择器，最终选择的数据在数组最后
+  // dataArray[0] 是仓库数据，dataArray[1] 是物品数据
+  final rawData = dataArray.last;
 
   debugPrint('[extractItemData] rawData 类型: ${rawData.runtimeType}');
   debugPrint('[extractItemData] rawData 内容: $rawData');
 
+  Map<String, dynamic> itemData = {};
   if (rawData is Map<String, dynamic>) {
     itemData = rawData;
   } else if (rawData is dynamic && rawData.toJson != null) {
@@ -60,18 +69,10 @@ Map<String, dynamic> extractItemData(List<dynamic> dataArray) {
   result['iconColor'] = itemData['iconColor'] as int?;
   result['purchasePrice'] = itemData['purchasePrice'] as double?;
 
-  // 检测是否为仓库数据（仓库有 items 字段）
-  final hasItemsField = itemData.containsKey('items') && itemData['items'] is List;
-  if (hasItemsField) {
-    // 仓库数据：仓库的 id 就是 warehouseId，标记为仓库类型
-    result['warehouseId'] = itemData['id'] as String?;
-    result['isWarehouse'] = true;
-    debugPrint('[extractItemData] 检测到仓库数据，使用 id 作为 warehouseId');
-  } else {
-    // 物品数据：使用 warehouseId 字段
-    result['warehouseId'] = itemData['warehouseId'] as String?;
-    result['isWarehouse'] = false;
-  }
+  // 从物品数据中获取 warehouseId
+  // _getAllItemsRecursively 函数已经在物品数据中包含了 warehouseId
+  result['warehouseId'] = itemData['warehouseId'] as String?;
+  result['isWarehouse'] = false;
 
   debugPrint('[extractItemData] 提取结果: $result');
 
