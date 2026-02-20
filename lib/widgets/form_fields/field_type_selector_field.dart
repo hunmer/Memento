@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -53,13 +55,15 @@ class FieldTypeSelectorField extends FormFieldWrapper {
   State<FieldTypeSelectorField> createState() => _FieldTypeSelectorFieldState();
 }
 
-class _FieldTypeSelectorFieldState extends FormFieldWrapperState<FieldTypeSelectorField> {
+class _FieldTypeSelectorFieldState
+    extends FormFieldWrapperState<FieldTypeSelectorField> {
   late dynamic _selectedValue;
 
   @override
   void initState() {
     super.initState();
-    _selectedValue = widget.initialValue ?? (widget.multiSelect ? <String>[] : null);
+    _selectedValue =
+        widget.initialValue ?? (widget.multiSelect ? <String>[] : null);
   }
 
   String get _selectedText {
@@ -76,9 +80,10 @@ class _FieldTypeSelectorFieldState extends FormFieldWrapperState<FieldTypeSelect
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: Colors.deepPurple)
-            : const Icon(Icons.dashboard, color: Colors.deepPurple),
+        leading:
+            widget.prefixIcon != null
+                ? Icon(widget.prefixIcon, color: Colors.deepPurple)
+                : const Icon(Icons.dashboard, color: Colors.deepPurple),
         title: Text(widget.dialogTitle ?? '选择字段类型'),
         subtitle: Text(_selectedText),
         trailing: const Icon(Icons.chevron_right),
@@ -92,13 +97,15 @@ class _FieldTypeSelectorFieldState extends FormFieldWrapperState<FieldTypeSelect
       // 配置模式：单选 + 双 Tab
       final result = await showDialog<FieldModel>(
         context: context,
-        builder: (context) => FieldTypeSelectorDialog(
-          initialSelectedTypes: _selectedValue != null ? [_selectedValue as String] : [],
-          dialogTitle: widget.dialogTitle ?? '选择字段类型',
-          multiSelect: false,
-          showConfigTab: true,
-          initialField: widget.initialField,
-        ),
+        builder:
+            (context) => FieldTypeSelectorDialog(
+              initialSelectedTypes:
+                  _selectedValue != null ? [_selectedValue as String] : [],
+              dialogTitle: widget.dialogTitle ?? '选择字段类型',
+              multiSelect: false,
+              showConfigTab: true,
+              initialField: widget.initialField,
+            ),
       );
 
       if (result != null) {
@@ -111,11 +118,12 @@ class _FieldTypeSelectorFieldState extends FormFieldWrapperState<FieldTypeSelect
       // 多选模式
       final result = await showDialog<List<String>>(
         context: context,
-        builder: (context) => FieldTypeSelectorDialog(
-          initialSelectedTypes: _selectedValue as List<String>? ?? [],
-          dialogTitle: widget.dialogTitle ?? '选择字段类型',
-          multiSelect: true,
-        ),
+        builder:
+            (context) => FieldTypeSelectorDialog(
+              initialSelectedTypes: _selectedValue as List<String>? ?? [],
+              dialogTitle: widget.dialogTitle ?? '选择字段类型',
+              multiSelect: true,
+            ),
       );
 
       if (result != null) {
@@ -128,11 +136,13 @@ class _FieldTypeSelectorFieldState extends FormFieldWrapperState<FieldTypeSelect
       // 单选模式（无配置）
       final result = await showDialog<String>(
         context: context,
-        builder: (context) => FieldTypeSelectorDialog(
-          initialSelectedTypes: _selectedValue != null ? [_selectedValue as String] : [],
-          dialogTitle: widget.dialogTitle ?? '选择字段类型',
-          multiSelect: false,
-        ),
+        builder:
+            (context) => FieldTypeSelectorDialog(
+              initialSelectedTypes:
+                  _selectedValue != null ? [_selectedValue as String] : [],
+              dialogTitle: widget.dialogTitle ?? '选择字段类型',
+              multiSelect: false,
+            ),
       );
 
       if (result != null) {
@@ -175,7 +185,8 @@ class FieldTypeSelectorDialog extends StatefulWidget {
   });
 
   @override
-  State<FieldTypeSelectorDialog> createState() => FieldTypeSelectorDialogState();
+  State<FieldTypeSelectorDialog> createState() =>
+      FieldTypeSelectorDialogState();
 }
 
 class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
@@ -198,7 +209,10 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: widget.showConfigTab ? 2 : 1, vsync: this);
+    _tabController = TabController(
+      length: widget.showConfigTab ? 2 : 1,
+      vsync: this,
+    );
     _selectedTypes = widget.initialSelectedTypes.toSet();
 
     // 如果没有初始选中类型，默认选中第一个
@@ -292,7 +306,10 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
           ),
           FormFieldConfig(
             name: 'defaultValue',
-            type: _selectedType == 'Long Text' ? FormFieldType.textArea : FormFieldType.text,
+            type:
+                _selectedType == 'Long Text'
+                    ? FormFieldType.textArea
+                    : FormFieldType.text,
             labelText: '默认值',
             hintText: '请输入默认值',
             initialValue: savedConfig['defaultValue']?.toString() ?? '',
@@ -304,7 +321,8 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
               type: FormFieldType.number,
               labelText: '最大行数',
               hintText: '默认 3 行',
-              initialValue: int.tryParse(savedConfig['maxLines']?.toString() ?? '') ?? 3,
+              initialValue:
+                  int.tryParse(savedConfig['maxLines']?.toString() ?? '') ?? 3,
               prefixIcon: Icons.line_style,
             ),
         ]);
@@ -318,7 +336,8 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
             type: FormFieldType.number,
             labelText: '最小值',
             hintText: '最小值',
-            initialValue: int.tryParse(savedConfig['minValue']?.toString() ?? '') ?? 0,
+            initialValue:
+                int.tryParse(savedConfig['minValue']?.toString() ?? '') ?? 0,
             prefixIcon: Icons.arrow_downward,
           ),
           FormFieldConfig(
@@ -326,7 +345,9 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
             type: FormFieldType.number,
             labelText: '最大值',
             hintText: _selectedType == 'Rating' ? '默认 5' : '最大值',
-            initialValue: int.tryParse(savedConfig['maxValue']?.toString() ?? '') ?? (_selectedType == 'Rating' ? 5 : 100),
+            initialValue:
+                int.tryParse(savedConfig['maxValue']?.toString() ?? '') ??
+                (_selectedType == 'Rating' ? 5 : 100),
             prefixIcon: Icons.arrow_upward,
           ),
           FormFieldConfig(
@@ -334,7 +355,9 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
             type: FormFieldType.number,
             labelText: '默认值',
             hintText: '请输入默认值',
-            initialValue: int.tryParse(savedConfig['defaultValue']?.toString() ?? '') ?? 0,
+            initialValue:
+                int.tryParse(savedConfig['defaultValue']?.toString() ?? '') ??
+                0,
             prefixIcon: Icons.data_array,
           ),
         ]);
@@ -371,7 +394,9 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
             type: FormFieldType.text,
             labelText: '日期格式',
             hintText: _selectedType == 'Time' ? 'HH:mm' : 'yyyy-MM-dd',
-            initialValue: savedConfig['format']?.toString() ?? (_selectedType == 'Time' ? 'HH:mm' : 'yyyy-MM-dd'),
+            initialValue:
+                savedConfig['format']?.toString() ??
+                (_selectedType == 'Time' ? 'HH:mm' : 'yyyy-MM-dd'),
             prefixIcon: Icons.text_format,
           ),
         ]);
@@ -489,31 +514,26 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
       content: SizedBox(
         width: widget.showConfigTab ? 500 : 400,
         height: widget.showConfigTab ? 500 : 400,
-        child: widget.showConfigTab
-            ? Column(
-                children: [
-                  // Tab Bar
-                  TabBar(
-                    controller: _tabController,
-                    tabs: [
-                      Tab(text: '选择类型'),
-                      Tab(text: '配置属性'),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Tab Views
-                  Expanded(
-                    child: TabBarView(
+        child:
+            widget.showConfigTab
+                ? Column(
+                  children: [
+                    // Tab Bar
+                    TabBar(
                       controller: _tabController,
-                      children: [
-                        _buildTypeSelectionTab(),
-                        _buildConfigTab(),
-                      ],
+                      tabs: [Tab(text: '选择类型'), Tab(text: '配置属性')],
                     ),
-                  ),
-                ],
-              )
-            : _buildTypeSelectionTab(),
+                    const SizedBox(height: 16),
+                    // Tab Views
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [_buildTypeSelectionTab(), _buildConfigTab()],
+                      ),
+                    ),
+                  ],
+                )
+                : _buildTypeSelectionTab(),
       ),
       actions: [
         // 左侧全选/反选按钮（仅多选模式且非配置模式）
@@ -524,7 +544,8 @@ class FieldTypeSelectorDialogState extends State<FieldTypeSelectorDialog>
             label: Text(_hasSelection ? '反选' : '全选'),
             style: TextButton.styleFrom(foregroundColor: Colors.deepPurple),
           ),
-        if (widget.multiSelect && !widget.showConfigTab) const SizedBox(width: 8),
+        if (widget.multiSelect && !widget.showConfigTab)
+          const SizedBox(width: 8),
         // 右侧取消/确定按钮
         TextButton(
           onPressed: () => Navigator.pop(context),

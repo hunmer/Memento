@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +7,7 @@ class FolderSelectionDialog extends StatefulWidget {
   const FolderSelectionDialog({super.key, required this.items});
 
   @override
+  // ignore: library_private_types_in_public_api
   _FolderSelectionDialogState createState() => _FolderSelectionDialogState();
 }
 
