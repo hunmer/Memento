@@ -56,26 +56,36 @@ Future<Map<String, Map<String, dynamic>>> provideNotesListWidgets(
     final folderNotes = controller.getFolderNotes(folderId);
 
     // 进一步按标签和日期过滤
-    filteredNotes = folderNotes.where((note) {
-      // 标签过滤
-      if (tags != null && tags.isNotEmpty) {
-        final hasMatchingTag = tags.any((tag) => note.tags.contains(tag as String));
-        if (!hasMatchingTag) return false;
-      }
+    filteredNotes =
+        folderNotes.where((note) {
+          // 标签过滤
+          if (tags != null && tags.isNotEmpty) {
+            final hasMatchingTag = tags.any(
+              (tag) => note.tags.contains(tag as String),
+            );
+            if (!hasMatchingTag) return false;
+          }
 
-      // 日期过滤
-      if (startDate != null && note.createdAt.isBefore(startDate)) {
-        return false;
-      }
-      if (endDate != null) {
-        final endOfDay = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
-        if (note.createdAt.isAfter(endOfDay)) {
-          return false;
-        }
-      }
+          // 日期过滤
+          if (startDate != null && note.createdAt.isBefore(startDate)) {
+            return false;
+          }
+          if (endDate != null) {
+            final endOfDay = DateTime(
+              endDate.year,
+              endDate.month,
+              endDate.day,
+              23,
+              59,
+              59,
+            );
+            if (note.createdAt.isAfter(endOfDay)) {
+              return false;
+            }
+          }
 
-      return true;
-    }).toList();
+          return true;
+        }).toList();
 
     // 按更新时间降序排序
     filteredNotes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
@@ -114,7 +124,8 @@ Future<Map<String, Map<String, dynamic>>> provideNotesListWidgets(
 
   // 最多显示 5 条笔记
   final displayNotes = filteredNotes.take(5).toList();
-  final moreCount = notesCount > displayNotes.length ? notesCount - displayNotes.length : 0;
+  final moreCount =
+      notesCount > displayNotes.length ? notesCount - displayNotes.length : 0;
 
   // 构建 TaskListCard 数据
   final taskListCardData = {
@@ -127,52 +138,57 @@ Future<Map<String, Map<String, dynamic>>> provideNotesListWidgets(
   };
 
   // 构建 NewsUpdateCard 数据
-  final newsUpdateCardData = displayNotes.isNotEmpty
-      ? {
-          'icon': 'bolt',
-          'title': displayNotes.first.title,
-          'timestamp': _formatTimeAgo(displayNotes.first.updatedAt, now),
-          'currentIndex': 0,
-          'totalItems': displayNotes.length.clamp(1, 4),
-        }
-      : {
-          'icon': 'bolt',
-          'title': 'notes_noNotes'.tr,
-          'timestamp': DateFormat('yyyy-MM-dd').format(now),
-          'currentIndex': 0,
-          'totalItems': 1,
-        };
+  final newsUpdateCardData =
+      displayNotes.isNotEmpty
+          ? {
+            'icon': 'bolt',
+            'title': displayNotes.first.title,
+            'timestamp': _formatTimeAgo(displayNotes.first.updatedAt, now),
+            'currentIndex': 0,
+            'totalItems': displayNotes.length.clamp(1, 4),
+          }
+          : {
+            'icon': 'bolt',
+            'title': 'notes_noNotes'.tr,
+            'timestamp': DateFormat('yyyy-MM-dd').format(now),
+            'currentIndex': 0,
+            'totalItems': 1,
+          };
 
   // 构建 ColorTagTaskCard 数据
   final colorTagTaskCardData = {
     'taskCount': notesCount,
     'label': folderName,
-    'tasks': displayNotes.map((note) {
-      final primaryTag = note.tags.isNotEmpty ? note.tags.first : '';
-      final tagColor = primaryTag.isNotEmpty ? tagColors[primaryTag] : notesColor;
-      return {
-        'title': note.title,
-        'color': tagColor?.value ?? notesColor.value,
-        'tag': primaryTag.isNotEmpty ? primaryTag : 'notes_untagged'.tr,
-      };
-    }).toList(),
+    'tasks':
+        displayNotes.map((note) {
+          final primaryTag = note.tags.isNotEmpty ? note.tags.first : '';
+          final tagColor =
+              primaryTag.isNotEmpty ? tagColors[primaryTag] : notesColor;
+          return {
+            'title': note.title,
+            'color': tagColor?.value ?? notesColor.value,
+            'tag': primaryTag.isNotEmpty ? primaryTag : 'notes_untagged'.tr,
+          };
+        }).toList(),
     'moreCount': moreCount,
   };
 
   // 构建 InboxMessageCard 数据
   final inboxMessageCardData = {
-    'messages': displayNotes.map((note) {
-      final primaryTag = note.tags.isNotEmpty ? note.tags.first : '';
-      final tagColor = primaryTag.isNotEmpty ? tagColors[primaryTag] : notesColor;
-      return {
-        'name': note.title,
-        'avatarUrl': '',
-        'preview': _getPreviewText(note.content),
-        'timeAgo': _formatTimeAgo(note.updatedAt, now),
-        'iconCodePoint': Icons.note_outlined.codePoint,
-        'iconBackgroundColor': tagColor?.value ?? notesColor.value,
-      };
-    }).toList(),
+    'messages':
+        displayNotes.map((note) {
+          final primaryTag = note.tags.isNotEmpty ? note.tags.first : '';
+          final tagColor =
+              primaryTag.isNotEmpty ? tagColors[primaryTag] : notesColor;
+          return {
+            'name': note.title,
+            'avatarUrl': '',
+            'preview': _getPreviewText(note.content),
+            'timeAgo': _formatTimeAgo(note.updatedAt, now),
+            'iconCodePoint': Icons.note_outlined.codePoint,
+            'iconBackgroundColor': tagColor?.value ?? notesColor.value,
+          };
+        }).toList(),
     'totalCount': notesCount,
     'remainingCount': moreCount,
     'title': folderName,
@@ -186,12 +202,15 @@ Future<Map<String, Map<String, dynamic>>> provideNotesListWidgets(
     'iconCodePoint': folder?.icon.codePoint ?? Icons.folder.codePoint,
     'colorValue': folder?.color.value ?? notesColor.value,
     'notesCount': notesCount,
-    'notes': displayNotes
-        .map((note) => {
-              'title': note.title,
-              'updatedAt': note.updatedAt.toIso8601String(),
-            })
-        .toList(),
+    'notes':
+        displayNotes
+            .map(
+              (note) => {
+                'title': note.title,
+                'updatedAt': note.updatedAt.toIso8601String(),
+              },
+            )
+            .toList(),
   };
 
   return {
@@ -199,7 +218,7 @@ Future<Map<String, Map<String, dynamic>>> provideNotesListWidgets(
     'newsUpdateCard': newsUpdateCardData,
     'colorTagTaskCard': colorTagTaskCardData,
     'inboxMessageCard': inboxMessageCardData,
-    if (folderNotesCardData != null) 'folderNotesCard': folderNotesCardData,
+    'folderNotesCard': folderNotesCardData,
   };
 }
 
@@ -214,14 +233,15 @@ Color _getColorFromTag(String tag) {
 /// 获取预览文本（前50个字符）
 String _getPreviewText(String content) {
   // 移除 Markdown 符号
-  String cleanText = content
-      .replaceAll(RegExp(r'^#+\s+', multiLine: true), '') // 标题
-      .replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'\1') // 粗体
-      .replaceAll(RegExp(r'\*([^*]+)\*'), r'\1') // 斜体
-      .replaceAll(RegExp(r'\[([^\]]+)\]\([^)]+\)'), r'\1') // 链接
-      .replaceAll(RegExp(r'`([^`]+)`'), r'\1') // 代码
-      .replaceAll(RegExp(r'^\s*[-*+]\s+', multiLine: true), '') // 列表
-      .trim();
+  String cleanText =
+      content
+          .replaceAll(RegExp(r'^#+\s+', multiLine: true), '') // 标题
+          .replaceAll(RegExp(r'\*\*([^*]+)\*\*'), r'\1') // 粗体
+          .replaceAll(RegExp(r'\*([^*]+)\*'), r'\1') // 斜体
+          .replaceAll(RegExp(r'\[([^\]]+)\]\([^)]+\)'), r'\1') // 链接
+          .replaceAll(RegExp(r'`([^`]+)`'), r'\1') // 代码
+          .replaceAll(RegExp(r'^\s*[-*+]\s+', multiLine: true), '') // 列表
+          .trim();
 
   if (cleanText.length > 50) {
     cleanText = cleanText.substring(0, 50);
