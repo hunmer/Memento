@@ -19,7 +19,12 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
     'description': '用于创建每日待办事项的预设模板',
     'fields': [
       {'id': 'field_1', 'type': 'text', 'label': '任务标题', 'required': true},
-      {'id': 'field_2', 'type': 'select', 'label': '优先级', 'options': ['高', '中', '低']},
+      {
+        'id': 'field_2',
+        'type': 'select',
+        'label': '优先级',
+        'options': ['高', '中', '低'],
+      },
       {'id': 'field_3', 'type': 'date', 'label': '截止日期', 'required': false},
       {'id': 'field_4', 'type': 'textarea', 'label': '详细描述', 'required': false},
     ],
@@ -55,9 +60,7 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('预设编辑表单'),
-      ),
+      appBar: AppBar(title: const Text('预设编辑表单')),
       body: Column(
         children: [
           // 尺寸切换按钮
@@ -65,164 +68,161 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
           const Divider(height: 1),
           // 内容
           Expanded(
-            child: _isFullWidth()
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'PresetEditForm',
-                          style: theme.textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('这是一个预设编辑表单组件。'),
-                        const SizedBox(height: 24),
-                        Text(
-                          '功能特性',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        const Text('- 表单验证'),
-                        const Text('- 动态字段'),
-                        const Text('- 预设模板'),
-                        const Text('- 数据持久化'),
-                        const SizedBox(height: 24),
-
-                        // 预设表单示例
-                        Card(
-                          elevation: 0,
-                          color: theme.cardColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+            child:
+                _isFullWidth()
+                    ? SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'PresetEditForm',
+                            style: theme.textTheme.titleLarge,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '预设表单示例',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                          const SizedBox(height: 16),
+                          const Text('这是一个预设编辑表单组件。'),
+                          const SizedBox(height: 24),
+                          Text('功能特性', style: theme.textTheme.titleMedium),
+                          const SizedBox(height: 8),
+                          const Text('- 表单验证'),
+                          const Text('- 动态字段'),
+                          const Text('- 预设模板'),
+                          const Text('- 数据持久化'),
+                          const SizedBox(height: 24),
+
+                          // 预设表单示例
+                          Card(
+                            elevation: 0,
+                            color: theme.cardColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '预设表单示例',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildFormExample(),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 使用说明
+                          Card(
+                            elevation: 0,
+                            color: theme.cardColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '使用说明',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildUsageGuide(),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    : Center(
+                      child: SizedBox(
+                        width: _getWidth(),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'PresetEditForm',
+                                style: theme.textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text('这是一个预设编辑表单组件。'),
+                              const SizedBox(height: 24),
+                              Text('功能特性', style: theme.textTheme.titleMedium),
+                              const SizedBox(height: 8),
+                              const Text('- 表单验证'),
+                              const Text('- 动态字段'),
+                              const Text('- 预设模板'),
+                              const Text('- 数据持久化'),
+                              const SizedBox(height: 24),
+
+                              // 预设表单示例
+                              Card(
+                                elevation: 0,
+                                color: theme.cardColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '预设表单示例',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _buildFormExample(),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                _buildFormExample(),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+                              ),
+                              const SizedBox(height: 24),
 
-                        // 使用说明
-                        Card(
-                          elevation: 0,
-                          color: theme.cardColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '使用说明',
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                              // 使用说明
+                              Card(
+                                elevation: 0,
+                                color: theme.cardColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '使用说明',
+                                        style: theme.textTheme.titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _buildUsageGuide(),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                _buildUsageGuide(),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                : Center(
-                    child: SizedBox(
-                      width: _getWidth(),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'PresetEditForm',
-                              style: theme.textTheme.titleLarge,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('这是一个预设编辑表单组件。'),
-                            const SizedBox(height: 24),
-                            Text(
-                              '功能特性',
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 8),
-                            const Text('- 表单验证'),
-                            const Text('- 动态字段'),
-                            const Text('- 预设模板'),
-                            const Text('- 数据持久化'),
-                            const SizedBox(height: 24),
-
-                            // 预设表单示例
-                            Card(
-                              elevation: 0,
-                              color: theme.cardColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '预设表单示例',
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _buildFormExample(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // 使用说明
-                            Card(
-                              elevation: 0,
-                              color: theme.cardColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '使用说明',
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    _buildUsageGuide(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ),
-                  ),
           ),
         ],
       ),
@@ -243,21 +243,22 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
-        children: sizes.map((size) {
-          final isSelected = _sizeMode == size['value'];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: ChoiceChip(
-              label: Text(size['label']!),
-              selected: isSelected,
-              onSelected: (_) {
-                setState(() {
-                  _sizeMode = size['value']!;
-                });
-              },
-            ),
-          );
-        }).toList(),
+        children:
+            sizes.map((size) {
+              final isSelected = _sizeMode == size['value'];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: ChoiceChip(
+                  label: Text(size['label']!),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    setState(() {
+                      _sizeMode = size['value']!;
+                    });
+                  },
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -293,14 +294,17 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
         // 标签选择
         Wrap(
           spacing: 8,
-          children: ['工作', '生活', '学习', '健康'].map((tag) {
-            final isSelected = (_samplePreset['tags'] as List).contains(tag);
-            return FilterChip(
-              label: Text(tag),
-              selected: isSelected,
-              onSelected: (_) {},
-            );
-          }).toList(),
+          children:
+              ['工作', '生活', '学习', '健康'].map((tag) {
+                final isSelected = (_samplePreset['tags'] as List).contains(
+                  tag,
+                );
+                return FilterChip(
+                  label: Text(tag),
+                  selected: isSelected,
+                  onSelected: (_) {},
+                );
+              }).toList(),
         ),
         const SizedBox(height: 16),
 
@@ -309,10 +313,7 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
           children: [
             Text(
               '预设字段',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
             TextButton.icon(
@@ -328,12 +329,16 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
         ...(_samplePreset['fields'] as List<dynamic>).map<Widget>((field) {
           return Card(
             elevation: 0,
-            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceVariant.withOpacity(0.5),
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               leading: Icon(_getFieldIcon(field['type'])),
               title: Text(field['label']),
-              subtitle: Text('类型: ${field['type']}${field['required'] ? ' (必填)' : ''}'),
+              subtitle: Text(
+                '类型: ${field['type']}${field['required'] ? ' (必填)' : ''}',
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -349,7 +354,7 @@ class _PresetEditFormExampleState extends State<PresetEditFormExample> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

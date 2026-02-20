@@ -17,7 +17,6 @@ import 'package:Memento/screens/home_screen/widgets/generic_plugin_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
 import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
-import 'data.dart';
 import 'providers.dart';
 import 'utils.dart';
 
@@ -134,7 +133,11 @@ Widget _buildCommonWidgetWithLiveData(
   final size = config['widgetSize'] as HomeWidgetSize? ?? metadata.defaultSize;
 
   // 使用实时数据更新 props
-  final liveProps = getLiveCommonWidgetProps(commonWidgetId, liveData, savedProps);
+  final liveProps = getLiveCommonWidgetProps(
+    commonWidgetId,
+    liveData,
+    savedProps,
+  );
 
   // 添加 custom 尺寸的实际宽高到 props 中
   if (size == const CustomSize(width: -1, height: -1)) {
@@ -152,10 +155,7 @@ Widget _buildCommonWidgetWithLiveData(
 }
 
 /// 构建 2x2 详细卡片组件
-Widget buildOverviewWidget(
-  BuildContext context,
-  Map<String, dynamic> config,
-) {
+Widget buildOverviewWidget(BuildContext context, Map<String, dynamic> config) {
   try {
     // 解析插件配置
     PluginWidgetConfig widgetConfig;

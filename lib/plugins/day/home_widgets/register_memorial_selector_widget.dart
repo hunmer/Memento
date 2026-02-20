@@ -77,8 +77,11 @@ class _MemorialSelectorWidget extends LiveSelectorWidget {
 
             // 从 plugin 重新获取最新的纪念日数据
             if (memorialDayId != null) {
-              final plugin = PluginManager.instance.getPlugin('day') as DayPlugin?;
-              debugPrint('[${widgetTag}] Plugin instance hash: ${plugin.hashCode}');
+              final plugin =
+                  PluginManager.instance.getPlugin('day') as DayPlugin?;
+              debugPrint(
+                '[$widgetTag] Plugin instance hash: ${plugin.hashCode}',
+              );
               if (plugin != null) {
                 final memorialDay = plugin.getMemorialDayById(memorialDayId);
                 if (memorialDay != null) {
@@ -94,10 +97,14 @@ class _MemorialSelectorWidget extends LiveSelectorWidget {
                     'isToday': memorialDay.isToday,
                     'isExpired': memorialDay.isExpired,
                   };
-                  debugPrint('[${widgetTag}] Refreshed memorial day: ${memorialDay.title}, daysRemaining: ${memorialDay.daysRemaining}');
+                  debugPrint(
+                    '[$widgetTag] Refreshed memorial day: ${memorialDay.title}, daysRemaining: ${memorialDay.daysRemaining}',
+                  );
                   return await provideMemorialDayCommonWidgets(data);
                 } else {
-                  debugPrint('[${widgetTag}] Memorial day not found: $memorialDayId (may have been deleted)');
+                  debugPrint(
+                    '[$widgetTag] Memorial day not found: $memorialDayId (may have been deleted)',
+                  );
                 }
               }
             }
@@ -105,7 +112,7 @@ class _MemorialSelectorWidget extends LiveSelectorWidget {
         }
       }
     } catch (e) {
-      debugPrint('[${widgetTag}] getLiveData error: $e');
+      debugPrint('[$widgetTag] getLiveData error: $e');
     }
     return {};
   }
