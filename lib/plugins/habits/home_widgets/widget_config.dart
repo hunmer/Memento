@@ -29,6 +29,7 @@ class HabitStatsWidgetConfig {
   /// 从动态配置中解析（支持多种格式）
   ///
   /// 支持的格式：
+  /// - SelectorWidgetConfig 格式: {selectedData: {...}, commonWidgetId: '...', commonWidgetProps: {...}}
   /// - {selectedData: {data: [{habitId, commonWidgetId, commonWidgetProps}]}}
   /// - {data: [{habitId, commonWidgetId, commonWidgetProps}]}
   /// - {habitId, commonWidgetId, commonWidgetProps}
@@ -37,9 +38,45 @@ class HabitStatsWidgetConfig {
     if (config == null) return null;
 
     Map<String, dynamic>? dataMap;
+    String? commonWidgetId;
+    Map<String, dynamic>? commonWidgetProps;
+    DateTime? lastUpdated;
 
-    // 格式1: 从 selectedData.data 中提取（保存的配置结构）
-    if (config is Map && config.containsKey('selectedData')) {
+    // 格式1: SelectorWidgetConfig 格式（直接包含 commonWidgetId）
+    if (config is Map) {
+      // 检查是否有 SelectorWidgetConfig 的顶级字段
+      final topCommonWidgetId = config['commonWidgetId']?.toString();
+      final topCommonWidgetProps = config['commonWidgetProps'] as Map<String, dynamic>?;
+      final topLastUpdated = config['lastUpdated'];
+
+      if (topCommonWidgetId != null && topCommonWidgetId.isNotEmpty) {
+        // 这是 SelectorWidgetConfig 格式，从 selectedData.data 中提取 habitId
+        commonWidgetId = topCommonWidgetId;
+        commonWidgetProps = topCommonWidgetProps;
+        if (topLastUpdated != null) {
+          final lastUpdatedStr = topLastUpdated.toString();
+          if (lastUpdatedStr.isNotEmpty) {
+            try {
+              lastUpdated = DateTime.parse(lastUpdatedStr);
+            } catch (_) {
+              // 忽略解析错误
+            }
+          }
+        }
+
+        // 从 selectedData.data 中提取 habitId
+        final selectedData = config['selectedData'];
+        if (selectedData is Map && selectedData.containsKey('data')) {
+          final dataList = selectedData['data'];
+          if (dataList is List && dataList.isNotEmpty) {
+            dataMap = dataList[0] as Map<String, dynamic>?;
+          }
+        }
+      }
+    }
+
+    // 格式2: 从 selectedData.data 中提取（旧格式）
+    if (dataMap == null && config is Map && config.containsKey('selectedData')) {
       final selectedData = config['selectedData'];
       if (selectedData is Map && selectedData.containsKey('data')) {
         final dataList = selectedData['data'];
@@ -48,15 +85,15 @@ class HabitStatsWidgetConfig {
         }
       }
     }
-    // 格式2: 从 data 数组中提取
-    else if (config is Map && config.containsKey('data')) {
+    // 格式3: 从 data 数组中提取
+    else if (dataMap == null && config is Map && config.containsKey('data')) {
       final dataList = config['data'];
       if (dataList is List && dataList.isNotEmpty) {
         dataMap = dataList[0] as Map<String, dynamic>?;
       }
     }
-    // 格式3/4: 直接是数据Map
-    else if (config is Map) {
+    // 格式4/5: 直接是数据Map
+    else if (dataMap == null && config is Map) {
       dataMap = Map<String, dynamic>.from(config);
     }
 
@@ -72,21 +109,20 @@ class HabitStatsWidgetConfig {
       return null;
     }
 
-    // 提取 commonWidgetId
-    final commonWidgetId = dataMap['commonWidgetId']?.toString();
+    // 如果从顶级字段中没有获取到 commonWidgetId，从 dataMap 中提取
+    commonWidgetId ??= dataMap['commonWidgetId']?.toString();
     if (commonWidgetId == null || commonWidgetId.isEmpty) {
       debugPrint('[HabitStatsWidgetConfig] 缺少 commonWidgetId: $dataMap');
       return null;
     }
 
-    // 提取 commonWidgetProps
-    final commonWidgetProps = dataMap['commonWidgetProps'] is Map
+    // 如果从顶级字段中没有获取到 commonWidgetProps，从 dataMap 中提取
+    commonWidgetProps ??= dataMap['commonWidgetProps'] is Map
         ? Map<String, dynamic>.from(dataMap['commonWidgetProps'] as Map)
         : <String, dynamic>{};
 
-    // 提取 lastUpdated
-    DateTime? lastUpdated;
-    if (dataMap['lastUpdated'] != null) {
+    // 提取 lastUpdated（如果之前没有提取）
+    if (lastUpdated == null && dataMap['lastUpdated'] != null) {
       final lastUpdatedStr = dataMap['lastUpdated']?.toString();
       if (lastUpdatedStr != null && lastUpdatedStr.isNotEmpty) {
         try {
@@ -107,8 +143,45 @@ class HabitStatsWidgetConfig {
 
   /// 只提取 habitId（用于只需要习惯ID的场景）
   static String? extractHabitId(dynamic config) {
-    final parsed = fromDynamic(config);
-    return parsed?.habitId;
+    if (config == null) return null;
+
+    Map<String, dynamic>? dataMap;
+
+    // 格式1: 从 selectedData.data 中提取（SelectorWidgetConfig 格式）
+    if (config is Map && config.containsKey('selectedData')) {
+      final selectedData = config['selectedData'];
+      if (selectedData is Map && selectedData.containsKey('data')) {
+        final dataList = selectedData['data'];
+        if (dataList is List && dataList.isNotEmpty) {
+          dataMap = dataList[0] as Map<String, dynamic>?;
+        }
+      }
+    }
+    // 格式2: 从 data 数组中提取
+    else if (config is Map && config.containsKey('data')) {
+      final dataList = config['data'];
+      if (dataList is List && dataList.isNotEmpty) {
+        dataMap = dataList[0] as Map<String, dynamic>?;
+      }
+    }
+    // 格式3: 直接是数据Map
+    else if (config is Map) {
+      dataMap = Map<String, dynamic>.from(config);
+    }
+
+    if (dataMap == null) {
+      debugPrint('[HabitStatsWidgetConfig] extractHabitId: 无法解析配置: $config');
+      return null;
+    }
+
+    // 提取 habitId
+    final habitId = dataMap['habitId']?.toString() ?? dataMap['id']?.toString();
+    if (habitId == null || habitId.isEmpty) {
+      debugPrint('[HabitStatsWidgetConfig] extractHabitId: 缺少 habitId: $dataMap');
+      return null;
+    }
+
+    return habitId;
   }
 
   /// 转换为 Map（用于序列化）
