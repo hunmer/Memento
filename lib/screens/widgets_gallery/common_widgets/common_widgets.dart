@@ -89,6 +89,9 @@ import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
 import 'package:Memento/plugins/activity/home_widgets/widgets/activity_last_activity.dart';
 import 'widgets/folder_notes_card.dart';
 import 'widgets/habit_heatmap_card.dart';
+import 'widgets/points_goal_card.dart';
+import 'widgets/store_product_selector_card.dart';
+import 'widgets/store_user_item_selector_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -179,6 +182,9 @@ enum CommonWidgetId {
   folderNotesCard,
   goodsItemSelector,
   habitHeatmapCard,
+  pointsGoalCard,
+  storeProductSelector,
+  storeUserItemSelector,
 }
 
 /// 公共小组件元数据
@@ -885,6 +891,30 @@ class CommonWidgetsRegistry {
       defaultSize: MediumSize(),
       supportedSizes: [MediumSize(), LargeSize()],
     ),
+    CommonWidgetId.pointsGoalCard: CommonWidgetMetadata(
+      id: CommonWidgetId.pointsGoalCard,
+      name: '积分目标进度',
+      description: '显示今日积分与目标的进度',
+      icon: Icons.flag,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
+    CommonWidgetId.storeProductSelector: CommonWidgetMetadata(
+      id: CommonWidgetId.storeProductSelector,
+      name: '商品选择器',
+      description: '显示商品列表，支持单个或多个商品展示',
+      icon: Icons.shopping_bag,
+      defaultSize: LargeSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
+    CommonWidgetId.storeUserItemSelector: CommonWidgetMetadata(
+      id: CommonWidgetId.storeUserItemSelector,
+      name: '用户物品选择器',
+      description: '显示用户物品列表，支持单个或多个物品展示',
+      icon: Icons.inventory_2,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1121,6 +1151,12 @@ class CommonWidgetBuilder {
         return GoodsItemSelectorWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.habitHeatmapCard:
         return HabitHeatmapCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.pointsGoalCard:
+        return PointsGoalCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.storeProductSelector:
+        return StoreProductSelectorCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.storeUserItemSelector:
+        return StoreUserItemSelectorCardWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }

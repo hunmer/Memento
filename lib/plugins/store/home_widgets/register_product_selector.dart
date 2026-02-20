@@ -1,4 +1,4 @@
-/// 积分商店插件 - 商品选择器注册
+/// 积分商店插件 - 商品选择器注册（公共小组件）
 library;
 
 import 'package:flutter/material.dart';
@@ -6,15 +6,87 @@ import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/core/navigation/navigation_helper.dart';
+import 'package:Memento/screens/home_screen/widgets/base/live_selector_widget.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import 'package:Memento/core/plugin_manager.dart';
-import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
-import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/widgets/event_listener_container.dart';
-import 'widgets/product_selector_widget.dart';
-import '../store_plugin.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
 
-/// 注册商品选择器小组件
+/// 商品选择器小组件（基于 LiveSelectorWidget）
+///
+/// 默认显示 goodsItemSelector 公共小组件，支持实时更新
+class _ProductSelectorLiveWidget extends LiveSelectorWidget {
+  const _ProductSelectorLiveWidget({
+    required super.config,
+    required super.widgetDefinition,
+  });
+
+  @override
+  List<String> get eventListeners => const [
+    'store_cache_updated',
+  ];
+
+  @override
+  Future<Map<String, Map<String, dynamic>>> getLiveData(Map<String, dynamic> config) async {
+    return _provideCommonWidgets({});
+  }
+
+  @override
+  String get widgetTag => 'ProductSelectorWidget';
+
+  @override
+  Widget buildCommonWidget(
+    BuildContext context,
+    CommonWidgetId widgetId,
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return CommonWidgetBuilder.build(
+      context,
+      widgetId,
+      props,
+      size,
+      inline: true,
+    );
+  }
+}
+
+/// 提供商品选择器公共小组件数据
+Future<Map<String, Map<String, dynamic>>> _provideCommonWidgets(
+  Map<String, dynamic> data,
+) async {
+  final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
+  if (plugin == null) return {};
+
+  final controller = plugin.controller;
+  final products = controller.products.map((p) => p.toJson()).toList();
+  final archivedProducts = controller.archivedProducts.map((p) => p.toJson()).toList();
+
+  // 合并商品和存档商品
+  final allProducts = [...products, ...archivedProducts];
+
+  // 默认显示前 3 个有库存的商品
+  final inStockProducts = allProducts
+      .where((p) => (p['stock'] as int? ?? 0) > 0)
+      .take(3)
+      .map((p) => {
+            'id': p['id'] as String,
+            'name': p['name'] as String,
+            'description': p['description'] as String? ?? '',
+            'price': p['price'] as int,
+            'stock': p['stock'] as int,
+            'image': p['image'] as String?,
+          })
+      .toList();
+
+  return {
+    'storeProductSelector': {
+      'products': inStockProducts,
+      'productCount': inStockProducts.length,
+    },
+  };
+}
+
+/// 注册商品选择器小组件（公共小组件，无配置）
 void registerProductSelectorWidget(HomeWidgetRegistry registry) {
   registry.register(
     HomeWidget(
@@ -27,239 +99,29 @@ void registerProductSelectorWidget(HomeWidgetRegistry registry) {
       defaultSize: const LargeSize(),
       supportedSizes: [const MediumSize(), const LargeSize()],
       category: 'home_categoryTools'.tr,
-
-      // 选择器配置
-      selectorId: 'store.product',
-      dataRenderer: _renderProductData,
-      dataSelector: (dataArray) {
-        final productData = dataArray[0] as Map<String, dynamic>;
-        return {
-          'id': productData['id'] as String,
-          'name': productData['name'] as String?,
-          'image': productData['image'] as String?,
-        };
-      },
-
+      commonWidgetsProvider: _provideCommonWidgets,
       builder: (context, config) {
-        final dataMap = config['selectedData'] as Map<String, dynamic>? ?? {};
-        return ProductSelectorWidget(config: dataMap);
+        return _ProductSelectorLiveWidget(
+          config: _ensureConfigHasCommonWidget(config, CommonWidgetId.storeProductSelector),
+          widgetDefinition: registry.getWidget('store_product_selector')!,
+        );
       },
     ),
   );
 }
 
-/// 渲染商品数据
-Widget _renderProductData(
-  BuildContext context,
-  SelectorResult result,
+/// 确保 config 包含默认的公共小组件配置
+Map<String, dynamic> _ensureConfigHasCommonWidget(
   Map<String, dynamic> config,
+  CommonWidgetId defaultWidgetId,
 ) {
-  // 从 result.data 获取保存的商品 ID
-  final savedData = result.data as Map<String, dynamic>?;
-  if (savedData == null) {
-    return HomeWidget.buildErrorWidget(context, '数据不存在');
+  final newConfig = Map<String, dynamic>.from(config);
+  if (!newConfig.containsKey('selectorWidgetConfig')) {
+    newConfig['selectorWidgetConfig'] = {
+      'commonWidgetId': defaultWidgetId.name,
+      'usesCommonWidget': true,
+      'commonWidgetProps': {},
+    };
   }
-
-  final productId = savedData['id'] as String? ?? '';
-  if (productId.isEmpty) {
-    return HomeWidget.buildErrorWidget(context, '商品ID不存在');
-  }
-
-  // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
-  return StatefulBuilder(
-    builder: (context, setState) {
-      return EventListenerContainer(
-        events: const [
-          'store_product_added',
-          'store_product_archived',
-          'store_product_restored',
-          'store_points_changed',
-        ],
-        onEvent: () => setState(() {}),
-        child: _buildProductWidget(context, productId),
-      );
-    },
-  );
-}
-
-/// 构建商品小组件内容（获取最新数据）
-Widget _buildProductWidget(BuildContext context, String productId) {
-  final theme = Theme.of(context);
-
-  // 从 PluginManager 获取最新的商品数据
-  final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
-  if (plugin == null) {
-    return HomeWidget.buildErrorWidget(
-      context,
-      'store_pluginNotAvailable'.tr,
-    );
-  }
-
-  // 查找对应商品
-  final product = plugin.controller.products.firstWhereOrNull(
-    (p) => p.id == productId,
-  );
-
-  // 如果商品不存在，尝试从存档中查找
-  final finalProduct =
-      product ??
-      plugin.controller.archivedProducts.firstWhereOrNull(
-        (p) => p.id == productId,
-      );
-
-  if (finalProduct == null) {
-    return HomeWidget.buildErrorWidget(context, 'store_productNotFound'.tr);
-  }
-
-  final name = finalProduct.name;
-  final description = finalProduct.description;
-  final price = finalProduct.price;
-  final stock = finalProduct.stock;
-  final imagePath = finalProduct.image;
-
-  return FutureBuilder<String?>(
-    future: _getProductImagePath(imagePath),
-    builder: (context, imageSnapshot) {
-      final hasImage =
-          imageSnapshot.hasData &&
-          imageSnapshot.data != null &&
-          imageSnapshot.data!.isNotEmpty;
-
-      return Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            // 导航到商品物品列表
-            NavigationHelper.pushNamed(
-              context,
-              '/store/product_items',
-              arguments: {
-                'productId': productId,
-                'productName': name,
-                'autoBuy': true,
-              },
-            );
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              image:
-                  hasImage
-                      ? DecorationImage(
-                        image: ImageUtils.createImageProvider(
-                          imageSnapshot.data,
-                        ),
-                        fit: BoxFit.cover,
-                      )
-                      : null,
-            ),
-            child: Stack(
-              children: [
-                // 半透明遮罩（确保文字可读性）
-                if (hasImage)
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.black.withOpacity(0.2),
-                      ),
-                    ),
-                  ),
-                // 内容区域（带 padding）
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 商品名称
-                      Text(
-                        name,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color:
-                              hasImage
-                                  ? Colors.white
-                                  : theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      // 商品描述
-                      if (description.isNotEmpty) ...[
-                        Text(
-                          description,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color:
-                                (hasImage
-                                    ? Colors.white70
-                                    : theme.colorScheme.onSurfaceVariant),
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-                      const Spacer(),
-                      // 底部信息栏 - 价格和库存
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.monetization_on,
-                            size: 16,
-                            color: hasImage ? Colors.orange : Colors.orange,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$price ${'store_points'.tr}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: hasImage ? Colors.orange : Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          // 库存状态
-                          Text(
-                            stock > 0
-                                ? '${'store_stockLabel'.tr}: $stock'
-                                : 'store_outOfStock'.tr,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color:
-                                  hasImage
-                                      ? (stock > 0
-                                          ? Colors.green
-                                          : Colors.grey)
-                                      : (stock > 0
-                                          ? Colors.green
-                                          : Colors.grey),
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-/// 获取商品的图片绝对路径
-Future<String?> _getProductImagePath(String? imagePath) async {
-  if (imagePath == null || imagePath.isEmpty) return null;
-
-  // 如果是绝对路径，直接返回
-  if (imagePath.startsWith('/') || imagePath.startsWith('http')) {
-    return imagePath;
-  }
-
-  // 如果是相对路径，使用 ImageUtils 转换
-  return ImageUtils.getAbsolutePath(imagePath);
+  return newConfig;
 }
