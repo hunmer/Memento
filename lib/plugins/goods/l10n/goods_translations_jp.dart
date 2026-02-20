@@ -173,4 +173,8 @@ const Map<String, String> goodsTranslationsJp = {
   'goods_unknownWarehouse': '不明な倉庫',
   'goods_noTags': 'タグがありません',
   'goods_optional': 'オプション',
+
+  // Common Widgets
+  'goods_commonWidgetsName': '物品コンポーネント',
+  'goods_commonWidgetsDesc': '物品管理共通ウィジェット',
 };

@@ -33,6 +33,6 @@ void register() {
   registerIconWidget(registry);
   registerOverviewWidget(registry);
   registerHabitHeatmapWidget(registry);
-  registerActivityStatsWidget(registry);
   registerHabitStatsWidget(registry);
+  registerActivityStatsWidget(registry);
 }
