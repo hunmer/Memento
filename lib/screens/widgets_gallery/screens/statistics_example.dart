@@ -27,21 +27,21 @@ class _StatisticsExampleState extends State<StatisticsExample> {
 
   // 生成演示饼图数据
   List<DistributionData> get _pieChartData => [
-        DistributionData(label: '工作', value: 35, color: _colorPalette[0]),
-        DistributionData(label: '学习', value: 25, color: _colorPalette[1]),
-        DistributionData(label: '娱乐', value: 20, color: _colorPalette[2]),
-        DistributionData(label: '运动', value: 12, color: _colorPalette[3]),
-        DistributionData(label: '其他', value: 8, color: _colorPalette[4]),
-      ];
+    DistributionData(label: '工作', value: 35, color: _colorPalette[0]),
+    DistributionData(label: '学习', value: 25, color: _colorPalette[1]),
+    DistributionData(label: '娱乐', value: 20, color: _colorPalette[2]),
+    DistributionData(label: '运动', value: 12, color: _colorPalette[3]),
+    DistributionData(label: '其他', value: 8, color: _colorPalette[4]),
+  ];
 
   // 生成演示排行榜数据
   List<RankingData> get _rankingData => [
-        RankingData(label: '项目 A', value: 156, color: _colorPalette[0]),
-        RankingData(label: '项目 B', value: 132, color: _colorPalette[1]),
-        RankingData(label: '项目 C', value: 98, color: _colorPalette[2]),
-        RankingData(label: '项目 D', value: 76, color: _colorPalette[3]),
-        RankingData(label: '项目 E', value: 54, color: _colorPalette[4]),
-      ];
+    RankingData(label: '项目 A', value: 156, color: _colorPalette[0]),
+    RankingData(label: '项目 B', value: 132, color: _colorPalette[1]),
+    RankingData(label: '项目 C', value: 98, color: _colorPalette[2]),
+    RankingData(label: '项目 D', value: 76, color: _colorPalette[3]),
+    RankingData(label: '项目 E', value: 54, color: _colorPalette[4]),
+  ];
 
   // 生成演示趋势图数据
   List<TimeSeriesData> get _timeSeriesData {
@@ -116,12 +116,9 @@ class _StatisticsExampleState extends State<StatisticsExample> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('统计图表'),
-      ),
+      appBar: AppBar(title: const Text('统计图表')),
       body: Column(
         children: [
           // 尺寸切换按钮
@@ -129,178 +126,175 @@ class _StatisticsExampleState extends State<StatisticsExample> {
           const Divider(height: 1),
           // 内容
           Expanded(
-            child: _isFullWidth()
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 标题说明
-                        Text(
-                          'Statistics Components',
-                          style: theme.textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '通用统计图表组件库，支持多种数据可视化方式。',
-                          style: TextStyle(
-                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+            child:
+                _isFullWidth()
+                    ? SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 标题说明
+                          Text(
+                            'Statistics Components',
+                            style: theme.textTheme.titleLarge,
                           ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // 饼图示例
-                        buildStatisticsCard(
-                          context: context,
-                          title: '分布饼图',
-                          subtitle: 'DistributionPieChart',
-                          child: DistributionPieChart(
-                            data: _pieChartData,
-                            colorPalette: _colorPalette,
-                            centerText: '100',
-                            centerSubtext: '总计小时',
+                          const SizedBox(height: 8),
+                          Text(
+                            '通用统计图表组件库，支持多种数据可视化方式。',
+                            style: TextStyle(
+                              color: theme.textTheme.bodyMedium?.color
+                                  ?.withOpacity(0.7),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 24),
 
-                        // 排行榜示例
-                        buildStatisticsCard(
-                          context: context,
-                          title: '排行榜',
-                          subtitle: 'RankingList',
-                          child: RankingList(
-                            data: _rankingData,
-                            colorPalette: _colorPalette,
-                            valueLabel: '小时',
+                          // 饼图示例
+                          buildStatisticsCard(
+                            context: context,
+                            title: '分布饼图',
+                            subtitle: 'DistributionPieChart',
+                            child: DistributionPieChart(
+                              data: _pieChartData,
+                              colorPalette: _colorPalette,
+                              centerText: '100',
+                              centerSubtext: '总计小时',
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // 趋势图示例
-                        buildStatisticsCard(
-                          context: context,
-                          title: '时间序列趋势图',
-                          subtitle: 'TimeSeriesChart',
-                          child: TimeSeriesChart(
-                            series: _timeSeriesData,
-                            height: 220,
-                            showDots: true,
-                            colorPalette: _colorPalette,
+                          // 排行榜示例
+                          buildStatisticsCard(
+                            context: context,
+                            title: '排行榜',
+                            subtitle: 'RankingList',
+                            child: RankingList(
+                              data: _rankingData,
+                              colorPalette: _colorPalette,
+                              valueLabel: '小时',
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // 24小时分布示例
-                        buildStatisticsCard(
-                          context: context,
-                          title: '24小时分布',
-                          subtitle: 'HourlyDistributionBar',
-                          child: HourlyDistributionBar(
-                            hourlyData: _hourlyData,
-                            colorPalette: _colorPalette,
-                            height: 50,
+                          // 趋势图示例
+                          buildStatisticsCard(
+                            context: context,
+                            title: '时间序列趋势图',
+                            subtitle: 'TimeSeriesChart',
+                            child: TimeSeriesChart(
+                              series: _timeSeriesData,
+                              height: 220,
+                              showDots: true,
+                              colorPalette: _colorPalette,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                        // 使用说明
-                        Text(
-                          '组件说明',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildUsageGuide(context),
-                      ],
-                    ),
-                  )
-                : Center(
-                    child: SizedBox(
-                      width: _getWidth(),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // 标题说明
-                            Text(
-                              'Statistics Components',
-                              style: theme.textTheme.titleLarge,
+                          // 24小时分布示例
+                          buildStatisticsCard(
+                            context: context,
+                            title: '24小时分布',
+                            subtitle: 'HourlyDistributionBar',
+                            child: HourlyDistributionBar(
+                              hourlyData: _hourlyData,
+                              colorPalette: _colorPalette,
+                              height: 50,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '通用统计图表组件库，支持多种数据可视化方式。',
-                              style: TextStyle(
-                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 使用说明
+                          Text('组件说明', style: theme.textTheme.titleMedium),
+                          const SizedBox(height: 12),
+                          _buildUsageGuide(context),
+                        ],
+                      ),
+                    )
+                    : Center(
+                      child: SizedBox(
+                        width: _getWidth(),
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 标题说明
+                              Text(
+                                'Statistics Components',
+                                style: theme.textTheme.titleLarge,
                               ),
-                            ),
-                            const SizedBox(height: 24),
-
-                            // 饼图示例
-                            buildStatisticsCard(
-                              context: context,
-                              title: '分布饼图',
-                              subtitle: 'DistributionPieChart',
-                              child: DistributionPieChart(
-                                data: _pieChartData,
-                                colorPalette: _colorPalette,
-                                centerText: '100',
-                                centerSubtext: '总计小时',
+                              const SizedBox(height: 8),
+                              Text(
+                                '通用统计图表组件库，支持多种数据可视化方式。',
+                                style: TextStyle(
+                                  color: theme.textTheme.bodyMedium?.color
+                                      ?.withOpacity(0.7),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 16),
+                              const SizedBox(height: 24),
 
-                            // 排行榜示例
-                            buildStatisticsCard(
-                              context: context,
-                              title: '排行榜',
-                              subtitle: 'RankingList',
-                              child: RankingList(
-                                data: _rankingData,
-                                colorPalette: _colorPalette,
-                                valueLabel: '小时',
+                              // 饼图示例
+                              buildStatisticsCard(
+                                context: context,
+                                title: '分布饼图',
+                                subtitle: 'DistributionPieChart',
+                                child: DistributionPieChart(
+                                  data: _pieChartData,
+                                  colorPalette: _colorPalette,
+                                  centerText: '100',
+                                  centerSubtext: '总计小时',
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 16),
+                              const SizedBox(height: 16),
 
-                            // 趋势图示例
-                            buildStatisticsCard(
-                              context: context,
-                              title: '时间序列趋势图',
-                              subtitle: 'TimeSeriesChart',
-                              child: TimeSeriesChart(
-                                series: _timeSeriesData,
-                                height: 200,
-                                showDots: true,
-                                colorPalette: _colorPalette,
+                              // 排行榜示例
+                              buildStatisticsCard(
+                                context: context,
+                                title: '排行榜',
+                                subtitle: 'RankingList',
+                                child: RankingList(
+                                  data: _rankingData,
+                                  colorPalette: _colorPalette,
+                                  valueLabel: '小时',
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 16),
+                              const SizedBox(height: 16),
 
-                            // 24小时分布示例
-                            buildStatisticsCard(
-                              context: context,
-                              title: '24小时分布',
-                              subtitle: 'HourlyDistributionBar',
-                              child: HourlyDistributionBar(
-                                hourlyData: _hourlyData,
-                                colorPalette: _colorPalette,
-                                height: 40,
+                              // 趋势图示例
+                              buildStatisticsCard(
+                                context: context,
+                                title: '时间序列趋势图',
+                                subtitle: 'TimeSeriesChart',
+                                child: TimeSeriesChart(
+                                  series: _timeSeriesData,
+                                  height: 200,
+                                  showDots: true,
+                                  colorPalette: _colorPalette,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 24),
+                              const SizedBox(height: 16),
 
-                            // 使用说明
-                            Text(
-                              '组件说明',
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 12),
-                            _buildUsageGuide(context),
-                          ],
+                              // 24小时分布示例
+                              buildStatisticsCard(
+                                context: context,
+                                title: '24小时分布',
+                                subtitle: 'HourlyDistributionBar',
+                                child: HourlyDistributionBar(
+                                  hourlyData: _hourlyData,
+                                  colorPalette: _colorPalette,
+                                  height: 40,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // 使用说明
+                              Text('组件说明', style: theme.textTheme.titleMedium),
+                              const SizedBox(height: 12),
+                              _buildUsageGuide(context),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
           ),
         ],
       ),
@@ -321,21 +315,22 @@ class _StatisticsExampleState extends State<StatisticsExample> {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
-        children: sizes.map((size) {
-          final isSelected = _sizeMode == size['value'];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: ChoiceChip(
-              label: Text(size['label']!),
-              selected: isSelected,
-              onSelected: (_) {
-                setState(() {
-                  _sizeMode = size['value']!;
-                });
-              },
-            ),
-          );
-        }).toList(),
+        children:
+            sizes.map((size) {
+              final isSelected = _sizeMode == size['value'];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: ChoiceChip(
+                  label: Text(size['label']!),
+                  selected: isSelected,
+                  onSelected: (_) {
+                    setState(() {
+                      _sizeMode = size['value']!;
+                    });
+                  },
+                ),
+              );
+            }).toList(),
       ),
     );
   }
@@ -379,7 +374,11 @@ class _StatisticsExampleState extends State<StatisticsExample> {
     );
   }
 
-  Widget _buildGuideItem(BuildContext context, {required String title, required String description}) {
+  Widget _buildGuideItem(
+    BuildContext context, {
+    required String title,
+    required String description,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

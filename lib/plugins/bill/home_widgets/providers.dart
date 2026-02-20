@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
-import 'bill_colors.dart';
 import 'utils.dart' show getCategoryColor;
 
 /// 账单统计类型
@@ -64,7 +63,6 @@ Future<Map<String, Map<String, dynamic>>> provideBillStatsWidgets(
     startDate: startDate,
     endDate: endDate,
   );
-  final accounts = controller.accounts;
 
   // 计算收入和支出
   double totalIncome = 0;
@@ -122,18 +120,6 @@ Future<Map<String, Map<String, dynamic>>> provideBillStatsWidgets(
   }
 
   // 获取账户信息
-  final accountInfo =
-      accounts.isNotEmpty
-          ? {
-            'name': accounts.first.title,
-            'iconCodePoint': accounts.first.icon.codePoint,
-            'iconColor': billColor.value,
-          }
-          : {
-            'name': '默认账户',
-            'iconCodePoint': Icons.account_balance_wallet.codePoint,
-            'iconColor': billColor.value,
-          };
 
   // 返回统计组件数据
   return {
@@ -167,8 +153,12 @@ Future<Map<String, Map<String, dynamic>>> provideBillStatsWidgets(
     'circularProgressCard': {
       'title': '收支比例',
       'subtitle': dateRangeLabel,
-      'progress': totalIncome > 0 ? (totalExpense / totalIncome).clamp(0.0, 1.0) : 0.0,
-      'percentage': totalIncome > 0 ? (totalExpense / totalIncome * 100).clamp(0.0, 100.0) : 0.0,
+      'progress':
+          totalIncome > 0 ? (totalExpense / totalIncome).clamp(0.0, 1.0) : 0.0,
+      'percentage':
+          totalIncome > 0
+              ? (totalExpense / totalIncome * 100).clamp(0.0, 100.0)
+              : 0.0,
       'progressColor': const Color(0xFFF44336).value,
     },
 
@@ -214,7 +204,8 @@ Future<Map<String, Map<String, dynamic>>> provideBillStatsWidgets(
       'avatarUrl': '',
       'availableBalance': balance,
       'totalBalance': totalIncome,
-      'changePercent': totalIncome > 0 ? ((balance / totalIncome * 100).round()) : 0,
+      'changePercent':
+          totalIncome > 0 ? ((balance / totalIncome * 100).round()) : 0,
       'income': totalIncome,
       'expenses': totalExpense,
     },

@@ -219,8 +219,7 @@ class _HomeGridState extends State<HomeGrid> {
         constraints.maxWidth - _gridPadding.left - _gridPadding.right;
 
     // 计算单个单元格宽度
-    final totalCrossSpacing =
-        (widget.crossAxisCount - 1) * _crossAxisSpacing;
+    final totalCrossSpacing = (widget.crossAxisCount - 1) * _crossAxisSpacing;
     final cellWidth =
         (availableWidth - totalCrossSpacing) / widget.crossAxisCount;
 
@@ -631,34 +630,22 @@ class _HomeGridState extends State<HomeGrid> {
 
     // 判断水平位置：0=左, 1=中, 2=右
     final int hZone;
-    final String hReason;
     if (normalizedX < edgeRatio) {
       hZone = 0; // 左
-      hReason = 'x=${normalizedX.toStringAsFixed(2)} < $edgeRatio';
     } else if (normalizedX > (1 - edgeRatio)) {
       hZone = 2; // 右
-      hReason =
-          'x=${normalizedX.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
     } else {
       hZone = 1; // 中
-      hReason =
-          '$edgeRatio <= x=${normalizedX.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
     }
 
     // 判断垂直位置：0=上, 1=中, 2=下
     final int vZone;
-    final String vReason;
     if (normalizedY < edgeRatio) {
       vZone = 0; // 上
-      vReason = 'y=${normalizedY.toStringAsFixed(2)} < $edgeRatio';
     } else if (normalizedY > (1 - edgeRatio)) {
       vZone = 2; // 下
-      vReason =
-          'y=${normalizedY.toStringAsFixed(2)} > ${(1 - edgeRatio).toStringAsFixed(2)}';
     } else {
       vZone = 1; // 中
-      vReason =
-          '$edgeRatio <= y=${normalizedY.toStringAsFixed(2)} <= ${(1 - edgeRatio).toStringAsFixed(2)}';
     }
 
     // 九宫格映射到方向

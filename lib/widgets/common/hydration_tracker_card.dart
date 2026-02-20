@@ -114,7 +114,7 @@ class _HydrationTrackerCardState extends State<HydrationTrackerCard>
     final padding = widget.size.getPadding();
     final iconSize = widget.size.getIconSize();
     final titleFontSize = widget.size.getTitleFontSize();
-    final subtitleFontSize = widget.size.getSubtitleFontSize();
+    widget.size.getSubtitleFontSize();
     final strokeWidth = widget.size.getStrokeWidth();
     final containerSize = iconSize * widget.size.iconContainerScale;
     final titleSpacing = widget.size.getTitleSpacing();
