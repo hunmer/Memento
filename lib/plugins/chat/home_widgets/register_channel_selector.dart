@@ -81,17 +81,17 @@ class _ChannelSelectorWidget extends StatelessWidget {
     }
 
     // 未配置状态
-    if (selectorConfig == null || !selectorConfig!.isConfigured) {
+    if (selectorConfig == null || !selectorConfig.isConfigured) {
       return HomeWidget.buildUnconfiguredWidget(context);
     }
 
     // 检查是否使用了公共小组件
-    if (selectorConfig!.usesCommonWidget) {
-      return _buildCommonWidgetWithLiveData(context, selectorConfig!);
+    if (selectorConfig.usesCommonWidget) {
+      return _buildCommonWidgetWithLiveData(context, selectorConfig);
     }
 
     // 默认视图（使用 dataRenderer）
-    final originalResult = selectorConfig!.toSelectorResult();
+    final originalResult = selectorConfig.toSelectorResult();
     if (originalResult == null) {
       return HomeWidget.buildErrorWidget(context, '无法解析选择的数据');
     }
@@ -139,8 +139,8 @@ class _ChannelSelectorWidget extends StatelessWidget {
     }
 
     // 获取尺寸
-    final size = config['widgetSize'] as HomeWidgetSize? ??
-        widgetDefinition.defaultSize;
+    final size =
+        config['widgetSize'] as HomeWidgetSize? ?? widgetDefinition.defaultSize;
 
     // 使用实时数据更新 props
     final liveProps = getLiveCommonWidgetProps(

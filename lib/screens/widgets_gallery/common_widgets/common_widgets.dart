@@ -213,7 +213,7 @@ class CommonWidgetsRegistry {
       description: '显示带彩色标签的任务列表，支持翻转计数动画和入场效果',
       icon: Icons.label,
       defaultSize: Large3Size(),
-      supportedSizes: const [const LargeSize()],
+      supportedSizes: const [LargeSize()],
     ),
     CommonWidgetId.activityProgressCard: CommonWidgetMetadata(
       id: CommonWidgetId.activityProgressCard,
@@ -229,7 +229,7 @@ class CommonWidgetsRegistry {
       description: '显示预算/余额的半圆形仪表盘',
       icon: Icons.speed,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.taskProgressCard: const CommonWidgetMetadata(
       id: CommonWidgetId.taskProgressCard,
@@ -237,7 +237,7 @@ class CommonWidgetsRegistry {
       description: '显示任务进度、待办列表',
       icon: Icons.task_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.taskListCard: CommonWidgetMetadata(
       id: CommonWidgetId.taskListCard,
@@ -245,7 +245,7 @@ class CommonWidgetsRegistry {
       description: '显示任务列表和计数信息',
       icon: Icons.format_list_bulleted,
       defaultSize: Large3Size(),
-      supportedSizes: const [const LargeSize()],
+      supportedSizes: const [LargeSize()],
     ),
     CommonWidgetId.audioWaveformCard: const CommonWidgetMetadata(
       id: CommonWidgetId.audioWaveformCard,
@@ -253,7 +253,7 @@ class CommonWidgetsRegistry {
       description: '显示音频录制信息、时长和波形可视化',
       icon: Icons.graphic_eq,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.segmentedProgressCard: const CommonWidgetMetadata(
       id: CommonWidgetId.segmentedProgressCard,
@@ -261,7 +261,7 @@ class CommonWidgetsRegistry {
       description: '多类别分段统计卡片',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.milestoneCard: CommonWidgetMetadata(
       id: CommonWidgetId.milestoneCard,
@@ -269,7 +269,7 @@ class CommonWidgetsRegistry {
       description: '时间里程碑追踪展示卡片',
       icon: Icons.flag,
       defaultSize: Large3Size(),
-      supportedSizes: const [const LargeSize()],
+      supportedSizes: const [LargeSize()],
     ),
     CommonWidgetId.monthlyProgressDotsCard: const CommonWidgetMetadata(
       id: CommonWidgetId.monthlyProgressDotsCard,
@@ -277,7 +277,7 @@ class CommonWidgetsRegistry {
       description: '圆点矩阵月度进度卡片',
       icon: Icons.calendar_month,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.multiMetricProgressCard: const CommonWidgetMetadata(
       id: CommonWidgetId.multiMetricProgressCard,
@@ -285,7 +285,7 @@ class CommonWidgetsRegistry {
       description: '多指标进度展示卡片，带圆形进度环',
       icon: Icons.dashboard,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.circularMetricsCard: const CommonWidgetMetadata(
       id: CommonWidgetId.circularMetricsCard,
@@ -293,7 +293,7 @@ class CommonWidgetsRegistry {
       description: '显示多个环形指标，带进度环和图标',
       icon: Icons.donut_large,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.smoothLineChartCard: const CommonWidgetMetadata(
       id: CommonWidgetId.smoothLineChartCard,
@@ -301,7 +301,7 @@ class CommonWidgetsRegistry {
       description: '带渐变填充的平滑折线图卡片',
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.verticalBarChartCard: const CommonWidgetMetadata(
       id: CommonWidgetId.verticalBarChartCard,
@@ -309,7 +309,7 @@ class CommonWidgetsRegistry {
       description: '双数据系列垂直柱状图展示卡片',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.lineChartTrendCard: const CommonWidgetMetadata(
       id: CommonWidgetId.lineChartTrendCard,
@@ -317,7 +317,7 @@ class CommonWidgetsRegistry {
       description: '折线图趋势统计卡片',
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.inboxMessageCard: const CommonWidgetMetadata(
       id: CommonWidgetId.inboxMessageCard,
@@ -325,7 +325,7 @@ class CommonWidgetsRegistry {
       description: '显示消息列表和计数信息',
       icon: Icons.inbox,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.roundedTaskListCard: const CommonWidgetMetadata(
       id: CommonWidgetId.roundedTaskListCard,
@@ -333,7 +333,7 @@ class CommonWidgetsRegistry {
       description: '显示任务列表和日期信息',
       icon: Icons.list_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.roundedRemindersList: const CommonWidgetMetadata(
       id: CommonWidgetId.roundedRemindersList,
@@ -341,7 +341,7 @@ class CommonWidgetsRegistry {
       description: '显示提醒事项列表和计数',
       icon: Icons.notification_important,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.dualSliderCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dualSliderCard,
@@ -349,7 +349,7 @@ class CommonWidgetsRegistry {
       description: '通用双滑块数值显示组件，支持自定义标签和进度',
       icon: Icons.access_time,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.earningsTrendCard: const CommonWidgetMetadata(
       id: CommonWidgetId.earningsTrendCard,
@@ -357,7 +357,7 @@ class CommonWidgetsRegistry {
       description: '显示收益趋势、货币数值、百分比变化和平滑折线图',
       icon: Icons.trending_up,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.revenueTrendCard: const CommonWidgetMetadata(
       id: CommonWidgetId.revenueTrendCard,
@@ -365,7 +365,7 @@ class CommonWidgetsRegistry {
       description: '显示收入趋势、货币数值、百分比变化和曲线图，支持日期标签和高亮点',
       icon: Icons.trending_up,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.watchProgressCard: const CommonWidgetMetadata(
       id: CommonWidgetId.watchProgressCard,
@@ -373,7 +373,7 @@ class CommonWidgetsRegistry {
       description: '显示用户观看进度、当前/总数和观看项目列表',
       icon: Icons.play_circle_outline,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.stressLevelMonitor: const CommonWidgetMetadata(
       id: CommonWidgetId.stressLevelMonitor,
@@ -381,7 +381,7 @@ class CommonWidgetsRegistry {
       description: '显示当前压力分数、状态描述和每周7天的柱状图数据，支持动画效果',
       icon: Icons.psychology_outlined,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.dailyTodoListCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dailyTodoListCard,
@@ -389,7 +389,7 @@ class CommonWidgetsRegistry {
       description: '显示日期、时间和待办任务列表，支持任务切换和提醒信息',
       icon: Icons.check_circle_outline,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.upcomingTasksWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.upcomingTasksWidget,
@@ -397,7 +397,7 @@ class CommonWidgetsRegistry {
       description: '显示任务计数、任务列表和更多任务数量，支持动画效果',
       icon: Icons.task_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.profileCardCard: const CommonWidgetMetadata(
       id: CommonWidgetId.profileCardCard,
@@ -405,7 +405,7 @@ class CommonWidgetsRegistry {
       description: '展示用户个人信息，包括背景图、姓名、认证标志、简介和关注统计',
       icon: Icons.account_circle,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.sleepStageChartCard: const CommonWidgetMetadata(
       id: CommonWidgetId.sleepStageChartCard,
@@ -413,7 +413,7 @@ class CommonWidgetsRegistry {
       description: '展示睡眠阶段的可视化图表，支持动画效果和时间范围选择',
       icon: Icons.bedtime_outlined,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.splitImageCard: const CommonWidgetMetadata(
       id: CommonWidgetId.splitImageCard,
@@ -421,7 +421,7 @@ class CommonWidgetsRegistry {
       description: '左右分屏布局的卡片组件，左侧展示图片，右侧展示信息',
       icon: Icons.image,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.socialProfileCard: const CommonWidgetMetadata(
       id: CommonWidgetId.socialProfileCard,
@@ -429,7 +429,7 @@ class CommonWidgetsRegistry {
       description: '显示用户头像、名称、账号、标签、内容和社交统计数据',
       icon: Icons.person,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.miniTrendCard: const CommonWidgetMetadata(
       id: CommonWidgetId.miniTrendCard,
@@ -437,7 +437,7 @@ class CommonWidgetsRegistry {
       description: '显示标题、图标、当前数值、单位、副标题、星期标签和趋势折线图',
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.accountBalanceCard: const CommonWidgetMetadata(
       id: CommonWidgetId.accountBalanceCard,
@@ -445,7 +445,7 @@ class CommonWidgetsRegistry {
       description: '显示多个账户的余额信息，包括账户名称、图标、账单数量和余额，支持正负余额显示和入场动画效果',
       icon: Icons.account_balance,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.modernRoundedSpendingWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.modernRoundedSpendingWidget,
@@ -453,7 +453,7 @@ class CommonWidgetsRegistry {
       description: '显示当前消费、预算、分类进度条和分类列表，支持动画效果',
       icon: Icons.payments_outlined,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.walletBalanceCard: const CommonWidgetMetadata(
       id: CommonWidgetId.walletBalanceCard,
@@ -461,7 +461,7 @@ class CommonWidgetsRegistry {
       description: '显示钱包余额、可用余额、收入支出统计和操作按钮，支持动画效果',
       icon: Icons.account_balance_wallet,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.scoreCardWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.scoreCardWidget,
@@ -469,7 +469,7 @@ class CommonWidgetsRegistry {
       description: '显示分数、等级和行为列表，支持翻转计数动画和渐变背景',
       icon: Icons.scoreboard,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.trendValueCard: const CommonWidgetMetadata(
       id: CommonWidgetId.trendValueCard,
@@ -478,7 +478,7 @@ class CommonWidgetsRegistry {
           '通用的数值展示卡片，支持数值和单位显示（带翻转动画）、趋势指示（上升/下降）、曲线图表（带渐变填充）和附加信息（日期、BMI等）',
       icon: Icons.trending_up,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.trendListCard: const CommonWidgetMetadata(
       id: CommonWidgetId.trendListCard,
@@ -486,7 +486,7 @@ class CommonWidgetsRegistry {
       description: '股票/指数价格与涨跌幅列表卡片，支持多个趋势项展示，带翻转计数动画和入场效果',
       icon: Icons.trending_up,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.modernEgfrHealthWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.modernEgfrHealthWidget,
@@ -494,7 +494,7 @@ class CommonWidgetsRegistry {
       description: '通用的健康指标展示卡片，支持标题、图标、数值（带翻转动画）、单位和状态指示器',
       icon: Icons.favorite,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.newsUpdateCard: const CommonWidgetMetadata(
       id: CommonWidgetId.newsUpdateCard,
@@ -502,7 +502,7 @@ class CommonWidgetsRegistry {
       description: '显示新闻标题、时间戳和分页指示器，支持动画效果',
       icon: Icons.newspaper,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.newsCard: const CommonWidgetMetadata(
       id: CommonWidgetId.newsCard,
@@ -510,7 +510,7 @@ class CommonWidgetsRegistry {
       description: '显示头条新闻、分类标签和新闻列表，支持动画效果',
       icon: Icons.article,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
 
     CommonWidgetId.moodChartCard: const CommonWidgetMetadata(
@@ -519,7 +519,7 @@ class CommonWidgetsRegistry {
       description: '显示每日情绪柱状图和每周心情历史记录，支持动画效果和多种心情表情',
       icon: Icons.sentiment_satisfied_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.dailyEventsCard: CommonWidgetMetadata(
       id: CommonWidgetId.dailyEventsCard,
@@ -527,7 +527,7 @@ class CommonWidgetsRegistry {
       description: '显示星期、日期和当日事件列表，支持翻转计数动画',
       icon: Icons.event,
       defaultSize: Large3Size(),
-      supportedSizes: const [const MediumSize(), const LargeSize()],
+      supportedSizes: const [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.dailyReflectionCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dailyReflectionCard,
@@ -535,7 +535,7 @@ class CommonWidgetsRegistry {
       description: '引导用户每日思考和记录的卡片，包含星期几、引导性问题和操作按钮',
       icon: Icons.lightbulb_outline,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.colorfulShortcutsGrid: const CommonWidgetMetadata(
       id: CommonWidgetId.colorfulShortcutsGrid,
@@ -543,7 +543,7 @@ class CommonWidgetsRegistry {
       description: '显示带颜色背景的快捷方式网格，支持动画效果和自定义图标',
       icon: Icons.grid_view,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.journalPromptCard: const CommonWidgetMetadata(
       id: CommonWidgetId.journalPromptCard,
@@ -551,7 +551,7 @@ class CommonWidgetsRegistry {
       description: '显示星期几、提示性问题和操作按钮（新建、同步），支持动画效果和自定义蝴蝶图标',
       icon: Icons.book,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.socialActivityCard: const CommonWidgetMetadata(
       id: CommonWidgetId.socialActivityCard,
@@ -559,7 +559,7 @@ class CommonWidgetsRegistry {
       description: '显示用户头像、名称、关注数和社交动态列表，支持翻转计数动画和互动数据',
       icon: Icons.people,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.monthlyBillCard: const CommonWidgetMetadata(
       id: CommonWidgetId.monthlyBillCard,
@@ -567,15 +567,15 @@ class CommonWidgetsRegistry {
       description: '显示月度账单信息，包括收入、支出和结余，支持翻转计数动画和入场效果',
       icon: Icons.receipt_long,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.timelineStatusCard: const CommonWidgetMetadata(
       id: CommonWidgetId.timelineStatusCard,
       name: '时间线状态卡片',
       description: '显示位置、标题、描述和时间线进度，支持动画效果和网格背景',
       icon: Icons.timeline,
-      defaultSize: const MediumSize(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.spendingTrendChart: const CommonWidgetMetadata(
       id: CommonWidgetId.spendingTrendChart,
@@ -583,7 +583,7 @@ class CommonWidgetsRegistry {
       description: '显示支出趋势对比的折线图卡片，支持当前月与上月对比、预算线显示和平滑曲线动画',
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.modernRoundedMoodWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.modernRoundedMoodWidget,
@@ -591,7 +591,7 @@ class CommonWidgetsRegistry {
       description: '周视图柱状图显示每日心情值，支持积极/消极情绪区分、7天心情历史和当前日期高亮',
       icon: Icons.sentiment_satisfied_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.dailyScheduleCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dailyScheduleCard,
@@ -599,7 +599,7 @@ class CommonWidgetsRegistry {
       description: '显示日期、今日活动和明日活动列表，支持时间活动和全天活动',
       icon: Icons.event,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.articleListCard: const CommonWidgetMetadata(
       id: CommonWidgetId.articleListCard,
@@ -607,7 +607,7 @@ class CommonWidgetsRegistry {
       description: '显示特色文章和普通文章列表，支持图片展示和动画效果',
       icon: Icons.article,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.eventCalendarWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.eventCalendarWidget,
@@ -615,7 +615,7 @@ class CommonWidgetsRegistry {
       description: '显示日期、周日历和事件列表，支持活动计数和提醒信息',
       icon: Icons.calendar_today,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.roundedTaskProgressWidget: const CommonWidgetMetadata(
       id: CommonWidgetId.roundedTaskProgressWidget,
@@ -623,7 +623,7 @@ class CommonWidgetsRegistry {
       description: '显示项目标题、进度条、待办任务列表、评论数、附件数和团队成员头像',
       icon: Icons.task_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.dualRangeChartCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dualRangeChartCard,
@@ -631,7 +631,7 @@ class CommonWidgetsRegistry {
       description: '显示双范围柱状图，支持日期选择、周视图和范围汇总数据',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.dailyBarChartCard: const CommonWidgetMetadata(
       id: CommonWidgetId.dailyBarChartCard,
@@ -639,7 +639,7 @@ class CommonWidgetsRegistry {
       description: '显示每日数据条形图，支持标题、副标题、数值显示和多种颜色',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.nutritionProgressCard: const CommonWidgetMetadata(
       id: CommonWidgetId.nutritionProgressCard,
@@ -647,7 +647,7 @@ class CommonWidgetsRegistry {
       description: '显示卡路里和营养素（蛋白质、碳水化合物、脂肪）进度，支持动画计数',
       icon: Icons.restaurant,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.portfolioStackedChart: const CommonWidgetMetadata(
       id: CommonWidgetId.portfolioStackedChart,
@@ -655,7 +655,7 @@ class CommonWidgetsRegistry {
       description: '显示投资组合的堆叠柱状图，支持多种资产类型和月度数据展示',
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.activityRingsCard: const CommonWidgetMetadata(
       id: CommonWidgetId.activityRingsCard,
@@ -663,7 +663,7 @@ class CommonWidgetsRegistry {
       description: '显示活动圆环（步数、卡路里等），支持日期和状态显示',
       icon: Icons.fitness_center,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.categoryStackWidget: CommonWidgetMetadata(
       id: CommonWidgetId.categoryStackWidget,
@@ -671,7 +671,7 @@ class CommonWidgetsRegistry {
       description: '显示分类消费堆叠图，支持当前金额、目标金额和分类列表',
       icon: Icons.pie_chart,
       defaultSize: Large3Size(),
-      supportedSizes: const [const LargeSize()],
+      supportedSizes: const [LargeSize()],
     ),
     CommonWidgetId.performanceBarChart: CommonWidgetMetadata(
       id: CommonWidgetId.performanceBarChart,
@@ -679,7 +679,7 @@ class CommonWidgetsRegistry {
       description: '显示性能指标柱状图，支持增长百分比和时间周期',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: const [const LargeSize()],
+      supportedSizes: const [LargeSize()],
     ),
     CommonWidgetId.rankedBarChartCard: CommonWidgetMetadata(
       id: CommonWidgetId.rankedBarChartCard,
@@ -687,7 +687,7 @@ class CommonWidgetsRegistry {
       description: '显示排名条形图列表，支持标题、副标题、条目计数和页脚文本',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: const [const LargeSize()],
+      supportedSizes: const [LargeSize()],
     ),
     CommonWidgetId.rentalPreviewCard: const CommonWidgetMetadata(
       id: CommonWidgetId.rentalPreviewCard,
@@ -695,7 +695,7 @@ class CommonWidgetsRegistry {
       description: '显示租赁信息的卡片，包含图片、标题、评分、描述和时间',
       icon: Icons.home_work,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.roundedPropertyCard: const CommonWidgetMetadata(
       id: CommonWidgetId.roundedPropertyCard,
@@ -703,7 +703,7 @@ class CommonWidgetsRegistry {
       description: '显示房地产属性的卡片，包含图片、标题、元数据和描述',
       icon: Icons.home,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.taskListStatCard: const CommonWidgetMetadata(
       id: CommonWidgetId.taskListStatCard,
@@ -711,7 +711,7 @@ class CommonWidgetsRegistry {
       description: '显示任务统计和列表的卡片，包含图标、计数和任务列表',
       icon: Icons.format_list_bulleted,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.verticalPropertyCard: const CommonWidgetMetadata(
       id: CommonWidgetId.verticalPropertyCard,
@@ -719,7 +719,7 @@ class CommonWidgetsRegistry {
       description: '显示属性信息的垂直卡片，包含图片、标题、元数据和操作按钮',
       icon: Icons.home_outlined,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.taskProgressList: const CommonWidgetMetadata(
       id: CommonWidgetId.taskProgressList,
@@ -727,7 +727,7 @@ class CommonWidgetsRegistry {
       description: '显示任务进度列表，包含任务标题、时间和进度条',
       icon: Icons.task_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.sleepDurationCard: const CommonWidgetMetadata(
       id: CommonWidgetId.sleepDurationCard,
@@ -735,7 +735,7 @@ class CommonWidgetsRegistry {
       description: '显示睡眠时长、趋势和睡眠周期可视化',
       icon: Icons.bedtime_outlined,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.moodTrackerCard: const CommonWidgetMetadata(
       id: CommonWidgetId.moodTrackerCard,
@@ -743,7 +743,7 @@ class CommonWidgetsRegistry {
       description: '显示情绪记录和每周情绪数据',
       icon: Icons.sentiment_satisfied_alt,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.habitStreakTrackerCard: const CommonWidgetMetadata(
       id: CommonWidgetId.habitStreakTrackerCard,
@@ -751,7 +751,7 @@ class CommonWidgetsRegistry {
       description: '显示习惯打卡连续天数、最佳记录、里程碑和日期网格',
       icon: Icons.local_fire_department,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.monthlyDotTrackerCard: const CommonWidgetMetadata(
       id: CommonWidgetId.monthlyDotTrackerCard,
@@ -759,15 +759,15 @@ class CommonWidgetsRegistry {
       description: '显示当月的签到状态点阵、进度统计和状态标签',
       icon: Icons.calendar_month,
       defaultSize: Large3Size(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.checkinItemCard: const CommonWidgetMetadata(
       id: CommonWidgetId.checkinItemCard,
       name: '签到项目卡片',
       description: '显示签到项目的图标、名称、今日打卡状态和热力图',
       icon: Icons.checklist,
-      defaultSize: const MediumSize(),
-      supportedSizes: [const MediumSize(), const LargeSize()],
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
     ),
     CommonWidgetId.activityHeatmapCard: const CommonWidgetMetadata(
       id: CommonWidgetId.activityHeatmapCard,
@@ -799,7 +799,7 @@ class CommonWidgetsRegistry {
       description: '显示两个关联数值和周趋势柱状图，适用于血压、血糖等健康指标',
       icon: Icons.water_drop,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.trendLineChartCard: const CommonWidgetMetadata(
       id: CommonWidgetId.trendLineChartCard,
@@ -807,7 +807,7 @@ class CommonWidgetsRegistry {
       description: '带动画效果的折线图组件，支持显示标题、图标、数值和时间轴标签',
       icon: Icons.show_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.modernRoundedBalanceCard: const CommonWidgetMetadata(
       id: CommonWidgetId.modernRoundedBalanceCard,
@@ -815,7 +815,7 @@ class CommonWidgetsRegistry {
       description: '展示余额和可用额度，带有每周数据柱状图',
       icon: Icons.account_balance_wallet,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.barChartStatsCard: const CommonWidgetMetadata(
       id: CommonWidgetId.barChartStatsCard,
@@ -823,7 +823,7 @@ class CommonWidgetsRegistry {
       description: '显示统计数据和日期范围的柱状图，支持动画效果',
       icon: Icons.bar_chart,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
     CommonWidgetId.expenseComparisonChart: const CommonWidgetMetadata(
       id: CommonWidgetId.expenseComparisonChart,
@@ -831,7 +831,7 @@ class CommonWidgetsRegistry {
       description: '显示本月与上月对比，双数据系列柱状图',
       icon: Icons.compare_arrows,
       defaultSize: Large3Size(),
-      supportedSizes: [const LargeSize()],
+      supportedSizes: [LargeSize()],
     ),
   };
 
@@ -871,15 +871,19 @@ class CommonWidgetBuilder {
     // 如果 props 中有 _pixelCategory，使用它创建基于像素尺寸的有效 size
     // 这样公共组件可以根据实际像素尺寸调整布局
     final pixelCategory = props['_pixelCategory'] as SizeCategory?;
-    final effectiveSize = pixelCategory != null
-        ? HomeWidgetSize.fromCategory(pixelCategory)
-        : size;
+    final effectiveSize =
+        pixelCategory != null
+            ? HomeWidgetSize.fromCategory(pixelCategory)
+            : size;
 
     switch (widgetId) {
       case CommonWidgetId.circularProgressCard:
         return CircularProgressCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.iconCircularProgressCard:
-        return IconCircularProgressCardWidget.fromProps(finalProps, effectiveSize);
+        return IconCircularProgressCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.colorTagTaskCard:
         return ColorTagTaskCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.activityProgressCard:
@@ -897,9 +901,15 @@ class CommonWidgetBuilder {
       case CommonWidgetId.milestoneCard:
         return MilestoneCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.monthlyProgressDotsCard:
-        return MonthlyProgressWithDotsCardWidget.fromProps(finalProps, effectiveSize);
+        return MonthlyProgressWithDotsCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.multiMetricProgressCard:
-        return MultiMetricProgressCardWidget.fromProps(finalProps, effectiveSize);
+        return MultiMetricProgressCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.circularMetricsCard:
         return CircularMetricsCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.smoothLineChartCard:
@@ -1019,7 +1029,10 @@ class CommonWidgetBuilder {
       case CommonWidgetId.moodTrackerCard:
         return CardEmojiIconDisplay.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.habitStreakTrackerCard:
-        return HabitStreakTrackerCardWidget.fromProps(finalProps, effectiveSize);
+        return HabitStreakTrackerCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.monthlyDotTrackerCard:
         return MonthlyDotTrackerCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.checkinItemCard:
@@ -1027,7 +1040,10 @@ class CommonWidgetBuilder {
       case CommonWidgetId.activityHeatmapCard:
         return ActivityHeatmapCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.activityTodayPieChartCard:
-        return ActivityTodayPieChartCardWidget.fromProps(finalProps, effectiveSize);
+        return ActivityTodayPieChartCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.timelineScheduleCard:
         return TimelineScheduleCard.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.bloodPressureTracker:
@@ -1039,7 +1055,10 @@ class CommonWidgetBuilder {
       case CommonWidgetId.barChartStatsCard:
         return BarChartStatsCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.expenseComparisonChart:
-        return ExpenseComparisonChartCardWidget.fromProps(finalProps, effectiveSize);
+        return ExpenseComparisonChartCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
     }
   }
 }

@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import 'package:Memento/plugins/chat/chat_plugin.dart';
-import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 import 'data.dart';
 
 /// 公共小组件提供者函数

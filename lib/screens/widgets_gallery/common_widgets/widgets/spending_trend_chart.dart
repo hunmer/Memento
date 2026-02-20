@@ -211,7 +211,11 @@ class _SpendingTrendChartWidgetState extends State<SpendingTrendChartWidget>
                             color: textColor,
                           ),
                         ),
-                        Icon(Icons.calendar_today, size: widget.size.getIconSize(), color: textColor),
+                        Icon(
+                          Icons.calendar_today,
+                          size: widget.size.getIconSize(),
+                          color: textColor,
+                        ),
                       ],
                     ),
                   ),
@@ -329,7 +333,10 @@ class _LegendItem extends StatelessWidget {
           child:
               isDashed
                   ? CustomPaint(
-                    size: Size(size.getLegendIndicatorWidth() / 2, size.getLegendIndicatorHeight() / 2),
+                    size: Size(
+                      size.getLegendIndicatorWidth() / 2,
+                      size.getLegendIndicatorHeight() / 2,
+                    ),
                     painter: _DashedCirclePainter(color: color),
                   )
                   : null,
@@ -425,10 +432,10 @@ class _TrendLineChart extends StatelessWidget {
 
     // 计算Y轴标签
     final yLabels = [
-      (maxAmount / 1000).toInt().toString() + 'k',
-      ((maxAmount * 0.75) / 1000).toInt().toString() + 'k',
-      ((maxAmount * 0.5) / 1000).toInt().toString() + 'k',
-      ((maxAmount * 0.25) / 1000).toInt().toString() + 'k',
+      '${(maxAmount / 1000).toInt()}k',
+      '${((maxAmount * 0.75) / 1000).toInt()}k',
+      '${((maxAmount * 0.5) / 1000).toInt()}k',
+      '${((maxAmount * 0.25) / 1000).toInt()}k',
     ];
 
     return Stack(
@@ -459,10 +466,12 @@ class _TrendLineChart extends StatelessWidget {
               budgetLabel: budgetLabel,
               fontSize: size.getLegendFontSize(),
               textColor: textColor,
-              backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
-              borderColor: isDark
-                  ? Colors.white.withOpacity(0.1)
-                  : Colors.black.withOpacity(0.05),
+              backgroundColor:
+                  isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+              borderColor:
+                  isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.05),
               itemSpacing: size.getItemSpacing(),
               lineWidth: 200,
             ),
@@ -606,21 +615,24 @@ class _BudgetLabelPainter extends CustomPainter {
     final bgPaint = Paint()..color = backgroundColor;
     canvas.drawRRect(bgRect, bgPaint);
 
-    final borderPaint = Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
+    final borderPaint =
+        Paint()
+          ..color = borderColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1;
     canvas.drawRRect(bgRect, borderPaint);
 
     // 绘制文本
     textPainter.paint(canvas, Offset(itemSpacing, itemSpacing / 4));
 
     // 绘制线条
-    final linePaint = Paint()
-      ..color = backgroundColor == Colors.grey.shade800
-          ? Colors.grey.shade700
-          : Colors.grey.shade300
-      ..strokeWidth = 1;
+    final linePaint =
+        Paint()
+          ..color =
+              backgroundColor == Colors.grey.shade800
+                  ? Colors.grey.shade700
+                  : Colors.grey.shade300
+          ..strokeWidth = 1;
     canvas.drawLine(
       Offset(bgWidth + itemSpacing, bgHeight / 2),
       Offset(bgWidth + itemSpacing + lineWidth, bgHeight / 2),
@@ -658,9 +670,7 @@ class _XAxisLabelPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-    );
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
 
     // 绘制开始标签
     textPainter.text = TextSpan(
@@ -684,10 +694,7 @@ class _XAxisLabelPainter extends CustomPainter {
       ),
     );
     textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset((size.width - textPainter.width) / 2, 0),
-    );
+    textPainter.paint(canvas, Offset((size.width - textPainter.width) / 2, 0));
 
     // 绘制结束标签
     textPainter.text = TextSpan(
@@ -699,10 +706,7 @@ class _XAxisLabelPainter extends CustomPainter {
       ),
     );
     textPainter.layout();
-    textPainter.paint(
-      canvas,
-      Offset(size.width - textPainter.width, 0),
-    );
+    textPainter.paint(canvas, Offset(size.width - textPainter.width, 0));
   }
 
   @override
