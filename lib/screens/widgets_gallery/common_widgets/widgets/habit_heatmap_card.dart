@@ -100,6 +100,13 @@ class HabitHeatmapCardWidget extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -217,7 +224,7 @@ class HabitHeatmapCardWidget extends StatelessWidget {
             spacing: spacing,
             runSpacing: spacing,
             alignment: WrapAlignment.start,
-            runAlignment: WrapAlignment.start,
+            runAlignment: WrapAlignment.end,
             children:
                 dailyData.map((item) {
                   // 根据时长计算透明度
