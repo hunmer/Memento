@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'package:flutter/material.dart';
 import 'package:Memento/widgets/form_fields/form_field_wrapper.dart';
 
@@ -564,7 +566,7 @@ class EventSelectorDialogState extends State<EventSelectorDialog> {
           label: Text(_hasSelection ? '反选' : '全选'),
           style: TextButton.styleFrom(foregroundColor: Colors.deepPurple),
         ),
-        const SizedBox(width: 8),  // 使用 SizedBox 替代 Spacer
+        const SizedBox(width: 8), // 使用 SizedBox 替代 Spacer
         // 右侧取消/确定按钮
         TextButton(
           onPressed: () => Navigator.pop(context),

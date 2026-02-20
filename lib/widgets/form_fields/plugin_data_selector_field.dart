@@ -1,3 +1,5 @@
+// ignore_for_file: overridden_fields
+
 import 'package:flutter/material.dart';
 import 'package:Memento/core/services/plugin_data_selector/plugin_data_selector_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_config.dart';
@@ -44,7 +46,8 @@ class PluginDataSelectorField extends FormFieldWrapper {
       _PluginDataSelectorFieldState();
 }
 
-class _PluginDataSelectorFieldState extends FormFieldWrapperState<PluginDataSelectorField> {
+class _PluginDataSelectorFieldState
+    extends FormFieldWrapperState<PluginDataSelectorField> {
   String? _selectedId;
   String? _selectedTitle;
   Map<String, dynamic>? _selectedData;
@@ -109,9 +112,10 @@ class _PluginDataSelectorFieldState extends FormFieldWrapperState<PluginDataSele
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, color: Colors.deepPurple)
-            : const Icon(Icons.smart_toy, color: Colors.deepPurple),
+        leading:
+            widget.prefixIcon != null
+                ? Icon(widget.prefixIcon, color: Colors.deepPurple)
+                : const Icon(Icons.smart_toy, color: Colors.deepPurple),
         title: Text(_selectedTitle ?? _selectedId ?? '未选择'),
         subtitle: _selectedId != null ? null : const Text('点击选择数据'),
         trailing: const Icon(Icons.chevron_right),

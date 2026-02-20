@@ -1,3 +1,5 @@
+// ignore_for_file: unintended_html_in_doc_comment
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -38,7 +40,9 @@ class JSBridgeInjector {
         maxBatchSize: maxBatchSize,
         maxConcurrent: maxConcurrentBatches,
       );
-      debugPrint('[JSBridge] 批处理已启用: 窗口=${batchWindowDuration.inMilliseconds}ms, 最大批次=$maxBatchSize, 并发=$maxConcurrentBatches');
+      debugPrint(
+        '[JSBridge] 批处理已启用: 窗口=${batchWindowDuration.inMilliseconds}ms, 最大批次=$maxBatchSize, 并发=$maxConcurrentBatches',
+      );
     }
   }
 
@@ -102,15 +106,18 @@ class JSBridgeInjector {
           // 检查 JSBridgeManager 是否已初始化
           if (!JSBridgeManager.instance.isSupported) {
             return jsonEncode({
-              'error': 'JS Bridge not initialized. Please wait for the bridge to be ready.',
+              'error':
+                  'JS Bridge not initialized. Please wait for the bridge to be ready.',
             });
           }
 
           // 检查插件是否已注册
-          final registeredPlugins = JSBridgeManager.instance.registeredPluginIds;
+          final registeredPlugins =
+              JSBridgeManager.instance.registeredPluginIds;
           if (!registeredPlugins.contains(pluginId)) {
             return jsonEncode({
-              'error': 'Plugin "$pluginId" is not registered. Available plugins: ${registeredPlugins.join(", ")}',
+              'error':
+                  'Plugin "$pluginId" is not registered. Available plugins: ${registeredPlugins.join(", ")}',
             });
           }
 
@@ -166,7 +173,8 @@ class JSBridgeInjector {
             return jsonEncode({'error': 'Missing method name'});
           }
 
-          final paramsArg = methodParams != null ? jsonEncode(methodParams) : '';
+          final paramsArg =
+              methodParams != null ? jsonEncode(methodParams) : '';
           // 构建 JS Bridge 调用代码（必须有 return 语句才能获取返回值）
           final code = 'return Memento_system_$method($paramsArg)';
 
@@ -201,9 +209,9 @@ class JSBridgeInjector {
           }
 
           final message = params['message'] as String? ?? '';
-          ScaffoldMessenger.of(_context!).showSnackBar(
-            SnackBar(content: Text(message)),
-          );
+          ScaffoldMessenger.of(
+            _context!,
+          ).showSnackBar(SnackBar(content: Text(message)));
         } catch (e) {
           debugPrint('Toast error: $e');
         }
@@ -233,16 +241,17 @@ class JSBridgeInjector {
 
           final result = await showDialog<bool>(
             context: _context!,
-            builder: (ctx) => AlertDialog(
-              title: Text(options['title'] as String? ?? '提示'),
-              content: Text(message),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: Text(options['confirmText'] as String? ?? '确定'),
+            builder:
+                (ctx) => AlertDialog(
+                  title: Text(options['title'] as String? ?? '提示'),
+                  content: Text(message),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text(options['confirmText'] as String? ?? '确定'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
           );
           return result ?? false;
         } catch (e) {
@@ -272,21 +281,22 @@ class JSBridgeInjector {
 
           final result = await showDialog<bool>(
             context: _context!,
-            builder: (ctx) => AlertDialog(
-              title: Text(options['title'] as String? ?? ''),
-              content: Text(options['content'] as String? ?? ''),
-              actions: [
-                if (options['showCancel'] != false)
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx, false),
-                    child: Text(options['cancelText'] as String? ?? '取消'),
-                  ),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: Text(options['confirmText'] as String? ?? '确定'),
+            builder:
+                (ctx) => AlertDialog(
+                  title: Text(options['title'] as String? ?? ''),
+                  content: Text(options['content'] as String? ?? ''),
+                  actions: [
+                    if (options['showCancel'] != false)
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text(options['cancelText'] as String? ?? '取消'),
+                      ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text(options['confirmText'] as String? ?? '确定'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
           );
           return result;
         } catch (e) {
@@ -320,7 +330,8 @@ class JSBridgeInjector {
           }
 
           // 获取 webview 插件的存储
-          final webviewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+          final webviewPlugin =
+              PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
           if (webviewPlugin == null) {
             return jsonEncode({'error': 'WebView plugin not found'});
           }
@@ -329,11 +340,15 @@ class JSBridgeInjector {
           final storagePath = 'webview/$key';
           final result = await webviewPlugin.storage.read(storagePath);
 
-          debugPrint('[JSBridge Storage Read] key=$key, hasData=${result != null}, dataType=${result?.runtimeType}, value=$result');
+          debugPrint(
+            '[JSBridge Storage Read] key=$key, hasData=${result != null}, dataType=${result?.runtimeType}, value=$result',
+          );
 
           // 修复：当 result 是空 Map 时，返回 null（因为文件不存在时某些存储实现返回空 Map）
           if (result != null && result is Map && result.isEmpty) {
-            debugPrint('[JSBridge Storage Read] Converting empty Map to null for key=$key');
+            debugPrint(
+              '[JSBridge Storage Read] Converting empty Map to null for key=$key',
+            );
             return jsonEncode({'success': true, 'data': null});
           }
 
@@ -374,7 +389,8 @@ class JSBridgeInjector {
           }
 
           // 获取 webview 插件的存储
-          final webviewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+          final webviewPlugin =
+              PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
           if (webviewPlugin == null) {
             return jsonEncode({'error': 'WebView plugin not found'});
           }
@@ -383,7 +399,9 @@ class JSBridgeInjector {
           final storagePath = 'webview/$key';
           await webviewPlugin.storage.write(storagePath, value);
 
-          debugPrint('[JSBridge Storage Write] key=$key, valueType=${value?.runtimeType}, success=true');
+          debugPrint(
+            '[JSBridge Storage Write] key=$key, valueType=${value?.runtimeType}, success=true',
+          );
 
           return jsonEncode({'success': true});
         } catch (e) {
@@ -417,7 +435,8 @@ class JSBridgeInjector {
           }
 
           // 获取 webview 插件的存储
-          final webviewPlugin = PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
+          final webviewPlugin =
+              PluginManager.instance.getPlugin('webview') as WebViewPlugin?;
           if (webviewPlugin == null) {
             return jsonEncode({'error': 'WebView plugin not found'});
           }

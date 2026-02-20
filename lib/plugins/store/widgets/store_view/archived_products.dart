@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
@@ -17,14 +19,10 @@ class _ArchivedProductsPageState extends State<ArchivedProductsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('store_archivedProductsTitle'.tr),
-      ),
+      appBar: AppBar(title: Text('store_archivedProductsTitle'.tr)),
       body:
           widget.controller.archivedProducts.isEmpty
-              ? Center(
-                child: Text('store_noArchivedProducts'.tr),
-              )
+              ? Center(child: Text('store_noArchivedProducts'.tr))
               : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: widget.controller.archivedProducts.length,

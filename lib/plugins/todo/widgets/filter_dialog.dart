@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
@@ -56,9 +58,7 @@ class _FilterDialogState extends State<FilterDialog> {
               // 优先级选择
               DropdownButtonFormField<TaskPriority>(
                 initialValue: _selectedPriority,
-                decoration: InputDecoration(
-                  labelText: 'todo_priority'.tr,
-                ),
+                decoration: InputDecoration(labelText: 'todo_priority'.tr),
                 items:
                     TaskPriority.values.map((priority) {
                       return DropdownMenuItem(

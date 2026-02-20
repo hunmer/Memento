@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
@@ -34,7 +36,9 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
 
-    debugPrint('[UserItemDetailPage] initState: autoUse=${widget.autoUse}, items.length=${widget.items.length}');
+    debugPrint(
+      '[UserItemDetailPage] initState: autoUse=${widget.autoUse}, items.length=${widget.items.length}',
+    );
 
     // 自动使用逻辑
     if (widget.autoUse && !_hasShownAutoUseDialog) {
@@ -55,7 +59,9 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
   /// 弹出使用对话框（使用已有的使用逻辑）
   void _showUseDialog() {
     final currentItem = widget.items[_currentIndex];
-    debugPrint('[UserItemDetailPage] _showUseDialog: itemName=${currentItem.productName}, expireDate=${currentItem.expireDate}');
+    debugPrint(
+      '[UserItemDetailPage] _showUseDialog: itemName=${currentItem.productName}, expireDate=${currentItem.expireDate}',
+    );
 
     // 检查是否过期
     if (currentItem.expireDate.isBefore(DateTime.now())) {
@@ -67,26 +73,29 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
     debugPrint('[UserItemDetailPage] 显示使用确认对话框');
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('store_useConfirmationTitle'.tr),
-        content: Text(
-          'store_useConfirmationMessage'.tr
-              .replaceFirst('%s', currentItem.productName),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('app_cancel'.tr),
+      builder:
+          (context) => AlertDialog(
+            title: Text('store_useConfirmationTitle'.tr),
+            content: Text(
+              'store_useConfirmationMessage'.tr.replaceFirst(
+                '%s',
+                currentItem.productName,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('app_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _useCurrentItem();
+                },
+                child: Text('app_ok'.tr),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _useCurrentItem();
-            },
-            child: Text('app_ok'.tr),
-          ),
-        ],
-      ),
     );
   }
 
@@ -104,12 +113,12 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: Text(
-                        'store_useConfirmationTitle'.tr,
-                      ),
+                      title: Text('store_useConfirmationTitle'.tr),
                       content: Text(
-                        'store_useConfirmationMessage'.tr
-                            .replaceFirst('%s', currentItem.productName),
+                        'store_useConfirmationMessage'.tr.replaceFirst(
+                          '%s',
+                          currentItem.productName,
+                        ),
                       ),
                       actions: [
                         TextButton(
@@ -237,8 +246,7 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
           _buildDetailRow(
             icon: Icons.attach_money,
             label: 'store_purchasePriceLabel'.tr,
-            value:
-                '${item.purchasePrice}${'store_points'.tr}',
+            value: '${item.purchasePrice}${'store_points'.tr}',
           ),
           _buildDetailRow(
             icon: Icons.layers,
@@ -278,7 +286,10 @@ class _UserItemDetailPageState extends State<UserItemDetailPage> {
         children: [
           Icon(icon, size: 20, color: Theme.of(context).primaryColor),
           const SizedBox(width: 12),
-          Text('store_labelColon'.trParams({'label': label}), style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            'store_labelColon'.trParams({'label': label}),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
           Text(value),
         ],
       ),

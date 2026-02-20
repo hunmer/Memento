@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/plugin_base.dart';
@@ -9,6 +8,7 @@ class PluginSelectionDialog extends StatefulWidget {
   const PluginSelectionDialog({super.key, required this.plugins});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PluginSelectionDialogState createState() => _PluginSelectionDialogState();
 }
 

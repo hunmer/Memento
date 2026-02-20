@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 library;
 
 import 'dart:io';
@@ -527,20 +529,21 @@ class _ScriptsCenterMainViewState extends State<ScriptsCenterMainView> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider.value(
-                      value: _plugin.scriptStoreManager,
+                builder:
+                    (_) => MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider.value(
+                          value: _plugin.scriptStoreManager,
+                        ),
+                        ChangeNotifierProvider.value(
+                          value: _plugin.scriptDownloadManager,
+                        ),
+                        ChangeNotifierProvider.value(
+                          value: _plugin.scriptManager,
+                        ),
+                      ],
+                      child: const ScriptStoreScreen(),
                     ),
-                    ChangeNotifierProvider.value(
-                      value: _plugin.scriptDownloadManager,
-                    ),
-                    ChangeNotifierProvider.value(
-                      value: _plugin.scriptManager,
-                    ),
-                  ],
-                  child: const ScriptStoreScreen(),
-                ),
               ),
             );
           },

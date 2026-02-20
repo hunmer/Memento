@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:get/get.dart';
 import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
@@ -126,10 +128,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
               const SizedBox(height: 16),
 
               // 描述
-              _buildLabel(
-                context,
-                'timer_timerDescription'.tr,
-              ),
+              _buildLabel(context, 'timer_timerDescription'.tr),
               const SizedBox(height: 8),
               TextFormField(
                 controller: _descriptionController,
@@ -201,10 +200,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel(
-                            context,
-                            'timer_hours'.tr,
-                          ),
+                          _buildLabel(context, 'timer_hours'.tr),
                           const SizedBox(height: 4),
                           TextFormField(
                             initialValue: _hours.toString(),
@@ -227,10 +223,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel(
-                            context,
-                            'timer_minutes'.tr,
-                          ),
+                          _buildLabel(context, 'timer_minutes'.tr),
                           const SizedBox(height: 4),
                           TextFormField(
                             initialValue: _minutes.toString(),
@@ -245,7 +238,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                             onChanged:
                                 (value) => _minutes = int.tryParse(value) ?? 0,
                           ),
-                        ]
+                        ],
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -253,10 +246,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildLabel(
-                            context,
-                            'timer_seconds'.tr,
-                          ),
+                          _buildLabel(context, 'timer_seconds'.tr),
                           const SizedBox(height: 4),
                           TextFormField(
                             initialValue: _seconds.toString(),
@@ -271,17 +261,14 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                             onChanged:
                                 (value) => _seconds = int.tryParse(value) ?? 0,
                           ),
-                        ]
+                        ],
                       ),
                     ),
                   ],
                 ),
               ] else ...[
                 // 番茄钟设置
-                _buildLabel(
-                  context,
-                  'timer_workDuration'.tr,
-                ),
+                _buildLabel(context, 'timer_workDuration'.tr),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _workMinutes.toString(),
@@ -292,10 +279,7 @@ class _AddTimerItemDialogState extends State<AddTimerItemDialog> {
                       (value) => _workMinutes = int.tryParse(value) ?? 25,
                 ),
                 const SizedBox(height: 16),
-                _buildLabel(
-                  context,
-                  'timer_breakDuration'.tr,
-                ),
+                _buildLabel(context, 'timer_breakDuration'.tr),
                 const SizedBox(height: 8),
                 TextFormField(
                   initialValue: _breakMinutes.toString(),

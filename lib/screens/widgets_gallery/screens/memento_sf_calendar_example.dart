@@ -15,7 +15,7 @@ class _MementoSfCalendarExampleState extends State<MementoSfCalendarExample> {
   final CalendarController _controller = CalendarController();
 
   // 可交互配置
-  CalendarView _currentView = CalendarView.month;
+  final CalendarView _currentView = CalendarView.month;
   bool _showAgenda = true;
   bool _showWeekNumber = false;
   bool _showNavigationArrow = true;
