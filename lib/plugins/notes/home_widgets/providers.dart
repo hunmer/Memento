@@ -179,11 +179,27 @@ Future<Map<String, Map<String, dynamic>>> provideNotesListWidgets(
     'primaryColor': notesColor.value,
   };
 
+  // 构建 folderNotesCard 数据
+  final folderNotesCardData = {
+    'folderName': folder?.name ?? 'notes_allNotes'.tr,
+    'folderPath': folderName,
+    'iconCodePoint': folder?.icon.codePoint ?? Icons.folder.codePoint,
+    'colorValue': folder?.color.value ?? notesColor.value,
+    'notesCount': notesCount,
+    'notes': displayNotes
+        .map((note) => {
+              'title': note.title,
+              'updatedAt': note.updatedAt.toIso8601String(),
+            })
+        .toList(),
+  };
+
   return {
     'taskListCard': taskListCardData,
     'newsUpdateCard': newsUpdateCardData,
     'colorTagTaskCard': colorTagTaskCardData,
     'inboxMessageCard': inboxMessageCardData,
+    if (folderNotesCardData != null) 'folderNotesCard': folderNotesCardData,
   };
 }
 

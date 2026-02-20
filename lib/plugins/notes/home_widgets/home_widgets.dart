@@ -7,7 +7,6 @@ import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 
 import 'register_icon_widget.dart' show registerIconWidget;
 import 'register_overview_widget.dart' show registerOverviewWidget;
-import 'register_folder_selector_widget.dart' show registerFolderSelectorWidget;
 import 'register_notes_list_widget.dart' show registerNotesListWidget;
 
 /// 笔记插件的主页小组件注册
@@ -15,6 +14,5 @@ void register() {
   final registry = HomeWidgetRegistry();
   registerIconWidget(registry);
   registerOverviewWidget(registry);
-  registerFolderSelectorWidget(registry);
   registerNotesListWidget(registry);
 }

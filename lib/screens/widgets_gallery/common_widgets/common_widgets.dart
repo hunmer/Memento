@@ -86,6 +86,7 @@ import 'widgets/weekly_diary_widget.dart';
 import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
 import 'package:Memento/plugins/activity/home_widgets/widgets/activity_last_activity.dart';
+import 'widgets/folder_notes_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -173,6 +174,7 @@ enum CommonWidgetId {
   expenseComparisonChart,
   weeklyDiaryWidget,
   activityLastActivity,
+  folderNotesCard,
 }
 
 /// 公共小组件元数据
@@ -855,6 +857,14 @@ class CommonWidgetsRegistry {
       defaultSize: MediumSize(),
       supportedSizes: [MediumSize()],
     ),
+    CommonWidgetId.folderNotesCard: CommonWidgetMetadata(
+      id: CommonWidgetId.folderNotesCard,
+      name: '文件夹笔记卡片',
+      description: '显示文件夹名称和最近的笔记列表',
+      icon: Icons.folder_open,
+      defaultSize: LargeSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1085,6 +1095,8 @@ class CommonWidgetBuilder {
         return WeeklyDiaryWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.activityLastActivity:
         return ActivityLastActivityWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.folderNotesCard:
+        return FolderNotesCardWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }
