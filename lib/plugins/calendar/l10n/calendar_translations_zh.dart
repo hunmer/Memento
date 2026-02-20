@@ -56,4 +56,9 @@ const Map<String, String> calendarTranslationsZh = {
   'calendar_eventListDesc': '显示未来7天内的活动',
   'calendar_emptyEvents': '近期无活动',
   'calendar_upcomingEvents': '即将开始',
+
+  // 事件列表小组件（支持公共组件）
+  'calendar_eventListWidgetName': '事件列表',
+  'calendar_eventListWidgetDesc': '支持多种样式的日历事件展示',
+  'calendar_widgetSelector': '日历小组件',
 };

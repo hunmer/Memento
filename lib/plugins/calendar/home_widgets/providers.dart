@@ -8,6 +8,9 @@ import 'package:get/get.dart';
 import '../calendar_plugin.dart';
 import '../models/event.dart';
 
+// 导出 CommandWidgetsProvider
+export 'providers/command_widgets_provider.dart';
+
 /// 获取可用的统计项
 List<StatItemData> getAvailableStats(BuildContext context) {
   try {

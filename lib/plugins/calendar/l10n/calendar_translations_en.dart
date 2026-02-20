@@ -56,4 +56,9 @@ const Map<String, String> calendarTranslationsEn = {
   'calendar_eventListDesc': 'Show events within 7 days',
   'calendar_emptyEvents': 'No upcoming events',
   'calendar_upcomingEvents': 'Coming Up',
+
+  // Event list widget (with common components)
+  'calendar_eventListWidgetName': 'Event List',
+  'calendar_eventListWidgetDesc': 'Calendar events with multiple styles',
+  'calendar_widgetSelector': 'Calendar Widget',
 };
