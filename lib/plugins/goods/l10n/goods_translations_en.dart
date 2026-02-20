@@ -173,4 +173,8 @@ const Map<String, String> goodsTranslationsEn = {
   'goods_unknownWarehouse': 'Unknown Warehouse',
   'goods_noTags': 'No tags',
   'goods_optional': 'Optional',
+
+  // Common Widgets
+  'goods_commonWidgetsName': 'Goods Components',
+  'goods_commonWidgetsDesc': 'Goods management common widgets',
 };

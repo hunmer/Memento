@@ -173,4 +173,8 @@ const Map<String, String> goodsTranslationsZh = {
   'goods_unknownWarehouse': '未知仓库',
   'goods_noTags': '暂无标签',
   'goods_optional': '可选',
+
+  // Common Widgets
+  'goods_commonWidgetsName': '物品组件',
+  'goods_commonWidgetsDesc': '物品管理通用组件',
 };
