@@ -532,24 +532,6 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
           }).toList(),
     },
 
-    // SleepTrackingCard (复用为习惯追踪卡片)
-    'sleepTrackingCard': {
-      'title': habit.title,
-      'mainValue': avgMinutes.toDouble() / 60, // 转换为小时
-      'statusLabel': skillName ?? habit.group ?? '习惯',
-      'unit': 'hr',
-      'weeklyProgress':
-          weekDays.asMap().entries.map((entry) {
-            final minutes = weeklyMinutes[entry.key];
-            return {
-              'day': weekDays[entry.key],
-              'achieved': minutes > 0,
-              'progress':
-                  maxWeeklyMinutes > 0 ? minutes / maxWeeklyMinutes : 0.0,
-            };
-          }).toList(),
-    },
-
     // SleepDurationCard (复用为习惯时长卡片)
     'sleepDurationCard': {
       'durationInMinutes': totalMinutes.toInt(),

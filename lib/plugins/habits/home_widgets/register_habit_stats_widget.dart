@@ -15,6 +15,7 @@ import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'utils.dart' show pluginColor;
 import 'providers.dart' show provideHabitStatsWidgets;
 import 'widget_config.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 
 /// 导航到习惯插件
 void _navigateToHabits(BuildContext context, SelectorResult result) {
@@ -52,17 +53,35 @@ class HabitStatsWidget extends LiveSelectorWidget {
   @override
   Future<Map<String, dynamic>> getLiveData(Map<String, dynamic> config) async {
     try {
-      // 使用统一的配置模型提取 habitId
-      final habitId = HabitStatsWidgetConfig.extractHabitId(config);
-      if (habitId == null || habitId.isEmpty) {
-        debugPrint('[HabitStatsWidget] No habitId in config');
+      // 获取 selectorWidgetConfig
+      final selectorWidgetConfig = config['selectorWidgetConfig'] as Map<String, dynamic>?;
+      if (selectorWidgetConfig == null) {
+        debugPrint('[HabitStatsWidget] No selectorWidgetConfig');
         return {};
       }
 
-      // 调用 provider 获取实时数据
-      return provideHabitStatsWidgets({'habitId': habitId});
+      // 解析 SelectorWidgetConfig，提取 habitId 和 commonWidgetId
+      final parsedConfig = SelectorWidgetConfig.fromJson(selectorWidgetConfig);
+      final habitId = HabitStatsWidgetConfig.extractHabitId(selectorWidgetConfig);
+
+      if (habitId == null || habitId.isEmpty) {
+        debugPrint('[HabitStatsWidget] No habitId in selectorWidgetConfig: $selectorWidgetConfig');
+        return {};
+      }
+
+      // 调用 provider 获取实时数据，包含 commonWidgetId
+      final data = <String, dynamic>{'habitId': habitId};
+      if (parsedConfig.commonWidgetId != null) {
+        data['commonWidgetId'] = parsedConfig.commonWidgetId!;
+      }
+      if (parsedConfig.commonWidgetProps != null) {
+        data['commonWidgetProps'] = parsedConfig.commonWidgetProps!;
+      }
+
+      return provideHabitStatsWidgets(data);
     } catch (e) {
       debugPrint('[HabitStatsWidget] 获取数据失败: $e');
+      debugPrint('[HabitStatsWidget] config: $config');
       return {};
     }
   }
