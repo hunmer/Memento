@@ -8,8 +8,6 @@ class DiaryTranslationsJp {
     // Widget related
     'diary_widgetName': '日記',
     'diary_widgetDescription': '日記へのクイックアクセス',
-    'diary_todayQuickName': '今日日記',
-    'diary_todayQuickDescription': '今日日記エディタへのクイックアクセス',
     'diary_overviewName': '日記概要',
     'diary_overviewDescription': '本日の文字数と月次進捗を表示',
     'diary_weeklyName': '今週の日記',

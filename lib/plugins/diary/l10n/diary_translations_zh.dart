@@ -8,8 +8,6 @@ class DiaryTranslationsZh {
     // 小组件相关
     'diary_widgetName': '日记',
     'diary_widgetDescription': '快速打开日记',
-    'diary_todayQuickName': '今日日记',
-    'diary_todayQuickDescription': '快捷打开今日日记编辑',
     'diary_overviewName': '日记概览',
     'diary_overviewDescription': '显示今日字数和本月进度',
     'diary_weeklyName': '七日日记',
