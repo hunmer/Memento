@@ -10,6 +10,7 @@ library;
 export 'data.dart';
 export 'utils.dart';
 export 'providers.dart';
+export 'providers/command_widgets_provider.dart';
 export 'widgets.dart';
 
 // 注册文件

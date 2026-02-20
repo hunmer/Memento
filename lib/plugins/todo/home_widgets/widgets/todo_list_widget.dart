@@ -3,23 +3,73 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/widgets/event_listener_container.dart';
 import '../providers.dart';
 import '../utils.dart';
 
 /// 2x2 待办列表小组件
 class TodoListWidget extends StatelessWidget {
-  const TodoListWidget({super.key});
+  final List<Map<String, dynamic>> tasks;
+
+  /// 是否为内联模式（用于公共小组件系统）
+  final bool inline;
+
+  /// 小组件尺寸
+  final HomeWidgetSize size;
+
+  const TodoListWidget({
+    super.key,
+    this.tasks = const [],
+    this.inline = false,
+    this.size = const MediumSize(),
+  });
+
+  /// 从 props 创建实例（用于公共小组件系统）
+  factory TodoListWidget.fromProps(
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    final tasksList = (props['tasks'] as List<dynamic>?)
+            ?.map((e) => e as Map<String, dynamic>)
+            .toList() ??
+        const [];
+
+    return TodoListWidget(
+      tasks: tasksList,
+      inline: props['inline'] as bool? ?? false,
+      size: size,
+    );
+  }
+
+  /// 转换为 props
+  Map<String, dynamic> toProps() {
+    return {
+      'tasks': tasks,
+      'inline': inline,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
+    // 如果是内联模式使用传入的 tasks，否则使用事件监听器
+    if (inline) {
+      return _TodoListWidgetContent(
+        tasks: tasks,
+        showEventUpdates: false,
+      );
+    }
+
     // 使用 StatefulBuilder 和 EventListenerContainer 实现动态更新
     return StatefulBuilder(
       builder: (context, setState) {
         return EventListenerContainer(
           events: const ['task_added', 'task_deleted', 'task_completed'],
           onEvent: () => setState(() {}),
-          child: const _TodoListWidgetContent(),
+          child: _TodoListWidgetContent(
+            tasks: getTodoTasks(5),
+            showEventUpdates: true,
+          ),
         );
       },
     );
@@ -28,12 +78,18 @@ class TodoListWidget extends StatelessWidget {
 
 /// 待办列表小组件内容
 class _TodoListWidgetContent extends StatelessWidget {
-  const _TodoListWidgetContent();
+  final List<Map<String, dynamic>> tasks;
+  final bool showEventUpdates;
+
+  const _TodoListWidgetContent({
+    this.tasks = const [],
+    this.showEventUpdates = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tasks = getTodoTasks(5);
+    final displayTasks = showEventUpdates ? getTodoTasks(5) : tasks;
 
     return Material(
       color: Colors.transparent,
