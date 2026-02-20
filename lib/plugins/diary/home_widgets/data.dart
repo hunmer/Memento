@@ -43,4 +43,30 @@ class WeekDiaryCardData {
     this.title,
     required this.hasEntry,
   });
+
+  /// 从 JSON 创建（用于公共小组件系统）
+  factory WeekDiaryCardData.fromJson(Map<String, dynamic> json) {
+    return WeekDiaryCardData(
+      date: DateTime.parse(json['date'] as String),
+      isToday: json['isToday'] as bool,
+      weekday: json['weekday'] as String,
+      dayNumber: json['dayNumber'] as String,
+      mood: json['mood'] as String?,
+      title: json['title'] as String?,
+      hasEntry: json['hasEntry'] as bool,
+    );
+  }
+
+  /// 转换为 JSON（用于公共小组件系统）
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date.toIso8601String(),
+      'isToday': isToday,
+      'weekday': weekday,
+      'dayNumber': dayNumber,
+      'mood': mood,
+      'title': title,
+      'hasEntry': hasEntry,
+    };
+  }
 }

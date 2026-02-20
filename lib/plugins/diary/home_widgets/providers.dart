@@ -11,6 +11,7 @@ import 'package:Memento/widgets/event_listener_container.dart';
 import '../diary_plugin.dart';
 import '../models/diary_entry.dart';
 import '../utils/diary_utils.dart';
+import 'utils.dart';
 
 /// 公共小组件提供者函数 - 本月日记列表
 ///
@@ -637,6 +638,363 @@ Map<String, dynamic>? _getMonthlyDiaryListDataSync(
     }
   } catch (e) {
     debugPrint('[Diary] 获取本月日记数据失败: $e');
+    return null;
+  }
+}
+
+/// 公共小组件提供者函数 - 七日周报
+///
+/// 异步加载本周日记数据，返回可用的公共小组件配置
+Future<Map<String, Map<String, dynamic>>> provideWeeklyDiaryWidgets(
+  Map<String, dynamic> data,
+) async {
+  final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
+  if (plugin == null) return {};
+
+  final now = DateTime.now();
+
+  // 异步加载所有日记条目
+  final allEntries = await DiaryUtils.loadDiaryEntries();
+
+  // 获取本周日期
+  final weekDays = getCurrentWeekDays(now);
+
+  // 过滤本周的日记
+  final weeklyEntries = <DateTime, DiaryEntry>{};
+  for (final date in weekDays) {
+    final entry = allEntries[DateTime(date.year, date.month, date.day)];
+    if (entry != null) {
+      weeklyEntries[date] = entry;
+    }
+  }
+
+  // 统计本周心情
+  final moodStats = <String, int>{};
+  for (final entry in weeklyEntries.values) {
+    if (entry.mood != null && entry.mood!.isNotEmpty) {
+      moodStats[entry.mood!] = (moodStats[entry.mood!] ?? 0) + 1;
+    }
+  }
+
+  // 创建心情图表数据
+  final moodChartData = moodStats.entries.map((e) {
+    final emoji = e.key;
+    final label = _getMoodLabel(emoji);
+    final value = e.value;
+    return {
+      'emoji': emoji,
+      'label': label,
+      'value': value,
+    };
+  }).toList();
+
+  // 计算本周连续打卡天数
+  final consecutiveDays = _calculateConsecutiveDays(weekDays, weeklyEntries);
+
+  // 计算最佳连续天数（本周内）
+  final bestStreak = _calculateBestStreak(weekDays, weeklyEntries);
+
+  return {
+    // 七日周报小组件 - 标准样式
+    'weeklyDiaryWidget': {
+      'title': '本周日记',
+      'showTitle': true,
+      'primaryColor': Colors.indigo.value,
+    },
+
+    // 心情图表卡片
+    'moodChartCard': {
+      'title': '本周心情',
+      'subtitle': '共 ${weeklyEntries.length} 篇日记',
+      'moods': moodChartData,
+      'displayType': 'emoji',
+      'primaryColor': Colors.indigo.value,
+    },
+
+    // 习惯连续追踪卡片
+    'habitStreakTrackerCard': {
+      'title': '本周日记打卡',
+      'currentStreak': consecutiveDays,
+      'bestStreak': bestStreak,
+      'totalCheckins': weeklyEntries.length,
+      'milestones': [
+        {'days': 3, 'isReached': consecutiveDays >= 3, 'label': '3天'},
+        {'days': 5, 'isReached': consecutiveDays >= 5, 'label': '5天'},
+        {'days': 7, 'isReached': consecutiveDays >= 7, 'label': '7天'},
+      ],
+    },
+  };
+}
+
+/// 获取心情标签
+String _getMoodLabel(String emoji) {
+  final moodLabels = {
+    '😊': '开心',
+    '😢': '难过',
+    '😡': '生气',
+    '😴': '困倦',
+    '🤔': '思考',
+    '😎': '酷',
+    '😍': '喜欢',
+    '🤮': '不适',
+    '😱': '惊讶',
+    '🥳': '庆祝',
+  };
+  return moodLabels[emoji] ?? '其他';
+}
+
+/// 计算连续打卡天数
+int _calculateConsecutiveDays(
+  List<DateTime> weekDays,
+  Map<DateTime, DiaryEntry> entries,
+) {
+  // 从今天开始往前计算连续天数
+  final today = DateTime.now();
+  int streak = 0;
+  DateTime? currentDate = today;
+
+  while (true) {
+    final normalizedDate = DateTime(currentDate!.year, currentDate.month, currentDate.day);
+    if (entries.containsKey(normalizedDate)) {
+      streak++;
+      currentDate = currentDate.subtract(const Duration(days: 1));
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+/// 计算最佳连续天数（本周内）
+int _calculateBestStreak(
+  List<DateTime> weekDays,
+  Map<DateTime, DiaryEntry> entries,
+) {
+  int bestStreak = 0;
+  int currentStreak = 0;
+
+  // 按日期顺序检查
+  for (final date in weekDays) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    if (entries.containsKey(normalizedDate)) {
+      currentStreak++;
+      if (currentStreak > bestStreak) {
+        bestStreak = currentStreak;
+      }
+    } else {
+      currentStreak = 0;
+    }
+  }
+
+  return bestStreak;
+}
+
+/// 构建七日周报通用小组件（根据配置渲染选中的公共小组件）
+Widget buildWeeklyDiaryWidget(
+  BuildContext context,
+  Map<String, dynamic> config,
+) {
+  final selectorConfig =
+      config['selectorWidgetConfig'] as Map<String, dynamic>?;
+  if (selectorConfig == null) {
+    return HomeWidget.buildErrorWidget(context, '配置错误：缺少 selectorWidgetConfig');
+  }
+
+  final commonWidgetId = selectorConfig['commonWidgetId'] as String?;
+
+  if (commonWidgetId == null) {
+    return HomeWidget.buildErrorWidget(
+      context,
+      '配置错误：缺少 commonWidgetId',
+    );
+  }
+
+  // 查找对应的 CommonWidgetId 枚举
+  final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
+  if (widgetIdEnum == null) {
+    return HomeWidget.buildErrorWidget(context, '未知的公共小组件类型: $commonWidgetId');
+  }
+
+  // 使用专用的 StatefulWidget 来持有缓存数据
+  return _WeeklyDiaryStatefulWidget(
+    config: config,
+    commonWidgetId: commonWidgetId,
+  );
+}
+
+/// 内部 StatefulWidget 用于持有缓存的事件数据
+class _WeeklyDiaryStatefulWidget extends StatefulWidget {
+  final Map<String, dynamic> config;
+  final String commonWidgetId;
+
+  const _WeeklyDiaryStatefulWidget({
+    required this.config,
+    required this.commonWidgetId,
+  });
+
+  @override
+  State<_WeeklyDiaryStatefulWidget> createState() => _WeeklyDiaryStatefulWidgetState();
+}
+
+class _WeeklyDiaryStatefulWidgetState extends State<_WeeklyDiaryStatefulWidget> {
+  /// 缓存的事件数据（性能优化：直接使用事件携带的数据）
+  List<(DateTime, DiaryEntry)>? _cachedEntries;
+
+  @override
+  Widget build(BuildContext context) {
+    return EventListenerContainer(
+      events: const [
+        'diary_cache_updated', // 监听缓存更新事件
+      ],
+      onEventWithData: (args) {
+        if (args is DiaryCacheUpdatedEventArgs) {
+          setState(() {
+            _cachedEntries = args.entries; // 直接使用事件数据
+          });
+        }
+      },
+      child: _buildWeeklyDiaryContent(
+        context,
+        widget.config,
+        widget.commonWidgetId,
+        _cachedEntries,
+      ),
+    );
+  }
+}
+
+/// 构建七日周报内容
+/// [cachedEntries] 事件携带的缓存数据（性能优化），为 null 时从插件获取
+Widget _buildWeeklyDiaryContent(
+  BuildContext context,
+  Map<String, dynamic> config,
+  String commonWidgetId,
+  List<(DateTime, DiaryEntry)>? cachedEntries,
+) {
+  // 查找对应的 CommonWidgetId 枚举
+  final widgetIdEnum = CommonWidgetId.values.asNameMap()[commonWidgetId];
+  if (widgetIdEnum == null) {
+    return HomeWidget.buildErrorWidget(context, '未知的公共小组件类型: $commonWidgetId');
+  }
+
+  // 获取元数据以确定默认尺寸
+  final metadata = CommonWidgetsRegistry.getMetadata(widgetIdEnum);
+  final size = config['widgetSize'] as HomeWidgetSize? ?? metadata.defaultSize;
+
+  // 获取最新数据
+  final latestProps = _getWeeklyDiaryDataSync(commonWidgetId, cachedEntries);
+
+  return CommonWidgetBuilder.build(
+    context,
+    widgetIdEnum,
+    latestProps ?? {},
+    size,
+    inline: true,
+  );
+}
+
+/// 同步获取七日周报小组件数据
+/// [cachedEntries] 事件携带的缓存数据（性能优化），为 null 时从插件获取
+Map<String, dynamic>? _getWeeklyDiaryDataSync(
+  String commonWidgetId,
+  List<(DateTime, DiaryEntry)>? cachedEntries,
+) {
+  try {
+    // 优先使用事件携带的缓存数据（性能优化）
+    List<(DateTime, DiaryEntry)> monthlyEntries;
+
+    if (cachedEntries != null) {
+      monthlyEntries = cachedEntries;
+    } else {
+      // 回退：从插件同步获取（首次构建或向后兼容）
+      final plugin = PluginManager.instance.getPlugin('diary') as DiaryPlugin?;
+      if (plugin == null) return null;
+      monthlyEntries = plugin.getMonthlyDiaryEntriesSync();
+    }
+
+    final now = DateTime.now();
+
+    // 转换为 Map<DateTime, DiaryEntry> 格式
+    final entriesMap = <DateTime, DiaryEntry>{};
+    for (final entry in monthlyEntries) {
+      entriesMap[entry.$1] = entry.$2;
+    }
+
+    // 获取本周日期
+    final weekDays = getCurrentWeekDays(now);
+
+    // 过滤本周的日记
+    final weeklyEntries = <DateTime, DiaryEntry>{};
+    for (final date in weekDays) {
+      final entry = entriesMap[DateTime(date.year, date.month, date.day)];
+      if (entry != null) {
+        weeklyEntries[date] = entry;
+      }
+    }
+
+    // 根据 commonWidgetId 返回对应的数据
+    switch (commonWidgetId) {
+      case 'weeklyDiaryWidget':
+        return {
+          'title': '本周日记',
+          'showTitle': true,
+          'primaryColor': Colors.indigo.value,
+        };
+
+      case 'moodChartCard':
+        // 统计本周心情
+        final moodStats = <String, int>{};
+        for (final entry in weeklyEntries.values) {
+          if (entry.mood != null && entry.mood!.isNotEmpty) {
+            moodStats[entry.mood!] = (moodStats[entry.mood!] ?? 0) + 1;
+          }
+        }
+
+        // 创建心情图表数据
+        final moodChartData = moodStats.entries.map((e) {
+          final emoji = e.key;
+          final label = _getMoodLabel(emoji);
+          final value = e.value;
+          return {
+            'emoji': emoji,
+            'label': label,
+            'value': value,
+          };
+        }).toList();
+
+        return {
+          'title': '本周心情',
+          'subtitle': '共 ${weeklyEntries.length} 篇日记',
+          'moods': moodChartData,
+          'displayType': 'emoji',
+          'primaryColor': Colors.indigo.value,
+        };
+
+      case 'habitStreakTrackerCard':
+        // 计算本周连续打卡天数
+        final consecutiveDays = _calculateConsecutiveDays(weekDays, weeklyEntries);
+
+        // 计算最佳连续天数（本周内）
+        final bestStreak = _calculateBestStreak(weekDays, weeklyEntries);
+
+        return {
+          'title': '本周日记打卡',
+          'currentStreak': consecutiveDays,
+          'bestStreak': bestStreak,
+          'totalCheckins': weeklyEntries.length,
+          'milestones': [
+            {'days': 3, 'isReached': consecutiveDays >= 3, 'label': '3天'},
+            {'days': 5, 'isReached': consecutiveDays >= 5, 'label': '5天'},
+            {'days': 7, 'isReached': consecutiveDays >= 7, 'label': '7天'},
+          ],
+        };
+
+      default:
+        return null;
+    }
+  } catch (e) {
+    debugPrint('[Diary] 获取七日周报数据失败: $e');
     return null;
   }
 }

@@ -2,12 +2,15 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/home_screen/models/plugin_widget_config.dart';
 import '../diary_plugin.dart';
+import '../models/diary_entry.dart';
 import '../screens/diary_editor_screen.dart';
 import '../utils/diary_utils.dart';
+import 'data.dart';
 
 /// 获取当前周的周一到周日日期列表
 ///
@@ -84,4 +87,21 @@ List<StatItemData> getAvailableStats(BuildContext context) {
   } catch (e) {
     return [];
   }
+}
+
+/// 根据日记条目创建周报卡片数据
+WeekDiaryCardData createWeekCardData(
+  DateTime date,
+  DiaryEntry? entry,
+) {
+  final now = DateTime.now();
+  return WeekDiaryCardData(
+    date: date,
+    isToday: DateUtils.isSameDay(date, now),
+    weekday: DateFormat('E').format(date),
+    dayNumber: DateFormat('d').format(date),
+    mood: entry?.mood,
+    title: entry?.title,
+    hasEntry: entry != null,
+  );
 }
