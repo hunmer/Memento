@@ -9,6 +9,7 @@ import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:Memento/plugins/habits/models/completion_record.dart';
 import 'package:Memento/plugins/habits/utils/habits_utils.dart';
 import 'widget_config.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/widgets/habit_heatmap_card.dart';
 
 /// 获取可用的统计项
 List<StatItemData> getAvailableStats(BuildContext context) {
@@ -431,8 +432,23 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
   final dynamic plugin = PluginManager.instance.getPlugin('habits');
   if (plugin == null) return {};
 
-  // 使用统一的配置模型提取 habitId
-  final habitId = HabitStatsWidgetConfig.extractHabitId(config);
+  // 提取 habitId
+  String? habitId;
+
+  // 格式1: 从 data 数组中提取（CommonWidgetSelectorPage 传入的格式）
+  if (config.containsKey('data')) {
+    final dataList = config['data'];
+    if (dataList is List && dataList.isNotEmpty) {
+      final firstItem = dataList[0];
+      if (firstItem is Map<String, dynamic>) {
+        habitId = firstItem['habitId']?.toString() ?? firstItem['id']?.toString();
+      }
+    }
+  }
+
+  // 格式2: 使用统一的配置模型提取
+  habitId ??= HabitStatsWidgetConfig.extractHabitId(config);
+
   if (habitId == null || habitId.isEmpty) {
     debugPrint('[provideHabitStatsWidgets] 无法从配置中提取 habitId: $config');
     return {};
@@ -597,6 +613,25 @@ Future<Map<String, Map<String, dynamic>>> provideHabitStatsWidgets(
                   : 0)
               .toDouble(),
       'weeklyData': weeklyMinutes.map((m) => m.toDouble()).toList(),
+    },
+
+    // HabitHeatmapCard - 习惯热力图卡片（过去7天）
+    'habitHeatmapCard': {
+      'title': habit.title,
+      'group': habit.group,
+      'iconCode': habit.icon,
+      'color': habitColor.value,
+      'totalMinutes': totalMinutes,
+      'viewMode': 'week',
+      'dailyData': weeklyMinutes.asMap().entries.map((entry) {
+        final now = DateTime.now();
+        final daysAgo = 6 - entry.key;
+        final date = now.subtract(Duration(days: daysAgo));
+        return HabitHeatmapDailyData(
+          day: date.day,
+          minutes: entry.value,
+        ).toJson();
+      }).toList(),
     },
   };
 }

@@ -88,6 +88,7 @@ import 'package:Memento/widgets/common/dual_value_tracker_card.dart';
 import 'package:Memento/widgets/common/modern_rounded_balance_card.dart';
 import 'package:Memento/plugins/activity/home_widgets/widgets/activity_last_activity.dart';
 import 'widgets/folder_notes_card.dart';
+import 'widgets/habit_heatmap_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -177,6 +178,7 @@ enum CommonWidgetId {
   activityLastActivity,
   folderNotesCard,
   goodsItemSelector,
+  habitHeatmapCard,
 }
 
 /// 公共小组件元数据
@@ -875,6 +877,14 @@ class CommonWidgetsRegistry {
       defaultSize: MediumSize(),
       supportedSizes: [MediumSize(), LargeSize()],
     ),
+    CommonWidgetId.habitHeatmapCard: CommonWidgetMetadata(
+      id: CommonWidgetId.habitHeatmapCard,
+      name: '习惯热力图卡片',
+      description: '显示习惯的每日热力图，支持过去7天和当月两种视图模式',
+      icon: Icons.grid_on,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1109,6 +1119,8 @@ class CommonWidgetBuilder {
         return FolderNotesCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.goodsItemSelector:
         return GoodsItemSelectorWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.habitHeatmapCard:
+        return HabitHeatmapCardWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }
