@@ -26,6 +26,7 @@ import 'widgets/monthly_progress_with_dots_card.dart';
 import 'widgets/multi_metric_progress_card.dart';
 import 'widgets/circular_metrics_card.dart';
 import 'widgets/smooth_line_chart_card.dart';
+import 'widgets/goods_item_selector.dart';
 import 'widgets/vertical_bar_chart_card.dart';
 import 'widgets/revenue_trend_card.dart';
 import 'widgets/dual_slider_widget.dart';
@@ -175,6 +176,7 @@ enum CommonWidgetId {
   weeklyDiaryWidget,
   activityLastActivity,
   folderNotesCard,
+  goodsItemSelector,
 }
 
 /// 公共小组件元数据
@@ -865,6 +867,14 @@ class CommonWidgetsRegistry {
       defaultSize: LargeSize(),
       supportedSizes: [MediumSize(), LargeSize()],
     ),
+    CommonWidgetId.goodsItemSelector: CommonWidgetMetadata(
+      id: CommonWidgetId.goodsItemSelector,
+      name: '物品选择器',
+      description: '显示单个或多个物品信息，支持列表和网格视图',
+      icon: Icons.inventory_2,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1097,6 +1107,8 @@ class CommonWidgetBuilder {
         return ActivityLastActivityWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.folderNotesCard:
         return FolderNotesCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.goodsItemSelector:
+        return GoodsItemSelectorWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }
