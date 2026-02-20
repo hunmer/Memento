@@ -284,7 +284,10 @@ class StoreHomeWidgets {
     // 从 PluginManager 获取最新的商品数据
     final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (plugin == null) {
-      return HomeWidget.buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(
+        context,
+        'store_pluginNotAvailable'.tr,
+      );
     }
 
     // 查找对应商品
@@ -499,7 +502,10 @@ class StoreHomeWidgets {
     // 从 PluginManager 获取最新的用户物品数据
     final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (plugin == null) {
-      return HomeWidget.buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(
+        context,
+        'store_pluginNotAvailable'.tr,
+      );
     }
 
     // 查找对应的用户物品
@@ -716,7 +722,10 @@ class StoreHomeWidgets {
     // 从 PluginManager 获取最新的积分数据
     final plugin = PluginManager.instance.getPlugin('store') as StorePlugin?;
     if (plugin == null) {
-      return HomeWidget.buildErrorWidget(context, 'store_pluginNotAvailable'.tr);
+      return HomeWidget.buildErrorWidget(
+        context,
+        'store_pluginNotAvailable'.tr,
+      );
     }
 
     final todayPoints = plugin.controller.getTodayPoints();
@@ -832,12 +841,12 @@ class _PointsGoalProgressWidget extends StatefulWidget {
   const _PointsGoalProgressWidget({required this.config});
 
   @override
-  State<_PointsGoalProgressWidget> createState() => _PointsGoalProgressWidgetState();
+  State<_PointsGoalProgressWidget> createState() =>
+      _PointsGoalProgressWidgetState();
 }
 
 class _PointsGoalProgressWidgetState extends State<_PointsGoalProgressWidget> {
   // 缓存的最新数据
-  int _userPoints = 0;
   List<Map<String, dynamic>> _pointsLogs = [];
 
   @override
@@ -847,7 +856,6 @@ class _PointsGoalProgressWidgetState extends State<_PointsGoalProgressWidget> {
       onEventWithData: (EventArgs args) {
         if (args is StoreCacheUpdatedEventArgs) {
           setState(() {
-            _userPoints = args.userPoints;
             _pointsLogs = args.pointsLogs;
           });
         }
@@ -1001,10 +1009,11 @@ class _ProductSelectorWidgetState extends State<_ProductSelectorWidget> {
     // 查找对应商品
     final productData = _products.firstWhere(
       (p) => p['id'] == productId,
-      orElse: () => _archivedProducts.firstWhere(
-        (p) => p['id'] == productId,
-        orElse: () => {},
-      ),
+      orElse:
+          () => _archivedProducts.firstWhere(
+            (p) => p['id'] == productId,
+            orElse: () => {},
+          ),
     );
 
     if (productData.isEmpty) {
@@ -1046,12 +1055,15 @@ class _ProductSelectorWidgetState extends State<_ProductSelectorWidget> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: hasImage
-                    ? DecorationImage(
-                        image: ImageUtils.createImageProvider(imageSnapshot.data),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                image:
+                    hasImage
+                        ? DecorationImage(
+                          image: ImageUtils.createImageProvider(
+                            imageSnapshot.data,
+                          ),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
               ),
               child: Stack(
                 children: [
@@ -1073,7 +1085,10 @@ class _ProductSelectorWidgetState extends State<_ProductSelectorWidget> {
                           name,
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: hasImage ? Colors.white : theme.colorScheme.onSurface,
+                            color:
+                                hasImage
+                                    ? Colors.white
+                                    : theme.colorScheme.onSurface,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -1083,9 +1098,10 @@ class _ProductSelectorWidgetState extends State<_ProductSelectorWidget> {
                           Text(
                             description,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: hasImage
-                                  ? Colors.white70
-                                  : theme.colorScheme.onSurfaceVariant,
+                              color:
+                                  hasImage
+                                      ? Colors.white70
+                                      : theme.colorScheme.onSurfaceVariant,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -1114,9 +1130,14 @@ class _ProductSelectorWidgetState extends State<_ProductSelectorWidget> {
                                   ? '${'store_stockLabel'.tr}: $stock'
                                   : 'store_outOfStock'.tr,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: hasImage
-                                    ? (stock > 0 ? Colors.green : Colors.grey)
-                                    : (stock > 0 ? Colors.green : Colors.grey),
+                                color:
+                                    hasImage
+                                        ? (stock > 0
+                                            ? Colors.green
+                                            : Colors.grey)
+                                        : (stock > 0
+                                            ? Colors.green
+                                            : Colors.grey),
                                 fontSize: 11,
                               ),
                             ),
@@ -1150,7 +1171,8 @@ class _UserItemSelectorWidget extends StatefulWidget {
   const _UserItemSelectorWidget({required this.config});
 
   @override
-  State<_UserItemSelectorWidget> createState() => _UserItemSelectorWidgetState();
+  State<_UserItemSelectorWidget> createState() =>
+      _UserItemSelectorWidgetState();
 }
 
 class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
@@ -1188,7 +1210,8 @@ class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
       return HomeWidget.buildErrorWidget(context, '物品未找到');
     }
 
-    final productSnapshot = itemData['product_snapshot'] as Map<String, dynamic>?;
+    final productSnapshot =
+        itemData['product_snapshot'] as Map<String, dynamic>?;
     final productName = productSnapshot?['name'] as String? ?? '';
     final productImage = productSnapshot?['image'] as String?;
     final purchasePrice = itemData['purchase_price'] as int? ?? 0;
@@ -1224,12 +1247,15 @@ class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
-                image: hasImage
-                    ? DecorationImage(
-                        image: ImageUtils.createImageProvider(imageSnapshot.data),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                image:
+                    hasImage
+                        ? DecorationImage(
+                          image: ImageUtils.createImageProvider(
+                            imageSnapshot.data,
+                          ),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
               ),
               child: Stack(
                 children: [
@@ -1268,7 +1294,8 @@ class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: (hasImage
+                                color:
+                                    (hasImage
                                         ? Colors.white.withOpacity(0.2)
                                         : Colors.pinkAccent.withOpacity(0.2)),
                                 borderRadius: BorderRadius.circular(8),
@@ -1276,7 +1303,10 @@ class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
                               child: Text(
                                 '$remaining ${'store_times'.tr}',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: hasImage ? Colors.white : Colors.pinkAccent,
+                                  color:
+                                      hasImage
+                                          ? Colors.white
+                                          : Colors.pinkAccent,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1288,7 +1318,11 @@ class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.monetization_on, size: 16, color: Colors.orange),
+                                Icon(
+                                  Icons.monetization_on,
+                                  size: 16,
+                                  color: Colors.orange,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '$purchasePrice ${'store_points'.tr}',
@@ -1304,13 +1338,18 @@ class _UserItemSelectorWidgetState extends State<_UserItemSelectorWidget> {
                                   ? 'store_itemExpired'.tr
                                   : '${'store_expireIn'.tr} $remainingDays ${'store_days'.tr}',
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: hasImage
-                                    ? (isExpired
-                                        ? Colors.red.shade300
-                                        : (isExpiringSoon ? Colors.orange.shade300 : Colors.green.shade300))
-                                    : (isExpired
-                                        ? Colors.red
-                                        : (isExpiringSoon ? Colors.orange : Colors.green)),
+                                color:
+                                    hasImage
+                                        ? (isExpired
+                                            ? Colors.red.shade300
+                                            : (isExpiringSoon
+                                                ? Colors.orange.shade300
+                                                : Colors.green.shade300))
+                                        : (isExpired
+                                            ? Colors.red
+                                            : (isExpiringSoon
+                                                ? Colors.orange
+                                                : Colors.green)),
                               ),
                             ),
                           ],

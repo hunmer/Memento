@@ -24,7 +24,8 @@ class AgentEditScreen extends StatefulWidget {
   final AIAgent? agent;
   final bool isFromMarketplace; // 是否来自商场
   final String? extraStorageKey; // 如果提供,保存到extra storage;否则保存到临时agents
-  final Future<AIAgent?> Function(AIAgent agent)? onSave; // 保存回调，如果不为null则调用回调而不保存到controller
+  final Future<AIAgent?> Function(AIAgent agent)?
+  onSave; // 保存回调，如果不为null则调用回调而不保存到controller
 
   const AgentEditScreen({
     super.key,
@@ -747,16 +748,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
   }
 
   // 触发表单验证并测试 Agent
-  Future<void> _testAgentWithSubmit(VoidCallback onSubmit) async {
-    // 首先调用 onSubmit 回调触发表单验证和 onSubmitted
-    onSubmit();
-
-    // 等待一帧让表单状态更新
-    await Future.delayed(Duration.zero);
-
-    // 然后调用 _testAgent，它会再次验证并获取表单值
-    await _testAgent();
-  }
 
   Future<void> _testAgent() async {
     if (_formKey.currentState == null ||

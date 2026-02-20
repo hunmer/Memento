@@ -8,8 +8,6 @@ class ActivityRingsCardExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       appBar: AppBar(title: const Text('活动圆环卡片')),
       body: Container(

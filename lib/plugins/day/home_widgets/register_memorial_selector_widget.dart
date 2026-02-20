@@ -120,28 +120,6 @@ class _MemorialSelectorWidget extends LiveSelectorWidget {
   @override
   String get widgetTag => 'MemorialSelector';
 
-  /// 从配置中提取纪念日数据
-  Map<String, dynamic> _extractMemorialDayData(Map<String, dynamic> config) {
-    try {
-      final selectorConfig =
-          config['selectorWidgetConfig'] as Map<String, dynamic>?;
-      if (selectorConfig != null) {
-        final selectedData =
-            selectorConfig['selectedData'] as Map<String, dynamic>?;
-        if (selectedData != null && selectedData.containsKey('data')) {
-          final dataArray = selectedData['data'] as List<dynamic>?;
-          if (dataArray != null && dataArray.isNotEmpty) {
-            // 使用 extractMemorialDayData 处理 MemorialDay 对象和 Map 的转换
-            return extractMemorialDayData(dataArray);
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('[MemorialSelector] 提取数据失败: $e');
-    }
-    return {};
-  }
-
   /// 自定义空状态（显示"暂无纪念日"）
   @override
   Widget buildEmpty(BuildContext context) {

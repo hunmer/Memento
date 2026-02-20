@@ -213,10 +213,7 @@ Future<Map<String, Map<String, dynamic>>> provideActivityStatsWidgets(
   );
 
   // topStats 的总时长（用于 rankedBarChartCard 的比例计算）
-  final topTotalMinutes = topStats.fold<int>(
-    0,
-    (sum, s) => sum + s.totalMinutes,
-  );
+  topStats.fold<int>(0, (sum, s) => sum + s.totalMinutes);
 
   // 为小组件准备数据
   final trackersData = <Map<String, dynamic>>[];
