@@ -77,7 +77,8 @@ void _registerDataSelectors() {
             final warehouse = Warehouse.fromJson(
               previousSelections['warehouse'] as Map<String, dynamic>,
             );
-            return _getAllItemsRecursively(warehouse.items);
+            // 传递 warehouseId 到 rawData 中
+            return _getAllItemsRecursively(warehouse.items, warehouse.id);
           },
         ),
       ],
@@ -115,11 +116,34 @@ void _registerDataSelectors() {
 
 // 递归获取所有物品（包含子物品），转换为 SelectableItem 列表
 List<SelectableItem> _getAllItemsRecursively(
-  List<GoodsItem> items, {
+  List<GoodsItem> items,
+  String warehouseId, {
   String prefix = '',
+  // 添加 warehouseId 参数
 }) {
   List<SelectableItem> result = [];
   for (var item in items) {
+    // 直接构建包含 warehouseId 的 rawData
+    final itemJson = <String, dynamic>{
+      'id': item.id,
+      'title': item.title,
+      'imageUrl': item.imageUrl,
+      'thumbUrl': item.thumbUrl,
+      'iconData': item.icon?.codePoint,
+      'iconColor': item.iconColor?.value,
+      'tags': item.tags,
+      'purchaseDate': item.purchaseDate?.toIso8601String(),
+      'expirationDate': item.expirationDate?.toIso8601String(),
+      'purchasePrice': item.purchasePrice,
+      'quantity': item.quantity,
+      'status': item.status,
+      'usageRecords': item.usageRecords.map((record) => record.toJson()).toList(),
+      'customFields': item.customFields.map((field) => field.toJson()).toList(),
+      'notes': item.notes,
+      'subItems': item.subItems.map((subItem) => subItem.toJson()).toList(),
+      'warehouseId': warehouseId,  // 添加 warehouseId
+    };
+
     result.add(
       SelectableItem(
         id: item.id,
@@ -130,7 +154,7 @@ List<SelectableItem> _getAllItemsRecursively(
                 : null,
         icon: item.icon,
         color: item.iconColor,
-        rawData: item.toJson(),
+        rawData: itemJson,
       ),
     );
     // 递归处理子物品
@@ -138,6 +162,7 @@ List<SelectableItem> _getAllItemsRecursively(
       result.addAll(
         _getAllItemsRecursively(
           item.subItems,
+          warehouseId,
           prefix: '$prefix${item.title} > ',
         ),
       );
