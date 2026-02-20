@@ -47,11 +47,13 @@ class GoodsItemSelectorWidget extends StatefulWidget {
     Map<String, dynamic> props,
     HomeWidgetSize size,
   ) {
-    final itemIds = (props['itemIds'] as List<dynamic>?)
+    final itemIds =
+        (props['itemIds'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList() ??
         const [];
-    final warehouseIds = (props['warehouseIds'] as List<dynamic>?)
+    final warehouseIds =
+        (props['warehouseIds'] as List<dynamic>?)
             ?.map((e) => e.toString())
             .toList();
     final showListMode = props['showListMode'] as bool? ?? false;
@@ -83,21 +85,30 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
 
     // 获取物品数据
     final List<GoodsItemData> items = [];
-    for (var i = 0; i < widget.itemIds.length; i++) {
-      final itemId = widget.itemIds[i];
-      final warehouseId = widget.warehouseIds != null && i < widget.warehouseIds!.length
-          ? widget.warehouseIds![i]
-          : null;
 
-      final findResult = warehouseId != null
-          ? plugin.findGoodsItemById(itemId)
-          : plugin.findGoodsItemById(itemId);
+    if (widget.itemIds.isNotEmpty) {
+      // 模式1：指定了具体的物品ID
+      for (var i = 0; i < widget.itemIds.length; i++) {
+        final itemId = widget.itemIds[i];
+        final findResult = plugin.findGoodsItemById(itemId);
 
-      if (findResult != null) {
-        items.add(GoodsItemData(
-          item: findResult.item,
-          warehouseId: findResult.warehouseId,
-        ));
+        if (findResult != null) {
+          items.add(
+            GoodsItemData(
+              item: findResult.item,
+              warehouseId: findResult.warehouseId,
+            ),
+          );
+        }
+      }
+    } else if (widget.warehouseIds != null && widget.warehouseIds!.isNotEmpty) {
+      // 模式2：未指定物品ID，但有仓库ID，显示仓库中的所有物品
+      for (final warehouseId in widget.warehouseIds!) {
+        final warehouse = plugin.getWarehouse(warehouseId);
+        if (warehouse != null) {
+          // 递归获取仓库中的所有物品（包括子物品）
+          _collectAllItems(warehouse.items, warehouse.id, items);
+        }
       }
     }
 
@@ -110,6 +121,20 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
       return _buildListLayout(context, theme, items);
     } else {
       return _buildSingleItemLayout(context, theme, items.first);
+    }
+  }
+
+  /// 递归收集所有物品（包括子物品）
+  void _collectAllItems(
+    List<GoodsItem> itemList,
+    String warehouseId,
+    List<GoodsItemData> result,
+  ) {
+    for (final item in itemList) {
+      result.add(GoodsItemData(item: item, warehouseId: warehouseId));
+      if (item.subItems.isNotEmpty) {
+        _collectAllItems(item.subItems, warehouseId, result);
+      }
     }
   }
 
@@ -127,31 +152,34 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => _navigateToItemDetail(
-          context,
-          item.id,
-          itemData.warehouseId,
-          item.title,
-        ),
+        onTap:
+            () => _navigateToItemDetail(
+              context,
+              item.id,
+              itemData.warehouseId,
+              item.title,
+            ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            image: hasImage
-                ? DecorationImage(
-                    image: ImageUtils.createImageProvider(item.imageUrl),
-                    fit: BoxFit.cover,
-                  )
-                : null,
-            gradient: !hasImage
-                ? LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      _goodsColor.withAlpha(30),
-                      _goodsColor.withAlpha(10),
-                    ],
-                  )
-                : null,
+            image:
+                hasImage
+                    ? DecorationImage(
+                      image: ImageUtils.createImageProvider(item.imageUrl),
+                      fit: BoxFit.cover,
+                    )
+                    : null,
+            gradient:
+                !hasImage
+                    ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        _goodsColor.withAlpha(30),
+                        _goodsColor.withAlpha(10),
+                      ],
+                    )
+                    : null,
           ),
           child: Container(
             decoration: BoxDecoration(
@@ -159,9 +187,10 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
               borderRadius: BorderRadius.circular(16),
             ),
             padding: const EdgeInsets.all(16),
-            child: isLarge
-                ? _buildLargeItemContent(context, theme, item, hasImage)
-                : _buildMediumItemContent(context, theme, item, hasImage),
+            child:
+                isLarge
+                    ? _buildLargeItemContent(context, theme, item, hasImage)
+                    : _buildMediumItemContent(context, theme, item, hasImage),
           ),
         ),
       ),
@@ -242,9 +271,8 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
                     Text(
                       '¥${item.purchasePrice!.toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: hasImage
-                            ? Colors.white
-                            : theme.colorScheme.primary,
+                        color:
+                            hasImage ? Colors.white : theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -292,8 +320,11 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(Icons.inventory_2,
-                  color: theme.colorScheme.primary, size: 20),
+              Icon(
+                Icons.inventory_2,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 title,
@@ -335,12 +366,13 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
     final item = itemData.item;
 
     return InkWell(
-      onTap: () => _navigateToItemDetail(
-        context,
-        item.id,
-        itemData.warehouseId,
-        item.title,
-      ),
+      onTap:
+          () => _navigateToItemDetail(
+            context,
+            item.id,
+            itemData.warehouseId,
+            item.title,
+          ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
@@ -383,8 +415,10 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant),
+            Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ],
         ),
       ),
@@ -406,10 +440,7 @@ class _GoodsItemSelectorWidgetState extends State<GoodsItemSelectorWidget> {
           children: [
             Icon(Icons.error_outline, color: Colors.red),
             const SizedBox(width: 8),
-            Text(
-              message,
-              style: const TextStyle(color: Colors.red),
-            ),
+            Text(message, style: const TextStyle(color: Colors.red)),
           ],
         ),
       ),
