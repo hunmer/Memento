@@ -3,9 +3,9 @@
 /// 提供多个主页小组件：
 /// - [registerIconWidget] - 1x1 简单图标组件
 /// - [registerOverviewWidget] - 2x2 详细卡片组件
-/// - [registerPointsGoalProgressWidget] - 积分目标进度小组件
-/// - [registerProductSelectorWidget] - 商品选择器小组件
-/// - [registerUserItemSelectorWidget] - 用户物品选择器小组件
+/// - [registerPointsGoalProgressWidget] - 积分目标进度小组件（公共小组件）
+/// - [registerProductSelectorWidget] - 商品选择器小组件（公共小组件）
+/// - [registerUserItemSelectorWidget] - 用户物品选择器小组件（公共小组件）
 library;
 
 // 导出模块
