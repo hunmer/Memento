@@ -73,6 +73,14 @@ class _ActivityLastActivityWidgetState
         onTap: () => _navigateToCreateActivity(context),
         child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.pink.withAlpha(30),
+              width: 1.5,
+            ),
+          ),
           child: Row(
             children: [
               Icon(Icons.history, color: Colors.pink, size: 32),
@@ -157,6 +165,14 @@ class _ActivityLastActivityWidgetState
         onTap: () => _navigateToCreateActivity(context),
         child: Container(
           padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.pink.withAlpha(30),
+              width: 1.5,
+            ),
+          ),
           child: Row(
             children: [
               Expanded(
