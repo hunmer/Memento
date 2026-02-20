@@ -148,11 +148,8 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
                 ]
                 : null,
       ),
-      child: ClipRect(
-        child: SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
             children: [
               // 当前连续打卡
               Column(
@@ -219,7 +216,8 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
                   ),
                 ],
               ),
-              SizedBox(height: largeSpacing),
+
+              const Spacer(),
 
               // 日期网格
               _buildDaysGrid(
@@ -230,8 +228,6 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 
@@ -254,8 +250,7 @@ class _HabitStreakTrackerState extends State<HabitStreakTracker>
     // 计算每一天圆形的尺寸（基于可用宽度和总天数）
     final daySize = dayFontSize * 2 + iconSize; // 动态计算大小
 
-    return SizedBox(
-      height: daySize + 8, // 固定高度，确保一行显示
+    return Expanded(
       child: ListView.builder(
         scrollDirection: Axis.horizontal, // 横向滚动
         itemCount: widget.totalDays,

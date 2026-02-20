@@ -122,6 +122,22 @@ class AllWidgetsPreviewPage extends StatefulWidget {
 class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
+  String? _selectedCategory;
+
+  /// 所有可用分类
+  List<String> get _allCategories {
+    final categories = widget.widgetItems.map((e) => e.category).toSet().toList();
+    categories.sort();
+    return categories;
+  }
+
+  /// 根据选择过滤后的小组件列表
+  List<WidgetPreviewItem> get _filteredWidgetItems {
+    if (_selectedCategory == null) {
+      return widget.widgetItems;
+    }
+    return widget.widgetItems.where((item) => item.category == _selectedCategory).toList();
+  }
 
   @override
   void initState() {
@@ -146,7 +162,38 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('所有小组件预览 (${widget.widgetItems.length})'),
+        title: InkWell(
+          onTap: () => _showCategoryDialog(context),
+          borderRadius: BorderRadius.circular(8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _selectedCategory ?? '全部',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.arrow_drop_down, size: 20),
+            ],
+          ),
+        ),
+        actions: [
+          if (_selectedCategory != null)
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _selectedCategory = null;
+                  _updateTabController();
+                });
+              },
+              icon: const Icon(Icons.clear, size: 18),
+              label: const Text('清除'),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          const SizedBox(width: 8),
+        ],
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
@@ -182,7 +229,7 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
               ),
               unselectedLabelStyle: const TextStyle(fontSize: 12),
               tabs:
-                  widget.widgetItems.map((item) {
+                  _filteredWidgetItems.map((item) {
                     return Tab(
                       icon: Icon(item.icon, size: 18),
                       text: item.title,
@@ -195,7 +242,7 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
             child: ExtendedTabBarView(
               controller: _tabController,
               children:
-                  widget.widgetItems.map((item) {
+                  _filteredWidgetItems.map((item) {
                     return _buildWidgetPreviewContent(item);
                   }).toList(),
             ),
@@ -203,6 +250,107 @@ class _AllWidgetsPreviewPageState extends State<AllWidgetsPreviewPage>
         ],
       ),
     );
+  }
+
+  /// 显示分类选择对话框
+  void _showCategoryDialog(BuildContext context) {
+    final categories = _allCategories;
+    final filteredCount = Map.fromEntries(
+      categories.map((c) => MapEntry(
+            c,
+            widget.widgetItems.where((item) => item.category == c).length,
+          )),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('选择分类'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 全部选项
+              ListTile(
+                leading: Radio<String?>(
+                  value: null,
+                  groupValue: _selectedCategory,
+                  onChanged: (value) {
+                    setState(() => _selectedCategory = value);
+                    Navigator.pop(context);
+                    _updateTabController();
+                  },
+                ),
+                title: Row(
+                  children: [
+                    const Text('全部'),
+                    const SizedBox(width: 8),
+                    Chip(
+                      label: Text('${widget.widgetItems.length}'),
+                      padding: EdgeInsets.zero,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              ...categories.map((category) {
+                return ListTile(
+                  leading: Radio<String?>(
+                    value: category,
+                    groupValue: _selectedCategory,
+                    onChanged: (value) {
+                      setState(() => _selectedCategory = value);
+                      Navigator.pop(context);
+                      _updateTabController();
+                    },
+                  ),
+                  title: Row(
+                    children: [
+                      Text(category),
+                      const SizedBox(width: 8),
+                      Chip(
+                        label: Text('${filteredCount[category]}'),
+                        padding: EdgeInsets.zero,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ],
+                ),
+                onTap: () {
+                  setState(() => _selectedCategory = category);
+                  Navigator.pop(context);
+                  _updateTabController();
+                },
+              );
+              }),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 更新 TabController 的长度
+  void _updateTabController() {
+    final filteredLength = _filteredWidgetItems.length;
+    if (filteredLength != _tabController.length) {
+      _tabController.dispose();
+      _tabController = TabController(
+        length: filteredLength,
+        vsync: this,
+      );
+      if (filteredLength > 0) {
+        _tabController.animateTo(0);
+      }
+    }
   }
 
   /// 构建单个小组件的预览内容

@@ -176,7 +176,7 @@ class _JournalPromptCardWidgetState extends State<JournalPromptCardWidget>
                             widget.prompt,
                             style: TextStyle(
                               color: const Color(0xFF9FA8DA),
-                              fontSize: widget.size.getLargeFontSize() - 20,
+                              fontSize: widget.size.getLargeFontSize() * 0.8,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
                               letterSpacing: -0.5,
@@ -225,10 +225,7 @@ class _ButterflyIcon extends StatelessWidget {
   final Animation<double> animation;
   final HomeWidgetSize size;
 
-  const _ButterflyIcon({
-    required this.animation,
-    required this.size,
-  });
+  const _ButterflyIcon({required this.animation, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +450,11 @@ class _SyncButton extends StatelessWidget {
           child: InkWell(
             onTap: onPressed,
             borderRadius: BorderRadius.circular(28),
-            child: Icon(Icons.sync, color: Colors.white, size: size.getIconSize()),
+            child: Icon(
+              Icons.sync,
+              color: Colors.white,
+              size: size.getIconSize(),
+            ),
           ),
         ),
       ),

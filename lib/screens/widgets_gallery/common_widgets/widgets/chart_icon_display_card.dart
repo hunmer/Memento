@@ -271,7 +271,8 @@ class _ChartIconDisplayCardState extends State<ChartIconDisplayCard>
           horizontal: widget.size.getItemSpacing(),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             // Y轴刻度
             SizedBox(
