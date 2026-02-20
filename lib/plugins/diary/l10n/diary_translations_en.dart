@@ -8,8 +8,6 @@ class DiaryTranslationsEn {
     // Widget related
     'diary_widgetName': 'Diary',
     'diary_widgetDescription': 'Quick access to diary',
-    'diary_todayQuickName': 'Today\'s Diary',
-    'diary_todayQuickDescription': 'Quick access to today\'s diary editor',
     'diary_overviewName': 'Diary Overview',
     'diary_overviewDescription': 'Display today\'s word count and monthly progress',
     'diary_weeklyName': 'Weekly Diary',
