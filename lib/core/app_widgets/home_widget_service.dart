@@ -45,7 +45,8 @@ import 'package:Memento/plugins/habits/home_widgets/home_widgets.dart'
 import 'package:Memento/plugins/database/home_widgets.dart';
 import 'package:Memento/plugins/calendar_album/home_widgets/home_widgets.dart'
     as CalendarAlbumHomeWidgets;
-import 'package:Memento/plugins/scripts_center/home_widgets.dart';
+import 'package:Memento/plugins/scripts_center/home_widgets/home_widgets.dart'
+    as ScriptsCenterHomeWidgets;
 import 'package:Memento/plugins/nfc/home_widgets.dart';
 import 'package:Memento/plugins/tts/home_widgets.dart';
 import 'package:Memento/plugins/webview/home_widgets.dart';
