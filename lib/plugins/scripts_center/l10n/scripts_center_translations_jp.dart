@@ -106,6 +106,10 @@ const Map<String, String> scriptsCenterTranslationsJp = {
   'scripts_center_scriptExecuteFailed': 'スクリプト実行に失敗しました',
   'scripts_center_scriptExecuteError': 'スクリプト実行エラー',
 
+  // Scripts List Widget
+  'scripts_center_scriptsListWidgetName': 'スクリプトリスト',
+  'scripts_center_scriptsListWidgetDesc': 'カラフルなグリッドですべてのスクリプトを表示',
+
   // Delete related
   'scripts_center_delete_confirm': '削除を確認',
   'scripts_center_delete_script_confirm': 'スクリプトの削除を確認',
