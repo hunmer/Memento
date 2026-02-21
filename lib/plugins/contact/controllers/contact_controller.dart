@@ -3,6 +3,8 @@ import 'package:Memento/plugins/contact/models/contact_model.dart';
 import 'package:Memento/plugins/contact/models/interaction_record_model.dart';
 import 'package:Memento/plugins/contact/models/filter_sort_config.dart';
 import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/item_event_args.dart';
 import 'package:path/path.dart' as path;
 import 'package:Memento/plugins/contact/sample_data.dart';
 
@@ -71,6 +73,18 @@ class ContactController {
     final contacts = await getAllContacts();
     contacts.add(contact);
     await saveAllContacts(contacts);
+
+    // 广播联系人创建事件
+    EventManager.instance.broadcast(
+      'contact_created',
+      ItemEventArgs(
+        eventName: 'contact_created',
+        itemId: contact.id,
+        title: contact.name,
+        action: 'created',
+      ),
+    );
+
     return contact;
   }
 
@@ -81,6 +95,18 @@ class ContactController {
     if (index != -1) {
       contacts[index] = contact;
       await saveAllContacts(contacts);
+
+      // 广播联系人更新事件
+      EventManager.instance.broadcast(
+        'contact_updated',
+        ItemEventArgs(
+          eventName: 'contact_updated',
+          itemId: contact.id,
+          title: contact.name,
+          action: 'updated',
+        ),
+      );
+
       return contact;
     }
     throw Exception('Contact not found');
@@ -88,12 +114,27 @@ class ContactController {
 
   // 删除联系人
   Future<void> deleteContact(String id) async {
+    // 先获取联系人信息用于事件广播
+    final contact = await getContact(id);
+    final contactName = contact?.name ?? '';
+
     final contacts = await getAllContacts();
     contacts.removeWhere((c) => c.id == id);
     await saveAllContacts(contacts);
 
     // 级联删除相关的交互记录
     await deleteInteractionsByContactId(id);
+
+    // 广播联系人删除事件
+    EventManager.instance.broadcast(
+      'contact_deleted',
+      ItemEventArgs(
+        eventName: 'contact_deleted',
+        itemId: id,
+        title: contactName,
+        action: 'deleted',
+      ),
+    );
   }
 
   // 获取联系人

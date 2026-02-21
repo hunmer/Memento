@@ -117,6 +117,8 @@ const Map<String, String> contactTranslationsEn = {
   'contact_overviewDescription': 'Display contacts statistics',
   'contact_personCardName': 'Contact Card',
   'contact_personCardDescription': 'Select a contact to display on home',
+  'contact_recentCardName': 'Recent Contacts',
+  'contact_recentCardDescription': 'Display list of contacts from last 30 days',
   'contact_today': 'Today',
   'contact_yesterday': 'Yesterday',
   'contact_daysAgo': '@days days ago',

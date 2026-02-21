@@ -117,6 +117,8 @@ const Map<String, String> contactTranslationsZh = {
   'contact_overviewDescription': '显示联系人统计信息',
   'contact_personCardName': '联系人卡片',
   'contact_personCardDescription': '选择一个联系人显示在主页',
+  'contact_recentCardName': '最近联系人',
+  'contact_recentCardDescription': '显示最近30天内的联系人列表',
   'contact_today': '今天',
   'contact_yesterday': '昨天',
   'contact_daysAgo': '@days 天前',

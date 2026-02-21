@@ -95,6 +95,8 @@ import 'widgets/store_user_item_selector_card.dart';
 import 'widgets/notebook_list_card.dart';
 import 'widgets/node_stats_card.dart';
 import 'widgets/todo_nodes_list.dart';
+import 'widgets/contact_card.dart';
+import 'widgets/recent_contact_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -191,6 +193,8 @@ enum CommonWidgetId {
   notebookListCard,
   nodeStatsCard,
   todoNodesList,
+  recentContactCard,
+  contactCard,
 }
 
 /// 公共小组件元数据
@@ -945,6 +949,22 @@ class CommonWidgetsRegistry {
       defaultSize: LargeSize(),
       supportedSizes: [const LargeSize(), const Large3Size()],
     ),
+    CommonWidgetId.recentContactCard: CommonWidgetMetadata(
+      id: CommonWidgetId.recentContactCard,
+      name: '最近联系人卡片',
+      description: '显示最近30天内的联系人列表',
+      icon: Icons.people,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
+    CommonWidgetId.contactCard: CommonWidgetMetadata(
+      id: CommonWidgetId.contactCard,
+      name: '联系人卡片',
+      description: '显示联系人信息（头像、姓名、最后联系时间、标签）',
+      icon: Icons.person,
+      defaultSize: MediumSize(),
+      supportedSizes: [MediumSize(), LargeSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1184,15 +1204,25 @@ class CommonWidgetBuilder {
       case CommonWidgetId.pointsGoalCard:
         return PointsGoalCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.storeProductSelector:
-        return StoreProductSelectorCardWidget.fromProps(finalProps, effectiveSize);
+        return StoreProductSelectorCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.storeUserItemSelector:
-        return StoreUserItemSelectorCardWidget.fromProps(finalProps, effectiveSize);
+        return StoreUserItemSelectorCardWidget.fromProps(
+          finalProps,
+          effectiveSize,
+        );
       case CommonWidgetId.notebookListCard:
         return NotebookListCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.nodeStatsCard:
         return NodeStatsCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.todoNodesList:
         return TodoNodesListWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.contactCard:
+        return ContactCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.recentContactCard:
+        return RecentContactCardWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }

@@ -10,11 +10,13 @@ export 'widgets.dart';
 export 'register_icon_widget.dart';
 export 'register_overview_widget.dart';
 export 'register_person_card.dart';
+export 'register_recent_contact_card.dart';
 
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'register_icon_widget.dart';
 import 'register_overview_widget.dart';
 import 'register_person_card.dart';
+import 'register_recent_contact_card.dart';
 
 /// 注册所有联系人插件的小组件
 void register() {
@@ -22,4 +24,5 @@ void register() {
   registerIconWidget(registry);
   registerOverviewWidget(registry);
   registerPersonCardWidget(registry);
+  registerRecentContactCard(registry);
 }

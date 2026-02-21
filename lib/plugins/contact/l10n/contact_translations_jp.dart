@@ -117,6 +117,8 @@ const Map<String, String> contactTranslationsJp = {
   'contact_overviewDescription': '連絡先統計を表示',
   'contact_personCardName': '連絡先カード',
   'contact_personCardDescription': 'ホームに表示する連絡先を選択',
+  'contact_recentCardName': '最近の連絡先',
+  'contact_recentCardDescription': '過去30日間の連絡先リストを表示',
   'contact_today': '今日',
   'contact_yesterday': '昨日',
   'contact_daysAgo': '@days 日前',
