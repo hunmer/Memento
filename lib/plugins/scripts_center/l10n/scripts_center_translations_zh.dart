@@ -106,6 +106,10 @@ const Map<String, String> scriptsCenterTranslationsZh = {
   'scripts_center_scriptExecuteFailed': '脚本执行失败',
   'scripts_center_scriptExecuteError': '脚本执行错误',
 
+  // 脚本列表小组件
+  'scripts_center_scriptsListWidgetName': '脚本列表',
+  'scripts_center_scriptsListWidgetDesc': '以彩色网格展示所有脚本',
+
   // 删除相关
   'scripts_center_delete_confirm': '确认删除',
   'scripts_center_delete_script_confirm': '确认删除脚本',

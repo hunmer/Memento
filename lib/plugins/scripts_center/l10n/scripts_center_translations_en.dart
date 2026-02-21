@@ -106,6 +106,10 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_scriptExecuteFailed': 'Script execution failed',
   'scripts_center_scriptExecuteError': 'Script execution error',
 
+  // Scripts List Widget
+  'scripts_center_scriptsListWidgetName': 'Scripts List',
+  'scripts_center_scriptsListWidgetDesc': 'Display all scripts in a colorful grid',
+
   // Delete related
   'scripts_center_delete_confirm': 'Confirm Delete',
   'scripts_center_delete_script_confirm': 'Confirm to delete script',
