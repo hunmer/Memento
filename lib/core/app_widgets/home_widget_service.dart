@@ -28,7 +28,8 @@ import 'package:Memento/plugins/checkin/home_widgets/home_widgets.dart'
     as CheckinHomeWidgets;
 import 'package:Memento/plugins/calendar/home_widgets/home_widgets.dart'
     as CalendarHomeWidgets;
-import 'package:Memento/plugins/timer/home_widgets.dart';
+import 'package:Memento/plugins/timer/home_widgets/home_widgets.dart'
+    as TimerHomeWidgets;
 import 'package:Memento/plugins/day/home_widgets/home_widgets.dart'
     as DayHomeWidgets;
 import 'package:Memento/plugins/tracker/home_widgets/home_widgets.dart'

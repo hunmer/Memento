@@ -46,6 +46,9 @@ class TimerTranslationsEn {
     'timer_overviewDescription': 'Display timer statistics',
     'timer_quickAccess': 'Quick Access',
     'timer_quickAccessDesc': 'Tap to go to timer detail',
+    'timer_listWidgetName': 'Timer List',
+    'timer_listWidgetDesc': 'Display all timers and their progress',
+    'timer_overview': 'Timer Overview',
     'viewDetail': 'View Detail',
   };
 }
