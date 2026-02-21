@@ -151,4 +151,8 @@ const Map<String, String> webviewTranslationsZh = {
   'webview_sort_by_open_time': '最近打开',
   'webview_sort_by_add_time': '最近添加',
   'webview_category': '分类',
+
+  // 小组件翻译
+  'webview_cardListWidgetName': '网址列表',
+  'webview_cardListWidgetDesc': '以彩色网格显示所有网址卡片',
 };
