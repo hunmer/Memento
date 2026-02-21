@@ -140,7 +140,8 @@ class GenericSelectorWidget extends StatelessWidget {
   ) {
     try {
       final widgetId = selectorConfig.commonWidgetId!;
-      final size = config['widgetSize'] as HomeWidgetSize? ??
+      final size =
+          config['widgetSize'] as HomeWidgetSize? ??
           widgetDefinition.defaultSize;
 
       // 获取 widgetItem.id 作为 key，确保小组件被正确创建并触发 initState
@@ -153,7 +154,9 @@ class GenericSelectorWidget extends StatelessWidget {
       }
 
       // 添加 custom 尺寸的实际宽高到 props 中
-      final props = Map<String, dynamic>.from(selectorConfig.commonWidgetProps!);
+      final props = Map<String, dynamic>.from(
+        selectorConfig.commonWidgetProps!,
+      );
       if (size == const CustomSize(width: -1, height: -1)) {
         props['customWidth'] = config['customWidth'] as int?;
         props['customHeight'] = config['customHeight'] as int?;
@@ -176,10 +179,7 @@ class GenericSelectorWidget extends StatelessWidget {
       // 使用 widgetItemId 作为 key，确保每个小组件实例都是唯一的
       // 这样当小组件被添加或替换时，Flutter 会创建新的组件实例并触发 initState
       if (widgetItemId != null) {
-        return KeyedSubtree(
-          key: ValueKey(widgetItemId),
-          child: child,
-        );
+        return KeyedSubtree(key: ValueKey(widgetItemId), child: child);
       }
 
       return child;

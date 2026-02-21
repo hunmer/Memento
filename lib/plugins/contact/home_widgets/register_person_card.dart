@@ -1,22 +1,91 @@
-/// 联系人插件 - 联系人卡片组件注册
+/// 联系人插件 - 联系人卡片组件注册（公共小组件）
 library;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/models/selector_result.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
-import 'package:Memento/screens/home_screen/widgets/generic_selector_widget.dart';
-import 'package:Memento/utils/image_utils.dart';
-import 'package:Memento/widgets/event_listener_container.dart';
-import '../contact_plugin.dart';
-import '../models/contact_model.dart';
-import 'utils.dart';
+import 'package:Memento/screens/home_screen/widgets/base/live_selector_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
+import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
+import '../home_widgets/providers/command_widgets_provider.dart' as cmd;
 
-/// 注册 2x1 联系人卡片 - 选择一个联系人显示
+/// 默认显示的公共小组件类型（私有）
+const CommonWidgetId _defaultWidgetType = CommonWidgetId.contactCard;
+
+/// 联系人卡片小组件（基于 LiveSelectorWidget）
+///
+/// 默认显示 contactNotFoundCard 公共小组件，支持实时更新
+class _ContactPersonLiveWidget extends LiveSelectorWidget {
+  const _ContactPersonLiveWidget({
+    super.key,
+    required super.config,
+    required super.widgetDefinition,
+  });
+
+  @override
+  List<String> get eventListeners => const [
+    'contact_created',
+    'contact_updated',
+    'contact_deleted',
+  ];
+
+  @override
+  Future<Map<String, dynamic>> getLiveData(Map<String, dynamic> config) async {
+    // 解析选择器配置，获取用户选择的联系人数据
+    String contactId = '';
+    try {
+      if (config.containsKey('selectorWidgetConfig')) {
+        final selectorConfig = SelectorWidgetConfig.fromJson(
+          config['selectorWidgetConfig'] as Map<String, dynamic>,
+        );
+        // 从 selectedData 中提取联系人 ID
+        // selectedData 结构来自 SelectorResult.toMap()，包含 data 字段
+        if (selectorConfig.selectedData != null) {
+          final selectedData = selectorConfig.selectedData!;
+          final data = selectedData['data'];
+
+          // data 可能是列表（多选）或单个对象
+          if (data is List && data.isNotEmpty) {
+            final contactJson = data[0] as Map<String, dynamic>;
+            contactId = contactJson['id'] as String? ?? '';
+          } else if (data is Map<String, dynamic>) {
+            contactId = data['id'] as String? ?? '';
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[ContactPersonWidget] 解析选择器数据失败: $e');
+    }
+
+    // 使用联系人 ID 获取实时数据
+    return cmd.ContactCommandWidgetsProvider.provideContactCardData(contactId);
+  }
+
+  @override
+  String get widgetTag => 'ContactPersonWidget';
+
+  @override
+  Widget buildCommonWidget(
+    BuildContext context,
+    CommonWidgetId widgetId,
+    Map<String, dynamic> props,
+    HomeWidgetSize size,
+  ) {
+    return CommonWidgetBuilder.build(
+      context,
+      widgetId,
+      props,
+      size,
+      inline: true,
+    );
+  }
+}
+
+/// 注册 2x1 联系人卡片 - 选择一个联系人显示（公共小组件，无配置）
 void registerPersonCardWidget(HomeWidgetRegistry registry) {
   registry.register(
     HomeWidget(
@@ -29,238 +98,37 @@ void registerPersonCardWidget(HomeWidgetRegistry registry) {
       defaultSize: const MediumSize(),
       supportedSizes: [const MediumSize()],
       category: 'home_categoryTools'.tr,
+      // 配置使用联系人选择器
       selectorId: 'contact.person',
-      dataRenderer: renderPersonCard,
-      navigationHandler: navigateToContactDetail,
+      commonWidgetsProvider: (data) async {
+        final contactId = data['id'] as String? ?? '';
+        return cmd.ContactCommandWidgetsProvider.provideContactCardData(contactId);
+      },
       dataSelector: (dataArray) {
         final contactJson = dataArray[0] as Map<String, dynamic>;
         return {
           'id': contactJson['id'] as String,
-          'title': contactJson['name'] as String?,
+          'name': contactJson['name'] as String?,
           'phone': contactJson['phone'] as String?,
         };
       },
+      navigationHandler: navigateToContactDetail,
       builder: (context, config) {
-        return GenericSelectorWidget(
+        return _ContactPersonLiveWidget(
+          config: _ensureConfigHasCommonWidget(config),
           widgetDefinition: registry.getWidget('contact_person')!,
-          config: config,
         );
       },
     ),
   );
 }
 
-/// 渲染联系人卡片小组件
-Widget renderPersonCard(
-  BuildContext context,
-  SelectorResult result,
-  Map<String, dynamic> config,
-) {
-  final savedData = result.data is Map
-      ? Map<String, dynamic>.from(result.data as Map)
-      : <String, dynamic>{};
-  final contactId = savedData['id'] as String? ?? '';
-
-  if (contactId.isEmpty) {
-    return buildContactNotFoundWidget(context, savedData);
-  }
-
-  return StatefulBuilder(
-    builder: (context, setState) {
-      return EventListenerContainer(
-        events: const ['contact_created'],
-        onEvent: () => setState(() {}),
-        child: buildContactCardWidgetByLoad(context, contactId, savedData),
-      );
-    },
-  );
-}
-
-/// 构建联系人卡片小组件（从 PluginManager 获取最新数据）
-Widget buildContactCardWidgetByLoad(
-  BuildContext context,
-  String contactId,
-  Map<String, dynamic> savedData,
-) {
-  return FutureBuilder<Contact?>(
-    future: loadContactById(contactId),
-    builder: (context, snapshot) {
-      final contact = snapshot.data;
-
-      if (contact == null) {
-        return buildContactNotFoundWidget(context, savedData);
-      }
-
-      return SizedBox.expand(
-        child: buildContactCardWidget(context, contact),
-      );
-    },
-  );
-}
-
-/// 从 controller 加载联系人数据
-Future<Contact?> loadContactById(String contactId) async {
-  try {
-    final plugin = PluginManager.instance.getPlugin('contact') as ContactPlugin?;
-    if (plugin == null || contactId.isEmpty) return null;
-    return await plugin.controller.getContact(contactId);
-  } catch (e) {
-    debugPrint('加载联系人失败: $e');
-    return null;
-  }
-}
-
-/// 构建联系人卡片小组件 UI
-Widget buildContactCardWidget(BuildContext context, Contact contact) {
-  final theme = Theme.of(context);
-
-  return Material(
-    color: Colors.transparent,
-    child: InkWell(
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            buildContactAvatar(contact, size: 48),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    contact.name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    formatLastContactTime(contact.lastContactTime),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-/// 构建联系人头像
-Widget buildContactAvatar(Contact contact, {required double size}) {
-  if (contact.avatar != null && contact.avatar!.isNotEmpty) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: contact.iconColor.withOpacity(0.2),
-      ),
-      child: ClipOval(
-        child: Image(
-          image: ImageUtils.createImageProvider(contact.avatar),
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(contact.icon, size: size * 0.5, color: contact.iconColor);
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                    : null,
-                strokeWidth: 2,
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  return Container(
-    width: size,
-    height: size,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      color: contact.iconColor,
-    ),
-    child: Icon(contact.icon, size: size * 0.5, color: Colors.white),
-  );
-}
-
-/// 构建联系人未找到提示组件
-Widget buildContactNotFoundWidget(
-  BuildContext context,
-  Map<String, dynamic> savedData,
-) {
-  final theme = Theme.of(context);
-  final name = savedData['title'] as String? ?? 'contact_unknownContact'.tr;
-
-  return SizedBox.expand(
-    child: Material(
-      color: Colors.transparent,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.person_off, size: 32, color: theme.colorScheme.error),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'contact_notFound'.tr,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onErrorContainer,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 /// 导航到联系人详情页
-void navigateToContactDetail(
-  BuildContext context,
-  SelectorResult result,
-) {
-  final data = result.data is Map<String, dynamic>
-      ? result.data as Map<String, dynamic>
-      : {};
+void navigateToContactDetail(BuildContext context, SelectorResult result) {
+  final data =
+      result.data is Map<String, dynamic>
+          ? result.data as Map<String, dynamic>
+          : {};
   final contactId = data['id'] as String?;
 
   if (contactId == null || contactId.isEmpty) {
@@ -273,4 +141,19 @@ void navigateToContactDetail(
     '/contact/detail',
     arguments: {'contactId': contactId},
   );
+}
+
+/// 确保 config 包含默认的公共小组件配置
+Map<String, dynamic> _ensureConfigHasCommonWidget(
+  Map<String, dynamic> config,
+) {
+  final newConfig = Map<String, dynamic>.from(config);
+  if (!newConfig.containsKey('selectorWidgetConfig')) {
+    newConfig['selectorWidgetConfig'] = {
+      'commonWidgetId': _defaultWidgetType.name,
+      'usesCommonWidget': true,
+      'commonWidgetProps': {},
+    };
+  }
+  return newConfig;
 }
