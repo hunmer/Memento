@@ -50,7 +50,8 @@ import 'package:Memento/plugins/scripts_center/home_widgets/home_widgets.dart'
 import 'package:Memento/plugins/nfc/home_widgets/home_widgets.dart' as NfcHomeWidgets;
 import 'package:Memento/plugins/tts/home_widgets/home_widgets.dart'
     as TtsHomeWidgets;
-import 'package:Memento/plugins/webview/home_widgets.dart';
+import 'package:Memento/plugins/webview/home_widgets/home_widgets.dart'
+    as WebviewHomeWidgets;
 import 'package:Memento/screens/home_screen/managers/home_layout_manager.dart';
 import 'package:Memento/screens/route.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
