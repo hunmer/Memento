@@ -151,4 +151,8 @@ const Map<String, String> webviewTranslationsEn = {
   'webview_sort_by_open_time': 'Recently Opened',
   'webview_sort_by_add_time': 'Recently Added',
   'webview_category': 'Category',
+
+  // Widget translations
+  'webview_cardListWidgetName': 'URL Cards',
+  'webview_cardListWidgetDesc': 'Display all URL cards in a colorful grid',
 };

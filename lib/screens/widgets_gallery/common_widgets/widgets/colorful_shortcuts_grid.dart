@@ -93,6 +93,8 @@ class _ColorfulShortcutsGridWidgetState
               MediaQuery.of(context).size.height * _slideAnimation.value.dy,
             ),
             child: Container(
+              width: widget.inline ? double.maxFinite : 320,
+              height: widget.inline ? double.maxFinite : 320,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(12),
@@ -166,11 +168,7 @@ class _ShortcutItemWidget extends StatelessWidget {
 
     final itemAnimation = CurvedAnimation(
       parent: animationController,
-      curve: Interval(
-        start,
-        end,
-        curve: Curves.easeOutCubic,
-      ),
+      curve: Interval(start, end, curve: Curves.easeOutCubic),
     );
 
     return AnimatedBuilder(
