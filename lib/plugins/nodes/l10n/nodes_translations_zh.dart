@@ -100,6 +100,8 @@ final Map<String, String> nodesTranslationsZh = {
   'nodes_selectNotebook': '选择笔记本',
   'nodes_notebookListName': '节点列表',
   'nodes_notebookListDescription': '显示选定笔记本的节点列表',
+  'nodes_notebookListWidgetName': '笔记本列表',
+  'nodes_notebookListWidgetDesc': '显示笔记本中的所有节点',
   'nodes_nodeCount': 'count 个节点',
   'nodes_noNodes': '暂无节点',
 };
