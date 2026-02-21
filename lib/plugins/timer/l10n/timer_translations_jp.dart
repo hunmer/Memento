@@ -47,6 +47,9 @@ class TimerTranslationsJp {
     'timer_overviewDescription': 'タイマー統計を表示',
     'timer_quickAccess': 'クイックアクセス',
     'timer_quickAccessDesc': 'タップしてタイマー詳細へ',
+    'timer_listWidgetName': 'タイマーリスト',
+    'timer_listWidgetDesc': 'すべてのタイマーと進捗を表示',
+    'timer_overview': 'タイマー概要',
     'viewDetail': '詳細を表示',
   };
 }

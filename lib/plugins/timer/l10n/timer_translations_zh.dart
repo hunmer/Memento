@@ -46,6 +46,9 @@ class TimerTranslationsZh {
     'timer_overviewDescription': '显示计时器统计信息',
     'timer_quickAccess': '快速访问',
     'timer_quickAccessDesc': '点击跳转到指定计时器详情',
+    'timer_listWidgetName': '计时器列表',
+    'timer_listWidgetDesc': '显示所有计时器及其进度',
+    'timer_overview': '计时器概览',
     'viewDetail': '查看详情',
   };
 }
