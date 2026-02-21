@@ -99,6 +99,8 @@ final Map<String, String> nodesTranslationsEn = {
   'nodes_selectNotebook': 'Select notebook',
   'nodes_notebookListName': 'Node List',
   'nodes_notebookListDescription': 'Display nodes from selected notebook',
+  'nodes_notebookListWidgetName': 'Notebook List',
+  'nodes_notebookListWidgetDesc': 'Display all nodes in notebook',
   'nodes_nodeCount': 'count nodes',
   'nodes_noNodes': 'No nodes',
 };

@@ -92,6 +92,9 @@ import 'widgets/habit_heatmap_card.dart';
 import 'widgets/points_goal_card.dart';
 import 'widgets/store_product_selector_card.dart';
 import 'widgets/store_user_item_selector_card.dart';
+import 'widgets/notebook_list_card.dart';
+import 'widgets/node_stats_card.dart';
+import 'widgets/todo_nodes_list.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -185,6 +188,9 @@ enum CommonWidgetId {
   pointsGoalCard,
   storeProductSelector,
   storeUserItemSelector,
+  notebookListCard,
+  nodeStatsCard,
+  todoNodesList,
 }
 
 /// 公共小组件元数据
@@ -915,6 +921,30 @@ class CommonWidgetsRegistry {
       defaultSize: MediumSize(),
       supportedSizes: [MediumSize(), LargeSize()],
     ),
+    CommonWidgetId.notebookListCard: CommonWidgetMetadata(
+      id: CommonWidgetId.notebookListCard,
+      name: '笔记本列表卡片',
+      description: '显示笔记本和节点列表，支持展开/折叠',
+      icon: Icons.book,
+      defaultSize: LargeSize(),
+      supportedSizes: [const LargeSize(), const Large3Size()],
+    ),
+    CommonWidgetId.nodeStatsCard: CommonWidgetMetadata(
+      id: CommonWidgetId.nodeStatsCard,
+      name: '节点统计卡片',
+      description: '显示节点统计信息（总数、待办、进行中、已完成）',
+      icon: Icons.bar_chart,
+      defaultSize: LargeSize(),
+      supportedSizes: [const LargeSize(), const Large3Size()],
+    ),
+    CommonWidgetId.todoNodesList: CommonWidgetMetadata(
+      id: CommonWidgetId.todoNodesList,
+      name: '待办节点列表',
+      description: '显示所有待办节点列表',
+      icon: Icons.check_circle_outline,
+      defaultSize: LargeSize(),
+      supportedSizes: [const LargeSize(), const Large3Size()],
+    ),
   };
 
   /// 获取元数据
@@ -1157,6 +1187,12 @@ class CommonWidgetBuilder {
         return StoreProductSelectorCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.storeUserItemSelector:
         return StoreUserItemSelectorCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.notebookListCard:
+        return NotebookListCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.nodeStatsCard:
+        return NodeStatsCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.todoNodesList:
+        return TodoNodesListWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }
