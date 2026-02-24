@@ -19,6 +19,7 @@ export 'register_activity_stats_widget.dart';
 export 'register_habit_stats_widget.dart';
 
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
+import 'providers/command_widgets_provider.dart';
 import 'register_icon_widget.dart';
 import 'register_overview_widget.dart';
 import 'register_activity_stats_widget.dart';
@@ -31,4 +32,9 @@ void register() {
   registerOverviewWidget(registry);
   registerHabitStatsWidget(registry);
   registerActivityStatsWidget(registry);
+}
+
+/// 获取公共小组件数据（用于 command widgets）
+dynamic provideCommonWidgets(Map<String, dynamic> config) {
+  return HabitsCommandWidgetsProvider.provideCommonWidgets(config);
 }

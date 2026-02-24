@@ -97,6 +97,7 @@ import 'widgets/node_stats_card.dart';
 import 'widgets/todo_nodes_list.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/recent_contact_card.dart';
+import 'package:Memento/plugins/habits/home_widgets/widgets/habit_card_widget.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -195,6 +196,7 @@ enum CommonWidgetId {
   todoNodesList,
   recentContactCard,
   contactCard,
+  habitCard,
 }
 
 /// 公共小组件元数据
@@ -965,6 +967,14 @@ class CommonWidgetsRegistry {
       defaultSize: MediumSize(),
       supportedSizes: [MediumSize(), LargeSize()],
     ),
+    CommonWidgetId.habitCard: CommonWidgetMetadata(
+      id: CommonWidgetId.habitCard,
+      name: '习惯卡片',
+      description: '显示习惯的打卡记录、统计和计时状态',
+      icon: Icons.auto_awesome,
+      defaultSize: LargeSize(),
+      supportedSizes: [LargeSize()],
+    ),
   };
 
   /// 获取元数据
@@ -1223,6 +1233,8 @@ class CommonWidgetBuilder {
         return ContactCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.recentContactCard:
         return RecentContactCardWidget.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.habitCard:
+        return HabitCard.fromProps(finalProps, effectiveSize);
     }
   }
 }
