@@ -72,3 +72,6 @@ export 'agent_card.dart' show AgentCardWidget, AgentCardData;
 
 // 导出商品卡片组件
 export 'product_card.dart' show ProductCardWidget, ProductCardData;
+
+// 导出用户物品卡片组件
+export 'user_item_card.dart' show UserItemCardWidget, UserItemCardData;
