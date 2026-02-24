@@ -78,3 +78,6 @@ export 'user_item_card.dart' show UserItemCardWidget, UserItemCardData;
 
 // 导出纪念日卡片组件
 export 'memorial_day_card.dart' show MemorialDayCardWidget;
+
+// 导出打卡项目卡片组件
+export 'checkin_item_card.dart' show CheckinItemCardWidget;
