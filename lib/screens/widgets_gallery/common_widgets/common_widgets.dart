@@ -98,7 +98,7 @@ import 'widgets/node_stats_card.dart';
 import 'widgets/todo_nodes_list.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/recent_contact_card.dart';
-import 'package:Memento/plugins/habits/home_widgets/widgets/habit_card_widget.dart';
+import 'package:Memento/widgets/common/habit_card.dart';
 import 'package:Memento/widgets/common/memorial_day_card.dart';
 
 /// 公共小组件 ID 枚举
@@ -1254,7 +1254,7 @@ class CommonWidgetBuilder {
       case CommonWidgetId.recentContactCard:
         return RecentContactCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.habitCard:
-        return HabitCard.fromProps(finalProps, effectiveSize);
+        return HabitCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.memorialDayCard:
         return MemorialDayCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.timerCard:

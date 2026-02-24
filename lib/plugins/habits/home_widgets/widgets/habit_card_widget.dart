@@ -13,6 +13,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/widgets/timer_dialog.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
+import 'package:Memento/widgets/common/habit_card.dart';
 
 /// HabitCard 数据模型
 class HabitCardData {
@@ -382,19 +383,18 @@ class _HabitCardState extends State<HabitCard> {
 
   @override
   Widget build(BuildContext context) {
+    // Data 模式：使用公共组件渲染
+    if (_useDataMode && widget.data != null) {
+      return HabitCardWidget(
+        data: widget.data!,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+      );
+    }
+
+    // Habit 模式：使用原有的交互式渲染
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.white;
-
-    // Data 模式下，使用传入的数据；Habit 模式下，用动态加载的数据
-    final dataModeTitle = widget.data?.title;
-    final dataModeSkillTitle = widget.data?.skillTitle ?? widget.data?.group;
-    final dataModeDuration = widget.data?.durationMinutes;
-    final dataModeTotalDuration = widget.data?.currentTotalDurationMinutes;
-    final dataModeCompletion = widget.data?.completionCount ?? 0;
-    final dataModeTodayCount = widget.data?.todayCount ?? 0;
-    final dataModeLast7Days = widget.data?.last7DaysStatus ?? List.filled(7, false);
-    final dataModeIsTiming = widget.data?.isTiming ?? false;
-    final dataModeTimerText = widget.data?.timerText ?? '00:00';
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -443,7 +443,7 @@ class _HabitCardState extends State<HabitCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        dataModeTitle ?? _title,
+                        _title,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -453,7 +453,7 @@ class _HabitCardState extends State<HabitCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        dataModeSkillTitle ?? _skillTitle,
+                        _skillTitle,
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark ? Colors.white70 : Colors.grey[600],
@@ -476,47 +476,44 @@ class _HabitCardState extends State<HabitCard> {
                 clipBehavior: Clip.none,
                 children: [
                   Row(
-                    children:
-                        (dataModeLast7Days).asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final isActive = entry.value;
-                          final date = DateTime.now().subtract(
-                            Duration(days: 6 - index),
-                          );
+                    children: _last7DaysStatus.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final isActive = entry.value;
+                      final date = DateTime.now().subtract(
+                        Duration(days: 6 - index),
+                      );
 
-                          return Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 1),
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color:
-                                    isActive
-                                        ? _themeColor
-                                        : (isDark
-                                            ? Colors.white.withValues(alpha: 0.1)
-                                            : Colors.grey[200]),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${date.day}',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        isActive
-                                            ? Colors.white
-                                            : (isDark
-                                                ? Colors.white30
-                                                : Colors.grey[400]),
-                                  ),
-                                ),
+                      return Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? _themeColor
+                                : (isDark
+                                    ? Colors.white.withValues(alpha: 0.1)
+                                    : Colors.grey[200]),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${date.day}',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: isActive
+                                    ? Colors.white
+                                    : (isDark
+                                        ? Colors.white30
+                                        : Colors.grey[400]),
                               ),
                             ),
-                          );
-                        }).toList(),
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                  if (dataModeTodayCount > 0 || _todayCount > 0)
+                  if (_todayCount > 0)
                     Positioned(
                       right: -4,
                       top: -8,
@@ -539,7 +536,7 @@ class _HabitCardState extends State<HabitCard> {
                         ),
                         child: Center(
                           child: Text(
-                            '${dataModeTodayCount > 0 ? dataModeTodayCount : _todayCount}',
+                            '$_todayCount',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 9,
@@ -573,7 +570,7 @@ class _HabitCardState extends State<HabitCard> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        '${_formatTotalDuration(_useDataMode ? widget.data!.totalDurationMinutes : _totalDurationMinutes)}(${_useDataMode ? dataModeCompletion : _completionCount})',
+                        '${_formatTotalDuration(_totalDurationMinutes)}($_completionCount)',
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -581,17 +578,13 @@ class _HabitCardState extends State<HabitCard> {
                         ),
                       ),
                       Text(
-                        ' / ${dataModeDuration ?? _durationMinutes}m',
+                        ' / $_durationMinutes m',
                         style: TextStyle(
                           fontSize: 11,
                           color: isDark ? Colors.white38 : Colors.grey[500],
                         ),
                       ),
-                      if (((_useDataMode
-                                          ? dataModeTotalDuration
-                                          : _currentTotalDurationMinutes) ??
-                                  0) >
-                          0) ...[
+                      if (_currentTotalDurationMinutes > 0) ...[
                         Text(
                           ' | ',
                           style: TextStyle(
@@ -600,7 +593,7 @@ class _HabitCardState extends State<HabitCard> {
                           ),
                         ),
                         Text(
-                          '总${_formatTotalDuration(dataModeTotalDuration ?? _currentTotalDurationMinutes)}',
+                          '总${_formatTotalDuration(_currentTotalDurationMinutes)}',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w500,
@@ -615,14 +608,9 @@ class _HabitCardState extends State<HabitCard> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(2),
                     child: LinearProgressIndicator(
-                      value:
-                          (dataModeDuration ?? _durationMinutes) > 0
-                              ? ((_useDataMode
-                                          ? widget.data!.totalDurationMinutes
-                                          : _totalDurationMinutes) /
-                                      (dataModeDuration ?? _durationMinutes))
-                                  .clamp(0.0, 1.0)
-                              : 0.0,
+                      value: _durationMinutes > 0
+                          ? (_totalDurationMinutes / _durationMinutes).clamp(0.0, 1.0)
+                          : 0.0,
                       backgroundColor:
                           isDark
                               ? Colors.white.withValues(alpha: 0.1)
@@ -642,30 +630,28 @@ class _HabitCardState extends State<HabitCard> {
               width: double.infinity,
               height: 36,
               child: Material(
-                color:
-                    (_useDataMode ? dataModeIsTiming : _isTiming)
-                        ? _themeColor
-                        : _themeColor.withValues(alpha: 0.2),
+                color: _isTiming
+                    ? _themeColor
+                    : _themeColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
                 child: InkWell(
-                  onTap: _useDataMode ? null : _handleTimerAction,
+                  onTap: _handleTimerAction,
                   borderRadius: BorderRadius.circular(8),
                   child: Center(
-                    child:
-                        (_useDataMode ? dataModeIsTiming : _isTiming)
-                            ? Text(
-                              _useDataMode ? dataModeTimerText : _timerText,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                            )
-                            : Icon(
-                              _useDataMode ? null : Icons.play_arrow,
-                              color: _themeColor,
-                              size: 24,
+                    child: _isTiming
+                        ? Text(
+                            _timerText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
+                          )
+                        : Icon(
+                            Icons.play_arrow,
+                            color: _themeColor,
+                            size: 24,
+                          ),
                   ),
                 ),
               ),

@@ -5,6 +5,7 @@ library;
 
 export 'dual_range_chart_card.dart';
 export 'dual_value_tracker_card.dart';
+export 'habit_card.dart';
 export 'habit_streak_tracker.dart';
 export 'image_preview.dart';
 export 'performance_bar_chart_card.dart';
