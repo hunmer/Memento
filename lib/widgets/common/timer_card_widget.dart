@@ -151,72 +151,44 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
   @override
   Widget build(BuildContext context) {
     final task = widget.task;
-    final isRunning = task.isRunning;
-
-    // 使用自定义颜色或默认值
-    final effectiveBackgroundColor =
-        widget.backgroundColor ??
-        (Theme.of(context).brightness == Brightness.dark
-            ? const Color(0xFF1E293B)
-            : Colors.white);
-    final effectiveBorderColor = widget.borderColor ?? task.color;
     final effectiveTextColor =
         widget.textColor ??
         (Theme.of(context).brightness == Brightness.dark
             ? Colors.white
             : Colors.grey.shade900);
 
-    return Container(
+    return ConstrainedBox(
       constraints: widget.size.getHeightConstraints(),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          // 默认阴影
-          BoxShadow(
-            color: Colors.black.withValues(
-              alpha:
-                  Theme.of(context).brightness == Brightness.dark ? 0.3 : 0.1,
-            ),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-          // 激活状态的发光效果
-          if (isRunning)
-            BoxShadow(
-              color: task.color.withValues(alpha: 0.3),
-              blurRadius: 12,
-              spreadRadius: 2,
-            ),
-        ],
-        color: effectiveBackgroundColor,
-      ),
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
+      child: Container(
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: effectiveBorderColor.withValues(
-              alpha: isRunning ? 0.8 : 0.5,
-            ),
+          border: Border.all(
+            color: widget.borderColor ?? task.color,
             width: 2,
           ),
         ),
         child: InkWell(
           onTap: () async {
-            if (widget.onTap != null) {
-              widget.onTap!(task);
-            } else {
-              await NavigationHelper.push(
-                context,
-                TimerTaskDetailsPage(taskId: task.id),
-              );
-              setState(() {});
-            }
-          },
-          onLongPress: () => _showContextMenu(context, task),
+          if (widget.onTap != null) {
+            widget.onTap!(task);
+          } else {
+            await NavigationHelper.push(
+              context,
+              TimerTaskDetailsPage(taskId: task.id),
+            );
+            setState(() {});
+          }
+        },
+        onLongPress: () => _showContextMenu(context, task),
+        splashColor: widget.borderColor ?? task.color.withValues(alpha: 0.1),
+        highlightColor: widget.borderColor ?? task.color.withValues(alpha: 0.05),
           child: Padding(
-            padding: widget.size.getPadding(),
+            padding: widget.size.getPadding().copyWith(
+              top: widget.size.getPadding().top * 1.2,
+              bottom: widget.size.getPadding().bottom * 1.2,
+              left: widget.size.getPadding().left * 1.2,
+              right: widget.size.getPadding().right * 1.2,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -225,7 +197,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                 Row(
                   children: [
                     Container(
-                      padding: EdgeInsets.all(widget.size.getIconSize() * 0.3),
+                      padding: EdgeInsets.all(widget.size.getIconSize() * 0.35),
                       decoration: BoxDecoration(
                         color: task.color,
                         shape: BoxShape.circle,
@@ -236,7 +208,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                         size: widget.size.getIconSize(),
                       ),
                     ),
-                    SizedBox(width: widget.size.getSmallSpacing()),
+                    SizedBox(width: widget.size.getSmallSpacing() * 1.5),
                     Expanded(
                       child: Text(
                         task.name,
@@ -251,12 +223,12 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                     ),
                   ],
                 ),
-                SizedBox(height: widget.size.getSmallSpacing()),
+                SizedBox(height: widget.size.getSmallSpacing() * 1.5),
 
                 // 分组名称
                 if (widget.showGroup)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: Text(
                       widget.task.group,
                       style: TextStyle(
@@ -272,7 +244,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                 // 重复次数显示
                 if (widget.task.repeatCount > 1)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: Row(
                       children: [
                         Icon(
@@ -283,7 +255,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                                   ? Colors.grey.shade400
                                   : Colors.grey.shade600,
                         ),
-                        SizedBox(width: 4),
+                        SizedBox(width: 6),
                         Text(
                           '重复 ${widget.task.remainingRepeatCount}/${widget.task.repeatCount} 次',
                           style: TextStyle(
@@ -302,8 +274,8 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                 widget.useGridLayout
                     ? _buildGridLayout()
                     : Wrap(
-                      spacing: widget.size.getSmallSpacing(),
-                      runSpacing: widget.size.getSmallSpacing(),
+                      spacing: widget.size.getSmallSpacing() * 1.2,
+                      runSpacing: widget.size.getSmallSpacing() * 1.2,
                       children:
                           widget.task.timerItems.map((timer) {
                             if (timer.isRunning) {
@@ -312,7 +284,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   _buildTimerTypeChip(timer),
-                                  const SizedBox(height: 2),
+                                  const SizedBox(height: 3),
                                   // 使用背景颜色显示进度
                                   Container(
                                     height: 4,
@@ -346,7 +318,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                             }
                           }).toList(),
                     ),
-                SizedBox(height: widget.size.getSmallSpacing()),
+                SizedBox(height: widget.size.getSmallSpacing() * 1.5),
                 // 控制按钮
                 if (widget.showActionButtons)
                   Align(
@@ -355,7 +327,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
                   ),
               ],
             ),
-          ),
+            ),
         ),
       ),
     );
@@ -432,43 +404,52 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
     final iconSize = widget.size.getIconSize() * 0.8;
 
     if (task.isRunning) {
-      return IconButton(
-        icon: Icon(Icons.pause, color: Colors.red, size: iconSize),
-        onPressed: () {
-          task.pause();
-          setState(() {});
-          if (widget.onReset != null) {
-            widget.onReset!(task);
-          }
-        },
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
+      return CircleAvatar(
+        radius: iconSize,
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
+        child: IconButton(
+          icon: Icon(Icons.pause, color: Colors.red, size: iconSize),
+          onPressed: () {
+            task.pause();
+            setState(() {});
+            if (widget.onReset != null) {
+              widget.onReset!(task);
+            }
+          },
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
       );
     } else if (task.isCompleted) {
-      return IconButton(
-        icon: Icon(Icons.replay, color: Colors.green, size: iconSize),
-        onPressed: () {
-          task.reset();
-          setState(() {});
-          if (widget.onReset != null) {
-            widget.onReset!(task);
-          }
-        },
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
+      return CircleAvatar(
+        radius: iconSize,
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
+        child: IconButton(
+          icon: Icon(Icons.replay, color: Colors.green, size: iconSize),
+          onPressed: () {
+            task.reset();
+            setState(() {});
+            if (widget.onReset != null) {
+              widget.onReset!(task);
+            }
+          },
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
       );
     } else {
-      return IconButton(
-        icon: Icon(Icons.play_arrow, color: Colors.green, size: iconSize),
-        onPressed: () {
-          task.start();
-          setState(() {});
-          if (widget.onEdit != null) {
-            widget.onEdit!(task);
-          }
-        },
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
+      return CircleAvatar(
+        radius: iconSize,
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
+        child: IconButton(
+          icon: Icon(Icons.play_arrow, color: Colors.green, size: iconSize),
+          onPressed: () {
+            task.start();
+            setState(() {});
+          },
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
       );
     }
   }
