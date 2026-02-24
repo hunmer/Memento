@@ -69,3 +69,6 @@ export 'event_calendar_card.dart' show CalendarEventData;
 
 // 导出 AI Agent 卡片组件
 export 'agent_card.dart' show AgentCardWidget, AgentCardData;
+
+// 导出商品卡片组件
+export 'product_card.dart' show ProductCardWidget, ProductCardData;
