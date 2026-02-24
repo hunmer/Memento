@@ -167,14 +167,19 @@ class _RoundedTaskListCardState extends State<RoundedTaskListCard>
                   ),
                 ],
               ),
-              padding: widget.size.getPadding() * 0.67,
+              padding: (widget.size.getPadding() * 0.7).copyWith(
+                top: widget.size.getPadding().top * 0.8,
+                bottom: widget.size.getPadding().bottom * 0.8,
+                left: widget.size.getPadding().left * 0.8,
+                right: widget.size.getPadding().right * 0.8,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 标题栏
                   _buildHeader(context, primaryColor, subtextColor),
-                  SizedBox(height: widget.size.getTitleSpacing() * 1.2),
+                  SizedBox(height: widget.size.getTitleSpacing() * 1.4),
                   // 任务列表 - 支持滚动
                   Flexible(
                     child: SingleChildScrollView(
@@ -295,7 +300,10 @@ class _TaskListItem extends StatelessWidget {
           child: Opacity(
             opacity: animation.value,
             child: Container(
-              padding: size.getPadding() * 0.67,
+              padding: (size.getPadding() * 0.7).copyWith(
+                top: size.getPadding().top * 0.8,
+                bottom: size.getPadding().bottom * 0.8,
+              ),
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(

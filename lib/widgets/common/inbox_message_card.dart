@@ -157,7 +157,12 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                 children: [
                   // 标题栏
                   Container(
-                    padding: widget.size.getPadding(),
+                    padding: widget.size.getPadding().copyWith(
+                      top: widget.size.getPadding().top * 1.2,
+                      bottom: widget.size.getPadding().bottom * 1.2,
+                      left: widget.size.getPadding().left * 1.2,
+                      right: widget.size.getPadding().right * 1.2,
+                    ),
                     decoration: BoxDecoration(
                       color: primaryColor,
                       borderRadius: const BorderRadius.only(
@@ -175,7 +180,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                               color: Colors.white,
                               size: widget.size.getThumbnailIconSize(),
                             ),
-                            SizedBox(width: widget.size.getItemSpacing()),
+                            SizedBox(width: widget.size.getItemSpacing() * 1.2),
                             Text(
                               widget.title ?? 'Inbox',
                               style: TextStyle(
@@ -202,14 +207,17 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                   Expanded(
                     child: Padding(
                       padding: widget.size.getPadding().copyWith(
-                        top: widget.size.getItemSpacing(),
+                        top: widget.size.getItemSpacing() * 1.2,
+                        left: widget.size.getPadding().left * 1.2,
+                        right: widget.size.getPadding().right * 1.2,
+                        bottom: widget.size.getPadding().bottom * 1.2,
                       ),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             for (int i = 0; i < widget.messages.length; i++) ...[
-                              if (i > 0) SizedBox(height: widget.size.getItemSpacing() * 0.5),
+                              if (i > 0) SizedBox(height: widget.size.getItemSpacing() * 0.8),
                               _MessageItem(
                                 message: widget.messages[i],
                                 textColor: textColor,
@@ -221,7 +229,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                                 size: widget.size,
                               ),
                             ],
-                            SizedBox(height: widget.size.getItemSpacing() * 2),
+                            SizedBox(height: widget.size.getItemSpacing() * 2.5),
                             // 更多按钮
                             GestureDetector(
                               onTap: widget.onMoreTap,
@@ -234,7 +242,7 @@ class _InboxMessageCardWidgetState extends State<InboxMessageCardWidget>
                                 ),
                               ),
                             ),
-                            SizedBox(height: widget.size.getItemSpacing()),
+                            SizedBox(height: widget.size.getItemSpacing() * 1.2),
                           ],
                         ),
                       ),

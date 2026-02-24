@@ -151,7 +151,7 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
       opacity: _fadeAnimation,
       child: Container(
         margin: EdgeInsets.symmetric(
-          horizontal: size.getPadding().horizontal / 2,
+          horizontal: size.getPadding().horizontal / 2 * 1.2,
         ),
         constraints: BoxConstraints(
           maxWidth: widget.inline ? double.maxFinite : 400,
@@ -177,13 +177,18 @@ class _EmotionTrackerCardState extends State<EmotionTrackerCard>
                       : Colors.white,
               borderRadius: BorderRadius.circular(24),
             ),
-            padding: size.getPadding(),
+            padding: size.getPadding().copyWith(
+              top: size.getPadding().top * 1.2,
+              bottom: size.getPadding().bottom * 1.2,
+              left: size.getPadding().left * 1.2,
+              right: size.getPadding().right * 1.2,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // 标题行
                 _buildHeader(context),
-                SizedBox(height: size.getTitleSpacing()),
+                SizedBox(height: size.getTitleSpacing() * 1.2),
 
                 // 主要内容区
                 _buildMainContent(context),
