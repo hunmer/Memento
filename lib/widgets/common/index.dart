@@ -81,3 +81,6 @@ export 'memorial_day_card.dart' show MemorialDayCardWidget;
 
 // 导出打卡项目卡片组件
 export 'checkin_item_card.dart' show CheckinItemCardWidget;
+
+// 导出联系人卡片组件
+export 'contact_card.dart' show ContactCardWidget, ContactCardData, ContactCardGender;
