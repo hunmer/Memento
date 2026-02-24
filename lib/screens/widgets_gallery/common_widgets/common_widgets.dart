@@ -22,6 +22,7 @@ import 'widgets/milestone_card.dart';
 import 'package:Memento/widgets/common/inbox_message_card.dart';
 import 'package:Memento/widgets/common/rounded_task_list_card.dart';
 import 'package:Memento/widgets/common/rounded_reminders_list_card.dart';
+import 'package:Memento/widgets/common/timer_card_widget.dart';
 import 'widgets/monthly_progress_with_dots_card.dart';
 import 'widgets/multi_metric_progress_card.dart';
 import 'widgets/circular_metrics_card.dart';
@@ -123,6 +124,7 @@ enum CommonWidgetId {
   roundedRemindersList,
   dualSliderCard,
   earningsTrendCard,
+  timerCard,
   revenueTrendCard,
   watchProgressCard,
   stressLevelMonitor,
@@ -967,6 +969,14 @@ class CommonWidgetsRegistry {
       defaultSize: MediumSize(),
       supportedSizes: [MediumSize(), LargeSize()],
     ),
+    CommonWidgetId.timerCard: CommonWidgetMetadata(
+      id: CommonWidgetId.timerCard,
+      name: '计时器卡片',
+      description: '显示计时器任务卡片，支持播放/暂停/重置功能',
+      icon: Icons.timer,
+      defaultSize: LargeSize(),
+      supportedSizes: [LargeSize()],
+    ),
     CommonWidgetId.habitCard: CommonWidgetMetadata(
       id: CommonWidgetId.habitCard,
       name: '习惯卡片',
@@ -1235,6 +1245,8 @@ class CommonWidgetBuilder {
         return RecentContactCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.habitCard:
         return HabitCard.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.timerCard:
+        return TimerCardWidget.fromProps(finalProps, effectiveSize);
     }
   }
 }
