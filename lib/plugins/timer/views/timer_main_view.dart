@@ -13,6 +13,7 @@ import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/timer/models/timer_task.dart';
 import 'package:collection/collection.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/widgets/common/timer_card_widget.dart';
 
 class TimerMainView extends StatefulWidget {
   const TimerMainView({super.key});
@@ -189,12 +190,36 @@ class _TimerMainViewState extends State<TimerMainView> {
         separatorBuilder: (context, index) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
           final task = _filteredByGroup[index];
-          return _TimerTaskCard(
-            task: task,
-            onTap: _showTaskDetails,
-            onEdit: _editTask,
-            onReset: _resetTask,
-            onDelete: _deleteTask,
+          // 根据计时器数量决定是否使用网格布局
+          final useGridLayout = task.timerItems.length >= 3;
+
+          return SwipeActionWrapper(
+            key: ValueKey(task.id),
+            trailingActions: [
+              SwipeActionPresets.edit(
+                onTap: () => _editTask(task),
+              ),
+              SwipeActionOption(
+                label: '重置',
+                icon: Icons.replay,
+                backgroundColor: Colors.orange,
+                textColor: Colors.white,
+                onTap: () => _resetTask(task),
+              ),
+              SwipeActionPresets.delete(
+                onTap: () => _deleteTask(task),
+                showConfirm: false,
+              ),
+            ],
+            child: TimerCardWidget(
+              task: task,
+              onTap: _showTaskDetails,
+              onEdit: _editTask,
+              onReset: _resetTask,
+              onDelete: _deleteTask,
+              showGroup: true,  // 显示分组名称
+              useGridLayout: useGridLayout,  // 根据计时器数量决定布局
+            ),
           );
         },
       ),
@@ -305,12 +330,36 @@ class _TimerMainViewState extends State<TimerMainView> {
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
         final task = _searchResults[index];
-        return _TimerTaskCard(
-          task: task,
-          onTap: _showTaskDetails,
-          onEdit: _editTask,
-          onReset: _resetTask,
-          onDelete: _deleteTask,
+        // 根据计时器数量决定是否使用网格布局
+        final useGridLayout = task.timerItems.length >= 3;
+
+        return SwipeActionWrapper(
+          key: ValueKey(task.id),
+          trailingActions: [
+            SwipeActionPresets.edit(
+              onTap: () => _editTask(task),
+            ),
+            SwipeActionOption(
+              label: '重置',
+              icon: Icons.replay,
+              backgroundColor: Colors.orange,
+              textColor: Colors.white,
+              onTap: () => _resetTask(task),
+            ),
+            SwipeActionPresets.delete(
+              onTap: () => _deleteTask(task),
+              showConfirm: false,
+            ),
+          ],
+          child: TimerCardWidget(
+            task: task,
+            onTap: _showTaskDetails,
+            onEdit: _editTask,
+            onReset: _resetTask,
+            onDelete: _deleteTask,
+            showGroup: true,  // 显示分组名称
+            useGridLayout: useGridLayout,  // 根据计时器数量决定布局
+          ),
         );
       },
     );
@@ -321,437 +370,5 @@ class _TimerMainViewState extends State<TimerMainView> {
     setState(() {
       _updateTasksAndGroups();
     });
-  }
-}
-
-class _TimerTaskCard extends StatefulWidget {
-  final TimerTask task;
-  final Function(TimerTask) onTap;
-  final Function(TimerTask) onEdit;
-  final Function(TimerTask) onReset;
-  final Function(TimerTask) onDelete;
-
-  const _TimerTaskCard({
-    required this.task,
-    required this.onTap,
-    required this.onEdit,
-    required this.onReset,
-    required this.onDelete,
-  });
-
-  @override
-  State<_TimerTaskCard> createState() => _TimerTaskCardState();
-}
-
-class _TimerTaskCardState extends State<_TimerTaskCard> {
-  Timer? _refreshTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final task = widget.task;
-    final bool useGridLayout = task.timerItems.length >= 3;
-
-    return SwipeActionWrapper(
-      key: ValueKey(task.id),
-      trailingActions: [
-        SwipeActionPresets.edit(
-          onTap: () => widget.onEdit(task),
-        ),
-        SwipeActionOption(
-          label: '重置',
-          icon: Icons.replay,
-          backgroundColor: Colors.orange,
-          textColor: Colors.white,
-          onTap: () => widget.onReset(task),
-        ),
-        SwipeActionPresets.delete(
-          onTap: () => widget.onDelete(task),
-          showConfirm: false,
-        ),
-      ],
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: InkWell(
-          onTap: () => widget.onTap(task),
-          borderRadius: BorderRadius.circular(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: task.color.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(task.icon, color: task.color, size: 28),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            task.name,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            task.group,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildActionButton(task),
-                  ],
-                ),
-              ),
-              // Body
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                child:
-                    useGridLayout
-                        ? _buildGridLayout(task)
-                        : _buildListLayout(task),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(TimerTask task) {
-    if (task.isRunning) {
-      final activeTimer = task.activeTimer;
-      String timerText = "Running";
-      if (activeTimer != null) {
-        timerText = activeTimer.formattedRemainingTime;
-      }
-
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            task.pause();
-            setState(() {});
-          },
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.pause,
-                  size: 18,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  timerText,
-                  style: TextStyle(
-                    fontFamily: 'Monospace',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    } else {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            if (task.isCompleted) {
-              widget.onReset(task);
-            } else {
-              task.start();
-            }
-            setState(() {});
-          },
-          borderRadius: BorderRadius.circular(24),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: task.color,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  task.isCompleted ? Icons.replay : Icons.play_arrow,
-                  size: 18,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  task.isCompleted ? 'Reset' : 'Start',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
-  Widget _buildGridLayout(TimerTask task) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 1.0,
-      children: task.timerItems.map((item) => _buildGridItem(item)).toList(),
-    );
-  }
-
-  Widget _buildGridItem(TimerItem item) {
-    final progress =
-        item.duration.inSeconds > 0
-            ? item.completedDuration.inSeconds / item.duration.inSeconds
-            : 0.0;
-    // Determine color based on type or order?
-    // HTML uses specific colors. We'll use type mapping or random/hash.
-    Color itemColor;
-    switch (item.type) {
-      case TimerType.pomodoro:
-        itemColor = Colors.red;
-        break;
-      case TimerType.countUp:
-        itemColor = Colors.blue;
-        break;
-      case TimerType.countDown:
-        itemColor = Colors.green;
-        break;
-    }
-    if (item.name.toLowerCase().contains('break')) {
-      itemColor = Colors.blue;
-      if (item.duration.inMinutes > 10) itemColor = Colors.green; // Long break
-    } else {
-      itemColor = Colors.red;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      // No background in grid items in HTML, just layout
-      child: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: CircularProgressIndicator(
-                    value: 1.0,
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    strokeWidth: 8,
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: CircularProgressIndicator(
-                    value:
-                        progress > 0
-                            ? progress
-                            : 0.001, // Show at least a dot? No.
-                    color: itemColor,
-                    strokeWidth: 8,
-                    strokeCap: StrokeCap.round,
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (item.type == TimerType.pomodoro)
-                      Text(
-                        '${item.currentCycle}/${item.cycles}',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: itemColor.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${item.duration.inMinutes} min',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: itemColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              item.type == TimerType.pomodoro
-                  ? (item.isWorkPhase == true ? 'Work' : 'Rest')
-                  : (item.name.contains('Break') ? 'Relax' : 'Work'),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: itemColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildListLayout(TimerTask task) {
-    return Column(
-      children:
-          task.timerItems
-              .map((item) => _buildListItem(item, task.color))
-              .toList(),
-    );
-  }
-
-  Widget _buildListItem(TimerItem item, Color taskColor) {
-    final progress =
-        item.duration.inSeconds > 0
-            ? item.completedDuration.inSeconds / item.duration.inSeconds
-            : 0.0;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-              if (item.type == TimerType.pomodoro)
-                Text(
-                  '${item.currentCycle}/${item.cycles} cycles',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Stack(
-            children: [
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              FractionallySizedBox(
-                widthFactor: progress.clamp(0.0, 1.0),
-                child: Container(
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: taskColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              item.formattedRemainingTime, // Or total duration? HTML shows total duration e.g. "50 min"
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
