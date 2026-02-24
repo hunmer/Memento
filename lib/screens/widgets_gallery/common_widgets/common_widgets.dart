@@ -99,6 +99,7 @@ import 'widgets/todo_nodes_list.dart';
 import 'widgets/contact_card.dart';
 import 'widgets/recent_contact_card.dart';
 import 'package:Memento/plugins/habits/home_widgets/widgets/habit_card_widget.dart';
+import 'package:Memento/widgets/common/memorial_day_card.dart';
 
 /// 公共小组件 ID 枚举
 enum CommonWidgetId {
@@ -199,6 +200,7 @@ enum CommonWidgetId {
   recentContactCard,
   contactCard,
   habitCard,
+  memorialDayCard,
 }
 
 /// 公共小组件元数据
@@ -985,6 +987,14 @@ class CommonWidgetsRegistry {
       defaultSize: LargeSize(),
       supportedSizes: [LargeSize()],
     ),
+    CommonWidgetId.memorialDayCard: const CommonWidgetMetadata(
+      id: CommonWidgetId.memorialDayCard,
+      name: '纪念日卡片',
+      description: '显示纪念日的日期、倒计时和背景样式',
+      icon: Icons.calendar_today,
+      defaultSize: Large3Size(),
+      supportedSizes: [Large3Size()],
+    ),
   };
 
   /// 获取元数据
@@ -1245,6 +1255,8 @@ class CommonWidgetBuilder {
         return RecentContactCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.habitCard:
         return HabitCard.fromProps(finalProps, effectiveSize);
+      case CommonWidgetId.memorialDayCard:
+        return MemorialDayCardWidget.fromProps(finalProps, effectiveSize);
       case CommonWidgetId.timerCard:
         return TimerCardWidget.fromProps(finalProps, effectiveSize);
     }
