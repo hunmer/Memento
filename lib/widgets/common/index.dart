@@ -75,3 +75,6 @@ export 'product_card.dart' show ProductCardWidget, ProductCardData;
 
 // 导出用户物品卡片组件
 export 'user_item_card.dart' show UserItemCardWidget, UserItemCardData;
+
+// 导出纪念日卡片组件
+export 'memorial_day_card.dart' show MemorialDayCardWidget;
