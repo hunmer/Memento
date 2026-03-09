@@ -16,6 +16,7 @@ import 'package:Memento/plugins/nfc/nfc_plugin.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:Memento/plugins/openai/openai_plugin.dart';
+import 'package:Memento/plugins/reminder/reminder_plugin.dart';
 import 'package:Memento/plugins/scripts_center/scripts_center_plugin.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/timer/timer_plugin.dart';
@@ -52,6 +53,7 @@ class BuiltinPlugins {
     () => TTSPlugin(),
     () => NfcPlugin(),
     () => WebViewPlugin(),
+    () => ReminderPlugin(),
   ];
 
   static List<PluginBase> createAll() {

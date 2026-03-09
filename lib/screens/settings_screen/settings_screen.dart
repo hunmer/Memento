@@ -27,6 +27,7 @@ import 'package:Memento/widgets/smooth_bottom_sheet.dart';
 import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/widgets/route_viewer_dialog.dart';
 import 'package:Memento/screens/route.dart';
+import 'package:Memento/plugins/reminder/screens/reminder_list_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -504,6 +505,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: Text('settings_screen_autoBackupTitle'.tr),
             subtitle: Text('settings_screen_autoBackupSubtitle'.tr),
             onTap: _backupService.showBackupScheduleDialog,
+          ),
+          ListTile(
+            leading: const Icon(Icons.alarm),
+            title: const Text('定时提醒'),
+            subtitle: const Text('管理定时提醒任务'),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              NavigationHelper.push(
+                context,
+                const ReminderListScreen(),
+                routeName: '/settings/reminder',
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.extension),
