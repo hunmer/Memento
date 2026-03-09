@@ -75,6 +75,7 @@ const Map<String, String> todoTranslationsEn = {
   // Filter and sort
   'todo_showCompleted': 'Show Completed',
   'todo_showIncomplete': 'Show Incomplete',
+  'todo_sortBy': 'Sort',
   'todo_sortByDueDate': 'Sort by Due Date',
   'todo_sortByPriority': 'Sort by Priority',
   'todo_customSort': 'Custom Sort',

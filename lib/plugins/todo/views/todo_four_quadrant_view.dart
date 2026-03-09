@@ -6,12 +6,14 @@ class TodoFourQuadrantView extends StatelessWidget {
   final List<Task> tasks;
   final Function(Task) onTaskTap;
   final Function(Task, TaskStatus) onTaskStatusChanged;
+  final Function(TaskPriority)? onAddTask;
 
   const TodoFourQuadrantView({
     super.key,
     required this.tasks,
     required this.onTaskTap,
     required this.onTaskStatusChanged,
+    this.onAddTask,
   });
 
   @override
@@ -65,6 +67,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     title: '紧急且重要', // Urgent & Important
                     color: Colors.red,
                     tasks: q1,
+                    priority: TaskPriority.high,
                   ),
                 ),
                 Expanded(
@@ -73,6 +76,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     title: '重要但不紧急', // Important & Not Urgent
                     color: Colors.green,
                     tasks: q2,
+                    priority: TaskPriority.medium,
                   ),
                 ),
               ],
@@ -88,6 +92,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     color: Colors.orange,
                     tasks: q3,
                     emptyIcon: Icons.inbox,
+                    priority: TaskPriority.medium,
                   ),
                 ),
                 Expanded(
@@ -97,6 +102,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     color: Colors.blue,
                     tasks: q4,
                     emptyIcon: Icons.archive,
+                    priority: TaskPriority.low,
                   ),
                 ),
               ],
@@ -113,6 +119,7 @@ class TodoFourQuadrantView extends StatelessWidget {
     required Color color,
     required List<Task> tasks,
     IconData? emptyIcon,
+    TaskPriority? priority,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
@@ -143,13 +150,31 @@ class TodoFourQuadrantView extends StatelessWidget {
               color: headerBgColor,
               border: Border(bottom: BorderSide(color: headerBorderColor)),
             ),
-            child: Text(
-              title,
-              style: TextStyle(
-                color: titleColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: titleColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                if (onAddTask != null && priority != null)
+                  IconButton(
+                    icon: Icon(
+                      Icons.add,
+                      size: 20,
+                      color: titleColor,
+                    ),
+                    onPressed: () => onAddTask!(priority),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    splashRadius: 16,
+                  ),
+              ],
             ),
           ),
           // List
@@ -216,11 +241,104 @@ class TodoFourQuadrantView extends StatelessWidget {
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Text(
-                                  task.title,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // 任务标题
+                                    Text(
+                                      task.title,
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // 标签和子任务信息
+                                    if (task.tags.isNotEmpty || task.subtasks.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Row(
+                                          children: [
+                                            // 标签显示
+                                            if (task.tags.isNotEmpty) ...[
+                                              ...task.tags.take(2).map((tag) => Container(
+                                                margin: const EdgeInsets.only(right: 4),
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  border: Border.all(
+                                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                                    width: 1,
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  tag,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                  ),
+                                                ),
+                                              )),
+                                              if (task.tags.length > 2)
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 6,
+                                                    vertical: 2,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(4),
+                                                  ),
+                                                  child: Text(
+                                                    '+${task.tags.length - 2}',
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      color: Theme.of(context).colorScheme.primary,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                            // 子任务数量
+                                            if (task.subtasks.isNotEmpty) ...[
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 2,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: isDark
+                                                      ? Colors.grey[700]?.withOpacity(0.3)
+                                                      : Colors.grey[200],
+                                                  borderRadius: BorderRadius.circular(4),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.check_box_outline_blank,
+                                                      size: 10,
+                                                    ),
+                                                    const SizedBox(width: 2),
+                                                    Text(
+                                                      '${task.subtasks.where((s) => s.isCompleted).length}/${task.subtasks.length}',
+                                                      style: TextStyle(
+                                                        fontSize: 10,
+                                                        color: isDark
+                                                            ? Colors.grey[400]
+                                                            : Colors.grey[700],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
                               // 计时器显示区域（右上角）

@@ -15,12 +15,14 @@ class TaskForm extends StatefulWidget {
   final Task? task; // If null, create new task
   final TaskController taskController;
   final ReminderController reminderController;
+  final TaskPriority? initialPriority; // 预设优先级（仅用于创建新任务）
 
   const TaskForm({
     super.key,
     this.task,
     required this.taskController,
     required this.reminderController,
+    this.initialPriority,
   });
 
   @override
@@ -270,7 +272,7 @@ class _TaskFormState extends State<TaskForm> {
       FormFieldConfig(
         name: 'priority',
         type: FormFieldType.select,
-        initialValue: widget.task?.priority ?? TaskPriority.medium,
+        initialValue: widget.task?.priority ?? widget.initialPriority ?? TaskPriority.medium,
         labelText: 'todo_priority'.tr,
         items: TaskPriority.values.map((p) {
           return DropdownMenuItem(

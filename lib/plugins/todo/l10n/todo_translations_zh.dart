@@ -75,6 +75,7 @@ const Map<String, String> todoTranslationsZh = {
   // 筛选与排序
   'todo_showCompleted': '显示已完成',
   'todo_showIncomplete': '显示未完成',
+  'todo_sortBy': '排序',
   'todo_sortByDueDate': '按截止日期排序',
   'todo_sortByPriority': '按优先级排序',
   'todo_customSort': '自定义排序',
