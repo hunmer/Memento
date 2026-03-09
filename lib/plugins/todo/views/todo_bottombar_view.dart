@@ -14,6 +14,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
 import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
+import 'package:Memento/plugins/todo/views/todo_week_view.dart';
 import 'package:Memento/plugins/todo/widgets/history_completed_view.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'todo_item_detail.dart';
@@ -460,9 +461,11 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       actions: [
         IconButton(
           icon: Icon(
-            _plugin.taskController.isGridView
-                ? Icons.view_list
-                : Icons.dashboard,
+            _plugin.taskController.viewMode == ViewMode.list
+                ? Icons.dashboard
+                : _plugin.taskController.viewMode == ViewMode.quadrant
+                    ? Icons.calendar_view_week
+                    : Icons.view_list,
           ),
           onPressed: _plugin.taskController.toggleViewMode,
         ),
@@ -476,51 +479,59 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
               : _plugin.taskController.tasks;
 
           return _plugin.taskController.isGridView
-              ? TodoFourQuadrantView(
-                tasks: tasks,
-                onTaskTap: (task) => _showTaskDetailDialog(context, task),
-                onTaskStatusChanged: (task, status) {
-                  _plugin.taskController.updateTaskStatus(task.id, status);
-                },
-                onAddTask: (priority) {
-                  NavigationHelper.openContainerWithHero(
-                    context,
-                    (context) => TaskForm(
-                      taskController: _plugin.taskController,
-                      reminderController: _plugin.reminderController,
-                      initialPriority: priority,
-                    ),
-                    transitionDuration: const Duration(milliseconds: 300),
-                  );
-                },
-              )
+              ? _plugin.taskController.viewMode == ViewMode.quadrant
+                  ? TodoFourQuadrantView(
+                      tasks: tasks,
+                      onTaskTap: (task) => _showTaskDetailDialog(context, task),
+                      onTaskStatusChanged: (task, status) {
+                        _plugin.taskController.updateTaskStatus(task.id, status);
+                      },
+                      onAddTask: (priority) {
+                        NavigationHelper.openContainerWithHero(
+                          context,
+                          (context) => TaskForm(
+                            taskController: _plugin.taskController,
+                            reminderController: _plugin.reminderController,
+                            initialPriority: priority,
+                          ),
+                          transitionDuration: const Duration(milliseconds: 300),
+                        );
+                      },
+                    )
+                  : TodoWeekView(
+                      tasks: tasks,
+                      onTaskTap: (task) => _showTaskDetailDialog(context, task),
+                      onTaskStatusChanged: (task, status) {
+                        _plugin.taskController.updateTaskStatus(task.id, status);
+                      },
+                    )
               : TaskListView(
-                tasks: tasks,
-                onTaskTap: (task) => _showTaskDetailDialog(context, task),
-                onTaskStatusChanged: (task, status) {
-                  _plugin.taskController.updateTaskStatus(task.id, status);
-                },
-                onTaskDismissed: (task) async {
-                  await _plugin.taskController.deleteTask(task.id);
-                },
-                onTaskEdit: (task) {
-                  NavigationHelper.push(
-                    context,
-                    TaskForm(
-                      task: task,
-                      taskController: _plugin.taskController,
-                      reminderController: _plugin.reminderController,
-                    ),
-                  );
-                },
-                onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
-                  _plugin.taskController.updateSubtaskStatus(
-                    taskId,
-                    subtaskId,
-                    isCompleted,
-                  );
-                },
-              );
+                  tasks: tasks,
+                  onTaskTap: (task) => _showTaskDetailDialog(context, task),
+                  onTaskStatusChanged: (task, status) {
+                    _plugin.taskController.updateTaskStatus(task.id, status);
+                  },
+                  onTaskDismissed: (task) async {
+                    await _plugin.taskController.deleteTask(task.id);
+                  },
+                  onTaskEdit: (task) {
+                    NavigationHelper.push(
+                      context,
+                      TaskForm(
+                        task: task,
+                        taskController: _plugin.taskController,
+                        reminderController: _plugin.reminderController,
+                      ),
+                    );
+                  },
+                  onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
+                    _plugin.taskController.updateSubtaskStatus(
+                      taskId,
+                      subtaskId,
+                      isCompleted,
+                    );
+                  },
+                );
         },
       ),
     );

@@ -12,6 +12,9 @@ import 'package:Memento/plugins/calendar/services/calendar_mapping_manager.dart'
 // 排序方式枚举，移到类外部
 enum SortBy { dueDate, priority, custom }
 
+// 视图模式枚举
+enum ViewMode { list, quadrant, week }
+
 class TaskController extends ChangeNotifier {
   final StorageManager _storage;
   final String _storageDir;
@@ -29,7 +32,7 @@ class TaskController extends ChangeNotifier {
   }
 
   // 视图模式
-  bool _isGridView = false;
+  ViewMode _viewMode = ViewMode.list;
 
   // 排序方式
   SortBy _sortBy = SortBy.dueDate;
@@ -40,12 +43,19 @@ class TaskController extends ChangeNotifier {
 
   // Getters
   List<Task> get tasks => _tasks;
-  bool get isGridView => _isGridView;
+  ViewMode get viewMode => _viewMode;
+  bool get isGridView => _viewMode != ViewMode.list;
   SortBy get sortBy => _sortBy;
 
-  // 切换视图模式
+  // 设置视图模式
+  void setViewMode(ViewMode mode) {
+    _viewMode = mode;
+    notifyListeners();
+  }
+
+  // 切换视图模式（循环切换 list -> quadrant -> week -> list）
   void toggleViewMode() {
-    _isGridView = !_isGridView;
+    _viewMode = ViewMode.values[(_viewMode.index + 1) % ViewMode.values.length];
     notifyListeners();
   }
 
