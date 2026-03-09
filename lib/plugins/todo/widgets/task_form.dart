@@ -38,9 +38,10 @@ class _TaskFormState extends State<TaskForm> {
 
   // 优先级标签映射
   late final Map<TaskPriority, String> _priorityLabels = {
-    TaskPriority.high: 'todo_high'.tr,
-    TaskPriority.medium: 'todo_medium'.tr,
-    TaskPriority.low: 'todo_low'.tr,
+    TaskPriority.q1: 'todo_q1'.tr,
+    TaskPriority.q2: 'todo_q2'.tr,
+    TaskPriority.q3: 'todo_q3'.tr,
+    TaskPriority.q4: 'todo_q4'.tr,
   };
 
   @override
@@ -89,7 +90,7 @@ class _TaskFormState extends State<TaskForm> {
     final description = values['description'] as String?;
     final startDate = values['startDate'] as DateTime?;
     final dueDate = values['dueDate'] as DateTime?;
-    final priority = values['priority'] as TaskPriority? ?? TaskPriority.medium;
+    final priority = values['priority'] as TaskPriority? ?? TaskPriority.q2;
     final tags = values['tags'] as List<String>? ?? [];
     final subtasks = (values['subtasks'] as List?)?.cast<Subtask>() ?? [];
     final reminders = values['reminders'] as List<DateTime>? ?? [];
@@ -272,7 +273,7 @@ class _TaskFormState extends State<TaskForm> {
       FormFieldConfig(
         name: 'priority',
         type: FormFieldType.select,
-        initialValue: widget.task?.priority ?? widget.initialPriority ?? TaskPriority.medium,
+        initialValue: widget.task?.priority ?? widget.initialPriority ?? TaskPriority.q2,
         labelText: 'todo_priority'.tr,
         items: TaskPriority.values.map((p) {
           return DropdownMenuItem(

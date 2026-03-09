@@ -3,7 +3,7 @@ import 'package:Memento/core/services/timer/unified_timer_controller.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'subtask.dart';
 
-enum TaskPriority { low, medium, high }
+enum TaskPriority { q1, q2, q3, q4 }
 enum TaskStatus { todo, inProgress, done }
 
 class Task {
@@ -33,7 +33,7 @@ class Task {
     required this.createdAt,
     this.startDate,
     this.dueDate,
-    this.priority = TaskPriority.medium,
+    this.priority = TaskPriority.q2,
     this.status = TaskStatus.todo,
     List<String>? tags,
     List<Subtask>? subtasks,
@@ -138,12 +138,14 @@ class Task {
 
   Color get priorityColor {
     switch (priority) {
-      case TaskPriority.low:
-        return Colors.green;
-      case TaskPriority.medium:
-        return Colors.orange;
-      case TaskPriority.high:
+      case TaskPriority.q1:
         return Colors.red;
+      case TaskPriority.q2:
+        return Colors.green;
+      case TaskPriority.q3:
+        return Colors.orange;
+      case TaskPriority.q4:
+        return Colors.blue;
     }
   }
 

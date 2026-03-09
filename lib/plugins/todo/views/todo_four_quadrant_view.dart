@@ -24,30 +24,15 @@ class TodoFourQuadrantView extends StatelessWidget {
     final q3 = <Task>[]; // Urgent & Not Important
     final q4 = <Task>[]; // Not Urgent & Not Important
 
-    final now = DateTime.now();
-    // Definition of Urgent: Due date is today, overdue, or within next 2 days
-    final urgentThreshold = now.add(const Duration(days: 2));
-
     for (final task in tasks) {
       if (task.status == TaskStatus.done) continue;
 
-      // Definition of Important: High or Medium Priority
-      final isImportant = task.priority == TaskPriority.high || task.priority == TaskPriority.medium;
-      
-      bool isUrgent = false;
-      if (task.dueDate != null) {
-        // Check if due date is before threshold (inclusive of today/overdue)
-        // Using isBefore, so anything before now+2days is urgent.
-        if (task.dueDate!.isBefore(urgentThreshold)) {
-          isUrgent = true;
-        }
-      }
-
-      if (isImportant && isUrgent) {
+      // 根据优先级直接分类到对应象限
+      if (task.priority == TaskPriority.q1) {
         q1.add(task);
-      } else if (isImportant && !isUrgent) {
+      } else if (task.priority == TaskPriority.q2) {
         q2.add(task);
-      } else if (!isImportant && isUrgent) {
+      } else if (task.priority == TaskPriority.q3) {
         q3.add(task);
       } else {
         q4.add(task);
@@ -67,7 +52,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     title: '紧急且重要', // Urgent & Important
                     color: Colors.red,
                     tasks: q1,
-                    priority: TaskPriority.high,
+                    priority: TaskPriority.q1,
                   ),
                 ),
                 Expanded(
@@ -76,7 +61,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     title: '重要但不紧急', // Important & Not Urgent
                     color: Colors.green,
                     tasks: q2,
-                    priority: TaskPriority.medium,
+                    priority: TaskPriority.q2,
                   ),
                 ),
               ],
@@ -92,7 +77,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     color: Colors.orange,
                     tasks: q3,
                     emptyIcon: Icons.inbox,
-                    priority: TaskPriority.medium,
+                    priority: TaskPriority.q3,
                   ),
                 ),
                 Expanded(
@@ -102,7 +87,7 @@ class TodoFourQuadrantView extends StatelessWidget {
                     color: Colors.blue,
                     tasks: q4,
                     emptyIcon: Icons.archive,
-                    priority: TaskPriority.low,
+                    priority: TaskPriority.q4,
                   ),
                 ),
               ],

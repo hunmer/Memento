@@ -158,19 +158,13 @@ class TodoSyncer extends PluginWidgetSyncer {
           .where((task) => task.status != TaskStatus.done)
           .toList();
 
-      // 按优先级和紧急程度分组到四个象限
-      final now = DateTime.now();
+      // 按优先级直接分组到四个象限
       final urgentImportantTasks = <Map<String, dynamic>>[];
       final notUrgentImportantTasks = <Map<String, dynamic>>[];
       final urgentNotImportantTasks = <Map<String, dynamic>>[];
       final notUrgentNotImportantTasks = <Map<String, dynamic>>[];
 
       for (final task in allTasks) {
-        final bool isImportant = task.priority == TaskPriority.high || task.priority == TaskPriority.medium;
-        final bool isUrgent = task.dueDate != null &&
-            (task.dueDate!.isBefore(now.add(Duration(days: 2))) ||
-             task.dueDate!.isAtSameMomentAs(DateTime(now.year, now.month, now.day)));
-
         final taskData = {
           'id': task.id,
           'title': task.title,
@@ -178,11 +172,12 @@ class TodoSyncer extends PluginWidgetSyncer {
           'dueDate': task.dueDate?.toIso8601String(),
         };
 
-        if (isImportant && isUrgent) {
+        // 根据优先级直接分类到对应象限
+        if (task.priority == TaskPriority.q1) {
           urgentImportantTasks.add(taskData);
-        } else if (isImportant && !isUrgent) {
+        } else if (task.priority == TaskPriority.q2) {
           notUrgentImportantTasks.add(taskData);
-        } else if (!isImportant && isUrgent) {
+        } else if (task.priority == TaskPriority.q3) {
           urgentNotImportantTasks.add(taskData);
         } else {
           notUrgentNotImportantTasks.add(taskData);

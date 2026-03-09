@@ -608,14 +608,17 @@ Future<String> _jsFindTasksByTag(Map<String, dynamic> params) async {
   if (priorityStr != null && priorityStr.isNotEmpty) {
     TaskPriority? priority;
     switch (priorityStr.toLowerCase()) {
-      case 'low':
-        priority = TaskPriority.low;
+      case 'q1':
+        priority = TaskPriority.q1;
         break;
-      case 'medium':
-        priority = TaskPriority.medium;
+      case 'q2':
+        priority = TaskPriority.q2;
         break;
-      case 'high':
-        priority = TaskPriority.high;
+      case 'q3':
+        priority = TaskPriority.q3;
+        break;
+      case 'q4':
+        priority = TaskPriority.q4;
         break;
     }
     if (priority != null) {
@@ -719,14 +722,17 @@ Future<String> _jsFindTasksByPriority(Map<String, dynamic> params) async {
 
   TaskPriority? priority;
   switch (priorityStr.toLowerCase()) {
-    case 'low':
-      priority = TaskPriority.low;
+    case 'q1':
+      priority = TaskPriority.q1;
       break;
-    case 'medium':
-      priority = TaskPriority.medium;
+    case 'q2':
+      priority = TaskPriority.q2;
       break;
-    case 'high':
-      priority = TaskPriority.high;
+    case 'q3':
+      priority = TaskPriority.q3;
+      break;
+    case 'q4':
+      priority = TaskPriority.q4;
       break;
   }
 

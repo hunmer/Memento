@@ -268,7 +268,7 @@ class TaskController extends ChangeNotifier {
     String? description,
     DateTime? startDate,
     DateTime? dueDate,
-    TaskPriority priority = TaskPriority.medium,
+    TaskPriority priority = TaskPriority.q2,
     List<String>? tags,
     List<Subtask>? subtasks,
     List<DateTime>? reminders,
@@ -569,23 +569,27 @@ class TaskController extends ChangeNotifier {
   /// 根据优先级获取图标
   IconData _getPriorityIcon(TaskPriority priority) {
     switch (priority) {
-      case TaskPriority.high:
+      case TaskPriority.q1:
         return Icons.flag;
-      case TaskPriority.medium:
+      case TaskPriority.q2:
         return Icons.flag_outlined;
-      case TaskPriority.low:
+      case TaskPriority.q3:
         return Icons.outlined_flag;
+      case TaskPriority.q4:
+        return Icons.emoji_flags;
     }
   }
 
   /// 根据优先级获取颜色
   Color _getPriorityColor(TaskPriority priority) {
     switch (priority) {
-      case TaskPriority.high:
+      case TaskPriority.q1:
         return Colors.red.shade300;
-      case TaskPriority.medium:
+      case TaskPriority.q2:
+        return Colors.green.shade300;
+      case TaskPriority.q3:
         return Colors.orange.shade300;
-      case TaskPriority.low:
+      case TaskPriority.q4:
         return Colors.blue.shade300;
     }
   }

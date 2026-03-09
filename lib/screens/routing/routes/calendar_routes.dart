@@ -193,13 +193,16 @@ class CalendarRoutes implements RouteRegistry {
   static CalendarEvent _convertTaskToEvent(Task task) {
     Color priorityColor;
     switch (task.priority) {
-      case TaskPriority.high:
+      case TaskPriority.q1:
         priorityColor = Colors.red.shade300;
         break;
-      case TaskPriority.medium:
+      case TaskPriority.q2:
+        priorityColor = Colors.green.shade300;
+        break;
+      case TaskPriority.q3:
         priorityColor = Colors.orange.shade300;
         break;
-      case TaskPriority.low:
+      case TaskPriority.q4:
         priorityColor = Colors.blue.shade300;
         break;
     }

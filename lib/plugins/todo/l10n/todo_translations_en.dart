@@ -66,9 +66,10 @@ const Map<String, String> todoTranslationsEn = {
 
   // Priority
   'todo_priority': 'Priority:',
-  'todo_low': 'Low',
-  'todo_medium': 'Medium',
-  'todo_high': 'High',
+  'todo_q1': 'Urgent & Important',
+  'todo_q2': 'Important & Not Urgent',
+  'todo_q3': 'Urgent & Not Important',
+  'todo_q4': 'Not Urgent & Not Important',
   'todo_highPriority': 'High Priority',
   'todo_overdue': 'Overdue',
 

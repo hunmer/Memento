@@ -66,9 +66,10 @@ const Map<String, String> todoTranslationsZh = {
 
   // 优先级
   'todo_priority': '优先级:',
-  'todo_low': '低',
-  'todo_medium': '中',
-  'todo_high': '高',
+  'todo_q1': '紧急且重要',
+  'todo_q2': '重要但不紧急',
+  'todo_q3': '紧急但不重要',
+  'todo_q4': '不紧急不重要',
   'todo_highPriority': '高优先级',
   'todo_overdue': '已逾期',
 
