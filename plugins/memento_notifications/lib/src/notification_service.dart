@@ -146,6 +146,49 @@ class MementoNotifications {
     await AwesomeNotifications().cancelAll();
   }
 
+  /// 调度定时通知（应用关闭后也能触发）
+  ///
+  /// [id] 通知唯一标识
+  /// [title] 通知标题
+  /// [body] 通知正文
+  /// [scheduledDate] 触发时间
+  /// [channelKey] 通知通道标识
+  /// [bigPicture] 大图 URL
+  /// [payload] 自定义数据
+  /// [preciseAlarm] 是否使用精确闹钟
+  /// [allowWhileIdle] 低电量模式下是否也触发
+  Future<void> scheduleNotification({
+    required int id,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    String channelKey = 'basic_channel',
+    String? bigPicture,
+    Map<String, String>? payload,
+    bool preciseAlarm = true,
+    bool allowWhileIdle = true,
+  }) async {
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: id,
+        channelKey: channelKey,
+        title: title,
+        body: body,
+        notificationLayout:
+            bigPicture != null
+                ? NotificationLayout.BigPicture
+                : NotificationLayout.Default,
+        bigPicture: bigPicture,
+        payload: payload,
+      ),
+      schedule: NotificationCalendar.fromDate(
+        date: scheduledDate,
+        preciseAlarm: preciseAlarm,
+        allowWhileIdle: allowWhileIdle,
+      ),
+    );
+  }
+
   /// 获取已调度的通知列表
   Future<List<MementoScheduledNotification>> getScheduledNotifications() async {
     final notifications = await AwesomeNotifications().listScheduledNotifications();

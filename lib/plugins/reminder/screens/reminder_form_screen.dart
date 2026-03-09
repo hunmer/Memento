@@ -135,7 +135,13 @@ class _ReminderFormScreenState extends State<ReminderFormScreen> {
     try {
       final title = values['title'] as String;
       final content = values['content'] as String;
-      final schedule = values['schedule'] as ReminderDateData;
+
+      // 将 Map 转换为 ReminderDateData
+      final scheduleMap = values['schedule'];
+      final schedule = scheduleMap is ReminderDateData
+          ? scheduleMap
+          : ReminderDateData.fromMap(scheduleMap as Map<String, dynamic>);
+
       final imageData = values['image'] as Map<String, dynamic>?;
       final pushMethodIndex = int.parse(values['pushMethod'] as String? ?? '0');
       final priority = int.parse(values['priority'] as String? ?? '0');
