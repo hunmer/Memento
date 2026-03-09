@@ -25,11 +25,13 @@ void _registerDataSelectors() {
                 : task.status == TaskStatus.inProgress
                     ? '进行中'
                     : '已完成';
-            final priorityText = task.priority == TaskPriority.low
-                ? '低优先级'
-                : task.priority == TaskPriority.medium
-                    ? '中优先级'
-                    : '高优先级';
+            final priorityText = task.priority == TaskPriority.q1
+                ? '紧急且重要'
+                : task.priority == TaskPriority.q2
+                    ? '重要但不紧急'
+                    : task.priority == TaskPriority.q3
+                        ? '紧急但不重要'
+                        : '不紧急不重要';
             final dueDateText = task.dueDate != null
                 ? ' | ${task.dueDate!.month}/${task.dueDate!.day}'
                 : '';

@@ -85,34 +85,40 @@ class _TodoItemDetailState extends State<TodoItemDetail> {
 
   Color get _priorityColor {
     switch (_task.priority) {
-      case TaskPriority.high:
+      case TaskPriority.q1:
         return Colors.red.shade400;
-      case TaskPriority.medium:
-        return Colors.orange.shade400;
-      case TaskPriority.low:
+      case TaskPriority.q2:
         return Colors.green.shade400;
+      case TaskPriority.q3:
+        return Colors.orange.shade400;
+      case TaskPriority.q4:
+        return Colors.blue.shade400;
     }
   }
 
   Color get _priorityBgColor {
     switch (_task.priority) {
-      case TaskPriority.high:
+      case TaskPriority.q1:
         return Colors.red.withOpacity(0.1);
-      case TaskPriority.medium:
-        return Colors.orange.withOpacity(0.1);
-      case TaskPriority.low:
+      case TaskPriority.q2:
         return Colors.green.withOpacity(0.1);
+      case TaskPriority.q3:
+        return Colors.orange.withOpacity(0.1);
+      case TaskPriority.q4:
+        return Colors.blue.withOpacity(0.1);
     }
   }
 
   String get _priorityText {
     switch (_task.priority) {
-      case TaskPriority.high:
-        return '紧急且重要'; // Using simplified text based on html example, though logic might vary
-      case TaskPriority.medium:
-        return '重要';
-      case TaskPriority.low:
-        return '普通';
+      case TaskPriority.q1:
+        return '紧急且重要';
+      case TaskPriority.q2:
+        return '重要但不紧急';
+      case TaskPriority.q3:
+        return '紧急但不重要';
+      case TaskPriority.q4:
+        return '不紧急不重要';
     }
   }
 

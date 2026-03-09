@@ -298,22 +298,25 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
             currentValue: currentValue,
             onChanged: onChanged,
             priorityLabels: {
-              TaskPriority.low: 'todo_low'.tr,
-              TaskPriority.medium: 'todo_medium'.tr,
-              TaskPriority.high: 'todo_high'.tr,
+              TaskPriority.q1: 'todo_q1'.tr,
+              TaskPriority.q2: 'todo_q2'.tr,
+              TaskPriority.q3: 'todo_q3'.tr,
+              TaskPriority.q4: 'todo_q4'.tr,
             },
             priorityColors: const {
-              TaskPriority.low: Colors.green,
-              TaskPriority.medium: Colors.orange,
-              TaskPriority.high: Colors.red,
+              TaskPriority.q1: Colors.red,
+              TaskPriority.q2: Colors.green,
+              TaskPriority.q3: Colors.orange,
+              TaskPriority.q4: Colors.blue,
             },
           );
         },
         getBadge:
             (value) => FilterBuilders.priorityBadge(value, {
-              TaskPriority.low: 'todo_low'.tr,
-              TaskPriority.medium: 'todo_medium'.tr,
-              TaskPriority.high: 'todo_high'.tr,
+              TaskPriority.q1: 'todo_q1'.tr,
+              TaskPriority.q2: 'todo_q2'.tr,
+              TaskPriority.q3: 'todo_q3'.tr,
+              TaskPriority.q4: 'todo_q4'.tr,
             }),
       ),
 

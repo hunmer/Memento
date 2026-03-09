@@ -67,9 +67,10 @@ const Map<String, String> todoTranslationsJp = {
 
   // Priority
   'todo_priority': '優先度:',
-  'todo_low': '低',
-  'todo_medium': '中',
-  'todo_high': '高',
+  'todo_q1': '緊急かつ重要',
+  'todo_q2': '重要だが緊急ではない',
+  'todo_q3': '緊急だが重要ではない',
+  'todo_q4': '緊急でも重要でもない',
   'todo_highPriority': '高優先度',
   'todo_overdue': '期限切れ',
 

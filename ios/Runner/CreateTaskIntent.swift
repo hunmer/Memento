@@ -21,7 +21,7 @@ struct CreateTaskIntent: AppIntent {
     @Parameter(
         title: "优先级",
         description: "任务的优先级级别",
-        default: TaskPriority.medium
+        default: TaskPriority.q2
     )
     var priority: TaskPriority
 
@@ -100,9 +100,10 @@ struct CreateTaskIntent: AppIntent {
 
 /// 任务优先级枚举
 enum TaskPriority: String, AppEnum {
-    case low = "low"
-    case medium = "medium"
-    case high = "high"
+    case q1 = "q1"
+    case q2 = "q2"
+    case q3 = "q3"
+    case q4 = "q4"
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation {
         TypeDisplayRepresentation(name: "优先级")
@@ -110,9 +111,10 @@ enum TaskPriority: String, AppEnum {
 
     static var caseDisplayRepresentations: [TaskPriority: DisplayRepresentation] {
         [
-            .low: DisplayRepresentation(title: "低", subtitle: "不紧急的任务"),
-            .medium: DisplayRepresentation(title: "中", subtitle: "普通任务"),
-            .high: DisplayRepresentation(title: "高", subtitle: "重要任务")
+            .q1: DisplayRepresentation(title: "紧急且重要", subtitle: "第一象限"),
+            .q2: DisplayRepresentation(title: "重要但不紧急", subtitle: "第二象限"),
+            .q3: DisplayRepresentation(title: "紧急但不重要", subtitle: "第三象限"),
+            .q4: DisplayRepresentation(title: "不紧急不重要", subtitle: "第四象限")
         ]
     }
 }

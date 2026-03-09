@@ -191,12 +191,14 @@ class TodoCommandWidgetsProvider {
   /// 获取优先级颜色
   static Color getPriorityColor(TaskPriority priority) {
     switch (priority) {
-      case TaskPriority.low:
-        return const Color(0xFF10B981);
-      case TaskPriority.high:
-        return const Color(0xFFEF4444);
-      default:
-        return const Color(0xFFF59E0B);
+      case TaskPriority.q1:
+        return const Color(0xFFEF4444); // red
+      case TaskPriority.q2:
+        return const Color(0xFF10B981); // green
+      case TaskPriority.q3:
+        return const Color(0xFFF59E0B); // orange
+      case TaskPriority.q4:
+        return const Color(0xFF3B82F6); // blue
     }
   }
 }

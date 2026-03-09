@@ -239,14 +239,17 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
       borderColor = Colors.transparent;
     } else {
       switch (widget.task.priority) {
-        case TaskPriority.high:
+        case TaskPriority.q1:
           borderColor = Colors.red;
           break;
-        case TaskPriority.medium:
+        case TaskPriority.q2:
+          borderColor = Colors.green;
+          break;
+        case TaskPriority.q3:
           borderColor = Colors.amber;
           break;
-        case TaskPriority.low:
-          borderColor = primaryColor; // Use primary for low/default
+        case TaskPriority.q4:
+          borderColor = Colors.blue;
           break;
       }
     }
@@ -453,9 +456,9 @@ class _TaskCardState extends State<_TaskCard> with SingleTickerProviderStateMixi
                                 ...widget.task.tags.map(
                                   (tag) => _buildTag(tag, isDark),
                                 ),
-                                if (widget.task.priority == TaskPriority.high)
+                                if (widget.task.priority == TaskPriority.q1)
                                   _buildTag(
-                                    'todo_highPriority'.tr,
+                                    'todo_q1'.tr,
                                     isDark,
                                     isHighPriority: true,
                                   ),
