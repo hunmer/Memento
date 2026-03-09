@@ -6,7 +6,14 @@ import 'reminder_service.dart';
 import 'reminder_notification_service.dart';
 
 /// 定时调度服务
-/// 使用 Timer.periodic 定期检查并触发提醒
+///
+/// 主要职责：
+/// 1. 在应用运行时检查并处理错过的提醒
+/// 2. 标记已触发的提醒
+/// 3. 广播提醒事件
+///
+/// 注意：实际的定时通知由系统的 AwesomeNotifications 调度，
+/// 即使应用关闭也能触发。
 class ReminderScheduler {
   static final ReminderScheduler _instance = ReminderScheduler._internal();
   factory ReminderScheduler() => _instance;
@@ -30,12 +37,12 @@ class ReminderScheduler {
 
     _isRunning = true;
 
-    // 立即检查一次
-    _checkAndTriggerReminders();
+    // 检查是否有错过的提醒
+    _checkMissedReminders();
 
-    // 启动定时器
+    // 启动定时器作为后备
     _checkTimer = Timer.periodic(_checkInterval, (_) {
-      _checkAndTriggerReminders();
+      _checkMissedReminders();
     });
 
     debugPrint('[ReminderScheduler] 调度器已启动');
@@ -49,25 +56,31 @@ class ReminderScheduler {
     debugPrint('[ReminderScheduler] 调度器已停止');
   }
 
-  /// 检查并触发到期的提醒
-  Future<void> _checkAndTriggerReminders() async {
+  /// 检查是否有错过的提醒（应用关闭期间）
+  Future<void> _checkMissedReminders() async {
     final now = DateTime.now();
     final reminders = _reminderService.getEnabledReminders();
 
     for (final reminder in reminders) {
       if (reminder.nextTriggerAt == null) continue;
 
-      // 检查是否到达触发时间（允许1分钟误差）
+      // 检查是否有错过的提醒（触发时间已过但还没触发）
+      // 如果 nextTriggerAt 已经过去超过1分钟，说明可能错过了
       final difference = now.difference(reminder.nextTriggerAt!);
-      if (difference.inMinutes >= 0 && difference.inMinutes < 1) {
-        await _triggerReminder(reminder);
+      if (difference.inMinutes > 1) {
+        debugPrint(
+          '[ReminderScheduler] 检测到错过的提醒: ${reminder.title}, '
+          '原定时间: ${reminder.nextTriggerAt}',
+        );
+        // 标记已触发并调度下一次
+        await _reminderService.markTriggered(reminder.id);
       }
     }
   }
 
-  /// 触发提醒
-  Future<void> _triggerReminder(Reminder reminder) async {
-    debugPrint('[ReminderScheduler] 触发提醒: ${reminder.title}');
+  /// 手动触发提醒（用于测试）
+  Future<void> triggerNow(Reminder reminder) async {
+    debugPrint('[ReminderScheduler] 手动触发提醒: ${reminder.title}');
 
     // 发送通知
     await _notificationService.showReminderNotification(reminder);
@@ -82,17 +95,15 @@ class ReminderScheduler {
     );
   }
 
-  /// 手动触发提醒（用于测试）
-  Future<void> triggerNow(Reminder reminder) async {
-    await _triggerReminder(reminder);
-  }
-
-  /// 重新调度所有提醒（在设置变更后调用）
+  /// 重新调度所有提醒
   Future<void> rescheduleAll() async {
-    // 计算所有提醒的下次触发时间
     for (final reminder in _reminderService.reminders) {
-      await _reminderService.updateReminder(reminder);
+      if (reminder.isEnabled) {
+        reminder.nextTriggerAt = reminder.calculateNextTriggerTime();
+        await _notificationService.scheduleReminderNotification(reminder);
+      }
     }
+    await _reminderService.refresh();
   }
 }
 

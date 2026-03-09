@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:Memento/core/app_initializer.dart';
 import '../models/reminder.dart';
+import 'reminder_notification_service.dart';
 
 /// 提醒管理服务
 /// 负责提醒的 CRUD 操作和数据持久化
@@ -13,12 +14,16 @@ class ReminderService {
   static const String _storageKey = 'reminders.json';
 
   List<Reminder> _reminders = [];
+  final ReminderNotificationService _notificationService =
+      ReminderNotificationService();
 
   List<Reminder> get reminders => List.unmodifiable(_reminders);
 
   /// 初始化服务，从存储加载数据
   Future<void> initialize() async {
     await _loadReminders();
+    // 恢复所有启用的提醒的调度
+    await _rescheduleAllEnabledReminders();
   }
 
   /// 加载提醒数据
@@ -50,6 +55,17 @@ class ReminderService {
     }
   }
 
+  /// 恢复所有启用的提醒的调度
+  Future<void> _rescheduleAllEnabledReminders() async {
+    for (final reminder in _reminders.where((r) => r.isEnabled)) {
+      // 重新计算下次触发时间
+      reminder.nextTriggerAt = reminder.calculateNextTriggerTime();
+      // 调度通知
+      await _notificationService.scheduleReminderNotification(reminder);
+    }
+    debugPrint('[ReminderService] 已恢复 ${_reminders.where((r) => r.isEnabled).length} 个提醒的调度');
+  }
+
   /// 添加提醒
   Future<Reminder> addReminder({
     required String title,
@@ -72,7 +88,7 @@ class ReminderService {
       time: time,
       pushMethod: pushMethod,
       createdAt: DateTime.now(),
-      nextTriggerAt: null, // 将在 scheduler 中计算
+      nextTriggerAt: null, // 将在下面计算
       groupId: groupId,
       priority: priority,
     );
@@ -82,6 +98,11 @@ class ReminderService {
 
     _reminders.add(reminder);
     await _saveReminders();
+
+    // 调度通知
+    if (reminder.isEnabled) {
+      await _notificationService.scheduleReminderNotification(reminder);
+    }
 
     return reminder;
   }
@@ -94,11 +115,20 @@ class ReminderService {
       reminder.nextTriggerAt = reminder.calculateNextTriggerTime();
       _reminders[index] = reminder;
       await _saveReminders();
+
+      // 重新调度通知
+      if (reminder.isEnabled) {
+        await _notificationService.scheduleReminderNotification(reminder);
+      } else {
+        await _notificationService.cancelScheduledNotification(reminder.id);
+      }
     }
   }
 
   /// 删除提醒
   Future<void> deleteReminder(String id) async {
+    // 取消调度通知
+    await _notificationService.cancelScheduledNotification(id);
     _reminders.removeWhere((r) => r.id == id);
     await _saveReminders();
   }
@@ -107,10 +137,17 @@ class ReminderService {
   Future<void> toggleReminder(String id) async {
     final index = _reminders.indexWhere((r) => r.id == id);
     if (index != -1) {
-      _reminders[index] = _reminders[index].copyWith(
-        isEnabled: !_reminders[index].isEnabled,
-      );
+      final newEnabled = !_reminders[index].isEnabled;
+      _reminders[index] = _reminders[index].copyWith(isEnabled: newEnabled);
       await _saveReminders();
+
+      // 更新调度
+      if (newEnabled) {
+        _reminders[index].nextTriggerAt = _reminders[index].calculateNextTriggerTime();
+        await _notificationService.scheduleReminderNotification(_reminders[index]);
+      } else {
+        await _notificationService.cancelScheduledNotification(id);
+      }
     }
   }
 
@@ -119,16 +156,22 @@ class ReminderService {
     return _reminders.where((r) => r.isEnabled).toList();
   }
 
-  /// 标记提醒已触发
+  /// 标记提醒已触发（并调度下一次）
   Future<void> markTriggered(String id) async {
     final index = _reminders.indexWhere((r) => r.id == id);
     if (index != -1) {
       final reminder = _reminders[index];
+      final nextTrigger = reminder.calculateNextTriggerTime();
       _reminders[index] = reminder.copyWith(
         lastTriggeredAt: DateTime.now(),
-        nextTriggerAt: reminder.calculateNextTriggerTime(),
+        nextTriggerAt: nextTrigger,
       );
       await _saveReminders();
+
+      // 调度下一次通知
+      if (_reminders[index].isEnabled) {
+        await _notificationService.scheduleReminderNotification(_reminders[index]);
+      }
     }
   }
 
