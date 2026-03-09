@@ -379,4 +379,44 @@ class FilterBuilders {
     }
     return null;
   }
+
+  /// 构建排序选择过滤器
+  /// [options] 格式：{'value': 'label'}
+  static Widget buildSortFilter({
+    required BuildContext context,
+    required dynamic currentValue,
+    required ValueChanged<dynamic> onChanged,
+    required Map<String, String> options,
+  }) {
+    final selectedValue = currentValue as String?;
+
+    return Wrap(
+      spacing: 8,
+      children: options.entries.map((entry) {
+        final key = entry.key;
+        final label = entry.value;
+        final isSelected = selectedValue == key;
+
+        return FilterChip(
+          label: Text(label),
+          selected: isSelected,
+          onSelected: (selected) {
+            onChanged(selected ? key : null);
+          },
+          visualDensity: VisualDensity.compact,
+          avatar: isSelected
+              ? const Icon(Icons.check, size: 16)
+              : const Icon(Icons.sort, size: 16),
+        );
+      }).toList(),
+    );
+  }
+
+  /// 生成排序过滤的 badge 文本
+  static String? sortBadge(dynamic value, Map<String, String> options) {
+    if (value is String && options.containsKey(value)) {
+      return options[value];
+    }
+    return null;
+  }
 }

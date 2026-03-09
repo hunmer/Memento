@@ -230,6 +230,46 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
     final availableTags = _plugin.taskController.getAllTags();
 
     return [
+      // 0. 排序选项
+      FilterItem(
+        id: 'sortBy',
+        title: 'todo_sortBy'.tr,
+        type: FilterType.custom,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildSortFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: (value) {
+              onChanged(value);
+              // 将字符串转换为 SortBy 枚举
+              if (value != null) {
+                _plugin.taskController.setSortBy(SortBy.values.firstWhere(
+                  (e) => e.toString() == value,
+                  orElse: () => SortBy.dueDate,
+                ));
+              } else {
+                _plugin.taskController.setSortBy(SortBy.dueDate);
+              }
+            },
+            options: {
+              'SortBy.dueDate': 'todo_sortByDueDate'.tr,
+              'SortBy.priority': 'todo_sortByPriority'.tr,
+              'SortBy.custom': 'todo_customSort'.tr,
+            },
+          );
+        },
+        getBadge: (value) {
+          if (value == null) return null;
+          final labels = {
+            'SortBy.dueDate': 'todo_sortByDueDate'.tr,
+            'SortBy.priority': 'todo_sortByPriority'.tr,
+            'SortBy.custom': 'todo_customSort'.tr,
+          };
+          return labels[value.toString()];
+        },
+        initialValue: 'SortBy.dueDate',
+      ),
+
       // 1. 标签多选过滤
       if (availableTags.isNotEmpty)
         FilterItem(
@@ -318,6 +358,17 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
   void _applyMultiFilters(Map<String, dynamic> filters) {
     // 构建过滤参数
     final filterParams = <String, dynamic>{};
+
+    // 排序选项（不作为过滤条件，只更新 controller）
+    if (filters['sortBy'] != null) {
+      final sortByValue = filters['sortBy'] as String;
+      if (sortByValue.isNotEmpty) {
+        _plugin.taskController.setSortBy(SortBy.values.firstWhere(
+          (e) => e.toString() == sortByValue,
+          orElse: () => SortBy.dueDate,
+        ));
+      }
+    }
 
     // 标签过滤
     if (filters['tags'] != null && (filters['tags'] as List).isNotEmpty) {
@@ -412,25 +463,6 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
           ),
           onPressed: _plugin.taskController.toggleViewMode,
         ),
-        PopupMenuButton<SortBy>(
-          icon: const Icon(Icons.sort),
-          onSelected: _plugin.taskController.setSortBy,
-          itemBuilder:
-              (context) => [
-                PopupMenuItem(
-                  value: SortBy.dueDate,
-                  child: Text('todo_sortByDueDate'.tr),
-                ),
-                PopupMenuItem(
-                  value: SortBy.priority,
-                  child: Text('todo_sortByPriority'.tr),
-                ),
-                PopupMenuItem(
-                  value: SortBy.custom,
-                  child: Text('todo_customSort'.tr),
-                ),
-              ],
-        ),
       ],
       body: AnimatedBuilder(
         animation: _plugin.taskController,
@@ -446,6 +478,17 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                 onTaskTap: (task) => _showTaskDetailDialog(context, task),
                 onTaskStatusChanged: (task, status) {
                   _plugin.taskController.updateTaskStatus(task.id, status);
+                },
+                onAddTask: (priority) {
+                  NavigationHelper.openContainerWithHero(
+                    context,
+                    (context) => TaskForm(
+                      taskController: _plugin.taskController,
+                      reminderController: _plugin.reminderController,
+                      initialPriority: priority,
+                    ),
+                    transitionDuration: const Duration(milliseconds: 300),
+                  );
                 },
               )
               : TaskListView(

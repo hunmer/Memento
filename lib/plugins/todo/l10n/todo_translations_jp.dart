@@ -76,6 +76,7 @@ const Map<String, String> todoTranslationsJp = {
   // Filter and sort
   'todo_showCompleted': '完了を表示',
   'todo_showIncomplete': '未完了を表示',
+  'todo_sortBy': '並べ替え',
   'todo_sortByDueDate': '期限日で並べ替え',
   'todo_sortByPriority': '優先度で並べ替え',
   'todo_customSort': 'カスタム並べ替え',
