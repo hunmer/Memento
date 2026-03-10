@@ -504,6 +504,17 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
                       onTaskStatusChanged: (task, status) {
                         _plugin.taskController.updateTaskStatus(task.id, status);
                       },
+                      onAddTask: (date) {
+                        NavigationHelper.openContainerWithHero(
+                          context,
+                          (context) => TaskForm(
+                            taskController: _plugin.taskController,
+                            reminderController: _plugin.reminderController,
+                            initialStartDate: date,
+                          ),
+                          transitionDuration: const Duration(milliseconds: 300),
+                        );
+                      },
                     )
               : TaskListView(
                   tasks: tasks,
