@@ -123,6 +123,10 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
     _checkTimer?.cancel();
     _checkTimer = null;
 
+    // 清空播报时间记录，避免重启后立即播报
+    _lastAnnouncementTime = null;
+    _lastCheckTime = null;
+
     // 停止当前的 TTS 播放
     try {
       await ttsPlugin.stop();
@@ -159,6 +163,16 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
 
       // 检查是否超过设定间隔
       if (unrecordedMins >= _unrecordedIntervalMinutes) {
+        // 检查距离上次播报是否已超过设定间隔（避免重复播报）
+        if (_lastAnnouncementTime != null) {
+          final timeSinceLastAnnouncement =
+              now.difference(_lastAnnouncementTime!).inMinutes;
+          if (timeSinceLastAnnouncement < _unrecordedIntervalMinutes) {
+            debugPrint('[ActivityTTSAnnouncement] 距离上次播报仅 ${timeSinceLastAnnouncement} 分钟，跳过本次播报');
+            return;
+          }
+        }
+
         // 替换占位符并播报
         final text = _replacePlaceholders(_textTemplate);
         await _speak(text);
@@ -335,12 +349,27 @@ class ActivityTTSAnnouncementService extends ChangeNotifier {
     }
 
     if (needRestart && _isActive) {
-      // 重启服务
-      await stop();
-      await start();
+      // 重启服务（原子操作：先停止，再启动）
+      await _restart();
     }
 
     notifyListeners();
+  }
+
+  /// 重启服务（原子操作）
+  Future<void> _restart() async {
+    debugPrint('[ActivityTTSAnnouncement] 正在重启服务...');
+
+    // 先停止服务（这会清空计时器和状态）
+    await stop();
+
+    // 等待一小段时间确保停止完成
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    // 再启动服务
+    await start();
+
+    debugPrint('[ActivityTTSAnnouncement] 服务重启完成');
   }
 
   /// 手动刷新最近活动
