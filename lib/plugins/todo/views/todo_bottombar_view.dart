@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/widgets/custom_bottom_bar.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/todo/controllers/task_controller.dart';
-import 'package:Memento/plugins/todo/widgets/task_list_view.dart';
 import 'package:Memento/plugins/todo/widgets/task_form.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
@@ -17,6 +16,7 @@ import 'package:Memento/plugins/todo/views/todo_four_quadrant_view.dart';
 import 'package:Memento/plugins/todo/views/todo_week_view.dart';
 import 'package:Memento/plugins/todo/widgets/history_completed_view.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:intl/intl.dart';
 import 'todo_item_detail.dart';
 
 class TodoBottomBarView extends StatefulWidget {
@@ -119,7 +119,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
         params['taskCount'] = taskCount;
       }
 
-      params['viewMode'] = _plugin.taskController.isGridView ? 'grid' : 'list';
+      params['viewMode'] = _plugin.taskController.viewMode.toString();
       params['sortBy'] = _plugin.taskController.sortBy.toString();
     } else {
       // 历史记录页
@@ -461,13 +461,14 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
       actions: [
         IconButton(
           icon: Icon(
-            _plugin.taskController.viewMode == ViewMode.list
-                ? Icons.dashboard
-                : _plugin.taskController.viewMode == ViewMode.quadrant
-                    ? Icons.calendar_view_week
-                    : Icons.view_list,
+            _plugin.taskController.viewMode == ViewMode.quadrant
+                ? Icons.calendar_view_week
+                : Icons.dashboard_outlined,
           ),
           onPressed: _plugin.taskController.toggleViewMode,
+          tooltip: _plugin.taskController.viewMode == ViewMode.quadrant
+              ? '切换到周视图'
+              : '切换到四象限视图',
         ),
       ],
       body: AnimatedBuilder(
@@ -478,68 +479,40 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
               ? _plugin.taskController.filterTasks(_currentFilter!)
               : _plugin.taskController.tasks;
 
-          return _plugin.taskController.isGridView
-              ? _plugin.taskController.viewMode == ViewMode.quadrant
-                  ? TodoFourQuadrantView(
-                      tasks: tasks,
-                      onTaskTap: (task) => _showTaskDetailDialog(context, task),
-                      onTaskStatusChanged: (task, status) {
-                        _plugin.taskController.updateTaskStatus(task.id, status);
-                      },
-                      onAddTask: (priority) {
-                        NavigationHelper.openContainerWithHero(
-                          context,
-                          (context) => TaskForm(
-                            taskController: _plugin.taskController,
-                            reminderController: _plugin.reminderController,
-                            initialPriority: priority,
-                          ),
-                          transitionDuration: const Duration(milliseconds: 300),
-                        );
-                      },
-                    )
-                  : TodoWeekView(
-                      tasks: tasks,
-                      onTaskTap: (task) => _showTaskDetailDialog(context, task),
-                      onTaskStatusChanged: (task, status) {
-                        _plugin.taskController.updateTaskStatus(task.id, status);
-                      },
-                      onAddTask: (date) {
-                        NavigationHelper.openContainerWithHero(
-                          context,
-                          (context) => TaskForm(
-                            taskController: _plugin.taskController,
-                            reminderController: _plugin.reminderController,
-                            initialStartDate: date,
-                          ),
-                          transitionDuration: const Duration(milliseconds: 300),
-                        );
-                      },
-                    )
-              : TaskListView(
+          return _plugin.taskController.viewMode == ViewMode.quadrant
+              ? TodoFourQuadrantView(
                   tasks: tasks,
                   onTaskTap: (task) => _showTaskDetailDialog(context, task),
                   onTaskStatusChanged: (task, status) {
                     _plugin.taskController.updateTaskStatus(task.id, status);
                   },
-                  onTaskDismissed: (task) async {
-                    await _plugin.taskController.deleteTask(task.id);
-                  },
-                  onTaskEdit: (task) {
-                    NavigationHelper.push(
+                  onAddTask: (priority) {
+                    NavigationHelper.openContainerWithHero(
                       context,
-                      TaskForm(
-                        task: task,
+                      (context) => TaskForm(
                         taskController: _plugin.taskController,
                         reminderController: _plugin.reminderController,
+                        initialPriority: priority,
                       ),
+                      transitionDuration: const Duration(milliseconds: 300),
                     );
                   },
-                  onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
-                    _plugin.taskController.updateSubtaskStatus(
-                      taskId,
-                      subtaskId,
-                      isCompleted,
+                )
+              : TodoWeekView(
+                  tasks: tasks,
+                  onTaskTap: (task) => _showTaskDetailDialog(context, task),
+                  onTaskStatusChanged: (task, status) {
+                    _plugin.taskController.updateTaskStatus(task.id, status);
+                  },
+                  onAddTask: (date) {
+                    NavigationHelper.openContainerWithHero(
+                      context,
+                      (context) => TaskForm(
+                        taskController: _plugin.taskController,
+                        reminderController: _plugin.reminderController,
+                        initialStartDate: date,
+                      ),
+                      transitionDuration: const Duration(milliseconds: 300),
                     );
                   },
                 );
@@ -659,34 +632,203 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
           );
         }
 
-        return TaskListView(
-          tasks: searchTasks,
-          onTaskTap: (task) => _showTaskDetailDialog(context, task),
-          onTaskStatusChanged: (task, status) {
-            _plugin.taskController.updateTaskStatus(task.id, status);
-          },
-          onTaskDismissed: (task) async {
-            await _plugin.taskController.deleteTask(task.id);
-          },
-          onTaskEdit: (task) {
-            NavigationHelper.push(
-              context,
-              TaskForm(
-                task: task,
-                taskController: _plugin.taskController,
-                reminderController: _plugin.reminderController,
-              ),
-            );
-          },
-          onSubtaskStatusChanged: (taskId, subtaskId, isCompleted) {
-            _plugin.taskController.updateSubtaskStatus(
-              taskId,
-              subtaskId,
-              isCompleted,
-            );
+        // 使用简单的列表视图显示搜索结果
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: searchTasks.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            final task = searchTasks[index];
+            return _buildSimpleTaskCard(task);
           },
         );
       },
+    );
+  }
+
+  // 构建简单的任务卡片（用于搜索结果）
+  Widget _buildSimpleTaskCard(Task task) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final isDone = task.status == TaskStatus.done;
+    final isOverdue =
+        task.dueDate != null &&
+        task.dueDate!.isBefore(DateTime.now()) &&
+        !isDone;
+
+    Color borderColor;
+    if (isDone) {
+      borderColor = Colors.transparent;
+    } else {
+      switch (task.priority) {
+        case TaskPriority.q1:
+          borderColor = Colors.red;
+          break;
+        case TaskPriority.q2:
+          borderColor = Colors.green;
+          break;
+        case TaskPriority.q3:
+          borderColor = Colors.amber;
+          break;
+        case TaskPriority.q4:
+          borderColor = Colors.blue;
+          break;
+      }
+    }
+
+    return GestureDetector(
+      onTap: () => _showTaskDetailDialog(context, task),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+          border: Border(left: BorderSide(color: borderColor, width: 4)),
+        ),
+        child: Opacity(
+          opacity: isDone ? 0.6 : 1.0,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon Box
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    task.icon ?? Icons.assignment,
+                    color: isDark ? Colors.white : Colors.grey[900],
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Main Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task.title,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white : Colors.grey[900],
+                          decoration: isDone ? TextDecoration.lineThrough : null,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          ...task.tags.map((tag) => _buildSimpleTag(tag, isDark)),
+                          if (task.priority == TaskPriority.q1)
+                            _buildSimpleTag('todo_q1'.tr, isDark, isHighPriority: true),
+                          if (isOverdue)
+                            _buildSimpleTag('todo_overdue'.tr, isDark, isOverdue: true),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      if (task.dueDate != null)
+                        Text(
+                          DateFormat('MMM d').format(task.dueDate!),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.grey[400] : Colors.grey[500],
+                            decoration: isDone ? TextDecoration.lineThrough : null,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // Checkbox
+                SizedBox(
+                  width: 48,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          final newStatus = isDone ? TaskStatus.todo : TaskStatus.done;
+                          _plugin.taskController.updateTaskStatus(task.id, newStatus);
+                        },
+                        child: SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: Checkbox(
+                            value: isDone,
+                            activeColor: const Color(0xFF607AFB),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            side: BorderSide(
+                              color: isDark ? Colors.white.withOpacity(0.2) : Colors.grey[400]!,
+                              width: 2,
+                            ),
+                            onChanged: (value) {
+                              final newStatus = value == true ? TaskStatus.done : TaskStatus.todo;
+                              _plugin.taskController.updateTaskStatus(task.id, newStatus);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 构建简单的标签
+  Widget _buildSimpleTag(
+    String text,
+    bool isDark, {
+    bool isHighPriority = false,
+    bool isOverdue = false,
+  }) {
+    Color bg;
+    Color fg;
+
+    if (isOverdue) {
+      bg = isDark ? Colors.red.withOpacity(0.2) : const Color(0xFFFEF2F2);
+      fg = isDark ? Colors.red[200]! : Colors.red[800]!;
+    } else if (isHighPriority) {
+      bg = isDark ? Colors.purple.withOpacity(0.2) : const Color(0xFFF3E8FF);
+      fg = isDark ? Colors.purple[200]! : Colors.purple[800]!;
+    } else if (text == 'Frontend' || text == 'UI/UX') {
+      bg = isDark ? Colors.blue.withOpacity(0.2) : const Color(0xFFDBEAFE);
+      fg = isDark ? Colors.blue[200]! : Colors.blue[800]!;
+    } else {
+      bg = isDark ? Colors.grey.withOpacity(0.2) : Colors.grey[200]!;
+      fg = isDark ? Colors.grey[300]! : Colors.grey[700]!;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: fg),
+      ),
     );
   }
 }
