@@ -53,6 +53,10 @@
 		<true/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+		<key>UIDeviceFamily</key>
+		<array>
+			<integer>1</integer> <!-- iPhone -->
+		</array>
 	</dict>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>需要完整的日历访问权限以查看和编辑事件</string>
