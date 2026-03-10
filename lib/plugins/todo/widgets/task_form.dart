@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/todo/controllers/controllers.dart';
 import 'package:Memento/plugins/todo/models/models.dart';
-import 'package:Memento/widgets/form_fields/index.dart';
+import 'package:Memento/widgets/form_fields/form_builder_wrapper.dart';
+import 'package:Memento/widgets/form_fields/config.dart';
+import 'package:Memento/widgets/form_fields/types.dart';
 
 /// 任务表单 - 使用 FormBuilderWrapper 重构版本
 ///
@@ -32,11 +33,11 @@ class TaskForm extends StatefulWidget {
 }
 
 class _TaskFormState extends State<TaskForm> {
-  /// 表单 key（用于访问 FormBuilder 状态）
-  final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
+  /// FormBuilderWrapper key
+  final GlobalKey<FormBuilderWrapperState> _formKey = GlobalKey<FormBuilderWrapperState>();
 
   /// FormBuilderWrapper 状态引用
-  FormBuilderWrapperState? _wrapperState;
+  FormBuilderWrapperState? _formWrapperState;
 
   // 优先级标签映射
   late final Map<TaskPriority, String> _priorityLabels = {
@@ -59,8 +60,6 @@ class _TaskFormState extends State<TaskForm> {
 
   // 自定义颜色
   static const Color _primaryColor = Color(0xFF607AFB);
-  static const Color _backgroundLight = Color(0xFFF5F6F8);
-  static const Color _backgroundDark = Color(0xFF0F1323);
 
   /// 更新路由上下文
   void _updateRouteContext() {
@@ -139,6 +138,40 @@ class _TaskFormState extends State<TaskForm> {
     }
   }
 
+  /// 确认删除任务
+  Future<void> _confirmDelete() async {
+    if (widget.task == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('todo_deleteTaskTitle'.tr),
+            content: Text('todo_deleteTaskMessage'.tr),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text('app_cancel'.tr),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  'app_delete'.tr,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      await widget.taskController.deleteTask(widget.task!.id);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -153,42 +186,41 @@ class _TaskFormState extends State<TaskForm> {
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 80),
-        child: FormBuilderWrapper(
-          formKey: _formKey,
-          onStateReady: (state) => _wrapperState = state,
-          config: FormConfig(
-            fieldSpacing: 0,
-            showSubmitButton: false,
-            showResetButton: false,
-            fields: _buildFormFieldConfigs(locale),
-            onSubmit: _handleSubmit,
+        actions: [
+          if (widget.task != null)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _confirmDelete,
+              tooltip: 'app_delete'.tr,
+            ),
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: () => _formWrapperState?.submitForm(),
+            tooltip: 'app_save'.tr,
           ),
-          contentBuilder: (context, fields) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                // 基本信息组
-                _buildBasicInfoGroup(fields),
-                const SizedBox(height: 16),
-                // 属性组
-                _buildPropertiesGroup(fields),
-                const SizedBox(height: 16),
-                // 时间组
-                _buildDateGroup(fields),
-                const SizedBox(height: 16),
-                // 设置组
-                _buildSettingsGroup(fields),
-                const SizedBox(height: 32),
-              ],
-            );
-          },
-        ),
+        ],
       ),
-      bottomNavigationBar: _buildBottomButton(isDark),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+              child: FormBuilderWrapper(
+                key: _formKey,
+                onStateReady: (state) => _formWrapperState = state,
+                config: FormConfig(
+                  fieldSpacing: 16,
+                  showSubmitButton: false,
+                  showResetButton: false,
+                  fields: _buildFormFieldConfigs(locale),
+                  onSubmit: _handleSubmit,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -213,6 +245,7 @@ class _TaskFormState extends State<TaskForm> {
         name: 'description',
         type: FormFieldType.textArea,
         initialValue: widget.task?.description ?? '',
+        labelText: 'todo_description'.tr,
         hintText: 'todo_addSomeNotesHint'.tr,
         extra: {'minLines': 4},
       ),
@@ -222,6 +255,7 @@ class _TaskFormState extends State<TaskForm> {
         name: 'tags',
         type: FormFieldType.tags,
         initialValue: widget.task?.tags.toList() ?? [],
+        labelText: 'todo_tags'.tr,
         extra: {'primaryColor': _primaryColor},
       ),
 
@@ -230,6 +264,7 @@ class _TaskFormState extends State<TaskForm> {
         name: 'subtasks',
         type: FormFieldType.listAdd,
         initialValue: widget.task?.subtasks.toList() ?? [],
+        labelText: 'todo_subtasks'.tr,
         hintText: '${'todo_add'.tr} ${'todo_subtasks'.tr}',
         extra: {
           'initialItems': widget.task?.subtasks.toList() ?? [],
@@ -264,9 +299,7 @@ class _TaskFormState extends State<TaskForm> {
         name: 'dueDate',
         type: FormFieldType.date,
         initialValue: widget.task?.dueDate,
-        hintText: DateFormat.yMMMEd(
-          locale,
-        ).format(DateTime.now().add(const Duration(days: 1))),
+        hintText: DateFormat.yMMMEd(locale).format(DateTime.now().add(const Duration(days: 1))),
         labelText: 'todo_dueDate'.tr,
         extra: {'inline': true, 'format': 'yMMMEd'},
       ),
@@ -275,8 +308,7 @@ class _TaskFormState extends State<TaskForm> {
       FormFieldConfig(
         name: 'priority',
         type: FormFieldType.select,
-        initialValue:
-            widget.task?.priority ?? widget.initialPriority ?? TaskPriority.q2,
+        initialValue: widget.task?.priority ?? widget.initialPriority ?? TaskPriority.q2,
         labelText: 'todo_priority'.tr,
         items:
             TaskPriority.values.map((p) {
@@ -297,151 +329,5 @@ class _TaskFormState extends State<TaskForm> {
         extra: {'primaryColor': _primaryColor},
       ),
     ];
-  }
-
-  /// 构建底部按钮
-  Widget _buildBottomButton(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? _backgroundDark : _backgroundLight,
-        border: Border(
-          top: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
-          ),
-        ),
-      ),
-      child: ElevatedButton(
-        onPressed: () async {
-          // 使用 FormBuilderWrapperState 保存并验证所有字段
-          if (_wrapperState != null) {
-            final isValid = _wrapperState!.saveAndValidate();
-            if (isValid) {
-              await _handleSubmit(_wrapperState!.currentValues);
-            }
-          } else {
-            final fbState = _formKey.currentState;
-            if (fbState != null && fbState.saveAndValidate()) {
-              await _handleSubmit(fbState.value);
-            }
-          }
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _primaryColor,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(26),
-          ),
-          elevation: 0,
-        ),
-        child: Text(
-          widget.task == null ? 'todo_createTask'.tr : 'todo_saveTask'.tr,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  /// 构建基本信息组
-  Widget _buildBasicInfoGroup(List<Widget> fields) {
-    return FormFieldGroup(
-      children: [
-        // 图标标题字段
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: fields[0], // titleIcon field
-        ),
-        // 描述输入
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: fields[1], // description field
-        ),
-      ],
-    );
-  }
-
-  /// 构建属性组（标签、子任务）
-  Widget _buildPropertiesGroup(List<Widget> fields) {
-    return FormFieldGroup(
-      children: [
-        // 标签管理
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'todo_tags'.tr,
-                style: TextStyle(
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey[400]
-                          : Colors.grey[500],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              fields[2], // tags field
-            ],
-          ),
-        ),
-        // 子任务管理
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'todo_subtasks'.tr,
-                style: TextStyle(
-                  color:
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey[400]
-                          : Colors.grey[500],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              fields[3], // subtasks field
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// 构建时间组（开始日期、截止日期）
-  Widget _buildDateGroup(List<Widget> fields) {
-    return FormFieldGroup(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: fields[4], // startDate field
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: fields[5], // dueDate field
-        ),
-      ],
-    );
-  }
-
-  /// 构建设置组（优先级、提醒）
-  Widget _buildSettingsGroup(List<Widget> fields) {
-    return FormFieldGroup(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: fields[6], // priority field
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: fields[7], // reminders field
-        ),
-      ],
-    );
   }
 }
