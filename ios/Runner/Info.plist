@@ -49,6 +49,8 @@
 	<string>此应用需要访问NFC以读取和写入NFC标签</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
+		<key>WKWatchKitApp</key>
+		<true/>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSAllowsLocalNetworking</key>
