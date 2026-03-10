@@ -99,7 +99,9 @@ class _TaskFormState extends State<TaskForm> {
 
     // 确保截止日期不早于开始日期
     DateTime? adjustedDueDate = dueDate;
-    if (startDate != null && adjustedDueDate != null && adjustedDueDate.isBefore(startDate)) {
+    if (startDate != null &&
+        adjustedDueDate != null &&
+        adjustedDueDate.isBefore(startDate)) {
       adjustedDueDate = null;
     }
 
@@ -144,7 +146,9 @@ class _TaskFormState extends State<TaskForm> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.task == null ? 'todo_newTask'.tr : 'todo_editTask'.tr),
+        title: Text(
+          widget.task == null ? 'todo_newTask'.tr : 'todo_editTask'.tr,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.pop(context),
@@ -195,9 +199,10 @@ class _TaskFormState extends State<TaskForm> {
       FormFieldConfig(
         name: 'titleIcon',
         type: FormFieldType.iconTitle,
-        initialValue: widget.task != null
-            ? {'title': widget.task!.title, 'icon': widget.task!.icon}
-            : {'title': '', 'icon': Icons.assignment},
+        initialValue:
+            widget.task != null
+                ? {'title': widget.task!.title, 'icon': widget.task!.icon}
+                : {'title': '', 'icon': Icons.assignment},
         required: true,
         validationMessage: 'todo_pleaseEnterTitle'.tr,
         hintText: 'todo_title'.tr,
@@ -227,6 +232,7 @@ class _TaskFormState extends State<TaskForm> {
         initialValue: widget.task?.subtasks.toList() ?? [],
         hintText: '${'todo_add'.tr} ${'todo_subtasks'.tr}',
         extra: {
+          'initialItems': widget.task?.subtasks.toList() ?? [],
           'primaryColor': _primaryColor,
           'getTitle': (Subtask s) => s.title,
           'getIsCompleted': (Subtask s) => s.isCompleted,
@@ -250,10 +256,7 @@ class _TaskFormState extends State<TaskForm> {
         initialValue: widget.task?.startDate ?? widget.initialStartDate,
         hintText: DateFormat.yMMMEd(locale).format(DateTime.now()),
         labelText: 'todo_startDate'.tr,
-        extra: {
-          'inline': true,
-          'format': 'yMMMEd',
-        },
+        extra: {'inline': true, 'format': 'yMMMEd'},
       ),
 
       // 截止日期
@@ -261,28 +264,27 @@ class _TaskFormState extends State<TaskForm> {
         name: 'dueDate',
         type: FormFieldType.date,
         initialValue: widget.task?.dueDate,
-        hintText: DateFormat.yMMMEd(locale).format(
-          DateTime.now().add(const Duration(days: 1)),
-        ),
+        hintText: DateFormat.yMMMEd(
+          locale,
+        ).format(DateTime.now().add(const Duration(days: 1))),
         labelText: 'todo_dueDate'.tr,
-        extra: {
-          'inline': true,
-          'format': 'yMMMEd',
-        },
+        extra: {'inline': true, 'format': 'yMMMEd'},
       ),
 
       // 优先级
       FormFieldConfig(
         name: 'priority',
         type: FormFieldType.select,
-        initialValue: widget.task?.priority ?? widget.initialPriority ?? TaskPriority.q2,
+        initialValue:
+            widget.task?.priority ?? widget.initialPriority ?? TaskPriority.q2,
         labelText: 'todo_priority'.tr,
-        items: TaskPriority.values.map((p) {
-          return DropdownMenuItem(
-            value: p,
-            child: Text(_priorityLabels[p] ?? ''),
-          );
-        }).toList(),
+        items:
+            TaskPriority.values.map((p) {
+              return DropdownMenuItem(
+                value: p,
+                child: Text(_priorityLabels[p] ?? ''),
+              );
+            }).toList(),
       ),
 
       // 提醒
@@ -305,9 +307,7 @@ class _TaskFormState extends State<TaskForm> {
         color: isDark ? _backgroundDark : _backgroundLight,
         border: Border(
           top: BorderSide(
-            color: isDark
-                ? Colors.white.withOpacity(0.1)
-                : Colors.grey[200]!,
+            color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
           ),
         ),
       ),
@@ -374,9 +374,10 @@ class _TaskFormState extends State<TaskForm> {
               Text(
                 'todo_tags'.tr,
                 style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[400]
-                      : Colors.grey[500],
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[500],
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -395,9 +396,10 @@ class _TaskFormState extends State<TaskForm> {
               Text(
                 'todo_subtasks'.tr,
                 style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.grey[400]
-                      : Colors.grey[500],
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[500],
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
