@@ -136,8 +136,10 @@ extension WCSessionManager {
 
 extension WCSessionManager: WCSessionDelegate {
 
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        DispatchQueue.main.async {
+    // watchOS 必需方法
+    #if os(watchOS)
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
+        Task { @MainActor in
             self.isConnected = (activationState == .activated)
             if let error = error {
                 self.logger.error("WCSession 激活失败: \(error.localizedDescription)")
@@ -146,9 +148,33 @@ extension WCSessionManager: WCSessionDelegate {
             }
         }
     }
+    #endif
+
+    // iOS 必需方法
+    #if os(iOS)
+    func sessionDidBecomeInactive(_ session: WCSession) {
+        logger.info("WCSession 已变为非活动状态")
+    }
+
+    func sessionDidDeactivate(_ session: WCSession) {
+        logger.info("WCSession 已停用")
+        WCSession.default.activate()
+    }
+
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
+        Task { @MainActor in
+            self.isConnected = (activationState == .activated)
+            if let error = error {
+                self.logger.error("WCSession 激活失败: \(error.localizedDescription)")
+            } else {
+                self.logger.info("WCSession 已激活，状态: \(activationState.rawValue)")
+            }
+        }
+    }
+    #endif
 
     func sessionReachabilityDidChange(_ session: WCSession) {
-        DispatchQueue.main.async {
+        Task { @MainActor in
             self.isReachable = session.isReachable
             self.logger.info("Phone reachable 状态变更: \(session.isReachable)")
         }
@@ -162,4 +188,9 @@ extension WCSessionManager: WCSessionDelegate {
         logger.info("收到应用上下文更新: \(applicationContext)")
     }
 
+    // 消息回复处理器
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("收到消息（带回复）: \(message)")
+        replyHandler(["received": true])
+    }
 }
