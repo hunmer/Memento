@@ -6,12 +6,14 @@ class TodoWeekView extends StatelessWidget {
   final List<Task> tasks;
   final Function(Task) onTaskTap;
   final Function(Task, TaskStatus) onTaskStatusChanged;
+  final Function(DateTime)? onAddTask;
 
   const TodoWeekView({
     super.key,
     required this.tasks,
     required this.onTaskTap,
     required this.onTaskStatusChanged,
+    this.onAddTask,
   });
 
   @override
@@ -110,7 +112,8 @@ class TodoWeekView extends StatelessWidget {
     final isPast = date.isBefore(DateTime.now());
 
     // 排除已完成的任务
-    final activeTasks = dayTasks.where((t) => t.status != TaskStatus.done).toList();
+    final activeTasks =
+        dayTasks.where((t) => t.status != TaskStatus.done).toList();
 
     // 根据任务状态设置卡片颜色
     Color cardColor;
@@ -137,9 +140,7 @@ class TodoWeekView extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: isToday
-            ? Border.all(color: headerBorderColor, width: 2)
-            : null,
+        border: isToday ? Border.all(color: headerBorderColor, width: 2) : null,
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -178,7 +179,10 @@ class TodoWeekView extends StatelessWidget {
                 ),
                 if (activeTasks.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: cardColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
@@ -192,92 +196,111 @@ class TodoWeekView extends StatelessWidget {
                       ),
                     ),
                   ),
+                if (onAddTask != null)
+                  IconButton(
+                    icon: Icon(
+                      Icons.add,
+                      size: 18,
+                      color: titleColor,
+                    ),
+                    onPressed: () => onAddTask!(date),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    splashRadius: 16,
+                  ),
               ],
             ),
           ),
           // 任务列表
           Expanded(
-            child: activeTasks.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          size: 32,
-                          color: Colors.green.withOpacity(0.3),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '无待办',
-                          style: TextStyle(
-                            color: Theme.of(context).disabledColor.withOpacity(0.4),
-                            fontSize: 12,
+            child:
+                activeTasks.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle_outline,
+                            size: 32,
+                            color: Colors.green.withOpacity(0.3),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            '无待办',
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).disabledColor.withOpacity(0.4),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    : ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      itemCount: activeTasks.length,
+                      itemBuilder: (context, index) {
+                        final task = activeTasks[index];
+                        return InkWell(
+                          onTap: () => onTaskTap(task),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: Checkbox(
+                                    value: task.status == TaskStatus.done,
+                                    onChanged: (val) {
+                                      onTaskStatusChanged(
+                                        task,
+                                        val == true
+                                            ? TaskStatus.done
+                                            : TaskStatus.todo,
+                                      );
+                                    },
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    side: BorderSide(
+                                      color: Theme.of(context).dividerColor,
+                                      width: 1.5,
+                                    ),
+                                    activeColor: Theme.of(context).primaryColor,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    task.title,
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                // 优先级指示器
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: task.priorityColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    itemCount: activeTasks.length,
-                    itemBuilder: (context, index) {
-                      final task = activeTasks[index];
-                      return InkWell(
-                        onTap: () => onTaskTap(task),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: Checkbox(
-                                  value: task.status == TaskStatus.done,
-                                  onChanged: (val) {
-                                    onTaskStatusChanged(
-                                      task,
-                                      val == true
-                                          ? TaskStatus.done
-                                          : TaskStatus.todo,
-                                    );
-                                  },
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  side: BorderSide(
-                                    color: Theme.of(context).dividerColor,
-                                    width: 1.5,
-                                  ),
-                                  activeColor: Theme.of(context).primaryColor,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  task.title,
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              // 优先级指示器
-                              Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: task.priorityColor,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
           ),
         ],
       ),
@@ -290,11 +313,7 @@ class TodoWeekView extends StatelessWidget {
     // 找到本周一
     final monday = now.subtract(Duration(days: now.weekday - 1));
     // 重置时间部分为 00:00:00
-    final normalizedMonday = DateTime(
-      monday.year,
-      monday.month,
-      monday.day,
-    );
+    final normalizedMonday = DateTime(monday.year, monday.month, monday.day);
 
     // 生成周一到周日的日期
     return List.generate(7, (index) {

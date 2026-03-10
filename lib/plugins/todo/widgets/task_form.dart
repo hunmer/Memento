@@ -16,6 +16,7 @@ class TaskForm extends StatefulWidget {
   final TaskController taskController;
   final ReminderController reminderController;
   final TaskPriority? initialPriority; // 预设优先级（仅用于创建新任务）
+  final DateTime? initialStartDate; // 预设开始日期（仅用于创建新任务）
 
   const TaskForm({
     super.key,
@@ -23,6 +24,7 @@ class TaskForm extends StatefulWidget {
     required this.taskController,
     required this.reminderController,
     this.initialPriority,
+    this.initialStartDate,
   });
 
   @override
@@ -245,7 +247,7 @@ class _TaskFormState extends State<TaskForm> {
       FormFieldConfig(
         name: 'startDate',
         type: FormFieldType.date,
-        initialValue: widget.task?.startDate,
+        initialValue: widget.task?.startDate ?? widget.initialStartDate,
         hintText: DateFormat.yMMMEd(locale).format(DateTime.now()),
         labelText: 'todo_startDate'.tr,
         extra: {
