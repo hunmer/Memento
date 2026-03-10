@@ -21,6 +21,7 @@ import 'services/ui_service.dart';
 import 'services/widget_service.dart';
 import 'services/tag_service.dart';
 import 'package:shared_models/usecases/chat/chat_usecase.dart';
+import 'package:Memento/core/watch_connectivity_manager.dart';
 
 part 'chat_js_api.dart';
 part 'chat_data_selectors.dart';
@@ -151,6 +152,13 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     // 注册 JS API（最后一步）
     await registerJSAPI();
+
+    // 初始化手表连接
+    try {
+      await WatchConnectivityManager().initialize();
+    } catch (e) {
+      debugPrint('Failed to initialize watch connectivity: $e');
+    }
   }
 
 
