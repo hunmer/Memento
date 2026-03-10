@@ -13,7 +13,7 @@ import 'package:Memento/plugins/calendar/services/calendar_mapping_manager.dart'
 enum SortBy { dueDate, priority, custom }
 
 // 视图模式枚举
-enum ViewMode { list, quadrant, week }
+enum ViewMode { quadrant, week }
 
 class TaskController extends ChangeNotifier {
   final StorageManager _storage;
@@ -31,8 +31,8 @@ class TaskController extends ChangeNotifier {
     EventManager.instance.broadcast('task_$action', eventArgs);
   }
 
-  // 视图模式
-  ViewMode _viewMode = ViewMode.list;
+  // 视图模式（默认四象限视图）
+  ViewMode _viewMode = ViewMode.quadrant;
 
   // 排序方式
   SortBy _sortBy = SortBy.dueDate;
@@ -44,19 +44,20 @@ class TaskController extends ChangeNotifier {
   // Getters
   List<Task> get tasks => _tasks;
   ViewMode get viewMode => _viewMode;
-  bool get isGridView => _viewMode != ViewMode.list;
   SortBy get sortBy => _sortBy;
 
   // 设置视图模式
   void setViewMode(ViewMode mode) {
     _viewMode = mode;
     notifyListeners();
+    _saveTasks(); // 保存视图模式到存储
   }
 
-  // 切换视图模式（循环切换 list -> quadrant -> week -> list）
+  // 切换视图模式（循环切换 quadrant -> week -> quadrant）
   void toggleViewMode() {
     _viewMode = ViewMode.values[(_viewMode.index + 1) % ViewMode.values.length];
     notifyListeners();
+    _saveTasks(); // 保存视图模式到存储
   }
 
   // 设置排序方式
@@ -241,9 +242,22 @@ class TaskController extends ChangeNotifier {
             completedTaskList.map((item) => Task.fromJson(item)).toList();
       }
 
+      // 加载视图模式设置
+      if (data['viewMode'] != null) {
+        try {
+          final viewModeStr = data['viewMode'] as String;
+          _viewMode = ViewMode.values.firstWhere(
+            (e) => e.toString() == viewModeStr,
+            orElse: () => ViewMode.quadrant, // 默认四象限视图
+          );
+        } catch (e) {
+          _viewMode = ViewMode.quadrant; // 解析失败时使用默认值
+        }
+      }
+
       _sortTasks();
       notifyListeners();
-    } 
+    }
   }
 
   // 保存任务
@@ -251,6 +265,7 @@ class TaskController extends ChangeNotifier {
     final data = {
       'tasks': _tasks.map((task) => task.toJson()).toList(),
       'completedTasks': _completedTasks.map((task) => task.toJson()).toList(),
+      'viewMode': _viewMode.toString(), // 保存视图模式设置
     };
     await _storage.write('$_storageDir/tasks.json', data);
   }
