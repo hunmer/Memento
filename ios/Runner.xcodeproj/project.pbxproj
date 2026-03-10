@@ -154,6 +154,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4B8276512F607D5600DF8056 /* Exceptions for "memento Watch App" folder in "memento Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4B8276222F607D5400DF8056 /* memento Watch App */;
+		};
 		4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -167,6 +174,7 @@
 		4B8276242F607D5400DF8056 /* memento Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				4B8276512F607D5600DF8056 /* Exceptions for "memento Watch App" folder in "memento Watch App" target */,
 			);
 			explicitFileTypes = {
 			};
@@ -981,12 +989,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = memento;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = github.hunmer.memento;
-				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
-				INFOPLIST_KEY_WKWatchKitApp = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "memento Watch App/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1030,12 +1034,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = memento;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = github.hunmer.memento;
-				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
-				INFOPLIST_KEY_WKWatchKitApp = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "memento Watch App/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1076,12 +1076,8 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = memento;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = github.hunmer.memento;
-				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
-				INFOPLIST_KEY_WKWatchKitApp = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "memento Watch App/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
