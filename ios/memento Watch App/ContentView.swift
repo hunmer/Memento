@@ -17,7 +17,7 @@ struct DemoCard: Identifiable {
 
 struct ContentView: View {
     private let demoCards = [
-        DemoCard(title: "待办事项", subtitle: "3个任务", icon: "checkmark.circle", color: .blue),
+        DemoCard(title: "待办事项", subtitle: "2个任务", icon: "checkmark.circle", color: .blue),
         DemoCard(title: "频道聊天", subtitle: "消息频道", icon: "message.fill", color: .indigo),
         DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red),
         DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange),

@@ -19,6 +19,7 @@ import 'services/widget_service.dart';
 import 'services/route_agent_config_service.dart';
 import 'services/shortcuts_handler_service.dart';
 import 'services/conversation_sync_service.dart';
+import 'services/watch_connectivity_service.dart';
 import 'models/chat_message.dart';
 import 'models/agent_chain_node.dart';
 import 'repositories/client_agent_chat_repository.dart';
@@ -114,6 +115,13 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
       await ConversationSyncService.instance.syncConversationsToIOS(
         _conversationController!.conversationService,
       );
+
+      // 初始化 WatchConnectivity 服务（用于与 Apple Watch 通信）
+      WatchConnectivityService.initialize(
+        conversationService: _conversationController!.conversationService,
+        messageService: _conversationController!.messageService,
+      );
+      debugPrint('[AgentChatPlugin] WatchConnectivity 服务已启动');
     }
 
     // 注册数据选择器

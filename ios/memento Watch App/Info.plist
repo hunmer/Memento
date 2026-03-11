@@ -31,5 +31,13 @@
 	<string>github.hunmer.memento</string>
 	<key>WKRunsIndependentlyOfCompanionApp</key>
 	<false/>
+	<key>WKScene</key>
+	<dict>
+		<key>content</key>
+		<dict>
+			<key>name</key>
+			<string>Default Configuration</string>
+		</dict>
+	</dict>
 </dict>
 </plist>
