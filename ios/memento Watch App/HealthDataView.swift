@@ -7,59 +7,85 @@
 
 import SwiftUI
 
-struct HealthMetric: Identifiable {
-    let id = UUID()
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-}
-
 struct HealthDataView: View {
-    private let metrics = [
-        HealthMetric(title: "今日步数", value: "8,432", icon: "figure.walk", color: .blue),
-        HealthMetric(title: "消耗卡路里", value: "324 kcal", icon: "flame.fill", color: .orange),
-        HealthMetric(title: "运动时间", value: "45 min", icon: "timer", color: .green),
-        HealthMetric(title: "心率", value: "72 bpm", icon: "heart.fill", color: .red),
-        HealthMetric(title: "睡眠时间", value: "7.5 h", icon: "bed.double.fill", color: .purple),
-        HealthMetric(title: "站立次数", value: "12/12", icon: "figure.stand", color: .cyan)
-    ]
-
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                ForEach(metrics) { metric in
-                    HStack(spacing: 12) {
-                        ZStack {
-                            Circle()
-                                .fill(metric.color.opacity(0.2))
-                                .frame(width: 44, height: 44)
+        VStack(spacing: 16) {
+            HealthMetricCard(
+                icon: "figure.walk",
+                title: "步数",
+                value: "8,432",
+                unit: "步",
+                color: .blue,
+                goalProgress: 0.84
+            )
 
-                            Image(systemName: metric.icon)
-                                .foregroundStyle(metric.color)
-                        }
+            HealthMetricCard(
+                icon: "heart.fill",
+                title: "心率",
+                value: "72",
+                unit: "bpm",
+                color: .red,
+                goalProgress: 1.0
+            )
 
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(metric.title)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-
-                            Text(metric.value)
-                                .font(.headline)
-                        }
-
-                        Spacer()
-                    }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.black.opacity(0.1))
-                    )
-                }
-            }
-            .padding()
+            HealthMetricCard(
+                icon: "flame.fill",
+                title: "卡路里",
+                value: "320",
+                unit: "kcal",
+                color: .orange,
+                goalProgress: 0.45
+            )
         }
         .navigationTitle("健康数据")
+    }
+}
+
+struct HealthMetricCard: View {
+    let icon: String
+    let title: String
+    let value: String
+    let unit: String
+    let color: Color
+    let goalProgress: Double
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .stroke(color.opacity(0.2), lineWidth: 4)
+                    .frame(width: 50, height: 50)
+
+                Circle()
+                    .trim(from: 0, to: goalProgress)
+                    .stroke(color, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .frame(width: 50, height: 50)
+                    .rotationEffect(.degrees(-90))
+
+                Image(systemName: icon)
+                    .foregroundStyle(color)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(value)
+                        .font(.title2)
+                        .fontWeight(.bold)
+                    Text(unit)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.black.opacity(0.1))
+        )
     }
 }
 

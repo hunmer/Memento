@@ -7,46 +7,28 @@
 
 import SwiftUI
 
-struct TodoItem: Identifiable {
-    let id = UUID()
-    var title: String
-    var isCompleted: Bool
-}
-
 struct TodoListView: View {
-    @State private var todoItems = [
-        TodoItem(title: "完成项目报告", isCompleted: false),
-        TodoItem(title: "团队会议", isCompleted: true),
-        TodoItem(title: "代码审查", isCompleted: false)
-    ]
-
     var body: some View {
         List {
-            ForEach($todoItems) { $item in
-                Toggle(isOn: $item.isCompleted) {
-                    Text(item.title)
-                        .strikethrough(item.isCompleted)
-                }
-                .toggleStyle(.switch)
-            }
-            .onDelete(perform: deleteItems)
+            TodoItem(title: "完成项目文档", isDone: false)
+            TodoItem(title: "代码审查", isDone: true)
+            TodoItem(title: "团队会议", isDone: false)
         }
         .navigationTitle("待办事项")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: addNewItem) {
-                    Image(systemName: "plus")
-                }
-            }
+    }
+}
+
+struct TodoItem: View {
+    let title: String
+    let isDone: Bool
+
+    var body: some View {
+        HStack {
+            Image(systemName: isDone ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(isDone ? .green : .gray)
+            Text(title)
+                .strikethrough(isDone)
         }
-    }
-
-    private func deleteItems(at offsets: IndexSet) {
-        todoItems.remove(atOffsets: offsets)
-    }
-
-    private func addNewItem() {
-        todoItems.append(TodoItem(title: "新任务", isCompleted: false))
     }
 }
 
