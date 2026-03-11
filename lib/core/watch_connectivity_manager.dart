@@ -55,10 +55,27 @@ class WatchConnectivityManager extends ChangeNotifier {
       // 定期检查可达性状态（watch_connectivity 插件不支持 stream）
       _startReachabilityCheck();
 
+      // 初始化时发送应用上下文，让 Watch App 能获取到数据
+      await _sendInitialContext();
+
       _isInitialized = true;
       debugPrint('WatchConnectivityManager initialized');
     } catch (e) {
       debugPrint('Failed to initialize WatchConnectivityManager: $e');
+    }
+  }
+
+  /// 发送初始应用上下文
+  Future<void> _sendInitialContext() async {
+    try {
+      // 发送一个空的初始化上下文，表示 iPhone App 已准备好
+      await _watchConnectivity.updateApplicationContext({
+        'initialized': true,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+      debugPrint('Sent initial context to watch');
+    } catch (e) {
+      debugPrint('Failed to send initial context: $e');
     }
   }
 
