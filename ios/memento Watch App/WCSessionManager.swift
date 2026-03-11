@@ -11,7 +11,7 @@ import Combine
 
 // MARK: - 数据模型
 
-struct ChatChannel: Codable, Identifiable {
+struct ChatChannel: Codable, Identifiable, Hashable {
     let id: String
     let name: String
     let description: String?

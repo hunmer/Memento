@@ -9,7 +9,8 @@ import SwiftUI
 
 struct ChatMessageView: View {
     @StateObject private var sessionManager = WCSessionManager.shared
-    let channel: ChatChannel
+    let channelId: String
+    let channelName: String
 
     @State private var messages: [ChatMessage] = []
     @State private var isLoading = false
@@ -57,7 +58,7 @@ struct ChatMessageView: View {
                 .padding()
             }
         }
-        .navigationTitle(channel.name)
+        .navigationTitle(channelName)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             loadMessages()
@@ -78,7 +79,7 @@ struct ChatMessageView: View {
 
         Task {
             do {
-                let loadedMessages = try await sessionManager.getChatMessages(channelId: channel.id)
+                let loadedMessages = try await sessionManager.getChatMessages(channelId: channelId)
                 await MainActor.run {
                     self.messages = loadedMessages
                     self.isLoading = false
@@ -130,7 +131,6 @@ struct ChatMessageBubble: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            // watchOS 不支持 UIScreen，使用相对宽度
             .frame(maxWidth: 180, alignment: message.isMe == true ? .trailing : .leading)
 
             if message.isMe != true {
@@ -165,13 +165,6 @@ struct ChatMessageBubble: View {
 
 #Preview {
     NavigationView {
-        ChatMessageView(channel: ChatChannel(
-            id: "1",
-            name: "示例频道",
-            description: "测试频道",
-            unreadCount: 0,
-            createdAt: nil,
-            lastActiveAt: nil
-        ))
+        ChatMessageView(channelId: "1", channelName: "示例频道")
     }
 }

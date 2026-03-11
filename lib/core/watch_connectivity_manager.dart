@@ -49,8 +49,10 @@ class WatchConnectivityManager extends ChangeNotifier {
       _contextSubscription = _watchConnectivity.contextStream.listen(_handleContextUpdate);
 
       // 检查连接状态
-      _isPaired = await _watchConnectivity.isPaired;
-      _isReachable = await _watchConnectivity.isReachable;
+      _isPaired = await _watchConnectivity.isPaired ?? false;
+      _isReachable = await _watchConnectivity.isReachable ?? false;
+
+      debugPrint('WatchConnectivity state - isPaired: $_isPaired, isReachable: $_isReachable');
 
       // 定期检查可达性状态（watch_connectivity 插件不支持 stream）
       _startReachabilityCheck();
@@ -59,9 +61,10 @@ class WatchConnectivityManager extends ChangeNotifier {
       await _sendInitialContext();
 
       _isInitialized = true;
-      debugPrint('WatchConnectivityManager initialized');
-    } catch (e) {
+      debugPrint('WatchConnectivityManager initialized successfully');
+    } catch (e, stackTrace) {
       debugPrint('Failed to initialize WatchConnectivityManager: $e');
+      debugPrint('StackTrace: $stackTrace');
     }
   }
 
@@ -209,10 +212,14 @@ class WatchConnectivityManager extends ChangeNotifier {
       }
 
       // 使用 channels getter 并手动查找频道
-      final channel = chatPlugin.channelService.channels.firstWhere(
-        (c) => c.id == channelId,
-        orElse: () => null as Channel,
-      );
+      Channel? channel;
+      try {
+        channel = chatPlugin.channelService.channels.firstWhere(
+          (c) => c.id == channelId,
+        );
+      } catch (_) {
+        channel = null;
+      }
 
       if (channel == null) {
         return {
