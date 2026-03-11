@@ -7,32 +7,61 @@
 
 import SwiftUI
 
+enum CardDestination: String {
+    case todo = "待办事项"
+    case chat = "频道聊天"
+    case health = "健康数据"
+    case weather = "天气"
+    case calendar = "日程"
+    case reminder = "提醒"
+    case settings = "设置"
+}
+
 struct DemoCard: Identifiable {
     let id = UUID()
     let title: String
     let subtitle: String
     let icon: String
     let color: Color
+    let destination: CardDestination
 }
 
 struct ContentView: View {
     private let demoCards = [
-        DemoCard(title: "待办事项", subtitle: "2个任务", icon: "checkmark.circle", color: .blue),
-        DemoCard(title: "频道聊天", subtitle: "消息频道", icon: "message.fill", color: .indigo),
-        DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red),
-        DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange),
-        DemoCard(title: "日程", subtitle: "2个会议", icon: "calendar", color: .green),
-        DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple),
-        DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray)
+        DemoCard(title: "待办事项", subtitle: "2个任务", icon: "checkmark.circle", color: .blue, destination: .todo),
+        DemoCard(title: "频道聊天", subtitle: "消息频道", icon: "message.fill", color: .indigo, destination: .chat),
+        DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red, destination: .health),
+        DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange, destination: .weather),
+        DemoCard(title: "日程", subtitle: "2个会议", icon: "calendar", color: .green, destination: .calendar),
+        DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple, destination: .reminder),
+        DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray, destination: .settings)
     ]
+
+    @ViewBuilder
+    private func destinationView(for card: DemoCard) -> some View {
+        switch card.destination {
+        case .todo:
+            TodoListView()
+        case .chat:
+            ChatChannelView()
+        case .health:
+            HealthDataView()
+        case .weather:
+            PlaceholderView(title: card.title, icon: card.icon, color: card.color)
+        case .calendar:
+            PlaceholderView(title: card.title, icon: card.icon, color: card.color)
+        case .reminder:
+            PlaceholderView(title: card.title, icon: card.icon, color: card.color)
+        case .settings:
+            PlaceholderView(title: card.title, icon: card.icon, color: card.color)
+        }
+    }
 
     var body: some View {
         ScrollView {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 ForEach(demoCards) { card in
-                    NavigationLink {
-                        destinationView(for: card.title)
-                    } label: {
+                    NavigationLink(destination: destinationView(for: card)) {
                         VStack(spacing: 8) {
                             ZStack {
                                 Circle()
@@ -59,32 +88,46 @@ struct ContentView: View {
                                 .fill(Color.black.opacity(0.1))
                         )
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                 }
             }
             .padding()
         }
         .navigationTitle("Demo 展示")
     }
-
-    @ViewBuilder
-    private func destinationView(for title: String) -> some View {
-        switch title {
-        case "待办事项":
-            TodoListView()
-        case "频道聊天":
-            ChatChannelView()
-        case "健康数据":
-            HealthDataView()
-        default:
-            Text("功能开发中...")
-                .navigationTitle(title)
-        }
-    }
 }
 
 #Preview {
     NavigationView {
         ContentView()
+    }
+}
+
+// 占位视图 - 用于尚未实现的功能
+struct PlaceholderView: View {
+    let title: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 20) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.2))
+                    .frame(width: 80, height: 80)
+
+                Image(systemName: icon)
+                    .font(.largeTitle)
+                    .foregroundStyle(color)
+            }
+
+            Text(title)
+                .font(.headline)
+
+            Text("功能开发中...")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .navigationTitle(title)
     }
 }
