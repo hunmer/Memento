@@ -49,16 +49,10 @@
 	<string>此应用需要访问NFC以读取和写入NFC标签</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>WKWatchKitApp</key>
-		<true/>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
-		<key>UIDeviceFamily</key>
-		<array>
-			<integer>1</integer> <!-- iPhone -->
-		</array>
 	</dict>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>需要完整的日历访问权限以查看和编辑事件</string>
@@ -75,6 +69,12 @@
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+	</array>
+	<key>WKWatchKitApp</key>
 	<true/>
 	<key>UIFileSharingEnabled</key>
 	<true/>

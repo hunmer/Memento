@@ -3,6 +3,7 @@ import UIKit
 import flutter_foreground_task
 import UserNotifications
 import intelligence
+import WatchConnectivity
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -31,6 +32,9 @@ import intelligence
 
     // 清理旧的临时文件
     cleanupOldTempFiles()
+
+    // 设置 WatchConnectivity
+    setupWatchConnectivity()
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -195,5 +199,24 @@ import intelligence
   @available(iOS 10.0, *)
   override func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
     completionHandler()
+  }
+
+  // MARK: - WatchConnectivity
+
+  private func setupWatchConnectivity() {
+    // 确保 WCSession 已激活
+    if WCSession.isSupported() {
+      WCSession.default.delegate = WCSessionManager.shared
+      WCSession.default.activate()
+
+      // 设置 MethodChannel
+      if let controller = window?.rootViewController as? FlutterViewController {
+        WCSessionManager.shared.setupMethodChannel(controller)
+      }
+
+      print("[AppDelegate] WatchConnectivity 已初始化")
+    } else {
+      print("[AppDelegate] 当前设备不支持 WatchConnectivity")
+    }
   }
 }

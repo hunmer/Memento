@@ -11,6 +11,7 @@
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		4B8276432F607D5500DF8056 /* memento Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 4B8276232F607D5400DF8056 /* memento Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4B854B812F61D0FA00D90D6C /* WCSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B854B802F61D0FA00D90D6C /* WCSessionManager.swift */; };
 		4B95490C2EFAD21F005F06E5 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B95490B2EFAD21F005F06E5 /* WidgetKit.framework */; };
 		4B95490E2EFAD21F005F06E5 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B95490D2EFAD21F005F06E5 /* SwiftUI.framework */; };
 		4B95491F2EFAD220005F06E5 /* MyAppWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4B95490A2EFAD21F005F06E5 /* MyAppWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -118,6 +119,7 @@
 		4B8276232F607D5400DF8056 /* memento Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "memento Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B82762F2F607D5500DF8056 /* memento Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "memento Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B8276392F607D5500DF8056 /* memento Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "memento Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B854B802F61D0FA00D90D6C /* WCSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WCSessionManager.swift; sourceTree = "<group>"; };
 		4B9549052EFAD1D0005F06E5 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		4B95490A2EFAD21F005F06E5 /* MyAppWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MyAppWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B95490B2EFAD21F005F06E5 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -292,6 +294,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				4B854B802F61D0FA00D90D6C /* WCSessionManager.swift */,
 				4B954D752F0039F9005F06E5 /* AppShortcutsProvider.swift */,
 				4B954C932EFD9899005F06E5 /* ShortcutResultStorage.swift */,
 				4B954C152EFD8DD9005F06E5 /* CallPluginMethodIntent.swift */,
@@ -734,6 +737,7 @@
 				4B954C1D2EFD8DD9005F06E5 /* CreateDiaryIntent.swift in Sources */,
 				4B954C1E2EFD8DD9005F06E5 /* CreateHabitIntent.swift in Sources */,
 				4B954D762F0039F9005F06E5 /* AppShortcutsProvider.swift in Sources */,
+				4B854B812F61D0FA00D90D6C /* WCSessionManager.swift in Sources */,
 				4B954C1F2EFD8DD9005F06E5 /* CreateTaskIntent.swift in Sources */,
 				4B954C942EFD9899005F06E5 /* ShortcutResultStorage.swift in Sources */,
 				4B954C202EFD8DD9005F06E5 /* CreateActivityIntent.swift in Sources */,
