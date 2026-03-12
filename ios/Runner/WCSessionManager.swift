@@ -41,6 +41,7 @@ enum WatchRequest: String {
     case getDiaryStats
     case getActivityToday
     case getActivityData
+    case getCheckinItems
 }
 
 // MARK: - WCSession Manager
@@ -114,17 +115,29 @@ extension WCSessionManager: WCSessionDelegate {
 
     // 处理来自 watchOS 的消息请求
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
-        logger.info("收到消息（带回复）: \(message)")
+        logger.info("===== 收到消息（带回复）: \(message) =====")
 
-        guard let requestString = message["request"] as? String,
-              let requestType = WatchRequest(rawValue: requestString) else {
+        guard let requestString = message["request"] as? String else {
+            logger.error("请求中没有 request 字段")
             replyHandler([
                 "success": false,
-                "error": "无效的请求类型"
+                "error": "无效的请求格式"
             ])
             return
         }
 
+        logger.info("请求类型: \(requestString)")
+
+        guard let requestType = WatchRequest(rawValue: requestString) else {
+            logger.error("未知的请求类型: \(requestString)")
+            replyHandler([
+                "success": false,
+                "error": "无效的请求类型: \(requestString)"
+            ])
+            return
+        }
+
+        logger.info("开始处理请求: \(requestString)")
         switch requestType {
         case .getChatChannels:
             handleGetChatChannels(replyHandler: replyHandler)
@@ -158,6 +171,8 @@ extension WCSessionManager: WCSessionDelegate {
             } else {
                 handleGetActivityData(date: nil, replyHandler: replyHandler)
             }
+        case .getCheckinItems:
+            handleGetCheckinItems(replyHandler: replyHandler)
         }
     }
 
@@ -426,6 +441,40 @@ extension WCSessionManager: WCSessionDelegate {
             }
         } catch {
             logger.error("编码消息数据失败: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - 打卡相关处理方法
+
+    private func handleGetCheckinItems(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getCheckinItems 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求打卡数据
+        methodChannel?.invokeMethod("getWatchCheckinItems", arguments: nil) { result in
+            // Flutter 的 result 可能是错误对象 (FlutterError)
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取打卡数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取打卡数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
         }
     }
 }

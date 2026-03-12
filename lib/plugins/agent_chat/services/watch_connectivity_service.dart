@@ -7,6 +7,7 @@ import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/diary/models/diary_entry.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
+import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -75,6 +76,8 @@ class WatchConnectivityService {
             return await _getWatchActivityData(call.arguments);
           case 'getWatchActivityToday':
             return await _getWatchActivityToday();
+          case 'getWatchCheckinItems':
+            return await _getWatchCheckinItems();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -315,6 +318,23 @@ class WatchConnectivityService {
       return activityList;
     } catch (e) {
       print('[WatchConnectivityService] 获取活动数据失败: $e');
+      return [];
+    }
+  }
+
+  // ============== 打卡相关方法 ==============
+
+  /// 获取打卡项目列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchCheckinItems() async {
+    try {
+      final checkinPlugin = CheckinPlugin.instance;
+      final items = checkinPlugin.getWatchCheckinItemsSync();
+
+      print('[WatchConnectivityService] 返回 ${items.length} 个打卡项目');
+      print('[WatchConnectivityService] 数据: $items');
+      return items;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取打卡数据失败: $e');
       return [];
     }
   }

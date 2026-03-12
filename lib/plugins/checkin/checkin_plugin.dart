@@ -192,6 +192,58 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
     return _checkinItems.where((item) => item.isCheckedToday()).length;
   }
 
+  // ====== watchOS 同步方法 ======
+
+  /// 获取所有打卡项目（同步方法，供 watchOS 使用）
+  List<Map<String, dynamic>> getWatchCheckinItemsSync() {
+    return _checkinItems.map((item) => _checkinItemToWatchData(item)).toList();
+  }
+
+  /// 将 CheckinItem 转换为 watchOS 需要的格式
+  Map<String, dynamic> _checkinItemToWatchData(CheckinItem item) {
+    // 获取过去7天的打卡状态
+    final weekDays = <Map<String, dynamic>>[];
+    final today = DateTime.now();
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      final hasRecord = item.checkInRecords.containsKey(dateStr) && item.checkInRecords[dateStr]!.isNotEmpty;
+
+      // weekday: 1=Monday, 7=Sunday
+      final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      final dayIndex = date.weekday - 1; // 转换为 0-6
+      weekDays.add({
+        'day': days[dayIndex],
+        'checked': hasRecord,
+      });
+    }
+
+    // 获取最后一次打卡时间
+    String? lastCheckinTime;
+    if (item.lastCheckinDate != null) {
+      final diff = today.difference(item.lastCheckinDate!);
+      if (diff.inMinutes < 60) {
+        lastCheckinTime = '${diff.inMinutes}m ago';
+      } else if (diff.inHours < 24) {
+        lastCheckinTime = '${diff.inHours}h ago';
+      } else {
+        lastCheckinTime = '${diff.inDays}d ago';
+      }
+    }
+
+    return {
+      'id': item.id,
+      'name': item.name,
+      'icon': item.icon.codePoint,
+      'color': item.color.value,
+      'isCheckedToday': item.isCheckedToday(),
+      'consecutiveDays': item.getConsecutiveDays(),
+      'weekDays': weekDays,
+      'lastCheckinTime': lastCheckinTime,
+    };
+  }
+
   // 触发保存的公共方法
   Future<void> triggerSave() async {
     await _saveCheckinItems();

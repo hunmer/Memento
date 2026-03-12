@@ -79,6 +79,24 @@ struct ActivityTodayStats: Codable {
     let activities: [ActivityRecord]
 }
 
+// MARK: - 打卡数据模型
+
+struct CheckinItem: Codable, Identifiable {
+    let id: String
+    let name: String
+    let icon: Int
+    let color: Int
+    let isCheckedToday: Bool
+    let consecutiveDays: Int
+    let weekDays: [CheckinDay]
+    let lastCheckinTime: String?
+}
+
+struct CheckinDay: Codable {
+    let day: String
+    let checked: Bool
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -89,6 +107,7 @@ enum WatchRequest: String, Codable {
     case getDiaryStats
     case getActivityToday
     case getActivityData
+    case getCheckinItems
 }
 
 enum ResponseKey: String, Codable {
@@ -340,6 +359,44 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取活动数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 打卡相关方法
+
+    /// 获取打卡项目列表
+    func getCheckinItems() async throws -> [CheckinItem] {
+        logger.info("发送 getCheckinItems 请求")
+        logger.info("Watch isReachable: \(WCSession.default.isReachable)")
+        logger.info("Watch activationState: \(WCSession.default.activationState.rawValue)")
+
+        let request: [String: Any] = ["request": WatchRequest.getCheckinItems.rawValue]
+        logger.info("请求内容: \(request)")
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到打卡数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([CheckinItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析打卡数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取打卡数据失败: \(error.localizedDescription)")
+                self.logger.error("WCError: \(error)")
                 continuation.resume(throwing: error)
             })
         }
