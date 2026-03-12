@@ -77,6 +77,10 @@ struct ContactCardView: View {
     let neonBlue: Color
     let neonPurple: Color
 
+    // 背景和边框颜色
+    private let cardBg = Color(hex: "1c1c1e")
+    private let textSecondary = Color(hex: "8e8e93")
+
     // 根据标签获取颜色
     private func getTagColor(_ tag: String) -> Color {
         let lowerTag = tag.lowercased()
@@ -114,108 +118,102 @@ struct ContactCardView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // 头像和名字
-            HStack(spacing: 8) {
-                // 头像
-                ZStack {
-                    Circle()
-                        .fill(Color.white.opacity(0.1))
-                        .frame(width: 32, height: 32)
+        HStack(spacing: 0) {
+            // 左侧彩色边框
+            RoundedRectangle(cornerRadius: 2)
+                .fill(borderColor)
+                .frame(width: 3)
 
-                    if let avatar = contact.avatar, !avatar.isEmpty {
-                        // 显示头像首字母作为占位
+            // 卡片内容
+            VStack(alignment: .leading, spacing: 6) {
+                // 头像和名字
+                HStack(spacing: 8) {
+                    // 头像
+                    ZStack {
+                        Circle()
+                            .fill(borderColor.opacity(0.2))
+                            .frame(width: 28, height: 28)
+
                         Text(String(contact.name.prefix(1)))
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(borderColor)
-                    } else {
-                        // 显示首字母
-                        Text(String(contact.name.prefix(1)))
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.system(size: 12, weight: .bold))
                             .foregroundStyle(borderColor)
                     }
-                }
 
-                // 名字和备注
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 4) {
-                        Text(contact.name)
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
+                    // 名字和备注
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 3) {
+                            Text(contact.name)
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(.white)
+                                .lineLimit(1)
 
-                        if let icon = genderIcon {
-                            Image(systemName: icon.name)
-                                .font(.system(size: 9))
-                                .foregroundStyle(icon.color)
+                            if let icon = genderIcon {
+                                Image(systemName: icon.name)
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(icon.color)
+                            }
+                        }
+
+                        if let notes = contact.notes, !notes.isEmpty {
+                            Text(notes)
+                                .font(.system(size: 8))
+                                .foregroundStyle(Color(hex: "8e8e93"))
+                                .lineLimit(1)
                         }
                     }
 
-                    if let notes = contact.notes, !notes.isEmpty {
-                        Text(notes)
-                            .font(.system(size: 8))
-                            .foregroundStyle(Color.gray)
-                            .lineLimit(1)
+                    Spacer()
+                }
+
+                // 电话
+                Text(contact.phone)
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundStyle(borderColor)
+
+                // 标签
+                if !contact.tags.isEmpty {
+                    HStack(spacing: 3) {
+                        ForEach(contact.tags.prefix(3), id: \.self) { tag in
+                            Text(tag)
+                                .font(.system(size: 7, weight: .bold))
+                                .foregroundStyle(getTagColor(tag))
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 2)
+                                .background(getTagColor(tag).opacity(0.15))
+                                .clipShape(Capsule())
+                        }
                     }
                 }
 
-                Spacer()
-            }
-
-            // 电话
-            Text(contact.phone)
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(borderColor)
-
-            // 标签
-            if !contact.tags.isEmpty {
-                HStack(spacing: 4) {
-                    ForEach(contact.tags.prefix(3), id: \.self) { tag in
-                        Text(tag)
-                            .font(.system(size: 7, weight: .bold))
-                            .foregroundStyle(getTagColor(tag))
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 2)
-                            .background(getTagColor(tag).opacity(0.2))
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-
-            // 底部统计
-            HStack {
-                // 交互次数
-                HStack(spacing: 2) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 8))
-                    Text("\(contact.interactionCount) 次")
-                        .font(.system(size: 7))
-                }
-                .foregroundStyle(Color.gray)
-
-                Spacer()
-
-                // 最近联系
-                if let lastTime = contact.lastInteractionTime {
+                // 底部统计
+                HStack {
+                    // 交互次数
                     HStack(spacing: 2) {
-                        Image(systemName: "phone.fill")
+                        Image(systemName: "arrow.clockwise")
                             .font(.system(size: 7))
-                        Text(lastTime)
+                        Text("\(contact.interactionCount) 次")
                             .font(.system(size: 7))
                     }
-                    .foregroundStyle(Color.gray.opacity(0.8))
+                    .foregroundStyle(Color(hex: "8e8e93"))
+
+                    Spacer()
+
+                    // 最近联系
+                    if let lastTime = contact.lastInteractionTime {
+                        HStack(spacing: 2) {
+                            Image(systemName: "phone.fill")
+                                .font(.system(size: 7))
+                            Text(lastTime)
+                                .font(.system(size: 7))
+                        }
+                        .foregroundStyle(Color(hex: "8e8e93"))
+                    }
                 }
             }
-            .padding(.top, 4)
+            .padding(8)
+            .background(Color(hex: "1c1c1e"))
         }
-        .padding(10)
-        .background(Color.white.opacity(0.05))
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(borderColor, lineWidth: 2)
-                .frame(width: 2), alignment: .leading
-        )
     }
 }
 
