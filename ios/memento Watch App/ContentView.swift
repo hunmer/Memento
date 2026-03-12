@@ -16,6 +16,7 @@ enum CardDestination: String {
     case weather = "天气"
     case calendar = "日程"
     case reminder = "提醒"
+    case checkin = "打卡"
     case settings = "设置"
 }
 
@@ -37,6 +38,7 @@ struct ContentView: View {
         DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red, destination: .health),
         DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange, destination: .weather),
         DemoCard(title: "日程", subtitle: "2个会议", icon: "calendar", color: .green, destination: .calendar),
+        DemoCard(title: "打卡", subtitle: "习惯养成", icon: "checkmark.circle.fill", color: .teal, destination: .checkin),
         DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple, destination: .reminder),
         DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray, destination: .settings)
     ]
@@ -58,6 +60,8 @@ struct ContentView: View {
             PlaceholderView(title: card.title, icon: card.icon, color: card.color)
         case .calendar:
             PlaceholderView(title: card.title, icon: card.icon, color: card.color)
+        case .checkin:
+            CheckinListView()
         case .reminder:
             PlaceholderView(title: card.title, icon: card.icon, color: card.color)
         case .settings:
