@@ -217,7 +217,21 @@ private func destinationView(for card: DemoCard) -> some View {
 
 ## 注意事项
 
-1. **使用同步方法**：Flutter 端优先使用 `xxxSync()` 方法获取数据，避免异步问题
-2. **数据精简**：watchOS 屏幕小，只传输必要字段，长文本做截断
-3. **错误处理**：每层都要有错误处理，返回用户友好的错误信息
-4. **重新编译**：修改后需同时重新编译 Flutter 应用和 watchOS 应用
+1. **⚠️ 禁止 null 值**：WatchConnectivity 的 `sendMessage` API **不支持 `nil`/`null` 值**。如果数据字典中包含 `null`，会报错 `WCErrorCodePayloadUnsupportedTypes`。**必须在返回数据前移除所有 null 值**：
+   ```dart
+   final data = {
+     'id': item.id,
+     'optionalField': item.optionalValue,  // 可能为 null
+   };
+   // 移除所有 null 值
+   data.removeWhere((key, value) => value == null);
+   return data;
+   ```
+
+2. **使用同步方法**：Flutter 端优先使用 `xxxSync()` 方法获取数据，避免异步问题
+
+3. **数据精简**：watchOS 屏幕小，只传输必要字段，长文本做截断
+
+4. **错误处理**：每层都要有错误处理，返回用户友好的错误信息
+
+5. **重新编译**：修改后需同时重新编译 Flutter 应用和 watchOS 应用

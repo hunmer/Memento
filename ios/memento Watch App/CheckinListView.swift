@@ -31,13 +31,13 @@ struct CheckinListView: View {
                 }
             } else {
                 ScrollView {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 12) {
                         ForEach(viewModel.items) { item in
                             CheckinItemRow(item: item)
                         }
                     }
-                    .padding(.horizontal, 6)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
                 }
             }
         }
@@ -75,8 +75,13 @@ struct CheckinItemRow: View {
         }
     }
 
+    // 获取当前日期的日（1-31）
+    private var currentDay: String {
+        String(Calendar.current.component(.day, from: Date()))
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             // Header
             HStack {
                 Image(systemName: iconName)
@@ -84,7 +89,7 @@ struct CheckinItemRow: View {
                     .foregroundStyle(neonColor)
 
                 Text(item.name)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 12, weight: .semibold))
                     .lineLimit(1)
 
                 Spacer()
@@ -96,37 +101,64 @@ struct CheckinItemRow: View {
                 }
             }
 
-            // Week days
-            HStack(spacing: 4) {
+            // Week days - 小方块显示日期数字
+            HStack(spacing: 3) {
                 ForEach(item.weekDays.indices, id: \.self) { index in
-                    VStack(spacing: 2) {
-                        Text(item.weekDays[index].day)
-                            .font(.system(size: 6))
-                            .foregroundStyle(.secondary)
-                        Circle()
-                            .fill(item.weekDays[index].checked ? itemColor : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 4)
-                            .shadow(color: item.weekDays[index].checked ? itemColor.opacity(0.5) : .clear, radius: 2)
-                    }
+                    let dayInfo = item.weekDays[index]
+                    let isToday = dayInfo.day == currentDay
+                    let isChecked = dayInfo.checked
+
+                    Text(dayInfo.day)
+                        .font(.system(size: 8, weight: isToday ? .bold : .medium))
+                        .foregroundStyle(
+                            isChecked
+                                ? .white
+                                : (isToday ? .primary : .secondary)
+                        )
+                        .frame(width: 18, height: 18)
+                        .background(
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(
+                                    isChecked
+                                        ? itemColor
+                                        : (isToday ? Color.gray.opacity(0.4) : Color.gray.opacity(0.2))
+                                )
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 3)
+                                .stroke(
+                                    isToday ? neonColor : .clear,
+                                    lineWidth: 1
+                                )
+                        )
+                        .shadow(
+                            color: isChecked ? itemColor.opacity(0.4) : .clear,
+                            radius: 1
+                        )
                 }
 
                 Spacer()
 
-                // Add button
+                // Checkin button
                 Button {
                     // TODO: 快速打卡功能
                 } label: {
-                    Image(systemName: "plus")
-                        .font(.system(size: 12))
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 16))
                         .foregroundStyle(itemColor)
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(8)
+        .padding(.vertical, 8)
+        .padding(.horizontal, 8)
         .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.black.opacity(0.4))
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.gray.opacity(0.15))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
+                )
         )
     }
 }
