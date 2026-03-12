@@ -59,6 +59,26 @@ struct DiaryStats: Codable {
     let totalDays: Int
 }
 
+// MARK: - 活动数据模型
+
+struct ActivityRecord: Codable, Identifiable {
+    let id: String
+    let title: String
+    let startTime: String
+    let endTime: String
+    let duration: Int
+    let tags: [String]
+    let description: String?
+    let mood: String?
+}
+
+struct ActivityTodayStats: Codable {
+    let todayCount: Int
+    let todayDuration: Int
+    let remainingTime: Int
+    let activities: [ActivityRecord]
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -67,6 +87,8 @@ enum WatchRequest: String, Codable {
     case getDiaryEntries
     case getDiaryEntry
     case getDiaryStats
+    case getActivityToday
+    case getActivityData
 }
 
 enum ResponseKey: String, Codable {
@@ -253,6 +275,71 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取日记统计失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 活动相关方法
+
+    /// 获取今日活动统计数据
+    func getActivityToday() async throws -> ActivityTodayStats {
+        let request: [String: Any] = ["request": WatchRequest.getActivityToday.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到今日活动统计响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let data = response["data"] as? [String: Any] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: data)
+                        let stats = try JSONDecoder().decode(ActivityTodayStats.self, from: jsonData)
+                        continuation.resume(returning: stats)
+                    } catch {
+                        self.logger.error("解析今日活动统计失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取今日活动统计失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    /// 获取指定日期的活动数据
+    func getActivityData(date: String? = nil) async throws -> [ActivityRecord] {
+        var request: [String: Any] = ["request": WatchRequest.getActivityData.rawValue]
+        if let date = date {
+            request["date"] = date
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到活动数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let activities = try JSONDecoder().decode([ActivityRecord].self, from: jsonData)
+                        continuation.resume(returning: activities)
+                    } catch {
+                        self.logger.error("解析活动数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取活动数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

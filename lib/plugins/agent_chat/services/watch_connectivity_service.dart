@@ -5,6 +5,8 @@ import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_service.dart';
 import 'package:Memento/plugins/diary/diary_plugin.dart';
 import 'package:Memento/plugins/diary/models/diary_entry.dart';
+import 'package:Memento/plugins/activity/activity_plugin.dart';
+import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -69,6 +71,10 @@ class WatchConnectivityService {
             return await _getWatchDiaryEntry(call.arguments);
           case 'getWatchDiaryStats':
             return await _getWatchDiaryStats();
+          case 'getWatchActivityData':
+            return await _getWatchActivityData(call.arguments);
+          case 'getWatchActivityToday':
+            return await _getWatchActivityToday();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -235,5 +241,81 @@ class WatchConnectivityService {
 
     print('[WatchConnectivityService] 返回日记统计: $result');
     return result;
+  }
+
+  // ============== 活动相关方法 ==============
+
+  /// 获取今日活动数据（供 watchOS 使用）
+  Future<Map<String, dynamic>> _getWatchActivityToday() async {
+    try {
+      final activityPlugin = ActivityPlugin.instance;
+      final todayActivities = activityPlugin.getTodayActivitiesSync();
+      final todayCount = activityPlugin.getTodayActivityCountSync();
+      final todayDuration = activityPlugin.getTodayActivityDurationSync();
+      final remainingTime = activityPlugin.getTodayRemainingTime();
+
+      final result = {
+        'todayCount': todayCount,
+        'todayDuration': todayDuration,
+        'remainingTime': remainingTime,
+        'activities': todayActivities.map((activity) => {
+          'id': activity.id,
+          'title': activity.title,
+          'startTime': activity.startTime.toIso8601String(),
+          'endTime': activity.endTime.toIso8601String(),
+          'duration': activity.durationInMinutes,
+          'tags': activity.tags,
+          'description': activity.description,
+          'mood': activity.mood,
+        }).toList(),
+      };
+
+      print('[WatchConnectivityService] 返回今日活动统计: todayCount=$todayCount, todayDuration=$todayDuration');
+      return result;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取今日活动数据失败: $e');
+      return {
+        'todayCount': 0,
+        'todayDuration': 0,
+        'remainingTime': 0,
+        'activities': [],
+      };
+    }
+  }
+
+  /// 获取指定日期范围的活动数据（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchActivityData(dynamic arguments) async {
+    try {
+      final activityPlugin = ActivityPlugin.instance;
+      List<ActivityRecord> activities;
+
+      if (arguments is Map && arguments['date'] != null) {
+        // 获取指定日期的活动
+        final dateStr = arguments['date'] as String;
+        final date = DateTime.parse(dateStr);
+        activities = activityPlugin.getActivitiesForDateSync(date);
+      } else {
+        // 默认获取今天的活动
+        activities = activityPlugin.getTodayActivitiesSync();
+      }
+
+      // 转换为 watchOS 需要的格式
+      final activityList = activities.map((activity) => {
+        'id': activity.id,
+        'title': activity.title,
+        'startTime': activity.startTime.toIso8601String(),
+        'endTime': activity.endTime.toIso8601String(),
+        'duration': activity.durationInMinutes,
+        'tags': activity.tags,
+        'description': activity.description,
+        'mood': activity.mood,
+      }).toList();
+
+      print('[WatchConnectivityService] 返回 ${activityList.length} 条活动');
+      return activityList;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取活动数据失败: $e');
+      return [];
+    }
   }
 }

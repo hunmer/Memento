@@ -39,6 +39,8 @@ enum WatchRequest: String {
     case getDiaryEntries
     case getDiaryEntry
     case getDiaryStats
+    case getActivityToday
+    case getActivityData
 }
 
 // MARK: - WCSession Manager
@@ -148,6 +150,14 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetDiaryEntry(date: date, replyHandler: replyHandler)
         case .getDiaryStats:
             handleGetDiaryStats(replyHandler: replyHandler)
+        case .getActivityToday:
+            handleGetActivityToday(replyHandler: replyHandler)
+        case .getActivityData:
+            if let date = message["date"] as? String {
+                handleGetActivityData(date: date, replyHandler: replyHandler)
+            } else {
+                handleGetActivityData(date: nil, replyHandler: replyHandler)
+            }
         }
     }
 
@@ -296,6 +306,73 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             guard let data = result as? [String: Any] else {
+                self.logger.error("无效的返回数据格式")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 活动相关处理方法
+
+    private func handleGetActivityToday(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getActivityToday 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求今日活动统计
+        methodChannel?.invokeMethod("getWatchActivityToday", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取今日活动统计失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [String: Any] else {
+                self.logger.error("无效的返回数据格式")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    private func handleGetActivityData(date: String?, replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getActivityData 请求: date=\(date ?? "nil")")
+
+        var arguments: [String: Any]? = nil
+        if let date = date {
+            arguments = ["date": date]
+        }
+
+        // 通过 MethodChannel 向 Flutter 请求活动数据
+        methodChannel?.invokeMethod("getWatchActivityData", arguments: arguments) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取活动数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
                 self.logger.error("无效的返回数据格式")
                 replyHandler([
                     "success": false,
