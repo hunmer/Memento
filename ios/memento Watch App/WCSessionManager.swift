@@ -30,11 +30,43 @@ struct ChatMessage: Codable, Identifiable {
     let isMe: Bool?
 }
 
+// MARK: - 日记数据模型
+
+struct DiaryEntry: Codable, Identifiable, Hashable {
+    var id: String { date }
+    let date: String
+    let title: String
+    let contentPreview: String
+    let wordCount: Int
+    let mood: String?
+    let updatedAt: String
+}
+
+struct DiaryEntryDetail: Codable {
+    let date: String
+    let title: String
+    let content: String
+    let wordCount: Int
+    let mood: String?
+    let createdAt: String
+    let updatedAt: String
+}
+
+struct DiaryStats: Codable {
+    let todayWordCount: Int
+    let monthWordCount: Int
+    let completedDays: Int
+    let totalDays: Int
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
     case getChatChannels
     case getChatMessages
+    case getDiaryEntries
+    case getDiaryEntry
+    case getDiaryStats
 }
 
 enum ResponseKey: String, Codable {
@@ -126,6 +158,101 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取消息列表失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 日记相关方法
+
+    /// 获取本月日记列表
+    func getDiaryEntries() async throws -> [DiaryEntry] {
+        let request: [String: Any] = ["request": WatchRequest.getDiaryEntries.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到日记列表响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let entries = try JSONDecoder().decode([DiaryEntry].self, from: jsonData)
+                        continuation.resume(returning: entries)
+                    } catch {
+                        self.logger.error("解析日记数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取日记列表失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    /// 获取指定日期的日记详情
+    func getDiaryEntry(date: String) async throws -> DiaryEntryDetail {
+        let request: [String: Any] = [
+            "request": WatchRequest.getDiaryEntry.rawValue,
+            "date": date
+        ]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到日记详情响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let data = response["data"] as? [String: Any] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: data)
+                        let entry = try JSONDecoder().decode(DiaryEntryDetail.self, from: jsonData)
+                        continuation.resume(returning: entry)
+                    } catch {
+                        self.logger.error("解析日记详情失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取日记详情失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    /// 获取日记统计数据
+    func getDiaryStats() async throws -> DiaryStats {
+        let request: [String: Any] = ["request": WatchRequest.getDiaryStats.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到日记统计响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let data = response["data"] as? [String: Any] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: data)
+                        let stats = try JSONDecoder().decode(DiaryStats.self, from: jsonData)
+                        continuation.resume(returning: stats)
+                    } catch {
+                        self.logger.error("解析日记统计失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取日记统计失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

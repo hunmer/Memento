@@ -10,8 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:watch_connectivity/watch_connectivity.dart';
 import '../plugins/chat/chat_plugin.dart';
 import '../plugins/chat/models/channel.dart';
-import '../plugins/chat/models/message.dart';
-import '../plugins/chat/models/user.dart';
+import '../plugins/diary/diary_plugin.dart';
+import '../plugins/diary/models/diary_entry.dart';
+import 'package:intl/intl.dart';
 
 /// 手表连接管理器 - 响应手表的数据请求
 class WatchConnectivityManager extends ChangeNotifier {
@@ -133,6 +134,19 @@ class WatchConnectivityManager extends ChangeNotifier {
             throw ArgumentError('channelId is required for getChatMessages');
           }
           response = await _getChatMessages(channelId);
+          break;
+        case 'getDiaryEntries':
+          response = await _getDiaryEntries();
+          break;
+        case 'getDiaryEntry':
+          final dateStr = message['date'] as String?;
+          if (dateStr == null) {
+            throw ArgumentError('date is required for getDiaryEntry');
+          }
+          response = await _getDiaryEntry(dateStr);
+          break;
+        case 'getDiaryStats':
+          response = await _getDiaryStats();
           break;
         default:
           response = {
@@ -270,6 +284,114 @@ class WatchConnectivityManager extends ChangeNotifier {
       return content;
     }
     return '';
+  }
+
+  /// 获取本月日记列表
+  Future<Map<String, dynamic>> _getDiaryEntries() async {
+    try {
+      final diaryPlugin = DiaryPlugin.instance;
+      final entries = diaryPlugin.getMonthlyDiaryEntriesSync();
+
+      // 转换为手表可识别的格式
+      final entryData = entries.map((tuple) {
+        final date = tuple.$1;
+        final entry = tuple.$2;
+        return {
+          'date': DateFormat('yyyy-MM-dd').format(date),
+          'title': entry.title,
+          'contentPreview': entry.content.length > 100
+              ? '${entry.content.substring(0, 100)}...'
+              : entry.content,
+          'wordCount': entry.content.length,
+          'mood': entry.mood,
+          'updatedAt': entry.updatedAt.toIso8601String(),
+        };
+      }).toList();
+
+      return {
+        'success': true,
+        'data': entryData,
+      };
+    } catch (e) {
+      debugPrint('Error getting diary entries: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// 获取指定日期的日记详情
+  Future<Map<String, dynamic>> _getDiaryEntry(String dateStr) async {
+    try {
+      final diaryPlugin = DiaryPlugin.instance;
+      final date = DateTime.parse(dateStr);
+      final entries = diaryPlugin.getMonthlyDiaryEntriesSync();
+
+      // 查找指定日期的日记
+      DiaryEntry? entry;
+      for (final tuple in entries) {
+        final entryDate = tuple.$1;
+        if (entryDate.year == date.year &&
+            entryDate.month == date.month &&
+            entryDate.day == date.day) {
+          entry = tuple.$2;
+          break;
+        }
+      }
+
+      if (entry == null) {
+        return {
+          'success': false,
+          'error': 'Diary entry not found for date: $dateStr',
+        };
+      }
+
+      return {
+        'success': true,
+        'data': {
+          'date': dateStr,
+          'title': entry.title,
+          'content': entry.content,
+          'wordCount': entry.content.length,
+          'mood': entry.mood,
+          'createdAt': entry.createdAt.toIso8601String(),
+          'updatedAt': entry.updatedAt.toIso8601String(),
+        },
+      };
+    } catch (e) {
+      debugPrint('Error getting diary entry: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
+
+  /// 获取日记统计数据
+  Future<Map<String, dynamic>> _getDiaryStats() async {
+    try {
+      final diaryPlugin = DiaryPlugin.instance;
+      final todayWordCount = diaryPlugin.getTodayWordCountSync();
+      final monthWordCount = diaryPlugin.getMonthWordCountSync();
+      final monthProgress = diaryPlugin.getMonthProgressSync();
+
+      return {
+        'success': true,
+        'data': {
+          'todayWordCount': todayWordCount,
+          'monthWordCount': monthWordCount,
+          'completedDays': monthProgress.$1,
+          'totalDays': monthProgress.$2,
+        },
+      };
+    } catch (e) {
+      debugPrint('Error getting diary stats: $e');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
   }
 
   /// 主动向手表推送数据（可选）
