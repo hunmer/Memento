@@ -232,7 +232,8 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
       }
     }
 
-    return {
+    // WatchConnectivity 不支持 null 值，需要过滤掉
+    final data = {
       'id': item.id,
       'name': item.name,
       'icon': item.icon.codePoint,
@@ -242,6 +243,10 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
       'weekDays': weekDays,
       'lastCheckinTime': lastCheckinTime,
     };
+
+    // 移除所有 null 值
+    data.removeWhere((key, value) => value == null);
+    return data;
   }
 
   // 触发保存的公共方法
