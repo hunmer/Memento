@@ -97,6 +97,22 @@ struct CheckinDay: Codable {
     let checked: Bool
 }
 
+// MARK: - 联系人数据模型
+
+struct ContactItem: Codable, Identifiable {
+    let id: String
+    let name: String
+    let phone: String
+    let avatar: String?
+    let gender: String?
+    let notes: String?
+    let tags: [String]
+    let interactionCount: Int
+    let lastInteractionType: String?
+    let lastInteractionTime: String?
+    let lastContactTime: String
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -108,6 +124,7 @@ enum WatchRequest: String, Codable {
     case getActivityToday
     case getActivityData
     case getCheckinItems
+    case getContactItems
 }
 
 enum ResponseKey: String, Codable {
@@ -397,6 +414,40 @@ extension WCSessionManager {
             }, errorHandler: { error in
                 self.logger.error("获取打卡数据失败: \(error.localizedDescription)")
                 self.logger.error("WCError: \(error)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 联系人相关方法
+
+    /// 获取联系人列表
+    func getContactItems() async throws -> [ContactItem] {
+        logger.info("发送 getContactItems 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getContactItems.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到联系人数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([ContactItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析联系人数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取联系人数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

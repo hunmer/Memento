@@ -42,6 +42,7 @@ enum WatchRequest: String {
     case getActivityToday
     case getActivityData
     case getCheckinItems
+    case getContactItems
 }
 
 // MARK: - WCSession Manager
@@ -173,6 +174,8 @@ extension WCSessionManager: WCSessionDelegate {
             }
         case .getCheckinItems:
             handleGetCheckinItems(replyHandler: replyHandler)
+        case .getContactItems:
+            handleGetContactItems(replyHandler: replyHandler)
         }
     }
 
@@ -471,6 +474,39 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             self.logger.info("成功获取打卡数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 联系人相关处理方法
+
+    private func handleGetContactItems(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getContactItems 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求联系人数据
+        methodChannel?.invokeMethod("getWatchContactItems", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取联系人数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取联系人数据，数据条数: \(data.count)")
             replyHandler([
                 "success": true,
                 "data": data
