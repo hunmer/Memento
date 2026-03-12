@@ -36,6 +36,9 @@ struct ChatMessage: Codable {
 enum WatchRequest: String {
     case getChatChannels
     case getChatMessages
+    case getDiaryEntries
+    case getDiaryEntry
+    case getDiaryStats
 }
 
 // MARK: - WCSession Manager
@@ -132,6 +135,19 @@ extension WCSessionManager: WCSessionDelegate {
                 return
             }
             handleGetChatMessages(channelId: channelId, replyHandler: replyHandler)
+        case .getDiaryEntries:
+            handleGetDiaryEntries(replyHandler: replyHandler)
+        case .getDiaryEntry:
+            guard let date = message["date"] as? String else {
+                replyHandler([
+                    "success": false,
+                    "error": "缺少 date 参数"
+                ])
+                return
+            }
+            handleGetDiaryEntry(date: date, replyHandler: replyHandler)
+        case .getDiaryStats:
+            handleGetDiaryStats(replyHandler: replyHandler)
         }
     }
 
@@ -198,6 +214,96 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             // 直接返回字典数组给 watchOS
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    private func handleGetDiaryEntries(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getDiaryEntries 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求日记列表
+        methodChannel?.invokeMethod("getWatchDiaryEntries", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取日记列表失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    private func handleGetDiaryEntry(date: String, replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getDiaryEntry 请求: date=\(date)")
+
+        // 通过 MethodChannel 向 Flutter 请求日记详情
+        methodChannel?.invokeMethod("getWatchDiaryEntry", arguments: ["date": date]) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取日记详情失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [String: Any] else {
+                self.logger.error("无效的返回数据格式")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    private func handleGetDiaryStats(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getDiaryStats 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求日记统计
+        methodChannel?.invokeMethod("getWatchDiaryStats", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取日记统计失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [String: Any] else {
+                self.logger.error("无效的返回数据格式")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
             replyHandler([
                 "success": true,
                 "data": data

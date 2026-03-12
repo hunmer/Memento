@@ -10,6 +10,7 @@ import SwiftUI
 enum CardDestination: String {
     case todo = "待办事项"
     case chat = "频道聊天"
+    case diary = "日记"
     case health = "健康数据"
     case weather = "天气"
     case calendar = "日程"
@@ -30,6 +31,7 @@ struct ContentView: View {
     private let demoCards = [
         DemoCard(title: "待办事项", subtitle: "2个任务", icon: "checkmark.circle", color: .blue, destination: .todo),
         DemoCard(title: "频道聊天", subtitle: "消息频道", icon: "message.fill", color: .indigo, destination: .chat),
+        DemoCard(title: "日记", subtitle: "今日记录", icon: "book.fill", color: .purple, destination: .diary),
         DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red, destination: .health),
         DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange, destination: .weather),
         DemoCard(title: "日程", subtitle: "2个会议", icon: "calendar", color: .green, destination: .calendar),
@@ -44,6 +46,8 @@ struct ContentView: View {
             TodoListView()
         case .chat:
             ChatChannelView()
+        case .diary:
+            DiaryListView()
         case .health:
             HealthDataView()
         case .weather:
