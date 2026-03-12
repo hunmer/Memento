@@ -35,14 +35,14 @@ struct ContentView: View {
         DemoCard(title: "待办事项", subtitle: "2个任务", icon: "checkmark.circle", color: .blue, destination: .todo),
         DemoCard(title: "频道聊天", subtitle: "消息频道", icon: "message.fill", color: .indigo, destination: .chat),
         DemoCard(title: "日记", subtitle: "今日记录", icon: "book.fill", color: .purple, destination: .diary),
-        DemoCard(title: "活动", subtitle: "时间记录", icon: "timeline", color: .pink, destination: .activity),
-        DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red, destination: .health),
-        DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange, destination: .weather),
-        DemoCard(title: "日程", subtitle: "2个会议", icon: "calendar", color: .green, destination: .calendar),
+        DemoCard(title: "活动", subtitle: "时间记录", icon: "stopwatch", color: .pink, destination: .activity),
+        // DemoCard(title: "健康数据", subtitle: "今日步数", icon: "heart.fill", color: .red, destination: .health),
+        // DemoCard(title: "天气", subtitle: "晴朗 23°C", icon: "sun.max.fill", color: .orange, destination: .weather),
+        // DemoCard(title: "日程", subtitle: "2个会议", icon: "calendar", color: .green, destination: .calendar),
         DemoCard(title: "打卡", subtitle: "习惯养成", icon: "checkmark.circle.fill", color: .teal, destination: .checkin),
         DemoCard(title: "联系人", subtitle: "通讯录", icon: "person.2.fill", color: .cyan, destination: .contacts),
-        DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple, destination: .reminder),
-        DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray, destination: .settings)
+        // DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple, destination: .reminder),
+        // DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray, destination: .settings)
     ]
 
     @ViewBuilder
