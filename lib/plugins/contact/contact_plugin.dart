@@ -228,6 +228,89 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       'recentContacts': recentContactsResult.dataOrNull ?? 0,
     };
   }
+
+  /// 获取用于 watchOS 显示的联系人列表
+  Future<List<Map<String, dynamic>>> getWatchContactItems() async {
+    try {
+      // 获取所有联系人
+      final contacts = await _controller.getAllContacts();
+
+      // 获取交互记录用于统计
+      final interactions = await _controller.getAllInteractions();
+
+      // 按最后联系时间排序，最近的在前
+      final sortedContacts = List<Contact>.from(contacts)
+        ..sort((a, b) => b.lastContactTime.compareTo(a.lastContactTime));
+
+      // 转换为 watchOS 需要的格式
+      return sortedContacts.map((contact) {
+        // 计算该联系人的交互次数
+        final contactInteractions = interactions
+            .where((i) => i.contactId == contact.id)
+            .toList();
+        final interactionCount = contactInteractions.length;
+
+        // 获取最近交互类型和时间
+        String? lastInteractionType;
+        String? lastInteractionTime;
+        if (contactInteractions.isNotEmpty) {
+          final lastInteraction = contactInteractions.reduce(
+            (a, b) => a.date.isAfter(b.date) ? a : b,
+          );
+          lastInteractionType = 'Call'; // 默认类型
+          final now = DateTime.now();
+          final diff = now.difference(lastInteraction.date);
+          if (diff.inDays == 0) {
+            lastInteractionTime = '今天';
+          } else if (diff.inDays == 1) {
+            lastInteractionTime = '昨天';
+          } else if (diff.inDays < 7) {
+            lastInteractionTime = '${diff.inDays}天前';
+          } else if (diff.inDays < 30) {
+            lastInteractionTime = '${(diff.inDays / 7).floor()}周前';
+          } else {
+            lastInteractionTime = '${(diff.inDays / 30).floor()}个月前';
+          }
+        }
+
+        // 处理性别
+        String? gender;
+        if (contact.gender != null) {
+          gender = contact.gender!.name; // 'male', 'female', 'other'
+        }
+
+        // 截断备注预览
+        String? notesPreview;
+        if (contact.notes != null && contact.notes!.isNotEmpty) {
+          notesPreview = contact.notes!.length > 20
+              ? '${contact.notes!.substring(0, 20)}...'
+              : contact.notes;
+        }
+
+        final data = {
+          'id': contact.id,
+          'name': contact.name,
+          'phone': contact.phone,
+          'avatar': contact.avatar,
+          'gender': gender,
+          'notes': notesPreview,
+          'tags': contact.tags.take(3).toList(), // 最多显示3个标签
+          'interactionCount': interactionCount,
+          'lastInteractionType': lastInteractionType,
+          'lastInteractionTime': lastInteractionTime,
+          'lastContactTime': contact.lastContactTime.toIso8601String(),
+        };
+
+        // ⚠️ 移除所有 null 值，避免 WCErrorCodePayloadUnsupportedTypes
+        data.removeWhere((key, value) => value == null);
+
+        return data;
+      }).toList();
+    } catch (e) {
+      print('[ContactPlugin] getWatchContactItems error: $e');
+      return [];
+    }
+  }
 }
 
 class ContactMainView extends StatefulWidget {
