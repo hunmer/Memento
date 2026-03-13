@@ -68,17 +68,26 @@ struct TimerListView: View {
 struct TimerRowView: View {
     let timer: TimerTaskItem
 
+    // 将颜色值转换为 SwiftUI Color
+    private var timerColor: Color {
+        Color(
+            red: Double((timer.color >> 16) & 0xFF) / 255.0,
+            green: Double((timer.color >> 8) & 0xFF) / 255.0,
+            blue: Double(timer.color & 0xFF) / 255.0
+        )
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             // 图标
             ZStack {
                 Circle()
-                    .fill(Color(timer.color).opacity(0.2))
+                    .fill(timerColor.opacity(0.2))
                     .frame(width: 36, height: 36)
 
                 Image(systemName: getIconName(timer.icon))
                     .font(.system(size: 16))
-                    .foregroundStyle(Color(timer.color))
+                    .foregroundStyle(timerColor)
             }
 
             // 内容
@@ -115,7 +124,7 @@ struct TimerRowView: View {
                    let activeTimer = timer.timerItems.first(where: { $0.id == activeId }) {
                     Text(formatTime(activeTimer.completedDuration))
                         .font(.system(size: 11, design: .monospaced))
-                        .foregroundStyle(Color(timer.color))
+                        .foregroundStyle(timerColor)
                 }
             }
 
@@ -157,6 +166,15 @@ struct TimerRowView: View {
 struct TimerDetailView: View {
     let timer: TimerTaskItem
 
+    // 将颜色值转换为 SwiftUI Color
+    private var timerColor: Color {
+        Color(
+            red: Double((timer.color >> 16) & 0xFF) / 255.0,
+            green: Double((timer.color >> 8) & 0xFF) / 255.0,
+            blue: Double(timer.color & 0xFF) / 255.0
+        )
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -164,12 +182,12 @@ struct TimerDetailView: View {
                 VStack(spacing: 8) {
                     ZStack {
                         Circle()
-                            .fill(Color(timer.color).opacity(0.2))
+                            .fill(timerColor.opacity(0.2))
                             .frame(width: 60, height: 60)
 
                         Image(systemName: getIconName(timer.icon))
                             .font(.title)
-                            .foregroundStyle(Color(timer.color))
+                            .foregroundStyle(timerColor)
                     }
 
                     Text(timer.name)
@@ -204,7 +222,7 @@ struct TimerDetailView: View {
                 // 计时器列表
                 VStack(spacing: 12) {
                     ForEach(timer.timerItems) { item in
-                        TimerItemCard(item: item, color: Color(timer.color))
+                        TimerItemCard(item: item, color: timerColor)
                     }
                 }
             }
