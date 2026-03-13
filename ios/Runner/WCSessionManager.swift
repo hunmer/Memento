@@ -552,4 +552,37 @@ extension WCSessionManager: WCSessionDelegate {
             ])
         }
     }
+
+    // MARK: - 计时器相关处理方法
+
+    private func handleGetTimers(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getTimers 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求计时器数据
+        methodChannel?.invokeMethod("getWatchTimers", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取计时器数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取计时器数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
 }
