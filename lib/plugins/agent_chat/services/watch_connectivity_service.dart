@@ -88,6 +88,8 @@ class WatchConnectivityService {
             return await _getWatchContactItems();
           case 'getWatchHabits':
             return await _getWatchHabits();
+          case 'getWatchTimers':
+            return await _getWatchTimers();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
