@@ -45,6 +45,7 @@ enum WatchRequest: String {
     case getContactItems
     case getHabits
     case getTimers
+    case getTodoTasks
 }
 
 // MARK: - WCSession Manager
@@ -182,6 +183,8 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetHabits(replyHandler: replyHandler)
         case .getTimers:
             handleGetTimers(replyHandler: replyHandler)
+        case .getTodoTasks:
+            handleGetTodoTasks(replyHandler: replyHandler)
         }
     }
 
@@ -579,6 +582,39 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             self.logger.info("成功获取计时器数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 待办任务相关处理方法
+
+    private func handleGetTodoTasks(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getTodoTasks 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求待办任务数据
+        methodChannel?.invokeMethod("getWatchTodoTasks", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取待办任务数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取待办任务数据，数据条数: \(data.count)")
             replyHandler([
                 "success": true,
                 "data": data
