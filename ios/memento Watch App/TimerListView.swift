@@ -44,7 +44,7 @@ struct TimerListView: View {
             VStack(spacing: 12) {
                 Image(systemName: "timer")
                     .font(.largeTitle)
-                    .foregroundStyle(.blueGrey)
+                    .foregroundStyle(.gray)
 
                 Text("暂无计时器")
                     .font(.headline)
