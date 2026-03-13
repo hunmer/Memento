@@ -11,6 +11,9 @@ import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
+import 'package:Memento/plugins/timer/timer_plugin.dart';
+import 'package:Memento/plugins/timer/models/timer_task.dart';
+import 'package:Memento/plugins/timer/models/timer_item.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
