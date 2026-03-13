@@ -10,6 +10,7 @@ import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
+import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -374,9 +375,9 @@ class WatchConnectivityService {
       final now = DateTime.now();
       final weekStart = now.subtract(Duration(days: now.weekday - 1)); // 本周一
 
-      final habitItems = await Future.wait<Map<String, dynamic>>(
-        habits.map((habit) async {
-          String? skillName;
+      final List<Map<String, dynamic>> habitItems = [];
+      for (final habit in habits) {
+        String? skillName;
         int skillColor = 0xFF39FF14; // 默认霓虹绿
         if (habit.skillId != null) {
           final skill = skillController.getSkillById(habit.skillId!);
@@ -413,8 +414,8 @@ class WatchConnectivityService {
 
         // 移除所有 null 值
         data.removeWhere((key, value) => value == null);
-        return data;
-      }).toList());
+        habitItems.add(data);
+      }
 
       print('[WatchConnectivityService] 返回 ${habitItems.length} 个习惯');
       return habitItems;
