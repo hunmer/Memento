@@ -71,6 +71,8 @@ struct ContentView: View {
             ContactListView()
         case .habits:
             HabitsListView()
+        case .timers:
+            TimerListView()
         case .reminder:
             PlaceholderView(title: card.title, icon: card.icon, color: card.color)
         case .settings:
