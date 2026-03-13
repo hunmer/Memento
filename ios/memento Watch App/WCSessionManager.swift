@@ -172,6 +172,7 @@ enum WatchRequest: String, Codable {
     case getCheckinItems
     case getContactItems
     case getHabits
+    case getTimers
 }
 
 enum ResponseKey: String, Codable {
