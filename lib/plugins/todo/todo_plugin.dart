@@ -197,4 +197,64 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       'findTasksByPriority': _jsFindTasksByPriority,
     };
   }
+
+  // ============== watchOS 支持方法 ==============
+
+  /// 获取 watchOS 待办任务列表（同步方法）
+  /// 返回未完成的任务，按优先级和日期排序
+  List<Map<String, dynamic>> getWatchTodoTasksSync() {
+    final tasks = taskController.tasks
+        .where((task) => task.status != TaskStatus.done)
+        .toList();
+
+    // 按优先级排序（Q1 > Q2 > Q3 > Q4）
+    tasks.sort((a, b) {
+      // 先按优先级排序
+      final priorityCompare = a.priority.index.compareTo(b.priority.index);
+      if (priorityCompare != 0) return priorityCompare;
+
+      // 同优先级按截止日期排序
+      if (a.dueDate == null && b.dueDate == null) return 0;
+      if (a.dueDate == null) return 1;
+      if (b.dueDate == null) return -1;
+      return a.dueDate!.compareTo(b.dueDate!);
+    });
+
+    // 转换为 watchOS 需要的格式
+    return tasks.map((task) {
+      final data = <String, dynamic>{
+        'id': task.id,
+        'title': task.title,
+        'description': task.description,
+        'priority': task.priority.index,
+        'quadrant': _getQuadrantLabel(task.priority),
+        'status': task.status.index,
+        'tags': task.tags,
+        'subtaskCount': task.subtasks.length,
+        'completedSubtaskCount': task.subtasks.where((s) => s.isCompleted).length,
+        'startDate': task.startDate?.toIso8601String(),
+        'dueDate': task.dueDate?.toIso8601String(),
+        'duration': task.duration?.inMinutes,
+        'iconCodePoint': task.icon?.codePoint,
+      };
+
+      // 移除所有 null 值（WCSession 不支持 null）
+      data.removeWhere((key, value) => value == null);
+      return data;
+    }).toList();
+  }
+
+  /// 获取四象限标签
+  String _getQuadrantLabel(TaskPriority priority) {
+    switch (priority) {
+      case TaskPriority.q1:
+        return 'Q1: 紧急';
+      case TaskPriority.q2:
+        return 'Q2: 重要';
+      case TaskPriority.q3:
+        return 'Q3: 一般';
+      case TaskPriority.q4:
+        return 'Q4: 低优';
+    }
+  }
 }

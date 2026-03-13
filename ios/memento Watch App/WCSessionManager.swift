@@ -159,6 +159,29 @@ struct TimerTaskItem: Codable, Identifiable {
     let createdAt: String?
 }
 
+// MARK: - 待办任务数据模型
+
+struct TodoTaskItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let description: String?
+    let priority: Int
+    let quadrant: String
+    let status: Int
+    let tags: [String]
+    let subtaskCount: Int
+    let completedSubtaskCount: Int
+    let startDate: String?
+    let dueDate: String?
+    let duration: Int?
+    let iconCodePoint: Int?
+
+    // 计算属性
+    var isCompleted: Bool {
+        return status == 2  // TaskStatus.done = 2
+    }
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -173,6 +196,7 @@ enum WatchRequest: String, Codable {
     case getContactItems
     case getHabits
     case getTimers
+    case getTodoTasks
 }
 
 enum ResponseKey: String, Codable {
@@ -564,6 +588,40 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取计时器数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 待办任务相关方法
+
+    /// 获取待办任务列表
+    func getTodoTasks() async throws -> [TodoTaskItem] {
+        logger.info("发送 getTodoTasks 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getTodoTasks.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到待办任务数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([TodoTaskItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析待办任务数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取待办任务数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

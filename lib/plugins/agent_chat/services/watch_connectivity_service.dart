@@ -12,6 +12,7 @@ import 'package:Memento/plugins/contact/contact_plugin.dart';
 import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
+import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -88,6 +89,8 @@ class WatchConnectivityService {
             return await _getWatchHabits();
           case 'getWatchTimers':
             return await _getWatchTimers();
+          case 'getWatchTodoTasks':
+            return await _getWatchTodoTasks();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -553,6 +556,22 @@ class WatchConnectivityService {
       return timerItems;
     } catch (e) {
       print('[WatchConnectivityService] 获取计时器数据失败: $e');
+      return [];
+    }
+  }
+
+  // ============== 待办任务相关方法 ==============
+
+  /// 获取待办任务列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchTodoTasks() async {
+    try {
+      final todoPlugin = TodoPlugin.instance;
+      final tasks = todoPlugin.getWatchTodoTasksSync();
+
+      print('[WatchConnectivityService] 返回 ${tasks.length} 个待办任务');
+      return tasks;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取待办任务数据失败: $e');
       return [];
     }
   }
