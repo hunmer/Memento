@@ -209,8 +209,8 @@ struct TimerDetailView: View {
                                 .foregroundStyle(.secondary)
                         }
 
-                        if timer.repeatCount > 1 {
-                            Label("×\(timer.repeatCount)", systemImage: "repeat")
+                        if let repeatCount = timer.repeatCount, repeatCount > 1 {
+                            Label("×\(repeatCount)", systemImage: "repeat")
                                 .font(.caption)
                                 .foregroundStyle(.orange)
                         }
