@@ -534,6 +534,40 @@ extension WCSessionManager {
             })
         }
     }
+
+    // MARK: - 计时器相关方法
+
+    /// 获取计时器列表
+    func getTimers() async throws -> [TimerTaskItem] {
+        logger.info("发送 getTimers 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getTimers.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到计时器数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([TimerTaskItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析计时器数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取计时器数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
 }
 
 // MARK: - WCSessionDelegate
