@@ -9,6 +9,7 @@ import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/plugins/checkin/checkin_plugin.dart';
 import 'package:Memento/plugins/contact/contact_plugin.dart';
+import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -81,6 +82,8 @@ class WatchConnectivityService {
             return await _getWatchCheckinItems();
           case 'getWatchContactItems':
             return await _getWatchContactItems();
+          case 'getWatchHabits':
+            return await _getWatchHabits();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -356,5 +359,129 @@ class WatchConnectivityService {
       print('[WatchConnectivityService] 获取联系人数据失败: $e');
       return [];
     }
+  }
+
+  // ============== 习惯相关方法 ==============
+
+  /// 获取习惯列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchHabits() async {
+    try {
+      final habitsPlugin = HabitsPlugin.instance;
+      final habits = habitsPlugin.getHabitController().getHabits();
+      final skillController = habitsPlugin.getSkillController();
+      final recordController = habitsPlugin.getRecordController();
+
+      final now = DateTime.now();
+      final weekStart = now.subtract(Duration(days: now.weekday - 1)); // 本周一
+
+      final habitItems = await Future.wait(
+        habits.map((habit) async {        String? skillName;
+        int skillColor = 0xFF39FF14; // 默认霓虹绿
+        if (habit.skillId != null) {
+          final skill = skillController.getSkillById(habit.skillId!);
+          if (skill != null) {
+            skillName = skill.title;
+            // 根据技能名称分配颜色
+            skillColor = _getSkillColor(skill.title);
+          }
+        }
+
+        // 计算本周每日完成情况
+        final dailyMinutes = await _calculateDailyMinutes(
+          habit.id,
+          weekStart,
+          recordController,
+        );
+
+        // 获取今日累计时长
+        final todayMinutes =
+            dailyMinutes.isNotEmpty ? dailyMinutes[now.weekday - 1] : 0;
+        final targetMinutes = habit.durationMinutes;
+
+        final data = <String, dynamic>{
+          'id': habit.id,
+          'title': habit.title,
+          'skillName': skillName ?? habit.group ?? 'General',
+          'skillColor': skillColor,
+          'icon': habit.icon,
+          'todayMinutes': todayMinutes,
+          'targetMinutes': targetMinutes,
+          'totalDurationMinutes': habit.totalDurationMinutes,
+          'dailyMinutes': dailyMinutes,
+        };
+
+        // 移除所有 null 值
+        data.removeWhere((key, value) => value == null);
+        return data;
+      }).toList());
+
+      print('[WatchConnectivityService] 返回 ${habitItems.length} 个习惯');
+      return habitItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取习惯数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 计算本周每日完成时长（分钟）
+  Future<List<int>> _calculateDailyMinutes(
+    String habitId,
+    DateTime weekStart,
+    dynamic recordController,
+  ) async {
+    final dailyMinutes = List<int>.filled(7, 0);
+
+    try {
+      final records = await recordController.getHabitCompletionRecords(habitId);
+
+      for (final record in records) {
+        final recordDate = record.date;
+        // 检查记录是否在本周
+        if (recordDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+            recordDate.isBefore(weekStart.add(const Duration(days: 7)))) {
+          final dayIndex = recordDate.weekday - 1;
+          dailyMinutes[dayIndex] += record.duration.inMinutes as int;
+        }
+      }
+    } catch (e) {
+      print('[WatchConnectivityService] 计算每日时长失败: $e');
+    }
+
+    return dailyMinutes;
+  }
+
+  /// 根据技能名称获取颜色
+  int _getSkillColor(String skillName) {
+    final lowerName = skillName.toLowerCase();
+
+    if (lowerName.contains('fitness') ||
+        lowerName.contains('运动') ||
+        lowerName.contains('健康') ||
+        lowerName.contains('health')) {
+      return 0xFF39FF14; // 霓虹绿
+    } else if (lowerName.contains('mental') ||
+        lowerName.contains('心理') ||
+        lowerName.contains('冥想') ||
+        lowerName.contains('meditation')) {
+      return 0xFFBC13FE; // 霓虹紫
+    } else if (lowerName.contains('focus') ||
+        lowerName.contains('专注') ||
+        lowerName.contains('学习') ||
+        lowerName.contains('read') ||
+        lowerName.contains('阅读')) {
+      return 0xFF0FF0FC; // 霓虹蓝
+    } else if (lowerName.contains('creative') ||
+        lowerName.contains('创意') ||
+        lowerName.contains('艺术') ||
+        lowerName.contains('writing') ||
+        lowerName.contains('写作')) {
+      return 0xFFFF6B35; // 橙色
+    } else if (lowerName.contains('work') ||
+        lowerName.contains('工作') ||
+        lowerName.contains('效率')) {
+      return 0xFFFFD700; // 金色
+    }
+
+    return 0xFF39FF14; // 默认霓虹绿
   }
 }
