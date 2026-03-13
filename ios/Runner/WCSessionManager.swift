@@ -180,6 +180,8 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetContactItems(replyHandler: replyHandler)
         case .getHabits:
             handleGetHabits(replyHandler: replyHandler)
+        case .getTimers:
+            handleGetTimers(replyHandler: replyHandler)
         }
     }
 
