@@ -374,8 +374,9 @@ class WatchConnectivityService {
       final now = DateTime.now();
       final weekStart = now.subtract(Duration(days: now.weekday - 1)); // 本周一
 
-      final habitItems = await Future.wait(
-        habits.map((habit) async {        String? skillName;
+      final habitItems = await Future.wait<Map<String, dynamic>>(
+        habits.map((habit) async {
+          String? skillName;
         int skillColor = 0xFF39FF14; // 默认霓虹绿
         if (habit.skillId != null) {
           final skill = skillController.getSkillById(habit.skillId!);
