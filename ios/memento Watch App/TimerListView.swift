@@ -13,53 +13,56 @@ struct TimerListView: View {
     @StateObject private var viewModel = TimerListViewModel()
 
     var body: some View {
-        Group {
-            if viewModel.isLoading {
-                ProgressView("加载中...")
-            } else if let error = viewModel.error {
-                VStack(spacing: 12) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.largeTitle)
-                        .foregroundStyle(.orange)
+        content
+            .navigationTitle("计时器")
+            .task {
+                await viewModel.loadTimers()
+            }
+    }
 
-                    Text(error)
-                        .font(.caption)
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.secondary)
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.isLoading {
+            ProgressView("加载中...")
+        } else if let error = viewModel.error {
+            VStack(spacing: 12) {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.largeTitle)
+                    .foregroundStyle(.orange)
 
-                    Button("重试") {
-                        Task { await viewModel.loadTimers() }
-                    }
-                    .buttonStyle(.bordered)
+                Text(error)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+
+                Button("重试") {
+                    Task { await viewModel.loadTimers() }
                 }
-            } else if viewModel.timers.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "timer")
-                        .font(.largeTitle)
-                        .foregroundStyle(.blueGrey)
+                .buttonStyle(.bordered)
+            }
+        } else if viewModel.timers.isEmpty {
+            VStack(spacing: 12) {
+                Image(systemName: "timer")
+                    .font(.largeTitle)
+                    .foregroundStyle(.blueGrey)
 
-                    Text("暂无计时器")
-                        .font(.headline)
+                Text("暂无计时器")
+                    .font(.headline)
 
-                    Text("请在手机上添加计时器")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                List(viewModel.timers) { timer in
-                    NavigationLink(destination: TimerDetailView(timer: timer)) {
-                        TimerRowView(timer: timer)
-                    }
-                }
-                .listStyle(.carousel)
-                .refreshable {
-                    await viewModel.loadTimers()
+                Text("请在手机上添加计时器")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            List(viewModel.timers) { timer in
+                NavigationLink(destination: TimerDetailView(timer: timer)) {
+                    TimerRowView(timer: timer)
                 }
             }
-        }
-        .navigationTitle("计时器")
-        .task {
-            await viewModel.loadTimers()
+            .listStyle(.carousel)
+            .refreshable {
+                await viewModel.loadTimers()
+            }
         }
     }
 }
