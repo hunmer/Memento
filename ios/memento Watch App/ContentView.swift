@@ -19,6 +19,7 @@ enum CardDestination: String {
     case checkin = "打卡"
     case contacts = "联系人"
     case habits = "习惯"
+    case timers = "计时器"
     case settings = "设置"
 }
 
