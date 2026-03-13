@@ -44,6 +44,7 @@ enum WatchRequest: String {
     case getCheckinItems
     case getContactItems
     case getHabits
+    case getTimers
 }
 
 // MARK: - WCSession Manager
