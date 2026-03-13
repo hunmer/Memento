@@ -189,6 +189,13 @@ struct TodoTaskCard: View {
     }
 }
 
+// MARK: - TodoTaskItem 扩展
+extension TodoTaskItem {
+    var taskDescription: String? {
+        return description
+    }
+}
+
 // MARK: - ViewModel
 @MainActor
 class TodoListViewModel: ObservableObject {
