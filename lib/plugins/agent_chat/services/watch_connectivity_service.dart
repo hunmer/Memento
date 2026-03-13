@@ -491,4 +491,71 @@ class WatchConnectivityService {
 
     return 0xFF39FF14; // 默认霓虹绿
   }
+
+  // ============== 计时器相关方法 ==============
+
+  /// 获取计时器列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchTimers() async {
+    try {
+      final timerPlugin = TimerPlugin.instance;
+      final tasks = timerPlugin.getTasks();
+
+      final List<Map<String, dynamic>> timerItems = [];
+      for (final task in tasks) {
+        // 获取当前活动的计时器
+        final activeTimer = task.activeTimer;
+
+        // 转换 TimerItem 列表为 watchOS 格式
+        final subTimers = task.timerItems.map((item) {
+          final data = <String, dynamic>{
+            'id': item.id,
+            'name': item.name,
+            'type': item.type.index, // 0: countUp, 1: countDown, 2: pomodoro
+            'duration': item.duration.inSeconds,
+            'completedDuration': item.completedDuration.inSeconds,
+            'isRunning': item.isRunning,
+            'isCompleted': item.isCompleted,
+            'repeatCount': item.repeatCount,
+          };
+
+          // 番茄钟特有属性
+          if (item.type == TimerType.pomodoro) {
+            data['workDuration'] = item.workDuration?.inSeconds;
+            data['breakDuration'] = item.breakDuration?.inSeconds;
+            data['cycles'] = item.cycles;
+            data['currentCycle'] = item.currentCycle;
+            data['isWorkPhase'] = item.isWorkPhase;
+          }
+
+          // 移除所有 null 值
+          data.removeWhere((key, value) => value == null);
+          return data;
+        }).toList();
+
+        final data = <String, dynamic>{
+          'id': task.id,
+          'name': task.name,
+          'color': task.color.toARGB32(),
+          'icon': task.icon.codePoint,
+          'group': task.group,
+          'isRunning': task.isRunning,
+          'isCompleted': task.isCompleted,
+          'repeatCount': task.repeatCount,
+          'timerItems': subTimers,
+          'activeTimerId': activeTimer?.id,
+          'createdAt': task.createdAt.toIso8601String(),
+        };
+
+        // 移除所有 null 值
+        data.removeWhere((key, value) => value == null);
+        timerItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${timerItems.length} 个计时器任务');
+      return timerItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取计时器数据失败: $e');
+      return [];
+    }
+  }
 }
