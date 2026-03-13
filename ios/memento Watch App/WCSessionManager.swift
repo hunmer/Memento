@@ -127,6 +127,38 @@ struct HabitItem: Codable, Identifiable {
     let dailyMinutes: [Int]
 }
 
+// MARK: - 计时器数据模型
+
+struct TimerSubItem: Codable, Identifiable {
+    let id: String
+    let name: String
+    let type: Int  // 0: countUp, 1: countDown, 2: pomodoro
+    let duration: Int  // 秒
+    let completedDuration: Int  // 秒
+    let isRunning: Bool
+    let isCompleted: Bool
+    let repeatCount: Int?
+    let workDuration: Int?  // 番茄钟专用
+    let breakDuration: Int?  // 番茄钟专用
+    let cycles: Int?  // 番茄钟专用
+    let currentCycle: Int?  // 番茄钟专用
+    let isWorkPhase: Bool?  // 番茄钟专用
+}
+
+struct TimerTaskItem: Codable, Identifiable {
+    let id: String
+    let name: String
+    let color: Int
+    let icon: Int
+    let group: String?
+    let isRunning: Bool
+    let isCompleted: Bool
+    let repeatCount: Int?
+    let timerItems: [TimerSubItem]
+    let activeTimerId: String?
+    let createdAt: String?
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
