@@ -17,13 +17,16 @@ class AdaptiveSwitch extends StatelessWidget {
   /// 状态改变回调
   final ValueChanged<bool>? onChanged;
 
-  /// 激活状态的颜色（仅 Material）
+  /// 激活状态的颜色（轨道颜色）
   final Color? activeColor;
 
-  /// 激活状态的拇指颜色（仅 Material）
+  /// 激活状态的拇指颜色
+  final Color? activeThumbColor;
+
+  /// 激活状态的轨道颜色（仅 Material）
   final Color? activeTrackColor;
 
-  /// 非激活状态的拇指颜色（仅 Material）
+  /// 非激活状态的拇指颜色
   final Color? inactiveThumbColor;
 
   /// 非激活状态的轨道颜色（仅 Material）
@@ -40,6 +43,7 @@ class AdaptiveSwitch extends StatelessWidget {
     required this.value,
     this.onChanged,
     this.activeColor,
+    this.activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -64,6 +68,7 @@ class AdaptiveSwitch extends StatelessWidget {
       value: value,
       onChanged: enabled ? onChanged : null,
       activeColor: activeColor,
+      activeThumbColor: activeThumbColor,
       activeTrackColor: activeTrackColor,
       inactiveThumbColor: inactiveThumbColor,
       inactiveTrackColor: inactiveTrackColor,
