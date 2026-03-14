@@ -1,13 +1,13 @@
-根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\bill\bill_plugin.dart 插件添加watchos端的入口，ui原型参考：
+根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\notes\notes_plugin.dart 插件添加watchos端的入口，ui原型参考：
 <!DOCTYPE html>
 
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -16,31 +16,42 @@
                     colors: {
                         "primary": "#ec5b13",
                         "background-light": "#f8f6f6",
-                        "background-dark": "#0a0705",
-                        "expense": "#ff3b30",
-                        "income": "#34c759",
+                        "background-dark": "#0a0a0a",
+                        "neon-cyan": "#00f2ff",
+                        "neon-purple": "#bc13fe",
+                        "neon-green": "#39ff14"
                     },
                     fontFamily: {
-                        "display": ["Public Sans"]
+                        "display": ["Public Sans", "sans-serif"]
                     },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
                 },
             },
         }
     </script>
 <style>
-        .watch-screen {
+        body {
+            font-family: 'Public Sans', sans-serif;
+            background-color: #0a0a0a;
+        }
+        .watch-viewport {
             width: 220px;
             height: 250px;
+            overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        .watch-screen::-webkit-scrollbar {
+        .watch-viewport::-webkit-scrollbar {
             display: none;
         }
-        .neon-border {
-            box-shadow: 0 0 4px rgba(236, 91, 19, 0.3);
-        }
+        .neon-border-cyan { border: 1px solid rgba(0, 242, 255, 0.3); }
+        .neon-border-purple { border: 1px solid rgba(188, 19, 254, 0.3); }
+        .neon-border-green { border: 1px solid rgba(57, 255, 20, 0.3); }
     </style>
 <style>
     body {
@@ -48,82 +59,60 @@
     }
   </style>
   </head>
-<body class="bg-slate-900 flex items-center justify-center min-h-screen font-display">
-<!-- Watch Frame Emulator -->
-<div class="watch-screen bg-background-dark rounded-[40px] border-[6px] border-slate-800 relative overflow-hidden flex flex-col shadow-2xl">
-<!-- Status Bar -->
-<div class="flex justify-between items-center px-6 pt-3 pb-1 w-full shrink-0">
-<span class="text-[10px] font-bold text-primary">10:09</span>
-<span class="material-symbols-outlined text-[12px] text-primary">battery_very_low</span>
-</div>
-<!-- Scrollable Content -->
-<div class="flex-1 overflow-y-auto px-2 pb-4 space-y-2">
+<body class="flex items-center justify-center min-h-screen bg-slate-900">
+<!-- Apple Watch Container -->
+<div class="watch-viewport bg-background-dark rounded-[40px] border-[6px] border-slate-800 shadow-2xl relative p-3 flex flex-col gap-2">
 <!-- Header -->
-<div class="px-2 pt-1 pb-2">
-<h1 class="text-white text-sm font-bold tracking-tight">Billing</h1>
-</div>
-<!-- Date Group: Today -->
-<div class="space-y-1">
-<p class="text-[10px] uppercase font-bold text-primary/70 px-2 tracking-wider">Today</p>
-<!-- Item 1: Expense -->
-<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
-<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary text-lg">music_note</span>
-</div>
-<div class="flex-1 min-w-0">
-<p class="text-white text-[11px] font-semibold truncate leading-tight">Apple Music</p>
-<p class="text-slate-400 text-[9px] truncate leading-tight">Subscription</p>
-</div>
-<div class="text-right shrink-0">
-<p class="text-expense text-[11px] font-bold">-$10.99</p>
+<div class="flex items-center justify-between px-1 mb-1">
+<span class="text-xs font-bold text-primary tracking-wider uppercase">Notes</span>
+<div class="flex gap-1">
+<span class="material-symbols-outlined text-[14px] text-slate-400">search</span>
+<span class="material-symbols-outlined text-[14px] text-primary">add_circle</span>
 </div>
 </div>
-<!-- Item 2: Income -->
-<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
-<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary text-lg">payments</span>
-</div>
-<div class="flex-1 min-w-0">
-<p class="text-white text-[11px] font-semibold truncate leading-tight">Tech Corp</p>
-<p class="text-slate-400 text-[9px] truncate leading-tight">Salary</p>
-</div>
-<div class="text-right shrink-0">
-<p class="text-income text-[11px] font-bold">+$5.2k</p>
+<!-- Note Card 1 -->
+<div class="flex flex-col gap-1 p-2 bg-slate-900/50 rounded-xl neon-border-cyan">
+<div class="flex justify-between items-start">
+<h3 class="text-[11px] font-bold text-slate-100 leading-tight truncate w-32">Project Alpha</h3>
+<div class="bg-primary/20 p-1 rounded-lg">
+<span class="material-symbols-outlined text-[12px] text-primary">folder</span>
 </div>
 </div>
-</div>
-<!-- Date Group: Yesterday -->
-<div class="space-y-1 pt-2">
-<p class="text-[10px] uppercase font-bold text-primary/70 px-2 tracking-wider">Yesterday</p>
-<!-- Item 3: Expense -->
-<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
-<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary text-lg">shopping_cart</span>
-</div>
-<div class="flex-1 min-w-0">
-<p class="text-white text-[11px] font-semibold truncate leading-tight">Grocery Mart</p>
-<p class="text-slate-400 text-[9px] truncate leading-tight">Food &amp; Drinks</p>
-</div>
-<div class="text-right shrink-0">
-<p class="text-expense text-[11px] font-bold">-$42.50</p>
+<p class="text-[9px] text-slate-400 leading-none">Oct 12 • 10:30 AM</p>
+<p class="text-[10px] text-slate-300 line-clamp-1">Strategy for Q4 expansion...</p>
+<div class="flex gap-1 mt-0.5">
+<span class="px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 text-[8px] font-medium rounded-full border border-cyan-500/30 uppercase">Work</span>
 </div>
 </div>
-<!-- Item 4: Expense -->
-<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
-<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary text-lg">bolt</span>
-</div>
-<div class="flex-1 min-w-0">
-<p class="text-white text-[11px] font-semibold truncate leading-tight">City Power</p>
-<p class="text-slate-400 text-[9px] truncate leading-tight">Utility Bill</p>
-</div>
-<div class="text-right shrink-0">
-<p class="text-expense text-[11px] font-bold">-$89.00</p>
+<!-- Note Card 2 -->
+<div class="flex flex-col gap-1 p-2 bg-slate-900/50 rounded-xl neon-border-purple">
+<div class="flex justify-between items-start">
+<h3 class="text-[11px] font-bold text-slate-100 leading-tight truncate w-32">Grocery List</h3>
+<div class="bg-neon-purple/20 p-1 rounded-lg">
+<span class="material-symbols-outlined text-[12px] text-neon-purple">shopping_basket</span>
 </div>
 </div>
+<p class="text-[9px] text-slate-400 leading-none">Oct 10 • Yesterday</p>
+<p class="text-[10px] text-slate-300 line-clamp-1">Milk, eggs, organic honey...</p>
+<div class="flex gap-1 mt-0.5">
+<span class="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 text-[8px] font-medium rounded-full border border-purple-500/30 uppercase">Personal</span>
 </div>
 </div>
-<!-- Subtle Bottom Fade/Nav Indicator -->
-<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary/30 rounded-full"></div>
+<!-- Note Card 3 -->
+<div class="flex flex-col gap-1 p-2 bg-slate-900/50 rounded-xl neon-border-green">
+<div class="flex justify-between items-start">
+<h3 class="text-[11px] font-bold text-slate-100 leading-tight truncate w-32">App Ideas</h3>
+<div class="bg-neon-green/20 p-1 rounded-lg">
+<span class="material-symbols-outlined text-[12px] text-neon-green">lightbulb</span>
+</div>
+</div>
+<p class="text-[9px] text-slate-400 leading-none">Oct 11 • 2h ago</p>
+<p class="text-[10px] text-slate-300 line-clamp-1">AI-driven sleep tracker...</p>
+<div class="flex gap-1 mt-0.5">
+<span class="px-1.5 py-0.5 bg-green-500/20 text-green-400 text-[8px] font-medium rounded-full border border-green-500/30 uppercase">Ideas</span>
+</div>
+</div>
+<!-- Bottom Spacer for Scrolling -->
+<div class="h-4 shrink-0"></div>
 </div>
 </body></html>
