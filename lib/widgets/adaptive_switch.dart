@@ -152,27 +152,26 @@ class AdaptiveSwitch extends StatelessWidget {
           );
         },
         foregroundIndicatorBuilder: (context, global) {
-          final position = global.position;
-          final indicatorOffset = (switchWidth - thumbSize - 4.0) * position;
-          return Container(
-            width: thumbSize,
-            height: thumbSize,
-            margin: EdgeInsets.only(
-              left: 2.0 + indicatorOffset,
-              top: 2.0,
-              right: 2.0,
-              bottom: 2.0,
+          return Align(
+            alignment: Alignment(
+              -1.0 + 2.0 * global.position, // -1.0 (left) to 1.0 (right)
+              0.0, // center vertically
             ),
-            decoration: BoxDecoration(
-              color: thumbColor,
-              borderRadius: BorderRadius.circular(thumbSize / 2),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+            child: Container(
+              width: thumbSize,
+              height: thumbSize,
+              margin: const EdgeInsets.symmetric(horizontal: 2.0),
+              decoration: BoxDecoration(
+                color: thumbColor,
+                borderRadius: BorderRadius.circular(thumbSize / 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
             ),
           );
         },
