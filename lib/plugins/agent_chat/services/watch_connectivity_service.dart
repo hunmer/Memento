@@ -17,6 +17,9 @@ import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:Memento/plugins/notes/notes_plugin.dart';
+import 'package:Memento/plugins/store/store_plugin.dart';
+import 'package:Memento/plugins/store/models/product.dart';
+import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -103,6 +106,10 @@ class WatchConnectivityService {
             return await _getWatchBillItems();
           case 'getWatchNotes':
             return await _getWatchNotes();
+          case 'getWatchStoreProducts':
+            return await _getWatchStoreProducts();
+          case 'getWatchUserItems':
+            return await _getWatchUserItems();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -882,5 +889,122 @@ class WatchConnectivityService {
     }
 
     return 0xFF00F2FF; // 默认霓虹青
+  }
+
+  // ============== 商店相关方法 ==============
+
+  /// 获取商品列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchStoreProducts() async {
+    try {
+      final storePlugin = StorePlugin.instance;
+      final controller = storePlugin.controller;
+
+      // 获取所有商品（去重）
+      final uniqueProducts = controller.products.fold<Map<String, Product>>({}, (map, product) {
+        if (!map.containsKey(product.id)) {
+          map[product.id] = product;
+        }
+        return map;
+      }).values.toList();
+
+      final now = DateTime.now();
+
+      final List<Map<String, dynamic>> productItems = [];
+      for (final product in uniqueProducts) {
+        // 检查商品是否可兑换
+        final isInExchangePeriod = now.isAfter(product.exchangeStart) && now.isBefore(product.exchangeEnd);
+        final isAvailable = product.stock > 0 && isInExchangePeriod;
+
+        final data = <String, dynamic>{
+          'id': product.id,
+          'name': product.name,
+          'description': product.description,
+          'price': product.price,
+          'stock': product.stock,
+          'isAvailable': isAvailable,
+          'useDuration': product.useDuration,
+        };
+
+        // 移除所有 null 值，避免 WCSession 传输问题
+        data.removeWhere((key, value) => value == null);
+        productItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${productItems.length} 个商品');
+      return productItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取商品数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 获取用户物品列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchUserItems() async {
+    try {
+      final storePlugin = StorePlugin.instance;
+      final controller = storePlugin.controller;
+
+      final now = DateTime.now();
+
+      // 按商品分组物品
+      final groupedItems = <String, List<UserItem>>{};
+      for (final item in controller.userItems) {
+        final key = item.productId;
+        if (groupedItems[key] == null) {
+          groupedItems[key] = [];
+        }
+        groupedItems[key]!.add(item);
+      }
+
+      final List<Map<String, dynamic>> userItemGroups = [];
+      for (final entry in groupedItems.entries) {
+        final productId = entry.key;
+        final items = entry.value;
+
+        // 获取第一个物品作为代表
+        final firstItem = items.first;
+        final isExpired = now.isAfter(firstItem.expireDate);
+
+        // 计算最早过期时间
+        final sortedByExpiry = List<UserItem>.from(items)
+          ..sort((a, b) => a.expireDate.compareTo(b.expireDate));
+        final earliestExpiry = sortedByExpiry.first.expireDate;
+
+        // 计算剩余天数
+        final daysRemaining = earliestExpiry.difference(now).inDays;
+
+        final data = <String, dynamic>{
+          'productId': productId,
+          'productName': firstItem.productName,
+          'count': items.length,
+          'isExpired': isExpired,
+          'earliestExpiry': earliestExpiry.toIso8601String(),
+          'daysRemaining': isExpired ? 0 : daysRemaining,
+          'purchasePrice': firstItem.purchasePrice,
+        };
+
+        // 移除所有 null 值，避免 WCSession 传输问题
+        data.removeWhere((key, value) => value == null);
+        userItemGroups.add(data);
+      }
+
+      // 按过期状态排序（未过期的在前，然后按剩余天数排序）
+      userItemGroups.sort((a, b) {
+        final aExpired = a['isExpired'] as bool;
+        final bExpired = b['isExpired'] as bool;
+        if (aExpired != bExpired) {
+          return aExpired ? 1 : -1;
+        }
+        final aDays = a['daysRemaining'] as int;
+        final bDays = b['daysRemaining'] as int;
+        return aDays.compareTo(bDays);
+      });
+
+      print('[WatchConnectivityService] 返回 ${userItemGroups.length} 个物品分组');
+      return userItemGroups;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取用户物品数据失败: $e');
+      return [];
+    }
   }
 }

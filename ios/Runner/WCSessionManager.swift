@@ -50,6 +50,8 @@ enum WatchRequest: String {
     case getTrackerGoals
     case getBillItems
     case getNotes
+    case getStoreProducts
+    case getUserItems
 }
 
 // MARK: - WCSession Manager
@@ -197,6 +199,10 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetBillItems(replyHandler: replyHandler)
         case .getNotes:
             handleGetNotes(replyHandler: replyHandler)
+        case .getStoreProducts:
+            handleGetStoreProducts(replyHandler: replyHandler)
+        case .getUserItems:
+            handleGetUserItems(replyHandler: replyHandler)
         }
     }
 
@@ -759,6 +765,70 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             self.logger.info("成功获取笔记数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 商店相关处理方法
+
+    private func handleGetStoreProducts(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getStoreProducts 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求商品数据
+        methodChannel?.invokeMethod("getWatchStoreProducts", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取商品数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取商品数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    private func handleGetUserItems(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getUserItems 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求用户物品数据
+        methodChannel?.invokeMethod("getWatchUserItems", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取用户物品数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取用户物品数据，数据条数: \(data.count)")
             replyHandler([
                 "success": true,
                 "data": data

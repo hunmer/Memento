@@ -368,6 +368,70 @@ struct NoteItem: Codable, Identifiable {
     }
 }
 
+// MARK: - 商店商品数据模型
+
+struct StoreProduct: Codable, Identifiable {
+    let id: String
+    let name: String
+    let description: String?
+    let price: Int
+    let stock: Int
+    let isAvailable: Bool
+    let useDuration: Int?
+
+    // 计算属性：显示的库存状态
+    var stockStatus: String {
+        if stock <= 0 {
+            return "已售罄"
+        } else if stock <= 5 {
+            return "仅剩\(stock)件"
+        } else {
+            return "库存\(stock)件"
+        }
+    }
+}
+
+// MARK: - 用户物品分组数据模型
+
+struct UserItemGroup: Codable, Identifiable {
+    var id: String { productId }
+    let productId: String
+    let productName: String
+    let count: Int
+    let isExpired: Bool
+    let earliestExpiry: String
+    let daysRemaining: Int
+    let purchasePrice: Int
+
+    // 计算属性：过期状态文本
+    var expiryStatus: String {
+        if isExpired {
+            return "已过期"
+        } else if daysRemaining == 0 {
+            return "今天过期"
+        } else if daysRemaining <= 3 {
+            return "\(daysRemaining)天后过期"
+        } else if daysRemaining <= 7 {
+            return "\(daysRemaining)天后过期"
+        } else {
+            return "\(daysRemaining)天后过期"
+        }
+    }
+
+    // 计算属性：状态颜色
+    var statusColor: Color {
+        if isExpired {
+            return .red
+        } else if daysRemaining == 0 {
+            return .orange
+        } else if daysRemaining <= 3 {
+            return .yellow
+        } else {
+            return .green
+        }
+    }
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -387,6 +451,8 @@ enum WatchRequest: String, Codable {
     case getTrackerGoals
     case getBillItems
     case getNotes
+    case getStoreProducts
+    case getUserItems
 }
 
 enum ResponseKey: String, Codable {
@@ -948,6 +1014,72 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取笔记数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 商店相关方法
+
+    /// 获取商品列表
+    func getStoreProducts() async throws -> [StoreProduct] {
+        logger.info("发送 getStoreProducts 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getStoreProducts.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到商品数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([StoreProduct].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析商品数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取商品数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    /// 获取用户物品列表
+    func getUserItems() async throws -> [UserItemGroup] {
+        logger.info("发送 getUserItems 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getUserItems.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到用户物品数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([UserItemGroup].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析用户物品数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取用户物品数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }
