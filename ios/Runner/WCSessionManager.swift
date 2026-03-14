@@ -47,6 +47,7 @@ enum WatchRequest: String {
     case getTimers
     case getTodoTasks
     case getDayItems
+    case getTrackerGoals
 }
 
 // MARK: - WCSession Manager
@@ -188,6 +189,8 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetTodoTasks(replyHandler: replyHandler)
         case .getDayItems:
             handleGetDayItems(replyHandler: replyHandler)
+        case .getTrackerGoals:
+            handleGetTrackerGoals(replyHandler: replyHandler)
         }
     }
 
@@ -651,6 +654,39 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             self.logger.info("成功获取纪念日数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 目标追踪相关处理方法
+
+    private func handleGetTrackerGoals(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getTrackerGoals 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求追踪目标数据
+        methodChannel?.invokeMethod("getWatchTrackerGoals", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取追踪目标数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取追踪目标数据，数据条数: \(data.count)")
             replyHandler([
                 "success": true,
                 "data": data
