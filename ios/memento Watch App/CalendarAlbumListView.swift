@@ -224,9 +224,15 @@ class CalendarAlbumListViewModel: ObservableObject {
 
         do {
             entries = try await WCSessionManager.shared.getCalendarAlbumEntries()
+            print("[CalendarAlbum] 获取到 \(entries.count) 个条目")
+            for entry in entries {
+                print("[CalendarAlbum] 条目: id=\(entry.id), title=\(entry.title), createdAt=\(entry.createdAt)")
+            }
             // 按日期分组
             groupEntriesByDate()
+            print("[CalendarAlbum] 分组后 \(groupedEntries.count) 个日期组")
         } catch {
+            print("[CalendarAlbum] 加载失败: \(error)")
             self.error = error.localizedDescription
         }
 
@@ -248,8 +254,13 @@ class CalendarAlbumListViewModel: ObservableObject {
                 isoFormatter.formatOptions = [.withInternetDateTime]
                 date = isoFormatter.date(from: entry.createdAt)
             }
+            if date == nil {
+                print("[CalendarAlbum] 无法解析日期: \(entry.createdAt)")
+                continue
+            }
             guard let validDate = date else { continue }
             let dateKey = formatter.string(from: validDate)
+            print("[CalendarAlbum] 条目 \(entry.id) 解析日期成功: \(dateKey)")
             grouped[dateKey, default: []].append(entry)
         }
         groupedEntries = grouped
