@@ -404,6 +404,112 @@ struct UserItemGroup: Codable, Identifiable {
     let purchasePrice: Int
 
     // 计算属性：过期状态文本
+    var expiryText: String {
+        if isExpired {
+            return "已过期"
+        } else if daysRemaining == 0 {
+            return "今天过期"
+        } else if daysRemaining <= 3 {
+            return "\(daysRemaining)天后过期"
+        } else if daysRemaining <= 7 {
+            return "\(daysRemaining)天后过期"
+        } else {
+            return "\(daysRemaining)天后过期"
+        }
+    }
+
+    // 计算属性：状态颜色
+    var statusColor: Color {
+        if isExpired {
+            return .red
+        } else if daysRemaining == 0 {
+            return .orange
+        } else if daysRemaining <= 3 {
+            return .yellow
+        } else {
+            return .green
+        }
+    }
+}
+
+// MARK: - 节点笔记本数据模型
+
+struct NodesNotebook: Codable, Identifiable {
+    let id: String
+    let title: String
+    let icon: Int
+    let color: Int
+    let nodeCount: Int
+
+    // 计算属性：笔记本颜色
+    var notebookColor: Color {
+        return Color(
+            red: Double((color >> 16) & 0xFF) / 255.0,
+            green: Double((color >> 8) & 0xFF) / 255.0,
+            blue: Double(color & 0xFF) / 255.0
+        )
+    }
+}
+
+// MARK: - 节点数据模型
+
+struct NodeItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let status: Int  // 0=todo, 1=doing, 2=done, 3=none
+    let color: Int
+    let tags: [String]
+    let notes: String?
+    let depth: Int
+    let hasChildren: Bool
+    let childrenCount: Int
+
+    // 计算属性：节点颜色
+    var nodeColor: Color {
+        return Color(
+            red: Double((color >> 16) & 0xFF) / 255.0,
+            green: Double((color >> 8) & 0xFF) / 255.0,
+            blue: Double(color & 0xFF) / 255.0
+        )
+    }
+
+    // 计算属性：状态图标
+    var statusIcon: String {
+        switch status {
+        case 0: return "circle"
+        case 1: return "clock"
+        case 2: return "checkmark.circle.fill"
+        default: return "circle"
+        }
+    }
+
+    // 计算属性：状态颜色
+    var statusColor: Color {
+        switch status {
+        case 0: return .gray
+        case 1: return .blue
+        case 2: return .green
+        default: return .gray.opacity(0.5)
+        }
+    }
+
+    // 计算属性：状态文本
+    var statusText: String {
+        switch status {
+        case 0: return "待办"
+        case 1: return "进行中"
+        case 2: return "已完成"
+        default: return ""
+        }
+    }
+}
+    let count: Int
+    let isExpired: Bool
+    let earliestExpiry: String
+    let daysRemaining: Int
+    let purchasePrice: Int
+
+    // 计算属性：过期状态文本
     var expiryStatus: String {
         if isExpired {
             return "已过期"
@@ -453,6 +559,8 @@ enum WatchRequest: String, Codable {
     case getNotes
     case getStoreProducts
     case getUserItems
+    case getNodesNotebooks
+    case getNodes
 }
 
 enum ResponseKey: String, Codable {
@@ -1080,6 +1188,75 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取用户物品数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 节点笔记本相关方法
+
+    /// 获取节点笔记本列表
+    func getNodesNotebooks() async throws -> [NodesNotebook] {
+        logger.info("发送 getNodesNotebooks 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getNodesNotebooks.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到节点笔记本数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([NodesNotebook].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析节点笔记本数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取节点笔记本数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    /// 获取指定笔记本的节点列表
+    func getNodes(notebookId: String) async throws -> [NodeItem] {
+        logger.info("发送 getNodes 请求, notebookId=\(notebookId)")
+
+        let request: [String: Any] = [
+            "request": WatchRequest.getNodes.rawValue,
+            "notebookId": notebookId
+        ]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到节点数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([NodeItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析节点数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取节点数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

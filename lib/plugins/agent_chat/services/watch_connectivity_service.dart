@@ -20,6 +20,7 @@ import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
+import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -110,6 +111,10 @@ class WatchConnectivityService {
             return await _getWatchStoreProducts();
           case 'getWatchUserItems':
             return await _getWatchUserItems();
+          case 'getWatchNodesNotebooks':
+            return await _getWatchNodesNotebooks();
+          case 'getWatchNodes':
+            return await _getWatchNodes(call.arguments);
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -1006,5 +1011,117 @@ class WatchConnectivityService {
       print('[WatchConnectivityService] 获取用户物品数据失败: $e');
       return [];
     }
+  }
+
+  // ============== 节点笔记本相关方法 ==============
+
+  /// 获取节点笔记本列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchNodesNotebooks() async {
+    try {
+      final nodesPlugin = NodesPlugin.instance;
+      final controller = nodesPlugin.controller;
+      final notebooks = controller.notebooks;
+
+      final List<Map<String, dynamic>> notebookItems = [];
+      for (final notebook in notebooks) {
+        // 递归计算节点数量
+        int nodeCount = _countAllNodes(notebook.nodes);
+
+        final data = <String, dynamic>{
+          'id': notebook.id,
+          'title': notebook.title,
+          'icon': notebook.icon.codePoint,
+          'color': notebook.color.toARGB32(),
+          'nodeCount': nodeCount,
+        };
+
+        // 移除所有 null 值
+        data.removeWhere((key, value) => value == null);
+        notebookItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${notebookItems.length} 个节点笔记本');
+      return notebookItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取节点笔记本数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 递归计算所有节点数量
+  int _countAllNodes(List<dynamic> nodes) {
+    int count = nodes.length;
+    for (var node in nodes) {
+      final children = (node as dynamic).children as List;
+      count += _countAllNodes(children);
+    }
+    return count;
+  }
+
+  /// 获取指定笔记本的节点列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchNodes(dynamic arguments) async {
+    try {
+      if (arguments is! Map) {
+        throw ArgumentError('参数必须是 Map 类型');
+      }
+
+      final notebookId = arguments['notebookId'] as String?;
+      if (notebookId == null) {
+        throw ArgumentError('缺少 notebookId 参数');
+      }
+
+      final nodesPlugin = NodesPlugin.instance;
+      final controller = nodesPlugin.controller;
+      final notebook = controller.getNotebook(notebookId);
+
+      if (notebook == null) {
+        throw Exception('未找到笔记本: $notebookId');
+      }
+
+      // 递归处理节点
+      List<Map<String, dynamic>> processNodes(List<dynamic> nodes, int depth) {
+        final List<Map<String, dynamic>> result = [];
+        for (var node in nodes) {
+          final nodeMap = node.toMap() as Map<String, dynamic>;
+          final children = (node as dynamic).children as List;
+
+          final data = <String, dynamic>{
+            'id': nodeMap['id'],
+            'title': nodeMap['title'] ?? '',
+            'status': nodeMap['status'] ?? 3, // 默认 none
+            'color': (nodeMap['color'] as int?) ?? 0xFF9E9E9E,
+            'tags': nodeMap['tags'] ?? [],
+            'notes': _truncateText(nodeMap['notes'] ?? '', 100),
+            'depth': depth,
+            'hasChildren': children.isNotEmpty,
+            'childrenCount': children.length,
+          };
+
+          // 移除所有 null 值
+          data.removeWhere((key, value) => value == null);
+          result.add(data);
+
+          // 递归处理子节点
+          if (children.isNotEmpty) {
+            result.addAll(processNodes(children, depth + 1));
+          }
+        }
+        return result;
+      }
+
+      final nodeItems = processNodes(notebook.nodes, 0);
+
+      print('[WatchConnectivityService] 返回 ${nodeItems.length} 个节点');
+      return nodeItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取节点数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 截断文本
+  String _truncateText(String text, int maxLength) {
+    if (text.length <= maxLength) return text;
+    return '${text.substring(0, maxLength)}...';
   }
 }

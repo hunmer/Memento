@@ -52,6 +52,8 @@ enum WatchRequest: String {
     case getNotes
     case getStoreProducts
     case getUserItems
+    case getNodesNotebooks
+    case getNodes
 }
 
 // MARK: - WCSession Manager
@@ -203,6 +205,17 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetStoreProducts(replyHandler: replyHandler)
         case .getUserItems:
             handleGetUserItems(replyHandler: replyHandler)
+        case .getNodesNotebooks:
+            handleGetNodesNotebooks(replyHandler: replyHandler)
+        case .getNodes:
+            guard let notebookId = message["notebookId"] as? String else {
+                replyHandler([
+                    "success": false,
+                    "error": "缺少 notebookId 参数"
+                ])
+                return
+            }
+            handleGetNodes(notebookId: notebookId, replyHandler: replyHandler)
         }
     }
 
@@ -829,6 +842,70 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             self.logger.info("成功获取用户物品数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 节点笔记本相关处理方法
+
+    private func handleGetNodesNotebooks(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getNodesNotebooks 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求节点笔记本数据
+        methodChannel?.invokeMethod("getWatchNodesNotebooks", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取节点笔记本数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取节点笔记本数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    private func handleGetNodes(notebookId: String, replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getNodes 请求: notebookId=\(notebookId)")
+
+        // 通过 MethodChannel 向 Flutter 请求节点数据
+        methodChannel?.invokeMethod("getWatchNodes", arguments: ["notebookId": notebookId]) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取节点数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取节点数据，数据条数: \(data.count)")
             replyHandler([
                 "success": true,
                 "data": data
