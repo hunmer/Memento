@@ -222,11 +222,19 @@ class FileWatchSyncService {
 
   /// 文件变化处理
   void _onFileChanged(FileSystemEvent event) {
-    // 只处理 JSON 文件
-    if (!event.path.endsWith('.json')) return;
-
     // 忽略同步快照文件
     if (event.path.contains('.sync_snapshots')) return;
+
+    // 忽略临时文件
+    if (event.path.endsWith('.tmp') ||
+        event.path.endsWith('.temp') ||
+        event.path.endsWith('.bak')) {
+      return;
+    }
+
+    // 忽略隐藏文件（以.开头）
+    final fileName = path.basename(event.path);
+    if (fileName.startsWith('.')) return;
 
     final eventType = _getEventTypeString(event.type);
     _log('检测到文件变化: ${event.path} (类型: $eventType)');
