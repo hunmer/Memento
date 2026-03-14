@@ -77,10 +77,16 @@ export class MementoClient {
    * 获取请求头
    */
   private getHeaders(): Record<string, string> {
-    return {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.config.authToken}`,
     };
+
+    // 使用 API Key 认证
+    if (this.config.apiKey) {
+      headers['X-API-Key'] = this.config.apiKey;
+    }
+
+    return headers;
   }
 
   /**
