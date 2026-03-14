@@ -572,6 +572,56 @@ struct GoodsItem: Codable, Identifiable {
     }
 }
 
+// MARK: - 日历事件数据模型
+
+struct CalendarEventItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let description: String?
+    let startTime: String
+    let endTime: String?
+    let startTimeStr: String
+    let endTimeStr: String?
+    let icon: Int?
+    let color: Int?
+    let source: String?
+    let neonBorderColor: Int
+    let dateStatus: String
+    let createdDate: String
+
+    // 计算属性：霓虹边框颜色
+    var neonColor: Color {
+        return Color(
+            red: Double((neonBorderColor >> 16) & 0xFF) / 255.0,
+            green: Double((neonBorderColor >> 8) & 0xFF) / 255.0,
+            blue: Double(neonBorderColor & 0xFF) / 255.0
+        )
+    }
+
+    // 计算属性：事件颜色
+    var eventColor: Color {
+        guard let c = color else { return .white }
+        return Color(
+            red: Double((c >> 16) & 0xFF) / 255.0,
+            green: Double((c >> 8) & 0xFF) / 255.0,
+            blue: Double(c & 0xFF) / 255.0
+        )
+    }
+
+    // 计算属性：是否是今天
+    var isToday: Bool {
+        return dateStatus == "Today"
+    }
+
+    // 计算属性：时间范围文本
+    var timeRangeText: String {
+        if let end = endTimeStr {
+            return "\(startTimeStr) - \(end)"
+        }
+        return startTimeStr
+    }
+}
+
 // MARK: - 用户物品分组数据模型（旧版）
 
 struct UserItemGroupOld: Codable, Identifiable {
@@ -638,6 +688,7 @@ enum WatchRequest: String, Codable {
     case getNodes
     case getGoodsWarehouses
     case getGoodsItems
+    case getCalendarEvents
 }
 
 enum ResponseKey: String, Codable {
@@ -1467,6 +1518,40 @@ extension WCSessionManager: WCSessionDelegate {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取物品数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 日历事件相关方法
+
+    /// 获取日历事件列表
+    func getCalendarEvents() async throws -> [CalendarEventItem] {
+        logger.info("发送 getCalendarEvents 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getCalendarEvents.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到日历事件数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([CalendarEventItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析日历事件数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取日历事件数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

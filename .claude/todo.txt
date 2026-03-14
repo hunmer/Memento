@@ -1,6 +1,144 @@
-根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\goods\goods_plugin.dart 插件添加watchos端的入口，
-增加两个页面，仓库列表页面和物品列表页面
-只需要做展示，不需要做编辑功能
-仓库列表布局参考： lib\plugins\goods\screens\warehouse_list_screen.dart 物品列表页面布局参考： lib/plugins/goods/screens/goods_list_screen.dart 需要修改成使用watchos小屏幕显示的ui
-
+根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\calendar\calendar_plugin.dart 插件添加watchos端的入口，
 ui原型参考：
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#ec5b13",
+              "background-light": "#f8f6f6",
+              "background-dark": "#000000",
+              "neon-cyan": "#00ffff",
+              "neon-purple": "#bc13fe",
+              "neon-orange": "#ec5b13",
+            },
+            fontFamily: {
+              "display": ["Public Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .neon-border-cyan { border: 1px solid #00ffff; box-shadow: 0 0 4px #00ffff; }
+        .neon-border-orange { border: 1px solid #ec5b13; box-shadow: 0 0 4px #ec5b13; }
+        .neon-border-purple { border: 1px solid #bc13fe; box-shadow: 0 0 4px #bc13fe; }
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display text-slate-100 antialiased flex items-center justify-center min-h-screen">
+<!-- Apple Watch Container (220x250) -->
+<div class="relative w-[220px] h-[250px] bg-background-dark overflow-y-auto overflow-x-hidden border border-slate-800 rounded-[40px] p-2 shadow-2xl">
+<!-- Header -->
+<div class="sticky top-0 z-10 bg-background-dark/90 backdrop-blur-md pb-2 px-1">
+<div class="flex items-center justify-between mt-1">
+<h1 class="text-xs font-bold tracking-tight text-slate-100">Schedule</h1>
+<div class="flex gap-1">
+<div class="bg-slate-800 p-1 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">search</span>
+</div>
+<div class="bg-primary p-1 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">add</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Schedule List -->
+<div class="space-y-2 pb-4">
+<!-- Card 1: Cyan Neon -->
+<div class="neon-border-cyan bg-slate-900/40 rounded-xl p-2 flex flex-col gap-1">
+<div class="flex items-start gap-2">
+<div class="mt-0.5">
+<input class="h-3 w-3 rounded-sm border-neon-cyan bg-transparent text-neon-cyan focus:ring-0 focus:ring-offset-0 checked:bg-neon-cyan" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-[10px] font-bold text-white truncate leading-tight">Design Review</h3>
+<span class="text-[8px] text-neon-cyan font-medium shrink-0">10:00 AM</span>
+</div>
+<p class="text-[8px] text-slate-400 line-clamp-1 leading-tight">Review neon UI mockups</p>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-white/10 pt-1 mt-0.5">
+<span class="text-[7px] text-slate-500">Created: Oct 20</span>
+<span class="text-[7px] font-bold text-neon-cyan">Due: Oct 25</span>
+</div>
+</div>
+<!-- Card 2: Orange Neon -->
+<div class="neon-border-orange bg-slate-900/40 rounded-xl p-2 flex flex-col gap-1">
+<div class="flex items-start gap-2">
+<div class="mt-0.5">
+<input checked="" class="h-3 w-3 rounded-sm border-neon-orange bg-transparent text-neon-orange focus:ring-0 focus:ring-offset-0 checked:bg-neon-orange" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-[10px] font-bold text-white truncate leading-tight">Sync Team</h3>
+<span class="text-[8px] text-neon-orange font-medium shrink-0">01:30 PM</span>
+</div>
+<p class="text-[8px] text-slate-400 line-clamp-1 leading-tight">Project kickoff &amp; sprint</p>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-white/10 pt-1 mt-0.5">
+<span class="text-[7px] text-slate-500">Created: Oct 21</span>
+<span class="text-[7px] font-bold text-neon-orange">Due: Oct 22</span>
+</div>
+</div>
+<!-- Card 3: Purple Neon -->
+<div class="neon-border-purple bg-slate-900/40 rounded-xl p-2 flex flex-col gap-1">
+<div class="flex items-start gap-2">
+<div class="mt-0.5">
+<input class="h-3 w-3 rounded-sm border-neon-purple bg-transparent text-neon-purple focus:ring-0 focus:ring-offset-0 checked:bg-neon-purple" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-[10px] font-bold text-white truncate leading-tight">Client Call</h3>
+<span class="text-[8px] text-neon-purple font-medium shrink-0">04:00 PM</span>
+</div>
+<p class="text-[8px] text-slate-400 line-clamp-1 leading-tight">Finalize scope details</p>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-white/10 pt-1 mt-0.5">
+<span class="text-[7px] text-slate-500">Created: Oct 22</span>
+<span class="text-[7px] font-bold text-neon-purple">Due: Oct 26</span>
+</div>
+</div>
+<!-- Card 4: Cyan Neon (Secondary) -->
+<div class="neon-border-cyan bg-slate-900/40 rounded-xl p-2 flex flex-col gap-1 opacity-80">
+<div class="flex items-start gap-2">
+<div class="mt-0.5">
+<input class="h-3 w-3 rounded-sm border-neon-cyan bg-transparent text-neon-cyan focus:ring-0 focus:ring-offset-0 checked:bg-neon-cyan" type="checkbox"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<h3 class="text-[10px] font-bold text-white truncate leading-tight">Gym Session</h3>
+<span class="text-[8px] text-neon-cyan font-medium shrink-0">06:00 PM</span>
+</div>
+<p class="text-[8px] text-slate-400 line-clamp-1 leading-tight">Cardio and strength</p>
+</div>
+</div>
+<div class="flex justify-between items-center border-t border-white/10 pt-1 mt-0.5">
+<span class="text-[7px] text-slate-500">Created: Oct 22</span>
+<span class="text-[7px] font-bold text-neon-cyan">Due: Today</span>
+</div>
+</div>
+</div>
+<!-- Subtle Home Indicator -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-slate-700 rounded-full"></div>
+</div>
+</body></html>
