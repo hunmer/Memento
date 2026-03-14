@@ -53,13 +53,14 @@ class AdaptiveSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 在 iOS 上使用 CupertinoSwitch 避免 UISwitch 语义化崩溃
+    // 在 iOS 上使用自定义开关组件，完全避免语义化问题
     if (Platform.isIOS) {
-      return CupertinoSwitch(
-        value: value,
-        onChanged: enabled ? onChanged : null,
-        activeColor: activeColor,
-        thumbColor: thumbColor,
+      return ExcludeSemantics(
+        child: _CustomCupertinoSwitch(
+          value: value,
+          onChanged: enabled ? onChanged : null,
+          activeColor: activeColor,
+        ),
       );
     }
 
@@ -72,6 +73,120 @@ class AdaptiveSwitch extends StatelessWidget {
       activeTrackColor: activeTrackColor,
       inactiveThumbColor: inactiveThumbColor,
       inactiveTrackColor: inactiveTrackColor,
+    );
+  }
+}
+
+/// 自定义 iOS 风格开关组件
+///
+/// 完全用 Flutter 绘制，不使用原生 UISwitch，避免模拟器崩溃
+class _CustomCupertinoSwitch extends StatefulWidget {
+  final bool value;
+  final ValueChanged<bool>? onChanged;
+  final Color? activeColor;
+
+  const _CustomCupertinoSwitch({
+    required this.value,
+    this.onChanged,
+    this.activeColor,
+  });
+
+  @override
+  State<_CustomCupertinoSwitch> createState() => _CustomCupertinoSwitchState();
+}
+
+class _CustomCupertinoSwitchState extends State<_CustomCupertinoSwitch>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+    if (widget.value) {
+      _controller.value = 1.0;
+    }
+  }
+
+  @override
+  void didUpdateWidget(_CustomCupertinoSwitch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      if (widget.value) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = widget.activeColor ?? CupertinoColors.activeGreen;
+    final inactiveColor = CupertinoColors.systemGrey5;
+    final thumbColor = CupertinoColors.white;
+
+    return GestureDetector(
+      onTap: widget.onChanged != null
+          ? () => widget.onChanged!(!widget.value)
+          : null,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          return Container(
+            width: 51.0,
+            height: 31.0,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.5),
+              color: Color.lerp(inactiveColor, activeColor, _animation.value),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 2,
+                  left: 2 + (_animation.value * 20),
+                  child: Container(
+                    width: 27.0,
+                    height: 27.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(13.5),
+                      color: thumbColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
