@@ -16,6 +16,7 @@ import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:Memento/plugins/bill/bill_plugin.dart';
+import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -100,6 +101,8 @@ class WatchConnectivityService {
             return await _getWatchTrackerGoals();
           case 'getWatchBillItems':
             return await _getWatchBillItems();
+          case 'getWatchNotes':
+            return await _getWatchNotes();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -792,5 +795,92 @@ class WatchConnectivityService {
       print('[WatchConnectivityService] 获取账单数据失败: $e');
       return [];
     }
+  }
+
+  // ============== 笔记相关方法 ==============
+
+  /// 获取笔记列表（供 watchOS 使用）
+  /// 返回最近更新的笔记，按文件夹分组显示
+  Future<List<Map<String, dynamic>>> _getWatchNotes() async {
+    try {
+      final notesPlugin = NotesPlugin.instance;
+      final controller = notesPlugin.controller;
+
+      // 获取所有笔记
+      final allNotes = controller.searchNotes(query: '');
+
+      // 按更新时间降序排序，取最近的笔记
+      allNotes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      final recentNotes = allNotes.take(20).toList(); // 限制为最近 20 条
+
+      final List<Map<String, dynamic>> noteItems = [];
+      for (final note in recentNotes) {
+        // 获取笔记所属文件夹信息
+        final folder = controller.getFolder(note.folderId);
+        String folderName = '默认';
+        int folderColor = 0xFFEC5B13; // 默认主题色
+        int folderIcon = 0xe2c7; // folder 图标
+
+        if (folder != null) {
+          folderName = folder.name;
+          folderColor = folder.color.toARGB32();
+          folderIcon = folder.icon.codePoint;
+        }
+
+        // 根据文件夹名称分配霓虹边框颜色
+        final neonBorderColor = _getNoteNeonColor(folderName);
+
+        final data = <String, dynamic>{
+          'id': note.id,
+          'title': note.title,
+          'contentPreview': note.content.length > 50
+              ? '${note.content.substring(0, 50)}...'
+              : note.content,
+          'folderId': note.folderId,
+          'folderName': folderName,
+          'folderColor': folderColor,
+          'folderIcon': folderIcon,
+          'neonBorderColor': neonBorderColor,
+          'tags': note.tags,
+          'createdAt': note.createdAt.toIso8601String(),
+          'updatedAt': note.updatedAt.toIso8601String(),
+        };
+
+        // 移除所有 null 值，避免 WCSession 传输问题
+        data.removeWhere((key, value) => value == null);
+        noteItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${noteItems.length} 条笔记');
+      return noteItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取笔记数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 根据文件夹名称获取霓虹边框颜色
+  int _getNoteNeonColor(String folderName) {
+    final lowerName = folderName.toLowerCase();
+
+    if (lowerName.contains('work') ||
+        lowerName.contains('工作') ||
+        lowerName.contains('项目')) {
+      return 0xFF00F2FF; // 霓虹青
+    } else if (lowerName.contains('personal') ||
+        lowerName.contains('个人') ||
+        lowerName.contains('生活')) {
+      return 0xFFBC13FE; // 霓虹紫
+    } else if (lowerName.contains('idea') ||
+        lowerName.contains('想法') ||
+        lowerName.contains('创意')) {
+      return 0xFF39FF14; // 霓虹绿
+    } else if (lowerName.contains('study') ||
+        lowerName.contains('学习') ||
+        lowerName.contains('笔记')) {
+      return 0xFFFFD700; // 金色
+    }
+
+    return 0xFF00F2FF; // 默认霓虹青
   }
 }

@@ -303,6 +303,71 @@ struct BillItem: Codable, Identifiable {
     }
 }
 
+// MARK: - 笔记数据模型
+
+struct NoteItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let contentPreview: String
+    let folderId: String
+    let folderName: String
+    let folderColor: Int
+    let folderIcon: Int
+    let neonBorderColor: Int
+    let tags: [String]
+    let createdAt: String
+    let updatedAt: String
+
+    // 计算属性：霓虹边框颜色
+    var neonColor: Color {
+        return Color(
+            red: Double((neonBorderColor >> 16) & 0xFF) / 255.0,
+            green: Double((neonBorderColor >> 8) & 0xFF) / 255.0,
+            blue: Double(neonBorderColor & 0xFF) / 255.0
+        )
+    }
+
+    // 计算属性：文件夹颜色
+    var folderItemColor: Color {
+        return Color(
+            red: Double((folderColor >> 16) & 0xFF) / 255.0,
+            green: Double((folderColor >> 8) & 0xFF) / 255.0,
+            blue: Double(folderColor & 0xFF) / 255.0
+        )
+    }
+
+    // 计算属性：格式化更新时间
+    var formattedUpdateTime: String {
+        let formatter = ISO8601DateFormatter()
+        guard let date = formatter.date(from: updatedAt) else {
+            return ""
+        }
+        let now = Date()
+        let calendar = Calendar.current
+
+        // 计算时间差
+        let components = calendar.dateComponents([.minute, .hour, .day], from: date, to: now)
+
+        if let days = components.day, days > 0 {
+            if days == 1 {
+                return "Yesterday"
+            } else if days < 7 {
+                return "\(days)d ago"
+            } else {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "MMM d"
+                return dateFormatter.string(from: date)
+            }
+        } else if let hours = components.hour, hours > 0 {
+            return "\(hours)h ago"
+        } else if let minutes = components.minute, minutes > 0 {
+            return "\(minutes)m ago"
+        } else {
+            return "Just now"
+        }
+    }
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -321,6 +386,7 @@ enum WatchRequest: String, Codable {
     case getDayItems
     case getTrackerGoals
     case getBillItems
+    case getNotes
 }
 
 enum ResponseKey: String, Codable {
@@ -848,6 +914,40 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取账单数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 笔记相关方法
+
+    /// 获取笔记列表
+    func getNotes() async throws -> [NoteItem] {
+        logger.info("发送 getNotes 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getNotes.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到笔记数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([NoteItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析笔记数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取笔记数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }
