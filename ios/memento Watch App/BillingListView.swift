@@ -91,7 +91,7 @@ struct BillDateGroup: View {
             Text(formatDateLabel(dateKey))
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(primaryColor.opacity(0.7))
-                .tracking(.wide(0.5))
+                .tracking(0.5)
 
             // 账单项列表
             VStack(spacing: 4) {

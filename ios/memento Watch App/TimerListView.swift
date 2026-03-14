@@ -59,7 +59,7 @@ struct TimerListView: View {
                     TimerRowView(timer: timer)
                 }
             }
-            .listStyle(.carousel)
+            .listStyle(.elliptical)
             .refreshable {
                 await viewModel.loadTimers()
             }

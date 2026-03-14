@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct NodesNotebooksView: View {
     @StateObject private var viewModel = NodesNotebooksViewModel()

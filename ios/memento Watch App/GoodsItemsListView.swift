@@ -11,12 +11,14 @@ import Combine
 /// 物品列表视图
 struct GoodsItemsListView: View {
     let warehouse: GoodsWarehouse?
+    let title: String
 
-    @StateObject private var viewModel = ViewModel()
+    @StateObject private var viewModel: GoodsItemsViewModel
 
-    init(warehouse: GoodsWarehouse? = nil) {
-        _warehouse = warehouse
-        _ = viewModel = ViewModel()
+    init(warehouse: GoodsWarehouse?, title: String = "物品") {
+        self.warehouse = warehouse
+        self.title = title
+        _viewModel = StateObject(wrappedValue: GoodsItemsViewModel(warehouse: warehouse))
     }
 
     var body: some View {
@@ -52,6 +54,7 @@ struct GoodsItemsListView: View {
                 .navigationTitle(warehouse?.title ?? "所有物品")
             }
         }
+        .task { await viewModel.loadData() }
     }
 }
 
@@ -98,11 +101,9 @@ struct GoodsItemRow: View {
             // 仓库和状态信息
             HStack(spacing: 8) {
                 // 仓库名
-                if let warehouseName = item.warehouseName {
-                    Text(warehouseName)
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
+                Text(item.warehouseName)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
 
                 Spacer()
 
@@ -129,14 +130,14 @@ struct GoodsItemRow: View {
 
 /// 视图模型
 @MainActor
-class ViewModel: ObservableObject {
+class GoodsItemsViewModel: ObservableObject {
     let warehouse: GoodsWarehouse?
     @Published var items: [GoodsItem] = []
     @Published var isLoading: Bool = false
     @Published var error: String?
 
     init(warehouse: GoodsWarehouse?) {
-        _warehouse = warehouse
+        self.warehouse = warehouse
     }
 
     func loadData() async {
@@ -146,11 +147,9 @@ class ViewModel: ObservableObject {
         do {
             let items = try await WCSessionManager.shared.getGoodsItems(warehouseId: warehouse?.id)
             self.items = items
-            isLoading = false
         } catch {
-            let errorMessage = error.localizedDescription
-            error = errorMessage
-            isLoading = false
+            self.error = error.localizedDescription
         }
+        isLoading = false
     }
 }
