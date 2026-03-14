@@ -93,6 +93,7 @@ void main(List<String> args) async {
   final authService = AuthService(
     storageService: storageService,
     jwtSecret: config.jwtSecret,
+    dataDir: config.dataDir,
     tokenExpiryDays: config.tokenExpiryDays,
   );
   logger.info('认证服务初始化完成');
@@ -333,7 +334,7 @@ void main(List<String> args) async {
           headers: {
             ACCESS_CONTROL_ALLOW_ORIGIN: config.corsOrigins.join(','),
             ACCESS_CONTROL_ALLOW_METHODS: 'GET, POST, PUT, DELETE, OPTIONS',
-            ACCESS_CONTROL_ALLOW_HEADERS: 'Origin, Content-Type, Authorization',
+            ACCESS_CONTROL_ALLOW_HEADERS: 'Origin, Content-Type, Authorization, X-API-Key',
           },
         ))
         .addMiddleware(logRequests())
@@ -364,6 +365,9 @@ void main(List<String> args) async {
   print('  POST /api/v1/auth/enable-api  - 启用 API 访问');
   print('  POST /api/v1/auth/disable-api - 禁用 API 访问');
   print('  GET  /api/v1/auth/api-status  - API 状态查询');
+  print('  POST /api/v1/auth/api-keys    - 创建 API Key');
+  print('  GET  /api/v1/auth/api-keys    - 列出 API Keys');
+  print('  DELETE /api/v1/auth/api-keys/<id> - 撤销 API Key');
   print('  POST /api/v1/sync/push     - 推送文件 (需认证)');
   print('  GET  /api/v1/sync/pull/*   - 拉取文件 (需认证)');
   print('  GET  /api/v1/sync/list     - 文件列表 (需认证)');

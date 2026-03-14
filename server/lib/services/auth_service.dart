@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:shared_models/shared_models.dart';
 
 import 'file_storage_service.dart';
+import '../models/api_key.dart';
 
 /// 认证服务 - JWT Token 管理和用户认证
 class AuthService {
@@ -11,13 +12,19 @@ class AuthService {
   final int _tokenExpiryDays;
   final _uuid = const Uuid();
 
+  /// API Key 存储管理
+  late final ApiKeyStore _apiKeyStore;
+
   AuthService({
     required FileStorageService storageService,
     required String jwtSecret,
+    required String dataDir,
     int tokenExpiryDays = 36500, // 100年 = 永久有效
   })  : _storageService = storageService,
         _jwtSecret = jwtSecret,
-        _tokenExpiryDays = tokenExpiryDays;
+        _tokenExpiryDays = tokenExpiryDays {
+    _apiKeyStore = ApiKeyStore(dataDir);
+  }
 
   /// 注册新用户
   Future<AuthResponse> register(RegisterRequest request) async {
@@ -191,4 +198,100 @@ class AuthService {
 
     return jwt.sign(SecretKey(_jwtSecret));
   }
+
+  // ==================== API Key 管理 ====================
+
+  /// 生成新的 API Key
+  ///
+  /// [userId] 用户 ID
+  /// [name] API Key 名称
+  /// [encryptionKey] 加密密钥 (Base64)
+  /// [expiry] 过期选项
+  Future<ApiKey> generateApiKey({
+    required String userId,
+    required String name,
+    required String encryptionKey,
+    ApiKeyExpiry expiry = ApiKeyExpiry.never,
+  }) async {
+    // 验证用户存在
+    final user = await _storageService.findUserById(userId);
+    if (user == null) {
+      throw Exception('用户不存在');
+    }
+
+    // 生成 API Key
+    final apiKey = ApiKey.generate(
+      userId: userId,
+      name: name,
+      encryptionKey: encryptionKey,
+      expiry: expiry,
+    );
+
+    // 保存到存储
+    await _apiKeyStore.saveKey(apiKey);
+
+    return apiKey;
+  }
+
+  /// 验证 API Key
+  ///
+  /// 返回验证结果，包含用户 ID 和加密密钥
+  /// 如果验证失败返回 null
+  Future<ApiKeyValidationResult?> verifyApiKey(String keyValue) async {
+    final apiKey = await _apiKeyStore.findByKey(keyValue);
+
+    if (apiKey == null) {
+      return null;
+    }
+
+    // 检查是否过期
+    if (apiKey.isExpired) {
+      return null;
+    }
+
+    // 更新最后使用时间
+    await _apiKeyStore.updateLastUsed(keyValue);
+
+    return ApiKeyValidationResult(
+      userId: apiKey.userId,
+      encryptionKey: apiKey.encryptionKey,
+      keyId: apiKey.id,
+      keyName: apiKey.name,
+    );
+  }
+
+  /// 获取用户的所有 API Keys
+  Future<List<ApiKey>> listApiKeys(String userId) async {
+    return await _apiKeyStore.findByUserId(userId);
+  }
+
+  /// 撤销 API Key
+  Future<bool> revokeApiKey(String userId, String keyId) async {
+    final keys = await _apiKeyStore.findByUserId(userId);
+    final key = keys.firstWhere(
+      (k) => k.id == keyId,
+      orElse: () => throw Exception('API Key 不存在'),
+    );
+
+    if (key.userId != userId) {
+      throw Exception('无权操作此 API Key');
+    }
+
+    return await _apiKeyStore.deleteKey(keyId);
+  }
+}
+
+/// API Key 验证结果
+class ApiKeyValidationResult {
+  final String userId;
+  final String encryptionKey;
+  final String keyId;
+  final String keyName;
+
+  ApiKeyValidationResult({
+    required this.userId,
+    required this.encryptionKey,
+    required this.keyId,
+    required this.keyName,
+  });
 }
