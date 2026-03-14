@@ -282,7 +282,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     context,
                   ).copyWith(textScaler: const TextScaler.linear(1.0)),
                   child: StyledToast(
-                    child: child!,
+                    // 在 iOS 模拟器上禁用语义化以避免 UISwitch 崩溃
+                    child: kIsWeb
+                        ? child!
+                        : ExcludeSemantics(
+                            excluding: !kReleaseMode &&
+                                defaultTargetPlatform == TargetPlatform.iOS,
+                            child: child!,
+                          ),
                   ),
                 );
               },
