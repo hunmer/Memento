@@ -239,10 +239,17 @@ class CalendarAlbumListViewModel: ObservableObject {
 
         var grouped: [String: [CalendarAlbumEntry]] = [:]
         for entry in entries {
-            // 从 createdAt 提取日期
+            // 从 createdAt 提取日期（支持带毫秒的 ISO8601 格式）
             let isoFormatter = ISO8601DateFormatter()
-            guard let date = isoFormatter.date(from: entry.createdAt) else { continue }
-            let dateKey = formatter.string(from: date)
+            isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            // 尝试带毫秒解析，失败则尝试不带毫秒
+            var date = isoFormatter.date(from: entry.createdAt)
+            if date == nil {
+                isoFormatter.formatOptions = [.withInternetDateTime]
+                date = isoFormatter.date(from: entry.createdAt)
+            }
+            guard let validDate = date else { continue }
+            let dateKey = formatter.string(from: validDate)
             grouped[dateKey, default: []].append(entry)
         }
         groupedEntries = grouped
