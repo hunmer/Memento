@@ -35,7 +35,6 @@ struct StoreListView: View {
                 }
                 .tag(1)
         }
-        .tabViewStyle(.verticalPage)
         .navigationTitle("Store")
         .task {
             await viewModel.loadAllData()
@@ -175,7 +174,7 @@ struct ProductItemRow: View {
 
                 Text(product.stockStatus)
                     .font(.system(size: 8))
-                    .foregroundStyle(product.stock > 0 ? .secondary : .red)
+                    .foregroundStyle(product.stock > 0 ? Color.secondary : Color.red)
             }
         }
         .padding(10)
@@ -219,7 +218,7 @@ struct UserItemRow: View {
                     .foregroundStyle(item.isExpired ? .gray : .white)
                     .lineLimit(1)
 
-                Text(item.expiryStatus)
+                Text(item.expiryText)
                     .font(.system(size: 9))
                     .foregroundStyle(item.statusColor)
             }

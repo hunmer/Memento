@@ -8,6 +8,7 @@
 import WatchConnectivity
 import os.log
 import Combine
+import SwiftUI
 
 // MARK: - 数据模型
 
@@ -1499,7 +1500,7 @@ extension WCSessionManager: WCSessionDelegate {
                 } else if let errorMessage = response["error"] as? String {
                     continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
                 } else {
-                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"))
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
                 }
             }, errorHandler: { error in
                 self.logger.error("获取仓库数据失败: \(error.localizedDescription)")
@@ -1532,9 +1533,9 @@ extension WCSessionManager: WCSessionDelegate {
                         continuation.resume(throwing: error)
                     }
                 } else if let errorMessage = response["error"] as? String {
-                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
                 } else {
-                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"))
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
                 }
             }, errorHandler: { error in
                 self.logger.error("获取物品数据失败: \(error.localizedDescription)")

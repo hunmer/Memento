@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct TrackerGoalsView: View {
     @StateObject private var viewModel = TrackerGoalsViewModel()
