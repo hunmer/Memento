@@ -220,6 +220,49 @@ struct DayItem: Codable, Identifiable {
     }
 }
 
+// MARK: - 目标追踪数据模型
+
+struct TrackerGoal: Codable, Identifiable {
+    let id: String
+    let name: String
+    let icon: String?
+    let iconColor: Int?
+    let unitType: String
+    let targetValue: Double
+    let currentValue: Double
+    let progress: Double
+    let isCompleted: Bool
+    let group: String
+    let accentColor: Int
+    let dateSettingsType: String?
+    let dailyCompleted: [Bool]?
+
+    // 计算属性：进度百分比
+    var progressPercent: Int {
+        return min(Int(progress * 100), 100)
+    }
+
+    // 计算属性：进度显示文本
+    var progressText: String {
+        if targetValue >= 1000 {
+            return String(format: "%.1fk/%.0fk", currentValue / 1000, targetValue / 1000)
+        } else if targetValue >= 100 {
+            return String(format: "%.0f/%.0f", currentValue, targetValue)
+        } else {
+            return String(format: "%.1f/%.1f", currentValue, targetValue)
+        }
+    }
+
+    // 计算属性：霓虹色
+    var neonColor: Color {
+        return Color(
+            red: Double((accentColor >> 16) & 0xFF) / 255.0,
+            green: Double((accentColor >> 8) & 0xFF) / 255.0,
+            blue: Double(accentColor & 0xFF) / 255.0
+        )
+    }
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -236,6 +279,7 @@ enum WatchRequest: String, Codable {
     case getTimers
     case getTodoTasks
     case getDayItems
+    case getTrackerGoals
 }
 
 enum ResponseKey: String, Codable {
@@ -695,6 +739,40 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取纪念日数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 目标追踪相关方法
+
+    /// 获取追踪目标列表
+    func getTrackerGoals() async throws -> [TrackerGoal] {
+        logger.info("发送 getTrackerGoals 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getTrackerGoals.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到追踪目标数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([TrackerGoal].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析追踪目标数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取追踪目标数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

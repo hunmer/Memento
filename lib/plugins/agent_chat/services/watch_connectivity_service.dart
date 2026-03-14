@@ -14,6 +14,7 @@ import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
+import 'package:Memento/plugins/tracker/tracker_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -94,6 +95,8 @@ class WatchConnectivityService {
             return await _getWatchTodoTasks();
           case 'getWatchDayItems':
             return await _getWatchDayItems();
+          case 'getWatchTrackerGoals':
+            return await _getWatchTrackerGoals();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -612,5 +615,129 @@ class WatchConnectivityService {
       print('[WatchConnectivityService] 获取纪念日数据失败: $e');
       return [];
     }
+  }
+
+  // ============== 目标追踪相关方法 ==============
+
+  /// 获取追踪目标列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchTrackerGoals() async {
+    try {
+      final trackerPlugin = TrackerPlugin.instance;
+      final controller = trackerPlugin.controller;
+      final goals = controller.goals;
+
+      final now = DateTime.now();
+      final weekStart = now.subtract(Duration(days: now.weekday - 1));
+
+      final List<Map<String, dynamic>> goalItems = [];
+      for (final goal in goals) {
+        // 计算本周每日完成情况
+        final dailyCompleted = await _calculateDailyCompleted(
+          goal.id,
+          weekStart,
+          controller,
+        );
+
+        // 根据分组分配颜色
+        final accentColor = _getGoalAccentColor(goal.group);
+
+        final data = <String, dynamic>{
+          'id': goal.id,
+          'name': goal.name,
+          'icon': goal.icon,
+          'iconColor': goal.iconColor,
+          'unitType': goal.unitType,
+          'targetValue': goal.targetValue,
+          'currentValue': goal.currentValue,
+          'progress': goal.targetValue > 0 ? goal.currentValue / goal.targetValue : 0,
+          'isCompleted': goal.isCompleted,
+          'group': goal.group,
+          'accentColor': accentColor,
+          'dateSettingsType': goal.dateSettings.type,
+          'dailyCompleted': dailyCompleted,
+        };
+
+        // 移除所有 null 值，避免 WCSession 传输问题
+        data.removeWhere((key, value) => value == null);
+        goalItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${goalItems.length} 个追踪目标');
+      return goalItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取追踪目标数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 计算本周每日完成情况（是否达到目标）
+  Future<List<bool>> _calculateDailyCompleted(
+    String goalId,
+    DateTime weekStart,
+    dynamic controller,
+  ) async {
+    final dailyCompleted = List<bool>.filled(7, false);
+
+    try {
+      final records = await controller.getRecordsForGoal(goalId);
+
+      // 按天分组计算
+      final dailyTotals = <int, double>{};
+      for (final record in records as List) {
+        final recordDate = record.recordedAt as DateTime;
+        // 检查记录是否在本周
+        if (recordDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
+            recordDate.isBefore(weekStart.add(const Duration(days: 7)))) {
+          final dayIndex = recordDate.weekday - 1;
+          dailyTotals[dayIndex] = (dailyTotals[dayIndex] ?? 0) + (record.value as double);
+        }
+      }
+
+      // 找到对应的目标 targetValue
+      final goals = controller.goals as List;
+      double targetValue = 1; // 默认值
+      for (final g in goals) {
+        if ((g as Goal).id == goalId) {
+          targetValue = g.targetValue;
+          break;
+        }
+      }
+
+      // 标记完成的天
+      for (final entry in dailyTotals.entries) {
+        dailyCompleted[entry.key] = entry.value >= targetValue;
+      }
+    } catch (e) {
+      print('[WatchConnectivityService] 计算每日完成情况失败: $e');
+    }
+
+    return dailyCompleted;
+  }
+
+  /// 根据目标分组获取颜色
+  int _getGoalAccentColor(String group) {
+    final lowerGroup = group.toLowerCase();
+
+    if (lowerGroup.contains('健康') ||
+        lowerGroup.contains('运动') ||
+        lowerGroup.contains('fitness') ||
+        lowerGroup.contains('health')) {
+      return 0xFF39FF14; // 霓虹绿
+    } else if (lowerGroup.contains('学习') ||
+        lowerGroup.contains('阅读') ||
+        lowerGroup.contains('study') ||
+        lowerGroup.contains('read')) {
+      return 0xFF00F3FF; // 霓虹青
+    } else if (lowerGroup.contains('工作') ||
+        lowerGroup.contains('效率') ||
+        lowerGroup.contains('work')) {
+      return 0xFFBC13FE; // 霓虹紫
+    } else if (lowerGroup.contains('生活') ||
+        lowerGroup.contains('日常') ||
+        lowerGroup.contains('life')) {
+      return 0xFFFF6B35; // 橙色
+    }
+
+    return 0xFF39FF14; // 默认霓虹绿
   }
 }

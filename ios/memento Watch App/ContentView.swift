@@ -21,6 +21,7 @@ enum CardDestination: String {
     case habits = "习惯"
     case timers = "计时器"
     case day = "纪念日"
+    case tracker = "目标追踪"
     case settings = "设置"
 }
 
@@ -47,6 +48,7 @@ struct ContentView: View {
         DemoCard(title: "联系人", subtitle: "通讯录", icon: "person.2.fill", color: .cyan, destination: .contacts),
         DemoCard(title: "计时器", subtitle: "时间管理", icon: "timer", color: .gray, destination: .timers),
         DemoCard(title: "纪念日", subtitle: "重要日期", icon: "heart.fill", color: .orange, destination: .day),
+        DemoCard(title: "目标追踪", subtitle: "进度管理", icon: "target", color: Color(red: 0.22, green: 1.0, blue: 0.08), destination: .tracker),
         // DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple, destination: .reminder),
         // DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray, destination: .settings)
     ]
@@ -78,6 +80,8 @@ struct ContentView: View {
             TimerListView()
         case .day:
             DayListView()
+        case .tracker:
+            TrackerGoalsView()
         case .reminder:
             PlaceholderView(title: card.title, icon: card.icon, color: card.color)
         case .settings:
