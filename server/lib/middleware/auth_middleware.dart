@@ -115,3 +115,10 @@ String? getUserIdFromContext(Request request) {
 AuthContext? getAuthContextFromRequest(Request request) {
   return request.context['authContext'] as AuthContext?;
 }
+
+/// 从请求头获取设备 ID
+///
+/// 客户端应通过 X-Device-ID 请求头发送设备标识
+String? getDeviceIdFromContext(Request request) {
+  return request.headers['x-device-id'];
+}

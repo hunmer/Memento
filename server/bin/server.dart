@@ -11,6 +11,7 @@ import 'package:memento_server/config/server_config.dart';
 import 'package:memento_server/services/file_storage_service.dart';
 import 'package:memento_server/services/auth_service.dart';
 import 'package:memento_server/services/plugin_data_service.dart';
+import 'package:memento_server/services/websocket_manager.dart';
 import 'package:memento_server/routes/auth_routes.dart';
 import 'package:memento_server/routes/sync_routes.dart';
 import 'package:memento_server/routes/plugin_routes/chat_routes.dart';
@@ -103,6 +104,10 @@ void main(List<String> args) async {
   await pluginDataService.initialize();
   logger.info('插件数据服务初始化完成');
 
+  // 初始化 WebSocket 管理器
+  final webSocketManager = WebSocketManager();
+  logger.info('WebSocket 管理器初始化完成');
+
   // 3. 创建路由
   final router = Router();
 
@@ -124,7 +129,7 @@ void main(List<String> args) async {
   router.mount('/api/v1/auth', authRoutes.router.call);
 
   // 同步路由 (需要认证)
-  final syncRoutes = SyncRoutes(storageService);
+  final syncRoutes = SyncRoutes(storageService, webSocketManager);
   router.mount(
     '/api/v1/sync',
     Pipeline()
