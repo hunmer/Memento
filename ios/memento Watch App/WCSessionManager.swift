@@ -263,6 +263,46 @@ struct TrackerGoal: Codable, Identifiable {
     }
 }
 
+// MARK: - 账单数据模型
+
+struct BillItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let category: String
+    let amount: Double
+    let date: String
+    let isExpense: Bool
+    let icon: Int
+    let iconColor: Int
+    let note: String?
+    let isSubscription: Bool?
+
+    // 计算属性：格式化金额
+    var formattedAmount: String {
+        let absAmount = abs(amount)
+        if absAmount >= 1000 {
+            return String(format: "%@%.1fk", isExpense ? "-" : "+", absAmount / 1000)
+        } else {
+            return String(format: "%@%.2f", isExpense ? "-" : "+", absAmount)
+        }
+    }
+
+    // 计算属性：图标颜色
+    var itemIconColor: Color {
+        return Color(
+            red: Double((iconColor >> 16) & 0xFF) / 255.0,
+            green: Double((iconColor >> 8) & 0xFF) / 255.0,
+            blue: Double(iconColor & 0xFF) / 255.0
+        )
+    }
+
+    // 计算属性：金额颜色
+    var amountColor: Color {
+        return isExpense ? Color(red: 1.0, green: 0.231, blue: 0.188) :  // 红色 #FF3B30
+               Color(red: 0.204, green: 0.78, blue: 0.349)  // 绿色 #34C759
+    }
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -280,6 +320,7 @@ enum WatchRequest: String, Codable {
     case getTodoTasks
     case getDayItems
     case getTrackerGoals
+    case getBillItems
 }
 
 enum ResponseKey: String, Codable {
@@ -773,6 +814,40 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取追踪目标数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 账单相关方法
+
+    /// 获取账单列表
+    func getBillItems() async throws -> [BillItem] {
+        logger.info("发送 getBillItems 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getBillItems.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到账单数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([BillItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析账单数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取账单数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }

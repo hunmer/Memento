@@ -48,6 +48,7 @@ enum WatchRequest: String {
     case getTodoTasks
     case getDayItems
     case getTrackerGoals
+    case getBillItems
 }
 
 // MARK: - WCSession Manager
@@ -191,6 +192,8 @@ extension WCSessionManager: WCSessionDelegate {
             handleGetDayItems(replyHandler: replyHandler)
         case .getTrackerGoals:
             handleGetTrackerGoals(replyHandler: replyHandler)
+        case .getBillItems:
+            handleGetBillItems(replyHandler: replyHandler)
         }
     }
 
@@ -687,6 +690,39 @@ extension WCSessionManager: WCSessionDelegate {
             }
 
             self.logger.info("成功获取追踪目标数据，数据条数: \(data.count)")
+            replyHandler([
+                "success": true,
+                "data": data
+            ])
+        }
+    }
+
+    // MARK: - 账单相关处理方法
+
+    private func handleGetBillItems(replyHandler: @escaping ([String: Any]) -> Void) {
+        logger.info("处理 getBillItems 请求")
+
+        // 通过 MethodChannel 向 Flutter 请求账单数据
+        methodChannel?.invokeMethod("getWatchBillItems", arguments: nil) { result in
+            if let flutterError = result as? FlutterError {
+                self.logger.error("获取账单数据失败: \(flutterError.message ?? "未知错误")")
+                replyHandler([
+                    "success": false,
+                    "error": flutterError.message ?? "未知错误"
+                ])
+                return
+            }
+
+            guard let data = result as? [[String: Any]] else {
+                self.logger.error("无效的返回数据格式: \(String(describing: result))")
+                replyHandler([
+                    "success": false,
+                    "error": "无效的返回数据格式"
+                ])
+                return
+            }
+
+            self.logger.info("成功获取账单数据，数据条数: \(data.count)")
             replyHandler([
                 "success": true,
                 "data": data
