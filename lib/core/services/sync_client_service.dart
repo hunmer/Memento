@@ -113,27 +113,42 @@ class SyncClientService {
     }
 
     try {
-      // 1. 读取本地文件
+      // 1. 读取本地文件内容
       final localContent = await _storage.readString(filePath);
       if (localContent == null) {
         return SyncResult.noChanges(filePath: filePath);
       }
 
-      final localJson = jsonDecode(localContent) as Map<String, dynamic>;
+      // 2. 判断文件类型并计算 MD5
+      final isJsonFile = filePath.toLowerCase().endsWith('.json');
+      String currentMd5;
 
-      // 2. 读取上次同步的 MD5 快照
+      if (isJsonFile) {
+        // JSON 文件：规范化后计算 MD5
+        try {
+          final localJson = jsonDecode(localContent) as Map<String, dynamic>;
+          currentMd5 = _encryption.computeMd5(localJson);
+        } catch (e) {
+          // JSON 解析失败，按普通文本处理
+          currentMd5 = _encryption.computeStringMd5(localContent);
+        }
+      } else {
+        // 非 JSON 文件：直接计算字符串 MD5
+        currentMd5 = _encryption.computeStringMd5(localContent);
+      }
+
+      // 3. 读取上次同步的 MD5 快照
       final snapshotMd5 = await _getSyncMd5(filePath);
-      final currentMd5 = _encryption.computeMd5(localJson);
 
-      // 3. 如果没有变化，跳过
+      // 4. 如果没有变化，跳过
       if (snapshotMd5 == currentMd5) {
         return SyncResult.noChanges(filePath: filePath);
       }
 
-      // 4. 加密数据
-      final encryptedData = _encryption.encryptData(localJson);
+      // 5. 加密数据（统一使用字符串加密）
+      final encryptedData = _encryption.encryptString(localContent);
 
-      // 5. 发送到服务器
+      // 6. 发送到服务器
       final response = await http.post(
         Uri.parse('$_serverUrl/api/v1/sync/push'),
         headers: _authHeaders(),
@@ -145,7 +160,7 @@ class SyncClientService {
         }),
       );
 
-      // 6. 处理响应
+      // 7. 处理响应
       if (response.statusCode == 200) {
         // 成功: 更新 MD5 快照
         await _saveSyncMd5(filePath, currentMd5);
@@ -289,11 +304,11 @@ class SyncClientService {
     String encryptedData,
     String serverMd5,
   ) async {
-    // 1. 解密服务器数据
-    final serverJson = _encryption.decryptData(encryptedData);
+    // 1. 解密服务器数据（使用字符串解密，支持任意文件类型）
+    final serverContent = _encryption.decryptString(encryptedData);
 
     // 2. 覆盖本地文件
-    await _storage.writeString(filePath, jsonEncode(serverJson));
+    await _storage.writeString(filePath, serverContent);
 
     // 3. 更新 MD5 快照
     await _saveSyncMd5(filePath, serverMd5);
@@ -347,16 +362,35 @@ class SyncClientService {
         final keys = await _storage.getKeysWithPrefix(dir);
 
         for (final key in keys) {
-          // 只处理 JSON 文件
-          if (!key.endsWith('.json')) continue;
+          // 忽略临时文件和隐藏文件
+          if (key.endsWith('.tmp') ||
+              key.endsWith('.temp') ||
+              key.endsWith('.bak') ||
+              key.split('/').last.startsWith('.')) {
+            continue;
+          }
 
           try {
-            final json = await _storage.readJson(key);
-            if (json is Map<String, dynamic>) {
-              final md5 = _encryption.computeMd5(json);
+            // 尝试读取文件内容
+            final content = await _storage.readString(key);
+            if (content != null) {
+              // 根据文件类型计算 MD5
+              String md5Hash;
+              if (key.toLowerCase().endsWith('.json')) {
+                try {
+                  final json = jsonDecode(content) as Map<String, dynamic>;
+                  md5Hash = _encryption.computeMd5(json);
+                } catch (e) {
+                  // JSON 解析失败，按普通文本处理
+                  md5Hash = _encryption.computeStringMd5(content);
+                }
+              } else {
+                md5Hash = _encryption.computeStringMd5(content);
+              }
+
               // 统一使用正斜杠作为路径分隔符
               final normalizedPath = key.replaceAll('\\', '/');
-              files.add({'path': normalizedPath, 'md5': md5});
+              files.add({'path': normalizedPath, 'md5': md5Hash});
             }
           } catch (e) {
             // 忽略读取失败的文件
