@@ -16,7 +16,7 @@ class TimerController {
   // 从存储加载任务
   Future<Map<String, dynamic>> loadTasks() async {
     try {
-      final data = await storage.read('timer/tasks');
+      final data = await storage.read('timer/tasks.json');
       _tasks =
           data['tasks'] != null
               ? (data['tasks'] as List)
@@ -35,7 +35,7 @@ class TimerController {
   // 保存任务到存储
   Future<void> saveTasks(List<TimerTask> tasks) async {
     final tasksData = tasks.map((task) => task.toJson()).toList();
-    await storage.write('timer/tasks', {'tasks': tasksData});
+    await storage.write('timer/tasks.json', {'tasks': tasksData});
     await _syncWidget();
   }
 

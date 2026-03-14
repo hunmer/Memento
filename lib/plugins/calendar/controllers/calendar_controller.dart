@@ -241,7 +241,7 @@ class CalendarController extends ChangeNotifier {
   // 保存事件
   Future<void> _saveEvents() async {
     try {
-      await _storage.write('calendar/calendar_events', {
+      await _storage.write('calendar/calendar_events.json', {
         'events': _events.map((e) => e.toJson()).toList(),
         'completedEvents': _completedEvents.map((e) => e.toJson()).toList(),
       });

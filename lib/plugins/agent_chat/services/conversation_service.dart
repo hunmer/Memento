@@ -74,14 +74,14 @@ class ConversationService extends ChangeNotifier {
 
       // 保存会话数据
       final conversationsJson = sampleData['conversations'] as List;
-      await storage.write('agent_chat/conversations', conversationsJson);
+      await storage.write('agent_chat/conversations.json', conversationsJson);
 
       // 保存消息数据
       final messagesJson = sampleData['messages'] as Map<String, dynamic>;
       for (var entry in messagesJson.entries) {
         final conversationId = entry.key;
         final messages = entry.value as List;
-        await storage.write('agent_chat/messages/$conversationId', messages);
+        await storage.write('agent_chat/messages/$conversationId.json', messages);
       }
 
       // 提取唯一分组数量
@@ -193,7 +193,7 @@ class ConversationService extends ChangeNotifier {
 
     // 同时删除会话的所有消息
     try {
-      await storage.delete('agent_chat/messages/$id');
+      await storage.delete('agent_chat/messages/$id.json');
     } catch (e) {
       debugPrint('删除会话失败: $e');
     }

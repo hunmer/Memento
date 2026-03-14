@@ -10,7 +10,7 @@ class SkillController {
   final StorageManager storage;
   static const _skillsKey = 'habits/skills.json';
   List<Skill> _skills = [];
-  static const String _initializedKey = 'habits/skills_initialized';
+  static const String _initializedKey = 'habits/skills_initialized.json';
 
   SkillController(this.storage) {
     loadSkills();

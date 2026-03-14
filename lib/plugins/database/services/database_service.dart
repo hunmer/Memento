@@ -3,7 +3,7 @@ import 'package:Memento/plugins/base_plugin.dart';
 
 class DatabaseService {
   final BasePlugin plugin;
-  final storekey = 'databases/databases';
+  final storekey = 'databases/databases.json';
   DatabaseService(this.plugin);
 
   /// 获取所有数据库
