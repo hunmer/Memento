@@ -7,13 +7,15 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../services/file_storage_service.dart';
+import '../services/websocket_manager.dart';
 import '../middleware/auth_middleware.dart';
 
 /// 同步路由 - 处理文件推送、拉取和列表
 class SyncRoutes {
   final FileStorageService _storageService;
+  final WebSocketManager? _webSocketManager;
 
-  SyncRoutes(this._storageService);
+  SyncRoutes(this._storageService, [this._webSocketManager]);
 
   Router get router {
     final router = Router();
@@ -24,6 +26,12 @@ class SyncRoutes {
     // GET /pull/<filePath> - 拉取加密文件
     // 使用通配符匹配任意路径
     router.get('/pull/<filePath|.*>', _handlePull);
+
+    // GET /info/<filePath> - 获取文件元信息（不含内容）
+    router.get('/info/<filePath|.*>', _handleInfo);
+
+    // GET /ws - WebSocket 连接（需要特殊处理）
+    // 注意: WebSocket 端点需要在主服务器中单独处理
 
     // GET /list - 列出用户所有文件
     router.get('/list', _handleList);
@@ -123,6 +131,18 @@ class SyncRoutes {
         details: 'md5: $newMd5',
       );
 
+      // 广播文件更新通知给其他设备
+      final deviceId = getDeviceIdFromContext(request);
+      if (_webSocketManager != null && deviceId != null) {
+        _webSocketManager!.broadcastFileUpdate(
+          userId,
+          filePath,
+          newMd5,
+          DateTime.now(),
+          deviceId,
+        );
+      }
+
       final response = SyncResponse.success(
         filePath: filePath,
         newMd5: newMd5,
@@ -179,6 +199,54 @@ class SyncRoutes {
 
       return Response.ok(
         jsonEncode(response.toJson()),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 处理文件信息查询（不含内容）
+  Future<Response> _handleInfo(Request request, String filePath) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      // 验证文件路径安全性
+      if (filePath.contains('..') || filePath.startsWith('/')) {
+        return _errorResponse(400, '无效的文件路径');
+      }
+
+      final serverFile =
+          await _storageService.readEncryptedFile(userId, filePath);
+
+      if (serverFile == null) {
+        return Response.ok(
+          jsonEncode({
+            'success': true,
+            'exists': false,
+            'file_path': filePath,
+          }),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      // 获取文件大小
+      final userDir = _storageService.getUserDir(userId);
+      final file = File('$userDir/$filePath');
+      final fileSize = await file.exists() ? await file.length() : 0;
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'exists': true,
+          'file_path': filePath,
+          'md5': serverFile['md5'] as String,
+          'modified_at': serverFile['updated_at'] as String,
+          'size': fileSize,
+        }),
         headers: {'Content-Type': 'application/json'},
       );
     } catch (e) {
