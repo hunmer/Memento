@@ -115,41 +115,67 @@ class AdaptiveSwitch extends StatelessWidget {
     final switchWidth = width ?? 51.0;
     final thumbSize = switchHeight - 4.0;
 
+    // 使用 CustomAnimatedToggleSwitch 实现简洁的胶囊型开关
     return SizedBox(
       width: switchWidth,
       height: switchHeight,
-      child: AnimatedToggleSwitch<bool>.dual(
+      child: CustomAnimatedToggleSwitch<bool>(
         current: value,
-        first: false,
-        second: true,
+        values: const [false, true],
         spacing: 0.0,
-        height: switchHeight,
-        style: ToggleStyle(
-          borderColor: Colors.transparent,
-          indicatorColor: thumbColor,
-          backgroundColor: inactiveClr,
-          borderRadius: BorderRadius.circular(switchHeight / 2),
-          indicatorBorderRadius: BorderRadius.circular(thumbSize / 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        styleBuilder: (v) => ToggleStyle(
-          backgroundColor: v ? activeClr : inactiveClr,
-        ),
-        borderWidth: 0.0,
         indicatorSize: Size.square(thumbSize),
         animationDuration: animationDuration ?? const Duration(milliseconds: 200),
         animationCurve: animationCurve ?? Curves.easeInOut,
         onChanged: enabled ? onChanged : null,
         loading: loading,
-        iconBuilder: (_) => const SizedBox.shrink(),
-        textBuilder: (_) => const SizedBox.shrink(),
-        customIconBuilder: (context, local, global) => const SizedBox.shrink(),
+        onTap: enabled && onChanged != null
+            ? (_) => onChanged!(!value)
+            : null,
+        iconsTappable: false,
+        iconBuilder: (context, local, global) => const SizedBox.shrink(),
+        wrapperBuilder: (context, global, child) {
+          return Container(
+            width: switchWidth,
+            height: switchHeight,
+            decoration: BoxDecoration(
+              color: Color.lerp(inactiveClr, activeClr, global.position),
+              borderRadius: BorderRadius.circular(switchHeight / 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: child,
+          );
+        },
+        foregroundIndicatorBuilder: (context, global) {
+          final position = global.position;
+          final indicatorOffset = (switchWidth - thumbSize - 4.0) * position;
+          return Container(
+            width: thumbSize,
+            height: thumbSize,
+            margin: EdgeInsets.only(
+              left: 2.0 + indicatorOffset,
+              top: 2.0,
+              right: 2.0,
+              bottom: 2.0,
+            ),
+            decoration: BoxDecoration(
+              color: thumbColor,
+              borderRadius: BorderRadius.circular(thumbSize / 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
