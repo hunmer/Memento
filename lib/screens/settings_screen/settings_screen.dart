@@ -4,6 +4,7 @@ import 'package:Memento/core/theme_controller.dart';
 import 'package:Memento/core/services/speech_recognition_config_service.dart';
 
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import './controllers/settings_screen_controller.dart';
@@ -369,7 +370,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.brightness_4),
             title: Text('settings_screen_darkModeTitle'.tr),
             subtitle: Text('settings_screen_darkModeSubtitle'.tr),
-            trailing: Switch(
+            trailing: AdaptiveSwitch(
               value: ThemeController.isDarkTheme(context),
               onChanged: (value) => _controller.setTheme(context, value),
             ),
@@ -530,7 +531,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.play_circle),
             title: Text('settings_screen_autoOpenLastPluginTitle'.tr),
             subtitle: Text('settings_screen_autoOpenLastPluginSubtitle'.tr),
-            trailing: Switch(
+            trailing: AdaptiveSwitch(
               value: _controller.autoOpenLastPlugin,
               onChanged:
                   (value) => setState(() {
@@ -583,7 +584,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.content_paste),
             title: const Text('自动读取剪切板'),
             subtitle: const Text('启用后将自动识别剪切板中的数据'),
-            trailing: Switch(
+            trailing: AdaptiveSwitch(
               value: _controller.clipboardAutoRead,
               onChanged:
                   (value) => setState(() {
@@ -627,7 +628,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             leading: const Icon(Icons.system_update),
             title: Text('settings_screen_autoCheckUpdateTitle'.tr),
             subtitle: Text('settings_screen_autoCheckUpdateSubtitle'.tr),
-            trailing: Switch(
+            trailing: AdaptiveSwitch(
               value: _controller.autoCheckUpdate,
               onChanged:
                   (value) => setState(() {

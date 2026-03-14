@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:Memento/core/services/log_service.dart';
 
 /// 日志查看界面
@@ -186,7 +187,7 @@ class _LogScreenState extends State<LogScreen> {
                     ],
                   ),
                 ),
-                Switch(
+                AdaptiveSwitch(
                   value: _isEnabled,
                   onChanged: _toggleEnabled,
                 ),

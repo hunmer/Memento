@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:Memento/plugins/activity/activity_plugin.dart';
 import 'package:Memento/plugins/activity/models/activity_record.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -403,7 +404,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                   'activity_enableNotificationBar'.tr,
                                   style: theme.textTheme.titleSmall,
                                 ),
-                                Switch(
+                                AdaptiveSwitch(
                                   value: _isNotificationEnabled,
                                   onChanged: _toggleNotification,
                                   activeColor: ActivityPlugin.instance.color,
@@ -548,7 +549,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                   ),
                                 ),
                               ),
-                              Switch(
+                              AdaptiveSwitch(
                                 value: _isTTSAnnouncementEnabled,
                                 onChanged: _toggleTTSAnnouncement,
                                 activeColor: ActivityPlugin.instance.color,
@@ -751,7 +752,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                   '仅在工作时间检查',
                                   style: theme.textTheme.titleSmall,
                                 ),
-                                Switch(
+                                AdaptiveSwitch(
                                   value: _checkOnlyWorkHours,
                                   onChanged: (value) {
                                     setState(() {
@@ -861,7 +862,7 @@ class _ActivitySettingsScreenState extends State<ActivitySettingsScreen> {
                                     ),
                                   ],
                                 ),
-                                Switch(
+                                AdaptiveSwitch(
                                   value: _enableHapticFeedback,
                                   onChanged: (value) {
                                     setState(() {

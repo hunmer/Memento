@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
@@ -279,7 +280,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                         ],
                       ),
                     ),
-                    Switch(
+                    AdaptiveSwitch(
                       value: _controller.autoHideInApp,
                       onChanged: (value) {
                         _controller.setAutoHideInApp(value);
@@ -367,7 +368,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   child: Row(
                     children: [
                       Expanded(child: Text('screens_autoRestoreFloatingBallState'.tr)),
-                      Switch(
+                      AdaptiveSwitch(
                         value: _controller.autoRestore,
                         onChanged: (value) {
                           _controller.setAutoRestore(value);

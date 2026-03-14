@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 import 'package:Memento/plugins/scripts_center/models/script_input.dart';
@@ -921,7 +922,7 @@ class _ScriptEditScreenState extends State<ScriptEditScreen>
                   ],
                 ),
               ),
-              Switch(
+              AdaptiveSwitch(
                 value: _autoRun,
                 onChanged: (value) {
                   setState(() {
