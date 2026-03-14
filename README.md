@@ -83,6 +83,12 @@ Material Design 3 设计语言
 <tr>
 <td align="center">
 
+### 🔑 API Key 管理
+内置 API Key 创建和管理，方便第三方应用集成
+
+</td>
+<td align="center">
+
 ### 🔧 MCP 服务
 集成 Model Context Protocol，支持多种 AI 模型接入
 
@@ -93,11 +99,71 @@ Material Design 3 设计语言
 内置 SDK，轻松实现实时通信和 API 集成
 
 </td>
-<td align="center">
-
-### 🎯 更多功能
-持续更新中...
-
-</td>
 </tr>
 </table>
+
+## 🏗️ 项目结构
+
+```
+Memento/
+├── lib/                    # Flutter 应用代码
+│   ├── core/               # 核心功能（插件系统、存储、事件）
+│   ├── plugins/            # 功能插件（25+）
+│   ├── screens/            # 应用界面
+│   └── widgets/            # 通用组件
+├── server/                 # Dart 同步服务器
+│   ├── admin/              # Web 管理面板
+│   └── lib/                # 服务器代码
+├── mcp-memento-server/     # MCP Server (AI 集成)
+├── shared_models/          # 共享数据模型
+└── docs/                   # 文档
+```
+
+## 🚀 快速开始
+
+### 移动端/桌面端
+
+1. 安装 [Flutter SDK](https://flutter.dev)
+2. 克隆项目并安装依赖
+   ```bash
+   git clone https://github.com/hunmer/Memento.git
+   cd Memento
+   flutter pub get
+   ```
+3. 运行应用
+   ```bash
+   flutter run
+   ```
+
+### 同步服务器
+
+```bash
+cd server
+dart pub get
+dart run bin/server.dart
+# 访问 http://localhost:8080/admin/
+```
+
+### MCP Server (AI 集成)
+
+```bash
+cd mcp-memento-server
+npm install
+npm run build
+
+# 配置 .env
+MEMENTO_SERVER_URL=http://localhost:8080
+MEMENTO_API_KEY=mk_live_your_api_key
+MEMENTO_ENCRYPTION_KEY=your_encryption_key
+```
+
+## 📖 更多文档
+
+- [完整文档](https://hunmer.github.io/memento_docs/)
+- [服务器文档](server/CLAUDE.md)
+- [MCP Server 文档](mcp-memento-server/README.md)
+- [核心功能文档](lib/core/CLAUDE.md)
+
+## 📄 许可证
+
+MIT License
