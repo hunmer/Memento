@@ -13,6 +13,7 @@ import 'package:Memento/plugins/habits/habits_plugin.dart';
 import 'package:Memento/plugins/timer/timer_plugin.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
+import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -91,6 +92,8 @@ class WatchConnectivityService {
             return await _getWatchTimers();
           case 'getWatchTodoTasks':
             return await _getWatchTodoTasks();
+          case 'getWatchDayItems':
+            return await _getWatchDayItems();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -572,6 +575,41 @@ class WatchConnectivityService {
       return tasks;
     } catch (e) {
       print('[WatchConnectivityService] 获取待办任务数据失败: $e');
+      return [];
+    }
+  }
+
+  // ============== 纪念日相关方法 ==============
+
+  /// 获取纪念日列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchDayItems() async {
+    try {
+      final dayPlugin = DayPlugin.instance;
+      final memorialDays = dayPlugin.getAllMemorialDays();
+
+      // 转换为 watchOS 需要的格式
+      final dayItems = memorialDays.map((day) {
+        final data = <String, dynamic>{
+          'id': day.id,
+          'title': day.title,
+          'targetDate': DateFormat('yyyy-MM-dd').format(day.targetDate),
+          'daysRemaining': day.daysRemaining,
+          'isExpired': day.isExpired,
+          'isToday': day.isToday,
+          'backgroundColor': day.backgroundColor.toARGB32(),
+          'backgroundImageUrl': day.backgroundImageUrl,
+          'notes': day.notes,
+        };
+
+        // 移除所有 null 值，避免 WCSession 传输问题
+        data.removeWhere((key, value) => value == null);
+        return data;
+      }).toList();
+
+      print('[WatchConnectivityService] 返回 ${dayItems.length} 个纪念日');
+      return dayItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取纪念日数据失败: $e');
       return [];
     }
   }

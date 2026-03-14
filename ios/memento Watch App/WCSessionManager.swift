@@ -182,6 +182,44 @@ struct TodoTaskItem: Codable, Identifiable {
     }
 }
 
+// MARK: - 纪念日数据模型
+
+struct DayItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let targetDate: String
+    let daysRemaining: Int
+    let isExpired: Bool
+    let isToday: Bool
+    let backgroundColor: Int
+    let backgroundImageUrl: String?
+    let notes: [String]?
+
+    // 计算属性：状态文本
+    var statusText: String {
+        if isToday {
+            return "今天"
+        } else if isExpired {
+            return "\(-daysRemaining) 天前"
+        } else {
+            return "\(daysRemaining) 天后"
+        }
+    }
+
+    // 计算属性：颜色
+    var accentColor: Color {
+        if isToday {
+            return .green
+        } else if isExpired {
+            return .purple
+        } else if daysRemaining <= 7 {
+            return .cyan
+        } else {
+            return .orange
+        }
+    }
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -197,6 +235,7 @@ enum WatchRequest: String, Codable {
     case getHabits
     case getTimers
     case getTodoTasks
+    case getDayItems
 }
 
 enum ResponseKey: String, Codable {
@@ -622,6 +661,40 @@ extension WCSessionManager {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取待办任务数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 纪念日相关方法
+
+    /// 获取纪念日列表
+    func getDayItems() async throws -> [DayItem] {
+        logger.info("发送 getDayItems 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getDayItems.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到纪念日数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([DayItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析纪念日数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取纪念日数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }
