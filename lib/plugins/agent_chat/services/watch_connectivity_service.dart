@@ -15,6 +15,7 @@ import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/plugins/todo/todo_plugin.dart';
 import 'package:Memento/plugins/day/day_plugin.dart';
 import 'package:Memento/plugins/tracker/tracker_plugin.dart';
+import 'package:Memento/plugins/bill/bill_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -97,6 +98,8 @@ class WatchConnectivityService {
             return await _getWatchDayItems();
           case 'getWatchTrackerGoals':
             return await _getWatchTrackerGoals();
+          case 'getWatchBillItems':
+            return await _getWatchBillItems();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -739,5 +742,55 @@ class WatchConnectivityService {
     }
 
     return 0xFF39FF14; // 默认霓虹绿
+  }
+
+  // ============== 账单相关方法 ==============
+
+  /// 获取账单列表（供 watchOS 使用）
+  /// 返回最近 7 天的账单，按日期分组
+  Future<List<Map<String, dynamic>>> _getWatchBillItems() async {
+    try {
+      final billPlugin = BillPlugin.instance;
+      final controller = billPlugin.controller;
+
+      // 获取最近 7 天的账单
+      final now = DateTime.now();
+      final startDate = now.subtract(const Duration(days: 7));
+
+      // 收集所有账户的账单
+      final allBills = <Map<String, dynamic>>[];
+      for (final account in controller.accounts) {
+        for (final bill in account.bills) {
+          // 筛选最近 7 天的账单
+          if (bill.date.isAfter(startDate) || bill.date.isAtSameMomentAs(startDate)) {
+            final data = <String, dynamic>{
+              'id': bill.id,
+              'title': bill.title,
+              'category': bill.category,
+              'amount': bill.amount,
+              'date': DateFormat('yyyy-MM-dd').format(bill.date),
+              'isExpense': bill.isExpense,
+              'icon': bill.icon.codePoint,
+              'iconColor': bill.iconColor.toARGB32(),
+              'note': bill.note,
+              'isSubscription': bill.isSubscription,
+            };
+
+            // 移除所有 null 值，避免 WCSession 传输问题
+            data.removeWhere((key, value) => value == null);
+            allBills.add(data);
+          }
+        }
+      }
+
+      // 按日期降序排序
+      allBills.sort((a, b) => (b['date'] as String).compareTo(a['date'] as String));
+
+      print('[WatchConnectivityService] 返回 ${allBills.length} 条账单');
+      return allBills;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取账单数据失败: $e');
+      return [];
+    }
   }
 }

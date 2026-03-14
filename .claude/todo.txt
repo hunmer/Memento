@@ -1,0 +1,129 @@
+根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\bill\bill_plugin.dart 插件添加watchos端的入口，ui原型参考：
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#0a0705",
+                        "expense": "#ff3b30",
+                        "income": "#34c759",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .watch-screen {
+            width: 220px;
+            height: 250px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .watch-screen::-webkit-scrollbar {
+            display: none;
+        }
+        .neon-border {
+            box-shadow: 0 0 4px rgba(236, 91, 19, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen font-display">
+<!-- Watch Frame Emulator -->
+<div class="watch-screen bg-background-dark rounded-[40px] border-[6px] border-slate-800 relative overflow-hidden flex flex-col shadow-2xl">
+<!-- Status Bar -->
+<div class="flex justify-between items-center px-6 pt-3 pb-1 w-full shrink-0">
+<span class="text-[10px] font-bold text-primary">10:09</span>
+<span class="material-symbols-outlined text-[12px] text-primary">battery_very_low</span>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto px-2 pb-4 space-y-2">
+<!-- Header -->
+<div class="px-2 pt-1 pb-2">
+<h1 class="text-white text-sm font-bold tracking-tight">Billing</h1>
+</div>
+<!-- Date Group: Today -->
+<div class="space-y-1">
+<p class="text-[10px] uppercase font-bold text-primary/70 px-2 tracking-wider">Today</p>
+<!-- Item 1: Expense -->
+<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-lg">music_note</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-[11px] font-semibold truncate leading-tight">Apple Music</p>
+<p class="text-slate-400 text-[9px] truncate leading-tight">Subscription</p>
+</div>
+<div class="text-right shrink-0">
+<p class="text-expense text-[11px] font-bold">-$10.99</p>
+</div>
+</div>
+<!-- Item 2: Income -->
+<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-lg">payments</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-[11px] font-semibold truncate leading-tight">Tech Corp</p>
+<p class="text-slate-400 text-[9px] truncate leading-tight">Salary</p>
+</div>
+<div class="text-right shrink-0">
+<p class="text-income text-[11px] font-bold">+$5.2k</p>
+</div>
+</div>
+</div>
+<!-- Date Group: Yesterday -->
+<div class="space-y-1 pt-2">
+<p class="text-[10px] uppercase font-bold text-primary/70 px-2 tracking-wider">Yesterday</p>
+<!-- Item 3: Expense -->
+<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-lg">shopping_cart</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-[11px] font-semibold truncate leading-tight">Grocery Mart</p>
+<p class="text-slate-400 text-[9px] truncate leading-tight">Food &amp; Drinks</p>
+</div>
+<div class="text-right shrink-0">
+<p class="text-expense text-[11px] font-bold">-$42.50</p>
+</div>
+</div>
+<!-- Item 4: Expense -->
+<div class="bg-background-dark border border-primary/20 rounded-xl p-2 flex items-center gap-2 neon-border">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-lg">bolt</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-[11px] font-semibold truncate leading-tight">City Power</p>
+<p class="text-slate-400 text-[9px] truncate leading-tight">Utility Bill</p>
+</div>
+<div class="text-right shrink-0">
+<p class="text-expense text-[11px] font-bold">-$89.00</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Subtle Bottom Fade/Nav Indicator -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary/30 rounded-full"></div>
+</div>
+</body></html>
