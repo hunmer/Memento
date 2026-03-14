@@ -112,40 +112,45 @@ class AdaptiveSwitch extends StatelessWidget {
     final inactiveClr = inactiveColor ?? Colors.grey.shade300;
     final thumbColor = activeThumbColor ?? Colors.white;
     final switchHeight = height ?? 31.0;
+    final switchWidth = width ?? 51.0;
     final thumbSize = switchHeight - 4.0;
 
-    return AnimatedToggleSwitch<bool>.dual(
-      current: value,
-      first: false,
-      second: true,
-      spacing: 0.0,
+    return SizedBox(
+      width: switchWidth,
       height: switchHeight,
-      style: ToggleStyle(
-        borderColor: Colors.transparent,
-        indicatorColor: thumbColor,
-        backgroundColor: inactiveClr,
-        borderRadius: BorderRadius.circular(switchHeight / 2),
-        indicatorBorderRadius: BorderRadius.circular(thumbSize / 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
+      child: AnimatedToggleSwitch<bool>.dual(
+        current: value,
+        first: false,
+        second: true,
+        spacing: 0.0,
+        height: switchHeight,
+        style: ToggleStyle(
+          borderColor: Colors.transparent,
+          indicatorColor: thumbColor,
+          backgroundColor: inactiveClr,
+          borderRadius: BorderRadius.circular(switchHeight / 2),
+          indicatorBorderRadius: BorderRadius.circular(thumbSize / 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        styleBuilder: (v) => ToggleStyle(
+          backgroundColor: v ? activeClr : inactiveClr,
+        ),
+        borderWidth: 0.0,
+        indicatorSize: Size.square(thumbSize),
+        animationDuration: animationDuration ?? const Duration(milliseconds: 200),
+        animationCurve: animationCurve ?? Curves.easeInOut,
+        onChanged: enabled ? onChanged : null,
+        loading: loading,
+        iconBuilder: (_) => const SizedBox.shrink(),
+        textBuilder: (_) => const SizedBox.shrink(),
+        customIconBuilder: (context, local, global) => const SizedBox.shrink(),
       ),
-      styleBuilder: (v) => ToggleStyle(
-        backgroundColor: v ? activeClr : inactiveClr,
-      ),
-      borderWidth: 0.0,
-      indicatorSize: Size.square(thumbSize),
-      animationDuration: animationDuration ?? const Duration(milliseconds: 200),
-      animationCurve: animationCurve ?? Curves.easeInOut,
-      onChanged: enabled ? onChanged : null,
-      loading: loading,
-      iconBuilder: (_) => const SizedBox.shrink(),
-      textBuilder: (_) => const SizedBox.shrink(),
-      customIconBuilder: (context, local, global) => const SizedBox.shrink(),
     );
   }
 
