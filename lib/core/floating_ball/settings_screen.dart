@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/action/action_manager.dart';
 import 'package:Memento/core/action/widgets/action_selector_dialog.dart';
@@ -82,7 +83,7 @@ class _FloatingBallSettingsScreenState
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('floating_ball_enableFloatingBall'.tr),
-                      Switch(
+                      AdaptiveSwitch(
                         value: _isEnabled,
                         onChanged: (value) async {
                           setState(() {

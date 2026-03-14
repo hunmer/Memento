@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:Memento/plugins/scripts_center/models/script_info.dart';
 
 /// 脚本卡片组件
@@ -87,7 +88,7 @@ class ScriptCard extends StatelessWidget {
                   ),
 
                   // 启用开关
-                  Switch(
+                  AdaptiveSwitch(
                     value: script.enabled,
                     onChanged: onToggle,
                     activeThumbColor: Colors.deepPurple,

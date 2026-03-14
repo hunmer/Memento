@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
@@ -171,7 +172,7 @@ class ToolListItem extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 ),
-              Switch(
+              AdaptiveSwitch(
                 value: config.enabled,
                 onChanged: (value) => _toggleEnabled(context, value),
               ),
