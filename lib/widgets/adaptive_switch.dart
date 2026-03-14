@@ -106,63 +106,46 @@ class AdaptiveSwitch extends StatelessWidget {
     }
   }
 
-  /// 构建简洁样式开关
+  /// 构建简洁样式开关（iOS 风格胶囊型）
   Widget _buildSimpleSwitch(BuildContext context) {
     final activeClr = activeColor ?? Theme.of(context).primaryColor;
     final inactiveClr = inactiveColor ?? Colors.grey.shade300;
     final thumbColor = activeThumbColor ?? Colors.white;
+    final switchHeight = height ?? 31.0;
+    final thumbSize = switchHeight - 4.0;
 
-    return CustomAnimatedToggleSwitch<bool>(
+    return AnimatedToggleSwitch<bool>.dual(
       current: value,
-      values: const [false, true],
+      first: false,
+      second: true,
       spacing: 0.0,
-      indicatorSize: const Size.square(26.0),
+      height: switchHeight,
+      style: ToggleStyle(
+        borderColor: Colors.transparent,
+        indicatorColor: thumbColor,
+        backgroundColor: inactiveClr,
+        borderRadius: BorderRadius.circular(switchHeight / 2),
+        indicatorBorderRadius: BorderRadius.circular(thumbSize / 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      styleBuilder: (v) => ToggleStyle(
+        backgroundColor: v ? activeClr : inactiveClr,
+      ),
+      borderWidth: 0.0,
+      indicatorSize: Size.square(thumbSize),
       animationDuration: animationDuration ?? const Duration(milliseconds: 200),
       animationCurve: animationCurve ?? Curves.easeInOut,
       onChanged: enabled ? onChanged : null,
       loading: loading,
-      iconBuilder: (context, local, global) => const SizedBox(),
-      cursors: const ToggleCursors(defaultCursor: SystemMouseCursors.click),
-      onTap: enabled && onChanged != null
-          ? (_) => onChanged!(!value)
-          : null,
-      iconsTappable: false,
-      wrapperBuilder: (context, global, child) {
-        return Container(
-          width: width ?? 50.0,
-          height: height ?? 30.0,
-          decoration: BoxDecoration(
-            color: Color.lerp(inactiveClr, activeClr, global.position),
-            borderRadius: BorderRadius.circular(15.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 2,
-                offset: const Offset(0, 1),
-              ),
-            ],
-          ),
-          child: child,
-        );
-      },
-      foregroundIndicatorBuilder: (context, global) {
-        return Container(
-          width: 26.0,
-          height: 26.0,
-          margin: const EdgeInsets.all(2.0),
-          decoration: BoxDecoration(
-            color: thumbColor,
-            borderRadius: BorderRadius.circular(13.0),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-        );
-      },
+      iconBuilder: (_) => const SizedBox.shrink(),
+      textBuilder: (_) => const SizedBox.shrink(),
+      customIconBuilder: (context, local, global) => const SizedBox.shrink(),
     );
   }
 
