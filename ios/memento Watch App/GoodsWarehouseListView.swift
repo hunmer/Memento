@@ -50,6 +50,9 @@ struct GoodsWarehouseListView: View {
                 .navigationTitle("仓库")
             }
         }
+        .onAppear {
+            Task { await viewModel.loadData() }
+        }
     }
 }
 
