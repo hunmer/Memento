@@ -4,6 +4,8 @@
 import type { MementoConfig } from './types/index.js';
 /**
  * 从环境变量加载配置
+ *
+ * 使用 API Key 认证：设置 MEMENTO_API_KEY 和 MEMENTO_ENCRYPTION_KEY
  */
 export declare function loadConfig(): MementoConfig;
 /**

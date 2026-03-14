@@ -161,6 +161,11 @@ export interface TodoStats {
 }
 export interface MementoConfig {
     serverUrl: string;
-    authToken: string;
+    /** @deprecated 使用 apiKey 替代 */
+    authToken?: string;
+    /** API Key (mk_live_xxx 格式) */
+    apiKey?: string;
+    /** 加密密钥 (Base64 编码) */
+    encryptionKey?: string;
 }
 //# sourceMappingURL=index.d.ts.map
