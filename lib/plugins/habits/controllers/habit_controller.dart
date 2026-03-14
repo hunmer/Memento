@@ -32,8 +32,8 @@ class HabitController {
   final StorageManager storage;
   final TimerController timerController;
   final SkillController skillController;
-  static const _habitsKey = 'habits/habits';
-  static const String _initializedKey = 'habits/habits_initialized';
+  static const _habitsKey = 'habits/habits.json';
+  static const String _initializedKey = 'habits/habits_initialized.json';
   List<Habit> _habits = [];
 
   HabitController(
@@ -121,7 +121,7 @@ class HabitController {
       final recordList = entry.value as List;
 
       if (recordList.isNotEmpty) {
-        await storage.writeJson('habits/records/$habitId.json', recordList);
+        await storage.writeJson('habits/records/$habitId.json.json', recordList);
       }
     }
 

@@ -37,7 +37,7 @@ class ChatDataService {
   }
 
   Future<void> _initializeDefaultData() async {
-    final channelsListData = await _plugin.storage.read('chat/channels');
+    final channelsListData = await _plugin.storage.read('chat/channels.json');
     if (channelsListData.isEmpty) {
       debugPrint('Chat插件: 首次初始化，正在加载示例数据...');
       await _loadSampleData();
@@ -63,20 +63,20 @@ class ChatDataService {
       for (var channelJson in sampleData['channels'] as List) {
         final channelId = channelJson['id'] as String;
 
-        await _plugin.storage.write('chat/channel/$channelId', {
+        await _plugin.storage.write('chat/channel/$channelId.json', {
           'channel': channelJson,
         });
 
         final messages = sampleMessages[channelId];
         if (messages != null && messages.isNotEmpty) {
-          await _plugin.storage.write('chat/messages/$channelId', {
+          await _plugin.storage.write('chat/messages/$channelId.json', {
             'messages': messages,
           });
           debugPrint(
             'Chat插件: 已加载频道 "${channelJson['name']}" 的 ${messages.length} 条消息',
           );
         } else {
-          await _plugin.storage.write('chat/messages/$channelId', {
+          await _plugin.storage.write('chat/messages/$channelId.json', {
             'messages': [],
           });
         }
@@ -108,13 +108,13 @@ class ChatDataService {
         'unreadCount': 0,
       };
 
-      await _plugin.storage.write('chat/channels', {
+      await _plugin.storage.write('chat/channels.json', {
         'channels': ['default'],
       });
-      await _plugin.storage.write('chat/channel/default', {
+      await _plugin.storage.write('chat/channel/default.json', {
         'channel': defaultChannel,
       });
-      await _plugin.storage.write('chat/messages/default', {'messages': []});
+      await _plugin.storage.write('chat/messages/default.json', {'messages': []});
 
       debugPrint('Chat插件: 已创建默认频道');
     } catch (e) {
@@ -126,7 +126,7 @@ class ChatDataService {
     try {
       _channels.clear();
 
-      final channelsListData = await _plugin.storage.read('chat/channels');
+      final channelsListData = await _plugin.storage.read('chat/channels.json');
 
       if (channelsListData.isNotEmpty &&
           channelsListData.containsKey('channels')) {
@@ -136,7 +136,7 @@ class ChatDataService {
 
         for (var channelId in channelIds) {
           final channelData = await _plugin.storage.read(
-            'chat/channel/$channelId',
+            'chat/channel/$channelId.json',
           );
           if (channelData.isEmpty || !channelData.containsKey('channel')) {
             continue;
@@ -145,7 +145,7 @@ class ChatDataService {
           final channelJson = channelData['channel'] as Map<String, dynamic>;
 
           final messagesData = await _plugin.storage.read(
-            'chat/messages/$channelId',
+            'chat/messages/$channelId.json',
           );
           List<Message> messages = [];
           if (messagesData.isNotEmpty && messagesData.containsKey('messages')) {
@@ -192,14 +192,14 @@ class ChatDataService {
       _channels.add(channel);
 
       await Future.wait([
-        _plugin.storage.write('chat/channel/${channel.id}', {
+        _plugin.storage.write('chat/channel/${channel.id}.json', {
           'channel': channel.toJson(),
         }),
-        _plugin.storage.write('chat/messages/${channel.id}', {'messages': []}),
+        _plugin.storage.write('chat/messages/${channel.id}.json', {'messages': []}),
       ]);
 
       final channelIds = _channels.map((c) => c.id).toList();
-      await _plugin.storage.write('chat/channels', {'channels': channelIds});
+      await _plugin.storage.write('chat/channels.json', {'channels': channelIds});
 
       _channels.sort(Channel.compare);
       _plugin.refresh();
@@ -222,12 +222,12 @@ class ChatDataService {
   }
 
   Future<void> saveChannel(Channel channel) async {
-    await _plugin.storage.write('chat/channel/${channel.id}', {
+    await _plugin.storage.write('chat/channel/${channel.id}.json', {
       'channel': channel.toJson(),
     });
 
     final channelIds = _channels.map((c) => c.id).toList();
-    await _plugin.storage.write('chat/channels', {'channels': channelIds});
+    await _plugin.storage.write('chat/channels.json', {'channels': channelIds});
 
     final index = _channels.indexWhere((c) => c.id == channel.id);
     if (index != -1) {
@@ -244,14 +244,14 @@ class ChatDataService {
   Future<void> deleteChannel(String channelId) async {
     try {
       await Future.wait([
-        _plugin.storage.delete('chat/channel/$channelId'),
-        _plugin.storage.delete('chat/messages/$channelId'),
+        _plugin.storage.delete('chat/channel/$channelId.json'),
+        _plugin.storage.delete('chat/messages/$channelId.json'),
       ]);
 
       _channels.removeWhere((channel) => channel.id == channelId);
 
       final channelIds = _channels.map((c) => c.id).toList();
-      await _plugin.storage.write('chat/channels', {'channels': channelIds});
+      await _plugin.storage.write('chat/channels.json', {'channels': channelIds});
 
       _plugin.refresh();
       await _syncWidget();
@@ -263,8 +263,8 @@ class ChatDataService {
 
   Future<void> deleteChannelMessages(String channelId) async {
     try {
-      await _plugin.storage.delete('chat/messages/$channelId');
-      await _plugin.storage.write('chat/messages/$channelId', {'messages': []});
+      await _plugin.storage.delete('chat/messages/$channelId.json');
+      await _plugin.storage.write('chat/messages/$channelId.json', {'messages': []});
 
       final channelIndex = _channels.indexWhere((c) => c.id == channelId);
       if (channelIndex != -1) {
@@ -382,7 +382,7 @@ class ChatDataService {
         messages.map((m) => m.toJson()),
       );
 
-      await _plugin.storage.write('chat/messages/$channelId', {
+      await _plugin.storage.write('chat/messages/$channelId.json', {
         'messages': messageJsonList,
       });
 

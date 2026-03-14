@@ -18,7 +18,7 @@ class RouteHistoryManager extends NavigatorObserver {
   StorageManager? _storage;
 
   /// 存储键
-  static const String _storageKey = 'configs/route_history';
+  static const String _storageKey = 'configs/route_history.json';
 
   /// 历史记录列表（按时间倒序）
   final List<PageVisitRecord> _history = [];

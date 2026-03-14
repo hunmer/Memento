@@ -21,7 +21,7 @@ class ScriptStoreManager extends ChangeNotifier {
   final http.Client _httpClient;
 
   // 存储键
-  static const String _sourcesKey = 'scripts_center_script_sources';
+  static const String _sourcesKey = 'scripts_center_script_sources.json';
   static const String _installedKey = 'scripts_center_installed_scripts';
 
   // 状态
