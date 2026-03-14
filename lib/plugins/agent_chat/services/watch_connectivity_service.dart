@@ -23,6 +23,7 @@ import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:Memento/plugins/calendar/calendar_plugin.dart';
+import 'package:Memento/plugins/calendar_album/calendar_album_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -123,6 +124,8 @@ class WatchConnectivityService {
             return await _getWatchGoodsItems(call.arguments);
           case 'getWatchCalendarEvents':
             return await _getWatchCalendarEvents();
+          case 'getWatchCalendarAlbumEntries':
+            return await _getWatchCalendarAlbumEntries();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -1323,6 +1326,122 @@ class WatchConnectivityService {
       print('[WatchConnectivityService] 获取日历事件数据失败: $e');
       return [];
     }
+  }
+
+  /// 获取日历相册数据（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchCalendarAlbumEntries() async {
+    try {
+      final plugin = CalendarAlbumPlugin.instance;
+      final controller = plugin.calendarController;
+
+      if (controller == null) {
+        print('[WatchConnectivityService] calendarController 未初始化');
+        return [];
+      }
+
+      // 获取最近 30 天的日记条目
+      final now = DateTime.now();
+      final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+
+      final List<Map<String, dynamic>> albumEntries = [];
+      final Map<String, List<Map<String, dynamic>>> groupedByDate = {};
+
+      // 遍历所有日期的日记
+      controller.entries.forEach((date, entries) {
+        if (date.isAfter(thirtyDaysAgo) || date.isAtSameMomentAs(thirtyDaysAgo)) {
+          for (final entry in entries) {
+            // 获取所有图片（imageUrls + Markdown中的图片）
+            final allImages = <String>[...entry.imageUrls, ...entry.extractImagesFromMarkdown()];
+
+            if (allImages.isNotEmpty) {
+              final dateStr = DateFormat('MMM d').format(entry.createdAt);
+              final timeStr = DateFormat('HH:mm').format(entry.createdAt);
+
+              // 根据日记标签或心情分配霓虹颜色
+              final neonBorderColor = _getAlbumNeonColor(entry.tags, entry.mood);
+
+              final entryData = <String, dynamic>{
+                'id': entry.id,
+                'title': entry.title,
+                'contentPreview': entry.content.length > 100
+                    ? '${entry.content.substring(0, 100)}...'
+                    : entry.content,
+                'createdAt': entry.createdAt.toIso8601String(),
+                'updatedAt': entry.updatedAt.toIso8601String(),
+                'dateStr': dateStr,
+                'timeStr': timeStr,
+                'tags': entry.tags,
+                'location': entry.location,
+                'mood': entry.mood,
+                'weather': entry.weather,
+                'imageCount': allImages.length,
+                'neonBorderColor': neonBorderColor,
+                'wordCount': entry.wordCount,
+              };
+
+              // 移除所有 null 值
+              entryData.removeWhere((key, value) => value == null);
+
+              // 按日期分组
+              final dateKey = DateFormat('yyyy-MM-dd').format(entry.createdAt);
+              groupedByDate.putIfAbsent(dateKey, () => []).add(entryData);
+            }
+          }
+        }
+      });
+
+      // 转换为列表并按日期降序排序
+      final sortedDates = groupedByDate.keys.toList()
+        ..sort((a, b) => b.compareTo(a));
+
+      for (final dateKey in sortedDates) {
+        albumEntries.addAll(groupedByDate[dateKey]!);
+      }
+
+      print('[WatchConnectivityService] 返回 ${albumEntries.length} 个相册条目');
+      return albumEntries;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取日历相册数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 根据标签和心情获取相册霓虹边框颜色
+  int _getAlbumNeonColor(List<String> tags, String? mood) {
+    // 根据标签分配颜色
+    final tagColors = {
+      '旅行': 0xFF00F3FF, // neon-cyan
+      '户外': 0xFF00F3FF, // neon-cyan
+      '运动': 0xFF39FF14, // neon-green
+      '健身': 0xFF39FF14, // neon-green
+      '美食': 0xFFEC5B13, // neon-orange
+      '聚会': 0xFFBC13FF, // neon-purple
+      '音乐': 0xFFBC13FF, // neon-purple
+      '艺术': 0xFFBC13FF, // neon-purple
+    };
+
+    for (final tag in tags) {
+      if (tagColors.containsKey(tag)) {
+        return tagColors[tag]!;
+      }
+    }
+
+    // 根据心情分配颜色
+    final moodColors = <String, int>{
+      '😊': 0xFF00F3FF, // neon-cyan - 开心
+      '😄': 0xFF00F3FF, // neon-cyan
+      '🎉': 0xFFBC13FF, // neon-purple - 庆祝
+      '😍': 0xFFBC13FF, // neon-purple
+      '😢': 0xFF39FF14, // neon-green - 悲伤（绿色）
+      '😡': 0xFFEC5B13, // neon-orange - 愤怒
+    };
+
+    if (mood != null && moodColors.containsKey(mood)) {
+      return moodColors[mood]!;
+    }
+
+    // 默认使用青色
+    return 0xFF00F3FF; // neon-cyan
   }
 
   /// 根据事件颜色获取霓虹边框颜色
