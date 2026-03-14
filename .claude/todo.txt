@@ -1,6 +1,6 @@
-根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\nodes\nodes_plugin.dart 插件添加watchos端的入口，
-增加两个页面，节点列表页面和节点详情页面
+根据 .claude\skills\add-watchos-plugin-support.md 给 lib\plugins\goods\goods_plugin.dart 插件添加watchos端的入口，
+增加两个页面，仓库列表页面和物品列表页面
 只需要做展示，不需要做编辑功能
-节点详情布局参考： lib/plugins/nodes/screens/nodes_screen.dart 节点列表布局参考： lib/plugins/nodes/screens/notebooks_screen.dart 需要修改成使用watchos小屏幕显示的ui
+仓库列表布局参考： lib\plugins\goods\screens\warehouse_list_screen.dart 物品列表页面布局参考： lib/plugins/goods/screens/goods_list_screen.dart 需要修改成使用watchos小屏幕显示的ui
 
 ui原型参考：
