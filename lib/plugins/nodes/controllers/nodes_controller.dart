@@ -69,7 +69,7 @@ class NodesController extends ChangeNotifier {
 
   Future<void> _loadData() async {
     try {
-      final notebooksData = await _storageManager.read('nodes/nodes_notebooks');
+      final notebooksData = await _storageManager.read('nodes/nodes_notebooks.json');
       if (notebooksData.isNotEmpty) {
         final List<dynamic> notebooks =
             notebooksData['notebooks'] as List<dynamic>;

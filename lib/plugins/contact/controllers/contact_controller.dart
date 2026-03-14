@@ -23,7 +23,7 @@ class ContactController {
   ContactController(this.plugin) {
     // 初始化时规范化所有路径
     contactsKey = _normalizePath('contacts${path.separator}contacts.json');
-    interactionsKey = _normalizePath('contacts${path.separator}interactions');
+    interactionsKey = _normalizePath('contacts${path.separator}interactions.json');
     filterConfigKey = _normalizePath('contacts${path.separator}filter_config');
     sortConfigKey = _normalizePath('contacts${path.separator}sort_config');
   }

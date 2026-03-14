@@ -21,7 +21,7 @@ class AppStoreManager extends ChangeNotifier {
   final http.Client _httpClient;
 
   // 存储键
-  static const String _sourcesKey = 'webview_app_sources';
+  static const String _sourcesKey = 'webview_app_sources.json';
 
   // 状态
   List<AppStoreSource> _sources = [];

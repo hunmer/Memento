@@ -148,7 +148,7 @@ class CalendarController extends ChangeNotifier {
   // 加载事件
   Future<void> _loadEvents() async {
     try {
-      final data = await _storage.read('calendar/calendar_events');
+      final data = await _storage.read('calendar/calendar_events.json');
       if (data.isNotEmpty) {
         final List<dynamic> eventsData = data['events'] ?? [];
         final List<dynamic> completedEventsData = data['completedEvents'] ?? [];

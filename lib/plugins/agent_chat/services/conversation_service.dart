@@ -44,7 +44,7 @@ class ConversationService extends ChangeNotifier {
   /// 加载所有会话
   Future<void> _loadConversations() async {
     try {
-      final data = await storage.read('agent_chat/conversations');
+      final data = await storage.read('agent_chat/conversations.json');
       if (data is List && data.isNotEmpty) {
         // 有数据，正常加载
         _conversations =
@@ -109,8 +109,7 @@ class ConversationService extends ChangeNotifier {
       debugPrint('AgentChat插件: 加载示例数据失败: $e');
       // 如果加载示例数据失败，创建空数据
       _conversations = [];
-      await storage.write('agent_chat/conversations', []);
-      notifyListeners();
+      await storage.write('agent_chat/conversations.json', []);      notifyListeners();
     }
   }
 
@@ -122,7 +121,7 @@ class ConversationService extends ChangeNotifier {
         .then((_) async {
           try {
             final data = _conversations.map((c) => c.toJson()).toList();
-            await storage.write('agent_chat/conversations', data);
+            await storage.write('agent_chat/conversations.json', data);
           } catch (e) {
             debugPrint('保存会话失败: $e');
             rethrow; // 重新抛出异常，让调用者知道保存失败

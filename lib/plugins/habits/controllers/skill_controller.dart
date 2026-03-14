@@ -8,7 +8,7 @@ import 'package:Memento/plugins/habits/sample_data.dart';
 
 class SkillController {
   final StorageManager storage;
-  static const _skillsKey = 'habits/skills';
+  static const _skillsKey = 'habits/skills.json';
   List<Skill> _skills = [];
   static const String _initializedKey = 'habits/skills_initialized';
 

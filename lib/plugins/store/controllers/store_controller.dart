@@ -353,14 +353,14 @@ class StoreController with ChangeNotifier {
 
   // 保存已使用物品
   Future<void> saveUsedItems() async {
-    await plugin.storage.write('store/used_items', {
+    await plugin.storage.write('store/used_items.json', {
       'items': _usedItems.map((item) => item.toJson()).toList(),
     });
   }
 
   // 加载已使用物品
   Future<void> loadUsedItems() async {
-    final storedUsedItems = await plugin.storage.read('store/used_items');
+    final storedUsedItems = await plugin.storage.read('store/used_items.json');
     if (storedUsedItems is Map<String, dynamic>) {
       final itemsData = storedUsedItems['items'];
       if (itemsData is List) {
@@ -491,12 +491,12 @@ class StoreController with ChangeNotifier {
 
   // 从存储加载数据
   Future<void> loadFromStorage() async {
-    final storedProducts = await plugin.storage.read('store/products');
+    final storedProducts = await plugin.storage.read('store/products.json');
     final storedArchivedProducts = await plugin.storage.read(
-      'store/archived_products',
+      'store/archived_products.json',
     );
-    final storedPoints = await plugin.storage.read('store/points');
-    final storedUserItems = await plugin.storage.read('store/user_items');
+    final storedPoints = await plugin.storage.read('store/points.json');
+    final storedUserItems = await plugin.storage.read('store/user_items.json');
     await loadUsedItems();
 
     _products.clear();
@@ -582,19 +582,19 @@ class StoreController with ChangeNotifier {
 
   // 保存商品数据
   Future<void> saveProducts() async {
-    await plugin.storage.write('store/products', {'products': productsJson});
+    await plugin.storage.write('store/products.json', {'products': productsJson});
   }
 
   // 保存存档商品数据
   Future<void> saveArchivedProducts() async {
-    await plugin.storage.write('store/archived_products', {
+    await plugin.storage.write('store/archived_products.json', {
       'products': archivedProductsJson,
     });
   }
 
   // 保存积分数据
   Future<void> savePoints() async {
-    await plugin.storage.write('store/points', {
+    await plugin.storage.write('store/points.json', {
       'value': _userPoints,
       'logs': _pointsLogs.map((log) => log.toJson()).toList(),
     });
@@ -602,7 +602,7 @@ class StoreController with ChangeNotifier {
 
   // 保存用户物品数据
   Future<void> saveUserItems() async {
-    await plugin.storage.write('store/user_items', {
+    await plugin.storage.write('store/user_items.json', {
       'items': _userItems.map((item) => item.toJson()).toList(),
     });
   }
