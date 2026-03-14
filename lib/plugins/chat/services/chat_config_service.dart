@@ -70,7 +70,7 @@ class ChatConfigService {
 
   Future<void> _initializeSettings() async {
     try {
-      final settings = await _plugin.storage.read('chat/settings');
+      final settings = await _plugin.storage.read('chat/settings.json');
       _showAvatarInChat = settings['showAvatarInChat'] ?? true;
       _showAvatarInTimeline = settings['showAvatarInTimeline'] ?? true;
       _playSoundOnSend = settings['playSoundOnSend'] ?? true;
@@ -171,7 +171,7 @@ class ChatConfigService {
   }
 
   Future<void> _saveSettings() async {
-    await _plugin.storage.write('chat/settings', {
+    await _plugin.storage.write('chat/settings.json', {
       'showAvatarInChat': _showAvatarInChat,
       'showAvatarInTimeline': _showAvatarInTimeline,
       'playSoundOnSend': _playSoundOnSend,

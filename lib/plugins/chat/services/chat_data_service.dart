@@ -58,7 +58,7 @@ class ChatDataService {
           (sampleData['channels'] as List)
               .map((channel) => channel['id'] as String)
               .toList();
-      await _plugin.storage.write('chat/channels', {'channels': channelIds});
+      await _plugin.storage.write('chat/channels.json', {'channels': channelIds});
 
       for (var channelJson in sampleData['channels'] as List) {
         final channelId = channelJson['id'] as String;
@@ -83,7 +83,7 @@ class ChatDataService {
       }
 
       if (sampleData.containsKey('settings')) {
-        await _plugin.storage.write('chat/settings', sampleData['settings']);
+        await _plugin.storage.write('chat/settings.json', sampleData['settings']);
       }
 
       debugPrint('Chat插件: 示例数据加载完成！共加载 ${channelIds.length} 个频道');

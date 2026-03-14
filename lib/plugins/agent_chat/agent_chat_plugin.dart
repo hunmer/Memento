@@ -186,7 +186,7 @@ class AgentChatPlugin extends PluginBase with ChangeNotifier {
       for (final conversation in controller.conversations) {
         try {
           // 加载该会话的消息
-          final data = await storage.read('agent_chat/messages/${conversation.id}');
+          final data = await storage.read('agent_chat/messages/${conversation.id}.json');
           if (data is List) {
             final messages = data
                 .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
