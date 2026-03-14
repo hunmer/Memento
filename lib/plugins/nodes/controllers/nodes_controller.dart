@@ -116,7 +116,7 @@ class NodesController extends ChangeNotifier {
       final Map<String, dynamic> data = {
         'notebooks': _notebooks.map((notebook) => notebook.toJson()).toList(),
       };
-      await _storageManager.write('nodes/nodes_notebooks', data);
+      await _storageManager.write('nodes/nodes_notebooks.json', data);
     } catch (e) {
       debugPrint('Error saving notebooks: $e');
     }
