@@ -42,9 +42,9 @@ class WatchConnectivityService {
   WatchConnectivityService._({
     required ConversationService conversationService,
     required MessageService messageService,
-  })  : _conversationService = conversationService,
-        _messageService = messageService,
-        _methodChannel = const MethodChannel(_channelName);
+  }) : _conversationService = conversationService,
+       _messageService = messageService,
+       _methodChannel = const MethodChannel(_channelName);
 
   /// 获取单例实例
   static WatchConnectivityService get instance {
@@ -147,9 +147,8 @@ class WatchConnectivityService {
     final conversations = _conversationService.conversations;
 
     // 转换为 watchOS 需要的格式
-    final channelList = conversations
-        .map((conv) => _conversationToWatchChannel(conv))
-        .toList();
+    final channelList =
+        conversations.map((conv) => _conversationToWatchChannel(conv)).toList();
 
     print('[WatchConnectivityService] 返回 ${channelList.length} 个会话');
     return channelList;
@@ -171,9 +170,8 @@ class WatchConnectivityService {
     final messages = await _messageService.getMessages(channelId);
 
     // 转换为 watchOS 需要的格式
-    final messageList = messages
-        .map((msg) => _messageToWatchMessage(msg))
-        .toList();
+    final messageList =
+        messages.map((msg) => _messageToWatchMessage(msg)).toList();
 
     print('[WatchConnectivityService] 返回 ${messageList.length} 条消息');
     return messageList;
@@ -212,20 +210,22 @@ class WatchConnectivityService {
     final entries = diaryPlugin.getMonthlyDiaryEntriesSync();
 
     // 转换为 watchOS 需要的格式
-    final entryList = entries.map((tuple) {
-      final date = tuple.$1;
-      final entry = tuple.$2;
-      return {
-        'date': DateFormat('yyyy-MM-dd').format(date),
-        'title': entry.title,
-        'contentPreview': entry.content.length > 100
-            ? '${entry.content.substring(0, 100)}...'
-            : entry.content,
-        'wordCount': entry.content.length,
-        'mood': entry.mood,
-        'updatedAt': entry.updatedAt.toIso8601String(),
-      };
-    }).toList();
+    final entryList =
+        entries.map((tuple) {
+          final date = tuple.$1;
+          final entry = tuple.$2;
+          return {
+            'date': DateFormat('yyyy-MM-dd').format(date),
+            'title': entry.title,
+            'contentPreview':
+                entry.content.length > 100
+                    ? '${entry.content.substring(0, 100)}...'
+                    : entry.content,
+            'wordCount': entry.content.length,
+            'mood': entry.mood,
+            'updatedAt': entry.updatedAt.toIso8601String(),
+          };
+        }).toList();
 
     print('[WatchConnectivityService] 返回 ${entryList.length} 条日记');
     return entryList;
@@ -309,19 +309,26 @@ class WatchConnectivityService {
         'todayCount': todayCount,
         'todayDuration': todayDuration,
         'remainingTime': remainingTime,
-        'activities': todayActivities.map((activity) => {
-          'id': activity.id,
-          'title': activity.title,
-          'startTime': activity.startTime.toIso8601String(),
-          'endTime': activity.endTime.toIso8601String(),
-          'duration': activity.durationInMinutes,
-          'tags': activity.tags,
-          'description': activity.description,
-          'mood': activity.mood,
-        }).toList(),
+        'activities':
+            todayActivities
+                .map(
+                  (activity) => {
+                    'id': activity.id,
+                    'title': activity.title,
+                    'startTime': activity.startTime.toIso8601String(),
+                    'endTime': activity.endTime.toIso8601String(),
+                    'duration': activity.durationInMinutes,
+                    'tags': activity.tags,
+                    'description': activity.description,
+                    'mood': activity.mood,
+                  },
+                )
+                .toList(),
       };
 
-      print('[WatchConnectivityService] 返回今日活动统计: todayCount=$todayCount, todayDuration=$todayDuration');
+      print(
+        '[WatchConnectivityService] 返回今日活动统计: todayCount=$todayCount, todayDuration=$todayDuration',
+      );
       return result;
     } catch (e) {
       print('[WatchConnectivityService] 获取今日活动数据失败: $e');
@@ -335,7 +342,9 @@ class WatchConnectivityService {
   }
 
   /// 获取指定日期范围的活动数据（供 watchOS 使用）
-  Future<List<Map<String, dynamic>>> _getWatchActivityData(dynamic arguments) async {
+  Future<List<Map<String, dynamic>>> _getWatchActivityData(
+    dynamic arguments,
+  ) async {
     try {
       final activityPlugin = ActivityPlugin.instance;
       List<ActivityRecord> activities;
@@ -351,16 +360,21 @@ class WatchConnectivityService {
       }
 
       // 转换为 watchOS 需要的格式
-      final activityList = activities.map((activity) => {
-        'id': activity.id,
-        'title': activity.title,
-        'startTime': activity.startTime.toIso8601String(),
-        'endTime': activity.endTime.toIso8601String(),
-        'duration': activity.durationInMinutes,
-        'tags': activity.tags,
-        'description': activity.description,
-        'mood': activity.mood,
-      }).toList();
+      final activityList =
+          activities
+              .map(
+                (activity) => {
+                  'id': activity.id,
+                  'title': activity.title,
+                  'startTime': activity.startTime.toIso8601String(),
+                  'endTime': activity.endTime.toIso8601String(),
+                  'duration': activity.durationInMinutes,
+                  'tags': activity.tags,
+                  'description': activity.description,
+                  'mood': activity.mood,
+                },
+              )
+              .toList();
 
       print('[WatchConnectivityService] 返回 ${activityList.length} 条活动');
       return activityList;
@@ -542,31 +556,33 @@ class WatchConnectivityService {
         final activeTimer = task.activeTimer;
 
         // 转换 TimerItem 列表为 watchOS 格式
-        final subTimers = task.timerItems.map((item) {
-          final data = <String, dynamic>{
-            'id': item.id,
-            'name': item.name,
-            'type': item.type.index, // 0: countUp, 1: countDown, 2: pomodoro
-            'duration': item.duration.inSeconds,
-            'completedDuration': item.completedDuration.inSeconds,
-            'isRunning': item.isRunning,
-            'isCompleted': item.isCompleted,
-            'repeatCount': item.repeatCount,
-          };
+        final subTimers =
+            task.timerItems.map((item) {
+              final data = <String, dynamic>{
+                'id': item.id,
+                'name': item.name,
+                'type':
+                    item.type.index, // 0: countUp, 1: countDown, 2: pomodoro
+                'duration': item.duration.inSeconds,
+                'completedDuration': item.completedDuration.inSeconds,
+                'isRunning': item.isRunning,
+                'isCompleted': item.isCompleted,
+                'repeatCount': item.repeatCount,
+              };
 
-          // 番茄钟特有属性
-          if (item.type == TimerType.pomodoro) {
-            data['workDuration'] = item.workDuration?.inSeconds;
-            data['breakDuration'] = item.breakDuration?.inSeconds;
-            data['cycles'] = item.cycles;
-            data['currentCycle'] = item.currentCycle;
-            data['isWorkPhase'] = item.isWorkPhase;
-          }
+              // 番茄钟特有属性
+              if (item.type == TimerType.pomodoro) {
+                data['workDuration'] = item.workDuration?.inSeconds;
+                data['breakDuration'] = item.breakDuration?.inSeconds;
+                data['cycles'] = item.cycles;
+                data['currentCycle'] = item.currentCycle;
+                data['isWorkPhase'] = item.isWorkPhase;
+              }
 
-          // 移除所有 null 值
-          data.removeWhere((key, value) => value == null);
-          return data;
-        }).toList();
+              // 移除所有 null 值
+              data.removeWhere((key, value) => value == null);
+              return data;
+            }).toList();
 
         final data = <String, dynamic>{
           'id': task.id,
@@ -620,23 +636,24 @@ class WatchConnectivityService {
       final memorialDays = dayPlugin.getAllMemorialDays();
 
       // 转换为 watchOS 需要的格式
-      final dayItems = memorialDays.map((day) {
-        final data = <String, dynamic>{
-          'id': day.id,
-          'title': day.title,
-          'targetDate': DateFormat('yyyy-MM-dd').format(day.targetDate),
-          'daysRemaining': day.daysRemaining,
-          'isExpired': day.isExpired,
-          'isToday': day.isToday,
-          'backgroundColor': day.backgroundColor.toARGB32(),
-          'backgroundImageUrl': day.backgroundImageUrl,
-          'notes': day.notes,
-        };
+      final dayItems =
+          memorialDays.map((day) {
+            final data = <String, dynamic>{
+              'id': day.id,
+              'title': day.title,
+              'targetDate': DateFormat('yyyy-MM-dd').format(day.targetDate),
+              'daysRemaining': day.daysRemaining,
+              'isExpired': day.isExpired,
+              'isToday': day.isToday,
+              'backgroundColor': day.backgroundColor.toARGB32(),
+              'backgroundImageUrl': day.backgroundImageUrl,
+              'notes': day.notes,
+            };
 
-        // 移除所有 null 值，避免 WCSession 传输问题
-        data.removeWhere((key, value) => value == null);
-        return data;
-      }).toList();
+            // 移除所有 null 值，避免 WCSession 传输问题
+            data.removeWhere((key, value) => value == null);
+            return data;
+          }).toList();
 
       print('[WatchConnectivityService] 返回 ${dayItems.length} 个纪念日');
       return dayItems;
@@ -678,7 +695,8 @@ class WatchConnectivityService {
           'unitType': goal.unitType,
           'targetValue': goal.targetValue,
           'currentValue': goal.currentValue,
-          'progress': goal.targetValue > 0 ? goal.currentValue / goal.targetValue : 0,
+          'progress':
+              goal.targetValue > 0 ? goal.currentValue / goal.targetValue : 0,
           'isCompleted': goal.isCompleted,
           'group': goal.group,
           'accentColor': accentColor,
@@ -718,7 +736,8 @@ class WatchConnectivityService {
         if (recordDate.isAfter(weekStart.subtract(const Duration(days: 1))) &&
             recordDate.isBefore(weekStart.add(const Duration(days: 7)))) {
           final dayIndex = recordDate.weekday - 1;
-          dailyTotals[dayIndex] = (dailyTotals[dayIndex] ?? 0) + (record.value as double);
+          dailyTotals[dayIndex] =
+              (dailyTotals[dayIndex] ?? 0) + (record.value as double);
         }
       }
 
@@ -788,7 +807,8 @@ class WatchConnectivityService {
       for (final account in controller.accounts) {
         for (final bill in account.bills) {
           // 筛选最近 7 天的账单
-          if (bill.date.isAfter(startDate) || bill.date.isAtSameMomentAs(startDate)) {
+          if (bill.date.isAfter(startDate) ||
+              bill.date.isAtSameMomentAs(startDate)) {
             final data = <String, dynamic>{
               'id': bill.id,
               'title': bill.title,
@@ -810,7 +830,9 @@ class WatchConnectivityService {
       }
 
       // 按日期降序排序
-      allBills.sort((a, b) => (b['date'] as String).compareTo(a['date'] as String));
+      allBills.sort(
+        (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+      );
 
       print('[WatchConnectivityService] 返回 ${allBills.length} 条账单');
       return allBills;
@@ -856,9 +878,10 @@ class WatchConnectivityService {
         final data = <String, dynamic>{
           'id': note.id,
           'title': note.title,
-          'contentPreview': note.content.length > 50
-              ? '${note.content.substring(0, 50)}...'
-              : note.content,
+          'contentPreview':
+              note.content.length > 50
+                  ? '${note.content.substring(0, 50)}...'
+                  : note.content,
           'folderId': note.folderId,
           'folderName': folderName,
           'folderColor': folderColor,
@@ -916,19 +939,25 @@ class WatchConnectivityService {
       final controller = storePlugin.controller;
 
       // 获取所有商品（去重）
-      final uniqueProducts = controller.products.fold<Map<String, Product>>({}, (map, product) {
-        if (!map.containsKey(product.id)) {
-          map[product.id] = product;
-        }
-        return map;
-      }).values.toList();
+      final uniqueProducts =
+          controller.products
+              .fold<Map<String, Product>>({}, (map, product) {
+                if (!map.containsKey(product.id)) {
+                  map[product.id] = product;
+                }
+                return map;
+              })
+              .values
+              .toList();
 
       final now = DateTime.now();
 
       final List<Map<String, dynamic>> productItems = [];
       for (final product in uniqueProducts) {
         // 检查商品是否可兑换
-        final isInExchangePeriod = now.isAfter(product.exchangeStart) && now.isBefore(product.exchangeEnd);
+        final isInExchangePeriod =
+            now.isAfter(product.exchangeStart) &&
+            now.isBefore(product.exchangeEnd);
         final isAvailable = product.stock > 0 && isInExchangePeriod;
 
         final data = <String, dynamic>{
@@ -1172,7 +1201,9 @@ class WatchConnectivityService {
 
   /// 获取物品列表（供 watchOS 使用）
   /// 可以指定仓库ID来过滤，如果 warehouseId 为空则返回所有物品
-  Future<List<Map<String, dynamic>>> _getWatchGoodsItems(dynamic arguments) async {
+  Future<List<Map<String, dynamic>>> _getWatchGoodsItems(
+    dynamic arguments,
+  ) async {
     try {
       final goodsPlugin = GoodsPlugin.instance;
       String? warehouseId;
@@ -1257,15 +1288,17 @@ class WatchConnectivityService {
       final today = DateTime(now.year, now.month, now.day);
       final weekEnd = today.add(const Duration(days: 8));
 
-      final upcomingEvents = allEvents.where((event) {
-        final eventDate = DateTime(
-          event.startTime.year,
-          event.startTime.month,
-          event.startTime.day,
-        );
-        return (eventDate.isAtSameMomentAs(today) || eventDate.isAfter(today)) &&
-            eventDate.isBefore(weekEnd);
-      }).toList();
+      final upcomingEvents =
+          allEvents.where((event) {
+            final eventDate = DateTime(
+              event.startTime.year,
+              event.startTime.month,
+              event.startTime.day,
+            );
+            return (eventDate.isAtSameMomentAs(today) ||
+                    eventDate.isAfter(today)) &&
+                eventDate.isBefore(weekEnd);
+          }).toList();
 
       // 按开始时间排序
       upcomingEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
@@ -1275,9 +1308,8 @@ class WatchConnectivityService {
         // 格式化时间显示
         final timeFormat = DateFormat('HH:mm');
         final startTimeStr = timeFormat.format(event.startTime);
-        final endTimeStr = event.endTime != null
-            ? timeFormat.format(event.endTime!)
-            : null;
+        final endTimeStr =
+            event.endTime != null ? timeFormat.format(event.endTime!) : null;
 
         // 计算日期状态
         final eventDate = DateTime(
@@ -1348,51 +1380,57 @@ class WatchConnectivityService {
 
       // 遍历所有日期的日记
       controller.entries.forEach((date, entries) {
-        if (date.isAfter(thirtyDaysAgo) || date.isAtSameMomentAs(thirtyDaysAgo)) {
+        if (date.isAfter(thirtyDaysAgo) ||
+            date.isAtSameMomentAs(thirtyDaysAgo)) {
           for (final entry in entries) {
             // 获取所有图片（imageUrls + Markdown中的图片）
-            final allImages = <String>[...entry.imageUrls, ...entry.extractImagesFromMarkdown()];
+            final allImages = <String>[
+              ...entry.imageUrls,
+              ...entry.extractImagesFromMarkdown(),
+            ];
 
-            if (allImages.isNotEmpty) {
-              final dateStr = DateFormat('MMM d').format(entry.createdAt);
-              final timeStr = DateFormat('HH:mm').format(entry.createdAt);
+            final dateStr = DateFormat('MMM d').format(entry.createdAt);
+            final timeStr = DateFormat('HH:mm').format(entry.createdAt);
 
-              // 根据日记标签或心情分配霓虹颜色
-              final neonBorderColor = _getAlbumNeonColor(entry.tags, entry.mood);
+            // 根据日记标签或心情分配霓虹颜色
+            final neonBorderColor = _getAlbumNeonColor(
+              entry.tags,
+              entry.mood,
+            );
 
-              final entryData = <String, dynamic>{
-                'id': entry.id,
-                'title': entry.title,
-                'contentPreview': entry.content.length > 100
-                    ? '${entry.content.substring(0, 100)}...'
-                    : entry.content,
-                'createdAt': entry.createdAt.toIso8601String(),
-                'updatedAt': entry.updatedAt.toIso8601String(),
-                'dateStr': dateStr,
-                'timeStr': timeStr,
-                'tags': entry.tags,
-                'location': entry.location,
-                'mood': entry.mood,
-                'weather': entry.weather,
-                'imageCount': allImages.length,
-                'neonBorderColor': neonBorderColor,
-                'wordCount': entry.wordCount,
-              };
+            final entryData = <String, dynamic>{
+              'id': entry.id,
+              'title': entry.title,
+              'contentPreview':
+                  entry.content.length > 100
+                      ? '${entry.content.substring(0, 100)}...'
+                      : entry.content,
+              'createdAt': entry.createdAt.toIso8601String(),
+              'updatedAt': entry.updatedAt.toIso8601String(),
+              'dateStr': dateStr,
+              'timeStr': timeStr,
+              'tags': entry.tags,
+              'location': entry.location,
+              'mood': entry.mood,
+              'weather': entry.weather,
+              'imageCount': allImages.length,
+              'neonBorderColor': neonBorderColor,
+              'wordCount': entry.wordCount,
+            };
 
-              // 移除所有 null 值
-              entryData.removeWhere((key, value) => value == null);
+            // 移除所有 null 值
+            entryData.removeWhere((key, value) => value == null);
 
-              // 按日期分组
-              final dateKey = DateFormat('yyyy-MM-dd').format(entry.createdAt);
-              groupedByDate.putIfAbsent(dateKey, () => []).add(entryData);
-            }
+            // 按日期分组
+            final dateKey = DateFormat('yyyy-MM-dd').format(entry.createdAt);
+            groupedByDate.putIfAbsent(dateKey, () => []).add(entryData);
           }
         }
       });
 
       // 转换为列表并按日期降序排序
-      final sortedDates = groupedByDate.keys.toList()
-        ..sort((a, b) => b.compareTo(a));
+      final sortedDates =
+          groupedByDate.keys.toList()..sort((a, b) => b.compareTo(a));
 
       for (final dateKey in sortedDates) {
         albumEntries.addAll(groupedByDate[dateKey]!);
