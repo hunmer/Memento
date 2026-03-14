@@ -89,6 +89,13 @@
                     </button>
                     <button
                         class="tab"
+                        :class="{ active: activeTab === 'apikeys' }"
+                        @click="activeTab = 'apikeys'"
+                    >
+                        API Keys
+                    </button>
+                    <button
+                        class="tab"
                         :class="{ active: activeTab === 'settings' }"
                         @click="activeTab = 'settings'"
                     >
@@ -180,6 +187,55 @@
                     </div>
                 </div>
 
+                <!-- API Keys Tab -->
+                <div v-show="activeTab === 'apikeys'" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>API Keys 管理</h3>
+                            <button class="btn btn-primary" @click="showCreateApiKeyModal = true">
+                                ➕ 创建 API Key
+                            </button>
+                        </div>
+
+                        <div class="api-key-info" style="margin-bottom: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
+                            <p style="margin: 0; color: #0369a1;">
+                                💡 <strong>API Key</strong> 用于 MCP Server 等外部应用访问 Memento 数据。
+                                <br>创建时需要提供加密密钥，请从 Memento 客户端获取。
+                            </p>
+                        </div>
+
+                        <!-- API Keys 列表 -->
+                        <div class="api-keys-list">
+                            <div v-if="apiKeys.length === 0" class="empty-message">
+                                暂无 API Key
+                            </div>
+                            <div v-for="key in apiKeys" :key="key.id" class="api-key-item">
+                                <div class="api-key-info">
+                                    <div class="api-key-name">
+                                        <strong>{{ key.name }}</strong>
+                                        <span v-if="key.is_expired" class="badge badge-danger">已过期</span>
+                                    </div>
+                                    <div class="api-key-meta">
+                                        <code>{{ key.key_prefix }}</code>
+                                        <span v-if="key.expires_at" class="text-muted">
+                                            | 过期: {{ formatTime(key.expires_at) }}
+                                        </span>
+                                        <span v-else class="text-muted">| 永不过期</span>
+                                        <span v-if="key.last_used_at" class="text-muted">
+                                            | 最后使用: {{ formatTime(key.last_used_at) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="api-key-actions">
+                                    <button class="btn btn-sm btn-danger" @click="revokeApiKey(key.id)">
+                                        撤销
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Settings Tab -->
                 <div v-show="activeTab === 'settings'" class="tab-content">
                     <!-- API 访问控制 -->
@@ -236,6 +292,99 @@
                 </div>
             </div>
         </main>
+
+        <!-- Create API Key Modal -->
+        <div v-if="showCreateApiKeyModal" class="modal-overlay" @click.self="showCreateApiKeyModal = false">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>创建 API Key</h3>
+                    <button class="modal-close" @click="showCreateApiKeyModal = false">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="apiKeyName">名称</label>
+                        <input
+                            type="text"
+                            id="apiKeyName"
+                            v-model="newApiKey.name"
+                            placeholder="例如: MCP Server"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKeyEncryptionKey">加密密钥 (Base64)</label>
+                        <input
+                            type="text"
+                            id="apiKeyEncryptionKey"
+                            v-model="newApiKey.encryptionKey"
+                            placeholder="从 Memento 客户端获取"
+                            required
+                        >
+                        <small class="form-hint">
+                            在 Memento 客户端 "设置 > 开发者选项" 中获取加密密钥
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKeyExpiry">过期时间</label>
+                        <select id="apiKeyExpiry" v-model="newApiKey.expiry">
+                            <option value="never">永不过期</option>
+                            <option value="7days">7天</option>
+                            <option value="30days">30天</option>
+                            <option value="90days">90天</option>
+                            <option value="1year">1年</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" @click="showCreateApiKeyModal = false">取消</button>
+                    <button class="btn btn-primary" @click="createApiKey" :disabled="loading">
+                        {{ loading ? '创建中...' : '创建' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Show New API Key Modal -->
+        <div v-if="showApiKeyResult" class="modal-overlay" @click.self="closeApiKeyResult">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>✅ API Key 已创建</h3>
+                    <button class="modal-close" @click="closeApiKeyResult">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="api-key-result-warning">
+                        ⚠️ <strong>重要提示：</strong>以下信息仅显示一次，请妥善保存！
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <div class="copy-field">
+                            <code>{{ createdApiKey.key }}</code>
+                            <button class="btn btn-sm btn-outline" @click="copyToClipboard(createdApiKey.key)">
+                                复制
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>加密密钥</label>
+                        <div class="copy-field">
+                            <code>{{ createdApiKey.encryption_key }}</code>
+                            <button class="btn btn-sm btn-outline" @click="copyToClipboard(createdApiKey.encryption_key)">
+                                复制
+                            </button>
+                        </div>
+                    </div>
+                    <div class="api-key-usage">
+                        <h4>MCP Server 配置示例 (.env)</h4>
+                        <pre class="code-block">MEMENTO_API_KEY={{ createdApiKey.key }}
+MEMENTO_ENCRYPTION_KEY={{ createdApiKey.encryption_key }}
+MEMENTO_SERVER_URL={{ serverUrl }}</pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" @click="closeApiKeyResult">我已保存</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Toast Notifications -->
         <div class="toast-container">

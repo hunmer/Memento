@@ -139,6 +139,17 @@ createApp({
         const recentActivities = ref([]);
         const toasts = ref([]);
 
+        // API Keys 状态
+        const apiKeys = ref([]);
+        const showCreateApiKeyModal = ref(false);
+        const showApiKeyResult = ref(false);
+        const createdApiKey = ref(null);
+        const newApiKey = reactive({
+            name: '',
+            encryptionKey: '',
+            expiry: 'never'
+        });
+
         // Methods
         const showToast = (message, type = 'success') => {
             const id = Date.now();
@@ -274,7 +285,8 @@ createApp({
                     checkServerHealth(),
                     loadFiles(),  // loadFiles will call buildDirectoryTree internally
                     loadStats(),
-                    loadApiStatus()
+                    loadApiStatus(),
+                    loadApiKeys()
                 ]);
             } catch (err) {
                 // 如果加载失败，可能是token问题，apiRequest已经处理了清理
@@ -661,6 +673,116 @@ createApp({
             }
         };
 
+        // ==================== API Keys 管理 ====================
+
+        const loadApiKeys = async () => {
+            try {
+                const data = await apiRequest('/api/v1/auth/api-keys');
+                apiKeys.value = data.api_keys || [];
+            } catch (err) {
+                console.error('Failed to load API keys:', err);
+                apiKeys.value = [];
+            }
+        };
+
+        const createApiKey = async () => {
+            if (!newApiKey.name) {
+                showToast('请输入 API Key 名称', 'error');
+                return;
+            }
+            if (!newApiKey.encryptionKey) {
+                showToast('请输入加密密钥', 'error');
+                return;
+            }
+
+            // 基本验证：检查是否为 Base64 格式
+            if (!/^[A-Za-z0-9+/]+=*$/.test(newApiKey.encryptionKey)) {
+                showToast('加密密钥格式无效，应为 Base64 编码', 'error');
+                return;
+            }
+
+            setLoading(true, '创建 API Key...');
+            try {
+                const data = await apiRequest('/api/v1/auth/api-keys', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: newApiKey.name,
+                        encryption_key: newApiKey.encryptionKey,
+                        expiry: newApiKey.expiry
+                    })
+                });
+
+                if (data.success && data.api_key) {
+                    // 保存创建的 API Key 用于显示
+                    createdApiKey.value = data.api_key;
+                    showCreateApiKeyModal.value = false;
+                    showApiKeyResult.value = true;
+
+                    // 重置表单
+                    newApiKey.name = '';
+                    newApiKey.encryptionKey = '';
+                    newApiKey.expiry = 'never';
+
+                    // 刷新列表
+                    await loadApiKeys();
+
+                    addActivity('settings', `创建了 API Key: ${data.api_key.name}`);
+                } else {
+                    throw new Error(data.error || '创建失败');
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const revokeApiKey = async (keyId) => {
+            if (!confirm('确定要撤销此 API Key 吗？使用此 Key 的应用将无法继续访问数据。')) {
+                return;
+            }
+
+            setLoading(true, '撤销 API Key...');
+            try {
+                const data = await apiRequest(`/api/v1/auth/api-keys/${keyId}`, {
+                    method: 'DELETE'
+                });
+
+                if (data.success) {
+                    await loadApiKeys();
+                    showToast('API Key 已撤销');
+                    addActivity('settings', '撤销了一个 API Key');
+                } else {
+                    throw new Error(data.error || '撤销失败');
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const closeApiKeyResult = () => {
+            showApiKeyResult.value = false;
+            createdApiKey.value = null;
+        };
+
+        const copyToClipboard = async (text) => {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('已复制到剪贴板');
+            } catch (err) {
+                // 降级方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('已复制到剪贴板');
+            }
+        };
+
         // Utilities
         const formatSize = (bytes) => {
             if (!bytes) return '0 B';
@@ -735,6 +857,11 @@ createApp({
             expandedFolders,
             recentActivities,
             toasts,
+            apiKeys,
+            showCreateApiKeyModal,
+            showApiKeyResult,
+            createdApiKey,
+            newApiKey,
 
             // Methods
             login,
@@ -749,6 +876,10 @@ createApp({
             enableApi,
             disableApi,
             refreshApiStatus,
+            createApiKey,
+            revokeApiKey,
+            closeApiKeyResult,
+            copyToClipboard,
 
             // Utilities
             formatSize,

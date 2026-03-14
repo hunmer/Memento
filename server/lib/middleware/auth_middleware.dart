@@ -4,10 +4,30 @@ import 'package:shelf/shelf.dart';
 
 import '../services/auth_service.dart';
 
+/// 认证上下文数据
+class AuthContext {
+  final String userId;
+  final String? encryptionKey;
+  final String? keyId;
+  final String? keyName;
+  final bool isApiKey;
+
+  AuthContext({
+    required this.userId,
+    this.encryptionKey,
+    this.keyId,
+    this.keyName,
+    this.isApiKey = false,
+  });
+}
+
 /// JWT 认证中间件
 ///
-/// 验证请求头中的 Authorization Bearer Token
-/// 成功后将 userId 添加到 request.context
+/// 支持两种认证方式：
+/// 1. Authorization: Bearer <jwt_token>
+/// 2. X-API-Key: <api_key>
+///
+/// 成功后将认证信息添加到 request.context
 Middleware authMiddleware(AuthService authService) {
   return (Handler innerHandler) {
     return (Request request) async {
@@ -16,11 +36,34 @@ Middleware authMiddleware(AuthService authService) {
         return innerHandler(request);
       }
 
-      // 获取 Authorization 头
-      final authHeader = request.headers['authorization'];
+      // 优先检查 X-API-Key 头
+      final apiKeyHeader = request.headers['x-api-key'];
+      if (apiKeyHeader != null && apiKeyHeader.isNotEmpty) {
+        final result = await authService.verifyApiKey(apiKeyHeader);
+        if (result == null) {
+          return _unauthorizedResponse('API Key 无效或已过期');
+        }
 
+        final updatedRequest = request.change(
+          context: {
+            ...request.context,
+            'userId': result.userId,
+            'authContext': AuthContext(
+              userId: result.userId,
+              encryptionKey: result.encryptionKey,
+              keyId: result.keyId,
+              keyName: result.keyName,
+              isApiKey: true,
+            ),
+          },
+        );
+        return innerHandler(updatedRequest);
+      }
+
+      // 检查 Authorization Bearer Token
+      final authHeader = request.headers['authorization'];
       if (authHeader == null || !authHeader.startsWith('Bearer ')) {
-        return _unauthorizedResponse('缺少或格式错误的 Authorization 头');
+        return _unauthorizedResponse('缺少认证信息');
       }
 
       // 提取 Token
@@ -38,6 +81,10 @@ Middleware authMiddleware(AuthService authService) {
         context: {
           ...request.context,
           'userId': userId,
+          'authContext': AuthContext(
+            userId: userId,
+            isApiKey: false,
+          ),
         },
       );
 
@@ -62,4 +109,9 @@ Response _unauthorizedResponse(String message) {
 /// 从请求上下文获取用户 ID 的辅助函数
 String? getUserIdFromContext(Request request) {
   return request.context['userId'] as String?;
+}
+
+/// 从请求上下文获取认证上下文的辅助函数
+AuthContext? getAuthContextFromRequest(Request request) {
+  return request.context['authContext'] as AuthContext?;
 }

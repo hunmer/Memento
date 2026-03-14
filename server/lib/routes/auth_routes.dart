@@ -6,6 +6,7 @@ import 'package:shared_models/shared_models.dart';
 
 import '../services/auth_service.dart';
 import '../services/plugin_data_service.dart';
+import '../models/api_key.dart';
 
 /// 认证路由
 class AuthRoutes {
@@ -34,6 +35,17 @@ class AuthRoutes {
 
     // GET /api-status - 查询 API 启用状态 (需要认证)
     router.get('/api-status', _handleApiStatus);
+
+    // ==================== API Key 管理 ====================
+
+    // POST /api-keys - 创建 API Key (需要认证)
+    router.post('/api-keys', _handleCreateApiKey);
+
+    // GET /api-keys - 列出用户的 API Keys (需要认证)
+    router.get('/api-keys', _handleListApiKeys);
+
+    // DELETE /api-keys/<id> - 撤销 API Key (需要认证)
+    router.delete('/api-keys/<id>', _handleRevokeApiKey);
 
     return router;
   }
@@ -256,6 +268,130 @@ class AuthRoutes {
       );
     } catch (e) {
       return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  // ==================== API Key 管理 ====================
+
+  /// 处理创建 API Key
+  ///
+  /// 请求体: {
+  ///   "name": "API Key 名称",
+  ///   "encryption_key": "base64-encoded-key",
+  ///   "expiry": "7days" | "30days" | "90days" | "1year" | "never"
+  /// }
+  Future<Response> _handleCreateApiKey(Request request) async {
+    try {
+      final userId = _getUserIdFromRequest(request);
+      if (userId == null) {
+        return _errorResponse(401, '未认证或 Token 无效');
+      }
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      final name = data['name'] as String?;
+      if (name == null || name.isEmpty) {
+        return _errorResponse(400, 'API Key 名称不能为空');
+      }
+
+      final encryptionKey = data['encryption_key'] as String?;
+      if (encryptionKey == null || encryptionKey.isEmpty) {
+        return _errorResponse(400, '缺少 encryption_key 参数');
+      }
+
+      // 解析过期选项
+      final expiryStr = data['expiry'] as String? ?? 'never';
+      final expiry = _parseExpiry(expiryStr);
+
+      // 生成 API Key
+      final apiKey = await _authService.generateApiKey(
+        userId: userId,
+        name: name,
+        encryptionKey: encryptionKey,
+        expiry: expiry,
+      );
+
+      // 同时启用用户的 API 访问
+      if (_pluginDataService != null) {
+        await _pluginDataService!.enableApi(userId, encryptionKey);
+      }
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'api_key': apiKey.toJson(), // 返回完整信息（仅创建时）
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 处理列出 API Keys
+  Future<Response> _handleListApiKeys(Request request) async {
+    try {
+      final userId = _getUserIdFromRequest(request);
+      if (userId == null) {
+        return _errorResponse(401, '未认证或 Token 无效');
+      }
+
+      final keys = await _authService.listApiKeys(userId);
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'api_keys': keys.map((k) => k.toSafeJson()).toList(),
+          'count': keys.length,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 处理撤销 API Key
+  Future<Response> _handleRevokeApiKey(Request request, String keyId) async {
+    try {
+      final userId = _getUserIdFromRequest(request);
+      if (userId == null) {
+        return _errorResponse(401, '未认证或 Token 无效');
+      }
+
+      final success = await _authService.revokeApiKey(userId, keyId);
+
+      return Response.ok(
+        jsonEncode({
+          'success': success,
+          'message': success ? 'API Key 已撤销' : '撤销失败',
+          'key_id': keyId,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 解析过期选项
+  ApiKeyExpiry _parseExpiry(String value) {
+    switch (value) {
+      case '7days':
+        return ApiKeyExpiry.sevenDays;
+      case '30days':
+        return ApiKeyExpiry.thirtyDays;
+      case '90days':
+        return ApiKeyExpiry.ninetyDays;
+      case '1year':
+        return ApiKeyExpiry.oneYear;
+      case 'never':
+      default:
+        return ApiKeyExpiry.never;
     }
   }
 }
