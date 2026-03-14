@@ -7,7 +7,8 @@
 - **端到端加密**: 服务器只存储密文，无法解密用户数据
 - **乐观并发控制**: 使用 MD5 验证检测冲突
 - **纯文件存储**: 零配置，无需数据库
-- **JWT 认证**: 安全的用户认证机制
+- **双重认证**: 支持 API Key 和 JWT Token 认证
+- **API Key 管理**: 内置 API Key 创建、管理界面
 - **文件级同步**: 以 JSON 文件为单位进行同步
 
 ## 快速开始
@@ -39,27 +40,54 @@ dart compile exe bin/server.dart -o memento_server
 ./memento_server
 ```
 
-### 4. 验证服务器
+### 4. 访问管理面板
+
+打开浏览器访问 http://localhost:8080/admin/
+
+默认登录凭据: `admin` / `admin123`
+
+## 认证方式
+
+### API Key 认证（推荐用于第三方应用）
+
+在管理面板的 "API Keys" 选项卡中创建 API Key，然后使用 `X-API-Key` 请求头：
 
 ```bash
-# 健康检查
-curl http://localhost:8080/health
+curl http://localhost:8080/api/v1/plugins/todo/tasks \
+  -H "X-API-Key: mk_live_your_api_key"
+```
 
-# 预期响应
-# {"status": "healthy", "timestamp": "2024-01-01T00:00:00.000Z"}
+### JWT Token 认证（用于管理面板）
+
+管理面板登录后自动获得 JWT Token，使用 `Authorization: Bearer` 请求头：
+
+```bash
+curl http://localhost:8080/api/v1/sync/list \
+  -H "Authorization: Bearer your_jwt_token"
 ```
 
 ## API 端点
 
-### 认证 (无需 Token)
+### 公开端点
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/health` | 健康检查 |
+| GET | `/version` | 版本信息 |
+| GET | `/admin/` | 管理面板 |
+
+### 认证 API
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
 | POST | `/api/v1/auth/register` | 用户注册 |
 | POST | `/api/v1/auth/login` | 用户登录 |
 | POST | `/api/v1/auth/refresh` | 刷新 Token |
+| POST | `/api/v1/auth/api-keys` | 创建 API Key |
+| GET | `/api/v1/auth/api-keys` | 列出 API Keys |
+| DELETE | `/api/v1/auth/api-keys/<id>` | 撤销 API Key |
 
-### 同步 (需要 Token)
+### 同步 API（需认证）
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -68,53 +96,70 @@ curl http://localhost:8080/health
 | GET | `/api/v1/sync/list` | 列出所有文件 |
 | DELETE | `/api/v1/sync/delete/{path}` | 删除文件 |
 | GET | `/api/v1/sync/status` | 同步状态 |
+| POST | `/api/v1/sync/export` | 导出 ZIP |
+| GET | `/api/v1/sync/download/{file}` | 下载导出文件 |
+
+### 插件 API（需认证）
+
+支持 19 个插件的 RESTful API：
+
+- `/api/v1/plugins/chat/*` - 聊天
+- `/api/v1/plugins/notes/*` - 笔记
+- `/api/v1/plugins/todo/*` - 任务
+- `/api/v1/plugins/diary/*` - 日记
+- `/api/v1/plugins/activity/*` - 活动记录
+- `/api/v1/plugins/bill/*` - 账单
+- `/api/v1/plugins/goods/*` - 物品
+- `/api/v1/plugins/calendar/*` - 日历
+- 等等...
+
+## API Key 管理
+
+### 创建 API Key
+
+1. 登录管理面板 (http://localhost:8080/admin/)
+2. 进入 "API Keys" 选项卡
+3. 点击 "创建 API Key"
+4. 输入名称、选择加密密钥、设置过期时间
+5. **重要**：保存显示的 API Key 和加密密钥（仅显示一次）
+
+### API Key 格式
+
+- 前缀: `mk_live_` 或 `mk_test_`
+- 总长度: 40 字符
+- 示例: `mk_live_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6`
+
+### 过期选项
+
+| 选项 | 说明 |
+|------|------|
+| 7天 | 适用于临时测试 |
+| 30天 | 适用于短期项目 |
+| 90天 | 适用于中期使用 |
+| 1年 | 适用于长期项目 |
+| 永不过期 | 适用于生产环境 |
 
 ## 请求示例
 
-### 注册
+### 使用 API Key 获取任务列表
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "user@example.com",
-    "password": "your_password",
-    "device_id": "device_123",
-    "device_name": "My Phone"
-  }'
+curl http://localhost:8080/api/v1/plugins/todo/tasks \
+  -H "X-API-Key: mk_live_your_api_key"
 ```
 
-### 登录
-
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "admin",
-    "password": "admin123",
-    "device_id": "device_123"
-  }'
-```
-
-### 推送文件
+### 使用 JWT Token 推送文件
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/sync/push \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "file_path": "diary/2024-01-01.json",
     "encrypted_data": "base64_iv.base64_ciphertext",
     "old_md5": null,
     "new_md5": "abc123..."
   }'
-```
-
-### 拉取文件
-
-```bash
-curl http://localhost:8080/api/v1/sync/pull/diary/2024-01-01.json \
-  -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ## 冲突处理
@@ -132,9 +177,6 @@ curl http://localhost:8080/api/v1/sync/pull/diary/2024-01-01.json \
 }
 ```
 
-客户端收到冲突响应后，根据配置的策略处理：
-- **服务器优先**: 自动使用服务器数据覆盖本地
-
 ## 数据目录结构
 
 ```
@@ -142,12 +184,11 @@ data/
 ├── users/
 │   └── {user_id}/
 │       ├── diary/
-│       │   └── 2024-01-01.json
 │       ├── chat/
-│       │   └── channels.json
 │       └── ...
 ├── auth/
-│   └── users.json
+│   ├── users.json
+│   └── api_keys.json
 └── logs/
     └── sync_2024-01-01.log
 ```
@@ -159,11 +200,9 @@ data/
 | `PORT` | 8080 | 服务器端口 |
 | `DATA_DIR` | ./data | 数据存储目录 |
 | `JWT_SECRET` | 随机生成 | JWT 签名密钥 |
-| `TOKEN_EXPIRY_DAYS` | 7 | Token 有效期 |
+| `TOKEN_EXPIRY_DAYS` | 36500 | Token 有效期 |
 | `ENABLE_CORS` | true | 是否启用 CORS |
 | `CORS_ORIGINS` | * | 允许的 CORS 源 |
-| `MAX_REQUEST_SIZE` | 10485760 | 最大请求体 (10MB) |
-| `ENABLE_LOGGING` | true | 是否启用日志 |
 
 ## Docker 部署
 
@@ -191,21 +230,8 @@ docker run -p 8080:8080 -v ./data:/data -e JWT_SECRET=your_secret memento-server
 1. **生产环境必须设置强随机 JWT_SECRET**
 2. **建议使用 HTTPS (通过反向代理如 Nginx)**
 3. **定期备份 data/ 目录**
-4. **用户密码使用 SHA256 + Salt 哈希存储**
+4. **API Key 仅显示一次，请妥善保存**
 5. **加密密钥在客户端派生，服务器无法获取**
-
-## 开发
-
-```bash
-# 运行测试
-dart test
-
-# 代码检查
-dart analyze
-
-# 格式化代码
-dart format .
-```
 
 ## 许可证
 
