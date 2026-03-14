@@ -503,6 +503,81 @@ struct NodeItem: Codable, Identifiable {
         }
     }
 }
+
+// MARK: - 物品仓库数据模型
+
+struct GoodsWarehouse: Codable, Identifiable {
+    let id: String
+    let title: String
+    let icon: Int
+    let iconColor: Int
+    let itemCount: Int
+
+    // 计算属性：仓库图标颜色
+    var warehouseColor: Color {
+        return Color(
+            red: Double((iconColor >> 16) & 0xFF) / 255.0,
+            green: Double((iconColor >> 8) & 0xFF) / 255.0,
+            blue: Double(iconColor & 0xFF) / 255.0
+        )
+    }
+}
+
+// MARK: - 物品数据模型
+
+struct GoodsItem: Codable, Identifiable {
+    let id: String
+    let title: String
+    let warehouseId: String
+    let warehouseName: String
+    let tags: [String]
+    let purchasePrice: Double?
+    let priceText: String?
+    let status: String
+    let lastUsedText: String?
+    let hasSubItems: Bool
+    let subItemsCount: Int
+
+    // 计算属性：状态颜色
+    var itemStatusColor: Color {
+        switch status {
+        case "normal": return .green
+        case "damaged": return .orange
+        case "lent": return .blue
+        case "sold": return .gray
+        default: return .green
+        }
+    }
+
+    // 计算属性：状态图标
+    var itemStatusIcon: String {
+        switch status {
+        case "normal": return "checkmark.circle"
+        case "damaged": return "exclamationmark.triangle"
+        case "lent": return "arrow.right.circle"
+        case "sold": return "cart"
+        default: return "circle"
+        }
+    }
+
+    // 计算属性：状态文本
+    var itemStatusText: String {
+        switch status {
+        case "normal": return "正常"
+        case "damaged": return "损坏"
+        case "lent": return "借出"
+        case "sold": return "已售"
+        default: return ""
+        }
+    }
+}
+
+// MARK: - 用户物品分组数据模型（旧版）
+
+struct UserItemGroupOld: Codable, Identifiable {
+    var id: String { productId }
+    let productId: String
+    let productName: String
     let count: Int
     let isExpired: Bool
     let earliestExpiry: String
@@ -561,6 +636,8 @@ enum WatchRequest: String, Codable {
     case getUserItems
     case getNodesNotebooks
     case getNodes
+    case getGoodsWarehouses
+    case getGoodsItems
 }
 
 enum ResponseKey: String, Codable {
@@ -1323,5 +1400,75 @@ extension WCSessionManager: WCSessionDelegate {
     func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
         logger.info("收到消息（带回复）: \(message)")
         replyHandler(["received": true])
+    }
+
+
+    // MARK: - 物品仓库相关方法
+
+    /// 获取仓库列表
+    func getGoodsWarehouses() async throws -> [GoodsWarehouse] {
+        logger.info("发送 getGoodsWarehouses 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getGoodsWarehouses.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到仓库数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([GoodsWarehouse].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析仓库数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取仓库数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    /// 获取物品列表
+    func getGoodsItems(warehouseId: String? = nil) async throws -> [GoodsItem] {
+        logger.info("发送 getGoodsItems 请求, warehouseId=\(warehouseId ?? "all")")
+
+        var request: [String: Any] = ["request": WatchRequest.getGoodsItems.rawValue]
+        if let warehouseId = warehouseId {
+            request["warehouseId"] = warehouseId
+        }
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到物品数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([GoodsItem].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析物品数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage])
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取物品数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
     }
 }

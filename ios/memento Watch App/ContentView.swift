@@ -25,6 +25,7 @@ enum CardDestination: String {
     case billing = "账单"
     case notes = "笔记"
     case store = "商店"
+    case goods = "物品"
     case settings = "设置"
 }
 
@@ -55,6 +56,7 @@ struct ContentView: View {
         DemoCard(title: "账单", subtitle: "财务记录", icon: "wallet.pass", color: .green, destination: .billing),
         DemoCard(title: "笔记", subtitle: "快速笔记", icon: "note.text", color: Color(red: 0.0, green: 0.949, blue: 1.0), destination: .notes),
         DemoCard(title: "商店", subtitle: "物品兑换", icon: "storefront", color: Color(red: 236/255, green: 91/255, blue: 19/255), destination: .store),
+        DemoCard(title: "物品", subtitle: "仓库管理", icon: "shippingbox", color: Color(red: 207/255, green: 77/255, blue: 116/255), destination: .goods),
         // DemoCard(title: "提醒", subtitle: "1个提醒", icon: "bell.fill", color: .purple, destination: .reminder),
         // DemoCard(title: "设置", subtitle: "偏好设置", icon: "gear", color: .gray, destination: .settings)
     ]
@@ -94,6 +96,8 @@ struct ContentView: View {
             NotesListView()
         case .store:
             StoreListView()
+        case .goods:
+            GoodsWarehouseListView()
         case .reminder:
             PlaceholderView(title: card.title, icon: card.icon, color: card.color)
         case .settings:

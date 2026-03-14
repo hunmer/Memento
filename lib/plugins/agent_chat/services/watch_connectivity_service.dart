@@ -21,6 +21,7 @@ import 'package:Memento/plugins/store/store_plugin.dart';
 import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
+import 'package:Memento/plugins/goods/goods_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -115,6 +116,10 @@ class WatchConnectivityService {
             return await _getWatchNodesNotebooks();
           case 'getWatchNodes':
             return await _getWatchNodes(call.arguments);
+          case 'getWatchGoodsWarehouses':
+            return await _getWatchGoodsWarehouses();
+          case 'getWatchGoodsItems':
+            return await _getWatchGoodsItems(call.arguments);
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -1123,5 +1128,109 @@ class WatchConnectivityService {
   String _truncateText(String text, int maxLength) {
     if (text.length <= maxLength) return text;
     return '${text.substring(0, maxLength)}...';
+  }
+
+  // ============== 物品管理相关方法 ==============
+
+  /// 获取仓库列表（供 watchOS 使用）
+  Future<List<Map<String, dynamic>>> _getWatchGoodsWarehouses() async {
+    try {
+      final goodsPlugin = GoodsPlugin.instance;
+      final warehouses = goodsPlugin.warehouses;
+
+      final List<Map<String, dynamic>> warehouseItems = [];
+      for (final warehouse in warehouses) {
+        // 计算仓库内物品总数
+        int itemCount = warehouse.items.length;
+
+        final data = <String, dynamic>{
+          'id': warehouse.id,
+          'title': warehouse.title,
+          'icon': warehouse.icon.codePoint,
+          'iconColor': warehouse.iconColor.toARGB32(),
+          'itemCount': itemCount,
+        };
+
+        // 移除所有 null 值
+        data.removeWhere((key, value) => value == null);
+        warehouseItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${warehouseItems.length} 个仓库');
+      return warehouseItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取仓库数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 获取物品列表（供 watchOS 使用）
+  /// 可以指定仓库ID来过滤，如果 warehouseId 为空则返回所有物品
+  Future<List<Map<String, dynamic>>> _getWatchGoodsItems(dynamic arguments) async {
+    try {
+      final goodsPlugin = GoodsPlugin.instance;
+      String? warehouseId;
+
+      if (arguments is Map) {
+        warehouseId = arguments['warehouseId'] as String?;
+      }
+
+      final List<Map<String, dynamic>> goodsItems = [];
+
+      for (final warehouse in goodsPlugin.warehouses) {
+        // 如果指定了仓库ID，只返回该仓库的物品
+        if (warehouseId != null && warehouse.id != warehouseId) {
+          continue;
+        }
+
+        for (final item in warehouse.items) {
+          // 计算最后使用时间
+          String? lastUsedText;
+          if (item.lastUsedDate != null) {
+            final now = DateTime.now();
+            final diff = now.difference(item.lastUsedDate!);
+            if (diff.inDays == 0) {
+              lastUsedText = '今天';
+            } else if (diff.inDays == 1) {
+              lastUsedText = '昨天';
+            } else if (diff.inDays < 7) {
+              lastUsedText = '${diff.inDays}天前';
+            } else {
+              lastUsedText = DateFormat('MM-dd').format(item.lastUsedDate!);
+            }
+          }
+
+          // 格式化价格
+          String? priceText;
+          if (item.purchasePrice != null) {
+            priceText = '¥${item.purchasePrice!.toStringAsFixed(0)}';
+          }
+
+          final data = <String, dynamic>{
+            'id': item.id,
+            'title': item.title,
+            'warehouseId': warehouse.id,
+            'warehouseName': warehouse.title,
+            'tags': item.tags,
+            'purchasePrice': item.purchasePrice,
+            'priceText': priceText,
+            'status': item.status ?? 'normal',
+            'lastUsedText': lastUsedText,
+            'hasSubItems': item.subItems.isNotEmpty,
+            'subItemsCount': item.subItems.length,
+          };
+
+          // 移除所有 null 值
+          data.removeWhere((key, value) => value == null);
+          goodsItems.add(data);
+        }
+      }
+
+      print('[WatchConnectivityService] 返回 ${goodsItems.length} 个物品');
+      return goodsItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取物品数据失败: $e');
+      return [];
+    }
   }
 }
