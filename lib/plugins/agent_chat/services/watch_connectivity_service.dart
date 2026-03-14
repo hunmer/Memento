@@ -22,6 +22,7 @@ import 'package:Memento/plugins/store/models/product.dart';
 import 'package:Memento/plugins/store/models/user_item.dart';
 import 'package:Memento/plugins/nodes/nodes_plugin.dart';
 import 'package:Memento/plugins/goods/goods_plugin.dart';
+import 'package:Memento/plugins/calendar/calendar_plugin.dart';
 import 'package:intl/intl.dart';
 
 /// WatchConnectivity 服务
@@ -120,6 +121,8 @@ class WatchConnectivityService {
             return await _getWatchGoodsWarehouses();
           case 'getWatchGoodsItems':
             return await _getWatchGoodsItems(call.arguments);
+          case 'getWatchCalendarEvents':
+            return await _getWatchCalendarEvents();
           default:
             throw PlatformException(
               code: 'UNIMPLEMENTED',
@@ -1232,5 +1235,116 @@ class WatchConnectivityService {
       print('[WatchConnectivityService] 获取物品数据失败: $e');
       return [];
     }
+  }
+
+  // ============== 日历事件相关方法 ==============
+
+  /// 获取日历事件列表（供 watchOS 使用）
+  /// 返回今天和未来 7 天的事件
+  Future<List<Map<String, dynamic>>> _getWatchCalendarEvents() async {
+    try {
+      final calendarPlugin = CalendarPlugin.instance;
+      final controller = calendarPlugin.controller;
+
+      // 获取所有事件
+      final allEvents = controller.getAllEvents();
+
+      // 筛选今天和未来 7 天的事件
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final weekEnd = today.add(const Duration(days: 8));
+
+      final upcomingEvents = allEvents.where((event) {
+        final eventDate = DateTime(
+          event.startTime.year,
+          event.startTime.month,
+          event.startTime.day,
+        );
+        return (eventDate.isAtSameMomentAs(today) || eventDate.isAfter(today)) &&
+            eventDate.isBefore(weekEnd);
+      }).toList();
+
+      // 按开始时间排序
+      upcomingEvents.sort((a, b) => a.startTime.compareTo(b.startTime));
+
+      final List<Map<String, dynamic>> eventItems = [];
+      for (final event in upcomingEvents) {
+        // 格式化时间显示
+        final timeFormat = DateFormat('HH:mm');
+        final startTimeStr = timeFormat.format(event.startTime);
+        final endTimeStr = event.endTime != null
+            ? timeFormat.format(event.endTime!)
+            : null;
+
+        // 计算日期状态
+        final eventDate = DateTime(
+          event.startTime.year,
+          event.startTime.month,
+          event.startTime.day,
+        );
+        String dateStatus;
+        if (eventDate.isAtSameMomentAs(today)) {
+          dateStatus = 'Today';
+        } else {
+          final diff = eventDate.difference(today).inDays;
+          dateStatus = 'Day $diff';
+        }
+
+        // 格式化创建日期
+        final dateFormat = DateFormat('MMM d');
+
+        // 根据事件颜色分配霓虹边框颜色
+        final neonBorderColor = _getCalendarNeonColor(event.color);
+
+        final data = <String, dynamic>{
+          'id': event.id,
+          'title': event.title,
+          'description': event.description,
+          'startTime': event.startTime.toIso8601String(),
+          'endTime': event.endTime?.toIso8601String(),
+          'startTimeStr': startTimeStr,
+          'endTimeStr': endTimeStr,
+          'icon': event.icon.codePoint,
+          'color': event.color.toARGB32(),
+          'source': event.source,
+          'neonBorderColor': neonBorderColor,
+          'dateStatus': dateStatus,
+          'createdDate': dateFormat.format(event.startTime),
+        };
+
+        // 移除所有 null 值
+        data.removeWhere((key, value) => value == null);
+        eventItems.add(data);
+      }
+
+      print('[WatchConnectivityService] 返回 ${eventItems.length} 个日历事件');
+      return eventItems;
+    } catch (e) {
+      print('[WatchConnectivityService] 获取日历事件数据失败: $e');
+      return [];
+    }
+  }
+
+  /// 根据事件颜色获取霓虹边框颜色
+  int _getCalendarNeonColor(Color eventColor) {
+    // 根据 RGB 值判断颜色倾向
+    final r = eventColor.red;
+    final g = eventColor.green;
+    final b = eventColor.blue;
+
+    // 青色系
+    if (g > 200 && b > 200 && r < 100) {
+      return 0xFF00FFFF; // neon-cyan
+    }
+    // 紫色系
+    if (b > 150 && r > 100 && g < 150) {
+      return 0xFFBC13FE; // neon-purple
+    }
+    // 绿色系
+    if (g > 150 && r < 150 && b < 150) {
+      return 0xFF39FF14; // neon-green
+    }
+    // 橙色/红色系
+    return 0xFFEC5B13; // neon-orange
   }
 }
