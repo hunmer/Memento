@@ -48,45 +48,48 @@ void main() async {
   };
 
   // 2. 使用 runZonedGuarded 捕获所有未处理的异步异常
-  runZonedGuarded(() async {
-    // 3. 重写 debugPrint，让所有日志输出路由到 LogService
-    // 这样无需修改现有的 debugPrint 调用
+  runZonedGuarded(
+    () async {
+      // 3. 重写 debugPrint，让所有日志输出路由到 LogService
+      // 这样无需修改现有的 debugPrint 调用
       final originalDebugPrint = debugPrint;
-    debugPrint = (String? message, {int? wrapWidth}) {
-      if (message == null || message.isEmpty) return;
+      debugPrint = (String? message, {int? wrapWidth}) {
+        if (message == null || message.isEmpty) return;
 
-      // 在控制台仍然输出（开发环境方便调试）
+        // 在控制台仍然输出（开发环境方便调试）
         originalDebugPrint(message, wrapWidth: wrapWidth);
 
-      // 同时记录到日志服务（如果启用）
+        // 同时记录到日志服务（如果启用）
+        final logService = LogService.instance;
+        if (logService.isEnabled && logService.isInitialized) {
+          logService.info(message);
+        }
+      };
+
+      // 执行核心初始化（快速完成）
+      await initializeApp();
+
+      // 立即启动应用，其他初始化在后台进行
+      runApp(const MyApp());
+    },
+    (error, stack) {
+      // 捕获所有未处理的异步异常
       final logService = LogService.instance;
       if (logService.isEnabled && logService.isInitialized) {
-        logService.info(message);
+        logService.error(
+          'Uncaught Exception: $error',
+          error: error,
+          stackTrace: stack,
+        );
       }
-    };
 
-    // 执行核心初始化（快速完成）
-    await initializeApp();
-
-    // 立即启动应用，其他初始化在后台进行
-    runApp(const MyApp());
-  }, (error, stack) {
-    // 捕获所有未处理的异步异常
-    final logService = LogService.instance;
-    if (logService.isEnabled && logService.isInitialized) {
-      logService.error(
-        'Uncaught Exception: $error',
-        error: error,
-        stackTrace: stack,
-      );
-    }
-
-    // 在调试模式下打印到控制台（使用 print 而不是 debugPrint）
-    if (kDebugMode) {
-      print('Uncaught Exception: $error');
-      print(stack);
-    }
-  });
+      // 在调试模式下打印到控制台（使用 print 而不是 debugPrint）
+      if (kDebugMode) {
+        print('Uncaught Exception: $error');
+        print(stack);
+      }
+    },
+  );
 }
 
 /// 处理小组件URI的包装组件
@@ -282,14 +285,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     context,
                   ).copyWith(textScaler: const TextScaler.linear(1.0)),
                   child: StyledToast(
-                    // 在 iOS 模拟器上禁用语义化以避免 UISwitch 崩溃
-                    child: kIsWeb
-                        ? child!
-                        : ExcludeSemantics(
-                            excluding: !kReleaseMode &&
-                                defaultTargetPlatform == TargetPlatform.iOS,
-                            child: child!,
-                          ),
+                    child: child!,
                   ),
                 );
               },

@@ -1,15 +1,26 @@
-import 'dart:io';
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+
+/// 自适应开关组件变体类型
+enum AdaptiveSwitchVariant {
+  /// 简洁样式 - 类似 iOS 原生开关
+  simple,
+
+  /// 双值样式 - 带图标和文字
+  dual,
+
+  /// 滚动样式 - 带动画效果
+  rolling,
+}
 
 /// 自适应开关组件
 ///
-/// 在 iOS 上使用 CupertinoSwitch，在其他平台上使用 Material Switch。
-/// 这个组件解决了 iOS 模拟器上 Flutter Switch 的语义化崩溃问题。
+/// 使用 animated_toggle_switch 包实现，避免 iOS 模拟器上 Flutter 原生 Switch 的语义化崩溃问题。
 ///
-/// 崩溃原因: Flutter 的 FlutterSwitchSemanticsObject 创建原生 UISwitch 时，
-/// iOS 模拟器的 _refreshVisualElementForTraitCollection 可能返回 nil visual element，
-/// 导致断言失败。真机不会触发此问题。
+/// 支持三种变体：
+/// - [AdaptiveSwitchVariant.simple]: 简洁样式，类似 iOS 原生开关
+/// - [AdaptiveSwitchVariant.dual]: 双值样式，带图标和文字
+/// - [AdaptiveSwitchVariant.rolling]: 滚动样式，带动画效果
 class AdaptiveSwitch extends StatelessWidget {
   /// 当前开关状态
   final bool value;
@@ -17,26 +28,50 @@ class AdaptiveSwitch extends StatelessWidget {
   /// 状态改变回调
   final ValueChanged<bool>? onChanged;
 
-  /// 激活状态的颜色（轨道颜色）
+  /// 激活状态的颜色
   final Color? activeColor;
 
   /// 激活状态的拇指颜色
   final Color? activeThumbColor;
 
-  /// 激活状态的轨道颜色（仅 Material）
-  final Color? activeTrackColor;
+  /// 非激活状态的颜色
+  final Color? inactiveColor;
 
   /// 非激活状态的拇指颜色
   final Color? inactiveThumbColor;
 
-  /// 非激活状态的轨道颜色（仅 Material）
-  final Color? inactiveTrackColor;
-
-  /// 激活状态的拇指颜色（仅 Cupertino）
-  final Color? thumbColor;
-
   /// 是否启用
   final bool enabled;
+
+  /// 开关变体类型
+  final AdaptiveSwitchVariant variant;
+
+  /// 激活状态图标（仅 dual 和 rolling 变体）
+  final Widget? activeIcon;
+
+  /// 非激活状态图标（仅 dual 和 rolling 变体）
+  final Widget? inactiveIcon;
+
+  /// 激活状态文字（仅 dual 变体）
+  final String? activeText;
+
+  /// 非激活状态文字（仅 dual 变体）
+  final String? inactiveText;
+
+  /// 高度（仅 dual 和 rolling 变体）
+  final double? height;
+
+  /// 宽度（仅 dual 变体）
+  final double? width;
+
+  /// 动画时长
+  final Duration? animationDuration;
+
+  /// 动画曲线
+  final Curve? animationCurve;
+
+  /// 是否显示加载状态
+  final bool loading;
 
   const AdaptiveSwitch({
     super.key,
@@ -44,149 +79,260 @@ class AdaptiveSwitch extends StatelessWidget {
     this.onChanged,
     this.activeColor,
     this.activeThumbColor,
-    this.activeTrackColor,
+    this.inactiveColor,
     this.inactiveThumbColor,
-    this.inactiveTrackColor,
-    this.thumbColor,
+    this.enabled = true,
+    this.variant = AdaptiveSwitchVariant.simple,
+    this.activeIcon,
+    this.inactiveIcon,
+    this.activeText,
+    this.inactiveText,
+    this.height,
+    this.width,
+    this.animationDuration,
+    this.animationCurve,
+    this.loading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    switch (variant) {
+      case AdaptiveSwitchVariant.simple:
+        return _buildSimpleSwitch(context);
+      case AdaptiveSwitchVariant.dual:
+        return _buildDualSwitch(context);
+      case AdaptiveSwitchVariant.rolling:
+        return _buildRollingSwitch(context);
+    }
+  }
+
+  /// 构建简洁样式开关
+  Widget _buildSimpleSwitch(BuildContext context) {
+    final activeClr = activeColor ?? Theme.of(context).primaryColor;
+    final inactiveClr = inactiveColor ?? Colors.grey.shade300;
+    final thumbColor = activeThumbColor ?? Colors.white;
+
+    return CustomAnimatedToggleSwitch<bool>(
+      current: value,
+      values: const [false, true],
+      spacing: 0.0,
+      indicatorSize: const Size.square(26.0),
+      animationDuration: animationDuration ?? const Duration(milliseconds: 200),
+      animationCurve: animationCurve ?? Curves.easeInOut,
+      onChanged: enabled ? onChanged : null,
+      loading: loading,
+      iconBuilder: (context, local, global) => const SizedBox(),
+      cursors: const ToggleCursors(defaultCursor: SystemMouseCursors.click),
+      onTap: enabled && onChanged != null
+          ? (_) => onChanged!(!value)
+          : null,
+      iconsTappable: false,
+      wrapperBuilder: (context, global, child) {
+        return Container(
+          width: width ?? 50.0,
+          height: height ?? 30.0,
+          decoration: BoxDecoration(
+            color: Color.lerp(inactiveClr, activeClr, global.position),
+            borderRadius: BorderRadius.circular(15.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      foregroundIndicatorBuilder: (context, global) {
+        return Container(
+          width: 26.0,
+          height: 26.0,
+          margin: const EdgeInsets.all(2.0),
+          decoration: BoxDecoration(
+            color: thumbColor,
+            borderRadius: BorderRadius.circular(13.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// 构建双值样式开关
+  Widget _buildDualSwitch(BuildContext context) {
+    final theme = Theme.of(context);
+    final activeClr = activeColor ?? theme.primaryColor;
+    final inactiveClr = inactiveColor ?? Colors.grey.shade300;
+
+    return AnimatedToggleSwitch<bool>.dual(
+      current: value,
+      first: false,
+      second: true,
+      spacing: 45.0,
+      height: height ?? 50.0,
+      animationDuration: animationDuration ?? const Duration(milliseconds: 300),
+      animationCurve: animationCurve ?? Curves.easeInOut,
+      style: ToggleStyle(
+        borderColor: Colors.transparent,
+        indicatorColor: activeThumbColor ?? Colors.white,
+        backgroundColor: inactiveClr,
+        borderRadius: BorderRadius.circular(25.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1.5),
+          ),
+        ],
+      ),
+      styleBuilder: (v) => ToggleStyle(
+        backgroundColor: v ? activeClr : inactiveClr,
+      ),
+      borderWidth: 0.0,
+      onChanged: enabled ? onChanged : null,
+      loading: loading,
+      iconBuilder: (v) => v
+          ? (activeIcon ?? const Icon(Icons.check, color: Colors.white))
+          : (inactiveIcon ?? const Icon(Icons.close, color: Colors.grey)),
+      textBuilder: (v) => v
+          ? Center(
+              child: Text(
+                activeText ?? 'ON',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          : Center(
+              child: Text(
+                inactiveText ?? 'OFF',
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+    );
+  }
+
+  /// 构建滚动样式开关
+  Widget _buildRollingSwitch(BuildContext context) {
+    final theme = Theme.of(context);
+    final activeClr = activeColor ?? theme.primaryColor;
+
+    return AnimatedToggleSwitch<bool>.rolling(
+      current: value,
+      values: const [false, true],
+      height: height ?? 40.0,
+      animationDuration: animationDuration ?? const Duration(milliseconds: 300),
+      animationCurve: animationCurve ?? Curves.easeInOut,
+      style: ToggleStyle(
+        borderColor: Colors.transparent,
+        indicatorColor: activeThumbColor ?? Colors.white,
+        backgroundColor: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20.0),
+        indicatorBorderRadius: BorderRadius.circular(15.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      styleBuilder: (v) => ToggleStyle(
+        backgroundColor: v ? activeClr.withOpacity(0.2) : Colors.grey.shade200,
+        indicatorColor: v ? activeClr : Colors.grey.shade400,
+      ),
+      onChanged: enabled ? onChanged : null,
+      loading: loading,
+      iconBuilder: (v, foreground) {
+        return v
+            ? (activeIcon ??
+                Icon(
+                  Icons.check_circle,
+                  color: activeThumbColor ?? Colors.white,
+                  size: 20.0,
+                ))
+            : (inactiveIcon ??
+                Icon(
+                  Icons.cancel_outlined,
+                  color: inactiveThumbColor ?? Colors.grey.shade600,
+                  size: 20.0,
+                ));
+      },
+    );
+  }
+}
+
+/// 带标签的自适应开关组件
+///
+/// 将开关和标签组合在一起，方便在设置页面中使用
+class AdaptiveSwitchListTile extends StatelessWidget {
+  /// 标签文字
+  final String title;
+
+  /// 副标题
+  final String? subtitle;
+
+  /// 当前状态
+  final bool value;
+
+  /// 状态改变回调
+  final ValueChanged<bool>? onChanged;
+
+  /// 激活颜色
+  final Color? activeColor;
+
+  /// 开关变体
+  final AdaptiveSwitchVariant variant;
+
+  /// 前置图标
+  final Widget? leading;
+
+  /// 是否启用
+  final bool enabled;
+
+  const AdaptiveSwitchListTile({
+    super.key,
+    required this.title,
+    this.subtitle,
+    required this.value,
+    this.onChanged,
+    this.activeColor,
+    this.variant = AdaptiveSwitchVariant.simple,
+    this.leading,
     this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    // 在 iOS 上使用自定义开关组件，完全避免语义化问题
-    if (Platform.isIOS) {
-      return ExcludeSemantics(
-        child: _CustomCupertinoSwitch(
-          value: value,
-          onChanged: enabled ? onChanged : null,
-          activeColor: activeColor,
-        ),
-      );
-    }
-
-    // 其他平台使用 Material Switch
-    return Switch(
-      value: value,
-      onChanged: enabled ? onChanged : null,
-      activeColor: activeColor,
-      activeThumbColor: activeThumbColor,
-      activeTrackColor: activeTrackColor,
-      inactiveThumbColor: inactiveThumbColor,
-      inactiveTrackColor: inactiveTrackColor,
-    );
-  }
-}
-
-/// 自定义 iOS 风格开关组件
-///
-/// 完全用 Flutter 绘制，不使用原生 UISwitch，避免模拟器崩溃
-class _CustomCupertinoSwitch extends StatefulWidget {
-  final bool value;
-  final ValueChanged<bool>? onChanged;
-  final Color? activeColor;
-
-  const _CustomCupertinoSwitch({
-    required this.value,
-    this.onChanged,
-    this.activeColor,
-  });
-
-  @override
-  State<_CustomCupertinoSwitch> createState() => _CustomCupertinoSwitchState();
-}
-
-class _CustomCupertinoSwitchState extends State<_CustomCupertinoSwitch>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
-    if (widget.value) {
-      _controller.value = 1.0;
-    }
-  }
-
-  @override
-  void didUpdateWidget(_CustomCupertinoSwitch oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value) {
-      if (widget.value) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final activeColor = widget.activeColor ?? CupertinoColors.activeGreen;
-    final inactiveColor = CupertinoColors.systemGrey5;
-    final thumbColor = CupertinoColors.white;
-
-    return GestureDetector(
-      onTap: widget.onChanged != null
-          ? () => widget.onChanged!(!widget.value)
-          : null,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Container(
-            width: 51.0,
-            height: 31.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15.5),
-              color: Color.lerp(inactiveColor, activeColor, _animation.value),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 2,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 2,
-                  left: 2 + (_animation.value * 20),
-                  child: Container(
-                    width: 27.0,
-                    height: 27.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(13.5),
-                      color: thumbColor,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+    return ListTile(
+      leading: leading,
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle!) : null,
+      trailing: AdaptiveSwitch(
+        value: value,
+        onChanged: onChanged,
+        activeColor: activeColor,
+        variant: variant,
+        enabled: enabled,
       ),
+      enabled: enabled,
+      onTap: enabled && onChanged != null
+          ? () => onChanged!(!value)
+          : null,
     );
   }
 }
