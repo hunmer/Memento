@@ -240,26 +240,47 @@ class CalendarAlbumListViewModel: ObservableObject {
     }
 
     private func groupEntriesByDate() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
+        let displayFormatter = DateFormatter()
+        displayFormatter.dateFormat = "yyyy-MM-dd"
 
         var grouped: [String: [CalendarAlbumEntry]] = [:]
         for entry in entries {
-            // 从 createdAt 提取日期（支持带毫秒的 ISO8601 格式）
+            // 尝试多种日期格式解析
+            var date: Date?
+
+            // 格式1: 带时区和毫秒 (ISO8601)
             let isoFormatter = ISO8601DateFormatter()
             isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            // 尝试带毫秒解析，失败则尝试不带毫秒
-            var date = isoFormatter.date(from: entry.createdAt)
+            date = isoFormatter.date(from: entry.createdAt)
+
+            // 格式2: 带时区无毫秒 (ISO8601)
             if date == nil {
                 isoFormatter.formatOptions = [.withInternetDateTime]
                 date = isoFormatter.date(from: entry.createdAt)
             }
+
+            // 格式3: 不带时区带毫秒 (如 2026-03-16T00:00:00.000)
+            if date == nil {
+                let customFormatter = DateFormatter()
+                customFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
+                customFormatter.timeZone = TimeZone.current
+                date = customFormatter.date(from: entry.createdAt)
+            }
+
+            // 格式4: 不带时区不带毫秒 (如 2026-03-16T00:00:00)
+            if date == nil {
+                let customFormatter = DateFormatter()
+                customFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                customFormatter.timeZone = TimeZone.current
+                date = customFormatter.date(from: entry.createdAt)
+            }
+
             if date == nil {
                 print("[CalendarAlbum] 无法解析日期: \(entry.createdAt)")
                 continue
             }
-            guard let validDate = date else { continue }
-            let dateKey = formatter.string(from: validDate)
+
+            let dateKey = displayFormatter.string(from: date!)
             print("[CalendarAlbum] 条目 \(entry.id) 解析日期成功: \(dateKey)")
             grouped[dateKey, default: []].append(entry)
         }
