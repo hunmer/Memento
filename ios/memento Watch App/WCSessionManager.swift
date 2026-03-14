@@ -663,6 +663,25 @@ struct UserItemGroupOld: Codable, Identifiable {
     }
 }
 
+// MARK: - 日历相册数据模型
+
+struct CalendarAlbumEntry: Codable, Identifiable {
+    let id: String
+    let title: String
+    let contentPreview: String
+    let createdAt: String
+    let updatedAt: String
+    let dateStr: String
+    let timeStr: String?
+    let tags: [String]
+    let location: String?
+    let mood: String?
+    let weather: String?
+    let imageCount: Int
+    let neonBorderColor: Int
+    let wordCount: Int?
+}
+
 // MARK: - 请求和响应类型
 
 enum WatchRequest: String, Codable {
@@ -689,6 +708,7 @@ enum WatchRequest: String, Codable {
     case getGoodsWarehouses
     case getGoodsItems
     case getCalendarEvents
+    case getCalendarAlbumEntries
 }
 
 enum ResponseKey: String, Codable {
@@ -1552,6 +1572,40 @@ extension WCSessionManager: WCSessionDelegate {
                 }
             }, errorHandler: { error in
                 self.logger.error("获取日历事件数据失败: \(error.localizedDescription)")
+                continuation.resume(throwing: error)
+            })
+        }
+    }
+
+    // MARK: - 日历相册相关方法
+
+    /// 获取日历相册列表
+    func getCalendarAlbumEntries() async throws -> [CalendarAlbumEntry] {
+        logger.info("发送 getCalendarAlbumEntries 请求")
+
+        let request: [String: Any] = ["request": WatchRequest.getCalendarAlbumEntries.rawValue]
+
+        return try await withCheckedThrowingContinuation { continuation in
+            WCSession.default.sendMessage(request, replyHandler: { response in
+                self.logger.info("收到日历相册数据响应")
+
+                if let success = response["success"] as? Bool, success,
+                   let dataArray = response["data"] as? [[String: Any]] {
+                    do {
+                        let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+                        let items = try JSONDecoder().decode([CalendarAlbumEntry].self, from: jsonData)
+                        continuation.resume(returning: items)
+                    } catch {
+                        self.logger.error("解析日历相册数据失败: \(error.localizedDescription)")
+                        continuation.resume(throwing: error)
+                    }
+                } else if let errorMessage = response["error"] as? String {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                } else {
+                    continuation.resume(throwing: NSError(domain: "WCSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "未知错误"]))
+                }
+            }, errorHandler: { error in
+                self.logger.error("获取日历相册数据失败: \(error.localizedDescription)")
                 continuation.resume(throwing: error)
             })
         }
