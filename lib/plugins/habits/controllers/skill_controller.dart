@@ -10,7 +10,6 @@ class SkillController {
   final StorageManager storage;
   static const _skillsKey = 'habits/skills.json';
   List<Skill> _skills = [];
-  static const String _initializedKey = 'habits/skills_initialized.json';
 
   SkillController(this.storage) {
     loadSkills();
@@ -55,11 +54,7 @@ class SkillController {
 
       // 如果没有技能数据且未初始化过，创建默认技能
       if (_skills.isEmpty) {
-        final isInitialized = await storage.readJson(_initializedKey, false);
-        if (isInitialized == false) {
-          await _createDefaultSkills();
-          await storage.writeJson(_initializedKey, true);
-        }
+        await _createDefaultSkills();
       }
 
       return _skills;
