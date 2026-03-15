@@ -63,9 +63,26 @@ struct MementoWidgetProvider: TimelineProvider {
         // 检查是否已配置
         let isConfigured = configJson != nil && !configJson!.isEmpty
 
-        // 加载图片
+        // 加载图片 - home_widget 的 renderFlutterWidget 保存的是文件，不是 UserDefaults Data
+        var imageData: Data? = nil
+
+        // 方式1: 尝试从 UserDefaults 读取路径（home_widget 可能存储了路径）
         let imageKey = "ios_widget_image_\(widgetKind)"
-        let imageData = defaults?.data(forKey: imageKey)
+        if let imagePath = defaults?.string(forKey: imageKey), !imagePath.isEmpty {
+            // 从路径读取文件
+            imageData = try? Data(contentsOf: URL(fileURLWithPath: imagePath))
+        }
+
+        // 方式2: 如果方式1失败，尝试直接从 App Group 容器读取预定义路径
+        if imageData == nil {
+            if let containerURL = FileManager.default.containerURL(
+                forSecurityApplicationGroupIdentifier: "group.github.hunmer.memento"
+            ) {
+                // home_widget 保存的文件路径格式
+                let imageURL = containerURL.appendingPathComponent("home_widget/\(imageKey).png")
+                imageData = try? Data(contentsOf: imageURL)
+            }
+        }
 
         return MementoWidgetEntry(
             date: Date(),

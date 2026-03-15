@@ -91,6 +91,11 @@ class IOSWidgetRenderer {
       final success = result != null && result.isNotEmpty;
       if (success) {
         debugPrint('[IOSWidgetRenderer] 渲染成功: ${iosSize.name}, 路径: $result');
+
+        // 保存图片路径到 UserDefaults，让 Swift 端可以读取
+        final imageKey = '$_imageKeyPrefix${iosSize.name}';
+        await home_widget_pkg.HomeWidget.saveWidgetData<String>(imageKey, result);
+        debugPrint('[IOSWidgetRenderer] 已保存图片路径到 UserDefaults: $imageKey');
       } else {
         debugPrint(
           '[IOSWidgetRenderer] 渲染失败: ${iosSize.name}, result: $result',
