@@ -99,8 +99,21 @@ struct MementoWidgetEntryView: View {
             unconfiguredView
                 .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
         }
-        .containerBackground(Color(UIColor.systemBackground), for: .widget)
+        .modifier(WidgetBackgroundModifier())
     }
+}
+
+// MARK: - Widget Background Modifier (iOS 17+ compatibility)
+
+struct WidgetBackgroundModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 17.0, *) {
+            content.containerBackground(Color(UIColor.systemBackground), for: .widget)
+        } else {
+            content.background(Color(UIColor.systemBackground))
+        }
+    }
+}
 
     /// 未配置状态的视图
     @ViewBuilder
