@@ -76,17 +76,19 @@ class IOSWidgetRenderer {
 
       // 使用 MyWidgetManager.renderFlutterWidget() 渲染
       final widgetManager = MyWidgetManager();
-      final success = await widgetManager.renderFlutterWidget(
+      final result = await home_widget_pkg.HomeWidget.renderFlutterWidget(
         wrappedWidget,
         key: '$_imageKeyPrefix${iosSize.name}',
         logicalSize: logicalSize,
         pixelRatio: pixelRatio,
       );
 
+      final success = result == true;
       if (success) {
         debugPrint('[IOSWidgetRenderer] 渲染成功: ${iosSize.name}');
       } else {
-        debugPrint('[IOSWidgetRenderer] 渲染失败: ${iosSize.name}');
+        debugPrint('[IOSWidgetRenderer] 渲染失败: ${iosSize.name}, result: $result');
+        debugPrint('[IOSWidgetRenderer] 可能的原因: 1.在模拟器上运行 2.Widget Extension未配置 3.App Group未正确设置');
       }
 
       return success;
