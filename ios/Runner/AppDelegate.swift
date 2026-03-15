@@ -201,6 +201,23 @@ import WatchConnectivity
     completionHandler()
   }
 
+  // MARK: - URL Scheme Handling
+
+  override func application(
+    _ app: UIApplication,
+    open url: URL,
+    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+  ) -> Bool {
+    print("[AppDelegate] 收到 URL: \(url.absoluteString)")
+    print("[AppDelegate] URL scheme: \(url.scheme ?? "nil")")
+    print("[AppDelegate] URL host: \(url.host ?? "nil")")
+    print("[AppDelegate] URL path: \(url.path)")
+
+    // 让 Flutter 处理这个 URL
+    // super.application 会将 URL 传递给 Flutter 插件（包括 home_widget）
+    return super.application(app, open: url, options: options)
+  }
+
   // MARK: - WatchConnectivity
 
   private func setupWatchConnectivity() {

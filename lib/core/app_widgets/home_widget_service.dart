@@ -122,12 +122,21 @@ Future<void> setupWidgetClickListener() async {
     await HomeWidget.setAppGroupId('group.github.hunmer.memento');
   }
 
-  // 监听 HomeWidget 的点击事件（备用方式）
+  // 监听 HomeWidget 的点击事件（iOS 使用此方式）
   HomeWidget.widgetClicked.listen((Uri? uri) {
+    debugPrint('HomeWidget.widgetClicked 收到: $uri');
     if (uri != null) {
       handleWidgetClick(uri.toString());
     }
   });
+
+  // 检查初始 URI（应用从小组件冷启动时）
+  final initialUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+  debugPrint('初始 URI: $initialUri');
+  if (initialUri != null) {
+    debugPrint('检测到从小组件冷启动，URI: ${initialUri.toString()}');
+    handleWidgetClick(initialUri.toString());
+  }
 
   // 监听 Android 原生通过 MethodChannel 发送的小组件点击事件
   const platform = MethodChannel('github.hunmer.memento/widget');
