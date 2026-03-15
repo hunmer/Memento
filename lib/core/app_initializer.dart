@@ -409,6 +409,13 @@ void _navigateToWidgetUri(String url) {
 
     debugPrint('处理后的路由路径: $routePath');
 
+    // 特殊处理：iOS 桌面小组件配置路由
+    // 从 /widget/config?kind=memento_widget_small 转换为 /ios_widget_config
+    if (routePath == '/widget/config' || routePath == '/config') {
+      routePath = '/ios_widget_config';
+      debugPrint('iOS 小组件配置路由转换为: $routePath');
+    }
+
     // 提取所有查询参数
     final queryParams = uri.queryParameters;
 
