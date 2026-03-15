@@ -13,6 +13,12 @@ struct MyAppWidgetBundle: WidgetBundle {
     @WidgetBundleBuilder
     var body: some Widget {
         MyAppWidget()
+
+        // Memento Flutter 渲染的小组件
+        MementoFlutterSmallWidget()
+        MementoFlutterWideWidget()
+        MementoFlutterLargeWidget()
+
         if #available(iOS 18.0, *) {
             MyAppWidgetControl()
         }

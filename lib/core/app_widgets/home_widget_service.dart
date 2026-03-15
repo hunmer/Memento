@@ -474,6 +474,13 @@ void handleWidgetClick(String url) {
 
     debugPrint('处理后的路由路径: $routePath');
 
+    // 特殊处理：iOS 桌面小组件配置路由
+    // 从 /widget/config?kind=memento_widget_small 转换为 /ios_widget_config
+    if (routePath == '/widget/config' || routePath == '/config') {
+      routePath = '/ios_widget_config';
+      debugPrint('iOS 小组件配置路由转换为: $routePath');
+    }
+
     // 特殊处理：打卡小组件配置路由
     // 从 /checkin_item/config?widgetId=xxx 转换为 /checkin_item_selector
     // widgetId 参数会在后面被提取到 arguments 中
