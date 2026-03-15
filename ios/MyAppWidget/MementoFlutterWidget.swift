@@ -165,26 +165,3 @@ struct MementoFlutterLargeWidget: Widget {
         .supportedFamilies([.systemLarge])
     }
 }
-
-// MARK: - Previews
-
-#Preview(as: .systemSmall) {
-    MementoFlutterSmallWidget()
-} timeline: {
-    MementoWidgetEntry(date: .now, imageData: nil, widgetKind: "small", isConfigured: false)
-    MementoWidgetEntry(date: .now, imageData: nil, widgetKind: "small", isConfigured: true)
-}
-
-#Preview(as: .systemMedium) {
-    MementoFlutterWideWidget()
-} timeline: {
-    MementoWidgetEntry(date: .now, imageData: nil, widgetKind: "wide", isConfigured: false)
-    MementoWidgetEntry(date: .now, imageData: nil, widgetKind: "wide", isConfigured: true)
-}
-
-#Preview(as: .systemLarge) {
-    MementoFlutterLargeWidget()
-} timeline: {
-    MementoWidgetEntry(date: .now, imageData: nil, widgetKind: "large", isConfigured: false)
-    MementoWidgetEntry(date: .now, imageData: nil, widgetKind: "large", isConfigured: true)
-}
