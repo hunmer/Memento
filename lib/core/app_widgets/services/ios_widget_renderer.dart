@@ -60,6 +60,7 @@ class IOSWidgetRenderer {
       final effectiveConfig = <String, dynamic>{
         ...config,
         'widgetSize': homeWidgetSize,
+        'disableAnimations': true, // 禁用动画，确保渲染时组件已完全显示
       };
 
       // 构建 Widget
@@ -77,6 +78,10 @@ class IOSWidgetRenderer {
 
       // 包装 Widget 以确保有完整的 Material 和 MediaQuery
       final wrappedWidget = _wrapWidget(widget, logicalSize);
+
+      // 等待动画完成（动画通常在 1200ms 内完成）
+      // TODO: 当所有 common widgets 都支持 disableAnimations 后，可以移除此延迟
+      await Future.delayed(const Duration(milliseconds: 1500));
 
       // 使用 MyWidgetManager.renderFlutterWidget() 渲染
       final widgetManager = MyWidgetManager();

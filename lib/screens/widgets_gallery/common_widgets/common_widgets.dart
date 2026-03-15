@@ -1030,6 +1030,10 @@ class CommonWidgetBuilder {
     final finalProps = Map<String, dynamic>.from(props);
     finalProps['inline'] = inline;
 
+    // 将 disableAnimations 添加到 props 中，以便各个小组件可以读取
+    // 用于 iOS 小组件渲染时禁用动画，确保截图时组件已完全显示
+    finalProps['disableAnimations'] = props['disableAnimations'] as bool? ?? false;
+
     // 如果 props 中有 _pixelCategory，使用它创建基于像素尺寸的有效 size
     // 这样公共组件可以根据实际像素尺寸调整布局
     final pixelCategory = props['_pixelCategory'] as SizeCategory?;
