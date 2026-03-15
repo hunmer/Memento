@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/screens/home_screen/widgets/add_widget_dialog.dart';
 import 'package:Memento/screens/home_screen/widgets/home_widget.dart';
+import 'package:Memento/screens/home_screen/widgets/common_widget_selector_page.dart';
 import 'package:Memento/screens/home_screen/managers/home_widget_registry.dart';
-import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/core/app_widgets/models/ios_widget_config.dart';
 import 'package:Memento/core/app_widgets/services/ios_widget_sync_service.dart';
 import 'package:Memento/core/app_widgets/services/widget_size_mapper.dart';
@@ -26,6 +25,9 @@ class IOSWidgetConfigScreen extends StatefulWidget {
 class _IOSWidgetConfigScreenState extends State<IOSWidgetConfigScreen> {
   /// 选中的 HomeWidget
   HomeWidget? _selectedWidget;
+
+  /// 选中的小组件配置（公共小组件样式和数据选择器配置）
+  Map<String, dynamic>? _selectedWidgetConfig;
 
   /// 选中的 iOS 尺寸
   IOSWidgetSize _selectedSize = IOSWidgetSize.small;
@@ -104,10 +106,39 @@ class _IOSWidgetConfigScreenState extends State<IOSWidgetConfigScreen> {
     );
 
     if (result != null) {
-      setState(() {
-        _selectedWidget = result;
-        _updateAvailableSizes();
-      });
+      // 如果支持公共小组件，打开公共小组件选择页面
+      if (result.supportsCommonWidgets) {
+        final selectorResult = await Navigator.push<CommonWidgetSelectorResult>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CommonWidgetSelectorPage(
+              pluginWidget: result,
+              selectionMode: true,
+            ),
+          ),
+        );
+
+        if (selectorResult != null) {
+          setState(() {
+            _selectedWidget = result;
+            _selectedWidgetConfig = {
+              'selectorWidgetConfig': selectorResult.selectorConfig?.toJson() ??
+                  {
+                    'commonWidgetId': selectorResult.commonWidgetId,
+                    'commonWidgetProps': selectorResult.commonWidgetProps,
+                    'lastUpdated': DateTime.now().toIso8601String(),
+                  },
+            };
+            _updateAvailableSizes();
+          });
+        }
+      } else {
+        setState(() {
+          _selectedWidget = result;
+          _selectedWidgetConfig = null;
+          _updateAvailableSizes();
+        });
+      }
     }
   }
 
@@ -130,6 +161,7 @@ class _IOSWidgetConfigScreenState extends State<IOSWidgetConfigScreen> {
       final success = await IOSWidgetSyncService().createConfig(
         homeWidgetId: _selectedWidget!.id,
         iosSize: _selectedSize,
+        config: _selectedWidgetConfig,
         context: context,
       );
 
@@ -390,9 +422,14 @@ class _IOSWidgetConfigScreenState extends State<IOSWidgetConfigScreen> {
                   ? Builder(
                       builder: (context) {
                         final homeSize = WidgetSizeMapper.iosToHome(_selectedSize);
+                        // 合并配置：包含 widgetSize 和可选的 selectorWidgetConfig
+                        final config = <String, dynamic>{
+                          'widgetSize': homeSize,
+                          ...?_selectedWidgetConfig,
+                        };
                         return _selectedWidget!.build(
                           context,
-                          {'widgetSize': homeSize},
+                          config,
                           homeSize,
                         );
                       },

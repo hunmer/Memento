@@ -13,6 +13,24 @@ import 'package:Memento/screens/home_screen/widgets/selector_widget_types.dart';
 import 'package:Memento/screens/home_screen/models/home_widget_size.dart';
 import 'package:Memento/screens/widgets_gallery/common_widgets/common_widgets.dart';
 
+/// 公共小组件选择结果
+class CommonWidgetSelectorResult {
+  /// 选中的公共小组件 ID
+  final String commonWidgetId;
+
+  /// 公共小组件的 props 配置
+  final Map<String, dynamic> commonWidgetProps;
+
+  /// 选择器配置（如果有 selectorId）
+  final SelectorWidgetConfig? selectorConfig;
+
+  const CommonWidgetSelectorResult({
+    required this.commonWidgetId,
+    required this.commonWidgetProps,
+    this.selectorConfig,
+  });
+}
+
 /// 公共小组件选择页面
 ///
 /// 用于让用户选择插件数据，然后选择一个公共小组件样式
@@ -38,6 +56,10 @@ class CommonWidgetSelectorPage extends StatefulWidget {
   /// 可选的原有小组件配置（用于保留自定义尺寸等信息）
   final Map<String, dynamic>? originalConfig;
 
+  /// 选择模式：仅返回选中的配置，不添加到布局
+  /// 用于外部调用者只需要选择配置的场景（如 iOS 桌面小组件配置）
+  final bool selectionMode;
+
   const CommonWidgetSelectorPage({
     super.key,
     required this.pluginWidget,
@@ -47,6 +69,7 @@ class CommonWidgetSelectorPage extends StatefulWidget {
     this.initialSelectorConfig,
     this.originalSize,
     this.originalConfig,
+    this.selectionMode = false,
   });
 
   @override
@@ -835,6 +858,29 @@ class _CommonWidgetSelectorPageState extends State<CommonWidgetSelectorPage>
     // 从当前激活的 tab 获取选中的 widgetId
     final index = _tabController.index;
     final widgetId = _availableCommonWidgets.keys.elementAt(index);
+    final widgetProps = _availableCommonWidgets[widgetId];
+
+    // 选择模式：返回配置结果
+    if (widget.selectionMode) {
+      final result = CommonWidgetSelectorResult(
+        commonWidgetId: widgetId,
+        commonWidgetProps: widgetProps ?? {},
+        selectorConfig: _originalSelectorResult != null
+            ? SelectorWidgetConfig(
+                selectedData: _originalSelectorResult!.toMap(),
+                lastUpdated: DateTime.now(),
+                commonWidgetId: widgetId,
+                commonWidgetProps: widgetProps,
+              )
+            : SelectorWidgetConfig(
+                commonWidgetId: widgetId,
+                commonWidgetProps: widgetProps,
+                lastUpdated: DateTime.now(),
+              ),
+      );
+      Navigator.of(context).pop(result);
+      return;
+    }
 
     final layoutManager = HomeLayoutManager();
 
