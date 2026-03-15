@@ -9,11 +9,23 @@ import WatchConnectivity
 @objc class AppDelegate: FlutterAppDelegate {
   private var timerMethodChannel: FlutterMethodChannel?
   static var shortcutMethodChannel: FlutterMethodChannel?
+  private var widgetMethodChannel: FlutterMethodChannel?
+
+  // 保存初始的 iOS 小组件 URL（用于冷启动）
+  private var initialIOSWidgetURL: String?
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // 检查是否通过 URL scheme 启动（冷启动情况）
+    if let url = launchOptions?[.url] as? URL {
+      if url.scheme == "memento" && url.host?.hasPrefix("ios_widget_config") == true {
+        print("[AppDelegate] 冷启动时检测到 iOS 小组件点击: \(url.absoluteString)")
+        initialIOSWidgetURL = url.absoluteString
+      }
+    }
+
     // Register plugins with the callback
     SwiftFlutterForegroundTaskPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
@@ -26,6 +38,9 @@ import WatchConnectivity
 
     // 设置 Shortcut 调用的 MethodChannel
     setupShortcutMethodChannel()
+
+    // 设置 Widget 点击的 MethodChannel
+    setupWidgetMethodChannel()
 
     // 设置 Intelligence 插件监听器
     setupIntelligencePlugin()
@@ -130,6 +145,30 @@ import WatchConnectivity
     print("[AppDelegate] Shortcut MethodChannel 已配置")
   }
 
+  /// 设置 Widget 点击的 MethodChannel
+  private func setupWidgetMethodChannel() {
+    let controller = window?.rootViewController as? FlutterViewController
+    widgetMethodChannel = FlutterMethodChannel(
+      name: "github.hunmer.memento/widget_click",
+      binaryMessenger: controller!.binaryMessenger
+    )
+
+    // 处理 Flutter 端的查询请求
+    widgetMethodChannel?.setMethodCallHandler { [weak self] call, result in
+      switch call.method {
+      case "getInitialIOSWidgetURL":
+        // 返回初始的 iOS 小组件 URL（冷启动时保存的）
+        result(self?.initialIOSWidgetURL)
+        // 返回后清除，避免重复处理
+        self?.initialIOSWidgetURL = nil
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    print("[AppDelegate] Widget MethodChannel 已配置")
+  }
+
   private func handleWriteShortcutResult(call: FlutterMethodCall, result: @escaping FlutterResult) {
     guard let args = call.arguments as? [String: Any],
           let callId = args["callId"] as? String,
@@ -213,7 +252,18 @@ import WatchConnectivity
     print("[AppDelegate] URL host: \(url.host ?? "nil")")
     print("[AppDelegate] URL path: \(url.path)")
 
-    // 让 Flutter 处理这个 URL
+    // 处理 iOS 原生小组件的点击事件
+    // URL 格式: memento://ios_widget_config_{widgetKind}
+    if url.scheme == "memento" && url.host?.hasPrefix("ios_widget_config") == true {
+      print("[AppDelegate] 检测到 iOS 小组件点击: \(url.absoluteString)")
+
+      // 直接通过 MethodChannel 发送给 Flutter
+      widgetMethodChannel?.invokeMethod("onIOSWidgetClicked", arguments: url.absoluteString)
+
+      return true
+    }
+
+    // 让 Flutter 处理其他 URL
     // super.application 会将 URL 传递给 Flutter 插件（包括 home_widget）
     return super.application(app, open: url, options: options)
   }

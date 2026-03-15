@@ -138,6 +138,33 @@ Future<void> setupWidgetClickListener() async {
     handleWidgetClick(initialUri.toString());
   }
 
+  // 监听 iOS 原生小组件点击事件（通过 AppDelegate 的 MethodChannel）
+  if (UniversalPlatform.isIOS) {
+    const iosWidgetChannel = MethodChannel('github.hunmer.memento/widget_click');
+    iosWidgetChannel.setMethodCallHandler((call) async {
+      if (call.method == 'onIOSWidgetClicked') {
+        final url = call.arguments as String?;
+        debugPrint('iOS 原生小组件点击: $url');
+        if (url != null) {
+          handleWidgetClick(url);
+        }
+      }
+    });
+
+    // 检查 iOS 小组件冷启动时的初始 URL
+    try {
+      final initialIOSWidgetURL = await iosWidgetChannel.invokeMethod<String>('getInitialIOSWidgetURL');
+      if (initialIOSWidgetURL != null && initialIOSWidgetURL.isNotEmpty) {
+        debugPrint('检测到 iOS 小组件冷启动 URL: $initialIOSWidgetURL');
+        handleWidgetClick(initialIOSWidgetURL);
+      }
+    } catch (e) {
+      debugPrint('获取 iOS 小组件初始 URL 失败: $e');
+    }
+
+    debugPrint('iOS 原生小组件点击监听器已设置');
+  }
+
   // 监听 Android 原生通过 MethodChannel 发送的小组件点击事件
   const platform = MethodChannel('github.hunmer.memento/widget');
   platform.setMethodCallHandler((call) async {
