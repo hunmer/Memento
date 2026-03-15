@@ -68,7 +68,11 @@ class IOSWidgetRenderer {
         widget = homeWidgetDef.build(context, effectiveConfig, homeWidgetSize);
       } else {
         // 使用默认的 Widget
-        widget = _buildDefaultWidget(homeWidgetDef, homeWidgetSize, effectiveConfig);
+        widget = _buildDefaultWidget(
+          homeWidgetDef,
+          homeWidgetSize,
+          effectiveConfig,
+        );
       }
 
       // 包装 Widget 以确保有完整的 Material 和 MediaQuery
@@ -83,12 +87,17 @@ class IOSWidgetRenderer {
         pixelRatio: pixelRatio,
       );
 
-      final success = result == true;
+      // renderFlutterWidget 返回文件路径字符串，不是布尔值
+      final success = result != null && result.isNotEmpty;
       if (success) {
-        debugPrint('[IOSWidgetRenderer] 渲染成功: ${iosSize.name}');
+        debugPrint('[IOSWidgetRenderer] 渲染成功: ${iosSize.name}, 路径: $result');
       } else {
-        debugPrint('[IOSWidgetRenderer] 渲染失败: ${iosSize.name}, result: $result');
-        debugPrint('[IOSWidgetRenderer] 可能的原因: 1.在模拟器上运行 2.Widget Extension未配置 3.App Group未正确设置');
+        debugPrint(
+          '[IOSWidgetRenderer] 渲染失败: ${iosSize.name}, result: $result',
+        );
+        debugPrint(
+          '[IOSWidgetRenderer] 可能的原因: 1.在模拟器上运行 2.Widget Extension未配置 3.App Group未正确设置',
+        );
       }
 
       return success;
@@ -176,7 +185,10 @@ class IOSWidgetRenderer {
       final configKey = '$_configKeyPrefix${config.widgetKind}';
       final configJson = jsonEncode(config.toJson());
 
-      final result = await home_widget_pkg.HomeWidget.saveWidgetData<String>(configKey, configJson);
+      final result = await home_widget_pkg.HomeWidget.saveWidgetData<String>(
+        configKey,
+        configJson,
+      );
 
       debugPrint('[IOSWidgetRenderer] 保存配置: $configKey');
       return result != null;
@@ -198,7 +210,9 @@ class IOSWidgetRenderer {
       await home_widget_pkg.HomeWidget.setAppGroupId(_appGroupId);
 
       final configKey = '$_configKeyPrefix$widgetKind';
-      final configJson = await home_widget_pkg.HomeWidget.getWidgetData<String>(configKey);
+      final configJson = await home_widget_pkg.HomeWidget.getWidgetData<String>(
+        configKey,
+      );
 
       if (configJson != null && configJson.isNotEmpty) {
         final json = jsonDecode(configJson) as Map<String, dynamic>;
