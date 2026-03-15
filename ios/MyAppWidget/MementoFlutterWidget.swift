@@ -99,6 +99,7 @@ struct MementoWidgetEntryView: View {
             unconfiguredView
                 .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
         }
+        .containerBackground(Color(UIColor.systemBackground), for: .widget)
     }
 
     /// 未配置状态的视图
@@ -118,7 +119,6 @@ struct MementoWidgetEntryView: View {
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.systemBackground))
     }
 }
 
