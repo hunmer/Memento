@@ -84,55 +84,44 @@ struct MementoWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
 
     var body: some View {
-        if entry.isConfigured, let imageData = entry.imageData, let uiImage = UIImage(data: imageData) {
-            // 已配置状态 - 显示渲染的图片
-            GeometryReader { geometry in
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .clipped()
-            }
-            .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
-        } else {
-            // 未配置状态 - 显示配置提示
-            unconfiguredView
+        ZStack {
+            if entry.isConfigured, let imageData = entry.imageData, let uiImage = UIImage(data: imageData) {
+                // 已配置状态 - 显示渲染的图片
+                GeometryReader { geometry in
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                }
                 .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
+            } else {
+                // 未配置状态 - 显示配置提示
+                unconfiguredView
+                    .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
+            }
         }
-        .modifier(WidgetBackgroundModifier())
+        .widgetBackground()
     }
 }
 
-// MARK: - Widget Background Modifier (iOS 17+ compatibility)
+/// 未配置状态的视图
+@ViewBuilder
+private var unconfiguredView: some View {
+    VStack(spacing: 12) {
+        Image(systemName: "plus.square")
+            .font(.system(size: 40))
+            .foregroundColor(.accentColor)
 
-struct WidgetBackgroundModifier: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 17.0, *) {
-            content.containerBackground(Color(UIColor.systemBackground), for: .widget)
-        } else {
-            content.background(Color(UIColor.systemBackground))
-        }
+        Text("点击配置")
+            .font(.headline)
+            .foregroundColor(.secondary)
+
+        Text("Memento")
+            .font(.caption)
+            .foregroundColor(.secondary)
     }
-}
-
-    /// 未配置状态的视图
-    @ViewBuilder
-    private var unconfiguredView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "plus.square")
-                .font(.system(size: 40))
-                .foregroundColor(.accentColor)
-
-            Text("点击配置")
-                .font(.headline)
-                .foregroundColor(.secondary)
-
-            Text("Memento")
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
 }
 
 // MARK: - Widget Definitions
@@ -176,5 +165,18 @@ struct MementoFlutterLargeWidget: Widget {
         .configurationDisplayName("Memento 大组件")
         .description("在桌面上显示 Memento 大组件内容")
         .supportedFamilies([.systemLarge])
+    }
+}
+
+// MARK: - View Extension for Widget Background
+
+extension View {
+    @ViewBuilder
+    func widgetBackground() -> some View {
+        if #available(iOS 17.0, *) {
+            self.containerBackground(Color(UIColor.systemBackground), for: .widget)
+        } else {
+            self.background(Color(UIColor.systemBackground))
+        }
     }
 }
