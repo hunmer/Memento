@@ -35,7 +35,7 @@ class CoreRoutes implements RouteRegistry {
           description: '设置界面（别名）',
         ),
 
-        // iOS 小组件配置页面
+        // iOS 小组件配置页面（通用，支持参数）
         RouteDefinition(
           path: '/ios_widget_config',
           handler: (settings) {
@@ -46,6 +46,33 @@ class CoreRoutes implements RouteRegistry {
             );
           },
           description: 'iOS 桌面小组件配置',
+        ),
+
+        // iOS 小组件配置页面 - Small 尺寸
+        RouteDefinition(
+          path: '/ios_widget_config_small',
+          handler: (settings) => RouteHelpers.createRoute(
+            const IOSWidgetConfigScreen(widgetKind: 'small'),
+          ),
+          description: 'iOS 小组件配置 - Small',
+        ),
+
+        // iOS 小组件配置页面 - Wide 尺寸
+        RouteDefinition(
+          path: '/ios_widget_config_wide',
+          handler: (settings) => RouteHelpers.createRoute(
+            const IOSWidgetConfigScreen(widgetKind: 'wide'),
+          ),
+          description: 'iOS 小组件配置 - Wide',
+        ),
+
+        // iOS 小组件配置页面 - Large 尺寸
+        RouteDefinition(
+          path: '/ios_widget_config_large',
+          handler: (settings) => RouteHelpers.createRoute(
+            const IOSWidgetConfigScreen(widgetKind: 'large'),
+          ),
+          description: 'iOS 小组件配置 - Large',
         ),
       ];
 }

@@ -93,11 +93,11 @@ struct MementoWidgetEntryView: View {
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
             }
-            .widgetURL(URL(string: "memento://widget/config?kind=\(entry.widgetKind)"))
+            .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
         } else {
             // 未配置状态 - 显示配置提示
             unconfiguredView
-                .widgetURL(URL(string: "memento://widget/config?kind=\(entry.widgetKind)"))
+                .widgetURL(URL(string: "memento://ios_widget_config_\(entry.widgetKind)"))
         }
     }
 
