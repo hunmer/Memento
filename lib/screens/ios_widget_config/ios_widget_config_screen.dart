@@ -98,7 +98,9 @@ class _IOSWidgetConfigScreenState extends State<IOSWidgetConfigScreen> {
   Future<void> _selectWidget() async {
     final result = await showDialog<HomeWidget>(
       context: context,
-      builder: (context) => const AddWidgetDialog(),
+      builder: (context) => const AddWidgetDialog(
+        selectionMode: true,
+      ),
     );
 
     if (result != null) {

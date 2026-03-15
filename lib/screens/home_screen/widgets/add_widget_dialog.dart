@@ -21,11 +21,16 @@ class AddWidgetDialog extends StatefulWidget {
   /// 初始搜索关键词（用于替换模式时自动搜索同插件组件）
   final String? initialSearchQuery;
 
+  /// 选择模式：仅返回选中的小组件，不添加到布局
+  /// 用于外部调用者只需要选择小组件的场景（如 iOS 桌面小组件配置）
+  final bool selectionMode;
+
   const AddWidgetDialog({
     super.key,
     this.folderId,
     this.replaceWidgetItemId,
     this.initialSearchQuery,
+    this.selectionMode = false,
   });
 
   @override
@@ -282,6 +287,12 @@ class _AddWidgetDialogState extends State<AddWidgetDialog> {
 
   /// 处理小组件点击
   void _handleWidgetTap(HomeWidget widget) async {
+    // 选择模式：直接返回选中的小组件
+    if (this.widget.selectionMode) {
+      Navigator.of(context).pop(widget);
+      return;
+    }
+
     if (widget.supportsCommonWidgets) {
       // 打开公共小组件选择页面
       await Navigator.push(
