@@ -184,9 +184,10 @@ class SyncClientService {
 
         // 记录推送成功
         final responseData = jsonDecode(response.body);
-        final serverTime = responseData['timestamp'] != null
-            ? DateTime.parse(responseData['timestamp'] as String)
-            : DateTime.now();
+        final serverTime =
+            responseData['timestamp'] != null
+                ? DateTime.parse(responseData['timestamp'] as String)
+                : DateTime.now();
         await _recordService.recordUpload(filePath, serverTime);
 
         // 标记为最近上传（防循环）
@@ -197,9 +198,10 @@ class SyncClientService {
       } else if (response.statusCode == 409) {
         // 冲突: 服务器优先 - 自动使用服务器版本覆盖本地
         final conflict = jsonDecode(response.body);
-        final serverTime = conflict['server_updated_at'] != null
-            ? DateTime.parse(conflict['server_updated_at'] as String)
-            : DateTime.now();
+        final serverTime =
+            conflict['server_updated_at'] != null
+                ? DateTime.parse(conflict['server_updated_at'] as String)
+                : DateTime.now();
         await _applyServerData(
           filePath,
           conflict['server_data'] as String,
@@ -237,9 +239,10 @@ class SyncClientService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final serverTime = data['updated_at'] != null
-            ? DateTime.parse(data['updated_at'] as String)
-            : DateTime.now();
+        final serverTime =
+            data['updated_at'] != null
+                ? DateTime.parse(data['updated_at'] as String)
+                : DateTime.now();
         await _applyServerData(
           filePath,
           data['encrypted_data'] as String,
@@ -280,9 +283,10 @@ class SyncClientService {
           filePath: filePath,
           exists: true,
           md5: data['md5'] as String?,
-          modifiedAt: data['modified_at'] != null
-              ? DateTime.parse(data['modified_at'] as String)
-              : null,
+          modifiedAt:
+              data['modified_at'] != null
+                  ? DateTime.parse(data['modified_at'] as String)
+                  : null,
           size: data['size'] as int?,
         );
       }
@@ -316,7 +320,10 @@ class SyncClientService {
       }
 
       // 2. 检查是否需要拉取（基于时间戳比较）
-      if (_recordService.needsPull(filePath, serverInfo.modifiedAt ?? DateTime.now())) {
+      if (_recordService.needsPull(
+        filePath,
+        serverInfo.modifiedAt ?? DateTime.now(),
+      )) {
         // 服务端更新，拉取
         _log('服务端更新，拉取: $filePath');
         return await pullFile(filePath);
@@ -354,9 +361,8 @@ class SyncClientService {
       }
 
       final serverData = jsonDecode(listResponse.body);
-      final serverFilePaths = (serverData['files'] as List)
-          .map((f) => f['path'] as String)
-          .toSet();
+      final serverFilePaths =
+          (serverData['files'] as List).map((f) => f['path'] as String).toSet();
 
       // 2. 获取本地文件列表
       final localFiles = await _listLocalDataFiles();
@@ -429,7 +435,24 @@ class SyncClientService {
     // 需要同步的插件目录
     final syncDirs = [
       'diary',
+      'agent_chat',
+      'app_images',
+      'calendar',
+      'calendar_album',
       'chat',
+      'configs',
+      'data',
+      'database',
+      'day',
+      'nodes',
+      'openai',
+      'plugins',
+      'reminder',
+      'scripts',
+      'store',
+      'timer',
+      'tts',
+      'webview',
       'notes',
       'todo',
       'activity',
@@ -512,7 +535,7 @@ class SyncDataUpdatedArgs extends EventArgs {
   final String source; // 'server' or 'local'
 
   SyncDataUpdatedArgs({required this.filePath, required this.source})
-      : super('sync_data_updated');
+    : super('sync_data_updated');
 }
 
 /// 服务器文件信息
