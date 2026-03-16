@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -156,14 +156,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4B8276512F607D5600DF8056 /* Exceptions for "memento Watch App" folder in "memento Watch App" target */ = {
+		4B8276512F607D5600DF8056 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 4B8276222F607D5400DF8056 /* memento Watch App */;
 		};
-		4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */ = {
+		4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -173,52 +173,10 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4B8276242F607D5400DF8056 /* memento Watch App */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				4B8276512F607D5600DF8056 /* Exceptions for "memento Watch App" folder in "memento Watch App" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = "memento Watch App";
-			sourceTree = "<group>";
-		};
-		4B8276322F607D5500DF8056 /* memento Watch AppTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = "memento Watch AppTests";
-			sourceTree = "<group>";
-		};
-		4B82763C2F607D5500DF8056 /* memento Watch AppUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = "memento Watch AppUITests";
-			sourceTree = "<group>";
-		};
-		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = MyAppWidget;
-			sourceTree = "<group>";
-		};
+		4B8276242F607D5400DF8056 /* memento Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B8276512F607D5600DF8056 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "memento Watch App"; sourceTree = "<group>"; };
+		4B8276322F607D5500DF8056 /* memento Watch AppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "memento Watch AppTests"; sourceTree = "<group>"; };
+		4B82763C2F607D5500DF8056 /* memento Watch AppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "memento Watch AppUITests"; sourceTree = "<group>"; };
+		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = MyAppWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -636,9 +594,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -690,9 +652,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
