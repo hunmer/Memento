@@ -3,55 +3,42 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 
 import '../services/plugin_data_service.dart';
-import 'auth_middleware.dart';
 
 /// API 启用检查中间件
 ///
 /// 检查用户是否已设置加密密钥
-/// 如果未设置，返回 403 Forbidden
-///
-/// 当使用 API Key 认证时，自动从 AuthContext 获取加密密钥
+/// 加密密钥通过 X-Encryption-Key 请求头传递
 Middleware apiEnabledMiddleware(PluginDataService pluginDataService) {
   return (Handler innerHandler) {
     return (Request request) async {
-      // 从请求上下文中获取认证信息（由 authMiddleware 设置）
-      final authContext = getAuthContextFromRequest(request);
       final userId = request.context['userId'] as String?;
 
       if (userId == null) {
         return _errorResponse(401, '未认证');
       }
 
-      // 如果使用 API Key 认证，检查是否有加密密钥
-      if (authContext != null && authContext.isApiKey) {
-        if (authContext.encryptionKey == null) {
-          return _errorResponse(403, 'API Key 缺少加密密钥');
-        }
+      // 从请求头获取加密密钥
+      final encryptionKey = request.headers['x-encryption-key'];
 
-        // 设置加密密钥（仅内存）
-        if (!pluginDataService.hasEncryptionKey(userId)) {
-          pluginDataService.setEncryptionKey(userId, authContext.encryptionKey!);
-        }
-
-        // 将加密密钥添加到请求上下文
-        final updatedRequest = request.change(
-          context: {
-            ...request.context,
-            'encryptionKey': authContext.encryptionKey,
-          },
-        );
-        return innerHandler(updatedRequest);
-      }
-
-      // JWT Token 认证：检查是否已设置密钥
-      if (!pluginDataService.hasEncryptionKey(userId)) {
+      if (encryptionKey == null || encryptionKey.isEmpty) {
         return _errorResponse(
           403,
           '请通过 X-Encryption-Key 请求头传递加密密钥',
         );
       }
 
-      return innerHandler(request);
+      // 设置加密密钥到内存
+      pluginDataService.setEncryptionKey(userId, encryptionKey);
+
+      // 将加密密钥添加到请求上下文
+      final updatedRequest = request.change(
+        context: {
+          ...request.context,
+          'encryptionKey': encryptionKey,
+        },
+      );
+
+      return innerHandler(updatedRequest);
     };
   };
 }

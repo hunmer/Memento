@@ -336,20 +336,14 @@ class AuthRoutes {
         return _errorResponse(400, 'API Key 名称不能为空');
       }
 
-      final encryptionKey = data['encryption_key'] as String?;
-      if (encryptionKey == null || encryptionKey.isEmpty) {
-        return _errorResponse(400, '缺少 encryption_key 参数');
-      }
-
       // 解析过期选项
       final expiryStr = data['expiry'] as String? ?? 'never';
       final expiry = _parseExpiry(expiryStr);
 
-      // 生成 API Key
+      // 生成 API Key（不再需要加密密钥）
       final apiKey = await _authService.generateApiKey(
         userId: userId,
         name: name,
-        encryptionKey: encryptionKey,
         expiry: expiry,
       );
 

@@ -146,7 +146,6 @@ createApp({
         const createdApiKey = ref(null);
         const newApiKey = reactive({
             name: '',
-            encryptionKey: '',
             expiry: 'never'
         });
 
@@ -766,16 +765,6 @@ createApp({
                 showToast('请输入 API Key 名称', 'error');
                 return;
             }
-            if (!newApiKey.encryptionKey) {
-                showToast('请输入加密密钥', 'error');
-                return;
-            }
-
-            // 基本验证：检查是否为 Base64 格式
-            if (!/^[A-Za-z0-9+/]+=*$/.test(newApiKey.encryptionKey)) {
-                showToast('加密密钥格式无效，应为 Base64 编码', 'error');
-                return;
-            }
 
             setLoading(true, '创建 API Key...');
             try {
@@ -783,7 +772,6 @@ createApp({
                     method: 'POST',
                     body: JSON.stringify({
                         name: newApiKey.name,
-                        encryption_key: newApiKey.encryptionKey,
                         expiry: newApiKey.expiry
                     })
                 });
@@ -796,7 +784,6 @@ createApp({
 
                     // 重置表单
                     newApiKey.name = '';
-                    newApiKey.encryptionKey = '';
                     newApiKey.expiry = 'never';
 
                     // 刷新列表

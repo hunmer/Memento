@@ -323,6 +323,12 @@
                     <button class="modal-close" @click="showCreateApiKeyModal = false">&times;</button>
                 </div>
                 <div class="modal-body">
+                    <div class="api-key-info" style="margin-bottom: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
+                        <p style="margin: 0; color: #0369a1;">
+                            💡 <strong>API Key</strong> 用于代替用户名密码进行认证。<br>
+                            使用时需要通过 <code>X-Encryption-Key</code> 请求头传递加密密钥。
+                        </p>
+                    </div>
                     <div class="form-group">
                         <label for="apiKeyName">名称</label>
                         <input
@@ -332,19 +338,6 @@
                             placeholder="例如: MCP Server"
                             required
                         >
-                    </div>
-                    <div class="form-group">
-                        <label for="apiKeyEncryptionKey">加密密钥 (Base64)</label>
-                        <input
-                            type="text"
-                            id="apiKeyEncryptionKey"
-                            v-model="newApiKey.encryptionKey"
-                            placeholder="从 Memento 客户端获取"
-                            required
-                        >
-                        <small class="form-hint">
-                            在 Memento 客户端 "设置 > 开发者选项" 中获取加密密钥
-                        </small>
                     </div>
                     <div class="form-group">
                         <label for="apiKeyExpiry">过期时间</label>
@@ -375,7 +368,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="api-key-result-warning">
-                        ⚠️ <strong>重要提示：</strong>以下信息仅显示一次，请妥善保存！
+                        ⚠️ <strong>重要提示：</strong>API Key 仅显示一次，请妥善保存！
                     </div>
                     <div class="form-group">
                         <label>API Key</label>
@@ -386,20 +379,16 @@
                             </button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>加密密钥</label>
-                        <div class="copy-field">
-                            <code>{{ createdApiKey.encryption_key }}</code>
-                            <button class="btn btn-sm btn-outline" @click="copyToClipboard(createdApiKey.encryption_key)">
-                                复制
-                            </button>
-                        </div>
-                    </div>
                     <div class="api-key-usage">
-                        <h4>MCP Server 配置示例 (.env)</h4>
+                        <h4>使用说明</h4>
+                        <p style="color: #64748b; font-size: 0.9rem;">
+                            API Key 用于代替用户名密码进行认证。<br>
+                            调用需要解密的接口时，需要通过 <code>X-Encryption-Key</code> 请求头传递加密密钥。
+                        </p>
+                        <h4 style="margin-top: 1rem;">MCP Server 配置示例 (.env)</h4>
                         <pre class="code-block">MEMENTO_API_KEY={{ createdApiKey.key }}
-MEMENTO_ENCRYPTION_KEY={{ createdApiKey.encryption_key }}
-MEMENTO_SERVER_URL={{ serverUrl }}</pre>
+MEMENTO_SERVER_URL={{ serverUrl }}
+# 加密密钥需要在调用时通过请求头传递</pre>
                     </div>
                 </div>
                 <div class="modal-footer">

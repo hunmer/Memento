@@ -7,14 +7,12 @@ import '../services/auth_service.dart';
 /// 认证上下文数据
 class AuthContext {
   final String userId;
-  final String? encryptionKey;
   final String? keyId;
   final String? keyName;
   final bool isApiKey;
 
   AuthContext({
     required this.userId,
-    this.encryptionKey,
     this.keyId,
     this.keyName,
     this.isApiKey = false,
@@ -50,7 +48,6 @@ Middleware authMiddleware(AuthService authService) {
             'userId': result.userId,
             'authContext': AuthContext(
               userId: result.userId,
-              encryptionKey: result.encryptionKey,
               keyId: result.keyId,
               keyName: result.keyName,
               isApiKey: true,

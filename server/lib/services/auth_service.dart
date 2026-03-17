@@ -203,14 +203,11 @@ class AuthService {
 
   /// 生成新的 API Key
   ///
-  /// [userId] 用户 ID
-  /// [name] API Key 名称
-  /// [encryptionKey] 加密密钥 (Base64)
-  /// [expiry] 过期选项
+  /// API Key 用于代替用户名密码进行认证
+  /// 加密密钥通过 X-Encryption-Key 请求头传递，不存储在 API Key 中
   Future<ApiKey> generateApiKey({
     required String userId,
     required String name,
-    required String encryptionKey,
     ApiKeyExpiry expiry = ApiKeyExpiry.never,
   }) async {
     // 验证用户存在
@@ -223,7 +220,6 @@ class AuthService {
     final apiKey = ApiKey.generate(
       userId: userId,
       name: name,
-      encryptionKey: encryptionKey,
       expiry: expiry,
     );
 
@@ -235,7 +231,7 @@ class AuthService {
 
   /// 验证 API Key
   ///
-  /// 返回验证结果，包含用户 ID 和加密密钥
+  /// 返回验证结果，包含用户 ID
   /// 如果验证失败返回 null
   Future<ApiKeyValidationResult?> verifyApiKey(String keyValue) async {
     final apiKey = await _apiKeyStore.findByKey(keyValue);
@@ -254,7 +250,6 @@ class AuthService {
 
     return ApiKeyValidationResult(
       userId: apiKey.userId,
-      encryptionKey: apiKey.encryptionKey,
       keyId: apiKey.id,
       keyName: apiKey.name,
     );
@@ -284,13 +279,11 @@ class AuthService {
 /// API Key 验证结果
 class ApiKeyValidationResult {
   final String userId;
-  final String encryptionKey;
   final String keyId;
   final String keyName;
 
   ApiKeyValidationResult({
     required this.userId,
-    required this.encryptionKey,
     required this.keyId,
     required this.keyName,
   });

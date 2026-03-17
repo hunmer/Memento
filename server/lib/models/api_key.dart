@@ -49,6 +49,9 @@ extension ApiKeyExpiryExtension on ApiKeyExpiry {
 }
 
 /// API Key 数据模型
+///
+/// API Key 用于代替用户名密码进行认证，不存储加密密钥
+/// 加密密钥应通过 X-Encryption-Key 请求头传递
 class ApiKey {
   /// 唯一标识符
   final String id;
@@ -61,9 +64,6 @@ class ApiKey {
 
   /// API Key 值 (mk_ 前缀 + 32 字符)
   final String key;
-
-  /// 关联的加密密钥 (Base64)
-  final String encryptionKey;
 
   /// 创建时间
   final DateTime createdAt;
@@ -79,7 +79,6 @@ class ApiKey {
     required this.userId,
     required this.name,
     required this.key,
-    required this.encryptionKey,
     required this.createdAt,
     this.lastUsedAt,
     this.expiresAt,
@@ -95,7 +94,6 @@ class ApiKey {
   static ApiKey generate({
     required String userId,
     required String name,
-    required String encryptionKey,
     ApiKeyExpiry expiry = ApiKeyExpiry.never,
   }) {
     const uuid = Uuid();
@@ -108,7 +106,6 @@ class ApiKey {
       userId: userId,
       name: name,
       key: keyValue,
-      encryptionKey: encryptionKey,
       createdAt: DateTime.now(),
       expiresAt: expiry.getExpiresAt(),
     );
@@ -121,7 +118,6 @@ class ApiKey {
       userId: json['user_id'] as String,
       name: json['name'] as String,
       key: json['key'] as String,
-      encryptionKey: json['encryption_key'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
       lastUsedAt: json['last_used_at'] != null
           ? DateTime.parse(json['last_used_at'] as String)
@@ -139,7 +135,6 @@ class ApiKey {
       'user_id': userId,
       'name': name,
       'key': key,
-      'encryption_key': encryptionKey,
       'created_at': createdAt.toIso8601String(),
       'last_used_at': lastUsedAt?.toIso8601String(),
       'expires_at': expiresAt?.toIso8601String(),
@@ -153,7 +148,6 @@ class ApiKey {
     String? userId,
     String? name,
     String? key,
-    String? encryptionKey,
     DateTime? createdAt,
     DateTime? lastUsedAt,
     DateTime? expiresAt,
@@ -163,7 +157,6 @@ class ApiKey {
       userId: userId ?? this.userId,
       name: name ?? this.name,
       key: key ?? this.key,
-      encryptionKey: encryptionKey ?? this.encryptionKey,
       createdAt: createdAt ?? this.createdAt,
       lastUsedAt: lastUsedAt ?? this.lastUsedAt,
       expiresAt: expiresAt ?? this.expiresAt,
