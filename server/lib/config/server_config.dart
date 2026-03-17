@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dotenv/dotenv.dart';
 
 /// 服务器配置
 class ServerConfig {
@@ -37,23 +38,30 @@ class ServerConfig {
     this.enableLogging = true,
   });
 
-  /// 从环境变量加载配置
+  /// 从环境变量加载配置（优先读取 .env 文件）
   factory ServerConfig.fromEnv() {
+    // 加载 .env 文件
+    final dotEnv = DotEnv();
+    try {
+      dotEnv.load(['.env']);
+    } catch (_) {
+      // .env 文件不存在时忽略
+    }
+
+    // 辅助函数：优先从 .env 读取，其次从系统环境变量读取
+    String getEnv(String key, [String? fallback]) {
+      return dotEnv[key] ?? Platform.environment[key] ?? fallback ?? '';
+    }
+
     return ServerConfig(
-      port: int.tryParse(Platform.environment['PORT'] ?? '') ?? 8080,
-      dataDir: Platform.environment['DATA_DIR'] ?? './data',
-      jwtSecret:
-          Platform.environment['JWT_SECRET'] ?? _generateDefaultSecret(),
-      tokenExpiryDays:
-          int.tryParse(Platform.environment['TOKEN_EXPIRY_DAYS'] ?? '') ?? 36500, // 约100年，相当于永不过期
-      enableCors:
-          Platform.environment['ENABLE_CORS']?.toLowerCase() != 'false',
-      corsOrigins: Platform.environment['CORS_ORIGINS']?.split(',') ?? ['*'],
-      maxRequestSize: int.tryParse(Platform.environment['MAX_REQUEST_SIZE'] ??
-              '') ??
-          10 * 1024 * 1024,
-      enableLogging:
-          Platform.environment['ENABLE_LOGGING']?.toLowerCase() != 'false',
+      port: int.tryParse(getEnv('PORT')) ?? 8080,
+      dataDir: getEnv('DATA_DIR', './data'),
+      jwtSecret: getEnv('JWT_SECRET', _generateDefaultSecret()),
+      tokenExpiryDays: int.tryParse(getEnv('TOKEN_EXPIRY_DAYS')) ?? 36500,
+      enableCors: getEnv('ENABLE_CORS', 'true').toLowerCase() != 'false',
+      corsOrigins: getEnv('CORS_ORIGINS', '*').split(','),
+      maxRequestSize: int.tryParse(getEnv('MAX_REQUEST_SIZE')) ?? 10 * 1024 * 1024,
+      enableLogging: getEnv('ENABLE_LOGGING', 'true').toLowerCase() != 'false',
     );
   }
 

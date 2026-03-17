@@ -80,6 +80,7 @@ class SyncRoutes {
       }
 
       final oldMd5 = data['old_md5'] as String?;
+      final isBinary = data['is_binary'] as bool? ?? false;
 
       // 读取服务器当前文件 (如果存在)
       final serverFile =
@@ -97,6 +98,7 @@ class SyncRoutes {
             serverData: serverFile['encrypted_data'] as String,
             serverMd5: currentMd5,
             serverUpdatedAt: DateTime.parse(serverFile['updated_at'] as String),
+            isBinary: serverFile['is_binary'] as bool? ?? false,
           );
 
           // 记录冲突日志
@@ -121,6 +123,7 @@ class SyncRoutes {
         filePath,
         encryptedData,
         newMd5,
+        isBinary: isBinary,
       );
 
       // 记录成功日志
@@ -195,6 +198,7 @@ class SyncRoutes {
         encryptedData: serverFile['encrypted_data'] as String,
         md5: serverFile['md5'] as String,
         updatedAt: DateTime.parse(serverFile['updated_at'] as String),
+        isBinary: serverFile['is_binary'] as bool? ?? false,
       );
 
       return Response.ok(

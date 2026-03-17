@@ -8,6 +8,23 @@ import '../event/event_manager.dart';
 import 'encryption_service.dart';
 import 'sync_record_service.dart';
 
+/// 二进制文件扩展名列表
+const _binaryExtensions = {
+  '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.ico',
+  '.mp3', '.mp4', '.wav', '.avi', '.mov', '.mkv',
+  '.pdf', '.zip', '.tar', '.gz', '.7z', '.rar',
+  '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+};
+
+/// 判断文件是否为二进制文件
+bool _isBinaryFile(String filePath) {
+  final lowerPath = filePath.toLowerCase();
+  for (final ext in _binaryExtensions) {
+    if (lowerPath.endsWith(ext)) return true;
+  }
+  return false;
+}
+
 /// 同步结果类型
 enum SyncResultType {
   /// 同步成功
@@ -130,10 +147,25 @@ class SyncClientService {
     }
 
     try {
+      final isBinary = _isBinaryFile(filePath);
+
       // 1. 读取本地文件内容
-      final localContent = await _storage.readString(filePath);
-      if (localContent == null) {
-        return SyncResult.noChanges(filePath: filePath);
+      String? localContent;
+      String? base64Data;
+
+      if (isBinary) {
+        // 二进制文件：读取字节并转为 base64
+        final bytes = await _storage.readBytes(filePath);
+        if (bytes == null) {
+          return SyncResult.noChanges(filePath: filePath);
+        }
+        base64Data = base64Encode(bytes);
+        localContent = base64Data; // 用于计算 MD5
+      } else {
+        localContent = await _storage.readString(filePath);
+        if (localContent == null) {
+          return SyncResult.noChanges(filePath: filePath);
+        }
       }
 
       // 2. 判断文件类型并计算 MD5
@@ -162,7 +194,7 @@ class SyncClientService {
         return SyncResult.noChanges(filePath: filePath);
       }
 
-      // 5. 加密数据（统一使用字符串加密）
+      // 5. 加密数据
       final encryptedData = _encryption.encryptString(localContent);
 
       // 6. 发送到服务器
@@ -174,6 +206,7 @@ class SyncClientService {
           'encrypted_data': encryptedData,
           'old_md5': snapshotMd5,
           'new_md5': currentMd5,
+          'is_binary': isBinary, // 标记是否为二进制文件
         }),
       );
 
@@ -206,7 +239,8 @@ class SyncClientService {
           filePath,
           conflict['server_data'] as String,
           conflict['server_md5'] as String,
-          serverTime,
+          serverTime: serverTime,
+          isBinary: conflict['is_binary'] as bool? ?? isBinary,
         );
         return SyncResult.conflictResolved(filePath: filePath);
       } else {
@@ -243,11 +277,13 @@ class SyncClientService {
             data['updated_at'] != null
                 ? DateTime.parse(data['updated_at'] as String)
                 : DateTime.now();
+        final isBinary = data['is_binary'] as bool? ?? _isBinaryFile(filePath);
         await _applyServerData(
           filePath,
           data['encrypted_data'] as String,
           data['md5'] as String,
-          serverTime,
+          serverTime: serverTime,
+          isBinary: isBinary,
         );
         return SyncResult.success(filePath: filePath);
       } else if (response.statusCode == 404) {
@@ -387,14 +423,22 @@ class SyncClientService {
   Future<void> _applyServerData(
     String filePath,
     String encryptedData,
-    String serverMd5, [
+    String serverMd5, {
     DateTime? serverTime,
-  ]) async {
-    // 1. 解密服务器数据（使用字符串解密，支持任意文件类型）
+    bool isBinary = false,
+  }) async {
+    // 1. 解密服务器数据
     final serverContent = _encryption.decryptString(encryptedData);
 
     // 2. 覆盖本地文件
-    await _storage.writeString(filePath, serverContent);
+    if (isBinary || _isBinaryFile(filePath)) {
+      // 二进制文件：从 base64 解码后写入
+      final bytes = base64Decode(serverContent);
+      await _storage.writeBytes(filePath, bytes);
+    } else {
+      // 文本文件：直接写入字符串
+      await _storage.writeString(filePath, serverContent);
+    }
 
     // 3. 更新 MD5 快照
     await _saveSyncMd5(filePath, serverMd5);
@@ -479,12 +523,24 @@ class SyncClientService {
           }
 
           try {
-            // 尝试读取文件内容
-            final content = await _storage.readString(key);
+            final isBinary = _isBinaryFile(key);
+            String? content;
+
+            if (isBinary) {
+              // 二进制文件：读取字节并转为 base64
+              final bytes = await _storage.readBytes(key);
+              if (bytes != null) {
+                content = base64Encode(bytes);
+              }
+            } else {
+              // 文本文件：读取字符串
+              content = await _storage.readString(key);
+            }
+
             if (content != null) {
               // 根据文件类型计算 MD5
               String md5Hash;
-              if (key.toLowerCase().endsWith('.json')) {
+              if (!isBinary && key.toLowerCase().endsWith('.json')) {
                 try {
                   final json = jsonDecode(content) as Map<String, dynamic>;
                   md5Hash = _encryption.computeMd5(json);

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -227,6 +228,16 @@ class StorageManager {
   ) async {
     final path = '${getPluginPath(pluginId)}/$fileName';
     await writeString(path, content);
+  }
+
+  /// 读取二进制文件
+  Future<Uint8List?> readBytes(String path) async {
+    return await _storage.readBytes(path);
+  }
+
+  /// 写入二进制文件
+  Future<void> writeBytes(String path, Uint8List bytes) async {
+    await _storage.writeBytes(path, bytes);
   }
 
   // 私有方法

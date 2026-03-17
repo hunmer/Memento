@@ -1,5 +1,6 @@
 import 'package:fs_shim/fs_idb.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:fs_shim/fs_shim.dart';
 import 'package:path/path.dart';
 import 'storage_interface.dart';
@@ -183,6 +184,34 @@ class WebStorage implements StorageInterface {
     final file = fs.file(join(_rootDir, path));
     if (await file.exists()) {
       await file.delete();
+    }
+  }
+
+  /// 读取二进制文件
+  @override
+  Future<Uint8List?> readBytes(String path) async {
+    try {
+      final file = fs.file(join(_rootDir, path));
+      if (!await file.exists()) {
+        return null;
+      }
+      return await file.readAsBytes();
+    } catch (e) {
+      print('Web存储读取二进制文件失败: $path - $e');
+      return null;
+    }
+  }
+
+  /// 写入二进制文件
+  @override
+  Future<void> writeBytes(String path, Uint8List bytes) async {
+    try {
+      final file = fs.file(join(_rootDir, path));
+      await _ensureDirectoryExists(file.path);
+      await file.writeAsBytes(bytes);
+    } catch (e) {
+      print('Web存储写入二进制文件失败: $path - $e');
+      rethrow;
     }
   }
 }

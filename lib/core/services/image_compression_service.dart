@@ -94,9 +94,13 @@ class ImageCompressionService {
     required int quality,
   }) async {
     try {
-      // Web 平台暂不支持压缩，直接返回源文件路径
+      // Web 和 Windows 平台暂不支持压缩，直接返回源文件路径
       if (kIsWeb) {
         debugPrint('Web 平台暂不支持图片压缩');
+        return sourcePath;
+      }
+      if (Platform.isWindows) {
+        debugPrint('Windows 平台暂不支持图片压缩');
         return sourcePath;
       }
 

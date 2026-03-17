@@ -44,6 +44,9 @@ class SyncResponse {
   /// 服务器数据的更新时间 (冲突时)
   final DateTime? serverUpdatedAt;
 
+  /// 是否为二进制文件
+  final bool isBinary;
+
   SyncResponse({
     required this.status,
     required this.filePath,
@@ -53,6 +56,7 @@ class SyncResponse {
     this.serverData,
     this.serverMd5,
     this.serverUpdatedAt,
+    this.isBinary = false,
   });
 
   /// 是否成功
@@ -70,6 +74,7 @@ class SyncResponse {
         'server_data': serverData,
         'server_md5': serverMd5,
         'server_updated_at': serverUpdatedAt?.toIso8601String(),
+        'is_binary': isBinary,
       };
 
   factory SyncResponse.fromJson(Map<String, dynamic> json) => SyncResponse(
@@ -86,6 +91,7 @@ class SyncResponse {
         serverUpdatedAt: json['server_updated_at'] != null
             ? DateTime.parse(json['server_updated_at'] as String)
             : null,
+        isBinary: json['is_binary'] as bool? ?? false,
       );
 
   String toJsonString() => jsonEncode(toJson());
@@ -112,6 +118,7 @@ class SyncResponse {
     required String serverData,
     required String serverMd5,
     required DateTime serverUpdatedAt,
+    bool isBinary = false,
   }) =>
       SyncResponse(
         status: SyncStatus.conflict,
@@ -121,6 +128,7 @@ class SyncResponse {
         serverData: serverData,
         serverMd5: serverMd5,
         serverUpdatedAt: serverUpdatedAt,
+        isBinary: isBinary,
       );
 
   /// 创建错误响应
@@ -175,22 +183,28 @@ class PullResponse {
   /// 更新时间
   final DateTime updatedAt;
 
+  /// 是否为二进制文件
+  final bool isBinary;
+
   PullResponse({
     required this.encryptedData,
     required this.md5,
     required this.updatedAt,
+    this.isBinary = false,
   });
 
   Map<String, dynamic> toJson() => {
         'encrypted_data': encryptedData,
         'md5': md5,
         'updated_at': updatedAt.toIso8601String(),
+        'is_binary': isBinary,
       };
 
   factory PullResponse.fromJson(Map<String, dynamic> json) => PullResponse(
         encryptedData: json['encrypted_data'] as String,
         md5: json['md5'] as String,
         updatedAt: DateTime.parse(json['updated_at'] as String),
+        isBinary: json['is_binary'] as bool? ?? false,
       );
 }
 /// 文件信息 - 用于列表同步

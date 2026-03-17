@@ -106,8 +106,9 @@ class FileStorageService {
     String userId,
     String filePath,
     String encryptedData,
-    String md5Hash,
-  ) async {
+    String md5Hash, {
+    bool isBinary = false,
+  }) async {
     final file = File(path.join(getUserDir(userId), filePath));
 
     // 确保父目录存在
@@ -119,6 +120,7 @@ class FileStorageService {
       'encrypted_data': encryptedData,
       'md5': md5Hash,
       'updated_at': DateTime.now().toIso8601String(),
+      'is_binary': isBinary,
     };
 
     await file.writeAsString(jsonEncode(data));

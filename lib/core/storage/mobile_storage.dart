@@ -244,4 +244,37 @@ class MobileStorage implements StorageInterface {
       await file.delete();
     }
   }
+
+  /// 读取二进制文件
+  @override
+  Future<Uint8List?> readBytes(String targetPath) async {
+    try {
+      await _ensureInitialized();
+      final fullPath = path.join(_basePath, targetPath);
+      final file = io.File(fullPath);
+      if (!await file.exists()) {
+        return null;
+      }
+      return await file.readAsBytes();
+    } catch (e) {
+      debugPrint('读取二进制文件失败: $targetPath - $e');
+      return null;
+    }
+  }
+
+  /// 写入二进制文件
+  @override
+  Future<void> writeBytes(String targetPath, Uint8List bytes) async {
+    await _ensureInitialized();
+    final fullPath = path.join(_basePath, targetPath);
+    final file = io.File(fullPath);
+
+    // 确保目录存在
+    final directory = file.parent;
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    await file.writeAsBytes(bytes);
+  }
 }
