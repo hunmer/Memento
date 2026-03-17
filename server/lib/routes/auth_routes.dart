@@ -9,6 +9,9 @@ import '../services/plugin_data_service.dart';
 import '../models/api_key.dart';
 
 /// 认证路由
+///
+/// 安全说明：加密密钥只保存在内存中，不持久化到文件
+/// 每次请求需要通过请求头 X-Encryption-Key 传递密钥
 class AuthRoutes {
   final AuthService _authService;
   final PluginDataService? _pluginDataService;
@@ -27,14 +30,17 @@ class AuthRoutes {
     // POST /refresh - 刷新 Token
     router.post('/refresh', _handleRefresh);
 
-    // POST /enable-api - 启用 API 访问 (需要认证)
-    router.post('/enable-api', _handleEnableApi);
+    // POST /set-encryption-key - 设置加密密钥（仅内存）
+    router.post('/set-encryption-key', _handleSetEncryptionKey);
 
-    // POST /disable-api - 禁用 API 访问 (需要认证)
-    router.post('/disable-api', _handleDisableApi);
+    // POST /clear-encryption-key - 清除内存中的加密密钥
+    router.post('/clear-encryption-key', _handleClearEncryptionKey);
 
-    // GET /api-status - 查询 API 启用状态 (需要认证)
-    router.get('/api-status', _handleApiStatus);
+    // GET /has-encryption-key - 检查是否已设置密钥（仅内存）
+    router.get('/has-encryption-key', _handleHasEncryptionKey);
+
+    // POST /re-encrypt - 用新密钥重新加密所有文件
+    router.post('/re-encrypt', _handleReEncrypt);
 
     // ==================== API Key 管理 ====================
 
@@ -169,12 +175,11 @@ class AuthRoutes {
     return _authService.getUserIdFromToken(token);
   }
 
-  /// 处理启用 API 访问
+  /// 设置加密密钥（仅内存，不持久化）
   ///
   /// 请求体: { "encryption_key": "base64-encoded-key" }
-  Future<Response> _handleEnableApi(Request request) async {
+  Future<Response> _handleSetEncryptionKey(Request request) async {
     try {
-      // 验证 Token
       final userId = _getUserIdFromRequest(request);
       if (userId == null) {
         return _errorResponse(401, '未认证或 Token 无效');
@@ -192,9 +197,9 @@ class AuthRoutes {
         return _errorResponse(400, '缺少 encryption_key 参数');
       }
 
-      // 验证密钥格式 (应为 32 字节的 base64)
+      // 验证密钥格式
       try {
-        await _pluginDataService!.enableApi(userId, encryptionKey);
+        _pluginDataService!.setEncryptionKey(userId, encryptionKey);
       } catch (e) {
         return _errorResponse(400, '无效的加密密钥: $e');
       }
@@ -202,7 +207,7 @@ class AuthRoutes {
       return Response.ok(
         jsonEncode({
           'success': true,
-          'message': 'API 访问已启用',
+          'message': '加密密钥已设置（仅当前会话有效）',
           'user_id': userId,
           'timestamp': DateTime.now().toIso8601String(),
         }),
@@ -213,10 +218,9 @@ class AuthRoutes {
     }
   }
 
-  /// 处理禁用 API 访问
-  Future<Response> _handleDisableApi(Request request) async {
+  /// 清除内存中的加密密钥
+  Future<Response> _handleClearEncryptionKey(Request request) async {
     try {
-      // 验证 Token
       final userId = _getUserIdFromRequest(request);
       if (userId == null) {
         return _errorResponse(401, '未认证或 Token 无效');
@@ -226,12 +230,12 @@ class AuthRoutes {
         return _errorResponse(503, 'API 服务未配置');
       }
 
-      await _pluginDataService!.disableApi(userId);
+      _pluginDataService!.removeEncryptionKey(userId);
 
       return Response.ok(
         jsonEncode({
           'success': true,
-          'message': 'API 访问已禁用',
+          'message': '加密密钥已清除',
           'user_id': userId,
           'timestamp': DateTime.now().toIso8601String(),
         }),
@@ -242,10 +246,9 @@ class AuthRoutes {
     }
   }
 
-  /// 处理查询 API 状态
-  Future<Response> _handleApiStatus(Request request) async {
+  /// 检查是否已设置密钥（仅内存）
+  Future<Response> _handleHasEncryptionKey(Request request) async {
     try {
-      // 验证 Token
       final userId = _getUserIdFromRequest(request);
       if (userId == null) {
         return _errorResponse(401, '未认证或 Token 无效');
@@ -255,12 +258,12 @@ class AuthRoutes {
         return _errorResponse(503, 'API 服务未配置');
       }
 
-      final isEnabled = _pluginDataService!.isApiEnabled(userId);
+      final hasKey = _pluginDataService!.hasEncryptionKey(userId);
 
       return Response.ok(
         jsonEncode({
           'success': true,
-          'api_enabled': isEnabled,
+          'has_key': hasKey,
           'user_id': userId,
           'timestamp': DateTime.now().toIso8601String(),
         }),
@@ -268,18 +271,56 @@ class AuthRoutes {
       );
     } catch (e) {
       return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 重新加密所有文件
+  ///
+  /// 请求体: { "old_key": "base64-old-key", "new_key": "base64-new-key" }
+  Future<Response> _handleReEncrypt(Request request) async {
+    try {
+      final userId = _getUserIdFromRequest(request);
+      if (userId == null) {
+        return _errorResponse(401, '未认证或 Token 无效');
+      }
+
+      if (_pluginDataService == null) {
+        return _errorResponse(503, 'API 服务未配置');
+      }
+
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      final oldKey = data['old_key'] as String?;
+      final newKey = data['new_key'] as String?;
+
+      if (oldKey == null || newKey == null) {
+        return _errorResponse(400, '缺少 old_key 或 new_key 参数');
+      }
+
+      // 先设置旧密钥
+      _pluginDataService!.setEncryptionKey(userId, oldKey);
+
+      // 执行重新加密
+      final result = await _pluginDataService!.reEncryptAllFiles(userId, newKey);
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'message': '重新加密完成',
+          'files_re_encrypted': result['file_count'],
+          'errors': result['errors'],
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '重新加密失败: $e');
     }
   }
 
   // ==================== API Key 管理 ====================
 
   /// 处理创建 API Key
-  ///
-  /// 请求体: {
-  ///   "name": "API Key 名称",
-  ///   "encryption_key": "base64-encoded-key",
-  ///   "expiry": "7days" | "30days" | "90days" | "1year" | "never"
-  /// }
   Future<Response> _handleCreateApiKey(Request request) async {
     try {
       final userId = _getUserIdFromRequest(request);
@@ -312,15 +353,10 @@ class AuthRoutes {
         expiry: expiry,
       );
 
-      // 同时启用用户的 API 访问
-      if (_pluginDataService != null) {
-        await _pluginDataService!.enableApi(userId, encryptionKey);
-      }
-
       return Response.ok(
         jsonEncode({
           'success': true,
-          'api_key': apiKey.toJson(), // 返回完整信息（仅创建时）
+          'api_key': apiKey.toJson(),
           'timestamp': DateTime.now().toIso8601String(),
         }),
         headers: {'Content-Type': 'application/json'},

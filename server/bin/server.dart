@@ -129,7 +129,7 @@ void main(List<String> args) async {
   router.mount('/api/v1/auth', authRoutes.router.call);
 
   // 同步路由 (需要认证)
-  final syncRoutes = SyncRoutes(storageService, webSocketManager);
+  final syncRoutes = SyncRoutes(storageService, webSocketManager, pluginDataService);
   router.mount(
     '/api/v1/sync',
     Pipeline()

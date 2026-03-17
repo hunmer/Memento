@@ -249,6 +249,20 @@
                                 <p class="status-description">
                                     {{ apiEnabled ? 'API 访问已开放，客户端可以正常进行数据同步。' : 'API 访问已关闭，所有客户端请求将被拒绝。' }}
                                 </p>
+
+                                <!-- 显示当前密钥 -->
+                                <div v-if="apiEnabled && currentEncryptionKey" class="encryption-key-display" style="margin-top: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <strong style="color: #475569;">当前加密密钥</strong>
+                                        <button class="btn btn-sm btn-outline" @click="copyToClipboard(currentEncryptionKey)">
+                                            📋 复制
+                                        </button>
+                                    </div>
+                                    <code style="display: block; word-break: break-all; color: #64748b; font-size: 0.85rem;">
+                                        {{ currentEncryptionKey }}
+                                    </code>
+                                </div>
+
                                 <p class="status-description" v-if="!apiEnabled" style="margin-top: 0.5rem; color: #f59e0b;">
                                     ⚠️ 启用 API 需要提供加密密钥（从 Memento 客户端获取）
                                 </p>
@@ -261,6 +275,14 @@
                                     :disabled="loading"
                                 >
                                     ✅ 启用 API 访问
+                                </button>
+                                <button
+                                    v-if="apiEnabled"
+                                    class="btn btn-warning"
+                                    @click="enableApi"
+                                    :disabled="loading"
+                                >
+                                    🔑 更改密钥
                                 </button>
                                 <button
                                     v-if="apiEnabled"

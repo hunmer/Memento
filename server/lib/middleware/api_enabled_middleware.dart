@@ -7,8 +7,8 @@ import 'auth_middleware.dart';
 
 /// API 启用检查中间件
 ///
-/// 检查用户是否已启用 API 访问（设置了加密密钥）
-/// 如果未启用，返回 403 Forbidden
+/// 检查用户是否已设置加密密钥
+/// 如果未设置，返回 403 Forbidden
 ///
 /// 当使用 API Key 认证时，自动从 AuthContext 获取加密密钥
 Middleware apiEnabledMiddleware(PluginDataService pluginDataService) {
@@ -28,10 +28,9 @@ Middleware apiEnabledMiddleware(PluginDataService pluginDataService) {
           return _errorResponse(403, 'API Key 缺少加密密钥');
         }
 
-        // 确保 API 访问已启用
-        if (!pluginDataService.isApiEnabled(userId)) {
-          // 自动启用 API 访问
-          await pluginDataService.enableApi(userId, authContext.encryptionKey!);
+        // 设置加密密钥（仅内存）
+        if (!pluginDataService.hasEncryptionKey(userId)) {
+          pluginDataService.setEncryptionKey(userId, authContext.encryptionKey!);
         }
 
         // 将加密密钥添加到请求上下文
@@ -44,11 +43,11 @@ Middleware apiEnabledMiddleware(PluginDataService pluginDataService) {
         return innerHandler(updatedRequest);
       }
 
-      // JWT Token 认证：检查是否已启用 API
-      if (!pluginDataService.isApiEnabled(userId)) {
+      // JWT Token 认证：检查是否已设置密钥
+      if (!pluginDataService.hasEncryptionKey(userId)) {
         return _errorResponse(
           403,
-          'API 访问未启用，请先调用 /api/v1/auth/enable-api',
+          '请通过 X-Encryption-Key 请求头传递加密密钥',
         );
       }
 

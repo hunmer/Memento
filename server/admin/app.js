@@ -150,6 +150,9 @@ createApp({
             expiry: 'never'
         });
 
+        // 当前加密密钥
+        const currentEncryptionKey = ref('');
+
         // Methods
         const showToast = (message, type = 'success') => {
             const id = Date.now();
@@ -456,12 +459,23 @@ createApp({
         };
 
         const downloadFile = async (filePath) => {
+            // 检查是否有加密密钥
+            if (!currentEncryptionKey.value) {
+                showToast('请先设置加密密钥', 'error');
+                return;
+            }
+
             setLoading(true, '下载文件...');
             try {
-                const data = await apiRequest(`/api/v1/sync/pull/${filePath}`);
+                // 通过请求头传递加密密钥
+                const data = await apiRequest(`/api/v1/sync/pull-decrypted/${filePath}`, {
+                    headers: {
+                        'X-Encryption-Key': currentEncryptionKey.value
+                    }
+                });
 
-                // Create download
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                // 下载解密后的数据
+                const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -469,7 +483,7 @@ createApp({
                 a.click();
                 URL.revokeObjectURL(url);
 
-                showToast('下载成功');
+                showToast('下载成功（已解密）');
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
@@ -578,18 +592,108 @@ createApp({
 
         // API Access Control
         const loadApiStatus = async () => {
-            try {
-                const data = await apiRequest('/api/v1/auth/api-status');
-                apiEnabled.value = data.api_enabled || false;
-            } catch (err) {
-                console.error('Failed to load API status:', err);
-                // 默认假设 API 已启用
+            // 从 localStorage 读取加密密钥
+            const savedKey = localStorage.getItem('encryptionKey');
+            if (savedKey) {
+                currentEncryptionKey.value = savedKey;
                 apiEnabled.value = true;
+            } else {
+                apiEnabled.value = false;
             }
         };
 
+        // 设置加密密钥
+        const setEncryptionKey = async (key) => {
+            // 验证密钥格式
+            if (!/^[A-Za-z0-9+/]+=*$/.test(key)) {
+                showToast('加密密钥格式无效，应为 Base64 编码', 'error');
+                return false;
+            }
+
+            if (key.length < 40) {
+                showToast('加密密钥长度不足，标准长度为 44 个字符', 'error');
+                return false;
+            }
+
+            // 保存到 localStorage
+            localStorage.setItem('encryptionKey', key);
+            currentEncryptionKey.value = key;
+            apiEnabled.value = true;
+
+            return true;
+        };
+
+        // 清除加密密钥
+        const clearEncryptionKey = () => {
+            localStorage.removeItem('encryptionKey');
+            currentEncryptionKey.value = '';
+            apiEnabled.value = false;
+            showToast('加密密钥已清除');
+        };
+
         const enableApi = async () => {
-            // 提示用户输入加密密钥
+            // 如果已有密钥，显示当前密钥并询问是否更改
+            if (currentEncryptionKey.value) {
+                const newKey = prompt(
+                    '当前加密密钥:\n' + currentEncryptionKey.value + '\n\n' +
+                    '如需更改，请输入新密钥 (留空则保持当前密钥):\n\n' +
+                    '⚠️ 更改密钥将重新加密所有文件，此操作可能需要较长时间。'
+                );
+
+                // 用户取消
+                if (newKey === null) {
+                    return;
+                }
+
+                // 用户留空，保持当前密钥
+                if (!newKey.trim()) {
+                    showToast('已保持当前密钥');
+                    return;
+                }
+
+                // 验证新密钥格式
+                if (!/^[A-Za-z0-9+/]+=*$/.test(newKey)) {
+                    showToast('加密密钥格式无效，应为 Base64 编码', 'error');
+                    return;
+                }
+
+                if (newKey.length < 40) {
+                    showToast('加密密钥长度不足，标准长度为 44 个字符', 'error');
+                    return;
+                }
+
+                // 确认更改
+                if (!confirm('确定要更改加密密钥吗？\n\n⚠️ 这将重新加密所有文件，请确保新密钥正确！')) {
+                    return;
+                }
+
+                // 调用重新加密接口
+                setLoading(true, '正在重新加密所有文件...');
+                try {
+                    const result = await apiRequest('/api/v1/auth/re-encrypt', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            old_key: currentEncryptionKey.value,
+                            new_key: newKey
+                        })
+                    });
+
+                    // 更新本地保存的密钥
+                    await setEncryptionKey(newKey);
+                    showToast(`密钥更改成功，已重新加密 ${result.files_re_encrypted} 个文件`);
+
+                    if (result.errors && result.errors.length > 0) {
+                        console.warn('重新加密过程中的错误:', result.errors);
+                    }
+                } catch (err) {
+                    showToast(err.message, 'error');
+                } finally {
+                    setLoading(false);
+                }
+                return;
+            }
+
+            // 首次设置密钥
             const encryptionKey = prompt(
                 '请输入加密密钥 (Base64 编码):\n\n' +
                 '⚠️ 重要说明：\n' +
@@ -614,58 +718,30 @@ createApp({
                 return;
             }
 
-            if (!confirm('确定要使用此密钥启用 API 访问吗？\n\n启用后，所有客户端将可以使用此密钥访问同步服务。')) {
+            if (!confirm('确定要使用此密钥吗？\n\n密钥将保存在浏览器本地存储中。')) {
                 return;
             }
 
-            setLoading(true, '启用 API 访问...');
-            try {
-                await apiRequest('/api/v1/auth/enable-api', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        encryption_key: encryptionKey
-                    })
-                });
-                apiEnabled.value = true;
-                showToast('API 访问已启用');
-                addActivity('settings', '启用了 API 访问');
-            } catch (err) {
-                showToast(err.message, 'error');
-            } finally {
-                setLoading(false);
+            if (await setEncryptionKey(encryptionKey)) {
+                showToast('加密密钥已设置');
+                addActivity('settings', '设置了加密密钥');
             }
         };
 
         const disableApi = async () => {
-            if (!confirm('警告：禁用 API 访问将导致所有客户端无法同步数据！\n\n确定要继续吗？')) {
+            if (!confirm('确定要清除加密密钥吗？\n\n清除后将无法解密下载文件，需要重新输入密钥。')) {
                 return;
             }
 
-            if (!confirm('再次确认：这将阻止所有客户端的同步请求！')) {
-                return;
-            }
-
-            setLoading(true, '禁用 API 访问...');
-            try {
-                await apiRequest('/api/v1/auth/disable-api', {
-                    method: 'POST',
-                    body: JSON.stringify({})
-                });
-                apiEnabled.value = false;
-                showToast('API 访问已禁用', 'warning');
-                addActivity('settings', '禁用了 API 访问');
-            } catch (err) {
-                showToast(err.message, 'error');
-            } finally {
-                setLoading(false);
-            }
+            clearEncryptionKey();
+            addActivity('settings', '清除了加密密钥');
         };
 
         const refreshApiStatus = async () => {
-            setLoading(true, '刷新 API 状态...');
+            setLoading(true, '刷新状态...');
             try {
                 await loadApiStatus();
-                showToast('API 状态已刷新');
+                showToast('状态已刷新');
             } catch (err) {
                 showToast(err.message, 'error');
             } finally {
@@ -849,6 +925,7 @@ createApp({
             serverUrl,
             serverStatus,
             apiEnabled,
+            currentEncryptionKey,
             loginForm,
             stats,
             files,

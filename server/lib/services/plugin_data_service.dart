@@ -10,121 +10,53 @@ import 'encryption_service.dart';
 ///
 /// 负责读取、解密、加密和写入各插件的数据
 /// 提供统一的数据访问接口供 HTTP 路由使用
+///
+/// 安全说明：加密密钥只保存在内存中，不持久化到文件
 class PluginDataService {
   final FileStorageService storageService;
   final ServerEncryptionService encryptionService;
   final String _dataDir;
 
-  /// API 密钥存储文件路径
-  late final String _apiKeysPath;
-
   PluginDataService(this.storageService, this._dataDir)
-      : encryptionService = ServerEncryptionService() {
-    _apiKeysPath = path.join(_dataDir, 'auth', 'api_keys.json');
-  }
+      : encryptionService = ServerEncryptionService();
 
   /// 初始化服务
   Future<void> initialize() async {
-    // 加载已保存的 API 密钥
-    await _loadApiKeys();
+    // 不再从文件加载密钥，密钥只保存在内存中
   }
 
-  /// 加载 API 密钥
-  Future<void> _loadApiKeys() async {
-    final file = File(_apiKeysPath);
-    if (await file.exists()) {
-      try {
-        final content = await file.readAsString();
-        final data = jsonDecode(content) as Map<String, dynamic>;
-        final keys = data['keys'] as Map<String, dynamic>? ?? {};
+  // ==================== 密钥管理（仅内存）====================
 
-        for (final entry in keys.entries) {
-          encryptionService.setUserKey(entry.key, entry.value as String);
-        }
-      } catch (e) {
-        print('加载 API 密钥失败: $e');
-      }
-    }
-  }
-
-  // ==================== API 密钥管理 ====================
-
-  /// 启用用户的 API 访问
-  ///
-  /// [userId] 用户ID
-  /// [encryptionKey] Base64 编码的加密密钥
-  Future<void> enableApi(String userId, String encryptionKey) async {
+  /// 设置用户的加密密钥（仅内存，不持久化）
+  void setEncryptionKey(String userId, String encryptionKey) {
     encryptionService.setUserKey(userId, encryptionKey);
-    await _persistApiKey(userId, encryptionKey);
   }
 
-  /// 禁用用户的 API 访问
-  Future<void> disableApi(String userId) async {
+  /// 移除用户的加密密钥（仅内存）
+  void removeEncryptionKey(String userId) {
     encryptionService.removeUserKey(userId);
-    await _removeApiKey(userId);
   }
 
-  /// 检查用户是否已启用 API
-  bool isApiEnabled(String userId) {
+  /// 检查用户是否已设置密钥（仅检查内存）
+  bool hasEncryptionKey(String userId) {
     return encryptionService.hasUserKey(userId);
   }
 
-  /// 持久化 API 密钥
-  Future<void> _persistApiKey(String userId, String key) async {
-    final file = File(_apiKeysPath);
-    Map<String, dynamic> data = {'keys': <String, dynamic>{}};
-
-    if (await file.exists()) {
-      try {
-        final content = await file.readAsString();
-        data = jsonDecode(content) as Map<String, dynamic>;
-        data['keys'] ??= <String, dynamic>{};
-      } catch (e) {
-        // 忽略解析错误，使用默认值
-      }
-    }
-
-    (data['keys'] as Map<String, dynamic>)[userId] = key;
-    data['updated_at'] = DateTime.now().toIso8601String();
-
-    if (!await file.parent.exists()) {
-      await file.parent.create(recursive: true);
-    }
-    await file.writeAsString(jsonEncode(data));
-  }
-
-  /// 移除 API 密钥
-  Future<void> _removeApiKey(String userId) async {
-    final file = File(_apiKeysPath);
-    if (!await file.exists()) return;
-
-    try {
-      final content = await file.readAsString();
-      final data = jsonDecode(content) as Map<String, dynamic>;
-      final keys = data['keys'] as Map<String, dynamic>? ?? {};
-      keys.remove(userId);
-      data['keys'] = keys;
-      data['updated_at'] = DateTime.now().toIso8601String();
-      await file.writeAsString(jsonEncode(data));
-    } catch (e) {
-      print('移除 API 密钥失败: $e');
-    }
+  /// 获取用户的加密密钥（仅从内存）
+  String? getEncryptionKey(String userId) {
+    return encryptionService.getUserKey(userId);
   }
 
   // ==================== 数据读取 ====================
 
   /// 读取并解密插件数据文件
-  ///
-  /// [userId] 用户ID
-  /// [pluginId] 插件ID (如 'chat', 'notes')
-  /// [fileName] 文件名 (如 'channels.json')
   Future<Map<String, dynamic>?> readPluginData(
     String userId,
     String pluginId,
     String fileName,
   ) async {
-    if (!isApiEnabled(userId)) {
-      throw StateError('用户未启用 API 访问');
+    if (!hasEncryptionKey(userId)) {
+      throw StateError('用户未设置加密密钥');
     }
 
     final filePath = '$pluginId/$fileName';
@@ -144,10 +76,6 @@ class PluginDataService {
   }
 
   /// 读取插件数据文件列表
-  ///
-  /// [userId] 用户ID
-  /// [pluginId] 插件ID
-  /// [pattern] 文件名模式 (如 'activities_*.json')
   Future<List<String>> listPluginFiles(
     String userId,
     String pluginId, {
@@ -170,7 +98,6 @@ class PluginDataService {
 
   /// 简单的文件名模式匹配
   bool _matchPattern(String fileName, String pattern) {
-    // 支持 * 通配符
     final regex = RegExp('^${pattern.replaceAll('*', '.*')}\$');
     return regex.hasMatch(fileName);
   }
@@ -184,8 +111,8 @@ class PluginDataService {
     String fileName,
     Map<String, dynamic> data,
   ) async {
-    if (!isApiEnabled(userId)) {
-      throw StateError('用户未启用 API 访问');
+    if (!hasEncryptionKey(userId)) {
+      throw StateError('用户未设置加密密钥');
     }
 
     final encryptedData = encryptionService.encryptData(userId, data);
@@ -246,6 +173,80 @@ class PluginDataService {
       'offset': start,
       'count': data.length,
       'hasMore': end < total,
+    };
+  }
+
+  // ==================== 重新加密（密钥更改）====================
+
+  /// 重新加密用户的所有文件
+  ///
+  /// [userId] 用户ID
+  /// [newKey] 新的加密密钥 (Base64)
+  /// 返回重新加密的文件数量和错误列表
+  Future<Map<String, dynamic>> reEncryptAllFiles(String userId, String newKey) async {
+    final oldKey = encryptionService.getUserKey(userId);
+    if (oldKey == null) {
+      throw StateError('请先设置当前加密密钥');
+    }
+
+    int fileCount = 0;
+    final errors = <String>[];
+
+    // 获取用户数据目录
+    final userDir = Directory(getUserDataDir(userId));
+    if (!await userDir.exists()) {
+      return {'file_count': 0, 'errors': errors};
+    }
+
+    // 遍历所有 JSON 文件
+    await for (final entity in userDir.list(recursive: true)) {
+      if (entity is File && entity.path.endsWith('.json')) {
+        try {
+          // 读取加密文件
+          final relativePath = path.relative(entity.path, from: userDir.path);
+          final fileData = await storageService.readEncryptedFile(userId, relativePath);
+
+          if (fileData == null) continue;
+
+          final encryptedData = fileData['encrypted_data'] as String?;
+          if (encryptedData == null) continue;
+
+          // 用旧密钥解密
+          final decryptedData = encryptionService.decryptData(userId, encryptedData);
+
+          // 临时设置新密钥
+          encryptionService.setUserKey(userId, newKey);
+
+          // 用新密钥重新加密
+          final newEncryptedData = encryptionService.encryptString(
+            userId,
+            jsonEncode(decryptedData),
+          );
+          final newMd5 = encryptionService.computeStringMd5(jsonEncode(decryptedData));
+
+          // 保存文件
+          await storageService.writeEncryptedFile(
+            userId,
+            relativePath,
+            newEncryptedData,
+            newMd5,
+          );
+
+          fileCount++;
+        } catch (e) {
+          errors.add('${entity.path}: $e');
+          // 恢复旧密钥以便继续处理其他文件
+          encryptionService.setUserKey(userId, oldKey);
+        }
+      }
+    }
+
+    // 确保新密钥设置正确（仅内存，不持久化）
+    encryptionService.setUserKey(userId, newKey);
+
+    return {
+      'file_count': fileCount,
+      'errors': errors,
     };
   }
 }

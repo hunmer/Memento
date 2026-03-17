@@ -7,6 +7,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../services/file_storage_service.dart';
+import '../services/plugin_data_service.dart';
 import '../services/websocket_manager.dart';
 import '../middleware/auth_middleware.dart';
 
@@ -14,8 +15,9 @@ import '../middleware/auth_middleware.dart';
 class SyncRoutes {
   final FileStorageService _storageService;
   final WebSocketManager? _webSocketManager;
+  final PluginDataService? _pluginDataService;
 
-  SyncRoutes(this._storageService, [this._webSocketManager]);
+  SyncRoutes(this._storageService, [this._webSocketManager, this._pluginDataService]);
 
   Router get router {
     final router = Router();
@@ -26,6 +28,9 @@ class SyncRoutes {
     // GET /pull/<filePath> - 拉取加密文件
     // 使用通配符匹配任意路径
     router.get('/pull/<filePath|.*>', _handlePull);
+
+    // GET /pull-decrypted/<filePath> - 拉取解密后的文件 (用于管理后台)
+    router.get('/pull-decrypted/<filePath|.*>', _handlePullDecrypted);
 
     // GET /info/<filePath> - 获取文件元信息（不含内容）
     router.get('/info/<filePath|.*>', _handleInfo);
@@ -207,6 +212,82 @@ class SyncRoutes {
       );
     } catch (e) {
       return _errorResponse(500, '服务器错误: $e');
+    }
+  }
+
+  /// 处理文件拉取（解密后）- 用于管理后台
+  ///
+  /// 需要通过 X-Encryption-Key 请求头传递加密密钥
+  Future<Response> _handlePullDecrypted(Request request, String filePath) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      // 验证文件路径安全性
+      if (filePath.contains('..') || filePath.startsWith('/')) {
+        return _errorResponse(400, '无效的文件路径');
+      }
+
+      // 检查是否启用了解密服务
+      if (_pluginDataService == null) {
+        return _errorResponse(503, '解密服务未配置');
+      }
+
+      // 从请求头获取加密密钥
+      final encryptionKey = request.headers['x-encryption-key'];
+      if (encryptionKey == null || encryptionKey.isEmpty) {
+        return _errorResponse(403, '请通过 X-Encryption-Key 请求头传递加密密钥');
+      }
+
+      // 设置加密密钥（仅内存）
+      _pluginDataService!.setEncryptionKey(userId, encryptionKey);
+
+      final serverFile =
+          await _storageService.readEncryptedFile(userId, filePath);
+
+      if (serverFile == null) {
+        return Response.notFound(
+          jsonEncode({
+            'success': false,
+            'error': '文件不存在',
+            'file_path': filePath,
+          }),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
+
+      final encryptedData = serverFile['encrypted_data'] as String?;
+      if (encryptedData == null) {
+        return _errorResponse(500, '文件数据为空');
+      }
+
+      // 解密数据
+      final decryptedData = _pluginDataService!.encryptionService.decryptData(
+        userId,
+        encryptedData,
+      );
+
+      // 记录拉取日志
+      await _storageService.logSync(
+        userId: userId,
+        action: 'pull_decrypted',
+        filePath: filePath,
+      );
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'file_path': filePath,
+          'data': decryptedData,
+          'md5': serverFile['md5'],
+          'updated_at': serverFile['updated_at'],
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '解密失败: $e');
     }
   }
 

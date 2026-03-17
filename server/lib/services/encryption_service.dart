@@ -18,6 +18,9 @@ class ServerEncryptionService {
   /// 检查用户是否已设置密钥
   bool hasUserKey(String userId) => _userEncrypters.containsKey(userId);
 
+  /// 获取已加载密钥的用户 ID 列表（用于调试）
+  List<String> get loadedUserIds => _userEncrypters.keys.toList();
+
   /// 设置用户的加密密钥
   ///
   /// [userId] 用户ID
@@ -40,17 +43,28 @@ class ServerEncryptionService {
   /// 获取用户的密钥 (用于持久化)
   String? getUserKey(String userId) => _userKeys[userId];
 
+  /// 获取用户密钥（别名，与其他服务保持一致）
+  String? getEncryptionKey(String userId) => _userKeys[userId];
+
   /// 移除用户的加密密钥
   void removeUserKey(String userId) {
     _userEncrypters.remove(userId);
     _userKeys.remove(userId);
   }
 
-  /// 解密数据为 JSON
+  /// 解密数据为 JSON（支持对象或数组）
   ///
   /// [userId] 用户ID
   /// [encryptedString] 加密字符串，格式: base64(iv).base64(ciphertext)
-  Map<String, dynamic> decryptData(String userId, String encryptedString) {
+  dynamic decryptData(String userId, String encryptedString) {
+    final decrypted = decryptString(userId, encryptedString);
+    return jsonDecode(decrypted);
+  }
+
+  /// 解密数据为 JSON 对象
+  ///
+  /// 如果数据是数组会抛出异常
+  Map<String, dynamic> decryptDataAsMap(String userId, String encryptedString) {
     final decrypted = decryptString(userId, encryptedString);
     return jsonDecode(decrypted) as Map<String, dynamic>;
   }
