@@ -117,7 +117,7 @@ createApp({
         const activeTab = ref('overview');
         const currentUser = ref('');
         const token = ref('');
-        const serverUrl = ref(localStorage.getItem('serverUrl') || 'http://localhost:8080');
+        const serverUrl = ref(localStorage.getItem('serverUrl') || 'http://localhost:8874');
         const serverStatus = ref('offline');
         const apiEnabled = ref(false);
 
