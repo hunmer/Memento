@@ -136,36 +136,69 @@ class FileStorageService {
     return false;
   }
 
-  /// 列出用户所有文件
-  Future<List<FileInfo>> listUserFiles(String userId) async {
+  /// 列出用户文件（单层目录）
+  ///
+  /// [userId] 用户ID
+  /// [directory] 可选的目录路径，为空时返回根目录内容
+  /// 只返回指定目录下的一层内容，不递归遍历子目录
+  Future<List<FileInfo>> listUserFiles(String userId, {String? directory}) async {
     final userDir = Directory(getUserDir(userId));
     if (!await userDir.exists()) return [];
 
-    final files = <FileInfo>[];
+    // 确定要列出的目录
+    final targetDir = directory != null && directory.isNotEmpty
+        ? Directory(path.join(userDir.path, directory))
+        : userDir;
 
-    await for (final entity in userDir.list(recursive: true)) {
-      if (entity is File && entity.path.endsWith('.json')) {
+    if (!await targetDir.exists()) return [];
+
+    final items = <FileInfo>[];
+
+    await for (final entity in targetDir.list()) {
+      final entityName = path.basename(entity.path);
+      final relativePath = directory != null && directory.isNotEmpty
+          ? '$directory/$entityName'
+          : entityName;
+
+      if (entity is File) {
         try {
           final content = await entity.readAsString();
           final data = jsonDecode(content) as Map<String, dynamic>;
 
-          // 计算相对路径
-          final relativePath = path.relative(entity.path, from: userDir.path);
-
-          final file = File(entity.path);
-          files.add(FileInfo(
+          items.add(FileInfo(
             path: relativePath.replaceAll('\\', '/'), // 统一使用正斜杠
-            size: await file.length(),
-            md5: data['md5'] as String,
+            size: await entity.length(),
+            md5: data['md5'] as String?,
             updatedAt: DateTime.parse(data['updated_at'] as String),
+            isFolder: false,
           ));
         } catch (e) {
-          print('读取文件信息失败: ${entity.path} - $e');
+          // 非 JSON 文件或解析失败，仍然返回基本信息
+          items.add(FileInfo(
+            path: relativePath.replaceAll('\\', '/'),
+            size: await entity.length(),
+            updatedAt: await entity.lastModified(),
+            isFolder: false,
+          ));
         }
+      } else if (entity is Directory) {
+        final stat = await entity.stat();
+        items.add(FileInfo(
+          path: relativePath.replaceAll('\\', '/'),
+          updatedAt: stat.modified,
+          isFolder: true,
+        ));
       }
     }
 
-    return files;
+    // 按名称排序：文件夹在前，文件在后
+    items.sort((a, b) {
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+      return a.path.compareTo(b.path);
+    });
+
+    return items;
   }
 
   /// 获取用户数据大小 (字节)

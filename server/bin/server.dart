@@ -339,7 +339,7 @@ void main(List<String> args) async {
           headers: {
             ACCESS_CONTROL_ALLOW_ORIGIN: config.corsOrigins.join(','),
             ACCESS_CONTROL_ALLOW_METHODS: 'GET, POST, PUT, DELETE, OPTIONS',
-            ACCESS_CONTROL_ALLOW_HEADERS: 'Origin, Content-Type, Authorization, X-API-Key',
+            ACCESS_CONTROL_ALLOW_HEADERS: 'Origin, Content-Type, Authorization, X-API-Key, X-Encryption-Key',
           },
         ))
         .addMiddleware(logRequests())

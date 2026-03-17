@@ -212,20 +212,24 @@ class FileInfo {
   /// 文件路径 (相对路径)
   final String path;
 
-  /// 文件大小 (字节)
-  final int size;
+  /// 文件大小 (字节)，文件夹时为 null
+  final int? size;
 
-  /// 文件 MD5
-  final String md5;
+  /// 文件 MD5，文件夹时为 null
+  final String? md5;
 
   /// 最后更新时间
   final DateTime updatedAt;
 
+  /// 是否为文件夹
+  final bool isFolder;
+
   FileInfo({
     required this.path,
-    required this.size,
-    required this.md5,
+    this.size,
+    this.md5,
     required this.updatedAt,
+    this.isFolder = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -233,12 +237,14 @@ class FileInfo {
         'size': size,
         'md5': md5,
         'updated_at': updatedAt.toIso8601String(),
+        'is_folder': isFolder,
       };
 
   factory FileInfo.fromJson(Map<String, dynamic> json) => FileInfo(
         path: json['path'] as String,
-        size: json['size'] as int,
-        md5: json['md5'] as String,
+        size: json['size'] as int?,
+        md5: json['md5'] as String?,
         updatedAt: DateTime.parse(json['updated_at'] as String),
+        isFolder: json['is_folder'] as bool? ?? false,
       );
 }

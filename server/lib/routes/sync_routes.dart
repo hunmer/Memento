@@ -347,7 +347,15 @@ class SyncRoutes {
     }
 
     try {
-      final files = await _storageService.listUserFiles(userId);
+      // 获取可选的目录参数
+      final directory = request.url.queryParameters['directory'];
+
+      // 验证目录路径安全性
+      if (directory != null && (directory.contains('..') || directory.startsWith('/'))) {
+        return _errorResponse(400, '无效的目录路径');
+      }
+
+      final files = await _storageService.listUserFiles(userId, directory: directory);
 
       final response = FileListResponse(
         files: files,
