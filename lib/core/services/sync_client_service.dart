@@ -88,6 +88,12 @@ class SyncClientService {
   String? _userId;
   String? _deviceId;
 
+  /// MD5 快照缓存（内存中的 Map）
+  Map<String, String> _md5Snapshots = {};
+
+  /// MD5 快照 JSON 文件路径
+  static const String _snapshotFilePath = '.sync_snapshots.json';
+
   static const String _tag = 'SyncClientService';
 
   /// 是否已登录
@@ -124,7 +130,37 @@ class SyncClientService {
 
     // 初始化同步记录服务
     await _recordService.initialize(_storage);
+
+    // 加载 MD5 快照
+    await _loadMd5Snapshots();
+
     _log('初始化完成');
+  }
+
+  /// 加载 MD5 快照到内存
+  Future<void> _loadMd5Snapshots() async {
+    try {
+      final content = await _storage.readString(_snapshotFilePath);
+      if (content != null) {
+        final json = jsonDecode(content) as Map<String, dynamic>;
+        _md5Snapshots = json.map((key, value) => MapEntry(key, value as String));
+      }
+    } catch (e) {
+      _log('加载 MD5 快照失败: $e');
+      _md5Snapshots = {};
+    }
+  }
+
+  /// 保存 MD5 快照到文件
+  Future<void> _saveMd5SnapshotsToFile() async {
+    try {
+      await _storage.writeString(
+        _snapshotFilePath,
+        jsonEncode(_md5Snapshots),
+      );
+    } catch (e) {
+      _log('保存 MD5 快照失败: $e');
+    }
   }
 
   /// 登出
@@ -473,19 +509,13 @@ class SyncClientService {
 
   /// 获取文件的同步 MD5 快照
   Future<String?> _getSyncMd5(String filePath) async {
-    final snapshotPath = _getSyncSnapshotPath(filePath);
-    return await _storage.readString(snapshotPath);
+    return _md5Snapshots[filePath];
   }
 
   /// 保存文件的同步 MD5 快照
   Future<void> _saveSyncMd5(String filePath, String md5) async {
-    final snapshotPath = _getSyncSnapshotPath(filePath);
-    await _storage.writeString(snapshotPath, md5);
-  }
-
-  /// 获取同步快照文件路径
-  String _getSyncSnapshotPath(String filePath) {
-    return '.sync_snapshots/$filePath.md5';
+    _md5Snapshots[filePath] = md5;
+    await _saveMd5SnapshotsToFile();
   }
 
   /// 列出本地数据文件
@@ -904,8 +934,8 @@ class SyncClientService {
     await _storage.delete(filePath);
 
     // 2. 删除 MD5 快照
-    final snapshotPath = _getSyncSnapshotPath(filePath);
-    await _storage.delete(snapshotPath);
+    _md5Snapshots.remove(filePath);
+    await _saveMd5SnapshotsToFile();
 
     // 3. 清除同步记录
     await _recordService.removeRecord(filePath);

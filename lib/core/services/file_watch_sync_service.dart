@@ -222,9 +222,6 @@ class FileWatchSyncService {
 
   /// 文件变化处理
   void _onFileChanged(FileSystemEvent event) {
-    // 忽略同步快照文件
-    if (event.path.contains('.sync_snapshots')) return;
-
     // 忽略临时文件
     if (event.path.endsWith('.tmp') ||
         event.path.endsWith('.temp') ||
