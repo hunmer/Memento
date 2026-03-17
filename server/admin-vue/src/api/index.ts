@@ -167,8 +167,10 @@ export const authApi = {
 
 // 同步 API
 export const syncApi = {
-  getFiles: (): Promise<{ success: boolean; files: SyncFileInfo[] }> =>
-    apiClient.request('/api/v1/sync/list'),
+  getFiles: (directory?: string): Promise<{ success: boolean; files: SyncFileInfo[] }> => {
+    const params = directory ? `?directory=${encodeURIComponent(directory)}` : ''
+    return apiClient.request(`/api/v1/sync/list${params}`)
+  },
 
   getStatus: (): Promise<{
     success: boolean

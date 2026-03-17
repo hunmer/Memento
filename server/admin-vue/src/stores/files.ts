@@ -52,11 +52,11 @@ export const useFilesStore = defineStore('files', () => {
   })
 
   // 加载文件列表
-  async function loadFiles(): Promise<void> {
+  async function loadFiles(directory?: string): Promise<void> {
     loading.value = true
     error.value = null
     try {
-      const response = await syncApi.getFiles()
+      const response = await syncApi.getFiles(directory)
       files.value = response.files || []
       buildDirectoryTree()
     } catch (err) {
@@ -64,6 +64,17 @@ export const useFilesStore = defineStore('files', () => {
       console.error('Failed to load files:', err)
     } finally {
       loading.value = false
+    }
+  }
+
+  // 按目录加载子文件（用于异步加载）
+  async function loadFilesByDirectory(directory: string): Promise<SyncFile[]> {
+    try {
+      const response = await syncApi.getFiles(directory)
+      return response.files || []
+    } catch (err) {
+      console.error('Failed to load files by directory:', err)
+      return []
     }
   }
 
@@ -201,6 +212,7 @@ export const useFilesStore = defineStore('files', () => {
 
     // 方法
     loadFiles,
+    loadFilesByDirectory,
     deleteFile,
     toggleFolder,
     isExpanded
