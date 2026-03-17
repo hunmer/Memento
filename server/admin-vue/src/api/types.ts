@@ -23,6 +23,22 @@ export interface LoginResponse {
   error?: string
 }
 
+export interface UserInfo {
+  username: string
+  created_at: string
+  sync_folder_count: number
+  sync_file_count: number
+  sync_total_size: number
+  sync_total_size_mb: string
+}
+
+export interface UserInfoResponse {
+  success: boolean
+  user_info?: UserInfo
+  error?: string
+  timestamp?: string
+}
+
 export interface ApiKey {
   id: string
   name: string
@@ -62,6 +78,7 @@ export interface SyncFile {
   size: number
   updated_at: string
   is_binary?: boolean
+  is_folder?: boolean
   md5?: string
 }
 

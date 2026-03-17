@@ -216,6 +216,38 @@ class FileStorageService {
     return totalSize;
   }
 
+  /// 获取用户存储统计信息
+  /// 返回文件数量、文件夹数量和总大小
+  Future<Map<String, dynamic>> getUserStorageStats(String userId) async {
+    final userDir = Directory(getUserDir(userId));
+    if (!await userDir.exists()) {
+      return {
+        'file_count': 0,
+        'folder_count': 0,
+        'total_size': 0,
+      };
+    }
+
+    int fileCount = 0;
+    int folderCount = 0;
+    int totalSize = 0;
+
+    await for (final entity in userDir.list(recursive: true)) {
+      if (entity is File) {
+        fileCount++;
+        totalSize += await entity.length();
+      } else if (entity is Directory) {
+        folderCount++;
+      }
+    }
+
+    return {
+      'file_count': fileCount,
+      'folder_count': folderCount,
+      'total_size': totalSize,
+    };
+  }
+
   // ========== 用户认证数据操作 ==========
 
   /// 获取用户认证文件路径

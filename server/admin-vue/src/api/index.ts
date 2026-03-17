@@ -1,4 +1,4 @@
-import type { ApiResponse, LoginRequest, LoginResponse } from './types'
+import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse } from './types'
 
 const DEFAULT_SERVER = 'http://localhost:8874'
 
@@ -162,7 +162,10 @@ export const authApi = {
   revokeApiKey: (keyId: string): Promise<ApiResponse> =>
     apiClient.request(`/api/v1/auth/api-keys/${keyId}`, {
       method: 'DELETE'
-    })
+    }),
+
+  getUserInfo: (): Promise<UserInfoResponse> =>
+    apiClient.request('/api/v1/auth/user-info')
 }
 
 // 同步 API

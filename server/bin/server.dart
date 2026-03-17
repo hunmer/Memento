@@ -125,7 +125,7 @@ void main(List<String> args) async {
   });
 
   // 认证路由 (无需认证)
-  final authRoutes = AuthRoutes(authService, pluginDataService);
+  final authRoutes = AuthRoutes(authService, pluginDataService, storageService);
   router.mount('/api/v1/auth', authRoutes.router.call);
 
   // 同步路由 (需要认证)

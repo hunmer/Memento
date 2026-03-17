@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, ref, onMounted } from 'vue'
+import { h, ref, computed, onMounted } from 'vue'
 import {
   NCard,
   NButton,
@@ -15,6 +15,7 @@ import {
   FolderOpenOutline,
   DocumentOutline
 } from '@vicons/ionicons5'
+import JSZip from 'jszip'
 import { useFilesStore } from '@/stores/files'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
@@ -36,6 +37,81 @@ const treeDataRef = ref<TreeOption[]>([])
 
 // 已加载的目录缓存
 const loadedDirectories = new Set<string>()
+
+// 从节点中递归提取所有文件路径
+function extractAllFilePaths(nodes: TreeOption[]): string[] {
+  const filePaths: string[] = []
+  for (const node of nodes) {
+    const nodeWithType = node as TreeOption & { isFolder?: boolean }
+    if (nodeWithType.isFolder) {
+      if (node.children) {
+        filePaths.push(...extractAllFilePaths(node.children))
+      }
+    } else {
+      filePaths.push(node.key as string)
+    }
+  }
+  return filePaths
+}
+
+// 递归加载目录下的所有文件
+async function loadAllFilesRecursively(dirPath: string): Promise<string[]> {
+  const filePaths: string[] = []
+
+  async function loadDir(path: string): Promise<void> {
+    try {
+      const response = await syncApi.getFiles(path)
+      const files = response.files || []
+
+      for (const file of files) {
+        if (file.is_folder) {
+          await loadDir(file.path)
+        } else {
+          filePaths.push(file.path)
+        }
+      }
+    } catch (err) {
+      console.error(`Failed to load directory ${path}:`, err)
+    }
+  }
+
+  await loadDir(dirPath)
+  return filePaths
+}
+
+// 计算选中的文件（包含文件夹内的所有文件）
+const selectedFiles = computed(() => {
+  const filePaths: string[] = []
+
+  for (const key of checkedKeys.value) {
+    const findNode = (nodes: TreeOption[], targetKey: string): TreeOption | null => {
+      for (const node of nodes) {
+        if (node.key === targetKey) return node
+        if (node.children) {
+          const found = findNode(node.children, targetKey)
+          if (found) return found
+        }
+      }
+      return null
+    }
+    const node = findNode(treeDataRef.value, key)
+    if (!node) continue
+
+    const nodeWithType = node as TreeOption & { isFolder?: boolean }
+    if (nodeWithType.isFolder) {
+      // 文件夹：提取已加载的子文件
+      if (node.children) {
+        filePaths.push(...extractAllFilePaths(node.children))
+      }
+    } else {
+      filePaths.push(key)
+    }
+  }
+
+  return filePaths
+})
+
+const hasSelectedFiles = computed(() => selectedFiles.value.length > 0)
 
 // 将 API 返回的文件数据转换为 TreeOption
 function convertFileToTreeOption(file: {
@@ -239,6 +315,139 @@ async function handleDelete(filePath: string): Promise<void> {
   }
 }
 
+// 处理选中更新 - 选中文件夹时递归加载子文件
+async function handleUpdateCheckedKeys(
+  keys: Array<string | number>,
+  _options: Array<TreeOption | null>,
+  meta: { action: 'check' | 'uncheck'; node: TreeOption | null }
+): Promise<void> {
+  const newKeys = keys as string[]
+
+  // 检测新选中的文件夹
+  if (meta.action === 'check' && meta.node) {
+    const node = meta.node as TreeOption & { isFolder?: boolean }
+    if (node.isFolder) {
+      // 递归加载该文件夹下的所有文件
+      const filePaths = await loadAllFilesRecursively(node.key as string)
+
+      // 将文件路径添加到选中列表（去重）
+      const existingKeys = new Set(newKeys)
+      for (const path of filePaths) {
+        if (!existingKeys.has(path)) {
+          newKeys.push(path)
+        }
+      }
+    }
+  }
+
+  checkedKeys.value = newKeys
+}
+
+// 批量下载选中的文件（打包成 ZIP）
+async function handleBatchDownload(): Promise<void> {
+  if (!authStore.encryptionKey) {
+    window.$message?.error('请先设置加密密钥')
+    return
+  }
+
+  if (selectedFiles.value.length === 0) {
+    window.$message?.warning('请先选择要下载的文件')
+    return
+  }
+
+  const files = selectedFiles.value
+
+  // 单个文件直接下载
+  if (files.length === 1) {
+    await handleDownload(files[0])
+    return
+  }
+
+  uiStore.setLoading(true, `正在下载 ${files.length} 个文件并打包...`)
+
+  const zip = new JSZip()
+  let successCount = 0
+  let failCount = 0
+
+  for (const filePath of files) {
+    try {
+      const result = await syncApi.downloadDecrypted(filePath, authStore.encryptionKey)
+      const content = JSON.stringify((result as { data: unknown }).data, null, 2)
+      zip.file(filePath, content)
+      successCount++
+    } catch {
+      failCount++
+    }
+  }
+
+  if (successCount === 0) {
+    uiStore.setLoading(false)
+    window.$message?.error('所有文件下载失败')
+    return
+  }
+
+  try {
+    // 生成 ZIP 文件
+    const zipBlob = await zip.generateAsync({ type: 'blob' })
+    const url = URL.createObjectURL(zipBlob)
+    const a = document.createElement('a')
+    a.href = url
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    a.download = `files_${timestamp}.zip`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    uiStore.setLoading(false)
+
+    if (failCount === 0) {
+      window.$message?.success(`成功下载 ${successCount} 个文件（已打包）`)
+    } else {
+      window.$message?.warning(`下载完成：${successCount} 个成功，${failCount} 个失败（已打包）`)
+    }
+    uiStore.addActivity('download', `批量下载了 ${successCount} 个文件`)
+  } catch (err) {
+    uiStore.setLoading(false)
+    window.$message?.error('打包失败')
+  }
+
+  checkedKeys.value = []
+}
+
+// 批量删除选中的文件
+async function handleBatchDelete(): Promise<void> {
+  if (selectedFiles.value.length === 0) {
+    window.$message?.warning('请先选择要删除的文件')
+    return
+  }
+
+  uiStore.setLoading(true, `正在删除 ${selectedFiles.value.length} 个文件...`)
+
+  let successCount = 0
+  let failCount = 0
+
+  for (const filePath of selectedFiles.value) {
+    try {
+      await filesStore.deleteFile(filePath)
+      successCount++
+    } catch {
+      failCount++
+    }
+  }
+
+  uiStore.setLoading(false)
+
+  if (successCount > 0 && failCount === 0) {
+    window.$message?.success(`成功删除 ${successCount} 个文件`)
+  } else if (successCount > 0 && failCount > 0) {
+    window.$message?.warning(`删除完成：${successCount} 个成功，${failCount} 个失败`)
+  } else {
+    window.$message?.error('所有文件删除失败')
+  }
+
+  checkedKeys.value = []
+  await handleRefresh()
+}
+
 // 初始加载
 onMounted(() => {
   loadRootFiles()
@@ -252,6 +461,37 @@ onMounted(() => {
         刷新
       </NButton>
     </template>
+
+    <!-- 批量操作栏 -->
+    <div class="batch-actions">
+      <span class="selection-info">
+        {{ hasSelectedFiles ? `已选择 ${selectedFiles.length} 个文件` : '选择文件进行批量操作' }}
+      </span>
+      <NSpace>
+        <NButton
+          size="small"
+          :disabled="!hasSelectedFiles"
+          @click="handleBatchDownload"
+        >
+          下载选中
+        </NButton>
+        <NPopconfirm
+          :disabled="!hasSelectedFiles"
+          @positive-click="handleBatchDelete"
+        >
+          <template #trigger>
+            <NButton
+              size="small"
+              type="error"
+              :disabled="!hasSelectedFiles"
+            >
+              删除选中
+            </NButton>
+          </template>
+          确定要删除选中的 {{ selectedFiles.length }} 个文件吗？此操作不可恢复。
+        </NPopconfirm>
+      </NSpace>
+    </div>
 
     <div v-if="!treeDataRef.length">
       <NEmpty description="暂无同步文件" />
@@ -268,7 +508,7 @@ onMounted(() => {
       expand-on-click
       checkable
       selectable
-      :on-update:checked-keys="(keys: Array<string | number>) => checkedKeys = keys as string[]"
+      :on-update:checked-keys="handleUpdateCheckedKeys"
       :on-update:expanded-keys="handleUpdateExpandedKeys"
       :render-suffix="renderSuffix"
     />
@@ -276,6 +516,21 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.batch-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.selection-info {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
 .tree-info {
   color: #6b7280;
   font-size: 0.875rem;

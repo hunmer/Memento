@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vicons/ionicons5": "^0.13.0",
+    "jszip": "^3.10.1",
     "naive-ui": "^2.44.1",
     "pinia": "^3.0.4",
     "vue": "^3.5.30"

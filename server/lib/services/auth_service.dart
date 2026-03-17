@@ -167,6 +167,11 @@ class AuthService {
     );
   }
 
+  /// 根据 ID 获取用户信息（公开方法，供路由使用）
+  Future<UserInfo?> getUserById(String userId) async {
+    return await _storageService.findUserById(userId);
+  }
+
   /// 验证 Token
   Map<String, dynamic>? verifyToken(String token) {
     try {

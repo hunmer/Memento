@@ -11,6 +11,11 @@ import '../services/plugin_data_service.dart';
 import '../services/websocket_manager.dart';
 import '../middleware/auth_middleware.dart';
 
+/// URL 解码文件路径
+String _decodeFilePath(String encodedPath) {
+  return Uri.decodeComponent(encodedPath);
+}
+
 /// 同步路由 - 处理文件推送、拉取和列表
 class SyncRoutes {
   final FileStorageService _storageService;
@@ -225,8 +230,11 @@ class SyncRoutes {
     }
 
     try {
+      // URL 解码文件路径
+      final decodedFilePath = _decodeFilePath(filePath);
+
       // 验证文件路径安全性
-      if (filePath.contains('..') || filePath.startsWith('/')) {
+      if (decodedFilePath.contains('..') || decodedFilePath.startsWith('/')) {
         return _errorResponse(400, '无效的文件路径');
       }
 
@@ -245,14 +253,14 @@ class SyncRoutes {
       _pluginDataService!.setEncryptionKey(userId, encryptionKey);
 
       final serverFile =
-          await _storageService.readEncryptedFile(userId, filePath);
+          await _storageService.readEncryptedFile(userId, decodedFilePath);
 
       if (serverFile == null) {
         return Response.notFound(
           jsonEncode({
             'success': false,
             'error': '文件不存在',
-            'file_path': filePath,
+            'file_path': decodedFilePath,
           }),
           headers: {'Content-Type': 'application/json'},
         );
@@ -273,13 +281,13 @@ class SyncRoutes {
       await _storageService.logSync(
         userId: userId,
         action: 'pull_decrypted',
-        filePath: filePath,
+        filePath: decodedFilePath,
       );
 
       return Response.ok(
         jsonEncode({
           'success': true,
-          'file_path': filePath,
+          'file_path': decodedFilePath,
           'data': decryptedData,
           'md5': serverFile['md5'],
           'updated_at': serverFile['updated_at'],

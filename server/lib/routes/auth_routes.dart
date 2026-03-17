@@ -5,6 +5,7 @@ import 'package:shelf_router/shelf_router.dart';
 import 'package:shared_models/shared_models.dart';
 
 import '../services/auth_service.dart';
+import '../services/file_storage_service.dart';
 import '../services/plugin_data_service.dart';
 import '../models/api_key.dart';
 
@@ -15,8 +16,9 @@ import '../models/api_key.dart';
 class AuthRoutes {
   final AuthService _authService;
   final PluginDataService? _pluginDataService;
+  final FileStorageService? _storageService;
 
-  AuthRoutes(this._authService, [this._pluginDataService]);
+  AuthRoutes(this._authService, [this._pluginDataService, this._storageService]);
 
   Router get router {
     final router = Router();
@@ -52,6 +54,9 @@ class AuthRoutes {
 
     // DELETE /api-keys/<id> - 撤销 API Key (需要认证)
     router.delete('/api-keys/<id>', _handleRevokeApiKey);
+
+    // GET /user-info - 获取用户信息 (需要认证)
+    router.get('/user-info', _handleUserInfo);
 
     return router;
   }
@@ -422,6 +427,52 @@ class AuthRoutes {
       case 'never':
       default:
         return ApiKeyExpiry.never;
+    }
+  }
+
+  /// 处理获取用户信息
+  Future<Response> _handleUserInfo(Request request) async {
+    try {
+      final userId = _getUserIdFromRequest(request);
+      if (userId == null) {
+        return _errorResponse(401, '未认证或 Token 无效');
+      }
+
+      // 获取用户基本信息
+      final user = await _authService.getUserById(userId);
+      if (user == null) {
+        return _errorResponse(404, '用户不存在');
+      }
+
+      // 获取存储统计信息
+      int fileCount = 0;
+      int folderCount = 0;
+      int totalSize = 0;
+
+      if (_storageService != null) {
+        final stats = await _storageService!.getUserStorageStats(userId);
+        fileCount = stats['file_count'] as int;
+        folderCount = stats['folder_count'] as int;
+        totalSize = stats['total_size'] as int;
+      }
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'user_info': {
+            'username': user.username,
+            'created_at': user.createdAt.toIso8601String(),
+            'sync_folder_count': folderCount,
+            'sync_file_count': fileCount,
+            'sync_total_size': totalSize,
+            'sync_total_size_mb': (totalSize / 1024 / 1024).toStringAsFixed(2),
+          },
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '服务器错误: $e');
     }
   }
 }
