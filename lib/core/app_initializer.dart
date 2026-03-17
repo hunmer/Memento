@@ -35,6 +35,7 @@ import 'services/log_service.dart';
 import 'api_forwarding/api_forwarding_config.dart';
 import 'api_forwarding/api_forwarding_service.dart';
 import 'services/speech_recognition_config_service.dart';
+import 'data_migration_controller.dart';
 
 /// 应用启动状态管理
 class AppStartupState extends ChangeNotifier {
@@ -159,6 +160,9 @@ Future<void> initializeApp() async {
   );
 
   try {
+    // === 数据迁移（在存储初始化之前执行） ===
+    await DataMigrationController.instance.migrate();
+
     // === 核心初始化（必须同步完成） ===
     // 创建并初始化存储管理器
     globalStorage = StorageManager();
