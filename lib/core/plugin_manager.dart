@@ -9,13 +9,11 @@ import 'storage/storage_manager.dart';
 /// 插件管理器，负责管理所有已注册的插件
 class PluginManager {
   StorageManager? _storageManager;
+  static const String _configStorageKey = 'configs/plugin_manager.json';
   Map<String, int> _pluginAccessTimes = {};
-  static const String _accessTimesStorageKey = 'configs/plugin_access_times';
-  static const String _settingsStorageKey = 'configs/plugin_manager_settings';
-  static const String _lastPluginKey = 'configs/last_opened_plugin';
-  PluginBase? _currentPlugin; // 当前打开的插件
-  bool _autoOpenLastPlugin = true; // 是否自动打开最后使用的插件
+  Map<String, dynamic> _settings = {'autoOpenLastPlugin': true};
   String? _lastOpenedPluginId; // 最后打开的插件ID
+  PluginBase? _currentPlugin; // 当前打开的插件
   // 单例实例
   static final PluginManager _instance = PluginManager._internal();
 
@@ -31,11 +29,8 @@ class PluginManager {
   // 设置存储管理器并初始化数据
   Future<void> setStorageManager(StorageManager manager) async {
     _storageManager = manager;
-
-    // 设置存储管理器后加载数据
-    await _loadAccessTimes();
-    await _loadSettings();
-    await _loadLastOpenedPlugin();
+    // 加载合并后的配置文件
+    await _loadConfig();
   }
 
   // 获取存储管理器
@@ -128,44 +123,53 @@ class PluginManager {
     _plugins.removeWhere((p) => p.id == id);
   }
 
-  /// 加载插件访问时间记录
-  Future<void> _loadAccessTimes() async {
-    // 确保初始化为空Map
-    _pluginAccessTimes = {};
-
+  /// 加载合并后的配置文件
+  Future<void> _loadConfig() async {
     if (_storageManager == null) return;
 
     try {
-      final data = await _storageManager!.read(_accessTimesStorageKey);
-      if (data.isNotEmpty) {
+      final configStr = await _storageManager!.readFile(
+        _configStorageKey,
+        '{}',
+      );
+      final config = jsonDecode(configStr) as Map<String, dynamic>;
+
+      // 加载访问时间
+      final accessTimes = config['accessTimes'] as Map<String, dynamic>?;
+      if (accessTimes != null) {
         _pluginAccessTimes = Map<String, int>.from(
-          data.map((key, value) => MapEntry(key, value as int)),
+          accessTimes.map((key, value) => MapEntry(key, value as int)),
         );
       }
+
+      // 加载设置
+      final settings = config['settings'] as Map<String, dynamic>?;
+      if (settings != null) {
+        _settings = settings;
+      }
+
+      // 加载最后打开的插件ID
+      final lastPlugin = config['lastOpenedPlugin'] as String?;
+      _lastOpenedPluginId = (lastPlugin?.isNotEmpty ?? false) ? lastPlugin : null;
     } catch (e) {
-      debugPrint('Warning: Failed to load plugin access times: $e');
-      // 保持使用空Map
+      debugPrint('Warning: Failed to load plugin manager config: $e');
     }
   }
 
-  /// 保存插件访问时间记录
-  Future<void> _saveAccessTimes() async {
+  /// 保存合并后的配置文件
+  Future<void> _saveConfig() async {
     if (_storageManager == null) return;
 
     try {
-      final Map<String, dynamic> data = Map<String, dynamic>.from(
-        _pluginAccessTimes,
-      );
-      await _storageManager!.write(_accessTimesStorageKey, data);
+      final config = {
+        'accessTimes': _pluginAccessTimes,
+        'settings': _settings,
+        'lastOpenedPlugin': _lastOpenedPluginId,
+      };
+      await _storageManager!.writeFile(_configStorageKey, jsonEncode(config));
     } catch (e) {
-      debugPrint('Warning: Failed to save plugin access times: $e');
+      debugPrint('Warning: Failed to save plugin manager config: $e');
     }
-  }
-
-  /// 更新插件访问时间
-  Future<void> _updatePluginAccessTime(String pluginId) async {
-    _pluginAccessTimes[pluginId] = DateTime.now().millisecondsSinceEpoch;
-    await _saveAccessTimes();
   }
 
   /// 获取当前打开的插件
@@ -175,71 +179,16 @@ class PluginManager {
   String? getCurrentPluginId() => _currentPlugin?.id;
 
   /// 获取是否自动打开最后使用的插件
-  bool get autoOpenLastPlugin => _autoOpenLastPlugin;
+  bool get autoOpenLastPlugin => _settings['autoOpenLastPlugin'] as bool? ?? true;
 
   /// 设置是否自动打开最后使用的插件
   set autoOpenLastPlugin(bool value) {
-    _autoOpenLastPlugin = value;
-    _saveSettings();
+    _settings['autoOpenLastPlugin'] = value;
+    _saveConfig();
   }
 
   /// 获取最后打开的插件ID
   String? get getLastOpenedPluginId => _lastOpenedPluginId;
-
-  /// 加载设置
-  Future<void> _loadSettings() async {
-    if (_storageManager == null) return;
-
-    try {
-      final settings = await _storageManager!.readFile(
-        _settingsStorageKey,
-        '{"autoOpenLastPlugin": true}',
-      );
-      final data = jsonDecode(settings);
-      _autoOpenLastPlugin = data['autoOpenLastPlugin'] ?? true;
-    } catch (e) {
-      debugPrint('Warning: Failed to load plugin manager settings: $e');
-      _autoOpenLastPlugin = true;
-    }
-  }
-
-  /// 保存设置
-  Future<void> _saveSettings() async {
-    if (_storageManager == null) return;
-
-    try {
-      final settings = jsonEncode({'autoOpenLastPlugin': _autoOpenLastPlugin});
-      await _storageManager!.writeFile(_settingsStorageKey, settings);
-    } catch (e) {
-      debugPrint('Warning: Failed to save plugin manager settings: $e');
-    }
-  }
-
-  /// 加载最后打开的插件ID
-  Future<void> _loadLastOpenedPlugin() async {
-    if (_storageManager == null) return;
-
-    try {
-      final lastPluginId = await _storageManager!.readFile(_lastPluginKey, '');
-      _lastOpenedPluginId = lastPluginId.isNotEmpty ? lastPluginId : null;
-    } catch (e) {
-      debugPrint('Warning: Failed to load last opened plugin: $e');
-      _lastOpenedPluginId = null;
-    }
-  }
-
-  /// 保存最后打开的插件ID
-  Future<void> _saveLastOpenedPlugin() async {
-    if (_storageManager == null) return;
-
-    try {
-      if (_lastOpenedPluginId != null) {
-        await _storageManager!.writeFile(_lastPluginKey, _lastOpenedPluginId!);
-      }
-    } catch (e) {
-      debugPrint('Warning: Failed to save last opened plugin: $e');
-    }
-  }
 
   /// 记录插件打开（仅记录，不导航）
   ///
@@ -247,8 +196,8 @@ class PluginManager {
   void recordPluginOpen(PluginBase plugin) {
     _currentPlugin = plugin;
     _lastOpenedPluginId = plugin.id;
-    _saveLastOpenedPlugin();
-    _updatePluginAccessTime(plugin.id);
+    _pluginAccessTimes[plugin.id] = DateTime.now().millisecondsSinceEpoch;
+    _saveConfig();
   }
 
   /// 打开插件界面
