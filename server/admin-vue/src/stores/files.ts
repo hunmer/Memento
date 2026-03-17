@@ -4,10 +4,11 @@ import { syncApi } from '@/api'
 
 interface SyncFile {
   path: string
-  size: number
+  size: number | null
   updated_at: string
+  is_folder?: boolean
   is_binary?: boolean
-  md5?: string
+  md5?: string | null
 }
 
 export interface TreeNode {
@@ -84,42 +85,45 @@ export const useFilesStore = defineStore('files', () => {
       return
     }
 
-    const folders = new Set<string>()
-    const fileNodes: TreeNode[] = []
+    const allNodes: Record<string, TreeNode> = {}
+    const folderPaths = new Set<string>()
 
-    // 收集文件夹路径
+    // 处理所有文件和文件夹
     files.value.forEach((file) => {
       const parts = file.path.split('/').filter((p) => p)
-      fileNodes.push({
+      const isFolder = file.is_folder ?? false
+
+      // 添加当前节点
+      allNodes[file.path] = {
         name: parts[parts.length - 1] || file.path,
         path: file.path,
-        is_folder: false,
-        size: file.size,
-        updated_at: file.updated_at
-      })
+        is_folder: isFolder,
+        size: file.size ?? undefined,
+        updated_at: file.updated_at,
+        children: isFolder ? [] : undefined
+      }
 
+      // 收集父文件夹路径
       for (let i = 1; i < parts.length; i++) {
-        folders.add(parts.slice(0, i).join('/'))
+        const parentPath = parts.slice(0, i).join('/')
+        folderPaths.add(parentPath)
+      }
+    })
+
+    // 确保所有父文件夹都存在
+    folderPaths.forEach((folderPath) => {
+      if (!allNodes[folderPath]) {
+        const parts = folderPath.split('/')
+        allNodes[folderPath] = {
+          name: parts[parts.length - 1],
+          path: folderPath,
+          is_folder: true,
+          children: []
+        }
       }
     })
 
     // 构建树结构
-    const allNodes: Record<string, TreeNode> = {}
-
-    folders.forEach((folderPath) => {
-      const parts = folderPath.split('/')
-      allNodes[folderPath] = {
-        name: parts[parts.length - 1],
-        path: folderPath,
-        is_folder: true,
-        children: []
-      }
-    })
-
-    fileNodes.forEach((file) => {
-      allNodes[file.path] = file
-    })
-
     const root: TreeNode = { name: '根目录', path: '', is_folder: true, children: [] }
     const pathMap: Record<string, TreeNode> = { '': root }
 
