@@ -112,6 +112,23 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'server_sync_copyKey': 'Copy Key',
   'server_sync_keyCopied': 'Key copied to clipboard',
 
+  // Force sync
+  'server_sync_forceToServer': 'Force Sync to Server',
+  'server_sync_forceToClient': 'Force Sync to Client',
+  'server_sync_forceToServerConfirmTitle': 'Confirm Force Sync to Server',
+  'server_sync_forceToClientConfirmTitle': 'Confirm Force Sync to Client',
+  'server_sync_forceToServerDesc': 'This will overwrite all server data with local data:',
+  'server_sync_forceToClientDesc': 'This will overwrite all local data with server data:',
+  'server_sync_forceToServerAction1': 'Upload all local files to server',
+  'server_sync_forceToServerAction2': 'Delete server files that don\'t exist locally',
+  'server_sync_forceToClientAction1': 'Download all server files to local',
+  'server_sync_forceToClientAction2': 'Delete local files that don\'t exist on server',
+  'server_sync_forceSyncWarning': 'Warning: Extra files will be permanently deleted. This cannot be undone!',
+  'server_sync_forceSyncToServerComplete': 'Force sync to server complete: Uploaded: {uploaded}, Deleted: {deleted}, Errors: {errors}',
+  'server_sync_forceSyncToClientComplete': 'Force sync to client complete: Downloaded: {downloaded}, Deleted: {deleted}, Errors: {errors}',
+  'server_sync_cancel': 'Cancel',
+  'server_sync_confirmSync': 'Confirm Sync',
+
   // Language selection dialog
   'settingsScreen_selectLanguage': 'Select Language',
   'settingsScreen_chinese': '中文',

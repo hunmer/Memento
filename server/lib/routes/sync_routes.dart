@@ -61,6 +61,12 @@ class SyncRoutes {
     // GET /download/<fileName> - 下载导出文件
     router.get('/download/<fileName|.*>', _handleDownload);
 
+    // GET /index - 获取完整文件索引（递归遍历所有文件）
+    router.get('/index', _handleIndex);
+
+    // POST /batch-delete - 批量删除文件
+    router.post('/batch-delete', _handleBatchDelete);
+
     return router;
   }
 
@@ -617,6 +623,125 @@ class SyncRoutes {
       );
     } catch (e) {
       return _errorResponse(500, '下载失败: $e');
+    }
+  }
+
+  /// 获取完整文件索引（从持久化索引读取）
+  ///
+  /// 返回所有文件的 path、md5、size、updated_at 信息
+  /// 用于客户端进行 Git 风格的双向同步
+  Future<Response> _handleIndex(Request request) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      // 从持久化索引读取
+      final indexData = await _storageService.getFileIndex(userId);
+      final filesMap = indexData['files'] as Map<String, dynamic>? ?? {};
+
+      // 转换为列表格式
+      final files = <Map<String, dynamic>>[];
+      int totalSize = 0;
+
+      for (final entry in filesMap.entries) {
+        final fileInfo = entry.value as Map<String, dynamic>;
+        files.add({
+          'path': entry.key,
+          'md5': fileInfo['md5'] ?? '',
+          'size': fileInfo['size'] ?? 0,
+          'updated_at': fileInfo['updated_at'] ?? '',
+        });
+        totalSize += (fileInfo['size'] as int?) ?? 0;
+      }
+
+      // 按路径排序
+      files.sort((a, b) => (a['path'] as String).compareTo(b['path'] as String));
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'index': {
+            'generated_at': indexData['updated_at'] ?? DateTime.now().toIso8601String(),
+            'files': files,
+            'total_files': files.length,
+            'total_size': totalSize,
+          },
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '获取文件索引失败: $e');
+    }
+  }
+
+  /// 批量删除文件
+  ///
+  /// 接收 file_paths 数组，批量删除服务端文件
+  /// 用于强制同步时删除多余的文件
+  Future<Response> _handleBatchDelete(Request request) async {
+    final userId = getUserIdFromContext(request);
+    if (userId == null) {
+      return _errorResponse(401, '未授权');
+    }
+
+    try {
+      final body = await request.readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      final filePaths = data['file_paths'] as List?;
+      if (filePaths == null || filePaths.isEmpty) {
+        return _errorResponse(400, '缺少 file_paths 参数');
+      }
+
+      int deletedCount = 0;
+      final errors = <String>[];
+      final deletedPaths = <String>[];
+
+      for (final filePath in filePaths) {
+        final pathStr = filePath as String;
+
+        // 验证文件路径安全性
+        if (pathStr.contains('..') || pathStr.startsWith('/')) {
+          errors.add('无效路径: $pathStr');
+          continue;
+        }
+
+        try {
+          final deleted = await _storageService.deleteFile(userId, pathStr);
+          if (deleted) {
+            deletedCount++;
+            deletedPaths.add(pathStr);
+            // 记录删除日志
+            await _storageService.logSync(
+              userId: userId,
+              action: 'batch_delete',
+              filePath: pathStr,
+            );
+          }
+        } catch (e) {
+          errors.add('$pathStr: $e');
+        }
+      }
+
+      // 批量从索引中移除已删除的文件
+      if (deletedPaths.isNotEmpty) {
+        await _storageService.batchRemoveFromFileIndex(userId, deletedPaths);
+      }
+
+      return Response.ok(
+        jsonEncode({
+          'success': true,
+          'deleted_count': deletedCount,
+          'total_requested': filePaths.length,
+          if (errors.isNotEmpty) 'errors': errors,
+          'timestamp': DateTime.now().toIso8601String(),
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+    } catch (e) {
+      return _errorResponse(500, '批量删除失败: $e');
     }
   }
 }

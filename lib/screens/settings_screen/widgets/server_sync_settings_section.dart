@@ -438,6 +438,226 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
     }
   }
 
+  /// 显示强制同步到服务端的确认对话框
+  Future<void> _showForceSyncToServerConfirm() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange),
+            SizedBox(width: 8),
+            Text('server_sync_forceToServerConfirmTitle'.tr),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('server_sync_forceToServerDesc'.tr),
+            const SizedBox(height: 12),
+            ...[
+              'server_sync_forceToServerAction1'.tr,
+              'server_sync_forceToServerAction2'.tr,
+            ].map((text) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Expanded(child: Text(text)),
+                ],
+              ),
+            )),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'server_sync_forceSyncWarning'.tr,
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text('server_sync_cancel'.tr),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('server_sync_confirmSync'.tr),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _performForceSyncToServer();
+    }
+  }
+
+  /// 显示强制同步到客户端的确认对话框
+  Future<void> _showForceSyncToClientConfirm() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('server_sync_forceToClientConfirmTitle'.tr),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('server_sync_forceToClientDesc'.tr),
+            const SizedBox(height: 12),
+            ...[
+              'server_sync_forceToClientAction1'.tr,
+              'server_sync_forceToClientAction2'.tr,
+            ].map((text) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Expanded(child: Text(text)),
+                ],
+              ),
+            )),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'server_sync_forceSyncWarning'.tr,
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            child: Text('server_sync_cancel'.tr),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              foregroundColor: Colors.white,
+            ),
+            child: Text('server_sync_confirmSync'.tr),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _performForceSyncToClient();
+    }
+  }
+
+  /// 执行强制同步到服务端
+  Future<void> _performForceSyncToServer() async {
+    if (_syncService == null || !_isLoggedIn) {
+      toastService.showToast('server_sync_notLoggedIn'.tr);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await _syncService!.forceSyncToServer();
+
+      if (!mounted) return;
+      toastService.showToast(
+        'server_sync_forceSyncToServerComplete'.trParams({
+          'uploaded': result.uploaded.toString(),
+          'deleted': result.deleted.toString(),
+          'errors': result.errors.length.toString(),
+        }),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      toastService.showToast('${'server_sync_syncFailed'.tr}: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  /// 执行强制同步到客户端
+  Future<void> _performForceSyncToClient() async {
+    if (_syncService == null || !_isLoggedIn) {
+      toastService.showToast('server_sync_notLoggedIn'.tr);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await _syncService!.forceSyncToClient();
+
+      if (!mounted) return;
+      toastService.showToast(
+        'server_sync_forceSyncToClientComplete'.trParams({
+          'downloaded': result.downloaded.toString(),
+          'deleted': result.deleted.toString(),
+          'errors': result.errors.length.toString(),
+        }),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      toastService.showToast('${'server_sync_syncFailed'.tr}: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _testConnection() async {
     setState(() {
       _isLoading = true;
@@ -797,6 +1017,37 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                       onPressed: _isLoading ? null : _performSync,
                       icon: const Icon(Icons.sync),
                       label: Text('server_sync_syncNow'.tr),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // 强制同步按钮
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _showForceSyncToServerConfirm,
+                      icon: const Icon(Icons.cloud_upload),
+                      label: Text('server_sync_forceToServer'.tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _showForceSyncToClientConfirm,
+                      icon: const Icon(Icons.cloud_download),
+                      label: Text('server_sync_forceToClient'.tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ),
                 ],

@@ -112,6 +112,23 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_copyKey': '复制密钥',
   'server_sync_keyCopied': '密钥已复制到剪贴板',
 
+  // 强制同步
+  'server_sync_forceToServer': '强制同步到服务端',
+  'server_sync_forceToClient': '强制同步到客户端',
+  'server_sync_forceToServerConfirmTitle': '确认强制同步到服务端',
+  'server_sync_forceToClientConfirmTitle': '确认强制同步到客户端',
+  'server_sync_forceToServerDesc': '此操作将使本地数据完全覆盖服务端：',
+  'server_sync_forceToClientDesc': '此操作将使服务端数据完全覆盖本地：',
+  'server_sync_forceToServerAction1': '上传所有客户端文件到服务端',
+  'server_sync_forceToServerAction2': '删除服务端存在但客户端没有的文件',
+  'server_sync_forceToClientAction1': '下载所有服务端文件到客户端',
+  'server_sync_forceToClientAction2': '删除客户端存在但服务端没有的文件',
+  'server_sync_forceSyncWarning': '警告：多余文件将被永久删除，此操作不可恢复！',
+  'server_sync_forceSyncToServerComplete': '强制同步到服务端完成： 上传: {uploaded}, 删除: {deleted}, 错误: {errors}',
+  'server_sync_forceSyncToClientComplete': '强制同步到客户端完成: 下载: {downloaded}, 删除: {deleted}, 错误: {errors}',
+  'server_sync_cancel': '取消',
+  'server_sync_confirmSync': '确认同步',
+
   // 语言选择对话框
   'settingsScreen_selectLanguage': '选择语言',
   'settingsScreen_chinese': '中文',

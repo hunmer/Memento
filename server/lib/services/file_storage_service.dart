@@ -39,6 +39,7 @@ class FolderNode {
 /// {dataDir}/
 /// ├── users/
 /// │   └── {userId}/
+/// │       ├── .file_index.json  (持久化文件索引)
 /// │       ├── diary/
 /// │       │   └── 2024-01-01.json
 /// │       ├── chat/
@@ -50,6 +51,15 @@ class FolderNode {
 ///     └── sync_2024-01-01.log
 class FileStorageService {
   final String _baseDir;
+
+  /// 索引文件名
+  static const String _indexFileName = '.file_index.json';
+
+  /// 索引版本
+  static const int _indexVersion = 1;
+
+  /// 内存中的索引缓存
+  final Map<String, Map<String, dynamic>> _indexCache = {};
 
   FileStorageService(this._baseDir);
 
@@ -116,14 +126,22 @@ class FileStorageService {
       await file.parent.create(recursive: true);
     }
 
+    final now = DateTime.now();
     final data = {
       'encrypted_data': encryptedData,
       'md5': md5Hash,
-      'updated_at': DateTime.now().toIso8601String(),
+      'updated_at': now.toIso8601String(),
       'is_binary': isBinary,
     };
 
     await file.writeAsString(jsonEncode(data));
+
+    // 更新文件索引
+    await _updateFileIndex(userId, filePath, {
+      'md5': md5Hash,
+      'size': await file.length(),
+      'updated_at': now.toIso8601String(),
+    });
   }
 
   /// 删除文件
@@ -131,9 +149,175 @@ class FileStorageService {
     final file = File(path.join(getUserDir(userId), filePath));
     if (await file.exists()) {
       await file.delete();
+
+      // 从文件索引中移除
+      await _removeFromFileIndex(userId, filePath);
+
       return true;
     }
     return false;
+  }
+
+  // ========== 文件索引操作 ==========
+
+  /// 获取索引文件路径
+  String _getIndexFilePath(String userId) {
+    return path.join(getUserDir(userId), _indexFileName);
+  }
+
+  /// 加载用户文件索引
+  Future<Map<String, dynamic>> _loadFileIndex(String userId) async {
+    // 先检查缓存
+    if (_indexCache.containsKey(userId)) {
+      return _indexCache[userId]!;
+    }
+
+    final indexFile = File(_getIndexFilePath(userId));
+
+    if (!await indexFile.exists()) {
+      // 索引不存在，重建索引
+      final index = await rebuildFileIndex(userId);
+      return index;
+    }
+
+    try {
+      final content = await indexFile.readAsString();
+      final data = jsonDecode(content) as Map<String, dynamic>;
+
+      // 检查版本
+      final version = data['version'] as int? ?? 0;
+      if (version < _indexVersion) {
+        // 版本过旧，重建索引
+        final index = await rebuildFileIndex(userId);
+        return index;
+      }
+
+      _indexCache[userId] = data;
+      return data;
+    } catch (e) {
+      print('加载文件索引失败: $e，将重建索引');
+      final index = await rebuildFileIndex(userId);
+      return index;
+    }
+  }
+
+  /// 保存用户文件索引
+  Future<void> _saveFileIndex(String userId, Map<String, dynamic> index) async {
+    final indexFile = File(_getIndexFilePath(userId));
+
+    // 确保用户目录存在
+    if (!await indexFile.parent.exists()) {
+      await indexFile.parent.create(recursive: true);
+    }
+
+    index['updated_at'] = DateTime.now().toIso8601String();
+    await indexFile.writeAsString(jsonEncode(index));
+
+    // 更新缓存
+    _indexCache[userId] = index;
+  }
+
+  /// 更新文件索引中的单个文件
+  Future<void> _updateFileIndex(String userId, String filePath, Map<String, dynamic> fileInfo) async {
+    final index = await _loadFileIndex(userId);
+    final files = index['files'] as Map<String, dynamic>? ?? {};
+
+    // 标准化路径（使用正斜杠）
+    final normalizedPath = filePath.replaceAll('\\', '/');
+    files[normalizedPath] = fileInfo;
+
+    index['files'] = files;
+    await _saveFileIndex(userId, index);
+  }
+
+  /// 从文件索引中移除文件
+  Future<void> _removeFromFileIndex(String userId, String filePath) async {
+    final index = await _loadFileIndex(userId);
+    final files = index['files'] as Map<String, dynamic>? ?? {};
+
+    // 标准化路径
+    final normalizedPath = filePath.replaceAll('\\', '/');
+    files.remove(normalizedPath);
+
+    index['files'] = files;
+    await _saveFileIndex(userId, index);
+  }
+
+  /// 获取用户文件索引
+  ///
+  /// 返回完整的文件索引，包含所有文件的 path、md5、size、updated_at
+  Future<Map<String, dynamic>> getFileIndex(String userId) async {
+    return await _loadFileIndex(userId);
+  }
+
+  /// 重建文件索引
+  ///
+  /// 遍历用户目录下的所有文件，重新生成索引
+  Future<Map<String, dynamic>> rebuildFileIndex(String userId) async {
+    final userDir = Directory(getUserDir(userId));
+    final files = <String, dynamic>{};
+
+    if (await userDir.exists()) {
+      await for (final entity in userDir.list(recursive: true)) {
+        if (entity is File) {
+          final fileName = path.basename(entity.path);
+
+          // 排除索引文件本身和临时文件
+          if (fileName == _indexFileName ||
+              fileName.startsWith('.') ||
+              fileName.endsWith('.tmp') ||
+              fileName.endsWith('.bak')) {
+            continue;
+          }
+
+          // 只处理 JSON 文件
+          if (!fileName.endsWith('.json')) {
+            continue;
+          }
+
+          try {
+            final relativePath = path.relative(entity.path, from: userDir.path);
+            final normalizedPath = relativePath.replaceAll('\\', '/');
+
+            final content = await entity.readAsString();
+            final data = jsonDecode(content) as Map<String, dynamic>;
+
+            files[normalizedPath] = {
+              'md5': data['md5'] as String? ?? '',
+              'size': await entity.length(),
+              'updated_at': data['updated_at'] as String? ?? DateTime.now().toIso8601String(),
+            };
+          } catch (e) {
+            print('重建索引时读取文件失败: ${entity.path} - $e');
+          }
+        }
+      }
+    }
+
+    final index = {
+      'version': _indexVersion,
+      'updated_at': DateTime.now().toIso8601String(),
+      'files': files,
+    };
+
+    await _saveFileIndex(userId, index);
+    print('已为用户 $userId 重建文件索引，共 ${files.length} 个文件');
+
+    return index;
+  }
+
+  /// 批量从索引中移除文件
+  Future<void> batchRemoveFromFileIndex(String userId, List<String> filePaths) async {
+    final index = await _loadFileIndex(userId);
+    final files = index['files'] as Map<String, dynamic>? ?? {};
+
+    for (final filePath in filePaths) {
+      final normalizedPath = filePath.replaceAll('\\', '/');
+      files.remove(normalizedPath);
+    }
+
+    index['files'] = files;
+    await _saveFileIndex(userId, index);
   }
 
   /// 列出用户文件（单层目录）
