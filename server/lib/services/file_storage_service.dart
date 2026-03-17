@@ -253,6 +253,9 @@ class FileStorageService {
   /// 重建文件索引
   ///
   /// 遍历用户目录下的所有文件，重新生成索引
+  /// 支持两种文件格式：
+  /// 1. .json 文件 - 直接解析 JSON
+  /// 2. 二进制加密文件（如 .png, .jpg 等）- 文件内容是 JSON 格式的加密数据
   Future<Map<String, dynamic>> rebuildFileIndex(String userId) async {
     final userDir = Directory(getUserDir(userId));
     final files = <String, dynamic>{};
@@ -270,25 +273,25 @@ class FileStorageService {
             continue;
           }
 
-          // 只处理 JSON 文件
-          if (!fileName.endsWith('.json')) {
-            continue;
-          }
-
           try {
             final relativePath = path.relative(entity.path, from: userDir.path);
             final normalizedPath = relativePath.replaceAll('\\', '/');
 
+            // 尝试读取文件内容并解析为 JSON
             final content = await entity.readAsString();
             final data = jsonDecode(content) as Map<String, dynamic>;
 
-            files[normalizedPath] = {
-              'md5': data['md5'] as String? ?? '',
-              'size': await entity.length(),
-              'updated_at': data['updated_at'] as String? ?? DateTime.now().toIso8601String(),
-            };
+            // 检查是否是加密文件格式（包含 md5 和 encrypted_data 或 updated_at）
+            if (data.containsKey('md5') &&
+                (data.containsKey('encrypted_data') || data.containsKey('updated_at'))) {
+              files[normalizedPath] = {
+                'md5': data['md5'] as String? ?? '',
+                'size': await entity.length(),
+                'updated_at': data['updated_at'] as String? ?? DateTime.now().toIso8601String(),
+              };
+            }
           } catch (e) {
-            print('重建索引时读取文件失败: ${entity.path} - $e');
+            // 非 JSON 文件或解析失败，跳过（如纯二进制文件、损坏的文件等）
           }
         }
       }

@@ -91,6 +91,9 @@ void main(List<String> args) async {
   await storageService.initialize();
   logger.info('文件存储服务初始化完成: ${config.dataDir}');
 
+  // 2.1 重建所有用户的文件索引（修复二进制文件索引问题）
+  await _rebuildAllUserIndexes(storageService, config.dataDir, logger);
+
   final authService = AuthService(
     storageService: storageService,
     jwtSecret: config.jwtSecret,
@@ -405,4 +408,44 @@ void main(List<String> args) async {
     await server.close();
     exit(0);
   });
+}
+
+/// 重建所有用户的文件索引
+///
+/// 遍历 data/users 目录下的所有用户目录，重建其文件索引
+/// 这确保了二进制文件（如图片）在服务重启后也能被正确索引
+Future<void> _rebuildAllUserIndexes(
+  FileStorageService storageService,
+  String dataDir,
+  Logger logger,
+) async {
+  try {
+    final usersDir = Directory(path.join(dataDir, 'users'));
+    if (!await usersDir.exists()) {
+      logger.info('用户目录不存在，跳过索引重建');
+      return;
+    }
+
+    int userCount = 0;
+    int totalFiles = 0;
+
+    await for (final entity in usersDir.list()) {
+      if (entity is Directory) {
+        final userId = path.basename(entity.path);
+        try {
+          final index = await storageService.rebuildFileIndex(userId);
+          final fileCount = (index['files'] as Map?)?.length ?? 0;
+          totalFiles += fileCount;
+          userCount++;
+          logger.info('已重建用户 $userId 的文件索引，共 $fileCount 个文件');
+        } catch (e) {
+          logger.warning('重建用户 $userId 的文件索引失败: $e');
+        }
+      }
+    }
+
+    logger.info('文件索引重建完成：共 $userCount 个用户，$totalFiles 个文件');
+  } catch (e) {
+    logger.warning('重建文件索引时发生错误: $e');
+  }
 }

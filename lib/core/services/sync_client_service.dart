@@ -335,7 +335,11 @@ class SyncClientService {
 
   /// 双向同步单个文件
   ///
-  /// 比较服务端修改时间和本地最后上传时间，决定同步方向
+  /// 同步逻辑顺序：
+  /// 1. 检查本地文件是否存在
+  /// 2. 检查服务端文件是否存在
+  /// 3. 根据存在性决定同步方向
+  /// 4. 两边都存在时，比较时间戳决定方向
   Future<SyncResult> bidirectionalSync(String filePath) async {
     if (!isLoggedIn) {
       return SyncResult.error('未登录');
@@ -346,19 +350,36 @@ class SyncClientService {
     }
 
     try {
-      // 1. 获取服务端文件信息
-      final serverInfo = await getServerFileInfo(filePath);
+      // 1. 检查本地文件是否存在
+      final localExists = await _storage.exists(filePath);
 
-      if (serverInfo == null || !serverInfo.exists) {
-        // 服务端没有此文件，推送
-        _log('服务端无文件，推送: $filePath');
+      // 2. 获取服务端文件信息
+      final serverInfo = await getServerFileInfo(filePath);
+      final serverExists = serverInfo != null && serverInfo.exists;
+
+      // 3. 根据存在性决定同步方向
+      if (!localExists && !serverExists) {
+        // 两边都不存在，跳过
+        _log('两边都不存在，跳过: $filePath');
+        return SyncResult.noChanges(filePath: filePath);
+      }
+
+      if (!localExists && serverExists) {
+        // 本地不存在，服务端存在 → 下载
+        _log('本地不存在，从服务端下载: $filePath');
+        return await pullFile(filePath);
+      }
+
+      if (localExists && !serverExists) {
+        // 本地存在，服务端不存在 → 上传
+        _log('服务端不存在，上传: $filePath');
         return await syncFile(filePath);
       }
 
-      // 2. 检查是否需要拉取（基于时间戳比较）
+      // 4. 两边都存在，比较时间戳决定方向
       if (_recordService.needsPull(
         filePath,
-        serverInfo.modifiedAt ?? DateTime.now(),
+        serverInfo?.modifiedAt ?? DateTime.now(),
       )) {
         // 服务端更新，拉取
         _log('服务端更新，拉取: $filePath');
@@ -386,28 +407,23 @@ class SyncClientService {
     final results = <SyncResult>[];
 
     try {
-      // 1. 获取服务器文件列表
-      final listResponse = await http.get(
-        Uri.parse('$_serverUrl/api/v1/sync/list'),
-        headers: _authHeaders(),
-      );
-
-      if (listResponse.statusCode != 200) {
-        return [SyncResult.error('获取服务器文件列表失败')];
+      // 1. 获取服务端完整文件索引（递归获取所有文件）
+      final serverIndex = await getServerFileIndex();
+      if (serverIndex == null) {
+        return [SyncResult.error('获取服务端文件索引失败')];
       }
 
-      final serverData = jsonDecode(listResponse.body);
-      final serverFilePaths =
-          (serverData['files'] as List).map((f) => f['path'] as String).toSet();
+      // 2. 提取服务端文件路径
+      final serverFilePaths = serverIndex.files.map((f) => f.path).toSet();
 
-      // 2. 获取本地文件列表
+      // 3. 获取本地文件列表（递归）
       final localFiles = await _listLocalDataFiles();
       final localFilePaths = localFiles.map((f) => f['path']!).toSet();
 
-      // 3. 合并所有文件路径
+      // 4. 合并所有文件路径
       final allFilePaths = <String>{...serverFilePaths, ...localFilePaths};
 
-      // 4. 对每个文件执行双向同步
+      // 5. 对每个文件执行双向同步
       for (final filePath in allFilePaths) {
         final result = await bidirectionalSync(filePath);
         results.add(result);
