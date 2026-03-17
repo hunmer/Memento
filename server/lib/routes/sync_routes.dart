@@ -223,6 +223,7 @@ class SyncRoutes {
   /// 处理文件拉取（解密后）- 用于管理后台
   ///
   /// 需要通过 X-Encryption-Key 请求头传递加密密钥
+  /// 二进制文件直接返回原始字节，文本文件返回 JSON
   Future<Response> _handlePullDecrypted(Request request, String filePath) async {
     final userId = getUserIdFromContext(request);
     if (userId == null) {
@@ -271,11 +272,7 @@ class SyncRoutes {
         return _errorResponse(500, '文件数据为空');
       }
 
-      // 解密数据
-      final decryptedData = _pluginDataService!.encryptionService.decryptData(
-        userId,
-        encryptedData,
-      );
+      final isBinary = serverFile['is_binary'] as bool? ?? false;
 
       // 记录拉取日志
       await _storageService.logSync(
@@ -284,19 +281,85 @@ class SyncRoutes {
         filePath: decodedFilePath,
       );
 
-      return Response.ok(
-        jsonEncode({
-          'success': true,
-          'file_path': decodedFilePath,
-          'data': decryptedData,
-          'md5': serverFile['md5'],
-          'updated_at': serverFile['updated_at'],
-        }),
-        headers: {'Content-Type': 'application/json'},
-      );
+      // 根据文件类型选择不同的响应方式
+      if (isBinary) {
+        // 二进制文件：解密后直接返回原始字节
+        final binaryData = _pluginDataService!.encryptionService.decryptBinary(
+          userId,
+          encryptedData,
+        );
+
+        // 根据文件扩展名确定 Content-Type
+        final contentType = _getContentType(decodedFilePath);
+
+        return Response.ok(
+          binaryData,
+          headers: {
+            'Content-Type': contentType,
+            'Content-Length': binaryData.length.toString(),
+            'X-File-Path': decodedFilePath,
+            'X-MD5': serverFile['md5'] as String,
+          },
+        );
+      } else {
+        // 文本文件：解密为 JSON
+        final decryptedData = _pluginDataService!.encryptionService.decryptData(
+          userId,
+          encryptedData,
+        );
+
+        return Response.ok(
+          jsonEncode({
+            'success': true,
+            'file_path': decodedFilePath,
+            'data': decryptedData,
+            'md5': serverFile['md5'],
+            'updated_at': serverFile['updated_at'],
+          }),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
     } catch (e) {
       return _errorResponse(500, '解密失败: $e');
     }
+  }
+
+  /// 根据文件扩展名获取 Content-Type
+  String _getContentType(String filePath) {
+    final extension = filePath.split('.').last.toLowerCase();
+    final contentTypes = <String, String>{
+      // 图片
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'svg': 'image/svg+xml',
+      'ico': 'image/x-icon',
+      'bmp': 'image/bmp',
+      // 音频
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'ogg': 'audio/ogg',
+      'm4a': 'audio/mp4',
+      // 视频
+      'mp4': 'video/mp4',
+      'webm': 'video/webm',
+      'mov': 'video/quicktime',
+      // 文档
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      // 压缩包
+      'zip': 'application/zip',
+      'rar': 'application/vnd.rar',
+      '7z': 'application/x-7z-compressed',
+      'tar': 'application/x-tar',
+      'gz': 'application/gzip',
+    };
+    return contentTypes[extension] ?? 'application/octet-stream';
   }
 
   /// 处理文件信息查询（不含内容）

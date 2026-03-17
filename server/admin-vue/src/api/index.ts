@@ -199,6 +199,36 @@ export const syncApi = {
       { 'X-Encryption-Key': encryptionKey }
     ),
 
+  // 下载解密后的二进制文件（图片等）
+  downloadDecryptedBinary: async (
+    filePath: string,
+    encryptionKey: string
+  ): Promise<Blob> => {
+    const url = `${apiClient.getBaseUrl()}/api/v1/sync/pull-decrypted/${encodeURIComponent(filePath)}`
+    const headers: Record<string, string> = {
+      'X-Encryption-Key': encryptionKey
+    }
+    const token = apiClient.getToken()
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
+    const response = await fetch(url, { headers })
+
+    if (response.status === 401 || response.status === 403) {
+      apiClient.setToken(null)
+      localStorage.removeItem('username')
+      throw new Error('登录已过期，请重新登录')
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.error || `HTTP Error: ${response.status}`)
+    }
+
+    return response.blob()
+  },
+
   exportData: (): Promise<{
     success: boolean
     file_name?: string

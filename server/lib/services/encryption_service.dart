@@ -87,6 +87,19 @@ class ServerEncryptionService {
     return encrypter.decrypt(encrypted, iv: iv);
   }
 
+  /// 解密二进制数据
+  ///
+  /// 解密后返回原始字节，适用于图片等二进制文件
+  /// [userId] 用户ID
+  /// [encryptedString] 加密字符串，格式: base64(iv).base64(ciphertext)
+  /// 返回解密后的原始字节数据（解密结果为 Base64 编码，再解码为字节）
+  Uint8List decryptBinary(String userId, String encryptedString) {
+    // 先解密得到 Base64 编码的原始数据
+    final decryptedBase64 = decryptString(userId, encryptedString);
+    // 将 Base64 解码为原始字节
+    return base64Decode(decryptedBase64);
+  }
+
   /// 加密 JSON 数据
   ///
   /// [userId] 用户ID

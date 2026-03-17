@@ -119,6 +119,7 @@ function convertFileToTreeOption(file: {
   size?: number | null
   updated_at?: string
   is_folder?: boolean
+  is_binary?: boolean
 }): TreeOption {
   const parts = file.path.split('/').filter(p => p)
   const name = parts[parts.length - 1] || file.path
@@ -133,6 +134,7 @@ function convertFileToTreeOption(file: {
     }),
     // 自定义属性
     isFolder,
+    isBinary: file.is_binary ?? false,
     size: file.size ?? undefined,
     updatedAt: file.updated_at
   }
@@ -272,6 +274,19 @@ async function handleRefresh(): Promise<void> {
   }
 }
 
+// 检查文件是否为二进制（根据扩展名）
+function isBinaryFile(filePath: string): boolean {
+  const binaryExtensions = [
+    '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.ico', '.svg',
+    '.mp3', '.wav', '.ogg', '.m4a', '.flac',
+    '.mp4', '.webm', '.mov', '.avi', '.mkv',
+    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+    '.zip', '.rar', '.7z', '.tar', '.gz'
+  ]
+  const ext = filePath.toLowerCase().slice(filePath.lastIndexOf('.'))
+  return binaryExtensions.includes(ext)
+}
+
 async function handleDownload(filePath: string): Promise<void> {
   if (!authStore.encryptionKey) {
     window.$message?.error('请先设置加密密钥')
@@ -280,17 +295,30 @@ async function handleDownload(filePath: string): Promise<void> {
 
   uiStore.setLoading(true, '下载文件...')
   try {
-    const result = await syncApi.downloadDecrypted(filePath, authStore.encryptionKey)
+    const fileName = filePath.split('/').pop() || 'file'
 
-    const blob = new Blob([JSON.stringify((result as { data: unknown }).data, null, 2)], {
-      type: 'application/json'
-    })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filePath.split('/').pop() || 'file.json'
-    a.click()
-    URL.revokeObjectURL(url)
+    if (isBinaryFile(filePath)) {
+      // 二进制文件：直接下载 Blob
+      const blob = await syncApi.downloadDecryptedBinary(filePath, authStore.encryptionKey)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      a.click()
+      URL.revokeObjectURL(url)
+    } else {
+      // 文本文件：下载 JSON
+      const result = await syncApi.downloadDecrypted(filePath, authStore.encryptionKey)
+      const blob = new Blob([JSON.stringify((result as { data: unknown }).data, null, 2)], {
+        type: 'application/json'
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName.endsWith('.json') ? fileName : `${fileName}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    }
 
     window.$message?.success('下载成功（已解密）')
     uiStore.addActivity('download', `下载了文件 ${filePath}`)
@@ -371,9 +399,16 @@ async function handleBatchDownload(): Promise<void> {
 
   for (const filePath of files) {
     try {
-      const result = await syncApi.downloadDecrypted(filePath, authStore.encryptionKey)
-      const content = JSON.stringify((result as { data: unknown }).data, null, 2)
-      zip.file(filePath, content)
+      if (isBinaryFile(filePath)) {
+        // 二进制文件：直接使用 Blob
+        const blob = await syncApi.downloadDecryptedBinary(filePath, authStore.encryptionKey)
+        zip.file(filePath, blob)
+      } else {
+        // 文本文件：使用 JSON 格式
+        const result = await syncApi.downloadDecrypted(filePath, authStore.encryptionKey)
+        const content = JSON.stringify((result as { data: unknown }).data, null, 2)
+        zip.file(filePath, content)
+      }
       successCount++
     } catch {
       failCount++
