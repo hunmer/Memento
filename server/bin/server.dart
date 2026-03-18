@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -430,50 +431,113 @@ Handler _createAuthenticatedWebSocketHandler({
   required WebSocketManager webSocketManager,
   required Logger logger,
 }) {
-  return (Request request) async {
-    // 从查询参数获取 token 和 device_id
-    final queryParams = request.url.queryParameters;
-    final token = queryParams['token'];
-    final deviceId = queryParams['device_id'];
+  // 使用 shelf_web_socket 创建 handler
+  // 认证在 WebSocket 连接建立后进行
+  return webSocketHandler((channel, protocol) async {
+    logger.info('收到 WebSocket 连接请求');
+
+    // 从 URL 获取认证信息需要通过其他方式
+    // 由于 WebSocket 已建立，我们通过首条消息进行认证
+    // 或者使用连接时的 context 信息
+
+    // 设置超时等待认证消息
+    final authCompleter = Completer<Map<String, dynamic>?>();
+
+    // 监听第一条消息进行认证
+    final subscription = channel.stream.listen(
+      (message) {
+        if (!authCompleter.isCompleted) {
+          try {
+            final data = jsonDecode(message as String) as Map<String, dynamic>;
+            if (data['type'] == 'auth') {
+              authCompleter.complete(data);
+            } else {
+              authCompleter.complete(null);
+            }
+          } catch (e) {
+            authCompleter.complete(null);
+          }
+        }
+      },
+      onError: (error) {
+        if (!authCompleter.isCompleted) {
+          authCompleter.complete(null);
+        }
+      },
+      onDone: () {
+        if (!authCompleter.isCompleted) {
+          authCompleter.complete(null);
+        }
+      },
+      cancelOnError: true,
+    );
+
+    // 等待认证消息（5秒超时）
+    final authData = await authCompleter.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => null,
+    );
+
+    await subscription.cancel();
+
+    if (authData == null) {
+      logger.warning('WebSocket 认证超时或失败');
+      channel.sink.add(jsonEncode({
+        'type': 'auth_error',
+        'error': '认证超时或失败',
+      }));
+      await channel.sink.close();
+      return;
+    }
+
+    final token = authData['token'] as String?;
+    final deviceId = authData['device_id'] as String?;
 
     if (token == null || deviceId == null) {
-      logger.warning('WebSocket 连接缺少认证参数');
-      return Response.forbidden(jsonEncode({
-        'success': false,
-        'error': '缺少认证参数 (token, device_id)',
-      }), headers: {'Content-Type': 'application/json'});
+      logger.warning('WebSocket 缺少认证参数');
+      channel.sink.add(jsonEncode({
+        'type': 'auth_error',
+        'error': '缺少认证参数',
+      }));
+      await channel.sink.close();
+      return;
     }
 
     // 验证 token
     final payload = authService.verifyToken(token);
     if (payload == null) {
-      logger.warning('WebSocket 连接 token 无效');
-      return Response.forbidden(jsonEncode({
-        'success': false,
+      logger.warning('WebSocket token 无效');
+      channel.sink.add(jsonEncode({
+        'type': 'auth_error',
         'error': '无效的 token',
-      }), headers: {'Content-Type': 'application/json'});
+      }));
+      await channel.sink.close();
+      return;
     }
 
     final userId = payload['sub'] as String?;
     if (userId == null) {
-      logger.warning('WebSocket 连接无法获取用户 ID');
-      return Response.forbidden(jsonEncode({
-        'success': false,
+      logger.warning('WebSocket 无法获取用户 ID');
+      channel.sink.add(jsonEncode({
+        'type': 'auth_error',
         'error': '无法获取用户 ID',
-      }), headers: {'Content-Type': 'application/json'});
+      }));
+      await channel.sink.close();
+      return;
     }
 
-    // 使用 shelf_web_socket 创建 handler
-    final handler = webSocketHandler((channel, protocol) {
-      logger.info('WebSocket 连接已建立: userId=$userId, deviceId=$deviceId');
+    logger.info('WebSocket 认证成功: userId=$userId, deviceId=$deviceId');
 
-      // 注册到 WebSocket 管理器
-      webSocketManager.registerChannel(userId, deviceId, channel);
-      logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
-    });
+    // 发送认证成功消息
+    channel.sink.add(jsonEncode({
+      'type': 'auth_success',
+      'user_id': userId,
+    }));
 
-    return handler(request);
-  };
+    // 注册到 WebSocket 管理器
+    webSocketManager.registerChannel(userId, deviceId, channel);
+    logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
+  });
 }
 
 /// 重建所有用户的文件索引

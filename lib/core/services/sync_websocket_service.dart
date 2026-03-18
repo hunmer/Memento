@@ -104,8 +104,8 @@ class SyncWebSocketService {
 
   /// 执行连接
   Future<void> _doConnect() async {
-    if (_serverUrl == null || _token == null) {
-      _log('服务器 URL 或 Token 为空，无法连接');
+    if (_serverUrl == null || _token == null || _deviceId == null) {
+      _log('服务器 URL、Token 或 DeviceId 为空，无法连接');
       return;
     }
 
@@ -117,7 +117,7 @@ class SyncWebSocketService {
           .replaceFirst('https://', 'wss://')
           .replaceFirst('http://', 'ws://');
 
-      final uri = Uri.parse('$wsUrl/api/v1/sync/ws?token=$_token&device_id=$_deviceId');
+      final uri = Uri.parse('$wsUrl/api/v1/sync/ws');
 
       _log('正在连接 WebSocket: $uri');
       _channel = IOWebSocketChannel.connect(uri);
@@ -125,7 +125,14 @@ class SyncWebSocketService {
       // 等待连接建立
       await _channel!.ready;
 
-      _log('WebSocket 连接成功');
+      _log('WebSocket 连接成功，发送认证消息');
+
+      // 发送认证消息
+      _channel!.sink.add(jsonEncode({
+        'type': 'auth',
+        'token': _token,
+        'device_id': _deviceId,
+      }));
 
       // 订阅消息
       _subscription = _channel!.stream.listen(
@@ -152,6 +159,14 @@ class SyncWebSocketService {
       final type = data['type'] as String?;
 
       switch (type) {
+        case 'auth_success':
+          _log('WebSocket 认证成功: userId=${data['user_id']}');
+          break;
+        case 'auth_error':
+          _log('WebSocket 认证失败: ${data['error']}');
+          // 认证失败，断开连接
+          disconnect();
+          break;
         case 'file_updated':
           _handleFileUpdated(data['data'] as Map<String, dynamic>);
           break;
