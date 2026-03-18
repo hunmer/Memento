@@ -15,6 +15,7 @@ import 'package:memento_server/services/file_storage_service.dart';
 import 'package:memento_server/services/auth_service.dart';
 import 'package:memento_server/services/plugin_data_service.dart';
 import 'package:memento_server/services/websocket_manager.dart';
+import 'package:memento_server/services/file_watcher_service.dart';
 import 'package:memento_server/routes/auth_routes.dart';
 import 'package:memento_server/routes/sync_routes.dart';
 import 'package:memento_server/routes/plugin_routes/chat_routes.dart';
@@ -114,6 +115,16 @@ void main(List<String> args) async {
   final webSocketManager = WebSocketManager();
   logger.info('WebSocket 管理器初始化完成');
 
+  // 初始化文件监听服务
+  final fileWatcherService = FileWatcherService(
+    storageService,
+    webSocketManager,
+    config.dataDir,
+    pollIntervalMs: 2000, // 每 2 秒检查一次文件变化
+  );
+  await fileWatcherService.start();
+  logger.info('文件监听服务初始化完成');
+
   // 3. 创建路由
   final router = Router();
 
@@ -145,7 +156,7 @@ void main(List<String> args) async {
   logger.info('WebSocket 路由已注册: /api/v1/sync/ws');
 
   // 同步路由 (需要认证)
-  final syncRoutes = SyncRoutes(storageService, webSocketManager, pluginDataService);
+  final syncRoutes = SyncRoutes(storageService, pluginDataService);
   router.mount(
     '/api/v1/sync',
     Pipeline()
@@ -419,6 +430,7 @@ void main(List<String> args) async {
   // 优雅关闭
   ProcessSignal.sigint.watch().listen((_) async {
     logger.info('收到关闭信号，正在停止服务器...');
+    await fileWatcherService.stop();
     await webSocketManager.closeAll();
     await server.close();
     exit(0);

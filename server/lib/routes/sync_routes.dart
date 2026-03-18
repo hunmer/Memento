@@ -8,7 +8,6 @@ import 'package:shared_models/shared_models.dart';
 
 import '../services/file_storage_service.dart';
 import '../services/plugin_data_service.dart';
-import '../services/websocket_manager.dart';
 import '../middleware/auth_middleware.dart';
 
 /// URL 解码文件路径
@@ -19,10 +18,9 @@ String _decodeFilePath(String encodedPath) {
 /// 同步路由 - 处理文件推送、拉取和列表
 class SyncRoutes {
   final FileStorageService _storageService;
-  final WebSocketManager? _webSocketManager;
   final PluginDataService? _pluginDataService;
 
-  SyncRoutes(this._storageService, [this._webSocketManager, this._pluginDataService]);
+  SyncRoutes(this._storageService, [this._pluginDataService]);
 
   Router get router {
     final router = Router();
@@ -150,17 +148,8 @@ class SyncRoutes {
         details: 'md5: $newMd5',
       );
 
-      // 广播文件更新通知给其他设备
-      final deviceId = getDeviceIdFromContext(request);
-      if (_webSocketManager != null && deviceId != null) {
-        _webSocketManager!.broadcastFileUpdate(
-          userId,
-          filePath,
-          newMd5,
-          DateTime.now(),
-          deviceId,
-        );
-      }
+      // 文件更新通知由 FileWatcherService 监听文件系统变化后广播
+      // 不在此处直接广播，以解耦存储逻辑和通知逻辑
 
       final response = SyncResponse.success(
         filePath: filePath,
