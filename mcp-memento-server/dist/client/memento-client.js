@@ -69,6 +69,10 @@ export class MementoClient {
         if (this.config.apiKey) {
             headers['X-API-Key'] = this.config.apiKey;
         }
+        // 添加加密密钥请求头
+        if (this.config.encryptionKey) {
+            headers['X-Encryption-Key'] = this.config.encryptionKey;
+        }
         return headers;
     }
     /**
