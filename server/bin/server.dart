@@ -134,6 +134,16 @@ void main(List<String> args) async {
   final authRoutes = AuthRoutes(authService, pluginDataService, storageService);
   router.mount('/api/v1/auth', authRoutes.router.call);
 
+  // WebSocket 实时同步 (无需 HTTP 认证，通过消息认证)
+  // 注意：必须在 sync routes mount 之前注册，否则会被 authMiddleware 拦截
+  final wsHandler = _createAuthenticatedWebSocketHandler(
+    authService: authService,
+    webSocketManager: webSocketManager,
+    logger: logger,
+  );
+  router.get('/api/v1/sync/ws', wsHandler);
+  logger.info('WebSocket 路由已注册: /api/v1/sync/ws');
+
   // 同步路由 (需要认证)
   final syncRoutes = SyncRoutes(storageService, webSocketManager, pluginDataService);
   router.mount(
@@ -285,16 +295,6 @@ void main(List<String> args) async {
 
   logger.info('已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
 
-  // 创建带认证的 WebSocket handler，并注册连接
-  final wsHandler = _createAuthenticatedWebSocketHandler(
-    authService: authService,
-    webSocketManager: webSocketManager,
-    logger: logger,
-  );
-
-  // 挂载 WebSocket 路由
-  router.get('/api/v1/sync/ws', wsHandler);
-
   // 管理界面静态文件服务
   final scriptDir = path.dirname(Platform.script.toFilePath());
   final adminDir = path.normalize(path.join(scriptDir, '..', 'admin'));
@@ -392,7 +392,7 @@ void main(List<String> args) async {
   print('  POST /api/v1/sync/push     - 推送文件 (需认证)');
   print('  GET  /api/v1/sync/pull/*   - 拉取文件 (需认证)');
   print('  GET  /api/v1/sync/list     - 文件列表 (需认证)');
-  print('  WS   /api/v1/sync/ws       - WebSocket 实时同步 (需认证)');
+  print('  WS   /api/v1/sync/ws       - WebSocket 实时同步 (消息认证)');
   print('');
   print('插件 API (需认证 + API 启用):');
   print('  /api/v1/plugins/chat           - 聊天插件');
