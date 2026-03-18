@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../storage/storage_manager.dart';
@@ -94,8 +93,6 @@ class SyncClientService {
   /// MD5 快照 JSON 文件路径
   static const String _snapshotFilePath = '.sync_snapshots.json';
 
-  static const String _tag = 'SyncClientService';
-
   /// 是否已登录
   bool get isLoggedIn => _token != null && _userId != null;
 
@@ -133,8 +130,6 @@ class SyncClientService {
 
     // 加载 MD5 快照
     await _loadMd5Snapshots();
-
-    _log('初始化完成');
   }
 
   /// 加载 MD5 快照到内存
@@ -146,7 +141,6 @@ class SyncClientService {
         _md5Snapshots = json.map((key, value) => MapEntry(key, value as String));
       }
     } catch (e) {
-      _log('加载 MD5 快照失败: $e');
       _md5Snapshots = {};
     }
   }
@@ -159,7 +153,7 @@ class SyncClientService {
         jsonEncode(_md5Snapshots),
       );
     } catch (e) {
-      _log('保存 MD5 快照失败: $e');
+      // 静默失败
     }
   }
 
@@ -262,7 +256,6 @@ class SyncClientService {
         // 标记为最近上传（防循环）
         _recordService.markRecentUpload(filePath);
 
-        _log('推送成功: $filePath');
         return SyncResult.success(filePath: filePath);
       } else if (response.statusCode == 409) {
         // 冲突: 服务器优先 - 自动使用服务器版本覆盖本地
@@ -364,7 +357,6 @@ class SyncClientService {
       }
       return null;
     } catch (e) {
-      _log('获取服务器文件信息失败: $e');
       return null;
     }
   }
@@ -396,19 +388,16 @@ class SyncClientService {
       // 3. 根据存在性决定同步方向
       if (!localExists && !serverExists) {
         // 两边都不存在，跳过
-        _log('两边都不存在，跳过: $filePath');
         return SyncResult.noChanges(filePath: filePath);
       }
 
       if (!localExists && serverExists) {
         // 本地不存在，服务端存在 → 下载
-        _log('本地不存在，从服务端下载: $filePath');
         return await pullFile(filePath);
       }
 
       if (localExists && !serverExists) {
         // 本地存在，服务端不存在 → 上传
-        _log('服务端不存在，上传: $filePath');
         return await syncFile(filePath);
       }
 
@@ -418,11 +407,9 @@ class SyncClientService {
         serverInfo?.modifiedAt ?? DateTime.now(),
       )) {
         // 服务端更新，拉取
-        _log('服务端更新，拉取: $filePath');
         return await pullFile(filePath);
       } else {
         // 客户端更新，推送
-        _log('客户端更新，推送: $filePath');
         return await syncFile(filePath);
       }
     } catch (e) {
@@ -503,8 +490,6 @@ class SyncClientService {
       'sync_data_updated',
       SyncDataUpdatedArgs(filePath: filePath, source: 'server'),
     );
-
-    _log('应用服务器数据: $filePath');
   }
 
   /// 获取文件的同步 MD5 快照
@@ -645,7 +630,6 @@ class SyncClientService {
       }
       return null;
     } catch (e) {
-      _log('获取服务端文件索引失败: $e');
       return null;
     }
   }
@@ -737,37 +721,30 @@ class SyncClientService {
       // 3. 计算差异
       final diff = computeSyncDiff(serverIndex, localFiles);
 
-      _log('同步差异: 下载 ${diff.toDownload.length}, 上传 ${diff.toUpload.length}, 冲突 ${diff.conflicts.length}');
-
       // 4. 下载服务端新增文件
       for (final file in diff.toDownload) {
-        _log('下载新文件: ${file.path}');
         final result = await pullFile(file.path);
         results.add(result);
       }
 
       // 5. 上传客户端新增文件
       for (final file in diff.toUpload) {
-        _log('上传新文件: ${file.path}');
         final result = await syncFile(file.path);
         results.add(result);
       }
 
       // 6. 处理冲突（基于修改时间，新的覆盖旧的）
       for (final conflict in diff.conflicts) {
-        _log('处理冲突: ${conflict.path}');
         // 获取本地最后上传时间
         final lastUpload = _recordService.getRecord(conflict.path)?.lastUploadTime;
         final serverTime = conflict.serverModifiedAt;
 
         if (lastUpload != null && lastUpload.isAfter(serverTime)) {
           // 客户端更新，推送
-          _log('冲突解决 - 客户端更新: ${conflict.path}');
           final result = await syncFile(conflict.path);
           results.add(result);
         } else {
           // 服务端更新或无法判断，拉取（服务器优先）
-          _log('冲突解决 - 服务端更新: ${conflict.path}');
           final result = await pullFile(conflict.path);
           results.add(result);
         }
@@ -817,7 +794,6 @@ class SyncClientService {
 
       // 4. 删除服务端多余的文件
       if (toDeleteOnServer.isNotEmpty) {
-        _log('批量删除服务端文件: ${toDeleteOnServer.length} 个');
         final deleteResult = await _batchDeleteServerFiles(toDeleteOnServer);
         deleted = deleteResult['deleted'] as int;
         if (deleteResult['errors'] != null) {
@@ -841,7 +817,6 @@ class SyncClientService {
         }
       }
 
-      _log('强制同步到服务端完成: 上传 $uploaded, 删除 $deleted, 错误 ${errors.length}');
       return ForceSyncResult(
         uploaded: uploaded,
         downloaded: 0,
@@ -896,7 +871,6 @@ class SyncClientService {
         try {
           await deleteLocalFile(path);
           deleted++;
-          _log('删除本地文件: $path');
         } catch (e) {
           errors.add('删除失败 $path: $e');
         }
@@ -916,7 +890,6 @@ class SyncClientService {
         }
       }
 
-      _log('强制同步到客户端完成: 下载 $downloaded, 删除 $deleted, 错误 ${errors.length}');
       return ForceSyncResult(
         uploaded: 0,
         downloaded: downloaded,
@@ -1048,13 +1021,6 @@ class SyncClientService {
       }
     } catch (e) {
       return {'deleted': 0, 'errors': ['$e']};
-    }
-  }
-
-  /// 输出日志
-  void _log(String message) {
-    if (kDebugMode) {
-      debugPrint('$_tag: $message');
     }
   }
 }

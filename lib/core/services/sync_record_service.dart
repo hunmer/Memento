@@ -74,26 +74,20 @@ class SyncRecordService {
 
     _storage = storage;
     await _load();
-    _log('初始化完成，已加载 ${_records.length} 条记录');
   }
 
   /// 从存储加载记录
   Future<void> _load() async {
-    if (_storage == null) {
-      _log('存储管理器未设置，跳过加载');
-      return;
-    }
+    if (_storage == null) return;
 
     try {
       final content = await _storage!.readString(_recordFilePath);
       if (content == null || content.isEmpty) {
-        _log('记录文件不存在，使用空记录');
         _loaded = true;
         return;
       }
 
       final json = jsonDecode(content) as Map<String, dynamic>;
-      final version = json['version'] as int? ?? 1;
       final records = json['records'] as Map<String, dynamic>?;
 
       if (records != null) {
@@ -103,19 +97,15 @@ class SyncRecordService {
       }
 
       _loaded = true;
-      _log('加载完成，版本: $version，记录数: ${_records.length}');
     } catch (e) {
-      _log('加载记录失败: $e');
-      _loaded = true; // 即使失败也标记为已加载，避免重复加载
+      debugPrint('$_tag: 加载记录失败: $e');
+      _loaded = true;
     }
   }
 
   /// 保存记录到存储
   Future<void> _save() async {
-    if (_storage == null) {
-      _log('存储管理器未设置，跳过保存');
-      return;
-    }
+    if (_storage == null) return;
 
     try {
       final json = {
@@ -125,9 +115,8 @@ class SyncRecordService {
       };
 
       await _storage!.writeString(_recordFilePath, jsonEncode(json));
-      _log('保存完成，记录数: ${_records.length}');
     } catch (e) {
-      _log('保存记录失败: $e');
+      debugPrint('$_tag: 保存记录失败: $e');
     }
   }
 
@@ -147,7 +136,6 @@ class SyncRecordService {
     _cleanRecentUploads();
 
     await _save();
-    _log('记录上传: $filePath, 服务端时间: $serverTime');
   }
 
   /// 记录拉取成功
@@ -161,7 +149,6 @@ class SyncRecordService {
     );
 
     await _save();
-    _log('记录拉取: $filePath, 服务端时间: $serverTime');
   }
 
   /// 判断是否需要从服务端拉取
@@ -172,28 +159,24 @@ class SyncRecordService {
 
     if (record == null) {
       // 从未同步过，需要拉取
-      _log('需要拉取 (无记录): $filePath');
       return true;
     }
 
     // 如果最近上传过，跳过（防循环）
     if (wasRecentlyUploaded(filePath)) {
-      _log('跳过拉取 (最近上传): $filePath');
       return false;
     }
 
-    // 比较服务端修改时间和最后上传时间
-    final lastUploadTime = record.lastUploadTime;
-    if (lastUploadTime == null) {
-      _log('需要拉取 (无上传记录): $filePath');
-      return true;
+    // 检查服务端修改时间是否有变化
+    // 如果记录的服务端时间与当前服务端时间相同，说明文件没有变化
+    final recordedServerTime = record.serverModifiedTime;
+    if (recordedServerTime != null &&
+        !serverModifiedTime.isAfter(recordedServerTime)) {
+      return false;
     }
 
-    final needsPull = serverModifiedTime.isAfter(lastUploadTime);
-    _log(
-      '判断拉取: $filePath, 服务端: $serverModifiedTime, 上传: $lastUploadTime, 结果: $needsPull',
-    );
-    return needsPull;
+    // 服务端有更新，需要拉取
+    return true;
   }
 
   /// 获取文件的同步记录
@@ -232,21 +215,12 @@ class SyncRecordService {
     _records.clear();
     _recentUploads.clear();
     await _save();
-    _log('已清除所有记录');
   }
 
   /// 删除单个文件记录
   Future<void> removeRecord(String filePath) async {
     _records.remove(filePath);
     await _save();
-    _log('已删除记录: $filePath');
-  }
-
-  /// 输出日志
-  void _log(String message) {
-    if (kDebugMode) {
-      debugPrint('$_tag: $message');
-    }
   }
 
   /// 获取记录数量
