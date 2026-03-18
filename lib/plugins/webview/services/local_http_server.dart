@@ -14,7 +14,7 @@ import 'package:Memento/core/storage/storage_manager.dart';
 /// 用于在 Windows 等平台上提供本地文件访问，绕过 file:// 协议的安全限制
 class LocalHttpServer {
   HttpServer? _server;
-  int _port = 8080;
+  int _port = 8899;
   String _rootDir = '';
   bool _isRunning = false;
 
@@ -25,8 +25,8 @@ class LocalHttpServer {
   /// 启动服务器
   ///
   /// [rootDir] 服务器根目录路径
-  /// [port] 服务器端口（默认 8080）
-  Future<bool> start({required String rootDir, int port = 8080}) async {
+  /// [port] 服务器端口（默认 8899）
+  Future<bool> start({required String rootDir, int port = 8899}) async {
     if (_isRunning) {
       debugPrint('[LocalHttpServer] 服务器已在运行');
       return true;
@@ -101,7 +101,7 @@ class LocalHttpServer {
         final referer = request.headers.value('referer');
         if (referer != null) {
           // 从 Referer 中提取项目名称
-          // 例如：http://localhost:8080/projectName/index.html -> projectName
+          // 例如：http://localhost:8899/projectName/index.html -> projectName
           final projectName = _extractProjectNameFromReferer(referer);
           if (projectName != null) {
             // 尝试在项目目录下查找文件
@@ -162,8 +162,8 @@ class LocalHttpServer {
 
   /// 从 Referer 中提取项目路径
   ///
-  /// 例如：http://localhost:8080/webview/http_server/dist/index.html -> webview/http_server/dist
-  /// 例如：http://localhost:8080/projectName/index.html -> projectName
+  /// 例如：http://localhost:8899/webview/http_server/dist/index.html -> webview/http_server/dist
+  /// 例如：http://localhost:8899/projectName/index.html -> projectName
   String? _extractProjectNameFromReferer(String referer) {
     try {
       final uri = Uri.parse(referer);
@@ -242,8 +242,8 @@ class LocalHttpServer {
   /// 将 file:// URL 转换为 HTTP URL
   ///
   /// 例如：
-  /// - file:///D:/path/to/file.html -> http://localhost:8080/path/to/file.html
-  /// - file:///path/to/file.html -> http://localhost:8080/path/to/file.html
+  /// - file:///D:/path/to/file.html -> http://localhost:8899/path/to/file.html
+  /// - file:///path/to/file.html -> http://localhost:8899/path/to/file.html
   String convertFileUrlToHttpUrl(String fileUrl) {
     if (!fileUrl.startsWith('file://')) {
       return fileUrl;
@@ -313,11 +313,11 @@ class LocalHttpServer {
 
   /// 获取 HTTP 服务器的完整 URL 前缀（静态方法）
   ///
-  /// [port] 服务器端口（默认 8080）
+  /// [port] 服务器端口（默认 8899）
   /// [appDataRoot] app_data 根目录路径
   /// [filePath] 要转换的文件路径
   ///
-  /// 返回 HTTP URL，例如：http://localhost:8080/webview/http_server/project/index.html
+  /// 返回 HTTP URL，例如：http://localhost:8899/webview/http_server/project/index.html
   static String getHttpUrl({
     required int port,
     required String appDataRoot,
@@ -349,7 +349,7 @@ class LocalHttpServer {
   /// 参数：
   /// - [imagePath] 图片路径（支持相对路径 ./xxx.png、file:// URL、绝对路径、网络 URL）
   /// - [httpServerRoot] HTTP 服务器根目录（现在是 app_data 目录）
-  /// - [port] HTTP 服务器端口（默认 8080）
+  /// - [port] HTTP 服务器端口（默认 8899）
   /// - [pluginStoragePath] 插件存储路径（可选，用于解析相对路径）
   ///
   /// 返回：
@@ -362,15 +362,15 @@ class LocalHttpServer {
   /// final httpUrl = await LocalHttpServer.convertImageToHttpUrl(
   ///   imagePath: './app_images/icon.png',
   ///   httpServerRoot: '/path/to/app_data',
-  ///   port: 8080,
+  ///   port: 8899,
   ///   pluginStoragePath: '/path/to/app_data/store',
   /// );
-  /// // 返回: 'http://localhost:8080/app_images/icon.png'
+  /// // 返回: 'http://localhost:8899/app_images/icon.png'
   /// ```
   static Future<String> convertImageToHttpUrl({
     required String? imagePath,
     required String httpServerRoot,
-    int port = 8080,
+    int port = 8899,
     String? pluginStoragePath,
   }) async {
     if (imagePath == null || imagePath.isEmpty) {
@@ -420,7 +420,7 @@ class LocalHttpServer {
   /// - [items] 包含图片字段的数据列表
   /// - [imageKey] 图片字段的键名（默认 'image'）
   /// - [httpServerRoot] HTTP 服务器根目录
-  /// - [port] HTTP 服务器端口（默认 8080）
+  /// - [port] HTTP 服务器端口（默认 8899）
   /// - [pluginStoragePath] 插件存储路径（可选）
   ///
   /// 返回：处理后的数据列表（不修改原始数据）
@@ -428,7 +428,7 @@ class LocalHttpServer {
     required List<dynamic> items,
     String imageKey = 'image',
     required String httpServerRoot,
-    int port = 8080,
+    int port = 8899,
     String? pluginStoragePath,
   }) async {
     final processedItems = <Map<String, dynamic>>[];
@@ -537,7 +537,7 @@ class LocalHttpServer {
   /// - [item] 包含图片字段的数据
   /// - [imageKey] 图片字段的键名（默认 'image'）
   /// - [httpServerRoot] HTTP 服务器根目录
-  /// - [port] HTTP 服务器端口（默认 8080）
+  /// - [port] HTTP 服务器端口（默认 8899）
   /// - [pluginStoragePath] 插件存储路径（可选）
   ///
   /// 返回：处理后的数据（不修改原始数据），如果输入为 null 则返回 null
@@ -545,7 +545,7 @@ class LocalHttpServer {
     required Map<String, dynamic>? item,
     String imageKey = 'image',
     required String httpServerRoot,
-    int port = 8080,
+    int port = 8899,
     String? pluginStoragePath,
   }) async {
     if (item == null) return null;

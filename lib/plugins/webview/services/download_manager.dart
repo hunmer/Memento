@@ -323,7 +323,7 @@ class DownloadManager extends ChangeNotifier {
       debugPrint('✅ [DownloadManager] 入口文件存在');
 
       // 创建卡片
-      final cardUrl = 'http://localhost:8080/${app.id}/index.html';
+      final cardUrl = 'http://localhost:8899/${app.id}/index.html';
       debugPrint('🃏 [DownloadManager] 创建卡片，URL: $cardUrl');
 
       final card = await _cardManager.addCard(

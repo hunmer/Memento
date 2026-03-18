@@ -364,7 +364,7 @@ class WebViewPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
 
     debugPrint('[WebViewPlugin] 尝试启动本地 HTTP 服务器，根目录: $rootDir');
 
-    final success = await localHttpServer.start(rootDir: rootDir, port: 8080);
+    final success = await localHttpServer.start(rootDir: rootDir, port: 8899);
 
     if (success) {
       debugPrint(

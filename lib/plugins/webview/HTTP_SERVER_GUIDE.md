@@ -24,14 +24,14 @@ WebView 插件集成了本地 HTTP 服务器，用于在 Windows 等平台上提
 ### 2. URL 格式
 
 - **相对路径格式**：`./项目名称/文件名.html`
-- **HTTP URL 格式**：`http://localhost:8080/项目名称/文件名.html`
+- **HTTP URL 格式**：`http://localhost:8899/项目名称/文件名.html`
 
 ### 3. 自动转换机制
 
 当加载 URL 时，系统会自动处理：
 1. 检测 `./` 开头的相对路径
 2. 确保 HTTP 服务器已启动
-3. 自动转换为 `http://localhost:8080/` 开头的 URL
+3. 自动转换为 `http://localhost:8899/` 开头的 URL
 
 ## 使用方法
 
@@ -67,7 +67,7 @@ WebView 插件集成了本地 HTTP 服务器，用于在 Windows 等平台上提
 2. **系统自动处理**：
    - 检测到 `./` 开头的 URL
    - 启动 HTTP 服务器（如果尚未运行）
-   - 转换为 `http://localhost:8080/...` URL
+   - 转换为 `http://localhost:8899/...` URL
    - 在 InAppWebView 中加载
 
 ### 管理本地项目
@@ -87,7 +87,7 @@ await WebViewPlugin.instance.deleteHttpProject('project1');
 
 ### 服务器特性
 
-- **端口**：8080（如果被占用会自动尝试 8081-8089）
+- **端口**：8899（如果被占用会自动尝试 8900-8908）
 - **根目录**：`{app_data}/webview/http_server/`
 - **MIME 类型**：自动识别（HTML、CSS、JS、图片等）
 - **CORS 支持**：允许跨域请求
@@ -122,7 +122,7 @@ await WebViewPlugin.instance.deleteHttpProject('project1');
 项目名称：test
 复制后：{app_data}/webview/http_server/test/test.html
 卡片 URL：./test/test.html
-实际访问：http://localhost:8080/test/test.html
+实际访问：http://localhost:8899/test/test.html
 ```
 
 ### 示例 2：添加带资源的项目（计划中）
@@ -140,7 +140,7 @@ await WebViewPlugin.instance.deleteHttpProject('project1');
   └── script.js
 
 卡片 URL：./my_app/index.html
-实际访问：http://localhost:8080/my_app/index.html
+实际访问：http://localhost:8899/my_app/index.html
 ```
 
 ## 故障排查
@@ -165,9 +165,9 @@ await WebViewPlugin.instance.deleteHttpProject('project1');
 **解决方法**：
 1. 检查控制台日志：
    ```
-   [WebViewPlugin] 本地 HTTP 服务器启动成功: http://localhost:8080
+   [WebViewPlugin] 本地 HTTP 服务器启动成功: http://localhost:8899
    ```
-2. 如果启动失败，检查 8080-8089 端口是否都被占用
+2. 如果启动失败，检查 8899-8908 端口是否都被占用
 3. 重启应用
 
 ### 问题 3：CSS/JS 资源无法加载
@@ -224,7 +224,7 @@ Future<void> deleteHttpProject(String projectName)
 ```dart
 String convertUrlIfNeeded(String url)
 ```
-自动转换 URL（`./` -> `http://localhost:8080/`）。
+自动转换 URL（`./` -> `http://localhost:8899/`）。
 
 **参数**：
 - `url`: 原始 URL
