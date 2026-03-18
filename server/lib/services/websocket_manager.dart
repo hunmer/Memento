@@ -78,7 +78,8 @@ class WebSocketManager {
   }
 
   /// 注册 WebSocket 连接
-  void registerChannel(String userId, String deviceId, WebSocketChannel channel) {
+  void registerChannel(
+      String userId, String deviceId, WebSocketChannel channel) {
     final connection = WebSocketConnection(
       userId: userId,
       deviceId: deviceId,

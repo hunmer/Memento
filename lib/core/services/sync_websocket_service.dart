@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 
 import '../route/route_refresh_manager.dart';
 import 'sync_client_service.dart';
@@ -118,8 +118,8 @@ class SyncWebSocketService {
 
       final uri = Uri.parse('$wsUrl/api/v1/sync/ws?token=$_token&device_id=$_deviceId');
 
-      _log('正在连接 WebSocket: $wsUrl');
-      _channel = WebSocketChannel.connect(uri);
+      _log('正在连接 WebSocket: $uri');
+      _channel = IOWebSocketChannel.connect(uri);
 
       // 等待连接建立
       await _channel!.ready;
