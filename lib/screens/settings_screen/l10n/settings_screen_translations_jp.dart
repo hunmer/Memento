@@ -112,6 +112,10 @@ const Map<String, String> settingsScreenTranslationsJp = {
   'server_sync_copyKey': 'キーをコピー',
   'server_sync_keyCopied': 'キーをクリップボードにコピーしました',
 
+  // WebSocket status
+  'server_sync_wsConnected': 'リアルタイム同期接続済み',
+  'server_sync_wsDisconnected': 'リアルタイム同期未接続',
+
   // Language selection dialog
   'settingsScreen_selectLanguage': '言語を選択',
   'settingsScreen_chinese': '中文',

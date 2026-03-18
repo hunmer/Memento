@@ -32,14 +32,14 @@ class FileUpdateNotification {
   });
 
   Map<String, dynamic> toJson() => {
-    'type': 'file_updated',
-    'data': {
-      'file_path': filePath,
-      'md5': md5,
-      'modified_at': modifiedAt.toUtc().toIso8601String(),
-      'source_device_id': sourceDeviceId,
-    },
-  };
+        'type': 'file_updated',
+        'data': {
+          'file_path': filePath,
+          'md5': md5,
+          'modified_at': modifiedAt.toUtc().toIso8601String(),
+          'source_device_id': sourceDeviceId,
+        },
+      };
 
   String toJsonString() => jsonEncode(toJson());
 }
@@ -139,7 +139,8 @@ class WebSocketManager {
           break;
         case 'ack':
           // 确认消息，记录日志
-          _log('收到确认: userId=${connection.userId}, deviceId=${connection.deviceId}');
+          _log(
+              '收到确认: userId=${connection.userId}, deviceId=${connection.deviceId}');
           break;
         default:
           _log('未知消息类型: $type');

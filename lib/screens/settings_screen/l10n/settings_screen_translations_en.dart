@@ -112,6 +112,10 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'server_sync_copyKey': 'Copy Key',
   'server_sync_keyCopied': 'Key copied to clipboard',
 
+  // WebSocket status
+  'server_sync_wsConnected': 'Real-time sync connected',
+  'server_sync_wsDisconnected': 'Real-time sync disconnected',
+
   // Force sync
   'server_sync_forceToServer': 'Force Sync to Server',
   'server_sync_forceToClient': 'Force Sync to Client',

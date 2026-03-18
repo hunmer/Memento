@@ -10,9 +10,12 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/sync_client_service.dart';
+import 'package:Memento/core/services/sync_websocket_service.dart';
+import 'package:Memento/core/services/sync_record_service.dart';
 import 'package:Memento/core/services/encryption_service.dart';
 import 'package:Memento/core/services/file_watch_sync_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/route/route_refresh_manager.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 
 /// 服务器同步设置组件
@@ -42,7 +45,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
   ServerSyncConfig? _config;
   SyncClientService? _syncService;
+  SyncRecordService? _recordService;
   Timer? _autoSyncTimer;
+  bool _isWsConnected = false;
 
   @override
   void initState() {
@@ -127,10 +132,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
     final storage = StorageManager();
     final encryption = EncryptionService();
-    await encryption.initializeFromPassword(
-      _config!.password,
-      _config!.salt!,
-    );
+    await encryption.initializeFromPassword(_config!.password, _config!.salt!);
 
     _syncService = SyncClientService(
       serverUrl: _config!.server,
@@ -142,6 +144,35 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
       userId: _config!.userId!,
       deviceId: _config!.deviceId,
     );
+
+    // 初始化记录服务
+    _recordService = SyncRecordService();
+    await _recordService!.initialize(storage);
+
+    // 配置并连接 WebSocket
+    _initWebSocket();
+  }
+
+  /// 初始化 WebSocket 连接
+  void _initWebSocket() {
+    if (_config == null || !_config!.isLoggedIn) return;
+
+    final wsService = SyncWebSocketService();
+    wsService.configure(
+      syncClientService: _syncService!,
+      recordService: _recordService!,
+      routeRefreshManager: RouteRefreshManager(),
+    );
+
+    wsService.connect(
+      serverUrl: _config!.server,
+      token: _config!.token!,
+      deviceId: _config!.deviceId,
+    );
+
+    setState(() {
+      _isWsConnected = true;
+    });
   }
 
   void _startAutoSyncIfEnabled() {
@@ -168,7 +199,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
         server: _serverController.text.trim(),
         username: _usernameController.text.trim(),
         password: _passwordController.text,
-        deviceId: _config?.deviceId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        deviceId:
+            _config?.deviceId ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         deviceName: _deviceNameController.text.trim(),
         autoSync: _autoSync,
         syncInterval: _syncInterval,
@@ -211,7 +244,8 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
     try {
       final serverUrl = _serverController.text.trim();
-      final deviceId = _config?.deviceId ?? DateTime.now().millisecondsSinceEpoch.toString();
+      final deviceId =
+          _config?.deviceId ?? DateTime.now().millisecondsSinceEpoch.toString();
 
       final response = await http.post(
         Uri.parse('$serverUrl/api/v1/auth/login'),
@@ -267,7 +301,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
       }
     } catch (e) {
       if (!mounted) return;
-      toastService.showToast('${'server_sync_loginFailed'.tr}: ${e.toString()}');
+      toastService.showToast(
+        '${'server_sync_loginFailed'.tr}: ${e.toString()}',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -344,7 +380,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
       }
     } catch (e) {
       if (!mounted) return;
-      toastService.showToast('${'server_sync_registerFailed'.tr}: ${e.toString()}');
+      toastService.showToast(
+        '${'server_sync_registerFailed'.tr}: ${e.toString()}',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -361,6 +399,11 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
     try {
       _autoSyncTimer?.cancel();
+
+      // 断开 WebSocket 连接
+      SyncWebSocketService().disconnect();
+      _isWsConnected = false;
+
       _syncService?.logout();
       await _config?.clearAuthInfo();
 
@@ -375,7 +418,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
       toastService.showToast('server_sync_logoutSuccess'.tr);
     } catch (e) {
       if (!mounted) return;
-      toastService.showToast('${'server_sync_logoutFailed'.tr}: ${e.toString()}');
+      toastService.showToast(
+        '${'server_sync_logoutFailed'.tr}: ${e.toString()}',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -442,71 +487,77 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
   Future<void> _showForceSyncToServerConfirm() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('server_sync_forceToServerConfirmTitle'.tr),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('server_sync_forceToServerDesc'.tr),
-            const SizedBox(height: 12),
-            ...[
-              'server_sync_forceToServerAction1'.tr,
-              'server_sync_forceToServerAction2'.tr,
-            ].map((text) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Expanded(child: Text(text)),
-                ],
-              ),
-            )),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'server_sync_forceSyncWarning'.tr,
-                      style: TextStyle(color: Colors.red.shade700),
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.warning, color: Colors.orange),
+                SizedBox(width: 8),
+                Text('server_sync_forceToServerConfirmTitle'.tr),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('server_sync_forceToServerDesc'.tr),
+                const SizedBox(height: 12),
+                ...[
+                  'server_sync_forceToServerAction1'.tr,
+                  'server_sync_forceToServerAction2'.tr,
+                ].map(
+                  (text) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(child: Text(text)),
+                      ],
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'server_sync_forceSyncWarning'.tr,
+                          style: TextStyle(color: Colors.red.shade700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text('server_sync_cancel'.tr),
+                onPressed: () => Navigator.pop(context, false),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            child: Text('server_sync_cancel'.tr),
-            onPressed: () => Navigator.pop(context, false),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('server_sync_confirmSync'.tr),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('server_sync_confirmSync'.tr),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -518,71 +569,77 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
   Future<void> _showForceSyncToClientConfirm() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('server_sync_forceToClientConfirmTitle'.tr),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('server_sync_forceToClientDesc'.tr),
-            const SizedBox(height: 12),
-            ...[
-              'server_sync_forceToClientAction1'.tr,
-              'server_sync_forceToClientAction2'.tr,
-            ].map((text) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('• ', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Expanded(child: Text(text)),
-                ],
-              ),
-            )),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.warning_amber, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'server_sync_forceSyncWarning'.tr,
-                      style: TextStyle(color: Colors.red.shade700),
+      builder:
+          (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.warning, color: Colors.blue),
+                SizedBox(width: 8),
+                Text('server_sync_forceToClientConfirmTitle'.tr),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('server_sync_forceToClientDesc'.tr),
+                const SizedBox(height: 12),
+                ...[
+                  'server_sync_forceToClientAction1'.tr,
+                  'server_sync_forceToClientAction2'.tr,
+                ].map(
+                  (text) => Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '• ',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(child: Text(text)),
+                      ],
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'server_sync_forceSyncWarning'.tr,
+                          style: TextStyle(color: Colors.red.shade700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text('server_sync_cancel'.tr),
+                onPressed: () => Navigator.pop(context, false),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            child: Text('server_sync_cancel'.tr),
-            onPressed: () => Navigator.pop(context, false),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('server_sync_confirmSync'.tr),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('server_sync_confirmSync'.tr),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
@@ -665,9 +722,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
     try {
       final serverUrl = _serverController.text.trim();
-      final response = await http.get(
-        Uri.parse('$serverUrl/health'),
-      ).timeout(const Duration(seconds: 10));
+      final response = await http
+          .get(Uri.parse('$serverUrl/health'))
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         if (!mounted) return;
@@ -677,7 +734,9 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
       }
     } catch (e) {
       if (!mounted) return;
-      toastService.showToast('${'server_sync_connectionFailed'.tr}: ${e.toString()}');
+      toastService.showToast(
+        '${'server_sync_connectionFailed'.tr}: ${e.toString()}',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -706,12 +765,25 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
-                if (_isLoggedIn)
+                if (_isLoggedIn) ...[
+                  // WebSocket 连接状态
+                  if (_isWsConnected)
+                    Tooltip(
+                      message: 'server_sync_wsConnected'.tr,
+                      child: const Icon(Icons.cloud_done, color: Colors.green, size: 18),
+                    )
+                  else
+                    Tooltip(
+                      message: 'server_sync_wsDisconnected'.tr,
+                      child: const Icon(Icons.cloud_off, color: Colors.grey, size: 18),
+                    ),
+                  const SizedBox(width: 8),
                   Chip(
                     label: Text('server_sync_loggedIn'.tr),
                     backgroundColor: Colors.green.withOpacity(0.2),
                     labelStyle: const TextStyle(color: Colors.green),
                   ),
+                ],
               ],
             ),
             const SizedBox(height: 16),
@@ -866,9 +938,8 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                           const SizedBox(width: 8),
                           Text(
                             'server_sync_encryptionKey'.tr,
-                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
@@ -891,7 +962,8 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                           children: [
                             Expanded(
                               child: SelectableText(
-                                _syncService?.encryption.encryptionKeyBase64 ?? 'N/A',
+                                _syncService?.encryption.encryptionKeyBase64 ??
+                                    'N/A',
                                 style: const TextStyle(
                                   fontFamily: 'monospace',
                                   fontSize: 12,
@@ -902,10 +974,15 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                               icon: const Icon(Icons.copy, size: 20),
                               tooltip: 'server_sync_copyKey'.tr,
                               onPressed: () {
-                                final key = _syncService?.encryption.encryptionKeyBase64;
+                                final key =
+                                    _syncService
+                                        ?.encryption
+                                        .encryptionKeyBase64;
                                 if (key != null) {
                                   Clipboard.setData(ClipboardData(text: key));
-                                  toastService.showToast('server_sync_keyCopied'.tr);
+                                  toastService.showToast(
+                                    'server_sync_keyCopied'.tr,
+                                  );
                                 }
                               },
                             ),
@@ -989,22 +1066,25 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
               // 同步目录选择
               ExpansionTile(
                 title: Text('server_sync_syncDirs'.tr),
-                subtitle: Text('${'server_sync_selected'.tr}: ${_selectedSyncDirs.length}'),
-                children: ServerSyncConfig.availableSyncDirs.map((dir) {
-                  return CheckboxListTile(
-                    title: Text(dir),
-                    value: _selectedSyncDirs.contains(dir),
-                    onChanged: (value) {
-                      setState(() {
-                        if (value == true) {
-                          _selectedSyncDirs.add(dir);
-                        } else {
-                          _selectedSyncDirs.remove(dir);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
+                subtitle: Text(
+                  '${'server_sync_selected'.tr}: ${_selectedSyncDirs.length}',
+                ),
+                children:
+                    ServerSyncConfig.availableSyncDirs.map((dir) {
+                      return CheckboxListTile(
+                        title: Text(dir),
+                        value: _selectedSyncDirs.contains(dir),
+                        onChanged: (value) {
+                          setState(() {
+                            if (value == true) {
+                              _selectedSyncDirs.add(dir);
+                            } else {
+                              _selectedSyncDirs.remove(dir);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
               ),
 
               const Divider(height: 32),
@@ -1029,7 +1109,8 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _showForceSyncToServerConfirm,
+                      onPressed:
+                          _isLoading ? null : _showForceSyncToServerConfirm,
                       icon: const Icon(Icons.cloud_upload),
                       label: Text('server_sync_forceToServer'.tr),
                       style: ElevatedButton.styleFrom(
@@ -1041,7 +1122,8 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: _isLoading ? null : _showForceSyncToClientConfirm,
+                      onPressed:
+                          _isLoading ? null : _showForceSyncToClientConfirm,
                       icon: const Icon(Icons.cloud_download),
                       label: Text('server_sync_forceToClient'.tr),
                       style: ElevatedButton.styleFrom(

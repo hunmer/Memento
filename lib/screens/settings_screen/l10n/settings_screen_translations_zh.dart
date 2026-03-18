@@ -112,6 +112,10 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_copyKey': '复制密钥',
   'server_sync_keyCopied': '密钥已复制到剪贴板',
 
+  // WebSocket 状态
+  'server_sync_wsConnected': '实时同步已连接',
+  'server_sync_wsDisconnected': '实时同步未连接',
+
   // 强制同步
   'server_sync_forceToServer': '强制同步到服务端',
   'server_sync_forceToClient': '强制同步到客户端',
