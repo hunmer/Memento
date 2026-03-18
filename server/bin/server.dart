@@ -1,10 +1,11 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
+import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
@@ -131,9 +132,6 @@ void main(List<String> args) async {
   // 认证路由 (无需认证)
   final authRoutes = AuthRoutes(authService, pluginDataService, storageService);
   router.mount('/api/v1/auth', authRoutes.router.call);
-
-  // WebSocket 端点 - 需要特殊处理，不使用 shelf_router
-  // 在主请求处理中拦截 WebSocket 升级请求
 
   // 同步路由 (需要认证)
   final syncRoutes = SyncRoutes(storageService, webSocketManager, pluginDataService);
@@ -286,6 +284,16 @@ void main(List<String> args) async {
 
   logger.info('已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
 
+  // 创建带认证的 WebSocket handler，并注册连接
+  final wsHandler = _createAuthenticatedWebSocketHandler(
+    authService: authService,
+    webSocketManager: webSocketManager,
+    logger: logger,
+  );
+
+  // 挂载 WebSocket 路由
+  router.get('/api/v1/sync/ws', wsHandler);
+
   // 管理界面静态文件服务
   final scriptDir = path.dirname(Platform.script.toFilePath());
   final adminDir = path.normalize(path.join(scriptDir, '..', 'admin'));
@@ -353,40 +361,12 @@ void main(List<String> args) async {
         .addHandler(router.call);
   }
 
-  // 包装 WebSocket 升级处理
-  handler = _createWebSocketHandler(
-    handler: handler,
-    authService: authService,
-    webSocketManager: webSocketManager,
-    logger: logger,
-  );
-
-  // 5. 启动服务器 - 使用自定义服务器以支持 WebSocket
-  final server = await HttpServer.bind(
+  // 5. 启动服务器
+  final server = await shelf_io.serve(
+    handler,
     InternetAddress.anyIPv4,
     config.port,
   );
-
-  // 处理请求
-  server.listen((HttpRequest httpRequest) async {
-    // 检查是否是 WebSocket 升级请求
-    if (_isWebSocketUpgradeRequest(httpRequest)) {
-      await _handleWebSocketUpgradeRequest(
-        httpRequest: httpRequest,
-        authService: authService,
-        webSocketManager: webSocketManager,
-        logger: logger,
-      );
-      return;
-    }
-
-    // 将 HttpRequest 转换为 Shelf Request 并处理
-    final shelfRequest = _convertToShelfRequest(httpRequest);
-    final shelfResponse = await handler(shelfRequest);
-
-    // 将 Shelf Response 写回 HttpRequest
-    await _writeShelfResponse(httpRequest.response, shelfResponse);
-  });
 
   logger.info('服务器启动成功!');
   print('');
@@ -438,9 +418,62 @@ void main(List<String> args) async {
   // 优雅关闭
   ProcessSignal.sigint.watch().listen((_) async {
     logger.info('收到关闭信号，正在停止服务器...');
+    await webSocketManager.closeAll();
     await server.close();
     exit(0);
   });
+}
+
+/// 创建带认证的 WebSocket handler
+Handler _createAuthenticatedWebSocketHandler({
+  required AuthService authService,
+  required WebSocketManager webSocketManager,
+  required Logger logger,
+}) {
+  return (Request request) async {
+    // 从查询参数获取 token 和 device_id
+    final queryParams = request.url.queryParameters;
+    final token = queryParams['token'];
+    final deviceId = queryParams['device_id'];
+
+    if (token == null || deviceId == null) {
+      logger.warning('WebSocket 连接缺少认证参数');
+      return Response.forbidden(jsonEncode({
+        'success': false,
+        'error': '缺少认证参数 (token, device_id)',
+      }), headers: {'Content-Type': 'application/json'});
+    }
+
+    // 验证 token
+    final payload = authService.verifyToken(token);
+    if (payload == null) {
+      logger.warning('WebSocket 连接 token 无效');
+      return Response.forbidden(jsonEncode({
+        'success': false,
+        'error': '无效的 token',
+      }), headers: {'Content-Type': 'application/json'});
+    }
+
+    final userId = payload['sub'] as String?;
+    if (userId == null) {
+      logger.warning('WebSocket 连接无法获取用户 ID');
+      return Response.forbidden(jsonEncode({
+        'success': false,
+        'error': '无法获取用户 ID',
+      }), headers: {'Content-Type': 'application/json'});
+    }
+
+    // 使用 shelf_web_socket 创建 handler
+    final handler = webSocketHandler((channel, protocol) {
+      logger.info('WebSocket 连接已建立: userId=$userId, deviceId=$deviceId');
+
+      // 注册到 WebSocket 管理器
+      webSocketManager.registerChannel(userId, deviceId, channel);
+      logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
+    });
+
+    return handler(request);
+  };
 }
 
 /// 重建所有用户的文件索引
@@ -481,218 +514,4 @@ Future<void> _rebuildAllUserIndexes(
   } catch (e) {
     logger.warning('重建文件索引时发生错误: $e');
   }
-}
-
-/// 创建 WebSocket 处理器
-///
-/// 检测 WebSocket 升级请求并处理连接
-Handler _createWebSocketHandler({
-  required Handler handler,
-  required AuthService authService,
-  required WebSocketManager webSocketManager,
-  required Logger logger,
-}) {
-  return (Request request) async {
-    // 检查是否是 WebSocket 升级请求
-    if (_isWebSocketRequest(request)) {
-      return await _handleWebSocketUpgrade(
-        request: request,
-        authService: authService,
-        webSocketManager: webSocketManager,
-        logger: logger,
-      );
-    }
-
-    // 非 WebSocket 请求，传递给原始 handler
-    return handler(request);
-  };
-}
-
-/// 检查是否是 WebSocket 升级请求
-bool _isWebSocketRequest(Request request) {
-  final path = request.url.path;
-  if (!path.endsWith('sync/ws')) return false;
-
-  // 检查 WebSocket 升级头
-  final upgrade = request.headers['upgrade'];
-  final connection = request.headers['connection'];
-  final wsVersion = request.headers['sec-websocket-version'];
-  final wsKey = request.headers['sec-websocket-key'];
-
-  return upgrade?.toLowerCase() == 'websocket' &&
-      (connection?.toLowerCase().contains('upgrade') ?? false) &&
-      wsVersion != null &&
-      wsKey != null;
-}
-
-/// 处理 WebSocket 升级
-Future<Response> _handleWebSocketUpgrade({
-  required Request request,
-  required AuthService authService,
-  required WebSocketManager webSocketManager,
-  required Logger logger,
-}) async {
-  try {
-    // 从查询参数获取 token 和 device_id
-    final queryParams = request.url.queryParameters;
-    final token = queryParams['token'];
-    final deviceId = queryParams['device_id'];
-
-    if (token == null || deviceId == null) {
-      logger.warning('WebSocket 连接缺少认证参数');
-      return Response.forbidden(jsonEncode({
-        'success': false,
-        'error': '缺少认证参数 (token, device_id)',
-      }), headers: {'Content-Type': 'application/json'});
-    }
-
-    // 验证 token
-    final payload = authService.verifyToken(token);
-    if (payload == null) {
-      logger.warning('WebSocket 连接 token 无效');
-      return Response.forbidden(jsonEncode({
-        'success': false,
-        'error': '无效的 token',
-      }), headers: {'Content-Type': 'application/json'});
-    }
-
-    final userId = payload['sub'] as String?;
-    if (userId == null) {
-      logger.warning('WebSocket 连接无法获取用户 ID');
-      return Response.forbidden(jsonEncode({
-        'success': false,
-        'error': '无法获取用户 ID',
-      }), headers: {'Content-Type': 'application/json'});
-    }
-
-    // 由于 Shelf 的限制，无法直接升级 WebSocket
-    // 返回错误提示使用自定义服务器
-    logger.warning('Shelf handler 收到 WebSocket 请求，但应通过自定义服务器处理');
-    return Response.internalServerError(body: jsonEncode({
-      'success': false,
-      'error': 'WebSocket 需要通过自定义服务器处理',
-    }), headers: {'Content-Type': 'application/json'});
-  } catch (e) {
-    logger.severe('处理 WebSocket 升级时发生错误: $e');
-    return Response.internalServerError(body: jsonEncode({
-      'success': false,
-      'error': '服务器错误',
-    }), headers: {'Content-Type': 'application/json'});
-  }
-}
-
-/// 检查是否是 WebSocket 升级请求 (HttpRequest 版本)
-bool _isWebSocketUpgradeRequest(HttpRequest request) {
-  final path = request.uri.path;
-  if (!path.endsWith('sync/ws')) return false;
-
-  // 检查 WebSocket 升级头
-  final upgrade = request.headers.value('upgrade');
-  final connection = request.headers.value('connection');
-  final wsVersion = request.headers.value('sec-websocket-version');
-  final wsKey = request.headers.value('sec-websocket-key');
-
-  return upgrade?.toLowerCase() == 'websocket' &&
-      (connection?.toLowerCase().contains('upgrade') ?? false) &&
-      wsVersion != null &&
-      wsKey != null;
-}
-
-/// 处理 WebSocket 升级请求 (HttpRequest 版本)
-Future<void> _handleWebSocketUpgradeRequest({
-  required HttpRequest httpRequest,
-  required AuthService authService,
-  required WebSocketManager webSocketManager,
-  required Logger logger,
-}) async {
-  try {
-    // 从查询参数获取 token 和 device_id
-    final queryParams = httpRequest.uri.queryParameters;
-    final token = queryParams['token'];
-    final deviceId = queryParams['device_id'];
-
-    if (token == null || deviceId == null) {
-      logger.warning('WebSocket 连接缺少认证参数');
-      httpRequest.response.statusCode = HttpStatus.forbidden;
-      httpRequest.response.headers.contentType = ContentType.json;
-      httpRequest.response.write(jsonEncode({
-        'success': false,
-        'error': '缺少认证参数 (token, device_id)',
-      }));
-      await httpRequest.response.close();
-      return;
-    }
-
-    // 验证 token
-    final payload = authService.verifyToken(token);
-    if (payload == null) {
-      logger.warning('WebSocket 连接 token 无效');
-      httpRequest.response.statusCode = HttpStatus.forbidden;
-      httpRequest.response.headers.contentType = ContentType.json;
-      httpRequest.response.write(jsonEncode({
-        'success': false,
-        'error': '无效的 token',
-      }));
-      await httpRequest.response.close();
-      return;
-    }
-
-    final userId = payload['sub'] as String?;
-    if (userId == null) {
-      logger.warning('WebSocket 连接无法获取用户 ID');
-      httpRequest.response.statusCode = HttpStatus.forbidden;
-      httpRequest.response.headers.contentType = ContentType.json;
-      httpRequest.response.write(jsonEncode({
-        'success': false,
-        'error': '无法获取用户 ID',
-      }));
-      await httpRequest.response.close();
-      return;
-    }
-
-    // 升级为 WebSocket
-    final socket = await WebSocketTransformer.upgrade(httpRequest);
-    logger.info('WebSocket 升级成功: userId=$userId, deviceId=$deviceId');
-
-    // 注册到 WebSocket 管理器
-    webSocketManager.register(userId, deviceId, socket);
-
-    logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
-  } catch (e) {
-    logger.severe('处理 WebSocket 升级时发生错误: $e');
-    try {
-      httpRequest.response.statusCode = HttpStatus.internalServerError;
-      httpRequest.response.close();
-    } catch (_) {}
-  }
-}
-
-/// 将 HttpRequest 转换为 Shelf Request
-Request _convertToShelfRequest(HttpRequest httpRequest) {
-  final headers = <String, String>{};
-  httpRequest.headers.forEach((name, values) {
-    headers[name] = values.join(',');
-  });
-
-  return Request(
-    httpRequest.method,
-    httpRequest.requestedUri,
-    headers: headers,
-    body: httpRequest,
-  );
-}
-
-/// 将 Shelf Response 写回 HttpResponse
-Future<void> _writeShelfResponse(HttpResponse httpResponse, Response shelfResponse) async {
-  httpResponse.statusCode = shelfResponse.statusCode;
-
-  shelfResponse.headers.forEach((name, value) {
-    httpResponse.headers.set(name, value);
-  });
-
-  await shelfResponse.read().forEach((chunk) {
-    httpResponse.add(chunk);
-  });
-
-  await httpResponse.close();
 }

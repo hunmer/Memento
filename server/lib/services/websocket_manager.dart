@@ -1,18 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 /// WebSocket 连接信息
 class WebSocketConnection {
   final String userId;
   final String deviceId;
-  final WebSocket socket;
+  final WebSocketChannel channel;
   final DateTime connectedAt;
 
   WebSocketConnection({
     required this.userId,
     required this.deviceId,
-    required this.socket,
+    required this.channel,
     required this.connectedAt,
   });
 }
@@ -77,11 +78,11 @@ class WebSocketManager {
   }
 
   /// 注册 WebSocket 连接
-  void register(String userId, String deviceId, WebSocket socket) {
+  void registerChannel(String userId, String deviceId, WebSocketChannel channel) {
     final connection = WebSocketConnection(
       userId: userId,
       deviceId: deviceId,
-      socket: socket,
+      channel: channel,
       connectedAt: DateTime.now(),
     );
 
@@ -90,13 +91,8 @@ class WebSocketManager {
 
     _log('注册连接: userId=$userId, deviceId=$deviceId, 当前连接数: $connectionCount');
 
-    // 监听连接关闭
-    socket.done.then((_) {
-      unregister(userId, deviceId);
-    });
-
     // 监听消息（用于心跳和确认）
-    socket.listen(
+    channel.stream.listen(
       (message) {
         _handleMessage(connection, message);
       },
@@ -105,6 +101,7 @@ class WebSocketManager {
         unregister(userId, deviceId);
       },
       onDone: () {
+        _log('WebSocket 关闭: userId=$userId, deviceId=$deviceId');
         unregister(userId, deviceId);
       },
     );
@@ -135,7 +132,7 @@ class WebSocketManager {
       switch (type) {
         case 'ping':
           // 心跳响应
-          _sendMessage(connection.socket, {'type': 'pong'});
+          _sendMessage(connection.channel, {'type': 'pong'});
           break;
         case 'ack':
           // 确认消息，记录日志
@@ -151,9 +148,9 @@ class WebSocketManager {
   }
 
   /// 发送消息
-  void _sendMessage(WebSocket socket, Map<String, dynamic> message) {
+  void _sendMessage(WebSocketChannel channel, Map<String, dynamic> message) {
     try {
-      socket.add(jsonEncode(message));
+      channel.sink.add(jsonEncode(message));
     } catch (e) {
       _log('发送消息失败: $e');
     }
@@ -199,7 +196,7 @@ class WebSocketManager {
       }
 
       try {
-        connection.socket.add(message);
+        connection.channel.sink.add(message);
         sentCount++;
       } catch (e) {
         _log('广播失败: userId=$userId, deviceId=$deviceId, error=$e');
@@ -223,7 +220,7 @@ class WebSocketManager {
 
     for (final connection in userConnections.values) {
       try {
-        connection.socket.add(messageStr);
+        connection.channel.sink.add(messageStr);
       } catch (e) {
         _log('广播失败: userId=$userId, deviceId=${connection.deviceId}, error=$e');
         unregister(userId, connection.deviceId);
@@ -254,7 +251,7 @@ class WebSocketManager {
     for (final userConnections in _connections.values) {
       for (final connection in userConnections.values) {
         try {
-          await connection.socket.close();
+          await connection.channel.sink.close();
         } catch (e) {
           // 忽略关闭错误
         }
