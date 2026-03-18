@@ -189,7 +189,9 @@ class SyncWebSocketService {
       _log('收到文件更新通知: ${notification.filePath}, 来源: ${notification.sourceDeviceId}');
 
       // 防护1: 忽略来自本设备的更新
-      if (notification.sourceDeviceId == _deviceId) {
+      // 只有当 sourceDeviceId 非空且等于本设备 ID 时才忽略
+      if (notification.sourceDeviceId.isNotEmpty &&
+          notification.sourceDeviceId == _deviceId) {
         _log('忽略来自本设备的更新');
         return;
       }

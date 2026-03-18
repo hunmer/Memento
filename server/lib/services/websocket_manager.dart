@@ -94,10 +94,11 @@ class WebSocketManager {
       connectedAt: DateTime.now(),
     );
 
-    _connections.putIfAbsent(userId, () => {});
+    // 显式指定 Map 类型，避免 {} 被推断为 Set
+    _connections.putIfAbsent(userId, () => <String, WebSocketConnection>{});
     _connections[userId]![deviceId] = connection;
 
-    _log('注册连接: userId=$userId, deviceId=$deviceId, 当前连接数: $connectionCount');
+    _log('注册连接: userId=$userId, deviceId=$deviceId, 当前连接数: $connectionCount, 设备列表: ${_connections[userId]?.keys.toList()}');
 
     // 如果已有订阅，使用它；否则创建新订阅
     if (subscription != null) {
