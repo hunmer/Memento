@@ -8,7 +8,10 @@ import 'package:path/path.dart' as path;
 
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/services/sync_client_service.dart';
+import 'package:Memento/core/services/sync_record_service.dart';
+import 'package:Memento/core/services/sync_websocket_service.dart';
 import 'package:Memento/core/services/encryption_service.dart';
+import 'package:Memento/core/route/route_refresh_manager.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 
 /// 文件监听同步服务
@@ -37,6 +40,12 @@ class FileWatchSyncService {
 
   // 同步服务
   SyncClientService? _syncService;
+
+  // 同步记录服务
+  SyncRecordService? _recordService;
+
+  // WebSocket 服务
+  SyncWebSocketService? _wsService;
 
   // 配置
   ServerSyncConfig? _config;
@@ -90,6 +99,13 @@ class FileWatchSyncService {
         deviceId: _config!.deviceId,
       );
 
+      // 初始化记录服务
+      _recordService = SyncRecordService();
+      await _recordService!.initialize(storage);
+
+      // 初始化 WebSocket 服务
+      _initWebSocket();
+
       // 开始监听
       await _startWatching();
 
@@ -110,6 +126,27 @@ class FileWatchSyncService {
     await dispose();
     _isInitialized = false;
     await initialize();
+  }
+
+  /// 初始化 WebSocket 连接
+  void _initWebSocket() {
+    if (_config == null || !_config!.isLoggedIn) return;
+    if (_syncService == null || _recordService == null) return;
+
+    _wsService = SyncWebSocketService();
+    _wsService!.configure(
+      syncClientService: _syncService!,
+      recordService: _recordService!,
+      routeRefreshManager: RouteRefreshManager(),
+    );
+
+    _wsService!.connect(
+      serverUrl: _config!.server,
+      token: _config!.token!,
+      deviceId: _config!.deviceId,
+    );
+
+    _log('WebSocket 连接已初始化');
   }
 
   /// 输出日志
@@ -495,6 +532,12 @@ class FileWatchSyncService {
     _syncQueue.clear();
     _fileModifyTimes.clear();
     _fileMd5Cache.clear();
+
+    // 断开并清理 WebSocket
+    _wsService?.disconnect();
+    _wsService = null;
+    _recordService = null;
+
     _syncService = null;
     _config = null;
     _isInitialized = false;
@@ -510,6 +553,9 @@ class FileWatchSyncService {
 
   /// 当前监听的目录数
   int get watchingDirsCount => _watchers.length;
+
+  /// WebSocket 是否已连接
+  bool get isWsConnected => _wsService?.isConnected ?? false;
 
   /// 是否正在同步
   bool get isSyncing => _isSyncing;

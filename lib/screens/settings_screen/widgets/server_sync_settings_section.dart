@@ -10,12 +10,9 @@ import 'package:universal_platform/universal_platform.dart';
 
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/sync_client_service.dart';
-import 'package:Memento/core/services/sync_websocket_service.dart';
-import 'package:Memento/core/services/sync_record_service.dart';
 import 'package:Memento/core/services/encryption_service.dart';
 import 'package:Memento/core/services/file_watch_sync_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
-import 'package:Memento/core/route/route_refresh_manager.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 
 /// 服务器同步设置组件
@@ -45,9 +42,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
   ServerSyncConfig? _config;
   SyncClientService? _syncService;
-  SyncRecordService? _recordService;
   Timer? _autoSyncTimer;
-  bool _isWsConnected = false;
 
   @override
   void initState() {
@@ -145,34 +140,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
       deviceId: _config!.deviceId,
     );
 
-    // 初始化记录服务
-    _recordService = SyncRecordService();
-    await _recordService!.initialize(storage);
-
-    // 配置并连接 WebSocket
-    _initWebSocket();
-  }
-
-  /// 初始化 WebSocket 连接
-  void _initWebSocket() {
-    if (_config == null || !_config!.isLoggedIn) return;
-
-    final wsService = SyncWebSocketService();
-    wsService.configure(
-      syncClientService: _syncService!,
-      recordService: _recordService!,
-      routeRefreshManager: RouteRefreshManager(),
-    );
-
-    wsService.connect(
-      serverUrl: _config!.server,
-      token: _config!.token!,
-      deviceId: _config!.deviceId,
-    );
-
-    setState(() {
-      _isWsConnected = true;
-    });
+    // WebSocket 初始化已移至 FileWatchSyncService.initialize() 中
   }
 
   void _startAutoSyncIfEnabled() {
@@ -400,15 +368,11 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
     try {
       _autoSyncTimer?.cancel();
 
-      // 断开 WebSocket 连接
-      SyncWebSocketService().disconnect();
-      _isWsConnected = false;
+      // 停止文件监听服务（包含 WebSocket 清理）
+      await fileWatchSyncService.dispose();
 
       _syncService?.logout();
       await _config?.clearAuthInfo();
-
-      // 停止文件监听服务
-      await fileWatchSyncService.dispose();
 
       setState(() {
         _isLoggedIn = false;
@@ -767,7 +731,7 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                 const Spacer(),
                 if (_isLoggedIn) ...[
                   // WebSocket 连接状态
-                  if (_isWsConnected)
+                  if (fileWatchSyncService.isWsConnected)
                     Tooltip(
                       message: 'server_sync_wsConnected'.tr,
                       child: const Icon(Icons.cloud_done, color: Colors.green, size: 18),
