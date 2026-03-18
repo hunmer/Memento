@@ -368,7 +368,12 @@ class SyncClientService {
   /// 2. 检查服务端文件是否存在
   /// 3. 根据存在性决定同步方向
   /// 4. 两边都存在时，比较时间戳决定方向
-  Future<SyncResult> bidirectionalSync(String filePath) async {
+  ///
+  /// [serverFileEntry] 可选的服务端文件信息，用于避免重复请求
+  Future<SyncResult> bidirectionalSync(
+    String filePath, {
+    ServerFileEntry? serverFileEntry,
+  }) async {
     if (!isLoggedIn) {
       return SyncResult.error('未登录');
     }
@@ -381,9 +386,9 @@ class SyncClientService {
       // 1. 检查本地文件是否存在
       final localExists = await _storage.exists(filePath);
 
-      // 2. 获取服务端文件信息
-      final serverInfo = await getServerFileInfo(filePath);
-      final serverExists = serverInfo != null && serverInfo.exists;
+      // 2. 获取服务端文件信息（优先使用传入的信息，避免重复请求）
+      final serverInfo = serverFileEntry;
+      final serverExists = serverInfo != null;
 
       // 3. 根据存在性决定同步方向
       if (!localExists && !serverExists) {
@@ -404,7 +409,7 @@ class SyncClientService {
       // 4. 两边都存在，比较时间戳决定方向
       if (_recordService.needsPull(
         filePath,
-        serverInfo?.modifiedAt ?? DateTime.now(),
+        serverInfo?.updatedAt ?? DateTime.now(),
       )) {
         // 服务端更新，拉取
         return await pullFile(filePath);
@@ -436,8 +441,9 @@ class SyncClientService {
         return [SyncResult.error('获取服务端文件索引失败')];
       }
 
-      // 2. 提取服务端文件路径
-      final serverFilePaths = serverIndex.files.map((f) => f.path).toSet();
+      // 2. 提取服务端文件路径和 Map
+      final serverFilesMap = serverIndex.filesByPath;
+      final serverFilePaths = serverFilesMap.keys.toSet();
 
       // 3. 获取本地文件列表（递归）
       final localFiles = await _listLocalDataFiles();
@@ -446,9 +452,12 @@ class SyncClientService {
       // 4. 合并所有文件路径
       final allFilePaths = <String>{...serverFilePaths, ...localFilePaths};
 
-      // 5. 对每个文件执行双向同步
+      // 5. 对每个文件执行双向同步（使用预取的服务端索引）
       for (final filePath in allFilePaths) {
-        final result = await bidirectionalSync(filePath);
+        final result = await bidirectionalSync(
+          filePath,
+          serverFileEntry: serverFilesMap[filePath],
+        );
         results.add(result);
       }
 
