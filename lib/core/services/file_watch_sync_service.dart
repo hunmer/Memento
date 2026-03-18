@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 
@@ -47,6 +49,9 @@ class FileWatchSyncService {
 
   // 文件修改时间记录（用于检测真正的修改）
   final Map<String, DateTime> _fileModifyTimes = {};
+
+  // 文件内容 MD5 缓存（用于检测内容是否真正变化）
+  final Map<String, String> _fileMd5Cache = {};
 
   // 同步防抖间隔（毫秒）- 同一文件在短时间内多次修改，只同步最后一次
   static const int _debounceMs = 500;
@@ -304,16 +309,123 @@ class FileWatchSyncService {
         return;
       }
 
-      // 更新修改时间记录
-      _fileModifyTimes[filePath] = modifiedTime;
+      // 计算文件内容的 MD5，检测内容是否真正变化
+      final currentMd5 = await _computeFileMd5(filePath);
+      if (currentMd5 == null) {
+        _log('无法计算文件 MD5，跳过: $filePath');
+        return;
+      }
 
-      _log('文件修改时间: ${modifiedTime.toIso8601String()}');
+      final cachedMd5 = _fileMd5Cache[filePath];
+      if (cachedMd5 != null && cachedMd5 == currentMd5) {
+        _log('文件内容未变化（MD5 相同），跳过同步: $filePath');
+        // 仍然更新修改时间记录，避免后续重复计算 MD5
+        _fileModifyTimes[filePath] = modifiedTime;
+        return;
+      }
+
+      // 更新记录
+      _fileModifyTimes[filePath] = modifiedTime;
+      _fileMd5Cache[filePath] = currentMd5;
+
+      _log('文件修改时间: ${modifiedTime.toIso8601String()}, MD5: $currentMd5');
 
       // 加入同步队列
       _addToSyncQueue(filePath, 'modify');
     } catch (e) {
       _log('检查文件修改时间失败: $filePath - $e');
     }
+  }
+
+  /// 计算文件的 MD5 值
+  Future<String?> _computeFileMd5(String filePath) async {
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) return null;
+
+      // 判断是否为二进制文件
+      final isBinary = _isBinaryFile(filePath);
+
+      if (isBinary) {
+        // 二进制文件：直接计算字节流的 MD5
+        final bytes = await file.readAsBytes();
+        return md5.convert(bytes).toString();
+      } else {
+        // 文本文件
+        final content = await file.readAsString();
+
+        // JSON 文件：规范化后计算 MD5（与 SyncClientService 保持一致）
+        if (filePath.toLowerCase().endsWith('.json')) {
+          try {
+            final json = jsonDecode(content) as Map<String, dynamic>;
+            return _computeNormalizedJsonMd5(json);
+          } catch (e) {
+            // JSON 解析失败，按普通文本处理
+          }
+        }
+
+        // 普通文本文件：直接计算 MD5
+        return md5.convert(utf8.encode(content)).toString();
+      }
+    } catch (e) {
+      _log('计算文件 MD5 失败: $filePath - $e');
+      return null;
+    }
+  }
+
+  /// 计算规范化 JSON 的 MD5（递归排序所有 key）
+  String _computeNormalizedJsonMd5(Map<String, dynamic> data) {
+    final normalized = _normalizeJson(data);
+    final jsonString = jsonEncode(normalized);
+    return md5.convert(utf8.encode(jsonString)).toString();
+  }
+
+  /// 规范化 JSON（递归排序所有 key）
+  Map<String, dynamic> _normalizeJson(Map<String, dynamic> data) {
+    final sortedKeys = data.keys.toList()..sort();
+    final result = <String, dynamic>{};
+
+    for (final key in sortedKeys) {
+      final value = data[key];
+      if (value is Map<String, dynamic>) {
+        result[key] = _normalizeJson(value);
+      } else if (value is List) {
+        result[key] = _normalizeJsonList(value);
+      } else {
+        result[key] = value;
+      }
+    }
+
+    return result;
+  }
+
+  /// 规范化 JSON 列表
+  List<dynamic> _normalizeJsonList(List<dynamic> list) {
+    return list.map((item) {
+      if (item is Map<String, dynamic>) {
+        return _normalizeJson(item);
+      } else if (item is List) {
+        return _normalizeJsonList(item);
+      }
+      return item;
+    }).toList();
+  }
+
+  /// 二进制文件扩展名列表
+  static const _binaryExtensions = {
+    '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.ico',
+    '.mp3', '.mp4', '.wav', '.avi', '.mov', '.mkv',
+    '.pdf', '.zip', '.tar', '.gz', '.7z', '.rar',
+    '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+  };
+
+  /// 判断文件是否为二进制文件
+  bool _isBinaryFile(String filePath) {
+    final lowerPath = filePath.toLowerCase();
+    for (final ext in _binaryExtensions) {
+      if (lowerPath.endsWith(ext)) return true;
+    }
+    return false;
   }
 
   /// 添加到同步队列
@@ -476,6 +588,7 @@ class FileWatchSyncService {
     _stopWatching();
     _syncQueue.clear();
     _fileModifyTimes.clear();
+    _fileMd5Cache.clear();
     _syncService = null;
     _config = null;
     _isInitialized = false;
