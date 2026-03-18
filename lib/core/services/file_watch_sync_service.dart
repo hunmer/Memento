@@ -220,6 +220,9 @@ class FileWatchSyncService {
     _log('已停止所有监听');
   }
 
+  /// 需要忽略的文件名列表（避免同步循环）
+  static const _ignoredFiles = {'sync_records.json'};
+
   /// 文件变化处理
   void _onFileChanged(FileSystemEvent event) {
     // 忽略临时文件
@@ -232,6 +235,9 @@ class FileWatchSyncService {
     // 忽略隐藏文件（以.开头）
     final fileName = path.basename(event.path);
     if (fileName.startsWith('.')) return;
+
+    // 忽略同步记录文件（避免无限循环）
+    if (_ignoredFiles.contains(fileName)) return;
 
     final eventType = _getEventTypeString(event.type);
     _log('检测到文件变化: ${event.path} (类型: $eventType)');

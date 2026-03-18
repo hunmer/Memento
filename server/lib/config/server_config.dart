@@ -54,13 +54,14 @@ class ServerConfig {
     }
 
     return ServerConfig(
-      port: int.tryParse(getEnv('PORT')) ?? 8080,
+      port: int.tryParse(getEnv('PORT')) ?? 8874,
       dataDir: getEnv('DATA_DIR', './data'),
       jwtSecret: getEnv('JWT_SECRET', _generateDefaultSecret()),
       tokenExpiryDays: int.tryParse(getEnv('TOKEN_EXPIRY_DAYS')) ?? 36500,
       enableCors: getEnv('ENABLE_CORS', 'true').toLowerCase() != 'false',
       corsOrigins: getEnv('CORS_ORIGINS', '*').split(','),
-      maxRequestSize: int.tryParse(getEnv('MAX_REQUEST_SIZE')) ?? 10 * 1024 * 1024,
+      maxRequestSize:
+          int.tryParse(getEnv('MAX_REQUEST_SIZE')) ?? 10 * 1024 * 1024,
       enableLogging: getEnv('ENABLE_LOGGING', 'true').toLowerCase() != 'false',
     );
   }
