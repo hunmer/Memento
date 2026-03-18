@@ -478,10 +478,12 @@ Handler _createAuthenticatedWebSocketHandler({
       onTimeout: () => null,
     );
 
-    await subscription.cancel();
+    // 注意：不取消订阅，因为 WebSocket stream 是单订阅的
+    // 订阅将被传递给 WebSocketManager 继续使用
 
     if (authData == null) {
       logger.warning('WebSocket 认证超时或失败');
+      await subscription.cancel();
       channel.sink.add(jsonEncode({
         'type': 'auth_error',
         'error': '认证超时或失败',
@@ -495,6 +497,7 @@ Handler _createAuthenticatedWebSocketHandler({
 
     if (token == null || deviceId == null) {
       logger.warning('WebSocket 缺少认证参数');
+      await subscription.cancel();
       channel.sink.add(jsonEncode({
         'type': 'auth_error',
         'error': '缺少认证参数',
@@ -507,6 +510,7 @@ Handler _createAuthenticatedWebSocketHandler({
     final payload = authService.verifyToken(token);
     if (payload == null) {
       logger.warning('WebSocket token 无效');
+      await subscription.cancel();
       channel.sink.add(jsonEncode({
         'type': 'auth_error',
         'error': '无效的 token',
@@ -518,6 +522,7 @@ Handler _createAuthenticatedWebSocketHandler({
     final userId = payload['sub'] as String?;
     if (userId == null) {
       logger.warning('WebSocket 无法获取用户 ID');
+      await subscription.cancel();
       channel.sink.add(jsonEncode({
         'type': 'auth_error',
         'error': '无法获取用户 ID',
@@ -534,8 +539,8 @@ Handler _createAuthenticatedWebSocketHandler({
       'user_id': userId,
     }));
 
-    // 注册到 WebSocket 管理器
-    webSocketManager.registerChannel(userId, deviceId, channel);
+    // 注册到 WebSocket 管理器（传递已有订阅）
+    webSocketManager.registerChannel(userId, deviceId, channel, subscription: subscription);
     logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
   });
 }

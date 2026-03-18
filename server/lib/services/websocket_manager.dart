@@ -78,8 +78,15 @@ class WebSocketManager {
   }
 
   /// 注册 WebSocket 连接
+  ///
+  /// [subscription] 可选的已有订阅。如果认证阶段已经创建了订阅，
+  /// 传入该订阅以避免重复监听单订阅流。
   void registerChannel(
-      String userId, String deviceId, WebSocketChannel channel) {
+    String userId,
+    String deviceId,
+    WebSocketChannel channel, {
+    StreamSubscription? subscription,
+  }) {
     final connection = WebSocketConnection(
       userId: userId,
       deviceId: deviceId,
@@ -92,20 +99,36 @@ class WebSocketManager {
 
     _log('注册连接: userId=$userId, deviceId=$deviceId, 当前连接数: $connectionCount');
 
-    // 监听消息（用于心跳和确认）
-    channel.stream.listen(
-      (message) {
+    // 如果已有订阅，使用它；否则创建新订阅
+    if (subscription != null) {
+      // 更新现有订阅的回调
+      subscription.onData((message) {
         _handleMessage(connection, message);
-      },
-      onError: (error) {
+      });
+      subscription.onError((error) {
         _log('WebSocket 错误: userId=$userId, deviceId=$deviceId, error=$error');
         unregister(userId, deviceId);
-      },
-      onDone: () {
+      });
+      subscription.onDone(() {
         _log('WebSocket 关闭: userId=$userId, deviceId=$deviceId');
         unregister(userId, deviceId);
-      },
-    );
+      });
+    } else {
+      // 创建新订阅
+      channel.stream.listen(
+        (message) {
+          _handleMessage(connection, message);
+        },
+        onError: (error) {
+          _log('WebSocket 错误: userId=$userId, deviceId=$deviceId, error=$error');
+          unregister(userId, deviceId);
+        },
+        onDone: () {
+          _log('WebSocket 关闭: userId=$userId, deviceId=$deviceId');
+          unregister(userId, deviceId);
+        },
+      );
+    }
   }
 
   /// 注销 WebSocket 连接
