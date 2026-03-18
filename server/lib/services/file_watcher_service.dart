@@ -224,7 +224,11 @@ class FileWatcherService {
   /// 广播文件更新
   void _broadcastUpdate(String userId, String filePath, _FileState state) {
     // 检查用户是否有在线连接
-    if (!_webSocketManager.isUserOnline(userId)) {
+    final isOnline = _webSocketManager.isUserOnline(userId);
+    _log('广播检查: userId=$userId, isOnline=$isOnline, filePath=$filePath');
+
+    if (!isOnline) {
+      _log('用户不在线，跳过广播: userId=$userId');
       return;
     }
 

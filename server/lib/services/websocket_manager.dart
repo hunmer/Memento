@@ -186,7 +186,7 @@ class WebSocketManager {
   /// [filePath] 文件路径
   /// [md5] 文件 MD5
   /// [modifiedAt] 修改时间
-  /// [sourceDeviceId] 触发更新的设备ID（不会被通知）
+  /// [sourceDeviceId] 触发更新的设备ID（不会被通知），为空表示广播给所有设备
   void broadcastFileUpdate(
     String userId,
     String filePath,
@@ -199,6 +199,8 @@ class WebSocketManager {
       _log('用户无在线连接，跳过广播: userId=$userId');
       return;
     }
+
+    _log('准备广播: userId=$userId, 连接数=${userConnections.length}, 设备列表=${userConnections.keys.toList()}, sourceDeviceId=$sourceDeviceId');
 
     final notification = FileUpdateNotification(
       filePath: filePath,
@@ -215,7 +217,9 @@ class WebSocketManager {
       final connection = entry.value;
 
       // 排除源设备（不回发给触发更新的设备）
-      if (deviceId == sourceDeviceId) {
+      // 只有当 sourceDeviceId 非空且匹配时才跳过
+      if (sourceDeviceId.isNotEmpty && deviceId == sourceDeviceId) {
+        _log('跳过源设备: deviceId=$deviceId');
         continue;
       }
 
