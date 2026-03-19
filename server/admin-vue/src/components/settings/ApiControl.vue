@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import {
   NCard,
   NSpace,
@@ -24,6 +24,9 @@ const showKeyInput = ref(false)
 const newKey = ref('')
 const savingKey = ref(false)
 
+// 本地是否有密钥
+const hasLocalKey = computed(() => !!authStore.encryptionKey)
+
 async function handleEnableApi(): Promise<void> {
   showKeyInput.value = true
 }
@@ -46,6 +49,7 @@ async function handleSaveKey(): Promise<void> {
   try {
     await authApi.setEncryptionKey(key)
     authStore.setEncryptionKey(key)
+    authStore.serverHasKey = true
     showKeyInput.value = false
     newKey.value = ''
     message.success('加密密钥已设置')
@@ -67,6 +71,7 @@ function handleDisableApi(): void {
       try {
         await authApi.clearEncryptionKey()
         authStore.clearEncryptionKey()
+        authStore.serverHasKey = false
         message.success('加密密钥已清除')
         uiStore.addActivity('settings', '清除了加密密钥')
       } catch (err) {
@@ -80,6 +85,7 @@ async function handleRefreshStatus(): Promise<void> {
   uiStore.setLoading(true, '刷新状态...')
   try {
     const response = await authApi.hasEncryptionKey()
+    authStore.serverHasKey = response.has_key
     if (response.has_key) {
       message.info('服务器内存中存在加密密钥')
     } else {
@@ -122,16 +128,20 @@ async function copyToClipboard(text: string): Promise<void> {
           {{ authStore.hasEncryptionKey ? '🟢 已启用' : '🔴 已禁用' }}
         </NTag>
         <p style="color: #6b7280; font-size: 0.875rem; margin: 8px 0 0 0">
-          {{
-            authStore.hasEncryptionKey
-              ? 'API 访问已开放，可以解密下载文件。'
-              : 'API 访问已关闭，需要设置加密密钥才能解密文件。'
-          }}
+          <template v-if="hasLocalKey">
+            API 访问已开放，可以解密下载文件。
+          </template>
+          <template v-else-if="authStore.serverHasKey">
+            服务器已保存密钥，但本设备未保存。需要输入密钥才能在此设备解密文件。
+          </template>
+          <template v-else>
+            API 访问已关闭，需要设置加密密钥才能解密文件。
+          </template>
         </p>
 
         <!-- 显示当前密钥 -->
         <div
-          v-if="authStore.hasEncryptionKey && authStore.encryptionKey"
+          v-if="hasLocalKey"
           style="
             margin-top: 16px;
             padding: 12px;
@@ -172,6 +182,13 @@ async function copyToClipboard(text: string): Promise<void> {
         >
           ⚠️ 启用 API 需要提供加密密钥（从 Memento 客户端获取）
         </NAlert>
+        <NAlert
+          v-if="authStore.serverHasKey && !hasLocalKey"
+          type="info"
+          style="margin-top: 12px"
+        >
+          💡 服务器已保存密钥，请输入相同的密钥以在此设备启用解密功能
+        </NAlert>
       </div>
 
       <!-- 密钥输入 -->
@@ -203,7 +220,14 @@ async function copyToClipboard(text: string): Promise<void> {
           ✅ 启用 API 访问
         </NButton>
         <NButton
-          v-if="authStore.hasEncryptionKey"
+          v-if="authStore.hasEncryptionKey && !hasLocalKey"
+          type="primary"
+          @click="handleEnableApi"
+        >
+          🔑 输入密钥
+        </NButton>
+        <NButton
+          v-if="hasLocalKey"
           type="warning"
           @click="handleEnableApi"
         >

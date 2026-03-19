@@ -21,12 +21,15 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  // 后端加密密钥状态
+  const serverHasKey = ref<boolean | null>(null)
+
   // API Keys
   const apiKeys = ref<ApiKey[]>([])
   const createdKey = ref<{ name: string; key: string } | null>(null)
 
   // 计算属性
-  const hasEncryptionKey = computed(() => !!encryptionKey.value)
+  const hasEncryptionKey = computed(() => !!encryptionKey.value || serverHasKey.value === true)
 
   // 登录方法
   async function login(
@@ -61,6 +64,19 @@ export const useAuthStore = defineStore('auth', () => {
       isLoggedIn.value = true
       apiClient.setToken(response.token)
       localStorage.setItem('username', usernameInput)
+
+      // 从后端检查加密密钥状态
+      try {
+        const keyStatus = await authApi.hasEncryptionKey()
+        serverHasKey.value = keyStatus.has_key
+        if (!keyStatus.has_key) {
+          // 后端没有密钥，清除本地的
+          clearEncryptionKey()
+        }
+      } catch (e) {
+        console.warn('Failed to check encryption key status:', e)
+        serverHasKey.value = null
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '登录失败'
       throw err
@@ -73,6 +89,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn.value = false
     username.value = ''
     encryptionKey.value = ''
+    serverHasKey.value = null
     apiClient.setToken(null)
     localStorage.removeItem('token')
     localStorage.removeItem('username')
@@ -144,6 +161,7 @@ export const useAuthStore = defineStore('auth', () => {
     username,
     encryptionKey,
     serverUrl,
+    serverHasKey,
     apiKeys,
     createdKey,
     loading,
