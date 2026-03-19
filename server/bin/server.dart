@@ -336,20 +336,38 @@ void main(List<String> args) async {
 
   // 管理界面静态资源
   router.get('/admin/<file|.*>', (Request request, String file) async {
+    logger.info('静态文件请求: $file');
+
     // 安全检查：防止路径遍历攻击
     if (file.contains('..')) {
+      logger.warning('路径遍历攻击检测: $file');
       return Response.forbidden('Invalid path');
     }
 
     final filePath = path.join(adminDir, file);
+    logger.info('文件完整路径: $filePath');
     final targetFile = File(filePath);
 
     if (await targetFile.exists()) {
       final content = await targetFile.readAsBytes();
       final mimeType = _getMimeType(file);
+      logger.info('返回文件: $file, MIME: $mimeType, 大小: ${content.length}');
       return Response.ok(
         content,
-        headers: {'Content-Type': mimeType},
+        headers: {
+          'Content-Type': mimeType,
+        },
+      );
+    }
+
+    logger.warning('文件不存在: $filePath');
+
+    // 如果文件不存在，返回 index.html（SPA 路由支持）
+    final indexFile = File(path.join(adminDir, 'index.html'));
+    if (await indexFile.exists()) {
+      return Response.ok(
+        await indexFile.readAsString(),
+        headers: {'Content-Type': 'text/html; charset=utf-8'},
       );
     }
 
