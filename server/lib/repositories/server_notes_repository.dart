@@ -21,28 +21,60 @@ class ServerNotesRepository extends INotesRepository {
 
   // ============ 内部方法 ============
 
-  /// 读取所有笔记
+  /// 读取所有笔记（分文件存储格式）
   Future<List<NoteDto>> _readAllNotes() async {
-    final notesData = await dataService.readPluginData(
+    // 读取笔记索引
+    final indexData = await dataService.readPluginData(
       userId,
       _pluginId,
-      'notes.json',
+      'notes/index.json',
     );
-    if (notesData == null) return [];
+    if (indexData == null) return [];
 
-    final notes = notesData['notes'] as List<dynamic>? ?? [];
-    return notes
-        .map((n) => NoteDto.fromJson(n as Map<String, dynamic>))
-        .toList();
+    final noteIds = indexData as List<dynamic>? ?? [];
+    final notes = <NoteDto>[];
+
+    // 逐个读取笔记文件
+    for (final id in noteIds) {
+      final noteData = await dataService.readPluginData(
+        userId,
+        _pluginId,
+        'notes/$id.json',
+      );
+      if (noteData != null) {
+        notes.add(NoteDto.fromJson(noteData));
+      }
+    }
+
+    return notes;
   }
 
-  /// 保存所有笔记
-  Future<void> _saveAllNotes(List<NoteDto> notes) async {
+  /// 保存笔记索引
+  Future<void> _saveNoteIndex(List<String> noteIds) async {
     await dataService.writePluginData(
       userId,
       _pluginId,
-      'notes.json',
-      {'notes': notes.map((n) => n.toJson()).toList()},
+      'notes/index.json',
+      noteIds,
+    );
+  }
+
+  /// 保存单个笔记到文件
+  Future<void> _saveNoteToFile(NoteDto note) async {
+    await dataService.writePluginData(
+      userId,
+      _pluginId,
+      'notes/${note.id}.json',
+      note.toJson(),
+    );
+  }
+
+  /// 删除笔记文件
+  Future<void> _deleteNoteFile(String noteId) async {
+    await dataService.deletePluginFile(
+      userId,
+      _pluginId,
+      'notes/$noteId.json',
     );
   }
 
@@ -55,7 +87,16 @@ class ServerNotesRepository extends INotesRepository {
     );
     if (foldersData == null) return [];
 
-    final folders = foldersData['folders'] as List<dynamic>? ?? [];
+    // 兼容两种格式：直接数组或 {"folders": [...]} 对象
+    List<dynamic> folders;
+    if (foldersData is List) {
+      folders = foldersData;
+    } else if (foldersData is Map) {
+      folders = foldersData['folders'] as List<dynamic>? ?? [];
+    } else {
+      return [];
+    }
+
     return folders
         .map((f) => FolderDto.fromJson(f as Map<String, dynamic>))
         .toList();
@@ -63,11 +104,12 @@ class ServerNotesRepository extends INotesRepository {
 
   /// 保存所有文件夹
   Future<void> _saveAllFolders(List<FolderDto> folders) async {
+    // 直接保存为数组格式，与客户端一致
     await dataService.writePluginData(
       userId,
       _pluginId,
       'folders.json',
-      {'folders': folders.map((f) => f.toJson()).toList()},
+      folders.map((f) => f.toJson()).toList(),
     );
   }
 
@@ -116,9 +158,21 @@ class ServerNotesRepository extends INotesRepository {
   @override
   Future<Result<NoteDto>> createNote(NoteDto note) async {
     try {
-      final notes = await _readAllNotes();
-      notes.add(note);
-      await _saveAllNotes(notes);
+      // 读取现有索引
+      final indexData = await dataService.readPluginData(
+        userId,
+        _pluginId,
+        'notes/index.json',
+      );
+      final noteIds = (indexData as List<dynamic>? ?? []).cast<String>().toList();
+
+      // 添加新笔记ID到索引
+      noteIds.add(note.id);
+
+      // 保存笔记文件和索引
+      await _saveNoteToFile(note);
+      await _saveNoteIndex(noteIds);
+
       return Result.success(note);
     } catch (e) {
       return Result.failure('创建笔记失败: $e', code: ErrorCodes.serverError);
@@ -128,15 +182,8 @@ class ServerNotesRepository extends INotesRepository {
   @override
   Future<Result<NoteDto>> updateNote(String id, NoteDto note) async {
     try {
-      final notes = await _readAllNotes();
-      final index = notes.indexWhere((n) => n.id == id);
-
-      if (index == -1) {
-        return Result.failure('笔记不存在', code: ErrorCodes.notFound);
-      }
-
-      notes[index] = note;
-      await _saveAllNotes(notes);
+      // 直接覆盖笔记文件
+      await _saveNoteToFile(note);
       return Result.success(note);
     } catch (e) {
       return Result.failure('更新笔记失败: $e', code: ErrorCodes.serverError);
@@ -146,15 +193,23 @@ class ServerNotesRepository extends INotesRepository {
   @override
   Future<Result<bool>> deleteNote(String id) async {
     try {
-      final notes = await _readAllNotes();
-      final initialLength = notes.length;
-      notes.removeWhere((n) => n.id == id);
+      // 读取索引
+      final indexData = await dataService.readPluginData(
+        userId,
+        _pluginId,
+        'notes/index.json',
+      );
+      final noteIds = (indexData as List<dynamic>? ?? []).cast<String>().toList();
 
-      if (notes.length == initialLength) {
+      if (!noteIds.contains(id)) {
         return Result.failure('笔记不存在', code: ErrorCodes.notFound);
       }
 
-      await _saveAllNotes(notes);
+      // 删除笔记文件并更新索引
+      await _deleteNoteFile(id);
+      noteIds.remove(id);
+      await _saveNoteIndex(noteIds);
+
       return Result.success(true);
     } catch (e) {
       return Result.failure('删除笔记失败: $e', code: ErrorCodes.serverError);
@@ -164,19 +219,36 @@ class ServerNotesRepository extends INotesRepository {
   @override
   Future<Result<NoteDto>> moveNote(String id, String? targetFolderId) async {
     try {
-      final notes = await _readAllNotes();
-      final index = notes.indexWhere((n) => n.id == id);
+      // 读取索引检查笔记是否存在
+      final indexData = await dataService.readPluginData(
+        userId,
+        _pluginId,
+        'notes/index.json',
+      );
+      final noteIds = (indexData as List<dynamic>? ?? []).cast<String>().toList();
 
-      if (index == -1) {
+      if (!noteIds.contains(id)) {
         return Result.failure('笔记不存在', code: ErrorCodes.notFound);
       }
 
-      final updated = notes[index].copyWith(
+      // 读取笔记并更新
+      final noteData = await dataService.readPluginData(
+        userId,
+        _pluginId,
+        'notes/$id.json',
+      );
+      if (noteData == null) {
+        return Result.failure('笔记不存在', code: ErrorCodes.notFound);
+      }
+
+      final note = NoteDto.fromJson(noteData);
+      final updated = note.copyWith(
         folderId: targetFolderId,
         updatedAt: DateTime.now(),
       );
-      notes[index] = updated;
-      await _saveAllNotes(notes);
+
+      // 保存更新后的笔记
+      await _saveNoteToFile(updated);
       return Result.success(updated);
     } catch (e) {
       return Result.failure('移动笔记失败: $e', code: ErrorCodes.serverError);
@@ -338,19 +410,13 @@ class ServerNotesRepository extends INotesRepository {
 
       await _saveAllFolders(folders);
 
-      // 将被删除文件夹下的笔记移到根目录
+      // 将被删除文件夹下的笔记移到根目录（分文件更新）
       final notes = await _readAllNotes();
-      var updated = false;
-      final updatedNotes = notes.map((note) {
+      for (final note in notes) {
         if (idsToDelete.contains(note.folderId)) {
-          updated = true;
-          return note.copyWith(folderId: null);
+          final updated = note.copyWith(folderId: null);
+          await _saveNoteToFile(updated);
         }
-        return note;
-      }).toList();
-
-      if (updated) {
-        await _saveAllNotes(updatedNotes);
       }
 
       return Result.success(true);

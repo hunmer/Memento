@@ -110,6 +110,16 @@ class ServerEncryptionService {
     return encryptString(userId, jsonString);
   }
 
+  /// 加密动态类型 JSON 数据（支持对象或数组）
+  ///
+  /// [userId] 用户ID
+  /// [data] 要加密的 JSON 数据（可以是 Map 或 List）
+  /// 返回格式: base64(iv).base64(ciphertext)
+  String encryptDynamic(String userId, dynamic data) {
+    final jsonString = jsonEncode(data);
+    return encryptString(userId, jsonString);
+  }
+
   /// 加密字符串
   String encryptString(String userId, String data) {
     final encrypter = _userEncrypters[userId];
@@ -125,6 +135,13 @@ class ServerEncryptionService {
 
   /// 计算数据的 MD5 (加密前的原始数据)
   String computeMd5(Map<String, dynamic> data) {
+    final normalizedJson = _normalizeJson(data);
+    final jsonString = jsonEncode(normalizedJson);
+    return md5.convert(utf8.encode(jsonString)).toString();
+  }
+
+  /// 计算动态类型数据的 MD5（支持对象或数组）
+  String computeDynamicMd5(dynamic data) {
     final normalizedJson = _normalizeJson(data);
     final jsonString = jsonEncode(normalizedJson);
     return md5.convert(utf8.encode(jsonString)).toString();

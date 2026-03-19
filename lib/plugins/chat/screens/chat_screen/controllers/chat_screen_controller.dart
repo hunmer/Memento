@@ -18,6 +18,12 @@ class ChatScreenController extends ChangeNotifier {
       allMessages = List<Message>.from(channelMessages)
         ..sort((a, b) => b.date.compareTo(a.date));
 
+      // 如果新消息数量超过了当前显示范围，调整索引以包含新消息
+      if (currentEndIndex < allMessages.length) {
+        // 保持当前起始索引，调整结束索引以包含所有新消息
+        currentEndIndex = allMessages.length;
+      }
+
       // 重新加载当前显示范围内的消息
       _loadMessagesInRange();
       notifyListeners();

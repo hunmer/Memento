@@ -861,7 +861,7 @@ class WatchConnectivityService {
       final List<Map<String, dynamic>> noteItems = [];
       for (final note in recentNotes) {
         // 获取笔记所属文件夹信息
-        final folder = controller.getFolder(note.folderId);
+        final folder = note.folderId != null ? controller.getFolder(note.folderId!) : null;
         String folderName = '默认';
         int folderColor = 0xFFEC5B13; // 默认主题色
         int folderIcon = 0xe2c7; // folder 图标

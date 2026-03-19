@@ -104,42 +104,8 @@ class NotesController {
               .catchError((_) => '');
           if (noteData.isNotEmpty) {
             final note = Note.fromJson(json.decode(noteData));
-            _notes.putIfAbsent(note.folderId, () => []).add(note);
+            _notes.putIfAbsent(note.folderId ?? 'root', () => []).add(note);
           }
-        }
-      } else {
-        // 兼容旧格式：尝试读取 notes.json
-        final legacyData = await _storage
-            .readPluginFile('notes', 'notes.json')
-            .catchError((_) => '');
-
-        if (legacyData.isNotEmpty) {
-          // 迁移旧数据到新格式
-          final List<dynamic> jsonList = json.decode(legacyData);
-          final noteIds = <String>[];
-          for (var item in jsonList) {
-            final note = Note.fromJson(item);
-            _notes.putIfAbsent(note.folderId, () => []).add(note);
-            noteIds.add(note.id);
-            _noteIds.add(note.id);
-            // 保存每个笔记到单独文件
-            await _saveNoteToFile(note);
-          }
-          // 保存索引文件
-          await _saveNoteIndex(noteIds);
-          // 删除旧文件
-          await _storage.deleteFile('notes/notes.json');
-        } else {
-          // 加载示例笔记数据
-          final sampleNotes = NotesSampleData.getSampleNotes();
-          final noteIds = <String>[];
-          for (var note in sampleNotes) {
-            _notes.putIfAbsent(note.folderId, () => []).add(note);
-            noteIds.add(note.id);
-            _noteIds.add(note.id);
-            await _saveNoteToFile(note);
-          }
-          await _saveNoteIndex(noteIds);
         }
       }
     } catch (e) {

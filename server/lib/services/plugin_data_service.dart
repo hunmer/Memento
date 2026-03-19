@@ -50,7 +50,7 @@ class PluginDataService {
   // ==================== 数据读取 ====================
 
   /// 读取并解密插件数据文件
-  Future<Map<String, dynamic>?> readPluginData(
+  Future<dynamic> readPluginData(
     String userId,
     String pluginId,
     String fileName,
@@ -104,19 +104,19 @@ class PluginDataService {
 
   // ==================== 数据写入 ====================
 
-  /// 加密并写入插件数据
+  /// 加密并写入插件数据（支持对象或数组）
   Future<void> writePluginData(
     String userId,
     String pluginId,
     String fileName,
-    Map<String, dynamic> data,
+    dynamic data,
   ) async {
     if (!hasEncryptionKey(userId)) {
       throw StateError('用户未设置加密密钥');
     }
 
-    final encryptedData = encryptionService.encryptData(userId, data);
-    final md5Hash = encryptionService.computeMd5(data);
+    final encryptedData = encryptionService.encryptDynamic(userId, data);
+    final md5Hash = encryptionService.computeDynamicMd5(data);
     final filePath = '$pluginId/$fileName';
 
     await storageService.writeEncryptedFile(
