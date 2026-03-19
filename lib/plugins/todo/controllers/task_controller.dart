@@ -227,6 +227,11 @@ class TaskController extends ChangeNotifier {
     }
   }
 
+  /// 重新加载任务数据（用于同步后刷新）
+  Future<void> reload() async {
+    await _loadTasks();
+  }
+
   // 加载任务
   Future<void> _loadTasks() async {
     final data = await _storage.read('$_storageDir/tasks.json');

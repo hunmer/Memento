@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'controllers/controllers.dart';
@@ -170,6 +171,17 @@ class TodoPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   Future<void> uninstall() async {
     // 清理插件数据
     await storageManager.delete(storageDir);
+  }
+
+  /// 刷新插件数据（同步后调用）
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      await taskController.reload();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override

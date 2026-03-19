@@ -101,40 +101,72 @@ class Task {
         'iconFontFamily': icon?.fontFamily, // 存储图标的字体族
       };
 
-  factory Task.fromJson(Map<String, dynamic> json) => Task(
-        id: json['id'],
-        title: json['title'],
-        description: json['description'],
-        createdAt: DateTime.parse(json['createdAt']),
-        startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
-        dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
-        priority: TaskPriority.values[json['priority']],
-        status: TaskStatus.values[json['status']],
-        tags: json['tags'] != null
-            ? List<String>.from(json['tags'])
-            : [],
-        subtasks: (json['subtasks'] as List)
-            .map((e) => Subtask.fromJson(e))
-            .toList(),
-        reminders: (json['reminders'] as List)
-            .map((e) => DateTime.parse(e))
-            .toList(),
-        completedDate: json['completedDate'] != null
-            ? DateTime.parse(json['completedDate'])
-            : null,
-        startTime: json['startTime'] != null
-            ? DateTime.parse(json['startTime'])
-            : null,
-        duration: json['duration'] != null
-            ? Duration(milliseconds: json['duration'])
-            : null,
-        icon: json['iconCodePoint'] != null && json['iconFontFamily'] != null
-            ? IconData(
-                json['iconCodePoint'],
-                fontFamily: json['iconFontFamily'],
-              )
-            : null,
-      );
+  factory Task.fromJson(Map<String, dynamic> json) {
+    // 兼容 TaskDto 格式：isCompleted -> status
+    TaskStatus status;
+    if (json.containsKey('status') && json['status'] != null) {
+      status = TaskStatus.values[json['status'] as int];
+    } else if (json.containsKey('isCompleted')) {
+      // TaskDto 格式：isCompleted 映射到 done/todo
+      final isCompleted = json['isCompleted'] as bool? ?? false;
+      status = isCompleted ? TaskStatus.done : TaskStatus.todo;
+    } else {
+      status = TaskStatus.todo;
+    }
+
+    // 兼容 TaskDto 格式：completedAt -> completedDate
+    DateTime? completedDate;
+    if (json['completedDate'] != null) {
+      completedDate = DateTime.parse(json['completedDate']);
+    } else if (json['completedAt'] != null) {
+      completedDate = DateTime.parse(json['completedAt']);
+    }
+
+    // 兼容 TaskDto 格式：priority (0-3 映射到 q1-q4)
+    TaskPriority priority;
+    if (json['priority'] != null) {
+      final priorityIndex = json['priority'] as int;
+      // TaskDto: 0=none, 1=low, 2=medium, 3=high
+      // Task: q1=紧急重要, q2=重要不紧急, q3=紧急不重要, q4=不重要不紧急
+      // 简单映射：0->q4, 1->q3, 2->q2, 3->q1
+      priority = TaskPriority.values[(3 - priorityIndex).clamp(0, 3)];
+    } else {
+      priority = TaskPriority.q2;
+    }
+
+    return Task(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      createdAt: DateTime.parse(json['createdAt']),
+      startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
+      dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : null,
+      priority: priority,
+      status: status,
+      tags: json['tags'] != null
+          ? List<String>.from(json['tags'])
+          : [],
+      subtasks: (json['subtasks'] as List?)
+          ?.map((e) => Subtask.fromJson(e))
+          .toList() ?? [],
+      reminders: (json['reminders'] as List?)
+          ?.map((e) => DateTime.parse(e))
+          .toList() ?? [],
+      completedDate: completedDate,
+      startTime: json['startTime'] != null
+          ? DateTime.parse(json['startTime'])
+          : null,
+      duration: json['duration'] != null
+          ? Duration(milliseconds: json['duration'])
+          : null,
+      icon: json['iconCodePoint'] != null && json['iconFontFamily'] != null
+          ? IconData(
+              json['iconCodePoint'],
+              fontFamily: json['iconFontFamily'],
+            )
+          : null,
+    );
+  }
 
   Color get priorityColor {
     switch (priority) {

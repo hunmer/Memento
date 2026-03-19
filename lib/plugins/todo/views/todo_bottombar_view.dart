@@ -206,7 +206,7 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
   Widget _buildTabPage(int index) {
     switch (index) {
       case 0:
-        // 使用 EventListenerContainer 监听任务事件来触发 UI 更新
+        // 使用 EventListenerContainer 监听任务事件和同步刷新事件来触发 UI 更新
         // AnimatedBuilder 会监听 taskController 的变化并重建 UI
         return EventListenerContainer(
           events: [
@@ -214,6 +214,8 @@ class _TodoBottomBarViewState extends State<TodoBottomBarView>
             'task_updated',
             'task_deleted',
             'task_completed',
+            'todo_refresh', // 同步后触发的刷新事件
+            'sync_data_updated', // 通用同步数据更新事件
           ],
           onEvent: () {}, // AnimatedBuilder 会处理更新
           child: _buildTaskListView(),
