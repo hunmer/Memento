@@ -32,6 +32,30 @@ export function getToolDefinitions() {
       },
     },
     {
+      name: 'memento_chat_updateChannel',
+      description: '更新频道信息',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '频道 ID' },
+          name: { type: 'string', description: '频道名称' },
+          description: { type: 'string', description: '频道描述' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_chat_deleteChannel',
+      description: '删除频道',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '频道 ID' },
+        },
+        required: ['id'],
+      },
+    },
+    {
       name: 'memento_chat_getMessages',
       description: '获取指定频道的消息列表',
       inputSchema: {
@@ -56,6 +80,34 @@ export function getToolDefinitions() {
           senderName: { type: 'string', description: '发送者名称' },
         },
         required: ['channelId', 'content', 'senderId', 'senderName'],
+      },
+    },
+    {
+      name: 'memento_chat_deleteMessage',
+      description: '删除消息',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          channelId: { type: 'string', description: '频道 ID' },
+          messageId: { type: 'string', description: '消息 ID' },
+        },
+        required: ['channelId', 'messageId'],
+      },
+    },
+    {
+      name: 'memento_chat_searchMessages',
+      description: '搜索消息',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          field: { type: 'string', description: '搜索字段（如 content）' },
+          value: { type: 'string', description: '搜索值' },
+          channelId: { type: 'string', description: '频道 ID（可选）' },
+          fuzzy: { type: 'boolean', description: '是否模糊搜索' },
+          offset: { type: 'number', description: '偏移量' },
+          count: { type: 'number', description: '数量限制' },
+        },
+        required: ['value'],
       },
     },
 
@@ -101,6 +153,17 @@ export function getToolDefinitions() {
       },
     },
     {
+      name: 'memento_notes_deleteNote',
+      description: '删除笔记',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '笔记 ID' },
+        },
+        required: ['id'],
+      },
+    },
+    {
       name: 'memento_notes_searchNotes',
       description: '搜索笔记',
       inputSchema: {
@@ -141,6 +204,36 @@ export function getToolDefinitions() {
           mood: { type: 'number', description: '心情值 (1-5)' },
         },
         required: ['startTime', 'endTime', 'title'],
+      },
+    },
+    {
+      name: 'memento_activity_updateActivity',
+      description: '更新活动记录',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '活动 ID' },
+          startTime: { type: 'string', description: '开始时间 (ISO 8601)' },
+          endTime: { type: 'string', description: '结束时间 (ISO 8601)' },
+          title: { type: 'string', description: '活动标题' },
+          tags: { type: 'array', items: { type: 'string' }, description: '标签' },
+          description: { type: 'string', description: '描述' },
+          mood: { type: 'number', description: '心情值 (1-5)' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_activity_deleteActivity',
+      description: '删除活动记录',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '活动 ID' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+        },
+        required: ['id'],
       },
     },
     {
@@ -190,6 +283,34 @@ export function getToolDefinitions() {
           tags: { type: 'array', items: { type: 'string' }, description: '标签' },
         },
         required: ['name', 'warehouseId'],
+      },
+    },
+    {
+      name: 'memento_goods_updateItem',
+      description: '更新物品',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '物品 ID' },
+          name: { type: 'string', description: '物品名称' },
+          description: { type: 'string', description: '描述' },
+          quantity: { type: 'number', description: '数量' },
+          category: { type: 'string', description: '分类' },
+          tags: { type: 'array', items: { type: 'string' }, description: '标签' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_goods_deleteItem',
+      description: '删除物品',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '物品 ID' },
+          warehouseId: { type: 'string', description: '仓库 ID（可选）' },
+        },
+        required: ['id'],
       },
     },
     {
@@ -244,6 +365,33 @@ export function getToolDefinitions() {
           date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
         },
         required: ['accountId', 'type', 'amount'],
+      },
+    },
+    {
+      name: 'memento_bill_updateBill',
+      description: '更新账单',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '账单 ID' },
+          type: { type: 'string', enum: ['income', 'expense', 'transfer'], description: '类型' },
+          amount: { type: 'number', description: '金额' },
+          category: { type: 'string', description: '分类' },
+          description: { type: 'string', description: '描述' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_bill_deleteBill',
+      description: '删除账单',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '账单 ID' },
+        },
+        required: ['id'],
       },
     },
     {
@@ -408,6 +556,17 @@ export function getToolDefinitions() {
       },
     },
     {
+      name: 'memento_diary_deleteEntry',
+      description: '删除日记',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+        },
+        required: ['date'],
+      },
+    },
+    {
       name: 'memento_diary_searchEntries',
       description: '搜索日记',
       inputSchema: {
@@ -454,6 +613,33 @@ export function getToolDefinitions() {
           description: { type: 'string', description: '描述' },
         },
         required: ['name'],
+      },
+    },
+    {
+      name: 'memento_checkin_updateItem',
+      description: '更新打卡项目',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '项目 ID' },
+          name: { type: 'string', description: '项目名称' },
+          icon: { type: 'string', description: '图标' },
+          color: { type: 'string', description: '颜色' },
+          group: { type: 'string', description: '分组' },
+          description: { type: 'string', description: '描述' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_checkin_deleteItem',
+      description: '删除打卡项目',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '项目 ID' },
+        },
+        required: ['id'],
       },
     },
     {
@@ -507,6 +693,33 @@ export function getToolDefinitions() {
       },
     },
     {
+      name: 'memento_day_updateMemorialDay',
+      description: '更新纪念日',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '纪念日 ID' },
+          name: { type: 'string', description: '纪念日名称' },
+          date: { type: 'string', description: '日期 (YYYY-MM-DD)' },
+          type: { type: 'string', description: '类型（倒计时/正计时）' },
+          description: { type: 'string', description: '描述' },
+          color: { type: 'string', description: '颜色' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_day_deleteMemorialDay',
+      description: '删除纪念日',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '纪念日 ID' },
+        },
+        required: ['id'],
+      },
+    },
+    {
       name: 'memento_day_searchMemorialDays',
       description: '搜索纪念日',
       inputSchema: {
@@ -553,6 +766,33 @@ export function getToolDefinitions() {
           description: { type: 'string', description: '描述' },
         },
         required: ['name', 'targetValue', 'unit'],
+      },
+    },
+    {
+      name: 'memento_tracker_updateGoal',
+      description: '更新追踪目标',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '目标 ID' },
+          name: { type: 'string', description: '目标名称' },
+          targetValue: { type: 'number', description: '目标值' },
+          unit: { type: 'string', description: '单位' },
+          group: { type: 'string', description: '分组' },
+          description: { type: 'string', description: '描述' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_tracker_deleteGoal',
+      description: '删除追踪目标',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '目标 ID' },
+        },
+        required: ['id'],
       },
     },
     {
@@ -606,6 +846,33 @@ export function getToolDefinitions() {
       },
     },
     {
+      name: 'memento_contact_updateContact',
+      description: '更新联系人',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '联系人 ID' },
+          name: { type: 'string', description: '姓名' },
+          phone: { type: 'string', description: '电话' },
+          email: { type: 'string', description: '邮箱' },
+          tags: { type: 'array', items: { type: 'string' }, description: '标签' },
+          notes: { type: 'string', description: '备注' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_contact_deleteContact',
+      description: '删除联系人',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '联系人 ID' },
+        },
+        required: ['id'],
+      },
+    },
+    {
       name: 'memento_contact_searchContacts',
       description: '搜索联系人',
       inputSchema: {
@@ -652,6 +919,33 @@ export function getToolDefinitions() {
           location: { type: 'string', description: '地点' },
         },
         required: ['title', 'startTime'],
+      },
+    },
+    {
+      name: 'memento_calendar_updateEvent',
+      description: '更新日历事件',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '事件 ID' },
+          title: { type: 'string', description: '事件标题' },
+          startTime: { type: 'string', description: '开始时间 (ISO 8601)' },
+          endTime: { type: 'string', description: '结束时间 (ISO 8601)' },
+          description: { type: 'string', description: '描述' },
+          location: { type: 'string', description: '地点' },
+        },
+        required: ['id'],
+      },
+    },
+    {
+      name: 'memento_calendar_deleteEvent',
+      description: '删除日历事件',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: '事件 ID' },
+        },
+        required: ['id'],
       },
     },
     {

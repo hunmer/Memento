@@ -61,6 +61,16 @@ async function main() {
                     const result = await client.createChannel(args);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
+                case 'memento_chat_updateChannel': {
+                    const { id, ...data } = args;
+                    const result = await client.updateChannel(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_chat_deleteChannel': {
+                    const { id } = args;
+                    const result = await client.deleteChannel(id);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
                 case 'memento_chat_getMessages': {
                     const { channelId, ...params } = args;
                     const result = await client.getMessages(channelId, params);
@@ -69,6 +79,15 @@ async function main() {
                 case 'memento_chat_sendMessage': {
                     const { channelId, ...data } = args;
                     const result = await client.sendMessage(channelId, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_chat_deleteMessage': {
+                    const { channelId, messageId } = args;
+                    const result = await client.deleteMessage(channelId, messageId);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_chat_searchMessages': {
+                    const result = await client.searchMessages(args);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 // ==================== Notes 工具 ====================
@@ -85,6 +104,11 @@ async function main() {
                     const result = await client.updateNote(id, data);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
+                case 'memento_notes_deleteNote': {
+                    const { id } = args;
+                    const result = await client.deleteNote(id);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
                 case 'memento_notes_searchNotes': {
                     const { keyword, ...params } = args;
                     const result = await client.searchNotes(keyword, params);
@@ -97,6 +121,16 @@ async function main() {
                 }
                 case 'memento_activity_createActivity': {
                     const result = await client.createActivity(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_activity_updateActivity': {
+                    const { id, ...data } = args;
+                    const result = await client.updateActivity(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_activity_deleteActivity': {
+                    const { id, date } = args;
+                    const result = await client.deleteActivity(id, date);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_activity_getTodayStats': {
@@ -114,6 +148,16 @@ async function main() {
                 }
                 case 'memento_goods_createItem': {
                     const result = await client.createItem(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_goods_updateItem': {
+                    const { id, ...data } = args;
+                    const result = await client.updateItem(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_goods_deleteItem': {
+                    const { id, warehouseId } = args;
+                    const result = await client.deleteItem(id, warehouseId);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_goods_searchItems': {
@@ -134,6 +178,16 @@ async function main() {
                 case 'memento_bill_createBill': {
                     const { accountId, ...data } = args;
                     const result = await client.createBill(accountId, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_bill_updateBill': {
+                    const { id, ...data } = args;
+                    const result = await client.updateBill(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_bill_deleteBill': {
+                    const { id } = args;
+                    const result = await client.deleteBill(id);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_bill_getStats': {
@@ -204,6 +258,11 @@ async function main() {
                     const result = await client.updateDiaryEntry(date, data);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
+                case 'memento_diary_deleteEntry': {
+                    const { date } = args;
+                    const result = await client.deleteDiaryEntry(date);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
                 case 'memento_diary_searchEntries': {
                     const result = await client.searchDiaryEntries(args);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
@@ -230,6 +289,16 @@ async function main() {
                     const result = await client.createCheckinItem(checkinData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
+                case 'memento_checkin_updateItem': {
+                    const { id, ...data } = args;
+                    const result = await client.updateCheckinItem(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_checkin_deleteItem': {
+                    const { id } = args;
+                    const result = await client.deleteCheckinItem(id);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
                 case 'memento_checkin_addRecord': {
                     const { itemId, ...data } = args;
                     const result = await client.addCheckinRecord(itemId, data);
@@ -254,6 +323,16 @@ async function main() {
                         backgroundColor: params.color ? parseInt(params.color) : 4280391411,
                     };
                     const result = await client.createMemorialDay(memorialDayData);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_day_updateMemorialDay': {
+                    const { id, ...data } = args;
+                    const result = await client.updateMemorialDay(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_day_deleteMemorialDay': {
+                    const { id } = args;
+                    const result = await client.deleteMemorialDay(id);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_day_searchMemorialDays': {
@@ -286,6 +365,16 @@ async function main() {
                     const result = await client.createTrackerGoal(trackerData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
+                case 'memento_tracker_updateGoal': {
+                    const { id, ...data } = args;
+                    const result = await client.updateTrackerGoal(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_tracker_deleteGoal': {
+                    const { id } = args;
+                    const result = await client.deleteTrackerGoal(id);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
                 case 'memento_tracker_addRecord': {
                     const result = await client.addTrackerRecord(args);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
@@ -301,6 +390,16 @@ async function main() {
                 }
                 case 'memento_contact_createContact': {
                     const result = await client.createContact(args);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_contact_updateContact': {
+                    const { id, ...data } = args;
+                    const result = await client.updateContact(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_contact_deleteContact': {
+                    const { id } = args;
+                    const result = await client.deleteContact(id);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_contact_searchContacts': {
@@ -330,6 +429,16 @@ async function main() {
                         color: params.color ?? 4280391411, // 默认颜色
                     };
                     const result = await client.createCalendarEvent(eventData);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_calendar_updateEvent': {
+                    const { id, ...data } = args;
+                    const result = await client.updateCalendarEvent(id, data);
+                    return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
+                }
+                case 'memento_calendar_deleteEvent': {
+                    const { id } = args;
+                    const result = await client.deleteCalendarEvent(id);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_calendar_completeEvent': {

@@ -93,10 +93,28 @@ export class MementoClient {
         return this.get('/api/v1/plugins/chat/channels', params);
     }
     /**
+     * 获取单个频道
+     */
+    async getChannel(id) {
+        return this.get(`/api/v1/plugins/chat/channels/${id}`);
+    }
+    /**
      * 创建频道
      */
     async createChannel(data) {
         return this.post('/api/v1/plugins/chat/channels', data);
+    }
+    /**
+     * 更新频道
+     */
+    async updateChannel(id, data) {
+        return this.put(`/api/v1/plugins/chat/channels/${id}`, data);
+    }
+    /**
+     * 删除频道
+     */
+    async deleteChannel(id) {
+        return this.delete(`/api/v1/plugins/chat/channels/${id}`);
     }
     /**
      * 获取消息列表
@@ -109,6 +127,48 @@ export class MementoClient {
      */
     async sendMessage(channelId, data) {
         return this.post(`/api/v1/plugins/chat/channels/${channelId}/messages`, data);
+    }
+    /**
+     * 删除消息
+     */
+    async deleteMessage(channelId, messageId) {
+        return this.delete(`/api/v1/plugins/chat/channels/${channelId}/messages/${messageId}`);
+    }
+    /**
+     * 搜索消息
+     */
+    async searchMessages(params) {
+        const queryParams = { value: params.value };
+        if (params.field)
+            queryParams.field = params.field;
+        if (params.channelId)
+            queryParams.channelId = params.channelId;
+        if (params.findAll !== undefined)
+            queryParams.findAll = String(params.findAll);
+        if (params.fuzzy !== undefined)
+            queryParams.fuzzy = String(params.fuzzy);
+        if (params.offset !== undefined)
+            queryParams.offset = String(params.offset);
+        if (params.count !== undefined)
+            queryParams.count = String(params.count);
+        return this.get('/api/v1/plugins/chat/find/message', queryParams);
+    }
+    /**
+     * 搜索频道
+     */
+    async searchChannels(params) {
+        const queryParams = { value: params.value };
+        if (params.field)
+            queryParams.field = params.field;
+        if (params.findAll !== undefined)
+            queryParams.findAll = String(params.findAll);
+        if (params.fuzzy !== undefined)
+            queryParams.fuzzy = String(params.fuzzy);
+        if (params.offset !== undefined)
+            queryParams.offset = String(params.offset);
+        if (params.count !== undefined)
+            queryParams.count = String(params.count);
+        return this.get('/api/v1/plugins/chat/find/channel', queryParams);
     }
     // ==================== Notes API ====================
     /**
@@ -128,6 +188,12 @@ export class MementoClient {
      */
     async updateNote(id, data) {
         return this.put(`/api/v1/plugins/notes/notes/${id}`, data);
+    }
+    /**
+     * 删除笔记
+     */
+    async deleteNote(id) {
+        return this.delete(`/api/v1/plugins/notes/notes/${id}`);
     }
     /**
      * 搜索笔记
@@ -152,6 +218,19 @@ export class MementoClient {
      */
     async createActivity(data) {
         return this.post('/api/v1/plugins/activity/activities', data);
+    }
+    /**
+     * 更新活动
+     */
+    async updateActivity(id, data) {
+        return this.put(`/api/v1/plugins/activity/activities/${id}`, data);
+    }
+    /**
+     * 删除活动
+     */
+    async deleteActivity(id, date) {
+        const params = date ? { date } : undefined;
+        return this.delete(`/api/v1/plugins/activity/activities/${id}`, params);
     }
     /**
      * 获取今日统计
@@ -179,6 +258,19 @@ export class MementoClient {
         return this.post('/api/v1/plugins/goods/items', data);
     }
     /**
+     * 更新物品
+     */
+    async updateItem(id, data) {
+        return this.put(`/api/v1/plugins/goods/items/${id}`, data);
+    }
+    /**
+     * 删除物品
+     */
+    async deleteItem(id, warehouseId) {
+        const params = warehouseId ? { warehouseId } : undefined;
+        return this.delete(`/api/v1/plugins/goods/items/${id}`, params);
+    }
+    /**
      * 搜索物品
      */
     async searchItems(keyword, params) {
@@ -202,6 +294,18 @@ export class MementoClient {
      */
     async createBill(accountId, data) {
         return this.post(`/api/v1/plugins/bill/accounts/${accountId}/bills`, data);
+    }
+    /**
+     * 更新账单
+     */
+    async updateBill(id, data) {
+        return this.put(`/api/v1/plugins/bill/bills/${id}`, data);
+    }
+    /**
+     * 删除账单
+     */
+    async deleteBill(id) {
+        return this.delete(`/api/v1/plugins/bill/bills/${id}`);
     }
     /**
      * 获取账单统计
