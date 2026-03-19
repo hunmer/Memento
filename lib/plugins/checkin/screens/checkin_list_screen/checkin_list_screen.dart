@@ -6,6 +6,7 @@ import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:Memento/plugins/checkin/controllers/checkin_list_controller.dart';
 import 'package:Memento/plugins/checkin/widgets/checkin_record_dialog.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
 import 'components/empty_state.dart';
 import 'components/checkin_item_card.dart';
 
@@ -31,11 +32,14 @@ class CheckinListScreen extends StatefulWidget {
 
 class _CheckinListScreenState extends State<CheckinListScreen> {
   late CheckinListController controller;
+  final _eventManager = EventManager.instance;
 
   @override
   void initState() {
     super.initState();
     controller = widget.controller;
+    // 订阅同步刷新事件
+    _eventManager.subscribe('checkin_refresh', _handleSyncRefresh);
     // 恢复最后一次排序设置
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await controller.restoreLastSortSetting();
@@ -49,6 +53,21 @@ class _CheckinListScreenState extends State<CheckinListScreen> {
         _showCheckinDialogForItem(widget.initialItemId!, widget.targetDate);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // 取消订阅，避免内存泄漏
+    _eventManager.unsubscribe('checkin_refresh', _handleSyncRefresh);
+    super.dispose();
+  }
+
+  /// 处理同步刷新事件
+  void _handleSyncRefresh(EventArgs args) {
+    debugPrint('[CheckinListScreen] 收到同步刷新事件');
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _handleStateChanged() {

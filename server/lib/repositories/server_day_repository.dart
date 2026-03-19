@@ -26,11 +26,11 @@ class ServerDayRepository extends IDayRepository {
     final daysData = await dataService.readPluginData(
       userId,
       _pluginId,
-      'days.json',
+      'memorial_days.json',
     );
     if (daysData == null) return [];
 
-    final days = daysData['days'] as List<dynamic>? ?? [];
+    final days = daysData as List<dynamic>? ?? [];
     return days
         .map((d) => MemorialDayDto.fromJson(d as Map<String, dynamic>))
         .toList();
@@ -41,8 +41,8 @@ class ServerDayRepository extends IDayRepository {
     await dataService.writePluginData(
       userId,
       _pluginId,
-      'days.json',
-      {'days': days.map((d) => d.toJson()).toList()},
+      'memorial_days.json',
+      days.map((d) => d.toJson()).toList(),
     );
   }
 

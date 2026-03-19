@@ -9,6 +9,7 @@ import 'package:Memento/plugins/day/widgets/memorial_day_list_item.dart';
 import 'package:Memento/plugins/day/widgets/edit_memorial_day_dialog/edit_memorial_day_page.dart';
 import 'package:Memento/plugins/day/models/memorial_day.dart';
 import 'package:Memento/core/route/route_history_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
 
 class DayHomeScreen extends StatefulWidget {
   const DayHomeScreen({super.key});
@@ -79,6 +80,21 @@ class _DayHomeScreenState extends State<DayHomeScreen> {
     super.initState();
     _controller = DayController();
     _initializeController();
+    // 订阅同步刷新事件
+    EventManager.instance.subscribe('day_refresh', _handleSyncRefresh);
+  }
+
+  @override
+  void dispose() {
+    // 取消订阅，避免内存泄漏
+    EventManager.instance.unsubscribe('day_refresh', _handleSyncRefresh);
+    super.dispose();
+  }
+
+  /// 处理同步刷新事件
+  void _handleSyncRefresh(EventArgs args) {
+    debugPrint('[DayHomeScreen] 收到同步刷新事件');
+    _controller.reloadData();
   }
 
   Future<void> _initializeController() async {
