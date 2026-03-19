@@ -25,7 +25,7 @@ class ServerContactRepository implements IContactRepository {
     );
     if (data == null) return [];
 
-    final contacts = data['contacts'] as List<dynamic>? ?? [];
+    final contacts = data as List<dynamic>? ?? [];
     return contacts
         .map((e) => ContactDto.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -36,7 +36,7 @@ class ServerContactRepository implements IContactRepository {
       userId,
       _pluginId,
       'contacts.json',
-      {'contacts': contacts.map((c) => c.toJson()).toList()},
+      contacts.map((c) => c.toJson()).toList(),
     );
   }
 

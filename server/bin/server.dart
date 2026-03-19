@@ -304,7 +304,8 @@ void main(List<String> args) async {
     pluginPipeline().addHandler(trackerRoutes.router.call),
   );
 
-  logger.info('已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
+  logger.info(
+      '已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
 
   // 管理界面静态文件服务
   final scriptDir = path.dirname(Platform.script.toFilePath());
@@ -366,7 +367,8 @@ void main(List<String> args) async {
           headers: {
             ACCESS_CONTROL_ALLOW_ORIGIN: config.corsOrigins.join(','),
             ACCESS_CONTROL_ALLOW_METHODS: 'GET, POST, PUT, DELETE, OPTIONS',
-            ACCESS_CONTROL_ALLOW_HEADERS: 'Origin, Content-Type, Authorization, X-API-Key, X-Encryption-Key',
+            ACCESS_CONTROL_ALLOW_HEADERS:
+                'Origin, Content-Type, Authorization, X-API-Key, X-Encryption-Key',
           },
         ))
         .addMiddleware(logRequests())
@@ -552,8 +554,10 @@ Handler _createAuthenticatedWebSocketHandler({
     }));
 
     // 注册到 WebSocket 管理器（传递已有订阅）
-    webSocketManager.registerChannel(userId, deviceId, channel, subscription: subscription);
-    logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
+    webSocketManager.registerChannel(userId, deviceId, channel,
+        subscription: subscription);
+    logger.info(
+        'WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
   });
 }
 

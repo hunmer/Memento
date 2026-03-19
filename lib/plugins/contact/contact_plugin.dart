@@ -7,6 +7,8 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'package:shared_models/repositories/contact/contact_repository.dart';
 import 'controllers/contact_controller.dart';
@@ -245,9 +247,8 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
       // 转换为 watchOS 需要的格式
       return sortedContacts.map((contact) {
         // 计算该联系人的交互次数
-        final contactInteractions = interactions
-            .where((i) => i.contactId == contact.id)
-            .toList();
+        final contactInteractions =
+            interactions.where((i) => i.contactId == contact.id).toList();
         final interactionCount = contactInteractions.length;
 
         // 获取最近交互类型和时间
@@ -282,9 +283,10 @@ class ContactPlugin extends BasePlugin with JSBridgePlugin {
         // 截断备注预览
         String? notesPreview;
         if (contact.notes != null && contact.notes!.isNotEmpty) {
-          notesPreview = contact.notes!.length > 20
-              ? '${contact.notes!.substring(0, 20)}...'
-              : contact.notes;
+          notesPreview =
+              contact.notes!.length > 20
+                  ? '${contact.notes!.substring(0, 20)}...'
+                  : contact.notes;
         }
 
         final data = {
@@ -342,6 +344,24 @@ class ContactMainViewState extends State<ContactMainView> {
     _plugin = PluginManager().getPlugin('contact') as ContactPlugin;
 
     _controller = _plugin._controller;
+
+    // 订阅同步刷新事件
+    EventManager.instance.subscribe('contact_refresh', _handleSyncRefresh);
+  }
+
+  @override
+  void dispose() {
+    // 取消订阅，避免内存泄漏
+    EventManager.instance.unsubscribe('contact_refresh', _handleSyncRefresh);
+    super.dispose();
+  }
+
+  /// 处理同步刷新事件
+  void _handleSyncRefresh(EventArgs args) {
+    debugPrint('[ContactMainView] 收到同步刷新事件');
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _showFilterDialog() async {
