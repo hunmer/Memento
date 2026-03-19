@@ -7,7 +7,8 @@ import {
   NInput,
   NSelect,
   NButton,
-  NSpace
+  NSpace,
+  useMessage
 } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 
@@ -23,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const authStore = useAuthStore()
+const message = useMessage()
 
 const form = reactive({
   name: '',
@@ -41,7 +43,7 @@ const expiryOptions = [
 
 async function handleCreate(): Promise<void> {
   if (!form.name.trim()) {
-    window.$message?.error('请输入 API Key 名称')
+    message.error('请输入 API Key 名称')
     return
   }
 
@@ -58,7 +60,7 @@ async function handleCreate(): Promise<void> {
 
     emit('success')
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '创建失败')
+    message.error(err instanceof Error ? err.message : '创建失败')
   } finally {
     loading.value = false
   }

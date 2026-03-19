@@ -10,7 +10,8 @@ import {
   NThing,
   NText,
   NTag,
-  NSpace
+  NSpace,
+  useMessage
 } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
@@ -20,6 +21,7 @@ import { formatTime } from '@/utils/format'
 
 const authStore = useAuthStore()
 const uiStore = useUIStore()
+const message = useMessage()
 
 const showCreateModal = ref(false)
 const showResultModal = ref(false)
@@ -38,10 +40,10 @@ async function handleRevoke(keyId: string): Promise<void> {
   uiStore.setLoading(true, '撤销 API Key...')
   try {
     await authStore.revokeApiKey(keyId)
-    window.$message?.success('API Key 已撤销')
+    message.success('API Key 已撤销')
     uiStore.addActivity('api_key', '撤销了一个 API Key')
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '撤销失败')
+    message.error(err instanceof Error ? err.message : '撤销失败')
   } finally {
     uiStore.setLoading(false)
   }

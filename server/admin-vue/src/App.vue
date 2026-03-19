@@ -26,27 +26,6 @@ const authStore = useAuthStore()
 const uiStore = useUIStore()
 const filesStore = useFilesStore()
 
-// 全局 message 实例
-declare global {
-  interface Window {
-    $message?: {
-      success: (msg: string) => void
-      error: (msg: string) => void
-      warning: (msg: string) => void
-      info: (msg: string) => void
-    }
-    $dialog?: {
-      warning: (options: {
-        title: string
-        content: string
-        positiveText: string
-        negativeText: string
-        onPositiveClick?: () => void
-      }) => boolean
-    }
-  }
-}
-
 onMounted(async () => {
   authStore.init()
 

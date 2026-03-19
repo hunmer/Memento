@@ -7,7 +7,9 @@ import {
   NTag,
   NAlert,
   NInput,
-  NInputGroup
+  NInputGroup,
+  useDialog,
+  useMessage
 } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
@@ -15,6 +17,8 @@ import { authApi } from '@/api'
 
 const authStore = useAuthStore()
 const uiStore = useUIStore()
+const dialog = useDialog()
+const message = useMessage()
 
 const showKeyInput = ref(false)
 const newKey = ref('')
@@ -29,12 +33,12 @@ async function handleSaveKey(): Promise<void> {
 
   // 验证密钥格式
   if (!/^[A-Za-z0-9+/]+=*$/.test(key)) {
-    window.$message?.error('加密密钥格式无效，应为 Base64 编码')
+    message.error('加密密钥格式无效，应为 Base64 编码')
     return
   }
 
   if (key.length < 40) {
-    window.$message?.error('加密密钥长度不足，标准长度为 44 个字符')
+    message.error('加密密钥长度不足，标准长度为 44 个字符')
     return
   }
 
@@ -44,17 +48,17 @@ async function handleSaveKey(): Promise<void> {
     authStore.setEncryptionKey(key)
     showKeyInput.value = false
     newKey.value = ''
-    window.$message?.success('加密密钥已设置')
+    message.success('加密密钥已设置')
     uiStore.addActivity('settings', '设置了加密密钥')
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '设置失败')
+    message.error(err instanceof Error ? err.message : '设置失败')
   } finally {
     savingKey.value = false
   }
 }
 
 function handleDisableApi(): void {
-  window.$dialog?.warning({
+  dialog.warning({
     title: '清除加密密钥',
     content: '确定要清除加密密钥吗？清除后将无法解密下载文件，需要重新输入密钥。',
     positiveText: '清除',
@@ -63,10 +67,10 @@ function handleDisableApi(): void {
       try {
         await authApi.clearEncryptionKey()
         authStore.clearEncryptionKey()
-        window.$message?.success('加密密钥已清除')
+        message.success('加密密钥已清除')
         uiStore.addActivity('settings', '清除了加密密钥')
       } catch (err) {
-        window.$message?.error(err instanceof Error ? err.message : '清除失败')
+        message.error(err instanceof Error ? err.message : '清除失败')
       }
     }
   })
@@ -77,12 +81,12 @@ async function handleRefreshStatus(): Promise<void> {
   try {
     const response = await authApi.hasEncryptionKey()
     if (response.has_key) {
-      window.$message?.info('服务器内存中存在加密密钥')
+      message.info('服务器内存中存在加密密钥')
     } else {
-      window.$message?.info('服务器内存中没有加密密钥')
+      message.info('服务器内存中没有加密密钥')
     }
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '刷新失败')
+    message.error(err instanceof Error ? err.message : '刷新失败')
   } finally {
     uiStore.setLoading(false)
   }
@@ -91,9 +95,9 @@ async function handleRefreshStatus(): Promise<void> {
 async function copyToClipboard(text: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text)
-    window.$message?.success('已复制到剪贴板')
+    message.success('已复制到剪贴板')
   } catch {
-    window.$message?.error('复制失败')
+    message.error('复制失败')
   }
 }
 </script>

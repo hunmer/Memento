@@ -7,7 +7,8 @@ import {
   NInput,
   NButton,
   NSpace,
-  NAlert
+  NAlert,
+  useMessage
 } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
@@ -16,6 +17,7 @@ import { useFilesStore } from '@/stores/files'
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 const filesStore = useFilesStore()
+const message = useMessage()
 
 const form = reactive({
   username: '',
@@ -41,7 +43,7 @@ async function handleLogin(): Promise<void> {
     // 加载数据
     await loadDashboardData()
 
-    window.$message?.success('登录成功')
+    message.success('登录成功')
   } catch (err) {
     error.value = err instanceof Error ? err.message : '登录失败，请检查用户名和密码'
   } finally {

@@ -5,7 +5,8 @@ import {
   NInput,
   NButton,
   NSpace,
-  NInputGroup
+  NInputGroup,
+  useMessage
 } from 'naive-ui'
 import { apiClient } from '@/api'
 
@@ -21,10 +22,12 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const message = useMessage()
+
 async function copyToClipboard(text: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text)
-    window.$message?.success('已复制到剪贴板')
+    message.success('已复制到剪贴板')
   } catch {
     // 降级方案
     const textarea = document.createElement('textarea')
@@ -35,7 +38,7 @@ async function copyToClipboard(text: string): Promise<void> {
     textarea.select()
     document.execCommand('copy')
     document.body.removeChild(textarea)
-    window.$message?.success('已复制到剪贴板')
+    message.success('已复制到剪贴板')
   }
 }
 
