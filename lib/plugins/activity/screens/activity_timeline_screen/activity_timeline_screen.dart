@@ -66,6 +66,12 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       _onActivityChanged,
     );
 
+    // 监听同步刷新事件（WebSocket 同步后触发）
+    eventManager.subscribe(
+      'activity_refresh',
+      _onSyncRefresh,
+    );
+
     _initializeService().then((_) {
       if (mounted) {
         setState(() {
@@ -148,6 +154,10 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
       'activity_updated',
       _onActivityChanged,
     );
+    eventManager.unsubscribe(
+      'activity_refresh',
+      _onSyncRefresh,
+    );
 
     // 清理控制器
     _viewModeController.dispose();
@@ -162,6 +172,18 @@ class _ActivityTimelineScreenState extends State<ActivityTimelineScreen> {
 
     // 重新加载当前日期的活动列表
     _activityController.loadActivities(_selectedDate);
+  }
+
+  /// 处理同步刷新事件（WebSocket 同步后触发）
+  void _onSyncRefresh(EventArgs args) {
+    debugPrint('[ActivityTimelineScreen] 收到同步刷新事件');
+
+    if (!_isInitialized || !mounted) return;
+
+    // 重新加载当前日期的活动列表
+    _activityController.loadActivities(_selectedDate).then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   /// 处理通知点击事件

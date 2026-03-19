@@ -35,9 +35,12 @@ class ServerActivityRepository extends IActivityRepository {
     );
     if (data == null) return [];
 
-    // activities 文件结构: { "activities": [...] }
-    final activities = data['activities'] as List<dynamic>? ?? [];
-    return activities
+    // 兼容两种格式：数组 [...] 或对象 {"activities": [...]}
+    final List<dynamic> activitiesData = data is List
+        ? data
+        : (data as Map<String, dynamic>)['activities'] as List<dynamic>? ?? [];
+
+    return activitiesData
         .map((a) => ActivityDto.fromJson(a as Map<String, dynamic>))
         .toList();
   }

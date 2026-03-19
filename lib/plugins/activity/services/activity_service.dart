@@ -85,7 +85,12 @@ class ActivityService {
 
       // 读取并解析文件
       final jsonString = await _storage.readString(filePath);
-      final List<dynamic> jsonList = jsonDecode(jsonString);
+      final dynamic jsonData = jsonDecode(jsonString);
+
+      // 兼容两种格式：数组 [...] 或对象 {"activities": [...]}
+      final List<dynamic> jsonList = jsonData is List
+          ? jsonData
+          : (jsonData as Map<String, dynamic>)['activities'] as List<dynamic>? ?? [];
 
       return jsonList.map((json) => ActivityRecord.fromJson(json)).toList();
     } catch (e) {
