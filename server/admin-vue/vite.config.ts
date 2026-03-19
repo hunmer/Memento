@@ -54,7 +54,8 @@ export default defineConfig(({ command }) => {
       }
     },
     build: {
-      outDir: 'dist',
+      outDir: '../admin',
+      emptyOutDir: true,
       assetsDir: 'assets'
     }
   }
