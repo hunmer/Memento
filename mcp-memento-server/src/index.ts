@@ -298,13 +298,22 @@ async function main() {
         }
 
         case 'memento_diary_createEntry': {
-          const result = await client.createDiaryEntry(args as {
+          const params = args as {
             date: string;
             content: string;
             mood?: number;
             weather?: string;
             tags?: string[];
-          });
+          };
+          // 将 mood 转换为 string 类型
+          const diaryData = {
+            date: params.date,
+            content: params.content,
+            mood: params.mood?.toString(),
+            weather: params.weather,
+            tags: params.tags,
+          };
+          const result = await client.createDiaryEntry(diaryData);
           return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
         }
 
@@ -368,7 +377,15 @@ async function main() {
         }
 
         case 'memento_day_createMemorialDay': {
-          const result = await client.createMemorialDay(args as { name: string; date: string; type?: string; description?: string; color?: string });
+          const params = args as { name: string; date: string; type?: string; description?: string; color?: string };
+          // 映射参数并添加默认值
+          const memorialDayData = {
+            title: params.name,
+            targetDate: params.date,
+            notes: params.description ? [params.description] : [],
+            backgroundColor: params.color ? parseInt(params.color) : 4280391411,
+          };
+          const result = await client.createMemorialDay(memorialDayData);
           return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
         }
 
@@ -435,7 +452,18 @@ async function main() {
         }
 
         case 'memento_calendar_createEvent': {
-          const result = await client.createCalendarEvent(args as { title: string; startTime: string; endTime?: string; description?: string; location?: string });
+          const params = args as { title: string; startTime: string; endTime?: string; description?: string; location?: string; icon?: number; color?: number };
+          // 添加默认值
+          const eventData = {
+            title: params.title,
+            startTime: params.startTime,
+            endTime: params.endTime,
+            description: params.description,
+            location: params.location,
+            icon: params.icon ?? 58050, // 默认图标
+            color: params.color ?? 4280391411, // 默认颜色
+          };
+          const result = await client.createCalendarEvent(eventData);
           return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
         }
 

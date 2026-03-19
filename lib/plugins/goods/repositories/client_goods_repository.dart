@@ -60,14 +60,11 @@ class ClientGoodsRepository extends IGoodsRepository {
       final warehouse = Warehouse(
         id: dto.id,
         title: dto.name,
-        icon: dto.icon != null
-            ? IconData(
-                int.parse(dto.icon!.replaceAll('0x', ''), radix: 16),
-                fontFamily: 'MaterialIcons',
-              )
+        icon: dto.iconData != null
+            ? IconData(dto.iconData!, fontFamily: 'MaterialIcons')
             : Icons.inventory_2,
-        iconColor: dto.color != null
-            ? Color(int.parse(dto.color!.replaceAll('#', ''), radix: 16) | 0xFF000000)
+        iconColor: dto.iconColor != null
+            ? Color(dto.iconColor!)
             : pluginColor,
         imageUrl: dto.description, // 使用 description 字段存储 imageUrl
         items: [],
@@ -92,14 +89,11 @@ class ClientGoodsRepository extends IGoodsRepository {
       // 创建更新后的仓库
       final updatedWarehouse = existingWarehouse.copyWith(
         title: dto.name,
-        icon: dto.icon != null
-            ? IconData(
-                int.parse(dto.icon!.replaceAll('0x', ''), radix: 16),
-                fontFamily: 'MaterialIcons',
-              )
+        icon: dto.iconData != null
+            ? IconData(dto.iconData!, fontFamily: 'MaterialIcons')
             : null,
-        iconColor: dto.color != null
-            ? Color(int.parse(dto.color!.replaceAll('#', ''), radix: 16) | 0xFF000000)
+        iconColor: dto.iconColor != null
+            ? Color(dto.iconColor!)
             : null,
         imageUrl: dto.description, // 临时使用 description 字段存储 imageUrl
       );
@@ -353,8 +347,8 @@ class ClientGoodsRepository extends IGoodsRepository {
       id: warehouse.id,
       name: warehouse.title,
       description: warehouse.imageUrl, // 映射 imageUrl 到 description
-      icon: '0x${warehouse.icon.codePoint.toRadixString(16)}',
-      color: '#${warehouse.iconColor.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+      iconData: warehouse.icon.codePoint,
+      iconColor: warehouse.iconColor.value,
       createdAt: DateTime.now(), // Warehouse 没有 createdAt 字段，使用当前时间
       updatedAt: DateTime.now(), // Warehouse 没有 updatedAt 字段，使用当前时间
     );
@@ -370,11 +364,10 @@ class ClientGoodsRepository extends IGoodsRepository {
       imageUrl: item.imageUrl, // 添加图片URL
       tags: item.tags,
       customFields: item.customFields.isNotEmpty
-          ? {
-              for (var field in item.customFields)
-                field.key: field.value,
-            }
-          : null,
+          ? item.customFields
+              .map((field) => {'key': field.key, 'value': field.value})
+              .toList()
+          : [],
       createdAt: DateTime.now(), // GoodsItem 没有 createdAt 字段
       updatedAt: DateTime.now(), // GoodsItem 没有 updatedAt 字段
     );
@@ -391,9 +384,12 @@ class ClientGoodsRepository extends IGoodsRepository {
       purchaseDate: null, // GoodsItem 没有 purchaseDate 字段
       purchasePrice: null, // GoodsItem 没有 purchasePrice 字段
       usageRecords: [],
-      customFields: dto.customFields != null
-          ? dto.customFields!.entries
-              .map((e) => CustomField(key: e.key, value: e.value.toString()))
+      customFields: dto.customFields.isNotEmpty
+          ? dto.customFields
+              .map((e) => CustomField(
+                key: (e['key'] ?? '').toString(),
+                value: (e['value'] ?? '').toString(),
+              ))
               .toList()
           : [],
       notes: dto.description,

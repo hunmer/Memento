@@ -89,8 +89,8 @@ class DayUseCase {
   /// [params] 必需参数:
   /// - `title`: 标题
   /// - `targetDate`: 目标日期 (ISO8601 字符串)
-  /// - `backgroundColor`: 背景颜色
   /// 可选参数:
+  /// - `backgroundColor`: 背景颜色 (默认: 4280391411)
   /// - `notes`: 备注列表
   /// - `backgroundImageUrl`: 背景图片 URL
   /// - `sortIndex`: 排序索引
@@ -110,12 +110,8 @@ class DayUseCase {
           code: ErrorCodes.invalidParams);
     }
 
-    final backgroundColorValidation =
-        ParamValidator.requireInt(params, 'backgroundColor');
-    if (!backgroundColorValidation.isValid) {
-      return Result.failure(backgroundColorValidation.errorMessage!,
-          code: ErrorCodes.invalidParams);
-    }
+    // backgroundColor 使用默认值
+    final backgroundColor = params['backgroundColor'] as int? ?? 4280391411;
 
     try {
       final targetDate = DateTime.parse(params['targetDate'] as String);
@@ -126,7 +122,7 @@ class DayUseCase {
         creationDate: DateTime.now(),
         targetDate: targetDate,
         notes: (params['notes'] as List<dynamic>?)?.cast<String>() ?? [],
-        backgroundColor: params['backgroundColor'] as int,
+        backgroundColor: backgroundColor,
         backgroundImageUrl: params['backgroundImageUrl'] as String?,
         sortIndex: params['sortIndex'] as int? ?? 0,
       );

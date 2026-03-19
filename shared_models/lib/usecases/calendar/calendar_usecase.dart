@@ -65,8 +65,9 @@ class CalendarUseCase {
   /// [params] 必需参数:
   /// - `title`: 事件标题
   /// - `startTime`: 开始时间
-  /// - `icon`: 图标 codePoint
-  /// - `color`: 颜色值
+  /// 可选参数:
+  /// - `icon`: 图标 codePoint (默认: 58050)
+  /// - `color`: 颜色值 (默认: 4280391411)
   Future<Result<Map<String, dynamic>>> createEvent(
     Map<String, dynamic> params,
   ) async {
@@ -87,21 +88,9 @@ class CalendarUseCase {
       );
     }
 
-    final iconValidation = ParamValidator.requireInt(params, 'icon');
-    if (!iconValidation.isValid) {
-      return Result.failure(
-        iconValidation.errorMessage!,
-        code: ErrorCodes.invalidParams,
-      );
-    }
-
-    final colorValidation = ParamValidator.requireInt(params, 'color');
-    if (!colorValidation.isValid) {
-      return Result.failure(
-        colorValidation.errorMessage!,
-        code: ErrorCodes.invalidParams,
-      );
-    }
+    // icon 和 color 使用默认值
+    final icon = params['icon'] as int? ?? 58050;
+    final color = params['color'] as int? ?? 4280391411;
 
     try {
       final now = DateTime.now();
@@ -111,8 +100,8 @@ class CalendarUseCase {
         description: params['description'] as String? ?? '',
         startTime: params['startTime'] as DateTime,
         endTime: params['endTime'] as DateTime?,
-        icon: params['icon'] as int,
-        color: params['color'] as int,
+        icon: icon,
+        color: color,
         source: params['source'] as String? ?? 'default',
         reminderMinutes: params['reminderMinutes'] as int?,
         createdAt: now,

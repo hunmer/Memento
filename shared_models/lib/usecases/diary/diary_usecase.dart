@@ -110,13 +110,20 @@ class DiaryUseCase {
     try {
       final now = DateTime.now();
 
+      // 处理 mood 参数，支持 int 或 string 类型
+      String? moodValue;
+      final moodParam = params['mood'];
+      if (moodParam != null) {
+        moodValue = moodParam.toString();
+      }
+
       final entry = DiaryEntryDto(
         date: params['date'] as String,
         title: params['title'] as String? ?? '',
         content: params['content'] as String,
         createdAt: now,
         updatedAt: now,
-        mood: params['mood'] as String?,
+        mood: moodValue,
       );
 
       final result = await repository.createEntry(entry);
@@ -154,10 +161,17 @@ class DiaryUseCase {
       }
 
       // 合并更新
+      // 处理 mood 参数，支持 int 或 string 类型
+      String? moodValue;
+      final moodParam = params['mood'];
+      if (moodParam != null) {
+        moodValue = moodParam.toString();
+      }
+
       final updated = existing.copyWith(
         title: params['title'] as String? ?? existing.title,
         content: params['content'] as String? ?? existing.content,
-        mood: params['mood'] as String? ?? existing.mood,
+        mood: moodValue ?? existing.mood,
         updatedAt: DateTime.now(),
       );
 

@@ -391,7 +391,7 @@ export class MementoClient {
   async createDiaryEntry(data: {
     date: string;
     content: string;
-    mood?: number;
+    mood?: string;
     weather?: string;
     tags?: string[];
   }) {
@@ -478,7 +478,7 @@ export class MementoClient {
     return this.get(`/api/v1/plugins/day/days/${id}`);
   }
 
-  async createMemorialDay(data: { name: string; date: string; type?: string; description?: string; color?: string }) {
+  async createMemorialDay(data: { title: string; targetDate: string; notes?: string[]; backgroundColor?: number }) {
     return this.post('/api/v1/plugins/day/days', data);
   }
 
@@ -572,7 +572,7 @@ export class MementoClient {
     return this.get(`/api/v1/plugins/calendar/events/${id}`);
   }
 
-  async createCalendarEvent(data: { title: string; startTime: string; endTime?: string; description?: string; location?: string }) {
+  async createCalendarEvent(data: { title: string; startTime: string; endTime?: string; description?: string; location?: string; icon?: number; color?: number }) {
     return this.post('/api/v1/plugins/calendar/events', data);
   }
 

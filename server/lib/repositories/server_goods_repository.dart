@@ -22,6 +22,10 @@ class ServerGoodsRepository extends IGoodsRepository {
   // ============ 内部方法 ============
 
   /// 读取所有仓库
+  ///
+  /// 客户端存储格式：
+  /// - warehouses.json: {"warehouses": ["id1", "id2"]}
+  /// - warehouse/<id>.json: {"warehouse": {...仓库数据}}
   Future<List<WarehouseDto>> _readAllWarehouses() async {
     final warehousesData = await dataService.readPluginData(
       userId,
@@ -30,32 +34,69 @@ class ServerGoodsRepository extends IGoodsRepository {
     );
     if (warehousesData == null) return [];
 
-    final warehouses = warehousesData['warehouses'] as List<dynamic>? ?? [];
-    return warehouses
-        .map((w) => WarehouseDto.fromJson(w as Map<String, dynamic>))
-        .toList();
+    // 客户端存储的是 ID 列表，需要从每个仓库文件读取完整数据
+    final warehouseIds = warehousesData['warehouses'] as List<dynamic>? ?? [];
+
+    final List<WarehouseDto> warehouses = [];
+    for (final id in warehouseIds) {
+      final warehouseId = id.toString();
+      final warehouseData = await dataService.readPluginData(
+        userId,
+        _pluginId,
+        'warehouse/$warehouseId.json',
+      );
+      if (warehouseData != null && warehouseData['warehouse'] != null) {
+        try {
+          warehouses.add(
+            WarehouseDto.fromJson(
+              warehouseData['warehouse'] as Map<String, dynamic>,
+            ),
+          );
+        } catch (e) {
+          // 解析失败时跳过
+          continue;
+        }
+      }
+    }
+    return warehouses;
   }
 
   /// 保存所有仓库
   Future<void> _saveAllWarehouses(List<WarehouseDto> warehouses) async {
+    // 只保存仓库 ID 列表到 warehouses.json
     await dataService.writePluginData(
       userId,
       _pluginId,
       'warehouses.json',
-      {'warehouses': warehouses.map((w) => w.toJson()).toList()},
+      {'warehouses': warehouses.map((w) => w.id).toList()},
     );
+
+    // 保存每个仓库的完整数据到单独文件
+    for (final warehouse in warehouses) {
+      await dataService.writePluginData(
+        userId,
+        _pluginId,
+        'warehouse/${warehouse.id}.json',
+        {'warehouse': warehouse.toJson()},
+      );
+    }
   }
 
   /// 读取仓库物品
+  ///
+  /// 物品存储在仓库文件的 warehouse.items 字段中
   Future<List<GoodsItemDto>> _readWarehouseItems(String warehouseId) async {
-    final itemsData = await dataService.readPluginData(
+    final warehouseData = await dataService.readPluginData(
       userId,
       _pluginId,
-      'warehouse_$warehouseId.json',
+      'warehouse/$warehouseId.json',
     );
-    if (itemsData == null) return [];
+    if (warehouseData == null) return [];
 
-    final items = itemsData['items'] as List<dynamic>? ?? [];
+    final warehouse = warehouseData['warehouse'] as Map<String, dynamic>?;
+    if (warehouse == null) return [];
+
+    final items = warehouse['items'] as List<dynamic>? ?? [];
     return items
         .map((i) => GoodsItemDto.fromJson(i as Map<String, dynamic>))
         .toList();
@@ -64,11 +105,41 @@ class ServerGoodsRepository extends IGoodsRepository {
   /// 保存仓库物品
   Future<void> _saveWarehouseItems(
       String warehouseId, List<GoodsItemDto> items) async {
+    // 读取现有仓库数据
+    final warehouseData = await dataService.readPluginData(
+      userId,
+      _pluginId,
+      'warehouse/$warehouseId.json',
+    );
+
+    if (warehouseData == null || warehouseData['warehouse'] == null) {
+      // 仓库不存在，创建空的
+      await dataService.writePluginData(
+        userId,
+        _pluginId,
+        'warehouse/$warehouseId.json',
+        {
+          'warehouse': {
+            'id': warehouseId,
+            'title': 'Unknown',
+            'items': items.map((i) => i.toJson()).toList(),
+          }
+        },
+      );
+      return;
+    }
+
+    // 更新仓库中的物品列表
+    final warehouse = Map<String, dynamic>.from(
+      warehouseData['warehouse'] as Map<String, dynamic>,
+    );
+    warehouse['items'] = items.map((i) => i.toJson()).toList();
+
     await dataService.writePluginData(
       userId,
       _pluginId,
-      'warehouse_$warehouseId.json',
-      {'items': items.map((i) => i.toJson()).toList()},
+      'warehouse/$warehouseId.json',
+      {'warehouse': warehouse},
     );
   }
 
