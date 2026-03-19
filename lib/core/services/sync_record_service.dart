@@ -154,17 +154,17 @@ class SyncRecordService {
   /// 判断是否需要从服务端拉取
   ///
   /// 返回 true 表示服务端有更新，需要拉取
+  ///
+  /// 防循环机制说明：
+  /// 当文件上传成功时，recordUpload 会同时记录 serverModifiedTime（服务端返回的时间戳）。
+  /// 因此在下次检查 needsPull 时，如果服务端时间与记录的时间相同（刚上传的），
+  /// !serverModifiedTime.isAfter(recordedServerTime) 会返回 false，不会触发拉取。
   bool needsPull(String filePath, DateTime serverModifiedTime) {
     final record = _records[filePath];
 
     if (record == null) {
       // 从未同步过，需要拉取
       return true;
-    }
-
-    // 如果最近上传过，跳过（防循环）
-    if (wasRecentlyUploaded(filePath)) {
-      return false;
     }
 
     // 检查服务端修改时间是否有变化
