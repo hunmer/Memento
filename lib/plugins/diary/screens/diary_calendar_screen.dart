@@ -6,6 +6,8 @@ import 'package:Memento/core/route/route_history_manager.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
+import 'package:Memento/core/event/event_manager.dart';
+import 'package:Memento/core/event/event.dart';
 import 'package:Memento/widgets/quill_viewer/index.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import 'diary_editor_screen.dart';
@@ -57,12 +59,23 @@ class _DiaryCalendarScreenState extends State<DiaryCalendarScreen> {
     _calendarController.displayDate = initialDay;
     _calendarController.selectedDate = _selectedDay;
     _loadDiaryEntries();
+
+    // 订阅同步刷新事件
+    EventManager.instance.subscribe('diary_refresh', _handleSyncRefresh);
   }
 
   @override
   void dispose() {
+    // 取消订阅，避免内存泄漏
+    EventManager.instance.unsubscribe('diary_refresh', _handleSyncRefresh);
     _calendarController.dispose();
     super.dispose();
+  }
+
+  /// 处理同步刷新事件
+  void _handleSyncRefresh(EventArgs args) {
+    debugPrint('[DiaryCalendarScreen] 收到同步刷新事件');
+    _loadDiaryEntries();
   }
 
   Future<void> _loadDiaryEntries() async {
