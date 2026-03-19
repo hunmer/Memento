@@ -54,6 +54,21 @@ class RouteRefreshManager {
     'store/': 'store',
   };
 
+  /// 路由ID -> 插件ID 映射（用于识别子页面属于哪个插件）
+  static const Map<String, String> _routeToPlugin = {
+    '/note_edit': 'notes',
+    '/diary_edit': 'diary',
+    '/todo_detail': 'todo',
+    '/activity_detail': 'activity',
+    '/bill_detail': 'bill',
+    '/contact_detail': 'contact',
+    '/calendar_event_edit': 'calendar',
+    '/tracker_detail': 'tracker',
+    '/goods_detail': 'goods',
+    '/database_record': 'database',
+    '/day_edit': 'day',
+  };
+
   /// 文件同步完成后触发刷新
   Future<void> onFileSynced(String filePath) async {
     final pluginId = _getPluginForFile(filePath);
@@ -127,7 +142,12 @@ class RouteRefreshManager {
 
     final currentRoute = currentContext.pageId;
 
-    // 检查路由是否包含插件ID
+    // 1. 检查路由映射表（子页面）
+    if (_routeToPlugin[currentRoute] == pluginId) {
+      return true;
+    }
+
+    // 2. 检查路由是否包含插件ID
     return currentRoute.contains('/$pluginId') ||
            currentRoute == pluginId ||
            currentRoute.endsWith('/$pluginId');

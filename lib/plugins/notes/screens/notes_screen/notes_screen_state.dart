@@ -1,10 +1,12 @@
 import 'package:Memento/plugins/notes/notes_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:Memento/core/event/event_manager.dart';
 import 'package:Memento/plugins/notes/models/folder.dart';
 import 'package:Memento/plugins/notes/models/note.dart';
 import 'package:Memento/plugins/notes/screens/notes_screen.dart';
 
 class NotesMainViewState extends State<NotesMainView> {
+  late final EventManager _eventManager;
   @protected
   String currentFolderId = 'root';
   @protected
@@ -19,10 +21,20 @@ class NotesMainViewState extends State<NotesMainView> {
   final TextEditingController searchController = TextEditingController();
 
   late NotesPlugin plugin;
+
   @override
   void initState() {
     super.initState();
     plugin = NotesPlugin.instance;
+    _eventManager = EventManager.instance;
+    // 订阅同步刷新事件
+    _eventManager.subscribe('notes_refresh', _handleSyncRefresh);
+    loadCurrentFolder();
+  }
+
+  /// 处理同步刷新事件
+  void _handleSyncRefresh(EventArgs args) {
+    debugPrint('[NotesMainView] 收到同步刷新事件');
     loadCurrentFolder();
   }
 
@@ -68,6 +80,7 @@ class NotesMainViewState extends State<NotesMainView> {
 
   @override
   void dispose() {
+    _eventManager.unsubscribe('notes_refresh', _handleSyncRefresh);
     searchController.dispose();
     super.dispose();
   }

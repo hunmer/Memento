@@ -193,6 +193,18 @@ class NotesController {
     return _notes[folderId] ?? [];
   }
 
+  /// 通过 ID 获取笔记
+  Note? getNoteById(String noteId) {
+    for (var noteList in _notes.values) {
+      for (var note in noteList) {
+        if (note.id == noteId) {
+          return note;
+        }
+      }
+    }
+    return null;
+  }
+
   // 创建新文件夹
   Future<Folder> createFolder(
     String name,
