@@ -24,12 +24,16 @@ class BillRoutes {
     router.put('/accounts/<id>', _updateAccount);
     router.delete('/accounts/<id>', _deleteAccount);
 
-    // ==================== 账单 API ====================
+    // ==================== 账单 API（扁平路由）====================
     router.get('/bills', _getBills);
     router.get('/bills/<id>', _getBill);
     router.post('/bills', _createBill);
     router.put('/bills/<id>', _updateBill);
     router.delete('/bills/<id>', _deleteBill);
+
+    // ==================== 账单 API（嵌套在账户下，兼容 MCP 客户端）====================
+    router.get('/accounts/<accountId>/bills', _getBillsByAccount);
+    router.post('/accounts/<accountId>/bills', _createBillForAccount);
 
     // ==================== 统计 API ====================
     router.get('/stats', _getStats);
@@ -201,6 +205,71 @@ class BillRoutes {
       }
     } catch (e) {
       return _errorResponse(500, '删除账户失败: $e');
+    }
+  }
+
+  // ==================== 账单处理方法（嵌套在账户下）====================
+
+  /// 获取指定账户的账单列表（嵌套路由）
+  Future<Response> _getBillsByAccount(Request request, String accountId) async {
+    final userId = _getUserId(request);
+    if (userId == null) return _errorResponse(401, '未认证');
+
+    try {
+      final useCase = _createUseCase(userId);
+      final params = {
+        'accountId': accountId,
+        'startDate': request.url.queryParameters['startDate'],
+        'endDate': request.url.queryParameters['endDate'],
+        'offset': int.tryParse(request.url.queryParameters['offset'] ?? ''),
+        'count': int.tryParse(request.url.queryParameters['count'] ?? ''),
+      };
+
+      final result = await useCase.getBills(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      } else {
+        final failure = result.errorOrNull;
+        return _errorResponse(
+          failure?.code == ErrorCodes.notFound ? 404 : 500,
+          failure?.message ?? '获取账单失败',
+        );
+      }
+    } catch (e) {
+      return _errorResponse(500, '获取账单失败: $e');
+    }
+  }
+
+  /// 为指定账户创建账单（嵌套路由）
+  Future<Response> _createBillForAccount(Request request, String accountId) async {
+    final userId = _getUserId(request);
+    if (userId == null) return _errorResponse(401, '未认证');
+
+    try {
+      final body = await request.readAsString();
+      final params = jsonDecode(body) as Map<String, dynamic>;
+      params['accountId'] = accountId; // 确保使用路径中的 accountId
+
+      final useCase = _createUseCase(userId);
+      final result = await useCase.createBill(params);
+
+      if (result.isSuccess) {
+        return _successResponse(result.dataOrNull);
+      } else {
+        final failure = result.errorOrNull;
+        final statusCode = failure?.code == ErrorCodes.invalidParams
+            ? 400
+            : failure?.code == ErrorCodes.notFound
+                ? 404
+                : 500;
+        return _errorResponse(
+          statusCode,
+          failure?.message ?? '创建账单失败',
+        );
+      }
+    } catch (e) {
+      return _errorResponse(500, '创建账单失败: $e');
     }
   }
 

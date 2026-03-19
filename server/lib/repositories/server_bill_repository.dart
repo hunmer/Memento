@@ -4,6 +4,8 @@
 /// 账单嵌套在账户的 bills 数组中存储
 library;
 
+import 'dart:convert';
+
 import 'package:shared_models/shared_models.dart';
 
 import '../services/plugin_data_service.dart';
@@ -29,12 +31,24 @@ class ServerBillRepository extends IBillRepository {
       _pluginId,
       'accounts.json',
     );
-    if (accountsData == null) return [];
 
-    final accounts = accountsData['accounts'] as List<dynamic>? ?? [];
-    return accounts
-        .map((a) => _AccountWithBills.fromJson(a as Map<String, dynamic>))
-        .toList();
+
+    if (accountsData == null) {
+      return [];
+    }
+
+    final accountsRaw = accountsData['accounts'] as List<dynamic>? ?? [];
+    return accountsRaw.map((a) {
+      // 兼容两种存储格式：
+      // 1. 客户端格式：账户是 JSON 编码的字符串
+      // 2. 标准格式：账户是 Map 对象
+      if (a is String) {
+        final decoded = jsonDecode(a) as Map<String, dynamic>;
+        return _AccountWithBills.fromJson(decoded);
+      } else {
+        return _AccountWithBills.fromJson(a as Map<String, dynamic>);
+      }
+    }).toList();
   }
 
   /// 保存所有账户（包含嵌套的账单）
@@ -460,6 +474,70 @@ class ServerBillRepository extends IBillRepository {
   }
 }
 
+// ============ 辅助函数 ============
+
+/// 将客户端格式的账单转换为 BillDto
+///
+/// 客户端格式字段：
+/// - title, note (而非 description), tag (而非 tags), icon, iconColor
+/// - 没有 type 字段（通过 amount 正负判断）
+BillDto _convertClientBillToDto(Map<String, dynamic> json) {
+  final amount = (json['amount'] as num?)?.toDouble() ?? 0.0;
+  final type = amount >= 0 ? 'income' : 'expense';
+
+  // 处理标签：支持单数 tag 和复数 tags
+  List<String> tags = [];
+  if (json['tags'] != null) {
+    tags = (json['tags'] as List<dynamic>?)?.cast<String>() ?? [];
+  } else if (json['tag'] != null) {
+    tags = [json['tag'] as String];
+  }
+
+  // 处理时间
+  final now = DateTime.now();
+  DateTime createdAt;
+  DateTime updatedAt;
+  DateTime date;
+
+  try {
+    createdAt = json['createdAt'] != null
+        ? DateTime.parse(json['createdAt'] as String)
+        : now;
+  } catch (_) {
+    createdAt = now;
+  }
+
+  try {
+    updatedAt = json['updatedAt'] != null
+        ? DateTime.parse(json['updatedAt'] as String)
+        : now;
+  } catch (_) {
+    updatedAt = now;
+  }
+
+  try {
+    date = json['date'] != null
+        ? DateTime.parse(json['date'] as String)
+        : createdAt;
+  } catch (_) {
+    date = createdAt;
+  }
+
+  return BillDto(
+    id: json['id'] as String? ?? '',
+    accountId: json['accountId'] as String? ?? '',
+    amount: amount.abs(),
+    type: type,
+    category: json['category'] as String? ?? '其他',
+    description: json['description'] as String? ?? json['note'] as String?,
+    date: date,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    tags: tags,
+    metadata: json['metadata'] as Map<String, dynamic>?,
+  );
+}
+
 // ============ 内部数据类 ============
 
 /// 账户（包含嵌套的账单列表）
@@ -488,17 +566,57 @@ class _AccountWithBills {
 
   factory _AccountWithBills.fromJson(Map<String, dynamic> json) {
     final billsList = json['bills'] as List<dynamic>? ?? [];
+
+    // 兼容客户端字段名：
+    // - title -> name
+    // - totalAmount -> balance
+    // - iconCodePoint -> icon (转为字符串)
+    // - backgroundColor -> color (转为十六进制字符串)
+    // - createdAt/updatedAt 可能为空，使用当前时间
+
+    final name = json['name'] as String? ?? json['title'] as String? ?? '未命名账户';
+    final balance = (json['balance'] as num?)?.toDouble() ??
+        (json['totalAmount'] as num?)?.toDouble() ??
+        0.0;
+
+    // 图标：优先使用 icon 字符串，否则从 iconCodePoint 转换
+    final icon =
+        json['icon'] as String? ?? (json['iconCodePoint'] as int?)?.toString();
+
+    // 颜色：优先使用 color 字符串，否则从 backgroundColor 整数转换
+    String? color = json['color'] as String?;
+    if (color == null && json['backgroundColor'] != null) {
+      color =
+          '#${(json['backgroundColor'] as int).toRadixString(16).padLeft(8, '0')}';
+    }
+
+    // 时间：兼容可能缺失的情况
+    final now = DateTime.now();
+    DateTime createdAt;
+    DateTime updatedAt;
+    try {
+      createdAt = json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : now;
+      updatedAt = json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : now;
+    } catch (_) {
+      createdAt = now;
+      updatedAt = now;
+    }
+
     return _AccountWithBills(
       id: json['id'] as String,
-      name: json['name'] as String,
-      balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
-      icon: json['icon'] as String?,
-      color: json['color'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      name: name,
+      balance: balance,
+      icon: icon,
+      color: color,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
       metadata: json['metadata'] as Map<String, dynamic>?,
       bills: billsList
-          .map((b) => BillDto.fromJson(b as Map<String, dynamic>))
+          .map((b) => _convertClientBillToDto(b as Map<String, dynamic>))
           .toList(),
     );
   }
