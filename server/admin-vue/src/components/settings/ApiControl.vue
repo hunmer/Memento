@@ -121,11 +121,11 @@ async function copyToClipboard(text: string): Promise<void> {
         "
       >
         <NTag
-          :type="authStore.hasEncryptionKey ? 'success' : 'warning'"
+          :type="hasLocalKey || authStore.serverHasKey ? 'success' : 'warning'"
           size="large"
           style="margin-bottom: 8px"
         >
-          {{ authStore.hasEncryptionKey ? '🟢 已启用' : '🔴 已禁用' }}
+          {{ hasLocalKey || authStore.serverHasKey ? '🟢 已启用' : '🔴 已禁用' }}
         </NTag>
         <p style="color: #6b7280; font-size: 0.875rem; margin: 8px 0 0 0">
           <template v-if="hasLocalKey">
@@ -176,14 +176,14 @@ async function copyToClipboard(text: string): Promise<void> {
         </div>
 
         <NAlert
-          v-if="!authStore.hasEncryptionKey"
+          v-if="!hasLocalKey && !authStore.serverHasKey"
           type="warning"
           style="margin-top: 12px"
         >
           ⚠️ 启用 API 需要提供加密密钥（从 Memento 客户端获取）
         </NAlert>
         <NAlert
-          v-if="authStore.serverHasKey && !hasLocalKey"
+          v-if="!hasLocalKey && authStore.serverHasKey"
           type="info"
           style="margin-top: 12px"
         >
@@ -213,14 +213,14 @@ async function copyToClipboard(text: string): Promise<void> {
       <!-- 操作按钮 -->
       <NSpace>
         <NButton
-          v-if="!authStore.hasEncryptionKey"
+          v-if="!hasLocalKey && !authStore.serverHasKey"
           type="success"
           @click="handleEnableApi"
         >
           ✅ 启用 API 访问
         </NButton>
         <NButton
-          v-if="authStore.hasEncryptionKey && !hasLocalKey"
+          v-if="!hasLocalKey && authStore.serverHasKey"
           type="primary"
           @click="handleEnableApi"
         >
@@ -234,7 +234,7 @@ async function copyToClipboard(text: string): Promise<void> {
           🔑 更改密钥
         </NButton>
         <NButton
-          v-if="authStore.hasEncryptionKey"
+          v-if="hasLocalKey || authStore.serverHasKey"
           type="error"
           @click="handleDisableApi"
         >

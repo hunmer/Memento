@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
   const createdKey = ref<{ name: string; key: string } | null>(null)
 
   // 计算属性
-  const hasEncryptionKey = computed(() => !!encryptionKey.value || serverHasKey.value === true)
+  const hasEncryptionKey = computed(() => !!encryptionKey.value)
 
   // 登录方法
   async function login(
@@ -65,17 +65,24 @@ export const useAuthStore = defineStore('auth', () => {
       apiClient.setToken(response.token)
       localStorage.setItem('username', usernameInput)
 
-      // 从后端检查加密密钥状态
-      try {
-        const keyStatus = await authApi.hasEncryptionKey()
-        serverHasKey.value = keyStatus.has_key
-        if (!keyStatus.has_key) {
-          // 后端没有密钥，清除本地的
-          clearEncryptionKey()
+      // 同步加密密钥到后端
+      if (encryptionKey.value) {
+        // 本地有密钥，同步到后端
+        try {
+          await authApi.setEncryptionKey(encryptionKey.value)
+          serverHasKey.value = true
+        } catch (e) {
+          console.warn('Failed to sync encryption key to server:', e)
         }
-      } catch (e) {
-        console.warn('Failed to check encryption key status:', e)
-        serverHasKey.value = null
+      } else {
+        // 本地没有密钥，检查后端状态
+        try {
+          const keyStatus = await authApi.hasEncryptionKey()
+          serverHasKey.value = keyStatus.has_key
+        } catch (e) {
+          console.warn('Failed to check encryption key status:', e)
+          serverHasKey.value = null
+        }
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '登录失败'
@@ -88,12 +95,11 @@ export const useAuthStore = defineStore('auth', () => {
   function logout(): void {
     isLoggedIn.value = false
     username.value = ''
-    encryptionKey.value = ''
+    // 保留 encryptionKey，不清除本地密钥
     serverHasKey.value = null
     apiClient.setToken(null)
     localStorage.removeItem('token')
     localStorage.removeItem('username')
-    localStorage.removeItem('encryptionKey')
   }
 
   function setEncryptionKey(key: string): void {
@@ -144,11 +150,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // 初始化检查
-  function init(): void {
+  async function init(): Promise<void> {
     const token = localStorage.getItem('token')
     if (token && username.value) {
       apiClient.setToken(token)
       isLoggedIn.value = true
+
+      // 如果本地有密钥，同步到后端
+      if (encryptionKey.value) {
+        try {
+          await authApi.setEncryptionKey(encryptionKey.value)
+          serverHasKey.value = true
+        } catch (e) {
+          console.warn('Failed to sync encryption key on init:', e)
+        }
+      }
     }
     if (serverUrl.value) {
       apiClient.setBaseUrl(serverUrl.value)
