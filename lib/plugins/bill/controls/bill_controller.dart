@@ -142,6 +142,20 @@ class BillController with ChangeNotifier {
     _subscriptionController.setPlugin(_plugin);
   }
 
+  /// 重新加载账户数据（供同步后刷新使用）
+  ///
+  /// 从存储中重新读取账户和账单数据，并刷新订阅数据
+  Future<void> reloadAccounts() async {
+    if (!_hasPlugin) {
+      debugPrint('BillPlugin尚未设置，无法重新加载账户');
+      return;
+    }
+
+    await _loadAccounts();
+    await _subscriptionController.loadSubscriptions();
+    notifyListeners();
+  }
+
   // 从插件存储加载账户列表
   Future<void> _loadAccounts() async {
     try {

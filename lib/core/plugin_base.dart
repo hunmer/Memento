@@ -3,6 +3,23 @@ import 'storage/storage_manager.dart';
 import 'plugin_manager.dart';
 import 'config_manager.dart';
 
+/// 插件数据刷新参数
+class PluginRefreshDataArgs {
+  /// 触发刷新的文件路径
+  final String filePath;
+
+  /// 触发源（websocket, manual, etc）
+  final String source;
+
+  /// 时间戳
+  final DateTime timestamp;
+
+  PluginRefreshDataArgs({
+    required this.filePath,
+    this.source = 'sync',
+  }) : timestamp = DateTime.now();
+}
+
 /// 插件基类，所有插件必须继承此类
 abstract class PluginBase {
   /// 插件唯一标识符
@@ -118,4 +135,24 @@ abstract class PluginBase {
   String? getPluginName(context) {
     return null;
   }
+
+  /// 刷新插件数据（可选实现）
+  ///
+  /// 当数据通过同步服务更新时调用，插件应重写此方法以重新加载内存中的数据。
+  /// 默认实现返回 false 表示未实现刷新功能。
+  ///
+  /// 参数:
+  /// - [args] 刷新参数，包含触发源和文件路径
+  ///
+  /// 返回值:
+  /// - true: 刷新成功
+  /// - false: 未实现刷新或刷新失败
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    return false;
+  }
+
+  /// 是否支持指定文件的刷新（可选实现）
+  ///
+  /// 子类可重写以实现更精细的文件级别刷新控制
+  bool supportsFileRefresh(String filePath) => true;
 }

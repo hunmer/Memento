@@ -12,6 +12,7 @@ import 'package:Memento/core/services/sync_record_service.dart';
 import 'package:Memento/core/services/sync_websocket_service.dart';
 import 'package:Memento/core/services/encryption_service.dart';
 import 'package:Memento/core/route/route_refresh_manager.dart';
+import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 
 /// 文件监听同步服务
@@ -132,6 +133,9 @@ class FileWatchSyncService {
   void _initWebSocket() {
     if (_config == null || !_config!.isLoggedIn) return;
     if (_syncService == null || _recordService == null) return;
+
+    // 设置 RouteRefreshManager 的 PluginManager 依赖
+    RouteRefreshManager().setPluginManager(PluginManager.instance);
 
     _wsService = SyncWebSocketService();
     _wsService!.configure(

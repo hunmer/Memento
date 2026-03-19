@@ -104,6 +104,31 @@ class BillPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
     return 'bill_name'.tr;
   }
 
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'bill/accounts.json',
+    'bill/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[BillPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _billController.reloadAccounts();
+      notifyListeners();
+      debugPrint('[BillPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[BillPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
+
   @override
   Widget buildMainView(BuildContext context) {
     return BillMainView();

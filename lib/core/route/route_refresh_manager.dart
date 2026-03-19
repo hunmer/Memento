@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 
 import '../event/event_manager.dart';
+import '../plugin_manager.dart';
+import '../plugin_base.dart';
 import 'route_history_manager.dart';
 
 /// 路由刷新管理器
 ///
 /// 负责:
 /// - 根据文件路径判断对应的插件
+/// - 主动调用插件的 refreshData() 方法重新加载数据
 /// - 检查当前路由是否匹配
 /// - 触发插件刷新事件
 class RouteRefreshManager {
@@ -15,6 +18,19 @@ class RouteRefreshManager {
   RouteRefreshManager._internal();
 
   static const String _tag = 'RouteRefreshManager';
+
+  PluginManager? _pluginManager;
+
+  /// 防抖：记录最近刷新时间
+  final Map<String, DateTime> _lastRefreshTimes = {};
+
+  /// 防抖间隔（毫秒）
+  static const int _debounceIntervalMs = 500;
+
+  /// 设置插件管理器
+  void setPluginManager(PluginManager pluginManager) {
+    _pluginManager = pluginManager;
+  }
 
   /// 文件路径前缀 -> 插件ID 映射
   static const Map<String, String> _fileToPlugin = {
@@ -39,19 +55,54 @@ class RouteRefreshManager {
   };
 
   /// 文件同步完成后触发刷新
-  void onFileSynced(String filePath) {
+  Future<void> onFileSynced(String filePath) async {
     final pluginId = _getPluginForFile(filePath);
     if (pluginId == null) {
       _log('未找到文件对应的插件: $filePath');
       return;
     }
 
-    // 检查当前路由是否匹配
+    // 防抖检查
+    final now = DateTime.now();
+    final lastRefresh = _lastRefreshTimes[pluginId];
+    if (lastRefresh != null) {
+      final diff = now.difference(lastRefresh).inMilliseconds;
+      if (diff < _debounceIntervalMs) {
+        _log('防抖：跳过刷新 $pluginId (${diff}ms < ${_debounceIntervalMs}ms)');
+        return;
+      }
+    }
+    _lastRefreshTimes[pluginId] = now;
+
+    // 1. 主动调用插件的 refreshData() 方法
+    bool refreshSuccess = false;
+    if (_pluginManager != null) {
+      final plugin = _pluginManager!.getPlugin(pluginId);
+      if (plugin != null) {
+        if (plugin.supportsFileRefresh(filePath)) {
+          try {
+            refreshSuccess = await plugin.refreshData(
+              PluginRefreshDataArgs(
+                filePath: filePath,
+                source: 'sync',
+              ),
+            );
+            _log('插件数据刷新${refreshSuccess ? "成功" : "失败"}: $pluginId');
+          } catch (e) {
+            _log('插件数据刷新异常: $pluginId, 错误: $e');
+          }
+        } else {
+          _log('插件不支持该文件的刷新: $filePath');
+        }
+      }
+    }
+
+    // 2. 检查当前路由是否匹配，如果在插件页面内则触发 UI 刷新事件
     if (_isCurrentRoute(pluginId)) {
-      _log('当前路由匹配，触发刷新: $pluginId');
-      _triggerRefresh(pluginId);
+      _log('当前路由匹配，触发 UI 刷新事件: $pluginId');
+      _triggerRefresh(pluginId, refreshSuccess);
     } else {
-      _log('当前路由不匹配，跳过刷新: $pluginId');
+      _log('当前路由不匹配，跳过 UI 刷新事件: $pluginId');
     }
   }
 
@@ -83,11 +134,11 @@ class RouteRefreshManager {
   }
 
   /// 触发插件刷新
-  void _triggerRefresh(String pluginId) {
+  void _triggerRefresh(String pluginId, bool refreshSuccess) {
     // 广播插件刷新事件
     EventManager.instance.broadcast(
       '${pluginId}_refresh',
-      PluginRefreshArgs(pluginId: pluginId),
+      PluginRefreshArgs(pluginId: pluginId, success: refreshSuccess),
     );
 
     // 同时广播通用的数据更新事件
@@ -120,8 +171,12 @@ class RouteRefreshManager {
 /// 插件刷新事件参数
 class PluginRefreshArgs extends EventArgs {
   final String pluginId;
+  final bool success;
 
-  PluginRefreshArgs({required this.pluginId}) : super('plugin_refresh');
+  PluginRefreshArgs({
+    required this.pluginId,
+    this.success = false,
+  }) : super('plugin_refresh');
 }
 
 /// 同步数据更新事件参数
