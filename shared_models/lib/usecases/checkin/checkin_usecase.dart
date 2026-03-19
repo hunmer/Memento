@@ -83,9 +83,9 @@ class CheckinUseCase {
   ///
   /// [params] 必需参数:
   /// - `name`: 项目名称
-  /// - `icon`: 图标代码点
-  /// - `color`: 颜色值
   /// 可选参数:
+  /// - `icon`: 图标代码点，默认 57527
+  /// - `color`: 颜色值，默认 4280391411
   /// - `group`: 分组名称
   /// - `description`: 描述
   /// - `cardStyle`: 卡片样式
@@ -99,24 +99,12 @@ class CheckinUseCase {
           code: ErrorCodes.invalidParams);
     }
 
-    final iconValidation = ParamValidator.requireInt(params, 'icon');
-    if (!iconValidation.isValid) {
-      return Result.failure(iconValidation.errorMessage!,
-          code: ErrorCodes.invalidParams);
-    }
-
-    final colorValidation = ParamValidator.requireInt(params, 'color');
-    if (!colorValidation.isValid) {
-      return Result.failure(colorValidation.errorMessage!,
-          code: ErrorCodes.invalidParams);
-    }
-
     try {
       final item = CheckinItemDto(
         id: params['id'] as String? ?? _uuid.v4(),
         name: params['name'] as String,
-        icon: params['icon'] as int,
-        color: params['color'] as int,
+        icon: params['icon'] as int? ?? 57527,
+        color: params['color'] as int? ?? 4280391411,
         group: params['group'] as String? ?? '默认分组',
         description: params['description'] as String? ?? '',
         cardStyle: params['cardStyle'] as int? ?? 0,

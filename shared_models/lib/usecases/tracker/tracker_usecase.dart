@@ -91,15 +91,15 @@ class TrackerUseCase {
   ///
   /// [params] 必需参数:
   /// - `name`: 目标名称
-  /// - `icon`: 图标
   /// - `unitType`: 单位类型
   /// - `targetValue`: 目标值
-  /// - `dateSettings`: 日期设置
   /// 可选参数:
+  /// - `icon`: 图标，默认 '57455'
   /// - `iconColor`: 图标颜色
   /// - `group`: 分组
   /// - `imagePath`: 图片路径
   /// - `progressColor`: 进度颜色
+  /// - `dateSettings`: 日期设置，默认 { type: 'daily' }
   /// - `reminderTime`: 提醒时间
   /// - `isLoopReset`: 是否循环重置
   Future<Result<Map<String, dynamic>>> createGoal(
@@ -108,12 +108,6 @@ class TrackerUseCase {
     final nameValidation = ParamValidator.requireString(params, 'name');
     if (!nameValidation.isValid) {
       return Result.failure(nameValidation.errorMessage!,
-          code: ErrorCodes.invalidParams);
-    }
-
-    final iconValidation = ParamValidator.requireString(params, 'icon');
-    if (!iconValidation.isValid) {
-      return Result.failure(iconValidation.errorMessage!,
           code: ErrorCodes.invalidParams);
     }
 
@@ -130,19 +124,20 @@ class TrackerUseCase {
           code: ErrorCodes.invalidParams);
     }
 
-    if (params['dateSettings'] == null) {
-      return Result.failure('缺少必需参数: dateSettings',
-          code: ErrorCodes.invalidParams);
-    }
-
     try {
-      final dateSettingsMap = params['dateSettings'] as Map<String, dynamic>;
-      final dateSettings = DateSettingsDto.fromJson(dateSettingsMap);
+      // 处理 dateSettings，提供默认值
+      DateSettingsDto dateSettings;
+      if (params['dateSettings'] != null) {
+        final dateSettingsMap = params['dateSettings'] as Map<String, dynamic>;
+        dateSettings = DateSettingsDto.fromJson(dateSettingsMap);
+      } else {
+        dateSettings = DateSettingsDto(type: 'daily');
+      }
 
       final goal = GoalDto(
         id: params['id'] as String? ?? _uuid.v4(),
         name: params['name'] as String,
-        icon: params['icon'] as String,
+        icon: params['icon'] as String? ?? '57455',
         iconColor: params['iconColor'] as int?,
         unitType: params['unitType'] as String,
         group: params['group'] as String? ?? '默认',

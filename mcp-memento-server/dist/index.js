@@ -187,7 +187,16 @@ async function main() {
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_diary_createEntry': {
-                    const result = await client.createDiaryEntry(args);
+                    const params = args;
+                    // 将 mood 转换为 string 类型
+                    const diaryData = {
+                        date: params.date,
+                        content: params.content,
+                        mood: params.mood?.toString(),
+                        weather: params.weather,
+                        tags: params.tags,
+                    };
+                    const result = await client.createDiaryEntry(diaryData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_diary_updateEntry': {
@@ -209,7 +218,16 @@ async function main() {
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_checkin_createItem': {
-                    const result = await client.createCheckinItem(args);
+                    const params = args;
+                    // 转换 icon 和 color 为整数
+                    const checkinData = {
+                        name: params.name,
+                        icon: typeof params.icon === 'string' ? parseInt(params.icon) : (params.icon ?? 57527),
+                        color: typeof params.color === 'string' ? parseInt(params.color.replace('#', ''), 16) : (params.color ?? 4280391411),
+                        group: params.group,
+                        description: params.description,
+                    };
+                    const result = await client.createCheckinItem(checkinData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_checkin_addRecord': {
@@ -227,7 +245,15 @@ async function main() {
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_day_createMemorialDay': {
-                    const result = await client.createMemorialDay(args);
+                    const params = args;
+                    // 映射参数并添加默认值
+                    const memorialDayData = {
+                        title: params.name,
+                        targetDate: params.date,
+                        notes: params.description ? [params.description] : [],
+                        backgroundColor: params.color ? parseInt(params.color) : 4280391411,
+                    };
+                    const result = await client.createMemorialDay(memorialDayData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_day_searchMemorialDays': {
@@ -244,7 +270,20 @@ async function main() {
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_tracker_createGoal': {
-                    const result = await client.createTrackerGoal(args);
+                    const params = args;
+                    // 添加必需的默认参数
+                    const trackerData = {
+                        name: params.name,
+                        targetValue: params.targetValue,
+                        unitType: params.unit,
+                        icon: '57455', // 默认图标
+                        iconColor: 4280391411, // 默认颜色
+                        progressColor: 4280391411, // 默认进度颜色
+                        dateSettings: { type: 'daily' }, // 默认每日重置
+                        group: params.group,
+                        description: params.description,
+                    };
+                    const result = await client.createTrackerGoal(trackerData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_tracker_addRecord': {
@@ -279,7 +318,18 @@ async function main() {
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_calendar_createEvent': {
-                    const result = await client.createCalendarEvent(args);
+                    const params = args;
+                    // 添加默认值
+                    const eventData = {
+                        title: params.title,
+                        startTime: params.startTime,
+                        endTime: params.endTime,
+                        description: params.description,
+                        location: params.location,
+                        icon: params.icon ?? 58050, // 默认图标
+                        color: params.color ?? 4280391411, // 默认颜色
+                    };
+                    const result = await client.createCalendarEvent(eventData);
                     return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
                 }
                 case 'memento_calendar_completeEvent': {

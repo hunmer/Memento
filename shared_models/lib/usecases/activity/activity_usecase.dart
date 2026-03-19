@@ -150,7 +150,7 @@ class ActivityUseCase {
         title: params['title'] as String,
         tags: (params['tags'] as List<dynamic>?)?.cast<String>() ?? [],
         description: params['description'] as String?,
-        mood: params['mood'] as String?,
+        mood: params['mood']?.toString(),
         metadata: params['metadata'] as Map<String, dynamic>?,
       );
 
@@ -248,7 +248,7 @@ class ActivityUseCase {
             ? params['description'] as String?
             : existing.description,
         mood:
-            params.containsKey('mood') ? params['mood'] as String? : existing.mood,
+            params.containsKey('mood') ? params['mood']?.toString() : existing.mood,
         metadata: params.containsKey('metadata')
             ? params['metadata'] as Map<String, dynamic>?
             : existing.metadata,

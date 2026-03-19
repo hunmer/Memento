@@ -253,7 +253,7 @@ export declare class MementoClient {
     createDiaryEntry(data: {
         date: string;
         content: string;
-        mood?: number;
+        mood?: string;
         weather?: string;
         tags?: string[];
     }): Promise<ApiResponse<unknown>>;
@@ -292,8 +292,8 @@ export declare class MementoClient {
     getCheckinItem(id: string): Promise<ApiResponse<unknown>>;
     createCheckinItem(data: {
         name: string;
-        icon?: string;
-        color?: string;
+        icon?: number;
+        color?: number;
         group?: string;
         description?: string;
     }): Promise<ApiResponse<unknown>>;
@@ -317,11 +317,10 @@ export declare class MementoClient {
     }): Promise<ApiResponse<unknown>>;
     getMemorialDay(id: string): Promise<ApiResponse<unknown>>;
     createMemorialDay(data: {
-        name: string;
-        date: string;
-        type?: string;
-        description?: string;
-        color?: string;
+        title: string;
+        targetDate: string;
+        notes?: string[];
+        backgroundColor?: number;
     }): Promise<ApiResponse<unknown>>;
     updateMemorialDay(id: string, data: {
         name?: string;
@@ -346,7 +345,13 @@ export declare class MementoClient {
     createTrackerGoal(data: {
         name: string;
         targetValue: number;
-        unit: string;
+        unitType: string;
+        icon?: string;
+        iconColor?: number;
+        progressColor?: number;
+        dateSettings?: {
+            type: string;
+        };
         group?: string;
         description?: string;
     }): Promise<ApiResponse<unknown>>;
@@ -401,6 +406,8 @@ export declare class MementoClient {
         endTime?: string;
         description?: string;
         location?: string;
+        icon?: number;
+        color?: number;
     }): Promise<ApiResponse<unknown>>;
     updateCalendarEvent(id: string, data: {
         title?: string;

@@ -448,7 +448,7 @@ export class MementoClient {
     return this.get(`/api/v1/plugins/checkin/items/${id}`);
   }
 
-  async createCheckinItem(data: { name: string; icon?: string; color?: string; group?: string; description?: string }) {
+  async createCheckinItem(data: { name: string; icon?: number; color?: number; group?: string; description?: string }) {
     return this.post('/api/v1/plugins/checkin/items', data);
   }
 
@@ -508,7 +508,7 @@ export class MementoClient {
     return this.get(`/api/v1/plugins/tracker/goals/${id}`);
   }
 
-  async createTrackerGoal(data: { name: string; targetValue: number; unit: string; group?: string; description?: string }) {
+  async createTrackerGoal(data: { name: string; targetValue: number; unitType: string; icon?: string; iconColor?: number; progressColor?: number; dateSettings?: { type: string }; group?: string; description?: string }) {
     return this.post('/api/v1/plugins/tracker/goals', data);
   }
 

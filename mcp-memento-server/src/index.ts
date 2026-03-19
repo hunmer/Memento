@@ -354,7 +354,16 @@ async function main() {
         }
 
         case 'memento_checkin_createItem': {
-          const result = await client.createCheckinItem(args as { name: string; icon?: string; color?: string; group?: string; description?: string });
+          const params = args as { name: string; icon?: string | number; color?: string | number; group?: string; description?: string };
+          // 转换 icon 和 color 为整数
+          const checkinData = {
+            name: params.name,
+            icon: typeof params.icon === 'string' ? parseInt(params.icon) : (params.icon ?? 57527),
+            color: typeof params.color === 'string' ? parseInt(params.color.replace('#', ''), 16) : (params.color ?? 4280391411),
+            group: params.group,
+            description: params.description,
+          };
+          const result = await client.createCheckinItem(checkinData);
           return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
         }
 
@@ -407,7 +416,20 @@ async function main() {
         }
 
         case 'memento_tracker_createGoal': {
-          const result = await client.createTrackerGoal(args as { name: string; targetValue: number; unit: string; group?: string; description?: string });
+          const params = args as { name: string; targetValue: number; unit: string; group?: string; description?: string };
+          // 添加必需的默认参数
+          const trackerData = {
+            name: params.name,
+            targetValue: params.targetValue,
+            unitType: params.unit,
+            icon: '57455', // 默认图标
+            iconColor: 4280391411, // 默认颜色
+            progressColor: 4280391411, // 默认进度颜色
+            dateSettings: { type: 'daily' }, // 默认每日重置
+            group: params.group,
+            description: params.description,
+          };
+          const result = await client.createTrackerGoal(trackerData);
           return { content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }] };
         }
 
