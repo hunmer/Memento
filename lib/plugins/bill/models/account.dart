@@ -30,16 +30,18 @@ class Account {
   // 从JSON创建账户
   factory Account.fromJson(Map<String, dynamic> json) {
     final List<dynamic> billsJson = json['bills'] as List<dynamic>? ?? [];
+    // 兼容 name 和 title 两种字段名
+    final title = json['title'] as String? ?? json['name'] as String? ?? '';
     return Account(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String? ?? '',
+      title: title,
       icon: IconData(
-        json['iconCodePoint'] as int,
-        fontFamily: json['iconFontFamily'] as String?,
+        json['iconCodePoint'] as int? ?? Icons.account_balance.codePoint,
+        fontFamily: json['iconFontFamily'] as String? ?? 'MaterialIcons',
         fontPackage: json['iconFontPackage'] as String?,
       ),
-      backgroundColor: Color(json['backgroundColor'] as int),
-      totalAmount: (json['totalAmount'] as num).toDouble(),
+      backgroundColor: Color(json['backgroundColor'] as int? ?? 0xFF2196F3),
+      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
       bills:
           billsJson
               .map(

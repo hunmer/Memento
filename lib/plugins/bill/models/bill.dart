@@ -129,18 +129,27 @@ class Bill {
 
   factory Bill.fromJson(Map<String, dynamic> json) {
     return Bill(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      amount: json['amount'] as double,
-      category: json['category'] as String,
-      date: DateTime.parse(json['date'] as String),
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      category: json['category'] as String? ?? '',
+      date: json['date'] != null
+          ? DateTime.parse(json['date'] as String)
+          : DateTime.now(),
       note: json['note'] as String? ?? '',
       tag: json['tag'] as String?,
-      accountId: json['accountId'] as String,
-      icon: IconData(json['icon'] as int, fontFamily: 'MaterialIcons'),
-      iconColor: Color(json['iconColor'] as int),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      accountId: json['accountId'] as String? ?? '',
+      icon: IconData(
+        json['icon'] as int? ?? Icons.attach_money.codePoint,
+        fontFamily: 'MaterialIcons',
+      ),
+      iconColor: Color(json['iconColor'] as int? ?? Colors.blue.value),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
       subscriptionId: json['subscriptionId'] as String?,
       isSubscription: json['isSubscription'] as bool? ?? false,
       subscriptionStartDate: json['subscriptionStartDate'] != null

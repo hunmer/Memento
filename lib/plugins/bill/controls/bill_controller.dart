@@ -170,13 +170,20 @@ class BillController with ChangeNotifier {
         {'accounts': []},
       );
 
-      final accountsJson = List<String>.from(accountsData['accounts'] ?? []);
+      final rawAccounts = accountsData['accounts'] ?? [];
       _accounts.clear();
 
-      if (accountsJson.isNotEmpty) {
-        _accounts.addAll(
-          accountsJson.map((json) => Account.fromJson(jsonDecode(json))),
-        );
+      if (rawAccounts.isNotEmpty) {
+        // 兼容两种格式：字符串数组（每项是 JSON 字符串）或对象数组
+        for (final item in rawAccounts) {
+          if (item is String) {
+            // 旧格式：JSON 字符串
+            _accounts.add(Account.fromJson(jsonDecode(item)));
+          } else if (item is Map<String, dynamic>) {
+            // 新格式：直接是对象
+            _accounts.add(Account.fromJson(item));
+          }
+        }
       } else {
         // 如果没有数据，加载示例数据
         await _loadSampleData();

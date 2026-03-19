@@ -494,7 +494,10 @@ class SyncClientService {
     // 4. 记录拉取时间
     await _recordService.recordPull(filePath, serverTime ?? DateTime.now());
 
-    // 5. 通知 UI 数据已更新
+    // 5. 标记为最近更新（防止文件监控触发回声上传）
+    _recordService.markRecentUpload(filePath);
+
+    // 6. 通知 UI 数据已更新
     EventManager.instance.broadcast(
       'sync_data_updated',
       SyncDataUpdatedArgs(filePath: filePath, source: 'server'),
