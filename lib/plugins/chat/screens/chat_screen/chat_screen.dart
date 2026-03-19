@@ -74,6 +74,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatPlugin.instance.addListener(_handleChatPluginUpdate);
     // 订阅消息更新事件
     eventManager.subscribe('chat_message_updated', _handleMessageUpdated);
+    // 订阅同步刷新事件（用于同步后的全量刷新）
+    eventManager.subscribe('chat_refresh', _handleSyncRefresh);
     _loadBackgroundPath();
     _loadChannelDraft();
 
@@ -120,6 +122,8 @@ class _ChatScreenState extends State<ChatScreen> {
     ChatPlugin.instance.removeListener(_handleChatPluginUpdate);
     // 取消订阅消息更新事件
     eventManager.unsubscribe('chat_message_updated', _handleMessageUpdated);
+    // 取消订阅同步刷新事件
+    eventManager.unsubscribe('chat_refresh', _handleSyncRefresh);
     _controller.dispose();
     _filterState.dispose();
     // MessageOperations不需要dispose
@@ -134,6 +138,13 @@ class _ChatScreenState extends State<ChatScreen> {
     final message = args.value1;
     if (message.channelId != widget.channel.id) return;
 
+    // 重新加载消息列表
+    _controller.reloadMessages();
+  }
+
+  // 处理同步刷新事件（来自 RouteRefreshManager）
+  void _handleSyncRefresh(EventArgs args) {
+    debugPrint('[ChatScreen] 收到同步刷新事件');
     // 重新加载消息列表
     _controller.reloadMessages();
   }

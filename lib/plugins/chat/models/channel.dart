@@ -107,9 +107,9 @@ class Channel {
     List<Message> messages = const [],
   }) {
 
-    // 解析图标
+    // 解析图标，提供默认图标
     final IconData icon = IconData(
-      json['icon'] as int,
+      json['icon'] as int? ?? Icons.chat.codePoint,
       fontFamily: json['iconFontFamily'] as String?,
       fontPackage: json['iconFontPackage'] as String?,
     );
@@ -121,8 +121,8 @@ class Channel {
             : Colors.blue;
 
     return Channel(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '未命名频道',
       draft: json['draft'] as String?,
       icon: icon,
       backgroundColor: backgroundColor,
