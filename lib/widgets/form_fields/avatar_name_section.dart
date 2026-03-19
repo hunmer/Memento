@@ -77,25 +77,22 @@ class AvatarNameSection extends StatelessWidget {
         SizedBox(
           width: 80,
           height: 80,
-          child: avatarUrl != null
-              ? AdaptiveImage(
-                  imagePath: avatarUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  shape: BoxShape.circle,
-                )
-              : Container(
-                  decoration: BoxDecoration(
+          child:
+              avatarUrl != null
+                  ? AdaptiveImage(
+                    imagePath: avatarUrl,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
                     shape: BoxShape.circle,
-                    color: theme.cardColor,
+                  )
+                  : Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.cardColor,
+                    ),
+                    child: Icon(Icons.person, size: 50, color: theme.hintColor),
                   ),
-                  child: Icon(
-                    Icons.person,
-                    size: 50,
-                    color: theme.hintColor,
-                  ),
-                ),
         ),
         Positioned(
           bottom: 0,
@@ -151,11 +148,12 @@ class AvatarNameSection extends StatelessWidget {
 
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => const ImagePickerDialog(
-        saveDirectory: 'contacts/images',
-        enableCrop: true,
-        cropAspectRatio: 1 / 1,
-      ),
+      builder:
+          (context) => const ImagePickerDialog(
+            saveDirectory: 'app_images',
+            enableCrop: true,
+            cropAspectRatio: 1 / 1,
+          ),
     );
 
     if (result != null && result['url'] != null) {

@@ -22,10 +22,12 @@ class ContactController {
 
   ContactController(this.plugin) {
     // 初始化时规范化所有路径
-    contactsKey = _normalizePath('contacts${path.separator}contacts.json');
-    interactionsKey = _normalizePath('contacts${path.separator}interactions.json');
-    filterConfigKey = _normalizePath('contacts${path.separator}filter_config');
-    sortConfigKey = _normalizePath('contacts${path.separator}sort_config');
+    contactsKey = _normalizePath('contact${path.separator}contacts.json');
+    interactionsKey = _normalizePath(
+      'contact${path.separator}interactions.json',
+    );
+    filterConfigKey = _normalizePath('contact${path.separator}filter_config');
+    sortConfigKey = _normalizePath('contact${path.separator}sort_config');
   }
 
   // 获取所有联系人
@@ -446,7 +448,9 @@ class ContactController {
       sampleInteractions.map((i) => i.toJson()).toList(),
     );
 
-    debugPrint('Created ${sampleContacts.length} sample contacts and ${sampleInteractions.length} interactions');
+    debugPrint(
+      'Created ${sampleContacts.length} sample contacts and ${sampleInteractions.length} interactions',
+    );
   }
 
   // 在应用退出前保存所有更改
