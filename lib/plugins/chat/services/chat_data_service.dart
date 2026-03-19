@@ -175,6 +175,11 @@ class ChatDataService {
     }
   }
 
+  /// 重新加载频道数据（供同步后刷新使用）
+  Future<void> reloadChannels() async {
+    await _loadChannels();
+  }
+
   // ==================== 频道操作 ====================
 
   void setCurrentChannel(Channel? channel) {

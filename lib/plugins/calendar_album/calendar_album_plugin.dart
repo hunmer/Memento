@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:shared_models/usecases/calendar_album/calendar_album_usecase.dart';
@@ -39,6 +40,30 @@ class CalendarAlbumPlugin extends BasePlugin with JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'calendar_album/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[CalendarAlbumPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      // 重新加载日记数据
+      await _calendarController?.reloadEntries();
+      debugPrint('[CalendarAlbumPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[CalendarAlbumPlugin] 数据刷新失败: $e');
+      return false;
+    }
   }
 
   CalendarController? _calendarController;

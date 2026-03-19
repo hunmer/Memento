@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:flutter/gestures.dart';
 import 'package:Memento/core/widgets/custom_bottom_bar.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -68,6 +69,34 @@ class ActivityPlugin extends BasePlugin with JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'activity/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[ActivityPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      // 刷新缓存数据
+      await Future.wait([
+        _refreshWeeklyActivitiesCache(),
+        _refreshTodayActivitiesCacheInternal(),
+        _refreshYesterdayActivitiesCache(),
+      ]);
+      debugPrint('[ActivityPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[ActivityPlugin] 数据刷新失败: $e');
+      return false;
+    }
   }
 
   @override

@@ -175,6 +175,11 @@ class CalendarController extends ChangeNotifier {
     _syncAllEventsToSystemCalendar();
   }
 
+  /// 重新加载事件数据（供同步后刷新使用）
+  Future<void> reloadEvents() async {
+    await _loadEvents();
+  }
+
   // 创建示例事件
   Future<void> _createSampleEvents() async {
     final now = DateTime.now();

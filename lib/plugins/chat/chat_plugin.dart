@@ -10,6 +10,7 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
 import 'package:Memento/plugins/base_plugin.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -89,6 +90,31 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'chat/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[ChatPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      // 重新加载频道和消息数据
+      await dataService.reloadChannels();
+      notifyListeners();
+      debugPrint('[ChatPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[ChatPlugin] 数据刷新失败: $e');
+      return false;
+    }
   }
 
   // Services

@@ -6,6 +6,7 @@ import 'package:home_widget/home_widget.dart';
 import 'package:Memento/utils/platform_utils.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart' as syncfusion;
 import 'package:Memento/widgets/memento_sf_calendar/memento_sf_calendar.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
@@ -40,6 +41,32 @@ class CalendarPlugin extends BasePlugin with JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'calendar/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[CalendarPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      // 重新加载日历事件
+      await controller.reloadEvents();
+      // 同步小组件数据
+      syncWidgetData();
+      debugPrint('[CalendarPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[CalendarPlugin] 数据刷新失败: $e');
+      return false;
+    }
   }
 
   // 总控制器，管理所有日历相关服务

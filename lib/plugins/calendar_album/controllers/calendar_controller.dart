@@ -153,6 +153,12 @@ class CalendarController extends ChangeNotifier {
     });
   }
 
+  /// 重新加载日记数据（供同步后刷新使用）
+  Future<void> reloadEntries() async {
+    _entries.clear();
+    await _loadEntries();
+  }
+
   /// 加载示例数据
   Future<void> _loadSampleData() async {
     final sampleEntries = CalendarAlbumSampleData.getSampleCalendarEntriesGrouped();
