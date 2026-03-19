@@ -39,7 +39,9 @@
       "Skill(glm-plan-usage:usage-query-skill)",
       "mcp__fetch__fetch",
       "Bash(cd:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "mcp__memento__memento_chat_getChannels",
+      "mcp__memento__memento_todo_getTasks"
     ],
     "deny": [],
     "ask": []

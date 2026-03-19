@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -102,6 +103,29 @@ class DiaryPlugin extends BasePlugin with JSBridgePlugin {
 
   // 初始化标志
   bool _isInitialized = false;
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'diary/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[DiaryPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _refreshMonthlyEntriesCache();
+      debugPrint('[DiaryPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[DiaryPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
 
   // 缓存统计数据（用于同步访问）
   int _cachedTodayWordCount = 0;

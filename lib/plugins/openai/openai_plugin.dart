@@ -12,6 +12,7 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:shared_models/usecases/openai/openai_usecase.dart';
 import 'package:Memento/widgets/preset_edit_form.dart';
 import 'repositories/client_openai_repository.dart';
@@ -44,6 +45,30 @@ class OpenAIPlugin extends BasePlugin with JSBridgePlugin {
   }
 
   final ChatEventHandler _chatEventHandler = ChatEventHandler();
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'openai/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[OpenAIPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      // OpenAI 插件的数据是通过 AgentController 等动态加载的
+      // 重新加载数据会自动在下次访问时进行
+      debugPrint('[OpenAIPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[OpenAIPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
 
   // UseCase 实例
   late final OpenAIUseCase _useCase;

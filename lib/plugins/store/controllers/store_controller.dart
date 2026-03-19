@@ -489,6 +489,12 @@ class StoreController with ChangeNotifier {
     _notifyCacheUpdatedEvent();
   }
 
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    await loadFromStorage();
+    notifyListeners();
+  }
+
   // 从存储加载数据
   Future<void> loadFromStorage() async {
     final storedProducts = await plugin.storage.read('store/products.json');

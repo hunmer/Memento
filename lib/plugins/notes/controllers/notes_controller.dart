@@ -48,6 +48,15 @@ class NotesController {
     await _loadNotes();
   }
 
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    _folders.clear();
+    _notes.clear();
+    _noteIds.clear();
+    await _loadFolders();
+    await _loadNotes();
+  }
+
   Future<void> _loadFolders() async {
     try {
       // 读取文件内容为字符串

@@ -13,6 +13,11 @@ class TimerController {
 
   List<TimerTask> getTasks() => _tasks;
 
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    await loadTasks();
+  }
+
   // 从存储加载任务
   Future<Map<String, dynamic>> loadTasks() async {
     try {

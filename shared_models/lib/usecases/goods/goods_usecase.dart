@@ -67,8 +67,8 @@ class GoodsUseCase {
   /// - `name`: 仓库名称
   /// 可选参数:
   /// - `description`: 描述
-  /// - `icon`: 图标
-  /// - `color`: 颜色
+  /// - `iconData`: 图标 codePoint
+  /// - `iconColor`: 图标颜色值
   Future<Result<Map<String, dynamic>>> createWarehouse(
       Map<String, dynamic> params) async {
     final nameValidation = ParamValidator.requireString(params, 'name');
@@ -83,8 +83,9 @@ class GoodsUseCase {
         id: params['id'] as String? ?? _uuid.v4(),
         name: params['name'] as String,
         description: params['description'] as String?,
-        icon: params['icon'] as String?,
-        color: params['color'] as String?,
+        iconData: params['iconData'] as int? ?? params['icon'] as int?,
+        iconColor: params['iconColor'] as int? ?? params['color'] as int?,
+        imageUrl: params['imageUrl'] as String?,
         createdAt: now,
         updatedAt: now,
       );
@@ -122,12 +123,19 @@ class GoodsUseCase {
         description: params.containsKey('description')
             ? params['description'] as String?
             : existing.description,
-        icon: params.containsKey('icon')
-            ? params['icon'] as String?
-            : existing.icon,
-        color: params.containsKey('color')
-            ? params['color'] as String?
-            : existing.color,
+        iconData: params.containsKey('iconData')
+            ? params['iconData'] as int?
+            : (params.containsKey('icon')
+                ? params['icon'] as int?
+                : existing.iconData),
+        iconColor: params.containsKey('iconColor')
+            ? params['iconColor'] as int?
+            : (params.containsKey('color')
+                ? params['color'] as int?
+                : existing.iconColor),
+        imageUrl: params.containsKey('imageUrl')
+            ? params['imageUrl'] as String?
+            : existing.imageUrl,
         updatedAt: DateTime.now(),
       );
 
@@ -234,8 +242,9 @@ class GoodsUseCase {
         description: params['description'] as String?,
         quantity: params['quantity'] as int? ?? 1,
         category: params['category'] as String?,
+        imageUrl: params['imageUrl'] as String?,
         tags: (params['tags'] as List<dynamic>?)?.cast<String>() ?? [],
-        customFields: params['customFields'] as Map<String, dynamic>?,
+        customFields: _parseCustomFields(params['customFields']),
         createdAt: now,
         updatedAt: now,
       );
@@ -283,11 +292,14 @@ class GoodsUseCase {
         category: params.containsKey('category')
             ? params['category'] as String?
             : existing.category,
+        imageUrl: params.containsKey('imageUrl')
+            ? params['imageUrl'] as String?
+            : existing.imageUrl,
         tags: params['tags'] != null
             ? (params['tags'] as List<dynamic>).cast<String>()
             : existing.tags,
         customFields: params.containsKey('customFields')
-            ? params['customFields'] as Map<String, dynamic>?
+            ? _parseCustomFields(params['customFields'])
             : existing.customFields,
         updatedAt: DateTime.now(),
       );
@@ -385,5 +397,18 @@ class GoodsUseCase {
       offset: offset ?? 0,
       count: count ?? 100,
     );
+  }
+
+  List<Map<String, dynamic>> _parseCustomFields(dynamic fields) {
+    if (fields == null) return [];
+    if (fields is List) {
+      return fields.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+    if (fields is Map) {
+      return fields.entries
+          .map((e) => {'key': e.key, 'value': e.value})
+          .toList();
+    }
+    return [];
   }
 }

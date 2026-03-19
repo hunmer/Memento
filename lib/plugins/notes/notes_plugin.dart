@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:intl/intl.dart';
 import 'controllers/notes_controller.dart';
 import 'screens/notes_screen.dart';
@@ -36,6 +37,29 @@ class NotesPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
   }
 
   late NotesController controller;
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'notes/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[NotesPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await controller.reloadData();
+      debugPrint('[NotesPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[NotesPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
   late ClientNotesRepository _repository;
   late NotesUseCase _useCase;
   bool _isInitialized = false;

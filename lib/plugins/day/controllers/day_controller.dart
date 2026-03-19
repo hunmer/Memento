@@ -47,6 +47,17 @@ class DayController extends ChangeNotifier {
     await _loadViewPreference();
   }
 
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    await _loadMemorialDays();
+    notifyListeners();
+    // 广播缓存更新事件
+    EventManager.instance.broadcast(
+      'memorial_day_cache_updated',
+      MemorialDayCacheUpdatedEventArgs(items: List.from(_memorialDays)),
+    );
+  }
+
   // 切换视图模式
   void toggleView() {
     _isCardView = !_isCardView;

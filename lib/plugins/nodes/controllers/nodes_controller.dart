@@ -67,6 +67,11 @@ class NodesController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    await _loadData();
+  }
+
   Future<void> _loadData() async {
     try {
       final notebooksData = await _storageManager.read('nodes/nodes_notebooks.json');

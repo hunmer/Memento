@@ -353,7 +353,7 @@ class ServerGoodsRepository extends IGoodsRepository {
         final items = await _readWarehouseItems(warehouse.id);
         totalItems += items.length;
         for (final item in items) {
-          totalQuantity += item.quantity;
+          totalQuantity += item.quantity ?? 0;
         }
       }
 

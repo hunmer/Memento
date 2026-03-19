@@ -10,6 +10,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_widget_sync_helper.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:shared_models/shared_models.dart';
 import 'models/checkin_item.dart';
@@ -168,6 +169,43 @@ class CheckinPlugin extends BasePlugin with JSBridgePlugin {
   IconData get icon => Icons.checklist;
 
   List<CheckinItem> _checkinItems = [];
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'checkin/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[CheckinPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _reloadData();
+      debugPrint('[CheckinPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[CheckinPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
+
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> _reloadData() async {
+    final itemsResult = await _checkinUseCase.getItems({});
+    if (itemsResult.isSuccess) {
+      final jsonList = itemsResult.dataOrNull as List<dynamic>;
+      final items = jsonList
+          .map((json) => CheckinItemDto.fromJson(json as Map<String, dynamic>))
+          .toList();
+      _checkinItems = items.map((dto) => _dtoToCheckinItem(dto)).toList();
+    }
+    // 同步到小组件
+    await _syncWidget();
+  }
 
   // UseCase 实例
   late final CheckinUseCase _checkinUseCase;

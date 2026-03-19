@@ -41,6 +41,14 @@ class TrackerController with ChangeNotifier {
     }
   }
 
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    _goals.clear();
+    _records.clear();
+    await loadInitialData();
+    notifyListeners();
+  }
+
   /// 插入默认数据
   Future<void> _insertDefaultData() async {
     final now = DateTime.now();

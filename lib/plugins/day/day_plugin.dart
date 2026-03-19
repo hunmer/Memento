@@ -5,6 +5,7 @@ import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
 import 'package:Memento/core/services/plugin_data_selector/index.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'screens/day_home_screen.dart';
 import 'controllers/day_controller.dart';
@@ -54,6 +55,29 @@ class DayPlugin extends BasePlugin with JSBridgePlugin {
 
   @override
   IconData get icon => Icons.event_outlined;
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'day/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[DayPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _controller.reloadData();
+      debugPrint('[DayPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[DayPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
 
   @override
   Future<void> registerToApp(

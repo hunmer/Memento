@@ -54,6 +54,29 @@ class NodesPlugin extends PluginBase with JSBridgePlugin {
   }
 
   late NodesController _controller;
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'nodes/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[NodesPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _controller.reloadData();
+      debugPrint('[NodesPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[NodesPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
   late NodesUseCase _useCase;
   bool _isInitialized = false;
 

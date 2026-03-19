@@ -13,30 +13,37 @@ class WarehouseDto {
   final String id;
   final String name;
   final String? description;
-  final String? icon;
-  final String? color;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final int? iconData;
+  final int? iconColor;
+  final String? imageUrl;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const WarehouseDto({
     required this.id,
     required this.name,
     this.description,
-    this.icon,
-    this.color,
-    required this.createdAt,
-    required this.updatedAt,
+    this.iconData,
+    this.iconColor,
+    this.imageUrl,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory WarehouseDto.fromJson(Map<String, dynamic> json) {
     return WarehouseDto(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: (json['name'] ?? json['title']) as String,
       description: json['description'] as String?,
-      icon: json['icon'] as String?,
-      color: json['color'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      iconData: (json['iconData'] ?? json['icon']) as int?,
+      iconColor: (json['iconColor'] ?? json['color']) as int?,
+      imageUrl: json['imageUrl'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 
@@ -44,11 +51,13 @@ class WarehouseDto {
     return {
       'id': id,
       'name': name,
+      'title': name,
       'description': description,
-      'icon': icon,
-      'color': color,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'iconData': iconData,
+      'iconColor': iconColor,
+      'imageUrl': imageUrl,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -56,8 +65,9 @@ class WarehouseDto {
     String? id,
     String? name,
     String? description,
-    String? icon,
-    String? color,
+    int? iconData,
+    int? iconColor,
+    String? imageUrl,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -65,8 +75,9 @@ class WarehouseDto {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
-      icon: icon ?? this.icon,
-      color: color ?? this.color,
+      iconData: iconData ?? this.iconData,
+      iconColor: iconColor ?? this.iconColor,
+      imageUrl: imageUrl ?? this.imageUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -78,54 +89,136 @@ class GoodsItemDto {
   final String id;
   final String name;
   final String? description;
-  final int quantity;
+  final int? quantity;
   final String? category;
   final String? imageUrl;
+  final String? thumbUrl;
+  final int? iconData;
+  final int? iconColor;
   final List<String> tags;
-  final Map<String, dynamic>? customFields;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final List<Map<String, dynamic>> customFields;
+  final DateTime? purchaseDate;
+  final DateTime? expirationDate;
+  final double? purchasePrice;
+  final String? status;
+  final String? notes;
+  final List<GoodsItemDto> subItems;
+  final List<Map<String, dynamic>> usageRecords;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const GoodsItemDto({
     required this.id,
     required this.name,
     this.description,
-    this.quantity = 1,
+    this.quantity,
     this.category,
     this.imageUrl,
+    this.thumbUrl,
+    this.iconData,
+    this.iconColor,
     this.tags = const [],
-    this.customFields,
-    required this.createdAt,
-    required this.updatedAt,
+    this.customFields = const [],
+    this.purchaseDate,
+    this.expirationDate,
+    this.purchasePrice,
+    this.status,
+    this.notes,
+    this.subItems = const [],
+    this.usageRecords = const [],
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory GoodsItemDto.fromJson(Map<String, dynamic> json) {
     return GoodsItemDto(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: (json['name'] ?? json['title']) as String,
       description: json['description'] as String?,
-      quantity: json['quantity'] as int? ?? 1,
+      quantity: json['quantity'] as int?,
       category: json['category'] as String?,
       imageUrl: json['imageUrl'] as String?,
+      thumbUrl: json['thumbUrl'] as String?,
+      iconData: (json['iconData'] ?? json['icon']) as int?,
+      iconColor: (json['iconColor'] ?? json['color']) as int?,
       tags: (json['tags'] as List<dynamic>?)?.cast<String>() ?? [],
-      customFields: json['customFields'] as Map<String, dynamic>?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      customFields: _parseCustomFields(json['customFields']),
+      purchaseDate: json['purchaseDate'] != null
+          ? DateTime.parse(json['purchaseDate'] as String)
+          : null,
+      expirationDate: json['expirationDate'] != null
+          ? DateTime.parse(json['expirationDate'] as String)
+          : null,
+      purchasePrice: json['purchasePrice'] != null
+          ? (json['purchasePrice'] as num).toDouble()
+          : null,
+      status: json['status'] as String?,
+      notes: json['notes'] as String?,
+      subItems: _parseSubItems(json['subItems']),
+      usageRecords: _parseUsageRecords(json['usageRecords']),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
+  }
+
+  static List<Map<String, dynamic>> _parseCustomFields(dynamic fields) {
+    if (fields == null) return [];
+    if (fields is List) {
+      return fields.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+    if (fields is Map) {
+      return fields.entries
+          .map((e) => {'key': e.key, 'value': e.value})
+          .toList();
+    }
+    return [];
+  }
+
+  static List<GoodsItemDto> _parseSubItems(dynamic items) {
+    if (items == null) return [];
+    if (items is List) {
+      return items
+          .map((e) => GoodsItemDto.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+    return [];
+  }
+
+  static List<Map<String, dynamic>> _parseUsageRecords(dynamic records) {
+    if (records == null) return [];
+    if (records is List) {
+      return records.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    }
+    return [];
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
+      'title': name,
       'description': description,
       'quantity': quantity,
       'category': category,
       'imageUrl': imageUrl,
+      'thumbUrl': thumbUrl,
+      'iconData': iconData,
+      'iconColor': iconColor,
       'tags': tags,
       'customFields': customFields,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'purchaseDate': purchaseDate?.toIso8601String(),
+      'expirationDate': expirationDate?.toIso8601String(),
+      'purchasePrice': purchasePrice,
+      'status': status,
+      'notes': notes,
+      'subItems': subItems.map((e) => e.toJson()).toList(),
+      'usageRecords': usageRecords,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
@@ -136,8 +229,18 @@ class GoodsItemDto {
     int? quantity,
     String? category,
     String? imageUrl,
+    String? thumbUrl,
+    int? iconData,
+    int? iconColor,
     List<String>? tags,
-    Map<String, dynamic>? customFields,
+    List<Map<String, dynamic>>? customFields,
+    DateTime? purchaseDate,
+    DateTime? expirationDate,
+    double? purchasePrice,
+    String? status,
+    String? notes,
+    List<GoodsItemDto>? subItems,
+    List<Map<String, dynamic>>? usageRecords,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -148,8 +251,18 @@ class GoodsItemDto {
       quantity: quantity ?? this.quantity,
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
+      thumbUrl: thumbUrl ?? this.thumbUrl,
+      iconData: iconData ?? this.iconData,
+      iconColor: iconColor ?? this.iconColor,
       tags: tags ?? this.tags,
       customFields: customFields ?? this.customFields,
+      purchaseDate: purchaseDate ?? this.purchaseDate,
+      expirationDate: expirationDate ?? this.expirationDate,
+      purchasePrice: purchasePrice ?? this.purchasePrice,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      subItems: subItems ?? this.subItems,
+      usageRecords: usageRecords ?? this.usageRecords,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -140,6 +140,29 @@ class TrackerPlugin extends PluginBase with ChangeNotifier, JSBridgePlugin {
   late final TrackerController _controller = TrackerController();
   TrackerController get controller => _controller;
 
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'tracker/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[TrackerPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _controller.reloadData();
+      debugPrint('[TrackerPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[TrackerPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
+
   // UseCase 实例
   late final TrackerUseCase _trackerUseCase;
   TrackerUseCase get trackerUseCase => _trackerUseCase;

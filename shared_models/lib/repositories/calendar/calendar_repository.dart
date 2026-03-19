@@ -18,8 +18,8 @@ class CalendarEventDto {
   final String source;
   final int? reminderMinutes;
   final DateTime? completedTime;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const CalendarEventDto({
     required this.id,
@@ -32,8 +32,8 @@ class CalendarEventDto {
     this.source = 'default',
     this.reminderMinutes,
     this.completedTime,
-    required this.createdAt,
-    required this.updatedAt,
+    this.createdAt,
+    this.updatedAt,
   });
 
   /// 从 JSON 构造
@@ -53,8 +53,12 @@ class CalendarEventDto {
       completedTime: json['completedTime'] != null
           ? DateTime.parse(json['completedTime'] as String)
           : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 
@@ -71,8 +75,8 @@ class CalendarEventDto {
       'source': source,
       'reminderMinutes': reminderMinutes,
       'completedTime': completedTime?.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 

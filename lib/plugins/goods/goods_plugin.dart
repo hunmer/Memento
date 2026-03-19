@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
@@ -101,6 +102,37 @@ class GoodsPlugin extends BasePlugin with JSBridgePlugin {
   final List<Function()> _listeners = [];
 
   List<Warehouse> get warehouses => _warehouses;
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'goods/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[GoodsPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await reloadData();
+      debugPrint('[GoodsPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[GoodsPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
+
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    await _loadWarehouses();
+    notifyListeners();
+    // 触发缓存更新事件
+    _notifyCacheUpdatedEvent();
+  }
 
   Warehouse? getWarehouse(String id) {
     try {

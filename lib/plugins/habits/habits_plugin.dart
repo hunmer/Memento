@@ -9,6 +9,7 @@ import 'package:Memento/plugins/habits/controllers/timer_controller.dart';
 import 'package:Memento/plugins/habits/models/habit.dart';
 import 'package:flutter/material.dart';
 import 'package:Memento/core/plugin_base.dart';
+import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/plugins/habits/controllers/completion_record_controller.dart';
 import 'package:Memento/plugins/habits/controllers/habit_controller.dart';
 import 'package:Memento/plugins/habits/controllers/skill_controller.dart';
@@ -57,6 +58,35 @@ class HabitsPlugin extends PluginBase with JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'habits/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[HabitsPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await reloadData();
+      debugPrint('[HabitsPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[HabitsPlugin] 数据刷新失败: $e');
+      return false;
+    }
+  }
+
+  /// 重新加载数据（供同步后刷新使用）
+  Future<void> reloadData() async {
+    await _habitController.loadHabits();
+    await _skillController.loadSkills();
   }
 
   @override

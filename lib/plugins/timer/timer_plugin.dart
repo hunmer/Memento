@@ -7,6 +7,7 @@ import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/core/services/timer/unified_timer_controller.dart';
 import 'package:Memento/core/services/timer/models/timer_state.dart';
 import 'package:Memento/core/services/timer/events/timer_events.dart';
@@ -41,6 +42,30 @@ class TimerPlugin extends BasePlugin with JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'timer/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[TimerPlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await timerController.reloadData();
+      _tasks = timerController.getTasks();
+      debugPrint('[TimerPlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[TimerPlugin] 数据刷新失败: $e');
+      return false;
+    }
   }
 
   @override

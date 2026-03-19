@@ -6,6 +6,7 @@ import 'package:Memento/core/config_manager.dart';
 import 'package:Memento/core/plugin_manager.dart';
 import 'package:Memento/plugins/base_plugin.dart';
 import 'package:Memento/core/js_bridge/js_bridge_plugin.dart';
+import 'package:Memento/core/plugin_base.dart';
 import 'package:Memento/plugins/store/controllers/store_controller.dart';
 import 'package:Memento/plugins/store/screens/store_settings_screen.dart';
 import 'package:Memento/plugins/store/events/point_award_event.dart';
@@ -32,6 +33,29 @@ class StorePlugin extends BasePlugin with JSBridgePlugin {
       }
     }
     return _instance!;
+  }
+
+  /// 支持刷新的文件路径前缀
+  static const List<String> _refreshableFiles = [
+    'store/',
+  ];
+
+  @override
+  bool supportsFileRefresh(String filePath) {
+    return _refreshableFiles.any((f) => filePath.startsWith(f));
+  }
+
+  @override
+  Future<bool> refreshData([PluginRefreshDataArgs? args]) async {
+    try {
+      debugPrint('[StorePlugin] 开始刷新数据, 文件: ${args?.filePath}');
+      await _controller?.reloadData();
+      debugPrint('[StorePlugin] 数据刷新成功');
+      return true;
+    } catch (e) {
+      debugPrint('[StorePlugin] 数据刷新失败: $e');
+      return false;
+    }
   }
 
   @override

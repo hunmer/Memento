@@ -113,12 +113,27 @@ class MessageDto {
       id: json['id'] as String,
       content: json['content'] as String,
       channelId: json['channelId'] as String? ?? '',
-      user: UserDto.fromJson(json['user'] as Map<String, dynamic>),
+      user: _parseUser(json['user']),
       type: json['type'] as String? ?? 'sent',
-      date: DateTime.parse(json['date'] as String),
+      date: json['date'] != null
+          ? DateTime.parse(json['date'] as String)
+          : DateTime.now(),
       replyToId: json['replyToId'] as String?,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
+  }
+
+  static UserDto _parseUser(dynamic userData) {
+    if (userData == null) {
+      return const UserDto(id: 'unknown', name: 'Unknown User');
+    }
+    if (userData is Map<String, dynamic>) {
+      return UserDto.fromJson(userData);
+    }
+    if (userData is String) {
+      return UserDto(id: userData, name: userData);
+    }
+    return const UserDto(id: 'unknown', name: 'Unknown User');
   }
 
   Map<String, dynamic> toJson() => {
@@ -151,9 +166,9 @@ class UserDto {
 
   factory UserDto.fromJson(Map<String, dynamic> json) {
     return UserDto(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      avatarPath: json['avatarPath'] as String?,
+      id: json['id'] as String? ?? 'unknown',
+      name: (json['name'] ?? json['username']) as String? ?? 'Unknown',
+      avatarPath: (json['avatarPath'] ?? json['iconPath']) as String?,
       isAI: json['isAI'] as bool? ?? false,
       metadata: json['metadata'] as Map<String, dynamic>?,
     );
