@@ -59,6 +59,43 @@ All Phases Complete ✅
 - [x] 清理代码、最终审查
 - **Status:** complete
 
+### Phase 6: 插件 Handler 集成 Hook 触发
+**目标**: 在所有插件 handler 中调用 before/after hook
+**Status:** pending
+
+**背景**:
+- `eventEmitter.ts` 已实现完整的 hook 系统 (`emitBefore`, `emitAfter`)
+- 插件可通过 `module.exports.handlers` 注册事件处理器
+- **问题**: 当前 `handlers/*.ts` 中没有调用 hook 触发代码
+
+**任务**:
+- [ ] 创建 `withHooks` 高阶函数封装 CRUD 操作
+- [ ] 为 `chat.ts` handler 添加 hook 调用
+- [ ] 为 `notes.ts` handler 添加 hook 调用
+- [ ] 为 `todo.ts` handler 添加 hook 调用
+- [ ] 为 `bill.ts` handler 添加 hook 调用
+- [ ] 为 `diary.ts` handler 添加 hook 调用
+- [ ] 为 `activity.ts` handler 添加 hook 调用
+- [ ] 为其他 handler 添加 hook 调用
+- [ ] 更新 `crud.ts` 通用处理器，集成 hook 调用
+- [ ] 编写测试验证 hook 触发
+
+### Phase 7: 插件 JS 公用基类
+**目标**: 定义插件公用基类，减少重复代码
+**Status:** pending
+
+**任务**:
+- [ ] 设计 `BasePlugin` 基类 API
+  - 生命周期钩子封装
+  - 事件订阅简化方法
+  - 日志工具
+  - 配置管理
+- [ ] 创建 `src/plugins/BasePlugin.js` 或 `BasePlugin.ts`
+- [ ] 添加类型定义（JSDoc 或 TypeScript）
+- [ ] 重构 `data-sync-logger` 插件使用基类
+- [ ] 编写基类使用文档
+- [ ] 更新 `plugin-store.json` 添加示例
+
 ## Key Questions
 1. ~~钩子拦截哪些操作？~~ → 数据处理拦截（已确定）
 2. ~~插件生命周期模式？~~ → 完整模式（已确定）

@@ -235,6 +235,59 @@ server-nodejs/
 
 ---
 
+### Phase 8: 插件 Handler 集成 Hook 触发 [ ] pending
+**目标**: 在所有插件 handler 中调用 before/after hook
+
+**背景**:
+- `eventEmitter.ts` 已实现完整的 hook 系统 (`emitBefore`, `emitAfter`)
+- 插件可通过 `module.exports.handlers` 注册事件处理器
+- **问题**: 当前 `handlers/*.ts` 中没有调用 hook 触发代码
+
+**任务**:
+- [ ] 8.1 创建 `withHooks` 高阶函数封装 CRUD 操作
+- [ ] 8.2 为 `chat.ts` handler 添加 hook 调用
+- [ ] 8.3 为 `notes.ts` handler 添加 hook 调用
+- [ ] 8.4 为 `todo.ts` handler 添加 hook 调用
+- [ ] 8.5 为 `bill.ts` handler 添加 hook 调用
+- [ ] 8.6 为 `diary.ts` handler 添加 hook 调用
+- [ ] 8.7 为 `activity.ts` handler 添加 hook 调用
+- [ ] 8.8 为其他 handler 添加 hook 调用（checkin, tracker, calendar, contact, day, goods）
+- [ ] 8.9 更新 `crud.ts` 通用处理器，集成 hook 调用
+- [ ] 8.10 编写测试验证 hook 触发
+
+**验收标准**:
+- 插件的 create/read/update/delete 操作触发对应的 before/after 事件
+- 现有插件（如 data-sync-logger）能收到事件通知
+- 所有测试通过
+
+---
+
+### Phase 9: 插件 JS 公用基类 [ ] pending
+**目标**: 定义插件公用基类，减少重复代码
+
+**背景**:
+- 当前插件 JS 需手动实现 `onLoad`, `onUnload`, `handlers` 等
+- 存在重复模式：日志记录、事件订阅、生命周期管理
+
+**任务**:
+- [ ] 9.1 设计 `BasePlugin` 基类 API
+  - 生命周期钩子封装
+  - 事件订阅简化方法
+  - 日志工具
+  - 配置管理
+- [ ] 9.2 创建 `src/plugins/BasePlugin.js` 或 `BasePlugin.ts`
+- [ ] 9.3 添加类型定义（JSDoc 或 TypeScript）
+- [ ] 9.4 重构 `data-sync-logger` 插件使用基类
+- [ ] 9.5 编写基类使用文档
+- [ ] 9.6 更新 `plugin-store.json` 添加示例
+
+**验收标准**:
+- 新插件可继承 `BasePlugin` 减少样板代码
+- 现有插件可迁移到基类
+- 文档清晰说明使用方式
+
+---
+
 ## 进度跟踪
 
 | Phase | 状态 | 开始时间 | 完成时间 |
@@ -246,6 +299,8 @@ server-nodejs/
 | Phase 5 | ✅ completed | 2026-03-20 | 2026-03-20 |
 | Phase 6 | ✅ completed | 2026-03-20 | 2026-03-20 |
 | Phase 7 | ✅ completed | 2026-03-20 | 2026-03-20 |
+| Phase 8 | ⏳ pending | - | - |
+| Phase 9 | ⏳ pending | - | - |
 
 ---
 

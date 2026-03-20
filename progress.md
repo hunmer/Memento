@@ -1,5 +1,24 @@
 # 进度日志
 
+## 会话: 2026-03-21
+
+### 新增任务
+- **Phase 8**: 插件 Handler 集成 Hook 触发
+- **Phase 9**: 插件 JS 公用基类
+
+### 研究发现
+- `eventEmitter.ts` 已实现完整的 before/after hook 系统
+- 插件可通过 `module.exports.handlers` 注册事件处理器
+- 当前 `handlers/*.ts` 中没有调用 hook 触发代码
+- 示例插件 `data-sync-logger` 已准备好接收事件
+
+### 下一步
+1. 创建 `withHooks` 高阶函数
+2. 为所有 handler 添加 hook 调用
+3. 设计 `BasePlugin` 基类
+
+---
+
 ## 会话: 2026-03-20
 
 ### 完成的工作
