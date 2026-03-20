@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Chat 插件专用处理器
@@ -102,7 +103,7 @@ export function createChatHandlers(pluginDataService: PluginDataService): Plugin
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取频道列表
     async getList(
       userId: string,
@@ -398,4 +399,20 @@ export function createChatHandlers(pluginDataService: PluginDataService): Plugin
       }
     },
   };
+
+  // 定义 handler 到 hook 的映射
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Channel' },
+    getById: { action: 'read', entity: 'Channel' },
+    create: { action: 'create', entity: 'Channel' },
+    update: { action: 'update', entity: 'Channel' },
+    delete: { action: 'delete', entity: 'Channel' },
+    getMessages: { action: 'read', entity: 'Message' },
+    sendMessage: { action: 'create', entity: 'Message' },
+    deleteMessage: { action: 'delete', entity: 'Message' },
+    findChannel: { action: 'read', entity: 'Channel' },
+    findMessage: { action: 'read', entity: 'Message' },
+  };
+
+  return addHooksToHandlers('chat', handlers, hookMappings);
 }

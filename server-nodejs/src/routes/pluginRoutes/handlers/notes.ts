@@ -2,6 +2,7 @@ import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { createCrudHandlers } from '../crud';
 import { createPaginatedResult, generateUUID } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Notes 插件专用处理器
@@ -75,7 +76,7 @@ export function createNotesHandlers(pluginDataService: PluginDataService): Plugi
     }
   }
 
-  return {
+  const handlers: PluginHandlers = {
     ...Object.fromEntries(
       Object.entries(folderCrud).map(([key, handler]) => [
         `Folder${key.charAt(0).toUpperCase() + key.slice(1)}`,
@@ -318,4 +319,16 @@ export function createNotesHandlers(pluginDataService: PluginDataService): Plugi
       }
     },
   };
+
+  // 定义 handler 到 hook 的映射
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Note' },
+    getById: { action: 'read', entity: 'Note' },
+    create: { action: 'create', entity: 'Note' },
+    update: { action: 'update', entity: 'Note' },
+    delete: { action: 'delete', entity: 'Note' },
+    search: { action: 'read', entity: 'Note' },
+  };
+
+  return addHooksToHandlers('notes', handlers, hookMappings);
 }

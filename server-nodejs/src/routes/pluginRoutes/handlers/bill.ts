@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Bill 插件专用处理器
@@ -79,7 +80,7 @@ export function createBillHandlers(pluginDataService: PluginDataService): Plugin
     };
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取账户列表
     async getList(
       userId: string,
@@ -531,4 +532,23 @@ export function createBillHandlers(pluginDataService: PluginDataService): Plugin
       }
     },
   };
+
+  // 定义 handler 到 hook 的映射
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Account' },
+    getById: { action: 'read', entity: 'Account' },
+    create: { action: 'create', entity: 'Account' },
+    update: { action: 'update', entity: 'Account' },
+    delete: { action: 'delete', entity: 'Account' },
+    getBills: { action: 'read', entity: 'Bill' },
+    getBillById: { action: 'read', entity: 'Bill' },
+    createBill: { action: 'create', entity: 'Bill' },
+    updateBill: { action: 'update', entity: 'Bill' },
+    deleteBill: { action: 'delete', entity: 'Bill' },
+    getBillsByAccount: { action: 'read', entity: 'Bill' },
+    createBillForAccount: { action: 'create', entity: 'Bill' },
+    getStats: { action: 'read', entity: 'BillStats' },
+  };
+
+  return addHooksToHandlers('bill', handlers, hookMappings);
 }

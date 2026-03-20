@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Day 插件专用处理器
@@ -42,7 +43,7 @@ export function createDayHandlers(pluginDataService: PluginDataService): PluginH
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取纪念日列表
     async getList(
       userId: string,
@@ -254,4 +255,16 @@ export function createDayHandlers(pluginDataService: PluginDataService): PluginH
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'MemorialDay' },
+    getById: { action: 'read', entity: 'MemorialDay' },
+    create: { action: 'create', entity: 'MemorialDay' },
+    update: { action: 'update', entity: 'MemorialDay' },
+    delete: { action: 'delete', entity: 'MemorialDay' },
+    search: { action: 'read', entity: 'MemorialDay' },
+    getStats: { action: 'read', entity: 'DayStats' },
+  };
+
+  return addHooksToHandlers('day', handlers, hookMappings);
 }

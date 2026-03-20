@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Goods 插件专用处理器
@@ -97,7 +98,7 @@ export function createGoodsHandlers(pluginDataService: PluginDataService): Plugi
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取仓库列表
     async getWarehouses(
       userId: string,
@@ -264,4 +265,15 @@ export function createGoodsHandlers(pluginDataService: PluginDataService): Plugi
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Item' },
+    getById: { action: 'read', entity: 'Item' },
+    create: { action: 'create', entity: 'Item' },
+    update: { action: 'update', entity: 'Item' },
+    delete: { action: 'delete', entity: 'Item' },
+    search: { action: 'read', entity: 'Item' },
+  };
+
+  return addHooksToHandlers('goods', handlers, hookMappings);
 }

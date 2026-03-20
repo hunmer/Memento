@@ -1,0 +1,22 @@
+{
+  "uuid": "data-sync-logger-v2",
+  "title": "数据同步日志记录器 (BasePlugin 版)",
+  "author": "Memento",
+  "description": "使用 BasePlugin 基类重构的日志记录器，展示插件开发最佳实践。",
+  "version": "2.0.0",
+  "website": "https://github.com/memento/data-sync-logger",
+  "permissions": {
+    "dataAccess": [],
+    "operations": ["read"],
+    "networkAccess": false
+  },
+  "priority": 100,
+  "events": [
+    "chat::*",
+    "notes::*",
+    "todo::*",
+    "diary::*",
+    "activity::*",
+    "bill::*"
+  ]
+}

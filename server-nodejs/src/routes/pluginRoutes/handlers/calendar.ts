@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Calendar 插件专用处理器
@@ -47,7 +48,7 @@ export function createCalendarHandlers(pluginDataService: PluginDataService): Pl
     return (data.completedEvents as Record<string, unknown>[]) || [];
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取事件列表
     async getList(
       userId: string,
@@ -274,4 +275,16 @@ export function createCalendarHandlers(pluginDataService: PluginDataService): Pl
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Event' },
+    getById: { action: 'read', entity: 'Event' },
+    create: { action: 'create', entity: 'Event' },
+    update: { action: 'update', entity: 'Event' },
+    delete: { action: 'delete', entity: 'Event' },
+    completeEvent: { action: 'update', entity: 'Event' },
+    search: { action: 'read', entity: 'Event' },
+  };
+
+  return addHooksToHandlers('calendar', handlers, hookMappings);
 }

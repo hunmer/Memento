@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, formatDate, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Activity 插件专用处理器
@@ -46,7 +47,7 @@ export function createActivityHandlers(pluginDataService: PluginDataService): Pl
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取活动列表
     async getList(
       userId: string,
@@ -224,4 +225,15 @@ export function createActivityHandlers(pluginDataService: PluginDataService): Pl
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Activity' },
+    getById: { action: 'read', entity: 'Activity' },
+    create: { action: 'create', entity: 'Activity' },
+    update: { action: 'update', entity: 'Activity' },
+    delete: { action: 'delete', entity: 'Activity' },
+    getTodayStats: { action: 'read', entity: 'ActivityStats' },
+  };
+
+  return addHooksToHandlers('activity', handlers, hookMappings);
 }

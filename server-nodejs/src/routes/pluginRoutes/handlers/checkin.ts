@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Checkin 插件专用处理器
@@ -38,7 +39,7 @@ export function createCheckinHandlers(pluginDataService: PluginDataService): Plu
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取打卡项目列表
     async getList(
       userId: string,
@@ -257,4 +258,16 @@ export function createCheckinHandlers(pluginDataService: PluginDataService): Plu
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Item' },
+    getById: { action: 'read', entity: 'Item' },
+    create: { action: 'create', entity: 'Item' },
+    update: { action: 'update', entity: 'Item' },
+    delete: { action: 'delete', entity: 'Item' },
+    addRecord: { action: 'create', entity: 'Record' },
+    getStats: { action: 'read', entity: 'CheckinStats' },
+  };
+
+  return addHooksToHandlers('checkin', handlers, hookMappings);
 }

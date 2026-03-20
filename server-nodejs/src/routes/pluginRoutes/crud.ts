@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from './types';
 import { generateUUID, createPaginatedResult } from './utils';
+import { addHooksToCrudHandlers } from './hooks';
 
 /**
  * 创建通用 CRUD 处理器
@@ -13,7 +14,7 @@ export function createCrudHandlers(
   resourceName: string,
   dataFile: string = 'data.json'
 ): PluginHandlers {
-  return {
+  const handlers: PluginHandlers = {
     // 获取列表
     async getList(
       userId: string,
@@ -205,4 +206,7 @@ export function createCrudHandlers(
       }
     },
   };
+
+  // 为 CRUD 操作添加 hooks
+  return addHooksToCrudHandlers(pluginId, handlers, 'Item');
 }

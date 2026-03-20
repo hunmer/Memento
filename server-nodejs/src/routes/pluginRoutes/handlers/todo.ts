@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Todo 插件专用处理器
@@ -55,7 +56,7 @@ export function createTodoHandlers(pluginDataService: PluginDataService): Plugin
     return dueDate === today;
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取任务列表
     async getList(
       userId: string,
@@ -318,4 +319,20 @@ export function createTodoHandlers(pluginDataService: PluginDataService): Plugin
       }
     },
   };
+
+  // 定义 handler 到 hook 的映射
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Task' },
+    getById: { action: 'read', entity: 'Task' },
+    create: { action: 'create', entity: 'Task' },
+    update: { action: 'update', entity: 'Task' },
+    delete: { action: 'delete', entity: 'Task' },
+    completeTask: { action: 'update', entity: 'Task' },
+    getTodayTasks: { action: 'read', entity: 'Task' },
+    getOverdueTasks: { action: 'read', entity: 'Task' },
+    getStats: { action: 'read', entity: 'TaskStats' },
+    searchTasks: { action: 'read', entity: 'Task' },
+  };
+
+  return addHooksToHandlers('todo', handlers, hookMappings);
 }

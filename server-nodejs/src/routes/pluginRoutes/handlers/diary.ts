@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Diary 插件专用处理器
@@ -98,7 +99,7 @@ export function createDiaryHandlers(pluginDataService: PluginDataService): Plugi
     return entries;
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取日记列表
     async getList(
       userId: string,
@@ -329,4 +330,16 @@ export function createDiaryHandlers(pluginDataService: PluginDataService): Plugi
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Entry' },
+    getByDate: { action: 'read', entity: 'Entry' },
+    create: { action: 'create', entity: 'Entry' },
+    updateByDate: { action: 'update', entity: 'Entry' },
+    deleteByDate: { action: 'delete', entity: 'Entry' },
+    search: { action: 'read', entity: 'Entry' },
+    getStats: { action: 'read', entity: 'EntryStats' },
+  };
+
+  return addHooksToHandlers('diary', handlers, hookMappings);
 }

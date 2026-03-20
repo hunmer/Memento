@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Contact 插件专用处理器
@@ -44,7 +45,7 @@ export function createContactHandlers(pluginDataService: PluginDataService): Plu
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取联系人列表
     async getList(
       userId: string,
@@ -217,4 +218,16 @@ export function createContactHandlers(pluginDataService: PluginDataService): Plu
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Contact' },
+    getById: { action: 'read', entity: 'Contact' },
+    create: { action: 'create', entity: 'Contact' },
+    update: { action: 'update', entity: 'Contact' },
+    delete: { action: 'delete', entity: 'Contact' },
+    search: { action: 'read', entity: 'Contact' },
+    getStats: { action: 'read', entity: 'ContactStats' },
+  };
+
+  return addHooksToHandlers('contact', handlers, hookMappings);
 }

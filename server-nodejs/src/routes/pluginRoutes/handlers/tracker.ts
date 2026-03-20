@@ -1,6 +1,7 @@
 import { PluginDataService } from '../../../services/pluginDataService';
 import { PluginHandlers, PluginResult } from '../types';
 import { generateUUID, createPaginatedResult } from '../utils';
+import { addHooksToHandlers, ActionType } from '../hooks';
 
 /**
  * 创建 Tracker 插件专用处理器
@@ -70,7 +71,7 @@ export function createTrackerHandlers(pluginDataService: PluginDataService): Plu
     );
   }
 
-  return {
+  const handlers: PluginHandlers = {
     // 获取目标列表
     async getList(
       userId: string,
@@ -317,4 +318,17 @@ export function createTrackerHandlers(pluginDataService: PluginDataService): Plu
       }
     },
   };
+
+  const hookMappings: Record<string, { action: ActionType; entity?: string }> = {
+    getList: { action: 'read', entity: 'Goal' },
+    getById: { action: 'read', entity: 'Goal' },
+    create: { action: 'create', entity: 'Goal' },
+    update: { action: 'update', entity: 'Goal' },
+    delete: { action: 'delete', entity: 'Goal' },
+    addRecord: { action: 'create', entity: 'Record' },
+    getRecords: { action: 'read', entity: 'Record' },
+    getStats: { action: 'read', entity: 'TrackerStats' },
+  };
+
+  return addHooksToHandlers('tracker', handlers, hookMappings);
 }
