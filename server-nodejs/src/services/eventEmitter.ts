@@ -208,7 +208,6 @@ export class PluginEventEmitter {
 
     for (const pattern of allPatterns) {
       const matches = eventMatchesPattern(eventName, pattern);
-      console.log(`[EventEmitter]   检查模式 "${pattern}" vs "${eventName}": ${matches}`);
       if (matches) {
         matching.push(pattern);
       }
