@@ -385,8 +385,19 @@ export class PluginService {
     delete require.cache[require.resolve(entryPath)];
 
     try {
-      // 加载插件模块
-      const pluginModule: PluginModule = require(entryPath);
+      // 加载 BasePlugin 基类
+      const { BasePlugin } = require('../plugins/BasePlugin');
+
+      // 加载插件模块（可能是工厂函数或直接模块）
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let pluginModuleRaw: any = require(entryPath);
+
+      // 如果导出的是工厂函数，则调用它并传入 BasePlugin
+      if (typeof pluginModuleRaw === 'function') {
+        pluginModuleRaw = pluginModuleRaw(BasePlugin);
+      }
+
+      const pluginModule: PluginModule = pluginModuleRaw;
 
       // 验证元信息匹配
       if (pluginModule.metadata?.uuid !== uuid) {
