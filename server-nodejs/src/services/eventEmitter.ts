@@ -114,6 +114,10 @@ export class PluginEventEmitter {
 
   /**
    * 批量注册事件处理器
+   *
+   * @param events 事件模式列表（支持通配符，如 'chat::*'）
+   * @param handlers 处理器映射（键为具体事件名，如 'chat::before:createChannel'）
+   * @returns 取消函数列表
    */
   registerHandlers(
     events: string[],
@@ -121,14 +125,17 @@ export class PluginEventEmitter {
   ): (() => void)[] {
     const unsubscribers: (() => void)[] = [];
 
-    for (const event of events) {
-      const handler = handlers[event];
-      if (handler) {
-        const unsub = this.onPattern(event, handler);
+    // 遍历 handlers 的键，检查是否匹配 events 中的任意模式
+    for (const [handlerKey, handler] of Object.entries(handlers)) {
+      // 检查这个 handler 是否匹配 events 中的任意模式
+      const matches = events.some(pattern => eventMatchesPattern(handlerKey, pattern));
+      if (matches && handler) {
+        const unsub = this.onPattern(handlerKey, handler);
         unsubscribers.push(unsub);
       }
     }
 
+    console.log(`[EventEmitter] registerHandlers: ${unsubscribers.length} 个处理器被注册`);
     return unsubscribers;
   }
 
