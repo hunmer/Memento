@@ -1,4 +1,4 @@
-import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse } from './types'
+import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse, PluginListResponse, StoreListResponse, PluginOperationResponse, StoreConfigResponse, StoreConfig, InstalledPlugin } from './types'
 
 const DEFAULT_SERVER = 'http://localhost:8874'
 

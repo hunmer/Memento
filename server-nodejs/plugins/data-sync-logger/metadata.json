@@ -1,0 +1,22 @@
+{
+  "uuid": "data-sync-logger",
+  "title": "数据同步日志记录器",
+  "author": "Memento",
+  "description": "监听所有插件数据变更并记录日志，用于调试和审计。",
+  "version": "1.0.0",
+  "website": "https://github.com/memento/data-sync-logger",
+  "permissions": {
+    "dataAccess": [],
+    "operations": ["read"],
+    "networkAccess": false
+  },
+  "priority": 100,
+  "events": [
+    "chat::*",
+    "notes::*",
+    "todo::*",
+    "diary::*",
+    "activity::*",
+    "bill::*"
+  ]
+}

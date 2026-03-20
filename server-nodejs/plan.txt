@@ -1,0 +1,90 @@
+需要给server添加插件系统（后端开启API，前端展示 插件列表/安装/卸载/启用插件）
+
+安装插件：上传zip,包含 main.js入口 metadata.json信息,保存到server目录下
+
+插件包含信息：uuid,title,author,description,website,permissions,updateURL,version,priority
+
+前端增加插件商店,可指定一个json url,json返回插件列表
+
+编写一个示例插件,并添加到一个json列表里
+
+使用 https://www.npmjs.com/package/hookable
+示例：
+import { createHooks } from 'hookable'
+
+type HookCallback = () => Promise<boolean> | boolean
+
+interface HookEntry {
+  name: string
+  callback: HookCallback
+  priority: number      // 越大越先执行
+}
+
+class InterceptManager {
+  private hooks = createHooks()
+  private entries: HookEntry[] = []
+
+  register(entry: HookEntry) {
+    this.entries.push(entry)
+    // 按 priority 降序排序（越大越先）
+    this.entries.sort((a, b) => b.priority - a.priority)
+
+    // 每次注册都重置 hook（最简单可靠方式）
+    this.hooks.clear()
+    for (const e of this.entries) {
+      this.hooks.hook('intercept', e.callback)
+    }
+  }
+
+  async run(): Promise<boolean> {
+    return await this.hooks.callHookWith('intercept', async (handlers) => {
+      for (const fn of handlers) {
+        const result = await fn()
+        if (result === false) return false
+      }
+      return true
+    })
+  }
+}
+
+// 使用示例
+const manager = new InterceptManager()
+
+manager.register({
+  name: "auth",
+  priority: 100,
+  callback: () => {
+    console.log("auth check")
+    return true
+  }
+})
+
+manager.register({
+  name: "rate-limit",
+  priority: 90,
+  callback: async () => {
+    console.log("rate limit")
+    return false   // 这里中断
+  }
+})
+
+manager.register({
+  name: "logging",
+  priority: 10,
+  callback: () => {
+    console.log("logging")
+    return true
+  }
+})
+
+async function apiCall() {
+  const allowed = await manager.run()
+  if (!allowed) {
+    console.log("请求被拦截")
+    return
+  }
+  console.log("继续执行业务逻辑")
+}
+
+apiCall()
+// 输出：auth check → rate limit → 请求被拦截

@@ -1,6 +1,6 @@
 # Memento Sync Server (Node.js + TypeScript)
 
-基于 Node.js + TypeScript 的 Memento 同步服务器，与原 Dart 版本功能完全兼容。
+基于 Node.js + TypeScript 的 Memento 同步服务器
 
 ## 功能特性
 

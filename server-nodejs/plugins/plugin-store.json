@@ -1,0 +1,57 @@
+[
+  {
+    "uuid": "data-sync-logger",
+    "title": "数据同步日志记录器",
+    "author": "Memento",
+    "description": "监听所有插件数据变更并记录日志，用于调试和审计。支持监听 chat、notes、todo、diary、activity、bill 等插件的数据变更事件。",
+    "version": "1.0.0",
+    "website": "https://github.com/memento/data-sync-logger",
+    "permissions": {
+      "dataAccess": [],
+      "operations": ["read"],
+      "networkAccess": false
+    },
+    "priority": 100,
+    "events": [
+      "chat::*",
+      "notes::*",
+      "todo::*",
+      "diary::*",
+      "activity::*",
+      "bill::*"
+    ],
+    "downloadURL": "https://example.com/plugins/data-sync-logger.zip"
+  },
+  {
+    "uuid": "webhook-notifier",
+    "title": "Webhook 通知器",
+    "author": "Memento",
+    "description": "当数据变更时发送 Webhook 通知到指定 URL，支持自定义请求头和请求体模板。",
+    "version": "1.0.0",
+    "website": "https://github.com/memento/webhook-notifier",
+    "permissions": {
+      "dataAccess": [],
+      "operations": ["read"],
+      "networkAccess": true
+    },
+    "priority": 50,
+    "events": ["*"],
+    "downloadURL": "https://example.com/plugins/webhook-notifier.zip"
+  },
+  {
+    "uuid": "data-backup",
+    "title": "数据备份助手",
+    "author": "Memento",
+    "description": "自动备份所有插件数据到指定目录，支持定时备份和增量备份。",
+    "version": "1.0.0",
+    "website": "https://github.com/memento/data-backup",
+    "permissions": {
+      "dataAccess": [],
+      "operations": ["read"],
+      "networkAccess": false
+    },
+    "priority": 10,
+    "events": [],
+    "downloadURL": "https://example.com/plugins/data-backup.zip"
+  }
+]

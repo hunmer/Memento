@@ -4,16 +4,27 @@ import path from 'path';
 import fs from 'fs';
 import http from 'http';
 import WebSocket from 'ws';
+import multer from 'multer';
 import { config, printConfig } from './config/serverConfig';
 import { FileStorageService } from './services/fileStorageService';
 import { AuthService } from './services/authService';
 import { PluginDataService } from './services/pluginDataService';
+import { PluginService } from './services/pluginService';
 import { WebSocketManager } from './services/webSocketManager';
 import { FileWatcherService } from './services/fileWatcherService';
 import { authMiddleware, apiEnabledMiddleware } from './middleware';
 import { createAuthRoutes } from './routes/authRoutes';
 import { createSyncRoutes } from './routes/syncRoutes';
 import { createPluginRoutesIndex } from './routes/pluginRoutes';
+import { createPluginSystemRoutes } from './routes/pluginSystemRoutes';
+
+// 文件上传配置
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  },
+});
 
 /**
  * MIME 类型映射
@@ -74,6 +85,11 @@ async function main() {
   const pluginDataService = new PluginDataService(storageService, config.dataDir);
   await pluginDataService.initialize();
   console.log('插件数据服务初始化完成');
+
+  // 插件系统服务
+  const pluginService = new PluginService(config.dataDir);
+  await pluginService.initialize();
+  console.log('插件系统服务初始化完成');
 
   const webSocketManager = WebSocketManager.getInstance();
   console.log('WebSocket 管理器初始化完成');
@@ -152,6 +168,11 @@ async function main() {
     );
   }
   console.log(`已挂载 ${pluginRoutes.size} 个插件路由: ${Array.from(pluginRoutes.keys()).join(', ')}`);
+
+  // 插件系统管理路由 (需要管理员权限)
+  const pluginSystemRoutes = createPluginSystemRoutes(pluginService, authService);
+  app.use('/api/v1/system', upload.single('plugin'), pluginSystemRoutes);
+  console.log('插件系统管理路由已挂载: /api/v1/system/plugins');
 
   // 5. 创建 HTTP 服务器
   const server = http.createServer(app);

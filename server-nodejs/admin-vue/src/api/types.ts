@@ -129,3 +129,87 @@ export interface ReEncryptResponse {
   errors?: string[]
   error?: string
 }
+
+// ==================== 插件系统相关 ====================
+
+/** 插件权限 */
+export interface PluginPermissions {
+  dataAccess: string[]
+  operations: ('create' | 'read' | 'update' | 'delete')[]
+  networkAccess: boolean
+}
+
+/** 已安装的插件 */
+export interface InstalledPlugin {
+  uuid: string
+  title: string
+  author: string
+  description: string
+  version: string
+  website?: string
+  permissions: PluginPermissions
+  updateURL?: string
+  priority?: number
+  events?: string[]
+  status: 'installed' | 'enabled' | 'disabled'
+  pluginPath: string
+  installedAt: string
+  updatedAt: string
+}
+
+/** 商店插件 */
+export interface StorePlugin {
+  uuid: string
+  title: string
+  author: string
+  description: string
+  version: string
+  website?: string
+  permissions: PluginPermissions
+  updateURL?: string
+  priority?: number
+  events?: string[]
+  downloadURL: string
+  sourceURL: string
+}
+
+/** 商店配置 */
+export interface StoreConfig {
+  storeURL: string
+  lastSyncAt?: string
+  syncInterval: number
+}
+
+/** 插件列表响应 */
+export interface PluginListResponse {
+  success: boolean
+  plugins: InstalledPlugin[]
+  total: number
+  timestamp: string
+}
+
+/** 商店列表响应 */
+export interface StoreListResponse {
+  success: boolean
+  plugins: StorePlugin[]
+  sourceURL: string
+  lastSyncAt?: string
+  total: number
+  timestamp: string
+}
+
+/** 插件操作响应 */
+export interface PluginOperationResponse {
+  success: boolean
+  message?: string
+  uuid?: string
+  error?: string
+  timestamp: string
+}
+
+/** 商店配置响应 */
+export interface StoreConfigResponse {
+  success: boolean
+  config: StoreConfig
+  timestamp: string
+}

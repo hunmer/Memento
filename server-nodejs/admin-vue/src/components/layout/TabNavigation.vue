@@ -4,6 +4,7 @@ import {
   HomeOutline,
   FolderOutline,
   KeyOutline,
+  ExtensionPuzzleOutline,
   SettingsOutline
 } from '@vicons/ionicons5'
 import { useUIStore, type TabId } from '@/stores/ui'
@@ -14,6 +15,7 @@ const tabs: { id: TabId; label: string; icon: typeof HomeOutline }[] = [
   { id: 'overview', label: '概览', icon: HomeOutline },
   { id: 'files', label: '文件管理', icon: FolderOutline },
   { id: 'apikeys', label: 'API Keys', icon: KeyOutline },
+  { id: 'plugins', label: '插件商店', icon: ExtensionPuzzleOutline },
   { id: 'settings', label: '设置', icon: SettingsOutline }
 ]
 
