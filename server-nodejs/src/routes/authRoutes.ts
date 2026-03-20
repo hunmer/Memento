@@ -388,5 +388,60 @@ export function createAuthRoutes(
     }
   });
 
+  // ==================== API 访问控制 ====================
+
+  /**
+   * GET /api-access - 获取 API 访问状态
+   */
+  router.get('/api-access', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = getUserIdFromRequest(req);
+      if (!userId) {
+        errorResponse(res, 401, '未认证或 Token 无效');
+        return;
+      }
+
+      const enabled = await authService.getApiAccessStatus(userId);
+
+      res.json({
+        success: true,
+        enabled,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
+  /**
+   * PUT /api-access - 设置 API 访问状态
+   */
+  router.put('/api-access', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = getUserIdFromRequest(req);
+      if (!userId) {
+        errorResponse(res, 401, '未认证或 Token 无效');
+        return;
+      }
+
+      const { enabled } = req.body;
+      if (typeof enabled !== 'boolean') {
+        errorResponse(res, 400, 'enabled 参数必须是布尔值');
+        return;
+      }
+
+      await authService.setApiAccessStatus(userId, enabled);
+
+      res.json({
+        success: true,
+        enabled,
+        message: enabled ? 'API 访问已开启' : 'API 访问已关闭',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
   return router;
 }

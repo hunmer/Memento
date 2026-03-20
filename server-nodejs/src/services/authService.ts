@@ -45,6 +45,7 @@ export class AuthService {
   private jwtSecret: string;
   private tokenExpiryDays: number;
   private apiKeyStore: string;
+  private apiAccessStore: string;
 
   private adminUsername?: string;
   private adminPassword?: string;
@@ -61,6 +62,7 @@ export class AuthService {
     this.jwtSecret = params.jwtSecret;
     this.tokenExpiryDays = params.tokenExpiryDays || 36500; // 100年
     this.apiKeyStore = path.join(params.dataDir, 'auth', 'api_keys');
+    this.apiAccessStore = path.join(params.dataDir, 'auth', 'api_access.json');
     this.adminUsername = params.adminUsername;
     this.adminPassword = params.adminPassword;
     this.ensureApiKeyStore();
@@ -454,5 +456,48 @@ export class AuthService {
     this.saveApiKeys(userId, keys);
 
     return true;
+  }
+
+  // ==================== API 访问控制 ====================
+
+  /**
+   * 读取 API 访问状态
+   */
+  private readApiAccessStatus(): Record<string, boolean> {
+    if (!fs.existsSync(this.apiAccessStore)) {
+      return {};
+    }
+
+    try {
+      const content = fs.readFileSync(this.apiAccessStore, 'utf8');
+      return JSON.parse(content) as Record<string, boolean>;
+    } catch (e) {
+      console.error(`读取 API 访问状态失败: ${e}`);
+      return {};
+    }
+  }
+
+  /**
+   * 保存 API 访问状态
+   */
+  private saveApiAccessStatus(status: Record<string, boolean>): void {
+    fs.writeFileSync(this.apiAccessStore, JSON.stringify(status, null, 2), 'utf8');
+  }
+
+  /**
+   * 获取用户的 API 访问状态
+   */
+  async getApiAccessStatus(userId: string): Promise<boolean> {
+    const status = this.readApiAccessStatus();
+    return status[userId] ?? false;
+  }
+
+  /**
+   * 设置用户的 API 访问状态
+   */
+  async setApiAccessStatus(userId: string, enabled: boolean): Promise<void> {
+    const status = this.readApiAccessStatus();
+    status[userId] = enabled;
+    this.saveApiAccessStatus(status);
   }
 }

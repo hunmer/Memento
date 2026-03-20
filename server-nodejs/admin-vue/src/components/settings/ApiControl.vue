@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   NCard,
   NSpace,
@@ -8,6 +8,8 @@ import {
   NAlert,
   NInput,
   NInputGroup,
+  NSwitch,
+  NSpin,
   useDialog,
   useMessage
 } from 'naive-ui'
@@ -20,6 +22,11 @@ const uiStore = useUIStore()
 const dialog = useDialog()
 const message = useMessage()
 
+// API 访问开关状态
+const apiEnabled = ref(false)
+const loadingApiStatus = ref(false)
+const togglingApi = ref(false)
+
 // 输入模式：'none' | 'input'
 const inputMode = ref<'none' | 'input'>('none')
 const keyInput = ref('')
@@ -27,6 +34,41 @@ const savingKey = ref(false)
 
 // 本地是否有密钥
 const hasLocalKey = computed(() => !!authStore.encryptionKey)
+
+// 初始化加载 API 访问状态
+onMounted(async () => {
+  await loadApiAccessStatus()
+})
+
+async function loadApiAccessStatus(): Promise<void> {
+  loadingApiStatus.value = true
+  try {
+    const response = await authApi.getApiAccessStatus()
+    apiEnabled.value = response.enabled
+  } catch (e) {
+    console.error('获取 API 访问状态失败:', e)
+  } finally {
+    loadingApiStatus.value = false
+  }
+}
+
+// 切换 API 访问状态
+async function handleToggleApi(enabled: boolean): Promise<void> {
+  togglingApi.value = true
+  try {
+    const response = await authApi.setApiAccessStatus(enabled)
+    apiEnabled.value = response.enabled
+    message.success(response.message)
+    uiStore.addActivity('settings', enabled ? '开启了 API 访问' : '关闭了 API 访问')
+  } catch (e) {
+    // 恢复原状态
+    apiEnabled.value = !enabled
+    const errorMessage = e instanceof Error ? e.message : '设置失败'
+    message.error(errorMessage)
+  } finally {
+    togglingApi.value = false
+  }
+}
 
 // 启用 API（输入密钥）
 function handleEnableApi(): void {
@@ -54,19 +96,19 @@ function validateKeyFormat(key: string): boolean {
 }
 
 // AES-GCM 解密（与客户端加密服务兼容）
+// Dart encrypt 包使用 GCM 模式时，密文和 authTag 合并在一起
 async function decryptVerificationData(encryptedData: string, key: string): Promise<string> {
-  // 解析加密数据格式: iv.base64.ciphertext.base64
+  // 解析加密数据格式: iv.base64.ciphertext_base64
   const parts = encryptedData.split('.')
-  if (parts.length !== 3) {
+  if (parts.length !== 2) {
     throw new Error('加密数据格式无效')
   }
 
-  const [ivBase64, ciphertextBase64, authTagBase64] = parts
+  const [ivBase64, combinedBase64] = parts
 
   // 解码 Base64
   const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0))
-  const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0))
-  const authTag = Uint8Array.from(atob(authTagBase64), c => c.charCodeAt(0))
+  const combined = Uint8Array.from(atob(combinedBase64), c => c.charCodeAt(0))
 
   // 解码密钥
   const keyBytes = Uint8Array.from(atob(key), c => c.charCodeAt(0))
@@ -80,12 +122,7 @@ async function decryptVerificationData(encryptedData: string, key: string): Prom
     ['decrypt']
   )
 
-  // 合并密文和认证标签
-  const combined = new Uint8Array(ciphertext.length + authTag.length)
-  combined.set(ciphertext, 0)
-  combined.set(authTag, ciphertext.length)
-
-  // 解密
+  // 解密（Web Crypto API 会自动处理 authTag）
   const decrypted = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv },
     cryptoKey,
@@ -175,7 +212,7 @@ async function copyToClipboard(text: string): Promise<void> {
 <template>
   <NCard title="API 访问控制">
     <NSpace vertical :size="16">
-      <!-- 状态显示 -->
+      <!-- API 访问开关 -->
       <div
         style="
           padding: 16px;
@@ -184,19 +221,45 @@ async function copyToClipboard(text: string): Promise<void> {
           border-left: 4px solid #4f46e5;
         "
       >
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <div>
+            <strong style="color: #374151">API 访问开关</strong>
+            <p style="color: #6b7280; font-size: 0.875rem; margin: 4px 0 0 0">
+              控制是否允许通过 API 访问数据
+            </p>
+          </div>
+          <NSpin :show="loadingApiStatus" size="small">
+            <NSwitch
+              :value="apiEnabled"
+              :loading="togglingApi"
+              @update:value="handleToggleApi"
+            />
+          </NSpin>
+        </div>
+      </div>
+
+      <!-- 加密密钥设置 -->
+      <div
+        style="
+          padding: 16px;
+          background: #f5f5f5;
+          border-radius: 8px;
+          border-left: 4px solid #10b981;
+        "
+      >
         <NTag
           :type="hasLocalKey ? 'success' : 'warning'"
           size="large"
           style="margin-bottom: 8px"
         >
-          {{ hasLocalKey ? '🟢 已启用' : '🔴 已禁用' }}
+          {{ hasLocalKey ? '🟢 已设置密钥' : '🔴 未设置密钥' }}
         </NTag>
         <p style="color: #6b7280; font-size: 0.875rem; margin: 8px 0 0 0">
           <template v-if="hasLocalKey">
-            API 访问已开放，可以解密下载文件。
+            加密密钥已设置，可以解密下载文件。
           </template>
           <template v-else>
-            API 访问已关闭，需要设置加密密钥才能解密文件。
+            加密密钥未设置，需要输入密钥才能解密文件。
           </template>
         </p>
 
@@ -241,7 +304,7 @@ async function copyToClipboard(text: string): Promise<void> {
           type="warning"
           style="margin-top: 12px"
         >
-          ⚠️ 启用 API 需要提供加密密钥（从 Memento 客户端获取）
+          ⚠️ 需要提供加密密钥才能解密文件（从 Memento 客户端获取）
         </NAlert>
       </div>
 
@@ -272,7 +335,7 @@ async function copyToClipboard(text: string): Promise<void> {
           type="success"
           @click="handleEnableApi"
         >
-          ✅ 启用 API 访问
+          ✅ 设置加密密钥
         </NButton>
         <NButton
           v-if="hasLocalKey"

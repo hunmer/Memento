@@ -182,7 +182,17 @@ export const authApi = {
     }),
 
   getUserInfo: (): Promise<UserInfoResponse> =>
-    apiClient.request('/api/v1/auth/user-info')
+    apiClient.request('/api/v1/auth/user-info'),
+
+  // API 访问控制
+  getApiAccessStatus: (): Promise<{ success: boolean; enabled: boolean }> =>
+    apiClient.request('/api/v1/auth/api-access'),
+
+  setApiAccessStatus: (enabled: boolean): Promise<{ success: boolean; enabled: boolean; message: string }> =>
+    apiClient.request('/api/v1/auth/api-access', {
+      method: 'PUT',
+      body: JSON.stringify({ enabled })
+    })
 }
 
 // 同步 API
