@@ -339,11 +339,11 @@ export function createBillHandlers(pluginDataService: PluginDataService): Plugin
 
         for (let i = 0; i < accounts.length; i++) {
           const account = accounts[i];
-          const bills = (account.bills as Array<unknown>) || [];
-          const billIndex = bills.findIndex((b: Record<string, unknown>) => b.id === params.id);
+          const bills = (account.bills as Record<string, unknown>[]) || [];
+          const billIndex = bills.findIndex((b) => b.id === params.id);
 
           if (billIndex !== -1) {
-            const oldBill = bills[billIndex] as Record<string, unknown>;
+            const oldBill = bills[billIndex];
             const oldAmount = (oldBill.amount as number) || 0;
             const newAmount = (params.amount as number) || 0;
 
@@ -382,11 +382,11 @@ export function createBillHandlers(pluginDataService: PluginDataService): Plugin
 
         for (let i = 0; i < accounts.length; i++) {
           const account = accounts[i];
-          const bills = (account.bills as Array<unknown>) || [];
-          const billIndex = bills.findIndex((b: Record<string, unknown>) => b.id === params.id);
+          const bills = (account.bills as Record<string, unknown>[]) || [];
+          const billIndex = bills.findIndex((b) => b.id === params.id);
 
           if (billIndex !== -1) {
-            const oldBill = bills[billIndex] as Record<string, unknown>;
+            const oldBill = bills[billIndex];
             const oldAmount = (oldBill.amount as number) || 0;
 
             bills.splice(billIndex, 1);
