@@ -55,8 +55,20 @@ class ApiClient {
       headers
     })
 
-    // 处理 401/403 认证错误
-    if (response.status === 401 || response.status === 403) {
+    // 处理 401 认证错误
+    if (response.status === 401) {
+      this.setToken(null)
+      localStorage.removeItem('username')
+      throw new Error('登录已过期，请重新登录')
+    }
+
+    // 处理 403 错误 - 仅对特定端点清除登录状态
+    if (response.status === 403) {
+      const errorData = await response.json().catch(() => ({}))
+      // 如果是密钥验证相关错误，不清除登录状态
+      if (errorData.error?.includes('密钥') || endpoint.includes('encryption-key')) {
+        throw new Error(errorData.error || '权限不足')
+      }
       this.setToken(null)
       localStorage.removeItem('username')
       throw new Error('登录已过期，请重新登录')
@@ -136,10 +148,10 @@ export const authApi = {
   hasEncryptionKey: (): Promise<{ success: boolean; has_key: boolean }> =>
     apiClient.request('/api/v1/auth/has-encryption-key'),
 
-  setEncryptionKey: (key: string): Promise<ApiResponse> =>
+  setEncryptionKey: (key: string, forceCreate = false): Promise<ApiResponse & { is_first_time?: boolean; is_key_updated?: boolean }> =>
     apiClient.request('/api/v1/auth/set-encryption-key', {
       method: 'POST',
-      body: JSON.stringify({ encryption_key: key })
+      body: JSON.stringify({ encryption_key: key, force_create: forceCreate })
     }),
 
   clearEncryptionKey: (): Promise<ApiResponse> =>

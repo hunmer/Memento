@@ -182,7 +182,9 @@ class AuthRoutes {
 
   /// 设置加密密钥（仅内存，不持久化）
   ///
-  /// 请求体: { "encryption_key": "base64-encoded-key" }
+  /// 请求体: { "encryption_key": "base64-encoded-key", "force_create": false }
+  /// 首次设置时创建验证文件，后续设置时验证密钥是否正确
+  /// force_create: 强制重新创建验证文件（用于更改密钥后）
   Future<Response> _handleSetEncryptionKey(Request request) async {
     try {
       final userId = _getUserIdFromRequest(request);
@@ -202,22 +204,74 @@ class AuthRoutes {
         return _errorResponse(400, '缺少 encryption_key 参数');
       }
 
-      // 验证密钥格式
+      final forceCreate = data['force_create'] as bool? ?? false;
+
+      // 验证密钥格式（Base64 32字节）
       try {
-        _pluginDataService!.setEncryptionKey(userId, encryptionKey);
+        final keyBytes = base64Decode(encryptionKey);
+        if (keyBytes.length != 32) {
+          return _errorResponse(400, '密钥长度必须为 32 字节 (256-bit)');
+        }
       } catch (e) {
-        return _errorResponse(400, '无效的加密密钥: $e');
+        return _errorResponse(400, '无效的 Base64 编码密钥');
       }
 
-      return Response.ok(
-        jsonEncode({
-          'success': true,
-          'message': '加密密钥已设置（仅当前会话有效）',
-          'user_id': userId,
-          'timestamp': DateTime.now().toIso8601String(),
-        }),
-        headers: {'Content-Type': 'application/json'},
-      );
+      // 检查是否已存在验证文件
+      final hasVerificationFile = await _pluginDataService!.hasKeyVerificationFile(userId);
+
+      if (hasVerificationFile && !forceCreate) {
+        // 已有验证文件，需要验证密钥是否正确
+        final (isValid, errorMessage) = await _pluginDataService!.verifyEncryptionKey(userId, encryptionKey);
+
+        if (!isValid) {
+          return _errorResponse(403, errorMessage ?? '密钥验证失败');
+        }
+
+        // 验证成功，密钥已设置
+        return Response.ok(
+          jsonEncode({
+            'success': true,
+            'message': '密钥验证成功',
+            'is_first_time': false,
+            'user_id': userId,
+            'timestamp': DateTime.now().toIso8601String(),
+          }),
+          headers: {'Content-Type': 'application/json'},
+        );
+      } else if (forceCreate) {
+        // 强制创建模式（更改密钥后）：设置密钥并更新验证文件
+        _pluginDataService!.setEncryptionKey(userId, encryptionKey);
+        await _pluginDataService!.updateKeyVerificationFile(userId);
+
+        return Response.ok(
+          jsonEncode({
+            'success': true,
+            'message': '加密密钥已更新',
+            'is_first_time': false,
+            'is_key_updated': true,
+            'user_id': userId,
+            'timestamp': DateTime.now().toIso8601String(),
+          }),
+          headers: {'Content-Type': 'application/json'},
+        );
+      } else {
+        // 首次设置密钥
+        _pluginDataService!.setEncryptionKey(userId, encryptionKey);
+
+        // 创建验证文件
+        await _pluginDataService!.createKeyVerificationFile(userId);
+
+        return Response.ok(
+          jsonEncode({
+            'success': true,
+            'message': '加密密钥已设置并创建验证文件',
+            'is_first_time': true,
+            'user_id': userId,
+            'timestamp': DateTime.now().toIso8601String(),
+          }),
+          headers: {'Content-Type': 'application/json'},
+        );
+      }
     } catch (e) {
       return _errorResponse(500, '服务器错误: $e');
     }

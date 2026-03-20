@@ -6,6 +6,12 @@ import 'package:path/path.dart' as path;
 import 'file_storage_service.dart';
 import 'encryption_service.dart';
 
+/// 密钥验证文件名
+const String _keyVerificationFileName = '.key_verification.json';
+
+/// 密钥验证文件内容（用于验证密钥是否正确）
+const String _keyVerificationContent = 'MEMENTO_KEY_VERIFICATION_v1';
+
 /// 插件数据访问服务
 ///
 /// 负责读取、解密、加密和写入各插件的数据
@@ -45,6 +51,124 @@ class PluginDataService {
   /// 获取用户的加密密钥（仅从内存）
   String? getEncryptionKey(String userId) {
     return encryptionService.getUserKey(userId);
+  }
+
+  // ==================== 密钥验证 ====================
+
+  /// 检查用户是否已创建密钥验证文件
+  Future<bool> hasKeyVerificationFile(String userId) async {
+    final filePath = path.join(getUserDataDir(userId), _keyVerificationFileName);
+    final file = File(filePath);
+    return await file.exists();
+  }
+
+  /// 创建密钥验证文件（首次设置密钥时调用）
+  ///
+  /// 使用当前设置的密钥加密一个已知内容，用于后续验证
+  Future<void> createKeyVerificationFile(String userId) async {
+    if (!hasEncryptionKey(userId)) {
+      throw StateError('用户未设置加密密钥');
+    }
+
+    final verificationData = {
+      'content': _keyVerificationContent,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    final encryptedData = encryptionService.encryptData(userId, verificationData);
+    final md5Hash = encryptionService.computeStringMd5(jsonEncode(verificationData));
+
+    final filePath = path.join(getUserDataDir(userId), _keyVerificationFileName);
+    final file = File(filePath);
+
+    // 确保用户目录存在
+    if (!await file.parent.exists()) {
+      await file.parent.create(recursive: true);
+    }
+
+    final fileContent = {
+      'encrypted_data': encryptedData,
+      'md5': md5Hash,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    await file.writeAsString(jsonEncode(fileContent));
+  }
+
+  /// 验证密钥是否正确
+  ///
+  /// 尝试用提供的密钥解密验证文件，验证密钥是否与首次设置的相同
+  /// 返回 (isValid, errorMessage)
+  Future<(bool, String?)> verifyEncryptionKey(String userId, String encryptionKey) async {
+    // 检查验证文件是否存在
+    if (!await hasKeyVerificationFile(userId)) {
+      // 验证文件不存在，这是首次设置密钥
+      return (true, null);
+    }
+
+    // 读取验证文件
+    final filePath = path.join(getUserDataDir(userId), _keyVerificationFileName);
+    final file = File(filePath);
+
+    if (!await file.exists()) {
+      return (true, null);
+    }
+
+    try {
+      final content = await file.readAsString();
+      final data = jsonDecode(content) as Map<String, dynamic>;
+      final encryptedData = data['encrypted_data'] as String?;
+
+      if (encryptedData == null) {
+        return (false, '验证文件格式错误');
+      }
+
+      // 临时设置密钥进行验证
+      final originalKey = encryptionService.getUserKey(userId);
+      encryptionService.setUserKey(userId, encryptionKey);
+
+      try {
+        // 尝试解密
+        final decryptedData = encryptionService.decryptData(userId, encryptedData) as Map<String, dynamic>;
+        final decryptedContent = decryptedData['content'] as String?;
+
+        // 验证内容是否正确
+        if (decryptedContent != _keyVerificationContent) {
+          // 恢复原始密钥
+          if (originalKey != null) {
+            encryptionService.setUserKey(userId, originalKey);
+          } else {
+            encryptionService.removeUserKey(userId);
+          }
+          return (false, '密钥验证失败：内容不匹配');
+        }
+
+        // 验证成功，保持新密钥设置
+        return (true, null);
+      } catch (e) {
+        // 解密失败，恢复原始密钥
+        if (originalKey != null) {
+          encryptionService.setUserKey(userId, originalKey);
+        } else {
+          encryptionService.removeUserKey(userId);
+        }
+        return (false, '密钥验证失败：无法解密验证文件，密钥可能不正确');
+      }
+    } catch (e) {
+      return (false, '读取验证文件失败: $e');
+    }
+  }
+
+  /// 更新验证文件（用于更改密钥后重新加密验证文件）
+  Future<void> updateKeyVerificationFile(String userId) async {
+    // 先删除旧的验证文件
+    final filePath = path.join(getUserDataDir(userId), _keyVerificationFileName);
+    final file = File(filePath);
+    if (await file.exists()) {
+      await file.delete();
+    }
+    // 创建新的验证文件
+    await createKeyVerificationFile(userId);
   }
 
   // ==================== 数据读取 ====================

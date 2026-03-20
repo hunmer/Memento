@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import {
   NCard,
   NSpace,
@@ -16,38 +16,126 @@ import { authApi } from '@/api'
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 
-const showKeyInput = ref(false)
+// 输入模式：'none' | 'first-time' | 'change'
+const inputMode = ref<'none' | 'first-time' | 'change'>('none')
+const oldKey = ref('')
 const newKey = ref('')
 const savingKey = ref(false)
 
-async function handleEnableApi(): Promise<void> {
-  showKeyInput.value = true
+// 是否是更改密钥模式
+const isChangeMode = computed(() => inputMode.value === 'change')
+
+// 首次启用 API
+function handleEnableApi(): void {
+  inputMode.value = 'first-time'
+  oldKey.value = ''
+  newKey.value = ''
 }
 
-async function handleSaveKey(): Promise<void> {
-  const key = newKey.value.trim()
+// 更改密钥
+function handleChangeKey(): void {
+  inputMode.value = 'change'
+  oldKey.value = ''
+  newKey.value = ''
+}
 
-  // 验证密钥格式
+// 取消输入
+function handleCancel(): void {
+  inputMode.value = 'none'
+  oldKey.value = ''
+  newKey.value = ''
+}
+
+// 验证密钥格式
+function validateKeyFormat(key: string): boolean {
   if (!/^[A-Za-z0-9+/]+=*$/.test(key)) {
     window.$message?.error('加密密钥格式无效，应为 Base64 编码')
-    return
+    return false
   }
-
   if (key.length < 40) {
     window.$message?.error('加密密钥长度不足，标准长度为 44 个字符')
+    return false
+  }
+  return true
+}
+
+// 保存密钥（首次设置或验证当前密钥）
+async function handleSaveKey(): Promise<void> {
+  const key = isChangeMode.value ? oldKey.value.trim() : newKey.value.trim()
+
+  if (!validateKeyFormat(key)) {
     return
   }
 
   savingKey.value = true
   try {
-    await authApi.setEncryptionKey(key)
-    authStore.setEncryptionKey(key)
-    showKeyInput.value = false
-    newKey.value = ''
-    window.$message?.success('加密密钥已设置')
-    uiStore.addActivity('settings', '设置了加密密钥')
+    const response = await authApi.setEncryptionKey(key)
+
+    if (response.success) {
+      authStore.setEncryptionKey(key)
+
+      if (isChangeMode.value) {
+        // 更改密钥模式：旧密钥验证成功，切换到输入新密钥
+        inputMode.value = 'first-time'
+        oldKey.value = ''
+        newKey.value = ''
+        window.$message?.success('旧密钥验证成功，请输入新密钥')
+      } else {
+        // 首次设置模式
+        inputMode.value = 'none'
+        newKey.value = ''
+
+        if (response.is_first_time) {
+          window.$message?.success('加密密钥已设置并创建验证文件')
+          uiStore.addActivity('settings', '首次设置了加密密钥')
+        } else {
+          window.$message?.success('密钥验证成功')
+          uiStore.addActivity('settings', '验证了加密密钥')
+        }
+      }
+    }
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '设置失败')
+    const errorMessage = err instanceof Error ? err.message : '设置失败'
+    if (errorMessage.includes('密钥验证失败') || errorMessage.includes('无法解密')) {
+      window.$message?.error('密钥错误：与首次设置的密钥不匹配')
+    } else {
+      window.$message?.error(errorMessage)
+    }
+  } finally {
+    savingKey.value = false
+  }
+}
+
+// 更改密钥（输入新密钥后保存）
+async function handleChangeKeySave(): Promise<void> {
+  const key = newKey.value.trim()
+
+  if (!validateKeyFormat(key)) {
+    return
+  }
+
+  // 检查新密钥是否与当前密钥相同
+  if (authStore.encryptionKey && key === authStore.encryptionKey) {
+    window.$message?.warning('新密钥与当前密钥相同，无需更改')
+    return
+  }
+
+  savingKey.value = true
+  try {
+    // 使用 forceCreate 强制更新验证文件
+    const response = await authApi.setEncryptionKey(key, true)
+
+    if (response.success) {
+      authStore.setEncryptionKey(key)
+      inputMode.value = 'none'
+      oldKey.value = ''
+      newKey.value = ''
+      window.$message?.success('密钥已更新')
+      uiStore.addActivity('settings', '更改了加密密钥')
+    }
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : '设置失败'
+    window.$message?.error(errorMessage)
   } finally {
     savingKey.value = false
   }
@@ -170,27 +258,65 @@ async function copyToClipboard(text: string): Promise<void> {
         </NAlert>
       </div>
 
-      <!-- 密钥输入 -->
-      <div v-if="showKeyInput">
+      <!-- 首次设置密钥 -->
+      <div v-if="inputMode === 'first-time' && !authStore.hasEncryptionKey">
+        <div style="margin-bottom: 8px; font-weight: 500; color: #475569">
+          设置加密密钥
+        </div>
         <NInputGroup>
           <NInput
             v-model:value="newKey"
             placeholder="请输入加密密钥 (Base64 编码，44 个字符)"
-            type="password"
-            show-password-on="click"
           />
           <NButton type="primary" :loading="savingKey" @click="handleSaveKey">
             保存
           </NButton>
-          <NButton @click="showKeyInput = false">取消</NButton>
+          <NButton @click="handleCancel">取消</NButton>
         </NInputGroup>
         <p style="color: #6b7280; font-size: 0.75rem; margin-top: 8px">
           💡 加密密钥可在 Memento 客户端 "设置 > 开发者选项" 中查看
         </p>
       </div>
 
+      <!-- 更改密钥：输入旧密钥验证 -->
+      <div v-if="inputMode === 'change'">
+        <div style="margin-bottom: 8px; font-weight: 500; color: #475569">
+          步骤 1：验证当前密钥
+        </div>
+        <NInputGroup>
+          <NInput
+            v-model:value="oldKey"
+            placeholder="请输入当前加密密钥"
+          />
+          <NButton type="primary" :loading="savingKey" @click="handleSaveKey">
+            验证
+          </NButton>
+          <NButton @click="handleCancel">取消</NButton>
+        </NInputGroup>
+      </div>
+
+      <!-- 更改密钥：输入新密钥（旧密钥验证成功后显示） -->
+      <div v-if="inputMode === 'first-time' && authStore.hasEncryptionKey">
+        <div style="margin-bottom: 8px; font-weight: 500; color: #475569">
+          步骤 2：设置新密钥
+        </div>
+        <NInputGroup>
+          <NInput
+            v-model:value="newKey"
+            placeholder="请输入新的加密密钥"
+          />
+          <NButton type="primary" :loading="savingKey" @click="handleChangeKeySave">
+            保存
+          </NButton>
+          <NButton @click="handleCancel">取消</NButton>
+        </NInputGroup>
+        <p style="color: #6b7280; font-size: 0.75rem; margin-top: 8px">
+          ⚠️ 更改密钥后，需要同步更新客户端的密钥配置
+        </p>
+      </div>
+
       <!-- 操作按钮 -->
-      <NSpace>
+      <NSpace v-if="inputMode === 'none'">
         <NButton
           v-if="!authStore.hasEncryptionKey"
           type="success"
@@ -201,7 +327,7 @@ async function copyToClipboard(text: string): Promise<void> {
         <NButton
           v-if="authStore.hasEncryptionKey"
           type="warning"
-          @click="handleEnableApi"
+          @click="handleChangeKey"
         >
           🔑 更改密钥
         </NButton>
