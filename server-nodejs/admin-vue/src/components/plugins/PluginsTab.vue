@@ -21,6 +21,7 @@ const message = useMessage()
 const dialog = useDialog()
 
 const fileInput = ref<File | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 const activeSubTab = ref<PluginSubTab>('installed')
 const showConfigModal = ref(false)
 const storeConfigURL = ref('')
@@ -84,6 +85,11 @@ function handleFileSelect(event: Event): void {
   fileInput.value = file
 }
 
+// 触发文件选择框
+function triggerFileSelect(): void {
+  fileInputRef.value?.click()
+}
+
 // 上传插件
 async function handleUpload(): Promise<void> {
   if (!fileInput.value) return
@@ -91,6 +97,9 @@ async function handleUpload(): Promise<void> {
   if (success) {
     message.success('插件上传成功')
     fileInput.value = null
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
   } else {
     message.error(pluginsStore.error || '上传失败')
   }
@@ -175,18 +184,22 @@ function getStatusClass(plugin: InstalledPlugin): string {
             <span>已安装插件 ({{ pluginsStore.installedPlugins.length }})</span>
             <NSpace>
               <input
-                ref="fileInput"
+                ref="fileInputRef"
                 type="file"
                 accept=".zip"
                 style="display: none"
                 @change="handleFileSelect"
               />
+              <NButton size="small" @click="triggerFileSelect">
+                选择文件
+              </NButton>
               <NButton size="small" :disabled="!fileInput" @click="handleUpload" :loading="pluginsStore.loading">
                 <template #icon>
                   <NIcon :component="CloudDownloadOutline" />
                 </template>
                 上传插件
               </NButton>
+              <span v-if="fileInput" class="file-name">{{ fileInput.name }}</span>
             </NSpace>
           </NSpace>
         </div>
@@ -497,5 +510,14 @@ function getStatusClass(plugin: InstalledPlugin): string {
   font-size: 12px;
   color: #999;
   margin-top: 4px;
+}
+
+.file-name {
+  font-size: 12px;
+  color: #666;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
