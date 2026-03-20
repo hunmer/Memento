@@ -4,7 +4,7 @@
 为 server-nodejs 添加完整的插件系统，支持细粒度事件订阅、生命周期管理、权限控制和插件商店功能。
 
 ## Current Phase
-Phase 1
+All Phases Complete ✅
 
 ## Phases
 

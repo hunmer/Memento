@@ -75,126 +75,7 @@ export function createPluginSystemRoutes(
     }
   });
 
-  /**
-   * GET /api/v1/system/plugins/:uuid - 获取单个插件详情
-   */
-  router.get('/plugins/:uuid', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = await requireAdmin(req, res);
-      if (!userId) return;
-
-      const plugin = await pluginService.getPluginByUUID(req.params.uuid);
-
-      if (!plugin) {
-        errorResponse(res, 404, '插件不存在');
-        return;
-      }
-
-      res.json({
-        success: true,
-        plugin,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (e) {
-      errorResponse(res, 500, `服务器错误: ${e}`);
-    }
-  });
-
-  /**
-   * POST /api/v1/system/plugins/upload - 上传并安装插件
-   */
-  router.post('/plugins/upload', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = await requireAdmin(req, res);
-      if (!userId) return;
-
-      // 检查文件上传
-      if (!req.file) {
-        errorResponse(res, 400, '请上传插件 ZIP 文件');
-        return;
-      }
-
-      const plugin = await pluginService.installFromZip(req.file.buffer);
-
-      res.json({
-        success: true,
-        plugin,
-        message: '插件安装成功',
-        timestamp: new Date().toISOString(),
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      errorResponse(res, 400, message);
-    }
-  });
-
-  /**
-   * POST /api/v1/system/plugins/:uuid/enable - 启用插件
-   */
-  router.post('/plugins/:uuid/enable', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = await requireAdmin(req, res);
-      if (!userId) return;
-
-      await pluginService.enablePlugin(req.params.uuid);
-
-      res.json({
-        success: true,
-        message: '插件已启用',
-        uuid: req.params.uuid,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      errorResponse(res, 400, message);
-    }
-  });
-
-  /**
-   * POST /api/v1/system/plugins/:uuid/disable - 禁用插件
-   */
-  router.post('/plugins/:uuid/disable', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = await requireAdmin(req, res);
-      if (!userId) return;
-
-      await pluginService.disablePlugin(req.params.uuid);
-
-      res.json({
-        success: true,
-        message: '插件已禁用',
-        uuid: req.params.uuid,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      errorResponse(res, 400, message);
-    }
-  });
-
-  /**
-   * DELETE /api/v1/system/plugins/:uuid - 卸载插件
-   */
-  router.delete('/plugins/:uuid', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = await requireAdmin(req, res);
-      if (!userId) return;
-
-      await pluginService.uninstallPlugin(req.params.uuid);
-
-      res.json({
-        success: true,
-        message: '插件已卸载',
-        uuid: req.params.uuid,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (e) {
-      const message = e instanceof Error ? e.message : String(e);
-      errorResponse(res, 400, message);
-    }
-  });
-
-  // ==================== 插件商店 ====================
+  // ==================== 商店相关（必须在 :uuid 路由之前）====================
 
   /**
    * GET /api/v1/system/plugins/store - 获取商店插件列表
@@ -287,6 +168,129 @@ export function createPluginSystemRoutes(
       });
     } catch (e) {
       errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
+  // ==================== 插件上传（必须在 :uuid 路由之前）====================
+
+  /**
+   * POST /api/v1/system/plugins/upload - 上传并安装插件
+   */
+  router.post('/plugins/upload', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = await requireAdmin(req, res);
+      if (!userId) return;
+
+      // 检查文件上传
+      if (!req.file) {
+        errorResponse(res, 400, '请上传插件 ZIP 文件');
+        return;
+      }
+
+      const plugin = await pluginService.installFromZip(req.file.buffer);
+
+      res.json({
+        success: true,
+        plugin,
+        message: '插件安装成功',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      errorResponse(res, 400, message);
+    }
+  });
+
+  // ==================== 单个插件操作（:uuid 路由放在最后）====================
+
+  /**
+   * GET /api/v1/system/plugins/:uuid - 获取单个插件详情
+   */
+  router.get('/plugins/:uuid', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = await requireAdmin(req, res);
+      if (!userId) return;
+
+      const plugin = await pluginService.getPluginByUUID(req.params.uuid);
+
+      if (!plugin) {
+        errorResponse(res, 404, '插件不存在');
+        return;
+      }
+
+      res.json({
+        success: true,
+        plugin,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
+  /**
+   * POST /api/v1/system/plugins/:uuid/enable - 启用插件
+   */
+  router.post('/plugins/:uuid/enable', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = await requireAdmin(req, res);
+      if (!userId) return;
+
+      await pluginService.enablePlugin(req.params.uuid);
+
+      res.json({
+        success: true,
+        message: '插件已启用',
+        uuid: req.params.uuid,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      errorResponse(res, 400, message);
+    }
+  });
+
+  /**
+   * POST /api/v1/system/plugins/:uuid/disable - 禁用插件
+   */
+  router.post('/plugins/:uuid/disable', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = await requireAdmin(req, res);
+      if (!userId) return;
+
+      await pluginService.disablePlugin(req.params.uuid);
+
+      res.json({
+        success: true,
+        message: '插件已禁用',
+        uuid: req.params.uuid,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      errorResponse(res, 400, message);
+    }
+  });
+
+  /**
+   * DELETE /api/v1/system/plugins/:uuid - 卸载插件
+   */
+  router.delete('/plugins/:uuid', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = await requireAdmin(req, res);
+      if (!userId) return;
+
+      await pluginService.uninstallPlugin(req.params.uuid);
+
+      res.json({
+        success: true,
+        message: '插件已卸载',
+        uuid: req.params.uuid,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      errorResponse(res, 400, message);
     }
   });
 

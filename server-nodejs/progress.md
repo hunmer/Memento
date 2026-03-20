@@ -87,7 +87,17 @@
 
 | Test | Input | Expected | Actual | Status |
 |------|-------|----------|--------|--------|
-| - | - | - | - | - |
+| 登录获取 Token | admin/admin123 | HTTP 200 | success | ✅ |
+| 获取已安装插件列表 | GET /api/v1/system/plugins | HTTP 200 | plugins: [] | ✅ |
+| 获取商店配置 | GET /api/v1/system/plugins/config | HTTP 200 | config object | ✅ |
+| 更新商店配置 | PUT /api/v1/system/plugins/config | HTTP 200 | success | ✅ |
+| 创建测试插件 | ZIP with metadata.json + main.js | valid ZIP | ✅ |
+| 上传插件 | POST /api/v1/system/plugins/upload | HTTP 200 | plugin installed | ✅ |
+| 获取已安装插件 | GET /api/v1/system/plugins | HTTP 200 | 1 plugin | ✅ |
+| 启用插件 | POST /api/v1/system/plugins/:uuid/enable | HTTP 200 | enabled | ✅ |
+| 禁用插件 | POST /api/v1/system/plugins/:uuid/disable | HTTP 200 | disabled | ✅ |
+| 卸载插件 | DELETE /api/v1/system/plugins/:uuid | HTTP 200 | deleted | ✅ |
+| 验证已卸载 | GET /api/v1/system/plugins | HTTP 200 | 0 plugins | ✅ |
 
 ## Error Log
 

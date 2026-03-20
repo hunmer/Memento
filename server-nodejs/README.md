@@ -3,6 +3,19 @@
 基于 Node.js + TypeScript 的 Memento 同步服务器
 
 ## 功能特性
+      - ✅ 端到端加密（AES-256-GCM）
+      - ✅ JWT 认证 + API Key 支持
+      - ✅ 文件同步（push/pull/list/delete)
+      - ✅ WebSocket 实时同步
+      - ✅ 19 个插件的 RESTful API
+      - ✅ **插件系统（安装/启用/禁用/卸载、 before/after 钩子)
+      - ✅ 纯文件存储（无需数据库）
+      - ✅ ZIP 数据导出
+      - ✅ Vue 3 管理界面
+      - ✅ 插件商店配置
+
+      - ✅ 从商店安装插件
+      - ✅ 上传 ZIP 安装
 
 - ✅ 端到端加密（AES-256-GCM）
 - ✅ JWT 认证 + API Key 支持
@@ -117,6 +130,88 @@ npm start
 **插件列表**:
 chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker
 
+### 插件系统 API (`/api/v1/system/plugins`)
+
+> 所有端点需要管理员权限
+
+| 端点 | 方法 | 说明 |
+|------|------|------|
+| `/` | GET | 获取已安装插件列表 |
+| `/:uuid` | GET | 获取单个插件详情 |
+| `/upload` | POST | 上传 ZIP 安装插件 |
+| `/:uuid/enable` | POST | 启用插件 |
+| `/:uuid/disable` | POST | 禁用插件 |
+| `/:uuid` | DELETE | 卸载插件 |
+| `/store` | GET | 获取商店插件列表 |
+| `/store/install` | POST | 从商店安装插件 |
+| `/config` | GET/PUT | 获取/更新商店配置 |
+
+## 插件系统
+
+### 插件结构
+
+插件以 ZIP 文件形式分发，包含以下文件：
+
+```
+plugin.zip
+├── metadata.json    # 必需 - 插件元信息
+└── main.js          # 必需 - 入口文件
+```
+
+### metadata.json 示例
+
+```json
+{
+  "uuid": "data-sync-logger",
+  "title": "数据同步日志记录器",
+  "author": "Memento",
+  "description": "监听插件数据变更并记录日志",
+  "version": "1.0.0",
+  "website": "https://github.com/memento/data-sync-logger",
+  "permissions": {
+    "dataAccess": [],
+    "operations": ["read"],
+    "networkAccess": false
+  },
+  "events": ["chat::*", "todo::*"]
+}
+```
+
+### main.js 示例
+
+```javascript
+module.exports.metadata = require('./metadata.json');
+
+module.exports.onLoad = async function() {
+  console.log('插件已加载');
+};
+
+module.exports.handlers = {
+  'chat::before:createChannel': async function(ctx) {
+    console.log('创建频道前:', ctx.data);
+    return ctx; // 可以修改 ctx.data 或设置 ctx.canceled = true
+  },
+  'chat::after:createChannel': async function(ctx) {
+    console.log('创建频道后:', ctx.success);
+  }
+};
+```
+
+### 事件命名格式
+
+```
+{pluginId}::{timing}:{action}{Entity}
+```
+
+- `timing`: `before` 或 `after`
+- `action`: `create`, `read`, `update`, `delete`
+- `entity`: 实体名称（如 `Channel`, `Task`, `Note` 等）
+
+示例：
+- `chat::before:createChannel` - 创建频道前
+- `todo::after:deleteTask` - 删除任务后
+- `notes::*` - 所有 notes 事件（通配符）
+
 ## 认证方式
 
 ### JWT Token
@@ -184,7 +279,21 @@ npm test
 
 # 带覆盖率报告
 npm run test:coverage
+
+# 插件系统 API 测试 (需要服务器运行)
+node test-api.mjs
 ```
+
+### 插件系统测试结果
+
+| 测试 | 状态 |
+|------|------|
+| 登录获取 Token | ✅ |
+| 获取已安装插件列表 | ✅ |
+| 获取/更新商店配置 | ✅ |
+| 上传插件 (ZIP) | ✅ |
+| 启用/禁用插件 | ✅ |
+| 卸载插件 | ✅ |
 
 ## 开发
 

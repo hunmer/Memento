@@ -10,8 +10,9 @@
       "devices": [
         {
           "deviceId": "test",
-          "deviceName": "Unknown Device",
-          "createdAt": "2026-03-20T03:57:29.007Z"
+          "deviceName": "test",
+          "createdAt": "2026-03-20T03:57:29.007Z",
+          "lastSyncAt": "2026-03-20T11:11:05.009Z"
         },
         {
           "deviceId": "admin_panel",
@@ -24,9 +25,14 @@
           "deviceName": "DESKTOP-SST5KQC",
           "createdAt": "2026-03-20T04:02:55.765Z",
           "lastSyncAt": "2026-03-20T06:07:14.104Z"
+        },
+        {
+          "deviceId": "test-script",
+          "deviceName": "Test Script",
+          "createdAt": "2026-03-20T11:12:22.224Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T07:18:40.657Z"
+      "lastLoginAt": "2026-03-20T11:12:22.224Z"
     },
     {
       "id": "fecef7f1-653a-41d0-ae32-485f826cbb50",
@@ -45,5 +51,5 @@
       "lastLoginAt": "2026-03-20T04:43:58.203Z"
     }
   ],
-  "updated_at": "2026-03-20T07:18:40.658Z"
+  "updated_at": "2026-03-20T11:12:22.224Z"
 }
