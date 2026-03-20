@@ -101,25 +101,6 @@ export function createSyncRoutes(
         return;
       }
 
-      // 检查是否需要创建密钥验证文件
-      // 首次同步时，如果没有验证文件，从请求头获取密钥并创建验证文件
-      const encryptionKey = req.headers['x-encryption-key'] as string | undefined;
-      if (encryptionKey && pluginDataService) {
-        const hasVerificationFile = await pluginDataService.hasKeyVerificationFile(userId);
-        if (!hasVerificationFile) {
-          // 验证密钥格式（Base64 32字节）
-          try {
-            const keyBytes = Buffer.from(encryptionKey, 'base64');
-            if (keyBytes.length === 32) {
-              // 创建密钥验证文件
-              await pluginDataService.createKeyVerificationFile(userId, encryptionKey);
-            }
-          } catch (e) {
-            // 密钥格式无效，忽略（不创建验证文件）
-          }
-        }
-      }
-
       const oldMd5 = data.old_md5;
       const isBinary = data.is_binary === true;
 

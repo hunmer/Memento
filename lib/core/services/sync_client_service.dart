@@ -241,7 +241,7 @@ class SyncClientService {
       // 6. 发送到服务器
       final response = await http.post(
         Uri.parse('$_serverUrl/api/v1/sync/push'),
-        headers: _authHeaders(withEncryptionKey: true),
+        headers: _authHeaders(),
         body: jsonEncode({
           'file_path': filePath,
           'encrypted_data': encryptedData,
@@ -623,14 +623,11 @@ class SyncClientService {
   }
 
   /// 获取认证请求头
-  Map<String, String> _authHeaders({bool withEncryptionKey = false}) {
+  Map<String, String> _authHeaders() {
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $_token',
       if (_deviceId != null) 'X-Device-ID': _deviceId!,
-      // 用于首次同步时创建密钥验证文件
-      if (withEncryptionKey && _encryption.isInitialized)
-        'X-Encryption-Key': _encryption.encryptionKeyBase64 ?? '',
     };
   }
 
@@ -990,7 +987,7 @@ class SyncClientService {
       // 强制推送（不提供 old_md5，直接覆盖）
       final response = await http.post(
         Uri.parse('$_serverUrl/api/v1/sync/push'),
-        headers: _authHeaders(withEncryptionKey: true),
+        headers: _authHeaders(),
         body: jsonEncode({
           'file_path': filePath,
           'encrypted_data': encryptedData,

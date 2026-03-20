@@ -53,6 +53,48 @@ function validateKeyFormat(key: string): boolean {
   return true
 }
 
+// AES-GCM 解密（与客户端加密服务兼容）
+async function decryptVerificationData(encryptedData: string, key: string): Promise<string> {
+  // 解析加密数据格式: iv.base64.ciphertext.base64
+  const parts = encryptedData.split('.')
+  if (parts.length !== 3) {
+    throw new Error('加密数据格式无效')
+  }
+
+  const [ivBase64, ciphertextBase64, authTagBase64] = parts
+
+  // 解码 Base64
+  const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0))
+  const ciphertext = Uint8Array.from(atob(ciphertextBase64), c => c.charCodeAt(0))
+  const authTag = Uint8Array.from(atob(authTagBase64), c => c.charCodeAt(0))
+
+  // 解码密钥
+  const keyBytes = Uint8Array.from(atob(key), c => c.charCodeAt(0))
+
+  // 导入密钥
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'AES-GCM' },
+    false,
+    ['decrypt']
+  )
+
+  // 合并密文和认证标签
+  const combined = new Uint8Array(ciphertext.length + authTag.length)
+  combined.set(ciphertext, 0)
+  combined.set(authTag, ciphertext.length)
+
+  // 解密
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv },
+    cryptoKey,
+    combined
+  )
+
+  return new TextDecoder().decode(decrypted)
+}
+
 // 验证并保存密钥
 async function handleSaveKey(): Promise<void> {
   const key = keyInput.value.trim()
@@ -63,28 +105,44 @@ async function handleSaveKey(): Promise<void> {
 
   savingKey.value = true
   try {
-    const response = await authApi.verifyEncryptionKey(key)
+    // 1. 获取服务端的验证文件
+    const response = await authApi.getKeyVerification()
 
-    if (response.success) {
+    if (!response.exists) {
+      message.error('服务端没有密钥验证文件，请先在客户端完成首次同步')
+      savingKey.value = false
+      return
+    }
+
+    // 2. 本地解密验证
+    if (!response.encrypted_data) {
+      message.error('验证文件数据无效')
+      savingKey.value = false
+      return
+    }
+
+    try {
+      const decryptedJson = await decryptVerificationData(response.encrypted_data, key)
+      const verificationData = JSON.parse(decryptedJson)
+
+      // 验证内容
+      if (verificationData.content !== 'MEMENTO_KEY_VERIFICATION_v1') {
+        message.error('密钥验证失败：内容不匹配')
+        return
+      }
+
+      // 验证成功，保存密钥到本地
       authStore.setEncryptionKey(key)
       inputMode.value = 'none'
       keyInput.value = ''
-
-      if (response.is_first_time) {
-        message.success('加密密钥已验证并创建验证文件')
-        uiStore.addActivity('settings', '首次验证了加密密钥')
-      } else {
-        message.success('密钥验证成功')
-        uiStore.addActivity('settings', '验证了加密密钥')
-      }
+      message.success('密钥验证成功')
+      uiStore.addActivity('settings', '验证了加密密钥')
+    } catch {
+      message.error('密钥验证失败：无法解密验证文件，密钥可能不正确')
     }
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : '验证失败'
-    if (errorMessage.includes('密钥验证失败') || errorMessage.includes('无法解密')) {
-      message.error('密钥错误：与首次设置的密钥不匹配')
-    } else {
-      message.error(errorMessage)
-    }
+    message.error(errorMessage)
   } finally {
     savingKey.value = false
   }
@@ -215,13 +273,6 @@ async function copyToClipboard(text: string): Promise<void> {
           @click="handleEnableApi"
         >
           ✅ 启用 API 访问
-        </NButton>
-        <NButton
-          v-if="hasLocalKey"
-          type="warning"
-          @click="handleEnableApi"
-        >
-          🔑 更换密钥
         </NButton>
         <NButton
           v-if="hasLocalKey"

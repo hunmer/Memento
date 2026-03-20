@@ -208,9 +208,12 @@ export function createAuthRoutes(
   // ==================== 需认证端点 ====================
 
   /**
-   * POST /verify-encryption-key - 验证加密密钥
+   * GET /key-verification - 获取密钥验证文件
+   *
+   * 返回加密的验证文件内容，由客户端在本地解密验证
+   * 服务端不接触明文密钥
    */
-  router.post('/verify-encryption-key', async (req: Request, res: Response): Promise<void> => {
+  router.get('/key-verification', async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = getUserIdFromRequest(req);
       if (!userId) {
@@ -218,88 +221,28 @@ export function createAuthRoutes(
         return;
       }
 
-      const encryptionKey = getEncryptionKeyFromRequest(req);
-      if (!encryptionKey) {
-        errorResponse(res, 400, '缺少 X-Encryption-Key 请求头');
+      // 读取加密的验证文件
+      const verificationFile = await storageService.readEncryptedFile(userId, '.key_verification.json');
+
+      if (!verificationFile) {
+        res.json({
+          success: true,
+          exists: false,
+          message: '密钥验证文件不存在',
+        });
         return;
       }
 
-      // 验证密钥格式（Base64 32字节）
-      try {
-        const keyBytes = Buffer.from(encryptionKey, 'base64');
-        if (keyBytes.length !== 32) {
-          errorResponse(res, 400, '密钥长度必须为 32 字节 (256-bit)');
-          return;
-        }
-      } catch (e) {
-        errorResponse(res, 400, '无效的 Base64 编码密钥');
-        return;
-      }
-
-      // 检查是否已存在验证文件
-      const hasVerificationFile = await pluginDataService.hasKeyVerificationFile(userId);
-
-      if (!hasVerificationFile) {
-        // 验证文件不存在，拒绝验证
-        // 密钥验证文件应通过 /api/v1/sync/push 首次推送时创建
-        errorResponse(res, 404, '密钥验证文件不存在，请先通过客户端同步数据以设置密钥');
-        return;
-      }
-
-      // 已有验证文件，验证密钥是否正确
-      const [isValid, errorMessage] = await pluginDataService.verifyEncryptionKey(userId, encryptionKey);
-
-      if (!isValid) {
-        errorResponse(res, 403, errorMessage || '密钥验证失败');
-        return;
-      }
-
-      // 验证成功
+      // 返回加密的验证文件内容，由客户端解密
       res.json({
         success: true,
-        message: '密钥验证成功',
-        user_id: userId,
-        timestamp: new Date().toISOString(),
+        exists: true,
+        encrypted_data: verificationFile.encrypted_data,
+        md5: verificationFile.md5,
+        updated_at: verificationFile.updated_at,
       });
     } catch (e) {
       errorResponse(res, 500, `服务器错误: ${e}`);
-    }
-  });
-
-  /**
-   * POST /re-encrypt - 用新密钥重新加密所有文件
-   */
-  router.post('/re-encrypt', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = getUserIdFromRequest(req);
-      if (!userId) {
-        errorResponse(res, 401, '未认证或 Token 无效');
-        return;
-      }
-
-      const data = req.body;
-      const oldKey = data.old_key;
-      const newKey = data.new_key;
-
-      if (!oldKey || !newKey) {
-        errorResponse(res, 400, '缺少 old_key 或 new_key 参数');
-        return;
-      }
-
-      // 执行重新加密
-      const result = await pluginDataService.reEncryptAllFiles(userId, oldKey, newKey);
-
-      // 更新验证文件
-      await pluginDataService.updateKeyVerificationFile(userId, newKey);
-
-      res.json({
-        success: true,
-        message: '重新加密完成',
-        files_re_encrypted: result.fileCount,
-        errors: result.errors,
-      });
-    } catch (e) {
-      errorResponse(res, 500, `重新加密失败: ${e}`);
     }
   });
 

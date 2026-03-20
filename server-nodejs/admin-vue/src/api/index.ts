@@ -155,10 +155,14 @@ export const authApi = {
       body: JSON.stringify(data)
     }),
 
-  verifyEncryptionKey: (key: string): Promise<ApiResponse & { is_first_time?: boolean }> =>
-    apiClient.request('/api/v1/auth/verify-encryption-key', {
-      method: 'POST'
-    }, { 'X-Encryption-Key': key }),
+  // 获取密钥验证文件（加密的，由客户端本地解密验证）
+  getKeyVerification: (): Promise<{
+    success: boolean
+    exists: boolean
+    encrypted_data?: string
+    md5?: string
+    updated_at?: string
+  }> => apiClient.request('/api/v1/auth/key-verification'),
 
   getApiKeys: (): Promise<{ success: boolean; api_keys?: ApiKeyInfo[] }> =>
     apiClient.request('/api/v1/auth/api-keys'),

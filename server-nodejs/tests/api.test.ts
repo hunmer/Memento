@@ -127,16 +127,15 @@ describe('Memento Sync Server', () => {
       expect(response.body.success).toBe(false);
     });
 
-    it('POST /api/v1/auth/verify-encryption-key should fail without key verification file', async () => {
+    it('GET /api/v1/auth/key-verification should return not exists initially', async () => {
       const response = await request(BASE_URL)
-        .post('/api/v1/auth/verify-encryption-key')
+        .get('/api/v1/auth/key-verification')
         .set('Authorization', `Bearer ${authToken}`)
-        .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
         .expect('Content-Type', /json/)
-        .expect(404);
+        .expect(200);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error).toContain('密钥验证文件不存在');
+      expect(response.body.success).toBe(true);
+      expect(response.body.exists).toBe(false);
     });
 
     it('GET /api/v1/auth/user-info should return user info', async () => {
@@ -185,11 +184,10 @@ describe('Memento Sync Server', () => {
     const testEncryptedData = 'dGVzdF9pdl90ZXN0X2NpcGhlcnRleHQ=.dGVzdF9jaXBoZXJ0ZXh0';
     const testMd5 = 'd41d8cd98f00b204e9800998ecf8427e';
 
-    it('POST /api/v1/sync/push should push file and create key verification', async () => {
+    it('POST /api/v1/sync/push should push file', async () => {
       const response = await request(BASE_URL)
         .post('/api/v1/sync/push')
         .set('Authorization', `Bearer ${authToken}`)
-        .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
         .send({
           file_path: testFilePath,
           encrypted_data: testEncryptedData,
@@ -202,16 +200,31 @@ describe('Memento Sync Server', () => {
       expect(response.body.file_path).toBe(testFilePath);
     });
 
-    it('POST /api/v1/auth/verify-encryption-key should verify encryption key after push', async () => {
-      const response = await request(BASE_URL)
-        .post('/api/v1/auth/verify-encryption-key')
+    it('GET /api/v1/auth/key-verification should return exists after push .key_verification.json', async () => {
+      // 推送验证文件（模拟客户端创建的验证文件）
+      const verificationResponse = await request(BASE_URL)
+        .post('/api/v1/sync/push')
         .set('Authorization', `Bearer ${authToken}`)
-        .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
+        .send({
+          file_path: '.key_verification.json',
+          encrypted_data: testEncryptedData,
+          new_md5: 'verification_md5_test',
+        })
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(verificationResponse.body.success).toBe(true);
+
+      // 验证 key-verification 接口返回验证文件
+      const response = await request(BASE_URL)
+        .get('/api/v1/auth/key-verification')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect('Content-Type', /json/)
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('密钥验证成功');
+      expect(response.body.exists).toBe(true);
+      expect(response.body.encrypted_data).toBeDefined();
     });
 
     it('GET /api/v1/sync/pull/* should pull file', async () => {
