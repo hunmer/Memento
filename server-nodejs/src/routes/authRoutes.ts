@@ -239,35 +239,28 @@ export function createAuthRoutes(
       // 检查是否已存在验证文件
       const hasVerificationFile = await pluginDataService.hasKeyVerificationFile(userId);
 
-      if (hasVerificationFile) {
-        // 已有验证文件，需要验证密钥是否正确
-        const [isValid, errorMessage] = await pluginDataService.verifyEncryptionKey(userId, encryptionKey);
-
-        if (!isValid) {
-          errorResponse(res, 403, errorMessage || '密钥验证失败');
-          return;
-        }
-
-        // 验证成功
-        res.json({
-          success: true,
-          message: '密钥验证成功',
-          is_first_time: false,
-          user_id: userId,
-          timestamp: new Date().toISOString(),
-        });
-      } else {
-        // 首次设置密钥，创建验证文件
-        await pluginDataService.createKeyVerificationFile(userId, encryptionKey);
-
-        res.json({
-          success: true,
-          message: '加密密钥已设置并创建验证文件',
-          is_first_time: true,
-          user_id: userId,
-          timestamp: new Date().toISOString(),
-        });
+      if (!hasVerificationFile) {
+        // 验证文件不存在，拒绝验证
+        // 密钥验证文件应通过 /api/v1/sync/push 首次推送时创建
+        errorResponse(res, 404, '密钥验证文件不存在，请先通过客户端同步数据以设置密钥');
+        return;
       }
+
+      // 已有验证文件，验证密钥是否正确
+      const [isValid, errorMessage] = await pluginDataService.verifyEncryptionKey(userId, encryptionKey);
+
+      if (!isValid) {
+        errorResponse(res, 403, errorMessage || '密钥验证失败');
+        return;
+      }
+
+      // 验证成功
+      res.json({
+        success: true,
+        message: '密钥验证成功',
+        user_id: userId,
+        timestamp: new Date().toISOString(),
+      });
     } catch (e) {
       errorResponse(res, 500, `服务器错误: ${e}`);
     }

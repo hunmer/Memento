@@ -17,15 +17,16 @@
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
           "createdAt": "2026-03-20T03:59:23.829Z",
-          "lastSyncAt": "2026-03-20T05:58:34.770Z"
+          "lastSyncAt": "2026-03-20T06:07:34.710Z"
         },
         {
           "deviceId": "1773728612517",
           "deviceName": "DESKTOP-SST5KQC",
-          "createdAt": "2026-03-20T04:02:55.765Z"
+          "createdAt": "2026-03-20T04:02:55.765Z",
+          "lastSyncAt": "2026-03-20T06:07:14.104Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T05:58:34.770Z"
+      "lastLoginAt": "2026-03-20T06:07:34.710Z"
     },
     {
       "id": "fecef7f1-653a-41d0-ae32-485f826cbb50",
@@ -44,5 +45,5 @@
       "lastLoginAt": "2026-03-20T04:43:58.203Z"
     }
   ],
-  "updated_at": "2026-03-20T05:58:34.771Z"
+  "updated_at": "2026-03-20T06:07:34.710Z"
 }

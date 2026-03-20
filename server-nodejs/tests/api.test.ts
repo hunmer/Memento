@@ -127,16 +127,16 @@ describe('Memento Sync Server', () => {
       expect(response.body.success).toBe(false);
     });
 
-    it('POST /api/v1/auth/verify-encryption-key should verify encryption key', async () => {
+    it('POST /api/v1/auth/verify-encryption-key should fail without key verification file', async () => {
       const response = await request(BASE_URL)
         .post('/api/v1/auth/verify-encryption-key')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
         .expect('Content-Type', /json/)
-        .expect(200);
+        .expect(404);
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.is_first_time).toBe(true);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error).toContain('密钥验证文件不存在');
     });
 
     it('GET /api/v1/auth/user-info should return user info', async () => {
@@ -185,10 +185,11 @@ describe('Memento Sync Server', () => {
     const testEncryptedData = 'dGVzdF9pdl90ZXN0X2NpcGhlcnRleHQ=.dGVzdF9jaXBoZXJ0ZXh0';
     const testMd5 = 'd41d8cd98f00b204e9800998ecf8427e';
 
-    it('POST /api/v1/sync/push should push file', async () => {
+    it('POST /api/v1/sync/push should push file and create key verification', async () => {
       const response = await request(BASE_URL)
         .post('/api/v1/sync/push')
         .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
         .send({
           file_path: testFilePath,
           encrypted_data: testEncryptedData,
@@ -199,6 +200,18 @@ describe('Memento Sync Server', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.file_path).toBe(testFilePath);
+    });
+
+    it('POST /api/v1/auth/verify-encryption-key should verify encryption key after push', async () => {
+      const response = await request(BASE_URL)
+        .post('/api/v1/auth/verify-encryption-key')
+        .set('Authorization', `Bearer ${authToken}`)
+        .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('密钥验证成功');
     });
 
     it('GET /api/v1/sync/pull/* should pull file', async () => {
