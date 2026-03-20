@@ -227,7 +227,8 @@ export function buildEventName(
 export function eventMatchesPattern(eventName: string, pattern: string): boolean {
   if (pattern === '*') return true;
   if (pattern.endsWith('::*')) {
-    const prefix = pattern.slice(0, -2);
+    // 'chat::*' -> prefix = 'chat' (移除最后 3 个字符 '::*')
+    const prefix = pattern.slice(0, -3);
     return eventName.startsWith(prefix + '::');
   }
   return eventName === pattern;
