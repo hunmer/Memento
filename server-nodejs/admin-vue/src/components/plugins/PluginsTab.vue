@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
-  NTabs, NTabPane, NCard, NButton, NSpace, NIcon, NEmpty, NSpin, NModal, NInput, NAlert, useDialog, useMessage
+  NTabs, NTabPane, NCard, NButton, NSpace, NIcon, NEmpty, NSpin, NModal, NInput, useDialog, useMessage }
  from 'naive-ui'
 import {
   ExtensionPuzzleOutline,
@@ -78,9 +78,9 @@ async function handleSaveConfig(): Promise<void> {
 // 文件上传处理
 function handleFileSelect(event: Event): void {
   const file = (event.target as HTMLInputElement).files?.[0] as File
-  if (!file) return
-  message.warning('请选择 ZIP 文件')
-  return
+  if (!file) {
+    message.warning('请选择 ZIP 文件')
+    return
   }
   fileInput.value = file
 }
@@ -356,7 +356,7 @@ function getStatusClass(plugin: InstalledPlugin): string {
 
     <!-- Config Modal -->
     <NModal
-      v-model:show="configModal"
+      v-model:show="showConfigModal"
       preset="dialog"
       title="商店配置"
       positive-text="保存"
@@ -372,7 +372,6 @@ function getStatusClass(plugin: InstalledPlugin): string {
         </div>
       </NSpace>
     </NModal>
-  </div>
 </template>
 
 <style scoped>
@@ -408,9 +407,6 @@ function getStatusClass(plugin: InstalledPlugin): string {
   gap: 8px;
   padding: 40px;
   color: #666;
-}
-
- text-align: center;
 }
 
 .empty-state {
@@ -459,9 +455,6 @@ function getStatusClass(plugin: InstalledPlugin): string {
   align-items: center;
 }
 
- margin-bottom: 8px;
-}
-
 .plugin-title-text {
   font-weight: 500;
 }
@@ -470,9 +463,6 @@ function getStatusClass(plugin: InstalledPlugin): string {
   margin: 12px 0;
   font-size: 13px;
   color: #666;
-}
-
- text-align: center;
 }
 
 .plugin-author {
@@ -501,9 +491,6 @@ function getStatusClass(plugin: InstalledPlugin): string {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid #eee;
-}
-
- text-align: center;
 }
 
 .config-hint {
