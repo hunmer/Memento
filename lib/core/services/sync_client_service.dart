@@ -128,6 +128,9 @@ class SyncClientService {
     _userId = userId;
     _deviceId = deviceId;
 
+    // 设置存储管理器
+    _encryption.setStorage(_storage);
+
     // 初始化同步记录服务
     await _recordService.initialize(_storage);
 
@@ -135,7 +138,7 @@ class SyncClientService {
     await _loadMd5Snapshots();
 
     // 确保密钥验证文件存在
-    if (ensureKeyVerification) {
+    if (ensureKeyVerification && _encryption.isInitialized) {
       await ensureKeyVerificationFile();
     }
   }
@@ -159,24 +162,75 @@ class SyncClientService {
     final serverExists = await _checkServerKeyVerificationFile();
 
     // 如果服务器不存在，上传本地验证文件
-    if (!serverExists && localExists) {
+    if (!serverExists) {
       await _uploadKeyVerificationFile();
     }
   }
 
-  /// 刷新密钥验证文件
+  /// 刷新加密密钥
   ///
-  /// 重新创建本地验证文件并上传到服务器
-  Future<void> refreshKeyVerification() async {
+  /// ⚠️ 警告: 此操作会生成新的加密密钥，并重新加密所有本地数据
+  /// 旧密钥加密的数据将无法解密
+  ///
+  /// 返回新的密钥（Base64 编码）
+  Future<String> refreshEncryptionKey() async {
     if (!_encryption.isInitialized) {
       throw StateError('加密服务未初始化');
     }
 
-    // 创建新的验证文件
+    // 1. 生成新密钥
+    final newKey = await _encryption.refreshKey();
+
+    // 2. 重新加密所有本地数据文件
+    await _reEncryptAllLocalFiles();
+
+    // 3. 重新创建验证文件
     await _createAndSaveKeyVerificationFile();
 
-    // 上传到服务器
+    // 4. 上传所有文件到服务器（强制覆盖）
+    await _forceSyncAllFiles();
+
+    return newKey;
+  }
+
+  /// 重新加密所有本地数据文件
+  Future<void> _reEncryptAllLocalFiles() async {
+    final files = await _listLocalDataFiles();
+
+    for (final file in files) {
+      final filePath = file['path']!;
+      // 跳过验证文件和快照文件
+      if (filePath == _encryption.keyVerificationFileName ||
+          filePath == _snapshotFilePath) {
+        continue;
+      }
+
+      try {
+        // 读取并重新加密
+        final content = await _storage.readString(filePath);
+        if (content != null) {
+          final encryptedData = _encryption.encryptString(content);
+          await _storage.writeString(filePath, encryptedData);
+        }
+      } catch (e) {
+        // 忽略单个文件的错误
+      }
+    }
+  }
+
+  /// 强制同步所有文件到服务器
+  Future<void> _forceSyncAllFiles() async {
+    // 先上传验证文件
     await _uploadKeyVerificationFile();
+
+    // 然后上传所有数据文件
+    final files = await _listLocalDataFiles();
+    for (final file in files) {
+      final filePath = file['path']!;
+      if (filePath == _snapshotFilePath) continue;
+
+      await _forcePushFile(filePath);
+    }
   }
 
   /// 创建并保存密钥验证文件到本地

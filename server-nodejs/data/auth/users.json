@@ -17,7 +17,7 @@
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
           "createdAt": "2026-03-20T03:59:23.829Z",
-          "lastSyncAt": "2026-03-20T06:07:34.710Z"
+          "lastSyncAt": "2026-03-20T07:18:40.657Z"
         },
         {
           "deviceId": "1773728612517",
@@ -26,7 +26,7 @@
           "lastSyncAt": "2026-03-20T06:07:14.104Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T06:07:34.710Z"
+      "lastLoginAt": "2026-03-20T07:18:40.657Z"
     },
     {
       "id": "fecef7f1-653a-41d0-ae32-485f826cbb50",
@@ -45,5 +45,5 @@
       "lastLoginAt": "2026-03-20T04:43:58.203Z"
     }
   ],
-  "updated_at": "2026-03-20T06:07:34.710Z"
+  "updated_at": "2026-03-20T07:18:40.658Z"
 }

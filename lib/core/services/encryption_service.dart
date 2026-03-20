@@ -5,8 +5,13 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
+import '../storage/storage_manager.dart';
+
 /// 密钥验证文件名
 const String _keyVerificationFileName = '.key_verification.json';
+
+/// 密钥本地存储文件名
+const String _keyStorageFileName = '.encryption_key.json';
 
 /// 密钥验证文件内容
 const String _keyVerificationContent = 'MEMENTO_KEY_VERIFICATION_v1';
@@ -14,12 +19,13 @@ const String _keyVerificationContent = 'MEMENTO_KEY_VERIFICATION_v1';
 /// 端到端加密服务 - 使用 AES-256-GCM
 ///
 /// 此服务负责:
-/// - 从用户密码派生加密密钥 (PBKDF2)
+/// - 管理独立的加密密钥（与密码无关）
 /// - 加密/解密 JSON 数据
 /// - 计算数据 MD5 (用于版本控制)
 /// - 创建和验证密钥验证文件
 ///
 /// 安全说明:
+/// - 加密密钥是独立生成的随机密钥，与用户密码无关
 /// - 加密密钥永不发送到服务器
 /// - 服务器只存储加密后的密文
 /// - 每次加密使用随机 IV
@@ -27,6 +33,7 @@ class EncryptionService {
   encrypt.Key? _key;
   encrypt.Encrypter? _encrypter;
   bool _initialized = false;
+  StorageManager? _storage;
 
   /// 是否已初始化
   bool get isInitialized => _initialized;
@@ -42,12 +49,22 @@ class EncryptionService {
     return _key!.base64;
   }
 
-  /// 从用户密码和 Salt 派生加密密钥 (PBKDF2)
+  /// 获取密钥验证文件名
+  String get keyVerificationFileName => _keyVerificationFileName;
+
+  /// 设置存储管理器（用于保存密钥）
+  void setStorage(StorageManager storage) {
+    _storage = storage;
+  }
+
+  /// 从 Base64 字符串初始化密钥
   ///
-  /// [password] 用户密码
-  /// [salt] 服务器为用户生成的唯一 Salt
-  Future<void> initializeFromPassword(String password, String salt) async {
-    final keyBytes = _deriveKey(password, salt);
+  /// [keyBase64] Base64 编码的 32 字节密钥
+  Future<void> initializeFromKey(String keyBase64) async {
+    final keyBytes = base64Decode(keyBase64);
+    if (keyBytes.length != 32) {
+      throw ArgumentError('密钥长度必须为 32 字节 (256-bit)');
+    }
     _key = encrypt.Key(keyBytes);
     _encrypter = encrypt.Encrypter(
       encrypt.AES(_key!, mode: encrypt.AESMode.gcm),
@@ -55,8 +72,74 @@ class EncryptionService {
     _initialized = true;
   }
 
-  /// 获取密钥验证文件名
-  String get keyVerificationFileName => _keyVerificationFileName;
+  /// 从本地存储加载密钥
+  ///
+  /// 如果密钥不存在，返回 false
+  Future<bool> loadKeyFromStorage() async {
+    if (_storage == null) {
+      throw StateError('存储管理器未设置，请先调用 setStorage()');
+    }
+
+    final content = await _storage!.readString(_keyStorageFileName);
+    if (content == null) {
+      return false;
+    }
+
+    try {
+      final data = jsonDecode(content) as Map<String, dynamic>;
+      final keyBase64 = data['key'] as String?;
+      if (keyBase64 == null) {
+        return false;
+      }
+      await initializeFromKey(keyBase64);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 保存密钥到本地存储
+  Future<void> saveKeyToStorage() async {
+    if (_storage == null) {
+      throw StateError('存储管理器未设置，请先调用 setStorage()');
+    }
+    if (!_initialized || _key == null) {
+      throw StateError('密钥未初始化');
+    }
+
+    final data = {
+      'key': _key!.base64,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+    await _storage!.writeString(_keyStorageFileName, jsonEncode(data));
+  }
+
+  /// 生成新的随机密钥并初始化
+  ///
+  /// 生成后会自动保存到本地存储
+  Future<void> generateNewKey() async {
+    final random = Random.secure();
+    final keyBytes = Uint8List.fromList(
+      List<int>.generate(32, (_) => random.nextInt(256)),
+    );
+    _key = encrypt.Key(keyBytes);
+    _encrypter = encrypt.Encrypter(
+      encrypt.AES(_key!, mode: encrypt.AESMode.gcm),
+    );
+    _initialized = true;
+
+    // 保存到本地存储
+    await saveKeyToStorage();
+  }
+
+  /// 刷新密钥（生成新密钥）
+  ///
+  /// ⚠️ 警告: 此操作会使所有旧密钥加密的数据无法解密
+  /// 调用此方法后需要重新加密所有数据
+  Future<String> refreshKey() async {
+    await generateNewKey();
+    return _key!.base64;
+  }
 
   /// 创建密钥验证文件内容
   ///
@@ -93,25 +176,6 @@ class EncryptionService {
     } catch (e) {
       return false;
     }
-  }
-
-  /// PBKDF2 密钥派生
-  ///
-  /// 迭代 10000 次 HMAC-SHA256 以增强安全性
-  Uint8List _deriveKey(String password, String salt) {
-    final hmacSha256 = Hmac(sha256, utf8.encode(salt));
-
-    // 初始密钥材料
-    List<int> key = utf8.encode(password);
-
-    // 迭代派生
-    for (var i = 0; i < 10000; i++) {
-      final digest = hmacSha256.convert(key);
-      key = digest.bytes;
-    }
-
-    // 返回 256-bit (32 bytes) 密钥
-    return Uint8List.fromList(key.take(32).toList());
   }
 
   /// 加密 JSON 数据
@@ -204,7 +268,7 @@ class EncryptionService {
   /// 检查是否已初始化
   void _checkInitialized() {
     if (!_initialized) {
-      throw StateError('EncryptionService 未初始化，请先调用 initializeFromPassword()');
+      throw StateError('EncryptionService 未初始化，请先初始化密钥');
     }
   }
 
@@ -215,10 +279,12 @@ class EncryptionService {
     _initialized = false;
   }
 
-  /// 生成随机 Salt (用于注册时，通常由服务器生成)
-  static String generateSalt() {
+  /// 生成随机 Base64 密钥（静态方法，用于外部使用）
+  static String generateRandomKeyBase64() {
     final random = Random.secure();
-    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
-    return base64Encode(bytes);
+    final keyBytes = Uint8List.fromList(
+      List<int>.generate(32, (_) => random.nextInt(256)),
+    );
+    return base64Encode(keyBytes);
   }
 }

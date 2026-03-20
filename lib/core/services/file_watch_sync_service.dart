@@ -84,17 +84,21 @@ class FileWatchSyncService {
       // 初始化同步服务
       final storage = StorageManager();
       final encryption = EncryptionService();
-      await encryption.initializeFromPassword(
-        _config!.password,
-        _config!.salt!,
-      );
+      encryption.setStorage(storage);
+
+      // 从本地存储加载密钥
+      final hasKey = await encryption.loadKeyFromStorage();
+      if (!hasKey) {
+        // 如果没有密钥，生成新的随机密钥
+        await encryption.generateNewKey();
+      }
 
       _syncService = SyncClientService(
         serverUrl: _config!.server,
         storage: storage,
         encryption: encryption,
       );
-      _syncService!.initialize(
+      await _syncService!.initialize(
         token: _config!.token!,
         userId: _config!.userId!,
         deviceId: _config!.deviceId,

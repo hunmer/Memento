@@ -111,9 +111,9 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'server_sync_encryptionKeyHint': '⚠️ This key is used for admin panel API access. Keep it secure and do not share',
   'server_sync_copyKey': 'Copy Key',
   'server_sync_keyCopied': 'Key copied to clipboard',
-  'server_sync_refreshKey': 'Refresh Key Verification',
-  'server_sync_keyRefreshed': 'Key verification file refreshed',
-  'server_sync_keyRefreshFailed': 'Failed to refresh key verification',
+  'server_sync_refreshKey': 'Change Encryption Key',
+  'server_sync_keyRefreshed': 'Encryption key changed, all data re-encrypted',
+  'server_sync_keyRefreshFailed': 'Failed to change encryption key',
 
   // WebSocket status
   'server_sync_wsConnected': 'Real-time sync connected',

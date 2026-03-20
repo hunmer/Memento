@@ -111,9 +111,9 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_encryptionKeyHint': '⚠️ 此密钥用于管理后台启用 API 访问，请妥善保管，切勿泄露',
   'server_sync_copyKey': '复制密钥',
   'server_sync_keyCopied': '密钥已复制到剪贴板',
-  'server_sync_refreshKey': '刷新密钥验证',
-  'server_sync_keyRefreshed': '密钥验证文件已刷新',
-  'server_sync_keyRefreshFailed': '刷新密钥验证失败',
+  'server_sync_refreshKey': '更换加密密钥',
+  'server_sync_keyRefreshed': '加密密钥已更换，所有数据已重新加密',
+  'server_sync_keyRefreshFailed': '更换加密密钥失败',
 
   // WebSocket 状态
   'server_sync_wsConnected': '实时同步已连接',

@@ -111,9 +111,9 @@ const Map<String, String> settingsScreenTranslationsJp = {
   'server_sync_encryptionKeyHint': '⚠️ このキーは管理パネルAPIアクセスに使用されます。安全に保管し、共有しないでください',
   'server_sync_copyKey': 'キーをコピー',
   'server_sync_keyCopied': 'キーをクリップボードにコピーしました',
-  'server_sync_refreshKey': 'キー検証を更新',
-  'server_sync_keyRefreshed': 'キー検証ファイルが更新されました',
-  'server_sync_keyRefreshFailed': 'キー検証の更新に失敗しました',
+  'server_sync_refreshKey': '暗号化キーを変更',
+  'server_sync_keyRefreshed': '暗号化キーが変更され、すべてのデータが再暗号化されました',
+  'server_sync_keyRefreshFailed': '暗号化キーの変更に失敗しました',
 
   // WebSocket status
   'server_sync_wsConnected': 'リアルタイム同期接続済み',

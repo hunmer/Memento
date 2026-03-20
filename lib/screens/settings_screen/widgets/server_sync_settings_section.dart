@@ -127,14 +127,22 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
 
     final storage = StorageManager();
     final encryption = EncryptionService();
-    await encryption.initializeFromPassword(_config!.password, _config!.salt!);
+    encryption.setStorage(storage);
+
+    // 尝试从本地存储加载密钥
+    final hasKey = await encryption.loadKeyFromStorage();
+
+    // 如果没有密钥，生成新的随机密钥
+    if (!hasKey) {
+      await encryption.generateNewKey();
+    }
 
     _syncService = SyncClientService(
       serverUrl: _config!.server,
       storage: storage,
       encryption: encryption,
     );
-    _syncService!.initialize(
+    await _syncService!.initialize(
       token: _config!.token!,
       userId: _config!.userId!,
       deviceId: _config!.deviceId,
@@ -1007,14 +1015,23 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                                   ? null
                                   : () async {
                                       if (_syncService == null) return;
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
                                       try {
-                                        await _syncService!.refreshKeyVerification();
+                                        await _syncService!.refreshEncryptionKey();
                                         if (!mounted) return;
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
                                         toastService.showToast(
                                           'server_sync_keyRefreshed'.tr,
                                         );
                                       } catch (e) {
                                         if (!mounted) return;
+                                        setState(() {
+                                          _isLoading = false;
+                                        });
                                         toastService.showToast(
                                           '${'server_sync_keyRefreshFailed'.tr}: $e',
                                         );
