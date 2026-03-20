@@ -13,6 +13,7 @@ export function createAuthRoutes(
   authService: AuthService,
   pluginDataService: PluginDataService,
   storageService: FileStorageService,
+  allowRegister: boolean = true,
 ): Router {
   const router = Router();
 
@@ -57,10 +58,27 @@ export function createAuthRoutes(
   // ==================== 公开端点 ====================
 
   /**
+   * GET /register-status - 获取注册状态
+   */
+  router.get('/register-status', async (req: Request, res: Response): Promise<void> => {
+    res.json({
+      success: true,
+      allow_register: allowRegister,
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  /**
    * POST /register - 用户注册
    */
   router.post('/register', async (req: Request, res: Response): Promise<void> => {
     try {
+      // 检查是否允许注册
+      if (!allowRegister) {
+        errorResponse(res, 403, '注册功能已关闭');
+        return;
+      }
+
       const data = req.body;
 
       // 验证必填字段

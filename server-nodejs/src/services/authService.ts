@@ -46,17 +46,60 @@ export class AuthService {
   private tokenExpiryDays: number;
   private apiKeyStore: string;
 
+  private adminUsername?: string;
+  private adminPassword?: string;
+
   constructor(params: {
     storageService: FileStorageService;
     jwtSecret: string;
     dataDir: string;
     tokenExpiryDays?: number;
+    adminUsername?: string;
+    adminPassword?: string;
   }) {
     this.storageService = params.storageService;
     this.jwtSecret = params.jwtSecret;
     this.tokenExpiryDays = params.tokenExpiryDays || 36500; // 100年
     this.apiKeyStore = path.join(params.dataDir, 'auth', 'api_keys');
+    this.adminUsername = params.adminUsername;
+    this.adminPassword = params.adminPassword;
     this.ensureApiKeyStore();
+  }
+
+  /**
+   * 初始化管理员账号
+   */
+  async initializeAdmin(): Promise<void> {
+    if (!this.adminUsername || !this.adminPassword) {
+      return;
+    }
+
+    // 检查管理员是否已存在
+    const existingAdmin = await this.storageService.findUserByUsername(this.adminUsername);
+    if (existingAdmin) {
+      console.log(`管理员账号已存在: ${this.adminUsername}`);
+      return;
+    }
+
+    // 创建管理员账号
+    const userSalt = PasswordHashUtils.generateSalt();
+    const passwordHash = PasswordHashUtils.hashPassword(this.adminPassword, userSalt);
+
+    const userId = uuidv4();
+    const now = new Date();
+
+    const admin: UserInfo = {
+      id: userId,
+      username: this.adminUsername,
+      passwordHash,
+      salt: userSalt,
+      createdAt: now,
+      isAdmin: true,
+      devices: [],
+    };
+
+    await this.storageService.addUser(admin);
+    console.log(`管理员账号已创建: ${this.adminUsername}`);
   }
 
   /**

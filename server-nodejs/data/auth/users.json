@@ -1,1 +1,26 @@
-{"users":[]}
+{
+  "users": [
+    {
+      "id": "e672683b-0dcd-4b52-9c0c-c86d5ab8c64e",
+      "username": "admin",
+      "passwordHash": "XEk1PKxzCqcSHf1w61gzeBHeE4S/u8GDjFje92ZeWaOY0Th5QiDtm8FJySialEAvIqGwuCPI0Gv9lKJVlFCXxA==",
+      "salt": "K4p2Gu6Srd0CSMa6f4dSWQ==",
+      "createdAt": "2026-03-20T03:57:27.214Z",
+      "isAdmin": true,
+      "devices": [
+        {
+          "deviceId": "test",
+          "deviceName": "Unknown Device",
+          "createdAt": "2026-03-20T03:57:29.007Z"
+        },
+        {
+          "deviceId": "admin_panel",
+          "deviceName": "Admin Panel",
+          "createdAt": "2026-03-20T03:59:23.829Z"
+        }
+      ],
+      "lastLoginAt": "2026-03-20T03:59:23.829Z"
+    }
+  ],
+  "updated_at": "2026-03-20T03:59:23.830Z"
+}

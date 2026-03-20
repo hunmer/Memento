@@ -15,6 +15,7 @@ export interface UserInfo {
   createdAt: Date;
   lastLoginAt?: Date;
   devices: DeviceInfo[];
+  isAdmin?: boolean;
 }
 
 // ==================== 认证相关类型 ====================

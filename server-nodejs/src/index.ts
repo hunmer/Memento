@@ -63,8 +63,13 @@ async function main() {
     jwtSecret: config.jwtSecret,
     dataDir: config.dataDir,
     tokenExpiryDays: config.tokenExpiryDays,
+    adminUsername: config.adminUsername,
+    adminPassword: config.adminPassword,
   });
   console.log('认证服务初始化完成');
+
+  // 初始化管理员账号
+  await authService.initializeAdmin();
 
   const pluginDataService = new PluginDataService(storageService, config.dataDir);
   await pluginDataService.initialize();
@@ -90,10 +95,15 @@ async function main() {
 
   // CORS 支持
   if (config.enableCors) {
+    // 当 corsOrigins 为 ['*'] 时，使用 true 允许所有来源
+    const corsOrigin = config.corsOrigins.length === 1 && config.corsOrigins[0] === '*'
+      ? true
+      : config.corsOrigins;
     app.use(cors({
-      origin: config.corsOrigins,
+      origin: corsOrigin,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Origin', 'Content-Type', 'Authorization', 'X-API-Key', 'X-Encryption-Key', 'X-Device-ID'],
+      credentials: true,
     }));
   }
 
@@ -124,7 +134,7 @@ async function main() {
   });
 
   // 认证路由 (无需认证)
-  const authRoutes = createAuthRoutes(authService, pluginDataService, storageService);
+  const authRoutes = createAuthRoutes(authService, pluginDataService, storageService, config.allowRegister);
   app.use('/api/v1/auth', authRoutes);
 
   // 同步路由 (需要认证)

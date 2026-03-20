@@ -28,6 +28,12 @@ export const config = {
   maxRequestSize: process.env.MAX_REQUEST_SIZE || '10mb',
   /** 是否启用日志 */
   enableLogging: process.env.ENABLE_LOGGING?.toLowerCase() !== 'false',
+  /** 管理员用户名 */
+  adminUsername: process.env.ADMIN_USERNAME || 'admin',
+  /** 管理员密码 */
+  adminPassword: process.env.ADMIN_PASSWORD || 'admin123',
+  /** 是否允许注册 */
+  allowRegister: process.env.ALLOW_REGISTER?.toLowerCase() !== 'false',
 };
 
 /**
@@ -42,4 +48,6 @@ export function printConfig(): void {
   console.log(`  - CORS: ${config.enableCors}`);
   console.log(`  - 最大请求体: ${config.maxRequestSize}`);
   console.log(`  - 日志: ${config.enableLogging}`);
+  console.log(`  - 管理员账号: ${config.adminUsername}`);
+  console.log(`  - 允许注册: ${config.allowRegister}`);
 }
