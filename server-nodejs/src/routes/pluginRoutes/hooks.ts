@@ -59,9 +59,12 @@ export function withHooks(
     params: Record<string, unknown>,
     req?: unknown
   ): Promise<PluginResult> => {
+    const eventName = `${pluginId}::before:${action}${entity}`;
+    console.log(`[Hook] 触发 before hook: ${eventName}`, { userId });
+
     // 构建 before hook 上下文
     const beforeCtx: BeforeHookContext = {
-      event: `${pluginId}::before:${action}${entity}`,
+      event: eventName,
       action,
       pluginId,
       entity,
@@ -72,6 +75,7 @@ export function withHooks(
 
     // 触发 before hook
     const afterBeforeCtx = await pluginEventEmitter.emitBefore(beforeCtx);
+    console.log(`[Hook] before hook 完成，取消: ${afterBeforeCtx.canceled}`);
 
     // 检查是否被取消
     if (afterBeforeCtx.canceled) {
@@ -91,8 +95,10 @@ export function withHooks(
       result = await handler(userId, encryptionKey, modifiedParams, req);
     } catch (error) {
       // 执行失败，触发 after hook
+      const afterEventName = `${pluginId}::after:${action}${entity}`;
+      console.log(`[Hook] 触发 after hook (错误): ${afterEventName}`);
       const errorAfterCtx: AfterHookContext = {
-        event: `${pluginId}::after:${action}${entity}`,
+        event: afterEventName,
         action,
         pluginId,
         entity,
@@ -106,8 +112,10 @@ export function withHooks(
     }
 
     // 触发 after hook
+    const afterEventName = `${pluginId}::after:${action}${entity}`;
+    console.log(`[Hook] 触发 after hook: ${afterEventName}`, { success: result.isSuccess });
     const afterCtx: AfterHookContext = {
-      event: `${pluginId}::after:${action}${entity}`,
+      event: afterEventName,
       action,
       pluginId,
       entity,

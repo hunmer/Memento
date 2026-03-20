@@ -12,10 +12,15 @@
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
           "createdAt": "2026-03-20T16:32:07.061Z"
+        },
+        {
+          "deviceId": "1774024797604",
+          "deviceName": "MacBook Pro",
+          "createdAt": "2026-03-20T16:39:57.622Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T16:32:07.061Z"
+      "lastLoginAt": "2026-03-20T16:39:57.622Z"
     }
   ],
-  "updated_at": "2026-03-20T16:32:07.061Z"
+  "updated_at": "2026-03-20T16:39:57.622Z"
 }

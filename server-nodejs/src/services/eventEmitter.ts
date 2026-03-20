@@ -67,15 +67,18 @@ export class PluginEventEmitter {
 
     // 找到所有匹配的处理器
     const matchingPatterns = this.getMatchingPatterns(eventName);
+    console.log(`[EventEmitter] emitBefore: ${eventName}, 匹配的模式: [${matchingPatterns.join(', ')}]`);
 
     let currentCtx = ctx;
 
     for (const pattern of matchingPatterns) {
       const handlers = this.handlers.get(pattern) || [];
+      console.log(`[EventEmitter] 执行模式 ${pattern} 的 ${handlers.length} 个处理器`);
       for (const handler of handlers) {
         try {
           currentCtx = await handler(currentCtx);
           if (currentCtx.canceled) {
+            console.log(`[EventEmitter] 钩子被取消: ${pattern}`);
             return currentCtx;
           }
         } catch (error) {
@@ -94,9 +97,11 @@ export class PluginEventEmitter {
     const eventName = buildEventName(ctx.pluginId, ctx.action, ctx.entity, 'after');
 
     const matchingPatterns = this.getMatchingPatterns(eventName);
+    console.log(`[EventEmitter] emitAfter: ${eventName}, 匹配的模式: [${matchingPatterns.join(', ')}]`);
 
     for (const pattern of matchingPatterns) {
       const handlers = this.handlers.get(pattern) || [];
+      console.log(`[EventEmitter] 执行模式 ${pattern} 的 ${handlers.length} 个处理器`);
       for (const handler of handlers) {
         try {
           await handler(ctx);
@@ -164,6 +169,8 @@ export class PluginEventEmitter {
     this.registeredHandlers.get(eventName)!.add(hookId);
     this.handlerIdToPattern.set(hookId, eventName);
 
+    console.log(`[EventEmitter] 注册处理器: ${eventName} (ID: ${hookId}), 当前共 ${this.handlers.get(eventName)!.length} 个处理器`);
+
     // 返回取消函数
     return () => {
       // 从处理器列表中移除
@@ -189,9 +196,13 @@ export class PluginEventEmitter {
    */
   private getMatchingPatterns(eventName: string): string[] {
     const matching: string[] = [];
+    const allPatterns = Array.from(this.registeredHandlers.keys());
+    console.log(`[EventEmitter] getMatchingPatterns: eventName=${eventName}, 已注册模式=[${allPatterns.join(', ')}]`);
 
-    for (const pattern of this.registeredHandlers.keys()) {
-      if (eventMatchesPattern(eventName, pattern)) {
+    for (const pattern of allPatterns) {
+      const matches = eventMatchesPattern(eventName, pattern);
+      console.log(`[EventEmitter]   检查模式 "${pattern}" vs "${eventName}": ${matches}`);
+      if (matches) {
         matching.push(pattern);
       }
     }
