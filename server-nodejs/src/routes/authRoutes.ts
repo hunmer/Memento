@@ -137,8 +137,6 @@ export function createAuthRoutes(
   router.post('/login', async (req: Request, res: Response): Promise<void> => {
     try {
       const data = req.body;
-      console.log('[登录请求] 收到的请求体:', JSON.stringify(data, null, 2));
-      console.log('[登录请求] Content-Type:', req.headers['content-type']);
 
       // 验证必填字段
       if (!data.username || !data.password) {
