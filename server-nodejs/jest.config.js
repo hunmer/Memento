@@ -3,6 +3,8 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
+  globalSetup: '<rootDir>/tests/globalSetup.ts',
+  globalTeardown: '<rootDir>/tests/globalTeardown.ts',
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/index.ts',
@@ -13,5 +15,6 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
-  }
+  },
+  testTimeout: 30000,
 };

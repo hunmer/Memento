@@ -239,7 +239,7 @@ async function main() {
 
     // 管理界面静态资源
     app.get('/admin/*', (req, res) => {
-      const filePath = req.params[0] || '';
+      const filePath = (req.params as Record<string, string>)[0] || '';
 
       // 安全检查：防止路径遍历攻击
       if (filePath.includes('..')) {

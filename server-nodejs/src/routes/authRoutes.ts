@@ -2,7 +2,6 @@ import { Router, Request, Response } from 'express';
 import { AuthService, PasswordHashUtils } from '../services/authService';
 import { FileStorageService } from '../services/fileStorageService';
 import { PluginDataService } from '../services/pluginDataService';
-import { getUserIdFromContext } from '../middleware/authMiddleware';
 
 /**
  * 认证路由
@@ -37,7 +36,7 @@ export function createAuthRoutes(
       return undefined;
     }
     const token = authHeader.substring(7);
-    return authService.getUserIdFromToken(token);
+    return authService.getUserIdFromToken(token) ?? undefined;
   }
 
   /**
@@ -189,7 +188,7 @@ export function createAuthRoutes(
    */
   router.post('/set-encryption-key', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -274,7 +273,7 @@ export function createAuthRoutes(
    */
   router.post('/clear-encryption-key', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -298,7 +297,7 @@ export function createAuthRoutes(
    */
   router.get('/has-encryption-key', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -322,7 +321,7 @@ export function createAuthRoutes(
    */
   router.post('/re-encrypt', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -346,7 +345,7 @@ export function createAuthRoutes(
       res.json({
         success: true,
         message: '重新加密完成',
-        files_re_encrypted: result.file_count,
+        files_re_encrypted: result.fileCount,
         errors: result.errors,
       });
     } catch (e) {
@@ -361,7 +360,7 @@ export function createAuthRoutes(
    */
   router.post('/api-keys', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -406,7 +405,7 @@ export function createAuthRoutes(
    */
   router.get('/api-keys', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -419,11 +418,11 @@ export function createAuthRoutes(
         api_keys: keys.map(k => ({
           id: k.id,
           name: k.name,
-          createdAt: k.createdAt.toISOString(),
-          lastUsedAt: k.lastUsedAt?.toISOString(),
-          expiresAt: k.expiresAt?.toISOString(),
+          createdAt: new Date(k.createdAt).toISOString(),
+          lastUsedAt: k.lastUsedAt ? new Date(k.lastUsedAt).toISOString() : undefined,
+          expiresAt: k.expiresAt ? new Date(k.expiresAt).toISOString() : undefined,
           isRevoked: k.isRevoked,
-          isExpired: k.expiresAt ? new Date() > k.expiresAt : false,
+          isExpired: k.expiresAt ? new Date() > new Date(k.expiresAt) : false,
         })),
         count: keys.length,
         timestamp: new Date().toISOString(),
@@ -438,7 +437,7 @@ export function createAuthRoutes(
    */
   router.delete('/api-keys/:id', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -463,7 +462,7 @@ export function createAuthRoutes(
    */
   router.get('/user-info', async (req: Request, res: Response): Promise<void> => {
     try {
-      const userId = getUserIdFromContext(req);
+      const userId = getUserIdFromRequest(req);
       if (!userId) {
         errorResponse(res, 401, '未认证或 Token 无效');
         return;
@@ -483,7 +482,7 @@ export function createAuthRoutes(
         success: true,
         user_info: {
           username: user.username,
-          created_at: user.createdAt.toISOString(),
+          created_at: new Date(user.createdAt).toISOString(),
           sync_folder_count: stats.folderCount,
           sync_file_count: stats.fileCount,
           sync_total_size: stats.totalSize,

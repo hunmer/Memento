@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { PluginDataService } from '../services/pluginDataService';
-import { getUserIdFromContext } from '../middleware/authMiddleware';
+import { PluginDataService } from '../../services/pluginDataService';
+import { getUserIdFromContext } from '../../middleware/authMiddleware';
 
 /**
  * 错误码到 HTTP 状态码的映射
@@ -187,7 +187,7 @@ export function createBasePluginHandlers(
     async getItems(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
-        let items = Array.isArray(data) ? data : (data as Record<string, unknown>)?.items || [];
+        let items: Record<string, unknown>[] = Array.isArray(data) ? data : (data as Record<string, unknown>)?.items as Record<string, unknown>[] || [];
 
         // 分页
         const offset = (params.offset as number) || 0;
@@ -213,7 +213,7 @@ export function createBasePluginHandlers(
     async getItem(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
-        const items = Array.isArray(data) ? data : (data as Record<string, unknown>)?.items || [];
+        const items: Record<string, unknown>[] = Array.isArray(data) ? data : (data as Record<string, unknown>)?.items as Record<string, unknown>[] || [];
         const item = items.find((i: Record<string, unknown>) => i.id === params.id);
 
         if (!item) {
@@ -229,7 +229,7 @@ export function createBasePluginHandlers(
     async createItem(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
-        let items = Array.isArray(data) ? [...data] : [...((data as Record<string, unknown>)?.items || [])];
+        const items: Record<string, unknown>[] = Array.isArray(data) ? [...data] : [...(((data as Record<string, unknown>)?.items as Record<string, unknown>[]) || [])];
 
         const now = new Date().toISOString();
         const newItem = {
@@ -252,7 +252,7 @@ export function createBasePluginHandlers(
     async updateItem(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
-        let items = Array.isArray(data) ? [...data] : [...((data as Record<string, unknown>)?.items || [])];
+        const items: Record<string, unknown>[] = Array.isArray(data) ? [...data] : [...(((data as Record<string, unknown>)?.items as Record<string, unknown>[]) || [])];
         const index = items.findIndex((i: Record<string, unknown>) => i.id === params.id);
 
         if (index === -1) {
@@ -277,7 +277,7 @@ export function createBasePluginHandlers(
     async deleteItem(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
-        let items = Array.isArray(data) ? [...data] : [...((data as Record<string, unknown>)?.items || [])];
+        const items: Record<string, unknown>[] = Array.isArray(data) ? [...data] : [...(((data as Record<string, unknown>)?.items as Record<string, unknown>[]) || [])];
         const index = items.findIndex((i: Record<string, unknown>) => i.id === params.id);
 
         if (index === -1) {

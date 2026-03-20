@@ -28,8 +28,6 @@ export const config = {
   maxRequestSize: process.env.MAX_REQUEST_SIZE || '10mb',
   /** 是否启用日志 */
   enableLogging: process.env.ENABLE_LOGGING?.toLowerCase() !== 'false',
-  /** 是否启用 CORS (别名) */
-  enableCors: process.env.ENABLE_CORS?.toLowerCase() !== 'false',
 };
 
 /**

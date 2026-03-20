@@ -180,6 +180,14 @@ export interface WSPong {
   type: 'pong';
 }
 
+export interface WSPing {
+  type: 'ping';
+}
+
+export interface WSAck {
+  type: 'ack';
+}
+
 export interface WSFileUpdate {
   type: 'file_updated';
   data: {
@@ -190,7 +198,7 @@ export interface WSFileUpdate {
   };
 }
 
-export type WSMessage = WSAuthMessage | WSAuthSuccess | WSAuthError | WSPong | WSFileUpdate;
+export type WSMessage = WSAuthMessage | WSAuthSuccess | WSAuthError | WSPong | WSPing | WSAck | WSFileUpdate;
 
 // ==================== 请求上下文类型 ====================
 

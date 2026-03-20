@@ -22,7 +22,7 @@ const TEST_USER = {
 
 // 测试加密密钥 (Base64 编码的 32 字节密钥)
 const TEST_ENCRYPTION_KEY = Buffer.from(
-  '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef',
+  '0123456789abcdef0123456789abcdef',
 ).toString('base64');
 
 // 全局变量

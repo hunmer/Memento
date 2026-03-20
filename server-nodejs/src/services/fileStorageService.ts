@@ -121,7 +121,7 @@ export class FileStorageService {
     await this.updateFileIndex(userId, filePath, {
       md5: md5Hash,
       size: stats.size,
-      updated_at: now.toISOString(),
+      updatedAt: now.toISOString(),
     });
   }
 
@@ -209,7 +209,7 @@ export class FileStorageService {
   private async updateFileIndex(
     userId: string,
     filePath: string,
-    fileInfo: { md5: string; size: number; updated_at: string },
+    fileInfo: { md5: string; size: number; updatedAt: string },
   ): Promise<void> {
     const index = await this.loadFileIndex(userId);
     const files = index.files || {};
@@ -273,7 +273,7 @@ export class FileStorageService {
             files[relativePath] = {
               md5: data.md5,
               size: stats.size,
-              updated_at: data.updated_at || new Date().toISOString(),
+              updatedAt: data.updated_at || new Date().toISOString(),
             };
           }
         } catch (e) {
@@ -355,6 +355,11 @@ export class FileStorageService {
         ? `${directory}/${entityName}`
         : entityName;
 
+      // 跳过隐藏文件（以 . 开头）
+      if (entityName.startsWith('.')) {
+        continue;
+      }
+
       if (entry.isFile()) {
         try {
           const fullPath = path.join(targetDir, entityName);
@@ -431,18 +436,23 @@ export class FileStorageService {
     let folderCount = 0;
     let totalSize = 0;
 
-    const entries = await fs.promises.readdir(userDir, { withFileTypes: true, recursive: true }) as fs.Dirent[];
-    for (const entry of entries) {
-      const fullPath = path.join(userDir, entry.name || entry.parentPath || '');
-      if (entry.isFile()) {
-        fileCount++;
-        const stats = await fs.promises.stat(fullPath);
-        totalSize += stats.size;
-      } else if (entry.isDirectory()) {
-        folderCount++;
+    // 递归遍历目录
+    const walkDir = async (dir: string): Promise<void> => {
+      const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          folderCount++;
+          await walkDir(fullPath);
+        } else if (entry.isFile()) {
+          fileCount++;
+          const stats = await fs.promises.stat(fullPath);
+          totalSize += stats.size;
+        }
       }
-    }
+    };
 
+    await walkDir(userDir);
     return { fileCount, folderCount, totalSize };
   }
 

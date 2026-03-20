@@ -91,6 +91,24 @@ server-nodejs/
 3. 启动服务: `npm run dev`
 4. 运行测试: `npm test`
 
+### 测试状态
+
+**2026-03-20**: 所有 24 个测试通过 ✅
+
+修复的问题:
+1. `serverConfig.ts` - 删除重复的 `enableCors` 属性
+2. `index.ts` - 修复 `req.params[0]` 类型问题
+3. `authService.ts` - 添加设备参数类型
+4. `types/index.ts` - 添加 `WSPing` 和 `WSAck` 类型
+5. `authRoutes.ts` - 修复 `getUserIdFromContext` → `getUserIdFromRequest`
+6. `authRoutes.ts` - 修复 Date 序列化问题 (`new Date(x).toISOString()`)
+7. `syncRoutes.ts` - 修复 `updatedAt` 可能为 undefined 的问题
+8. `fileStorageService.ts` - 修复 `updated_at` → `updatedAt` 字段名
+9. `fileStorageService.ts` - 修复 `getUserStorageStats` 递归目录遍历
+10. `fileStorageService.ts` - 跳过隐藏文件（以 `.` 开头）
+11. `pluginRoutes/factory.ts` - 修复导入路径和数组类型
+12. 测试 - 修正加密密钥长度（64字节 → 32字节）
+
 ---
 
 ## 错误日志

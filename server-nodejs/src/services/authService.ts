@@ -137,7 +137,7 @@ export class AuthService {
 
     // 更新设备信息
     const now = new Date();
-    const deviceIndex = user.devices.findIndex(d => d.deviceId === request.deviceId);
+    const deviceIndex = user.devices.findIndex((d: { deviceId: string }) => d.deviceId === request.deviceId);
 
     if (deviceIndex >= 0) {
       // 更新现有设备

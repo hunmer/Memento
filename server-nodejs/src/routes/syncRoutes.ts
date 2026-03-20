@@ -383,7 +383,7 @@ export function createSyncRoutes(
           path: f.path,
           size: f.size,
           md5: f.md5,
-          updated_at: f.updatedAt.toISOString(),
+          updated_at: f.updatedAt ? new Date(f.updatedAt).toISOString() : undefined,
           is_folder: f.isFolder,
         })),
         timestamp: new Date().toISOString(),
