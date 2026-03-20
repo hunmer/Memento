@@ -242,9 +242,6 @@ export function createSyncRoutes(
         return;
       }
 
-      // 设置加密密钥（仅内存）
-      pluginDataService.setEncryptionKey(userId, encryptionKey);
-
       const serverFile = await storageService.readEncryptedFile(userId, filePath);
 
       if (!serverFile) {
@@ -275,7 +272,7 @@ export function createSyncRoutes(
       if (isBinary) {
         // 二进制文件：解密后直接返回原始字节
         const binaryData = pluginDataService.encryptionService.decryptBinary(
-          userId,
+          encryptionKey,
           encryptedData,
         );
 
@@ -290,7 +287,7 @@ export function createSyncRoutes(
       } else {
         // 文本文件：解密为 JSON
         const decryptedData = pluginDataService.encryptionService.decryptData(
-          userId,
+          encryptionKey,
           encryptedData,
         );
 

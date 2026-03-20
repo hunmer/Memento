@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { PluginDataService } from '../../services/pluginDataService';
-import { getUserIdFromContext } from '../../middleware/authMiddleware';
-import { PluginRouteConfig, RouteDefinition, PLUGIN_ROUTE_CONFIGS } from './routeConfig';
+import { getUserIdFromContext, getEncryptionKeyFromContext } from '../../middleware/authMiddleware';
+import { PluginRouteConfig, PLUGIN_ROUTE_CONFIGS } from './routeConfig';
 
 /**
  * 错误码到 HTTP 状态码的映射
@@ -58,7 +58,7 @@ function resultToResponse<T>(res: Response, result: {
  * 插件处理器类型
  */
 export interface PluginHandlers {
-  [key: string]: (userId: string, params: Record<string, unknown>, req?: Request) => Promise<PluginResult>;
+  [key: string]: (userId: string, encryptionKey: string, params: Record<string, unknown>, req?: Request) => Promise<PluginResult>;
 }
 
 /**
@@ -93,9 +93,9 @@ function createCrudHandlers(
 ): PluginHandlers {
   return {
     // 获取列表
-    async getList(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getList(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
+        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile, encryptionKey);
         let items: Record<string, unknown>[] = Array.isArray(data)
           ? data
           : (data as Record<string, unknown>)?.[resourceName] as Record<string, unknown>[] || [];
@@ -122,9 +122,9 @@ function createCrudHandlers(
     },
 
     // 根据 ID 获取
-    async getById(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getById(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
+        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile, encryptionKey);
         const items: Record<string, unknown>[] = Array.isArray(data)
           ? data
           : (data as Record<string, unknown>)?.[resourceName] as Record<string, unknown>[] || [];
@@ -141,9 +141,9 @@ function createCrudHandlers(
     },
 
     // 创建
-    async create(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async create(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
+        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile, encryptionKey);
         const items: Record<string, unknown>[] = Array.isArray(data)
           ? [...data]
           : [...(((data as Record<string, unknown>)?.[resourceName] as Record<string, unknown>[]) || [])];
@@ -158,7 +158,7 @@ function createCrudHandlers(
 
         items.push(newItem);
 
-        await pluginDataService.writePluginData(userId, pluginId, dataFile, { [resourceName]: items });
+        await pluginDataService.writePluginData(userId, pluginId, dataFile, { [resourceName]: items }, encryptionKey);
 
         return { isSuccess: true, data: newItem };
       } catch (e) {
@@ -167,9 +167,9 @@ function createCrudHandlers(
     },
 
     // 更新
-    async update(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async update(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
+        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile, encryptionKey);
         const items: Record<string, unknown>[] = Array.isArray(data)
           ? [...data]
           : [...(((data as Record<string, unknown>)?.[resourceName] as Record<string, unknown>[]) || [])];
@@ -186,7 +186,7 @@ function createCrudHandlers(
         };
         items[index] = updatedItem;
 
-        await pluginDataService.writePluginData(userId, pluginId, dataFile, { [resourceName]: items });
+        await pluginDataService.writePluginData(userId, pluginId, dataFile, { [resourceName]: items }, encryptionKey);
 
         return { isSuccess: true, data: updatedItem };
       } catch (e) {
@@ -195,9 +195,9 @@ function createCrudHandlers(
     },
 
     // 删除
-    async delete(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async delete(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile);
+        const data = await pluginDataService.readPluginData(userId, pluginId, dataFile, encryptionKey);
         const items: Record<string, unknown>[] = Array.isArray(data)
           ? [...data]
           : [...(((data as Record<string, unknown>)?.[resourceName] as Record<string, unknown>[]) || [])];
@@ -208,7 +208,7 @@ function createCrudHandlers(
         }
 
         items.splice(index, 1);
-        await pluginDataService.writePluginData(userId, pluginId, dataFile, { [resourceName]: items });
+        await pluginDataService.writePluginData(userId, pluginId, dataFile, { [resourceName]: items }, encryptionKey);
 
         return { isSuccess: true, data: { id: params.id } };
       } catch (e) {
@@ -228,10 +228,10 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
     ...crud,
 
     // 获取消息列表
-    async getMessages(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getMessages(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const channelId = params.channelId as string;
-        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json');
+        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json', encryptionKey);
         let messages: Record<string, unknown>[] = (data as Record<string, unknown>)?.messages as Record<string, unknown>[] || [];
 
         // 按频道过滤
@@ -259,10 +259,10 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 发送消息
-    async sendMessage(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async sendMessage(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const channelId = params.channelId as string;
-        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json');
+        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json', encryptionKey);
         const messages: Record<string, unknown>[] = ((data as Record<string, unknown>)?.messages as Record<string, unknown>[]) || [];
 
         const now = new Date().toISOString();
@@ -275,7 +275,7 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
         };
 
         messages.push(newMessage);
-        await pluginDataService.writePluginData(userId, 'chat', 'messages.json', { messages });
+        await pluginDataService.writePluginData(userId, 'chat', 'messages.json', { messages }, encryptionKey);
 
         return { isSuccess: true, data: newMessage };
       } catch (e) {
@@ -284,10 +284,10 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 删除消息
-    async deleteMessage(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async deleteMessage(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { channelId, messageId } = params as { channelId: string; messageId: string };
-        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json');
+        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json', encryptionKey);
         const messages: Record<string, unknown>[] = ((data as Record<string, unknown>)?.messages as Record<string, unknown>[]) || [];
         const index = messages.findIndex((m: Record<string, unknown>) => m.id === messageId && m.channelId === channelId);
 
@@ -296,7 +296,7 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
         }
 
         messages.splice(index, 1);
-        await pluginDataService.writePluginData(userId, 'chat', 'messages.json', { messages });
+        await pluginDataService.writePluginData(userId, 'chat', 'messages.json', { messages }, encryptionKey);
 
         return { isSuccess: true, data: { id: messageId } };
       } catch (e) {
@@ -305,9 +305,9 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 查找频道
-    async findChannel(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async findChannel(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'chat', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'chat', 'data.json', encryptionKey);
         let channels: Record<string, unknown>[] = (data as Record<string, unknown>)?.channels as Record<string, unknown>[] || [];
 
         const { field, value, fuzzy } = params;
@@ -328,9 +328,9 @@ function createChatHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 查找消息
-    async findMessage(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async findMessage(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json');
+        const data = await pluginDataService.readPluginData(userId, 'chat', 'messages.json', encryptionKey);
         let messages: Record<string, unknown>[] = (data as Record<string, unknown>)?.messages as Record<string, unknown>[] || [];
 
         const { field, value, channelId, fuzzy } = params;
@@ -369,30 +369,30 @@ function createNotesHandlers(pluginDataService: PluginDataService): PluginHandle
     ),
 
     // 获取文件夹列表
-    async getFolders(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return folderCrud.getList(userId, params);
+    async getFolders(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return folderCrud.getList(userId, encryptionKey, params);
     },
 
-    async getFolderById(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return folderCrud.getById(userId, params);
+    async getFolderById(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return folderCrud.getById(userId, encryptionKey, params);
     },
 
-    async createFolder(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return folderCrud.create(userId, params);
+    async createFolder(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return folderCrud.create(userId, encryptionKey, params);
     },
 
-    async updateFolder(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return folderCrud.update(userId, params);
+    async updateFolder(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return folderCrud.update(userId, encryptionKey, params);
     },
 
-    async deleteFolder(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return folderCrud.delete(userId, params);
+    async deleteFolder(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return folderCrud.delete(userId, encryptionKey, params);
     },
 
     // 移动笔记
-    async moveNote(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async moveNote(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'notes', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'notes', 'data.json', encryptionKey);
         const notes: Record<string, unknown>[] = ((data as Record<string, unknown>)?.notes as Record<string, unknown>[]) || [];
         const index = notes.findIndex((n: Record<string, unknown>) => n.id === params.id);
 
@@ -406,7 +406,7 @@ function createNotesHandlers(pluginDataService: PluginDataService): PluginHandle
           updatedAt: new Date().toISOString(),
         };
 
-        await pluginDataService.writePluginData(userId, 'notes', 'data.json', { notes, folders: (data as Record<string, unknown>)?.folders || [] });
+        await pluginDataService.writePluginData(userId, 'notes', 'data.json', { notes, folders: (data as Record<string, unknown>)?.folders || [] }, encryptionKey);
 
         return { isSuccess: true, data: notes[index] };
       } catch (e) {
@@ -415,10 +415,10 @@ function createNotesHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 获取文件夹的笔记
-    async getFolderNotes(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getFolderNotes(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const folderId = params.id;
-        const data = await pluginDataService.readPluginData(userId, 'notes', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'notes', 'data.json', encryptionKey);
         let notes: Record<string, unknown>[] = ((data as Record<string, unknown>)?.notes as Record<string, unknown>[]) || [];
 
         notes = notes.filter((n: Record<string, unknown>) => n.folderId === folderId);
@@ -430,10 +430,10 @@ function createNotesHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 搜索笔记
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { keyword, folderId } = params;
-        const data = await pluginDataService.readPluginData(userId, 'notes', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'notes', 'data.json', encryptionKey);
         let notes: Record<string, unknown>[] = ((data as Record<string, unknown>)?.notes as Record<string, unknown>[]) || [];
 
         if (folderId) {
@@ -469,42 +469,42 @@ function createBillHandlers(pluginDataService: PluginDataService): PluginHandler
     ),
 
     // 获取账单列表
-    async getBills(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return billCrud.getList(userId, params);
+    async getBills(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return billCrud.getList(userId, encryptionKey, params);
     },
 
-    async getBillById(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return billCrud.getById(userId, params);
+    async getBillById(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return billCrud.getById(userId, encryptionKey, params);
     },
 
-    async createBill(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return billCrud.create(userId, params);
+    async createBill(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return billCrud.create(userId, encryptionKey, params);
     },
 
-    async updateBill(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return billCrud.update(userId, params);
+    async updateBill(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return billCrud.update(userId, encryptionKey, params);
     },
 
-    async deleteBill(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return billCrud.delete(userId, params);
+    async deleteBill(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return billCrud.delete(userId, encryptionKey, params);
     },
 
     // 按账户获取账单
-    async getBillsByAccount(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getBillsByAccount(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       const accountId = params.accountId as string;
-      return billCrud.getList(userId, { ...params, accountId });
+      return billCrud.getList(userId, encryptionKey, { ...params, accountId });
     },
 
     // 为账户创建账单
-    async createBillForAccount(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async createBillForAccount(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       const accountId = params.accountId as string;
-      return billCrud.create(userId, { ...params, accountId });
+      return billCrud.create(userId, encryptionKey, { ...params, accountId });
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'bill', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'bill', 'data.json', encryptionKey);
         const bills: Record<string, unknown>[] = ((data as Record<string, unknown>)?.bills as Record<string, unknown>[]) || [];
         const accounts: Record<string, unknown>[] = ((data as Record<string, unknown>)?.accounts as Record<string, unknown>[]) || [];
 
@@ -542,15 +542,15 @@ function createTodoHandlers(pluginDataService: PluginDataService): PluginHandler
     ...crud,
 
     // 完成任务
-    async completeTask(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return crud.update(userId, { id: params.id, completed: true, completedAt: new Date().toISOString() });
+    async completeTask(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return crud.update(userId, encryptionKey, { id: params.id, completed: true, completedAt: new Date().toISOString() });
     },
 
     // 获取今日任务
-    async getTodayTasks(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getTodayTasks(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json', encryptionKey);
         let tasks: Record<string, unknown>[] = ((data as Record<string, unknown>)?.tasks as Record<string, unknown>[]) || [];
 
         tasks = tasks.filter((t: Record<string, unknown>) => {
@@ -565,10 +565,10 @@ function createTodoHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 获取过期任务
-    async getOverdueTasks(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getOverdueTasks(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json', encryptionKey);
         let tasks: Record<string, unknown>[] = ((data as Record<string, unknown>)?.tasks as Record<string, unknown>[]) || [];
 
         tasks = tasks.filter((t: Record<string, unknown>) => {
@@ -583,10 +583,10 @@ function createTodoHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 搜索任务
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { keyword } = params;
-        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json', encryptionKey);
         let tasks: Record<string, unknown>[] = ((data as Record<string, unknown>)?.tasks as Record<string, unknown>[]) || [];
 
         if (keyword) {
@@ -604,9 +604,9 @@ function createTodoHandlers(pluginDataService: PluginDataService): PluginHandler
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'todo', 'data.json', encryptionKey);
         const tasks: Record<string, unknown>[] = ((data as Record<string, unknown>)?.tasks as Record<string, unknown>[]) || [];
 
         const completed = tasks.filter((t: Record<string, unknown>) => t.completed).length;
@@ -638,10 +638,10 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
     ...crud,
 
     // 按日期获取
-    async getByDate(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getByDate(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const date = params.date as string;
-        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json', encryptionKey);
         const entries: Record<string, unknown>[] = ((data as Record<string, unknown>)?.entries as Record<string, unknown>[]) || [];
         const entry = entries.find((e: Record<string, unknown>) => e.date === date);
 
@@ -656,10 +656,10 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 按日期更新
-    async updateByDate(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async updateByDate(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const date = params.date as string;
-        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json', encryptionKey);
         const entries: Record<string, unknown>[] = ((data as Record<string, unknown>)?.entries as Record<string, unknown>[]) || [];
         const index = entries.findIndex((e: Record<string, unknown>) => e.date === date);
 
@@ -673,7 +673,7 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
           updatedAt: new Date().toISOString(),
         };
 
-        await pluginDataService.writePluginData(userId, 'diary', 'data.json', { entries });
+        await pluginDataService.writePluginData(userId, 'diary', 'data.json', { entries }, encryptionKey);
 
         return { isSuccess: true, data: entries[index] };
       } catch (e) {
@@ -682,10 +682,10 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 按日期删除
-    async deleteByDate(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async deleteByDate(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const date = params.date as string;
-        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json', encryptionKey);
         const entries: Record<string, unknown>[] = ((data as Record<string, unknown>)?.entries as Record<string, unknown>[]) || [];
         const index = entries.findIndex((e: Record<string, unknown>) => e.date === date);
 
@@ -694,7 +694,7 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
         }
 
         entries.splice(index, 1);
-        await pluginDataService.writePluginData(userId, 'diary', 'data.json', { entries });
+        await pluginDataService.writePluginData(userId, 'diary', 'data.json', { entries }, encryptionKey);
 
         return { isSuccess: true, data: { date } };
       } catch (e) {
@@ -703,10 +703,10 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 搜索
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { keyword, startDate, endDate, mood } = params;
-        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json', encryptionKey);
         let entries: Record<string, unknown>[] = ((data as Record<string, unknown>)?.entries as Record<string, unknown>[]) || [];
 
         if (startDate) {
@@ -732,9 +732,9 @@ function createDiaryHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'diary', 'data.json', encryptionKey);
         const entries: Record<string, unknown>[] = ((data as Record<string, unknown>)?.entries as Record<string, unknown>[]) || [];
 
         const totalWords = entries.reduce((sum: number, e: Record<string, unknown>) => {
@@ -766,9 +766,9 @@ function createGoodsHandlers(pluginDataService: PluginDataService): PluginHandle
     ...itemCrud,
 
     // 获取仓库列表
-    async getWarehouses(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getWarehouses(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'goods', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'goods', 'data.json', encryptionKey);
         const warehouses: Record<string, unknown>[] = ((data as Record<string, unknown>)?.warehouses as Record<string, unknown>[]) || [];
 
         return { isSuccess: true, data: { data: warehouses, total: warehouses.length } };
@@ -778,10 +778,10 @@ function createGoodsHandlers(pluginDataService: PluginDataService): PluginHandle
     },
 
     // 搜索物品
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { keyword, warehouseId } = params;
-        const data = await pluginDataService.readPluginData(userId, 'goods', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'goods', 'data.json', encryptionKey);
         let items: Record<string, unknown>[] = ((data as Record<string, unknown>)?.items as Record<string, unknown>[]) || [];
 
         if (warehouseId) {
@@ -813,10 +813,10 @@ function createActivityHandlers(pluginDataService: PluginDataService): PluginHan
     ...crud,
 
     // 获取今日统计
-    async getTodayStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getTodayStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const today = new Date().toISOString().split('T')[0];
-        const data = await pluginDataService.readPluginData(userId, 'activity', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'activity', 'data.json', encryptionKey);
         const activities: Record<string, unknown>[] = ((data as Record<string, unknown>)?.activities as Record<string, unknown>[]) || [];
 
         const todayActivities = activities.filter((a: Record<string, unknown>) => {
@@ -855,10 +855,10 @@ function createCheckinHandlers(pluginDataService: PluginDataService): PluginHand
     ...crud,
 
     // 添加签到记录
-    async addRecord(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async addRecord(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { id: itemId, date, note } = params;
-        const data = await pluginDataService.readPluginData(userId, 'checkin', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'checkin', 'data.json', encryptionKey);
         const records: Record<string, unknown>[] = ((data as Record<string, unknown>)?.records as Record<string, unknown>[]) || [];
 
         const newRecord = {
@@ -873,7 +873,7 @@ function createCheckinHandlers(pluginDataService: PluginDataService): PluginHand
         await pluginDataService.writePluginData(userId, 'checkin', 'data.json', {
           items: (data as Record<string, unknown>)?.items || [],
           records,
-        });
+        }, encryptionKey);
 
         return { isSuccess: true, data: newRecord };
       } catch (e) {
@@ -882,9 +882,9 @@ function createCheckinHandlers(pluginDataService: PluginDataService): PluginHand
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'checkin', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'checkin', 'data.json', encryptionKey);
         const items: Record<string, unknown>[] = ((data as Record<string, unknown>)?.items as Record<string, unknown>[]) || [];
         const records: Record<string, unknown>[] = ((data as Record<string, unknown>)?.records as Record<string, unknown>[]) || [];
 
@@ -912,10 +912,10 @@ function createTrackerHandlers(pluginDataService: PluginDataService): PluginHand
     ...crud,
 
     // 添加记录
-    async addRecord(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async addRecord(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { goalId, value, date, note } = params;
-        const data = await pluginDataService.readPluginData(userId, 'tracker', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'tracker', 'data.json', encryptionKey);
         const records: Record<string, unknown>[] = ((data as Record<string, unknown>)?.records as Record<string, unknown>[]) || [];
 
         const newRecord = {
@@ -931,7 +931,7 @@ function createTrackerHandlers(pluginDataService: PluginDataService): PluginHand
         await pluginDataService.writePluginData(userId, 'tracker', 'data.json', {
           goals: (data as Record<string, unknown>)?.goals || [],
           records,
-        });
+        }, encryptionKey);
 
         return { isSuccess: true, data: newRecord };
       } catch (e) {
@@ -940,10 +940,10 @@ function createTrackerHandlers(pluginDataService: PluginDataService): PluginHand
     },
 
     // 获取目标的记录
-    async getRecords(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getRecords(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { goalId } = params;
-        const data = await pluginDataService.readPluginData(userId, 'tracker', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'tracker', 'data.json', encryptionKey);
         let records: Record<string, unknown>[] = ((data as Record<string, unknown>)?.records as Record<string, unknown>[]) || [];
 
         records = records.filter((r: Record<string, unknown>) => r.goalId === goalId);
@@ -955,9 +955,9 @@ function createTrackerHandlers(pluginDataService: PluginDataService): PluginHand
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'tracker', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'tracker', 'data.json', encryptionKey);
         const goals: Record<string, unknown>[] = ((data as Record<string, unknown>)?.goals as Record<string, unknown>[]) || [];
         const records: Record<string, unknown>[] = ((data as Record<string, unknown>)?.records as Record<string, unknown>[]) || [];
 
@@ -985,15 +985,15 @@ function createCalendarHandlers(pluginDataService: PluginDataService): PluginHan
     ...crud,
 
     // 完成事件
-    async completeEvent(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
-      return crud.update(userId, { id: params.id, completed: true, completedAt: new Date().toISOString() });
+    async completeEvent(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
+      return crud.update(userId, encryptionKey, { id: params.id, completed: true, completedAt: new Date().toISOString() });
     },
 
     // 搜索事件
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { keyword, startDate, endDate } = params;
-        const data = await pluginDataService.readPluginData(userId, 'calendar', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'calendar', 'data.json', encryptionKey);
         let events: Record<string, unknown>[] = ((data as Record<string, unknown>)?.events as Record<string, unknown>[]) || [];
 
         if (startDate) {
@@ -1028,10 +1028,10 @@ function createContactHandlers(pluginDataService: PluginDataService): PluginHand
     ...crud,
 
     // 搜索联系人
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { keyword } = params;
-        const data = await pluginDataService.readPluginData(userId, 'contact', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'contact', 'data.json', encryptionKey);
         let contacts: Record<string, unknown>[] = ((data as Record<string, unknown>)?.contacts as Record<string, unknown>[]) || [];
 
         if (keyword) {
@@ -1050,9 +1050,9 @@ function createContactHandlers(pluginDataService: PluginDataService): PluginHand
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'contact', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'contact', 'data.json', encryptionKey);
         const contacts: Record<string, unknown>[] = ((data as Record<string, unknown>)?.contacts as Record<string, unknown>[]) || [];
 
         return {
@@ -1078,10 +1078,10 @@ function createDayHandlers(pluginDataService: PluginDataService): PluginHandlers
     ...crud,
 
     // 搜索纪念日
-    async search(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async search(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
         const { startDate, endDate, includeExpired } = params;
-        const data = await pluginDataService.readPluginData(userId, 'day', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'day', 'data.json', encryptionKey);
         let days: Record<string, unknown>[] = ((data as Record<string, unknown>)?.days as Record<string, unknown>[]) || [];
 
         const today = new Date().toISOString().split('T')[0];
@@ -1103,9 +1103,9 @@ function createDayHandlers(pluginDataService: PluginDataService): PluginHandlers
     },
 
     // 获取统计
-    async getStats(userId: string, params: Record<string, unknown>): Promise<PluginResult> {
+    async getStats(userId: string, encryptionKey: string, params: Record<string, unknown>): Promise<PluginResult> {
       try {
-        const data = await pluginDataService.readPluginData(userId, 'day', 'data.json');
+        const data = await pluginDataService.readPluginData(userId, 'day', 'data.json', encryptionKey);
         const days: Record<string, unknown>[] = ((data as Record<string, unknown>)?.days as Record<string, unknown>[]) || [];
 
         return {
@@ -1223,6 +1223,12 @@ export function createPluginRoutes(
         return;
       }
 
+      const encryptionKey = getEncryptionKeyFromContext(req);
+      if (!encryptionKey) {
+        errorResponse(res, 403, '缺少 X-Encryption-Key 请求头');
+        return;
+      }
+
       try {
         // 合并路径参数、查询参数和请求体
         const pathParams = extractPathParams(req, route.path);
@@ -1231,7 +1237,7 @@ export function createPluginRoutes(
 
         const params = { ...queryParams, ...pathParams, ...bodyParams };
 
-        const result = await handler(userId, params, req);
+        const result = await handler(userId, encryptionKey, params, req);
         resultToResponse(res, result, method === 'post' ? 201 : 200);
       } catch (e) {
         errorResponse(res, 500, `服务器错误: ${e}`);

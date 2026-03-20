@@ -11,6 +11,7 @@ declare global {
       context?: {
         userId?: string;
         authContext?: AuthContext;
+        encryptionKey?: string;
       };
     }
   }
@@ -35,6 +36,13 @@ export function getAuthContextFromRequest(req: Request): AuthContext | undefined
  */
 export function getDeviceIdFromContext(req: Request): string | undefined {
   return req.headers['x-device-id'] as string | undefined;
+}
+
+/**
+ * 从请求上下文获取加密密钥
+ */
+export function getEncryptionKeyFromContext(req: Request): string | undefined {
+  return req.context?.encryptionKey;
 }
 
 /**

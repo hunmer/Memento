@@ -147,7 +147,7 @@ async function main() {
     app.use(
       `/api/v1/plugins/${pluginId}`,
       authMiddleware(authService),
-      apiEnabledMiddleware(pluginDataService),
+      apiEnabledMiddleware(),
       router,
     );
   }
@@ -296,13 +296,13 @@ async function main() {
     console.log('  GET  /version             - 版本信息');
     console.log('  POST /api/v1/auth/register - 用户注册');
     console.log('  POST /api/v1/auth/login    - 用户登录');
-    console.log('  POST /api/v1/auth/set-encryption-key - 设置加密密钥');
+    console.log('  POST /api/v1/auth/verify-encryption-key - 验证加密密钥');
     console.log('  POST /api/v1/sync/push     - 推送文件 (需认证)');
     console.log('  GET  /api/v1/sync/pull/*   - 拉取文件 (需认证)');
     console.log('  GET  /api/v1/sync/list     - 文件列表 (需认证)');
     console.log('  WS   /api/v1/sync/ws       - WebSocket 实时同步');
     console.log('');
-    console.log('插件 API (需认证 + 设置加密密钥):');
+    console.log('插件 API (需认证 + X-Encryption-Key 请求头):');
     for (const pluginId of pluginRoutes.keys()) {
       console.log(`  /api/v1/plugins/${pluginId}`);
     }

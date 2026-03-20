@@ -155,19 +155,10 @@ export const authApi = {
       body: JSON.stringify(data)
     }),
 
-  hasEncryptionKey: (): Promise<{ success: boolean; has_key: boolean }> =>
-    apiClient.request('/api/v1/auth/has-encryption-key'),
-
-  setEncryptionKey: (key: string, forceCreate = false): Promise<ApiResponse & { is_first_time?: boolean; is_key_updated?: boolean }> =>
-    apiClient.request('/api/v1/auth/set-encryption-key', {
-      method: 'POST',
-      body: JSON.stringify({ encryption_key: key, force_create: forceCreate })
-    }),
-
-  clearEncryptionKey: (): Promise<ApiResponse> =>
-    apiClient.request('/api/v1/auth/clear-encryption-key', {
+  verifyEncryptionKey: (key: string): Promise<ApiResponse & { is_first_time?: boolean }> =>
+    apiClient.request('/api/v1/auth/verify-encryption-key', {
       method: 'POST'
-    }),
+    }, { 'X-Encryption-Key': key }),
 
   getApiKeys: (): Promise<{ success: boolean; api_keys?: ApiKeyInfo[] }> =>
     apiClient.request('/api/v1/auth/api-keys'),

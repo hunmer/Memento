@@ -127,29 +127,16 @@ describe('Memento Sync Server', () => {
       expect(response.body.success).toBe(false);
     });
 
-    it('POST /api/v1/auth/set-encryption-key should set encryption key', async () => {
+    it('POST /api/v1/auth/verify-encryption-key should verify encryption key', async () => {
       const response = await request(BASE_URL)
-        .post('/api/v1/auth/set-encryption-key')
+        .post('/api/v1/auth/verify-encryption-key')
         .set('Authorization', `Bearer ${authToken}`)
-        .send({
-          encryption_key: TEST_ENCRYPTION_KEY,
-        })
+        .set('X-Encryption-Key', TEST_ENCRYPTION_KEY)
         .expect('Content-Type', /json/)
         .expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.is_first_time).toBe(true);
-    });
-
-    it('GET /api/v1/auth/has-encryption-key should return true', async () => {
-      const response = await request(BASE_URL)
-        .get('/api/v1/auth/has-encryption-key')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.has_key).toBe(true);
     });
 
     it('GET /api/v1/auth/user-info should return user info', async () => {

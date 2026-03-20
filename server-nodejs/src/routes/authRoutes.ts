@@ -6,8 +6,7 @@ import { PluginDataService } from '../services/pluginDataService';
 /**
  * 认证路由
  *
- * 安全说明：加密密钥只保存在内存中，不持久化到文件
- * 每次请求需要通过请求头 X-Encryption-Key 传递密钥
+ * 安全说明：服务端不保存用户密钥，每次请求需要通过请求头 X-Encryption-Key 传递密钥
  */
 export function createAuthRoutes(
   authService: AuthService,
@@ -38,6 +37,13 @@ export function createAuthRoutes(
     }
     const token = authHeader.substring(7);
     return authService.getUserIdFromToken(token) ?? undefined;
+  }
+
+  /**
+   * 从请求头获取加密密钥
+   */
+  function getEncryptionKeyFromRequest(req: Request): string | undefined {
+    return req.headers['x-encryption-key'] as string | undefined;
   }
 
   /**
@@ -202,9 +208,9 @@ export function createAuthRoutes(
   // ==================== 需认证端点 ====================
 
   /**
-   * POST /set-encryption-key - 设置加密密钥
+   * POST /verify-encryption-key - 验证加密密钥
    */
-  router.post('/set-encryption-key', async (req: Request, res: Response): Promise<void> => {
+  router.post('/verify-encryption-key', async (req: Request, res: Response): Promise<void> => {
     try {
       const userId = getUserIdFromRequest(req);
       if (!userId) {
@@ -212,14 +218,11 @@ export function createAuthRoutes(
         return;
       }
 
-      const data = req.body;
-      const encryptionKey = data.encryption_key;
-      if (!encryptionKey || typeof encryptionKey !== 'string') {
-        errorResponse(res, 400, '缺少 encryption_key 参数');
+      const encryptionKey = getEncryptionKeyFromRequest(req);
+      if (!encryptionKey) {
+        errorResponse(res, 400, '缺少 X-Encryption-Key 请求头');
         return;
       }
-
-      const forceCreate = data.force_create === true;
 
       // 验证密钥格式（Base64 32字节）
       try {
@@ -236,7 +239,7 @@ export function createAuthRoutes(
       // 检查是否已存在验证文件
       const hasVerificationFile = await pluginDataService.hasKeyVerificationFile(userId);
 
-      if (hasVerificationFile && !forceCreate) {
+      if (hasVerificationFile) {
         // 已有验证文件，需要验证密钥是否正确
         const [isValid, errorMessage] = await pluginDataService.verifyEncryptionKey(userId, encryptionKey);
 
@@ -245,7 +248,7 @@ export function createAuthRoutes(
           return;
         }
 
-        // 验证成功，密钥已设置
+        // 验证成功
         res.json({
           success: true,
           message: '密钥验证成功',
@@ -253,25 +256,9 @@ export function createAuthRoutes(
           user_id: userId,
           timestamp: new Date().toISOString(),
         });
-      } else if (forceCreate) {
-        // 强制创建模式（更改密钥后）：设置密钥并更新验证文件
-        pluginDataService.setEncryptionKey(userId, encryptionKey);
-        await pluginDataService.updateKeyVerificationFile(userId);
-
-        res.json({
-          success: true,
-          message: '加密密钥已更新',
-          is_first_time: false,
-          is_key_updated: true,
-          user_id: userId,
-          timestamp: new Date().toISOString(),
-        });
       } else {
-        // 首次设置密钥
-        pluginDataService.setEncryptionKey(userId, encryptionKey);
-
-        // 创建验证文件
-        await pluginDataService.createKeyVerificationFile(userId);
+        // 首次设置密钥，创建验证文件
+        await pluginDataService.createKeyVerificationFile(userId, encryptionKey);
 
         res.json({
           success: true,
@@ -281,54 +268,6 @@ export function createAuthRoutes(
           timestamp: new Date().toISOString(),
         });
       }
-    } catch (e) {
-      errorResponse(res, 500, `服务器错误: ${e}`);
-    }
-  });
-
-  /**
-   * POST /clear-encryption-key - 清除内存中的加密密钥
-   */
-  router.post('/clear-encryption-key', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = getUserIdFromRequest(req);
-      if (!userId) {
-        errorResponse(res, 401, '未认证或 Token 无效');
-        return;
-      }
-
-      pluginDataService.removeEncryptionKey(userId);
-
-      res.json({
-        success: true,
-        message: '加密密钥已清除',
-        user_id: userId,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (e) {
-      errorResponse(res, 500, `服务器错误: ${e}`);
-    }
-  });
-
-  /**
-   * GET /has-encryption-key - 检查是否已设置密钥
-   */
-  router.get('/has-encryption-key', async (req: Request, res: Response): Promise<void> => {
-    try {
-      const userId = getUserIdFromRequest(req);
-      if (!userId) {
-        errorResponse(res, 401, '未认证或 Token 无效');
-        return;
-      }
-
-      const hasKey = pluginDataService.hasEncryptionKey(userId);
-
-      res.json({
-        success: true,
-        has_key: hasKey,
-        user_id: userId,
-        timestamp: new Date().toISOString(),
-      });
     } catch (e) {
       errorResponse(res, 500, `服务器错误: ${e}`);
     }
@@ -354,11 +293,11 @@ export function createAuthRoutes(
         return;
       }
 
-      // 先设置旧密钥
-      pluginDataService.setEncryptionKey(userId, oldKey);
-
       // 执行重新加密
-      const result = await pluginDataService.reEncryptAllFiles(userId, newKey);
+      const result = await pluginDataService.reEncryptAllFiles(userId, oldKey, newKey);
+
+      // 更新验证文件
+      await pluginDataService.updateKeyVerificationFile(userId, newKey);
 
       res.json({
         success: true,

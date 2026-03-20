@@ -21,9 +21,6 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  // 后端加密密钥状态
-  const serverHasKey = ref<boolean | null>(null)
-
   // API Keys
   const apiKeys = ref<ApiKey[]>([])
   const createdKey = ref<{ name: string; key: string } | null>(null)
@@ -65,23 +62,12 @@ export const useAuthStore = defineStore('auth', () => {
       apiClient.setToken(response.token)
       localStorage.setItem('username', usernameInput)
 
-      // 同步加密密钥到后端
+      // 如果本地有密钥，验证密钥
       if (encryptionKey.value) {
-        // 本地有密钥，同步到后端
         try {
-          await authApi.setEncryptionKey(encryptionKey.value)
-          serverHasKey.value = true
+          await authApi.verifyEncryptionKey(encryptionKey.value)
         } catch (e) {
-          console.warn('Failed to sync encryption key to server:', e)
-        }
-      } else {
-        // 本地没有密钥，检查后端状态
-        try {
-          const keyStatus = await authApi.hasEncryptionKey()
-          serverHasKey.value = keyStatus.has_key
-        } catch (e) {
-          console.warn('Failed to check encryption key status:', e)
-          serverHasKey.value = null
+          console.warn('Failed to verify encryption key:', e)
         }
       }
     } catch (err) {
@@ -96,7 +82,6 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn.value = false
     username.value = ''
     // 保留 encryptionKey，不清除本地密钥
-    serverHasKey.value = null
     apiClient.setToken(null)
     localStorage.removeItem('token')
     localStorage.removeItem('username')
@@ -156,13 +141,12 @@ export const useAuthStore = defineStore('auth', () => {
       apiClient.setToken(token)
       isLoggedIn.value = true
 
-      // 如果本地有密钥，同步到后端
+      // 如果本地有密钥，验证密钥
       if (encryptionKey.value) {
         try {
-          await authApi.setEncryptionKey(encryptionKey.value)
-          serverHasKey.value = true
+          await authApi.verifyEncryptionKey(encryptionKey.value)
         } catch (e) {
-          console.warn('Failed to sync encryption key on init:', e)
+          console.warn('Failed to verify encryption key on init:', e)
         }
       }
     }
@@ -177,7 +161,6 @@ export const useAuthStore = defineStore('auth', () => {
     username,
     encryptionKey,
     serverUrl,
-    serverHasKey,
     apiKeys,
     createdKey,
     loading,

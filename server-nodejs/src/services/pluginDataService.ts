@@ -15,7 +15,7 @@ const KEY_VERIFICATION_CONTENT = 'MEMENTO_KEY_VERIFICATION_v1';
  * 负责读取、解密、加密和写入各插件的数据
  * 提供统一的数据访问接口供 HTTP 路由使用
  *
- * 安全说明：加密密钥只保存在内存中，不持久化到文件
+ * 安全说明：服务端不保存用户密钥，每次操作需要从请求头传入密钥
  */
 export class PluginDataService {
   public storageService: FileStorageService;
@@ -32,37 +32,7 @@ export class PluginDataService {
    * 初始化服务
    */
   async initialize(): Promise<void> {
-    // 不再从文件加载密钥，密钥只保存在内存中
-  }
-
-  // ==================== 密钥管理（仅内存）====================
-
-  /**
-   * 设置用户的加密密钥（仅内存，不持久化）
-   */
-  setEncryptionKey(userId: string, encryptionKey: string): void {
-    this.encryptionService.setUserKey(userId, encryptionKey);
-  }
-
-  /**
-   * 移除用户的加密密钥（仅内存）
-   */
-  removeEncryptionKey(userId: string): void {
-    this.encryptionService.removeUserKey(userId);
-  }
-
-  /**
-   * 检查用户是否已设置密钥（仅检查内存）
-   */
-  hasEncryptionKey(userId: string): boolean {
-    return this.encryptionService.hasUserKey(userId);
-  }
-
-  /**
-   * 获取用户的加密密钥（仅从内存）
-   */
-  getEncryptionKey(userId: string): string | undefined {
-    return this.encryptionService.getUserKey(userId);
+    // 服务端不保存密钥，无需初始化
   }
 
   // ==================== 密钥验证 ====================
@@ -78,17 +48,13 @@ export class PluginDataService {
   /**
    * 创建密钥验证文件（首次设置密钥时调用）
    */
-  async createKeyVerificationFile(userId: string): Promise<void> {
-    if (!this.hasEncryptionKey(userId)) {
-      throw new Error('用户未设置加密密钥');
-    }
-
+  async createKeyVerificationFile(userId: string, encryptionKey: string): Promise<void> {
     const verificationData = {
       content: KEY_VERIFICATION_CONTENT,
       created_at: new Date().toISOString(),
     };
 
-    const encryptedData = this.encryptionService.encryptData(userId, verificationData);
+    const encryptedData = this.encryptionService.encryptData(encryptionKey, verificationData);
     const md5Hash = this.encryptionService.computeMd5(verificationData);
 
     const filePath = path.join(this.getUserDataDir(userId), KEY_VERIFICATION_FILE_NAME);
@@ -137,38 +103,22 @@ export class PluginDataService {
         return [false, '验证文件格式错误'];
       }
 
-      // 临时设置密钥进行验证
-      const originalKey = this.encryptionService.getUserKey(userId);
-      this.encryptionService.setUserKey(userId, encryptionKey);
-
       try {
         // 尝试解密
         const decryptedData = this.encryptionService.decryptData(
-          userId,
+          encryptionKey,
           encryptedData,
         ) as Record<string, unknown>;
         const decryptedContent = decryptedData.content as string | undefined;
 
         // 验证内容是否正确
         if (decryptedContent !== KEY_VERIFICATION_CONTENT) {
-          // 恢复原始密钥
-          if (originalKey) {
-            this.encryptionService.setUserKey(userId, originalKey);
-          } else {
-            this.encryptionService.removeUserKey(userId);
-          }
           return [false, '密钥验证失败：内容不匹配'];
         }
 
-        // 验证成功，保持新密钥设置
+        // 验证成功
         return [true, null];
       } catch (e) {
-        // 解密失败，恢复原始密钥
-        if (originalKey) {
-          this.encryptionService.setUserKey(userId, originalKey);
-        } else {
-          this.encryptionService.removeUserKey(userId);
-        }
         return [false, '密钥验证失败：无法解密验证文件，密钥可能不正确'];
       }
     } catch (e) {
@@ -179,14 +129,14 @@ export class PluginDataService {
   /**
    * 更新验证文件（用于更改密钥后重新加密验证文件）
    */
-  async updateKeyVerificationFile(userId: string): Promise<void> {
+  async updateKeyVerificationFile(userId: string, encryptionKey: string): Promise<void> {
     // 先删除旧的验证文件
     const filePath = path.join(this.getUserDataDir(userId), KEY_VERIFICATION_FILE_NAME);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
     // 创建新的验证文件
-    await this.createKeyVerificationFile(userId);
+    await this.createKeyVerificationFile(userId, encryptionKey);
   }
 
   // ==================== 数据读取 ====================
@@ -198,11 +148,8 @@ export class PluginDataService {
     userId: string,
     pluginId: string,
     fileName: string,
+    encryptionKey: string,
   ): Promise<unknown> {
-    if (!this.hasEncryptionKey(userId)) {
-      throw new Error('用户未设置加密密钥');
-    }
-
     const filePath = `${pluginId}/${fileName}`;
     const fileData = await this.storageService.readEncryptedFile(userId, filePath);
 
@@ -212,7 +159,7 @@ export class PluginDataService {
     if (!encryptedData) return null;
 
     try {
-      return this.encryptionService.decryptData(userId, encryptedData);
+      return this.encryptionService.decryptData(encryptionKey, encryptedData);
     } catch (e) {
       console.error(`解密数据失败 (${filePath}): ${e}`);
       return null;
@@ -262,12 +209,9 @@ export class PluginDataService {
     pluginId: string,
     fileName: string,
     data: unknown,
+    encryptionKey: string,
   ): Promise<void> {
-    if (!this.hasEncryptionKey(userId)) {
-      throw new Error('用户未设置加密密钥');
-    }
-
-    const encryptedData = this.encryptionService.encryptDynamic(userId, data);
+    const encryptedData = this.encryptionService.encryptDynamic(encryptionKey, data);
     const md5Hash = this.encryptionService.computeDynamicMd5(data);
     const filePath = `${pluginId}/${fileName}`;
 
@@ -349,13 +293,9 @@ export class PluginDataService {
    */
   async reEncryptAllFiles(
     userId: string,
+    oldKey: string,
     newKey: string,
   ): Promise<{ fileCount: number; errors: string[] }> {
-    const oldKey = this.encryptionService.getUserKey(userId);
-    if (!oldKey) {
-      throw new Error('请先设置当前加密密钥');
-    }
-
     let fileCount = 0;
     const errors: string[] = [];
 
@@ -386,14 +326,11 @@ export class PluginDataService {
             if (!encryptedData) continue;
 
             // 用旧密钥解密
-            const decryptedData = this.encryptionService.decryptData(userId, encryptedData);
-
-            // 临时设置新密钥
-            this.encryptionService.setUserKey(userId, newKey);
+            const decryptedData = this.encryptionService.decryptData(oldKey, encryptedData);
 
             // 用新密钥重新加密
             const newEncryptedData = this.encryptionService.encryptString(
-              userId,
+              newKey,
               JSON.stringify(decryptedData),
             );
             const newMd5 = this.encryptionService.computeStringMd5(JSON.stringify(decryptedData));
@@ -409,17 +346,12 @@ export class PluginDataService {
             fileCount++;
           } catch (e) {
             errors.push(`${entry.name}: ${e}`);
-            // 恢复旧密钥以便继续处理其他文件
-            this.encryptionService.setUserKey(userId, oldKey);
           }
         }
       }
     };
 
     await processDir(userDir);
-
-    // 确保新密钥设置正确（仅内存，不持久化）
-    this.encryptionService.setUserKey(userId, newKey);
 
     return { fileCount, errors };
   }

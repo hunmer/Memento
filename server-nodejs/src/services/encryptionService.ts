@@ -5,11 +5,10 @@ import crypto from 'crypto';
  *
  * 与 Dart 客户端 EncryptionService 兼容
  * 加密格式: base64(iv).base64(ciphertext)
+ *
+ * 安全说明：服务端不保存用户密钥，每次操作需要传入密钥
  */
 export class EncryptionService {
-  /** 用户加密密钥缓存 (userId -> encrypter) */
-  private userKeys: Map<string, Buffer> = new Map();
-
   /** 算法 */
   private readonly ALGORITHM = 'aes-256-gcm';
   /** IV 长度 (16 字节) */
@@ -18,75 +17,41 @@ export class EncryptionService {
   private readonly AUTH_TAG_LENGTH = 16;
 
   /**
-   * 检查用户是否已设置密钥
+   * 验证密钥格式
    */
-  hasUserKey(userId: string): boolean {
-    return this.userKeys.has(userId);
-  }
-
-  /**
-   * 获取已加载密钥的用户 ID 列表
-   */
-  get loadedUserIds(): string[] {
-    return Array.from(this.userKeys.keys());
-  }
-
-  /**
-   * 设置用户的加密密钥
-   * @param userId 用户ID
-   * @param base64Key Base64 编码的 256-bit 密钥
-   */
-  setUserKey(userId: string, base64Key: string): void {
+  validateKey(base64Key: string): Buffer {
     const keyBytes = Buffer.from(base64Key, 'base64');
     if (keyBytes.length !== 32) {
       throw new Error('密钥长度必须为 32 字节 (256-bit)');
     }
-    this.userKeys.set(userId, keyBytes);
-  }
-
-  /**
-   * 获取用户的密钥 (用于持久化)
-   */
-  getUserKey(userId: string): string | undefined {
-    const key = this.userKeys.get(userId);
-    return key ? key.toString('base64') : undefined;
-  }
-
-  /**
-   * 移除用户的加密密钥
-   */
-  removeUserKey(userId: string): void {
-    this.userKeys.delete(userId);
+    return keyBytes;
   }
 
   /**
    * 解密数据为 JSON
-   * @param userId 用户ID
+   * @param base64Key Base64 编码的 256-bit 密钥
    * @param encryptedString 加密字符串，格式: base64(iv).base64(ciphertext)
    */
-  decryptData(userId: string, encryptedString: string): unknown {
-    const decrypted = this.decryptString(userId, encryptedString);
+  decryptData(base64Key: string, encryptedString: string): unknown {
+    const decrypted = this.decryptString(base64Key, encryptedString);
     return JSON.parse(decrypted);
   }
 
   /**
    * 解密数据为 JSON 对象
    */
-  decryptDataAsMap(userId: string, encryptedString: string): Record<string, unknown> {
-    const decrypted = this.decryptString(userId, encryptedString);
+  decryptDataAsMap(base64Key: string, encryptedString: string): Record<string, unknown> {
+    const decrypted = this.decryptString(base64Key, encryptedString);
     return JSON.parse(decrypted) as Record<string, unknown>;
   }
 
   /**
    * 解密数据为字符串
-   * @param userId 用户ID
+   * @param base64Key Base64 编码的 256-bit 密钥
    * @param encryptedString 加密字符串，格式: base64(iv).base64(ciphertext)
    */
-  decryptString(userId: string, encryptedString: string): string {
-    const key = this.userKeys.get(userId);
-    if (!key) {
-      throw new Error(`用户 ${userId} 的加密密钥未设置`);
-    }
+  decryptString(base64Key: string, encryptedString: string): string {
+    const key = this.validateKey(base64Key);
 
     const parts = encryptedString.split('.');
     if (parts.length !== 2) {
@@ -114,47 +79,44 @@ export class EncryptionService {
   /**
    * 解密二进制数据
    * 解密后返回原始字节，适用于图片等二进制文件
-   * @param userId 用户ID
+   * @param base64Key Base64 编码的 256-bit 密钥
    * @param encryptedString 加密字符串
    * @returns 解密后的原始字节数据（解密结果为 Base64 编码，再解码为字节）
    */
-  decryptBinary(userId: string, encryptedString: string): Buffer {
+  decryptBinary(base64Key: string, encryptedString: string): Buffer {
     // 先解密得到 Base64 编码的原始数据
-    const decryptedBase64 = this.decryptString(userId, encryptedString);
+    const decryptedBase64 = this.decryptString(base64Key, encryptedString);
     // 将 Base64 解码为原始字节
     return Buffer.from(decryptedBase64, 'base64');
   }
 
   /**
    * 加密 JSON 数据
-   * @param userId 用户ID
+   * @param base64Key Base64 编码的 256-bit 密钥
    * @param data 要加密的 JSON 数据
    * @returns 格式: base64(iv).base64(ciphertext)
    */
-  encryptData(userId: string, data: Record<string, unknown>): string {
+  encryptData(base64Key: string, data: Record<string, unknown>): string {
     const jsonString = JSON.stringify(data);
-    return this.encryptString(userId, jsonString);
+    return this.encryptString(base64Key, jsonString);
   }
 
   /**
    * 加密动态类型 JSON 数据（支持对象或数组）
    */
-  encryptDynamic(userId: string, data: unknown): string {
+  encryptDynamic(base64Key: string, data: unknown): string {
     const jsonString = JSON.stringify(data);
-    return this.encryptString(userId, jsonString);
+    return this.encryptString(base64Key, jsonString);
   }
 
   /**
    * 加密字符串
-   * @param userId 用户ID
+   * @param base64Key Base64 编码的 256-bit 密钥
    * @param data 要加密的数据
    * @returns 格式: base64(iv).base64(ciphertext+authTag)
    */
-  encryptString(userId: string, data: string): string {
-    const key = this.userKeys.get(userId);
-    if (!key) {
-      throw new Error(`用户 ${userId} 的加密密钥未设置`);
-    }
+  encryptString(base64Key: string, data: string): string {
+    const key = this.validateKey(base64Key);
 
     const iv = crypto.randomBytes(this.IV_LENGTH);
     const cipher = crypto.createCipheriv(this.ALGORITHM, key, iv);
