@@ -195,7 +195,7 @@ C:\Users\Administrator\Documents\app_data\
 
 ## 已修复的问题
 
-### Bill 模块 `getBills` 报错
+### 1. Bill 模块 `getBills` 报错
 
 **问题描述**：调用 `memento_bill_getBills` 返回 `TypeError: Cannot read properties of undefined (reading 'getBills')`
 
@@ -204,6 +204,18 @@ C:\Users\Administrator\Documents\app_data\
 **修复方案**：将 `getBills` 和 `createBill` 的完整逻辑复制到 `getBillsByAccount` 和 `createBillForAccount` 中，避免使用 `this` 引用。
 
 **修改文件**：`server-nodejs/src/routes/pluginRoutes/handlers/bill.ts`
+
+### 2. Notes 模块 `getNotes` 返回空数据
+
+**问题描述**：调用 `memento_notes_getNotes` 始终返回空数组，即使数据文件中存在笔记。
+
+**根本原因**：Notes handler 使用 `createCrudHandlers` 读取默认的 `data.json` 文件，但实际 Notes 数据存储格式为：
+- `notes/notes/index.json` - 笔记 ID 列表
+- `notes/notes/{id}.json` - 单个笔记详情
+
+**修复方案**：重写 notes.ts，实现 `readAllNotes` 和 `saveAllNotes` 函数来正确读取/写入分离存储的笔记文件，与 Goods 模块的仓库结构类似。
+
+**修改文件**：`server-nodejs/src/routes/pluginRoutes/handlers/notes.ts`
 
 ## 注意事项
 
