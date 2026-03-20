@@ -180,18 +180,30 @@ C:\Users\Administrator\Documents\app_data\
 
 | 模块 | 状态 | 问题 | 修复状态 |
 |------|------|------|----------|
-| Activity | 待测试 | - | - |
-| Bill | 待测试 | - | - |
-| Calendar | 待测试 | - | - |
-| Chat | 待测试 | - | - |
-| Checkin | 待测试 | - | - |
-| Contact | 待测试 | - | - |
-| Day | 待测试 | - | - |
-| Diary | 待测试 | - | - |
-| Goods | 待测试 | - | - |
-| Notes | 待测试 | - | - |
-| Todo | 待测试 | - | - |
-| Tracker | 待测试 | - | - |
+| Activity | ✅ 通过 | 无 | - |
+| Bill | ✅ 通过 | `getBills` 报错 `TypeError: Cannot read properties of undefined` | ✅ 已修复 |
+| Calendar | ✅ 通过 | 无 | - |
+| Chat | ✅ 通过 | 无 | - |
+| Checkin | ✅ 通过 | 无 | - |
+| Contact | ✅ 通过 | 无 | - |
+| Day | ✅ 通过 | 无 | - |
+| Diary | ✅ 通过 | 无 | - |
+| Goods | ✅ 通过 | 无 | - |
+| Notes | ✅ 通过 | 无（测试数据为空，返回空列表正确） | - |
+| Todo | ✅ 通过 | 无（测试数据为空，返回空列表正确） | - |
+| Tracker | ✅ 通过 | 无 | - |
+
+## 已修复的问题
+
+### Bill 模块 `getBills` 报错
+
+**问题描述**：调用 `memento_bill_getBills` 返回 `TypeError: Cannot read properties of undefined (reading 'getBills')`
+
+**根本原因**：在 `bill.ts` 的 `getBillsByAccount` 和 `createBillForAccount` 方法中，使用 `this.getBills` 和 `this.createBill` 来引用同一对象字面量中的其他方法。在 ES6 之前的对象字面量方法定义中，`this` 不会指向对象本身，导致运行时错误。
+
+**修复方案**：将 `getBills` 和 `createBill` 的完整逻辑复制到 `getBillsByAccount` 和 `createBillForAccount` 中，避免使用 `this` 引用。
+
+**修改文件**：`server-nodejs/src/routes/pluginRoutes/handlers/bill.ts`
 
 ## 注意事项
 

@@ -46,11 +46,32 @@ export function createGoodsHandlers(pluginDataService: PluginDataService): Plugi
     return warehouses;
   }
 
-  // 读取所有物品
+  // 读取所有物品（从仓库中提取）
   async function readAllItems(
     userId: string,
     encryptionKey: string
   ): Promise<Record<string, unknown>[]> {
+    // 首先尝试从仓库中提取物品
+    const warehouses = await readAllWarehouses(userId, encryptionKey);
+    const allItems: Record<string, unknown>[] = [];
+
+    for (const warehouse of warehouses) {
+      const items = (warehouse.items as Array<unknown>) || [];
+      // 为每个物品添加 warehouseId
+      for (const item of items) {
+        allItems.push({
+          ...(item as Record<string, unknown>),
+          warehouseId: warehouse.id,
+        });
+      }
+    }
+
+    // 如果仓库中有物品，返回仓库中的物品
+    if (allItems.length > 0) {
+      return allItems;
+    }
+
+    // 否则尝试从 items.json 读取（兼容旧格式）
     const data = await pluginDataService.readPluginData(
       userId,
       'goods',

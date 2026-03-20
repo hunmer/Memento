@@ -414,7 +414,36 @@ export function createBillHandlers(pluginDataService: PluginDataService): Plugin
       encryptionKey: string,
       params: Record<string, unknown>
     ): Promise<PluginResult> {
-      return this.getBills(userId, encryptionKey, params);
+      // 直接复制 getBills 的逻辑，避免使用 this
+      try {
+        const accounts = await readAllAccounts(userId, encryptionKey);
+        const accountId = params.accountId as string | undefined;
+        let allBills: Record<string, unknown>[] = [];
+
+        for (const account of accounts) {
+          if (accountId && account.id !== accountId) continue;
+          const bills = (account.bills as Array<unknown>) || [];
+          allBills = allBills.concat(
+            bills.map((b) => convertClientBillToDto(b as Record<string, unknown>))
+          );
+        }
+
+        // 按日期排序（最新在前）
+        allBills.sort((a, b) => {
+          const aDate = (a.date as string) || '';
+          const bDate = (b.date as string) || '';
+          return bDate.localeCompare(aDate);
+        });
+
+        const result = createPaginatedResult(allBills, {
+          offset: params.offset as number,
+          count: params.count as number,
+        });
+
+        return { isSuccess: true, data: result };
+      } catch (e) {
+        return { isSuccess: false, message: `获取账单失败: ${e}`, code: 'INTERNAL_ERROR' };
+      }
     },
 
     // 为账户创建账单
@@ -423,7 +452,41 @@ export function createBillHandlers(pluginDataService: PluginDataService): Plugin
       encryptionKey: string,
       params: Record<string, unknown>
     ): Promise<PluginResult> {
-      return this.createBill(userId, encryptionKey, params);
+      // 直接复制 createBill 的逻辑，避免使用 this
+      try {
+        const accounts = await readAllAccounts(userId, encryptionKey);
+        const accountIndex = accounts.findIndex(
+          (a: Record<string, unknown>) => a.id === params.accountId
+        );
+
+        if (accountIndex === -1) {
+          return { isSuccess: false, message: '账户不存在', code: 'NOT_FOUND' };
+        }
+
+        const now = new Date().toISOString();
+        const newBill = {
+          ...params,
+          id: params.id || generateUUID(),
+          createdAt: now,
+          updatedAt: now,
+        };
+
+        const account = accounts[accountIndex];
+        const bills = (account.bills as Array<unknown>) || [];
+        bills.push(newBill);
+        account.bills = bills;
+
+        // 更新账户余额
+        const amount = (params.amount as number) || 0;
+        const currentBalance = (account.balance as number) ?? (account.totalAmount as number) ?? 0;
+        account.balance = currentBalance + amount;
+        account.updatedAt = now;
+
+        await saveAllAccounts(userId, encryptionKey, accounts);
+        return { isSuccess: true, data: convertClientBillToDto(newBill) };
+      } catch (e) {
+        return { isSuccess: false, message: `创建账单失败: ${e}`, code: 'INTERNAL_ERROR' };
+      }
     },
 
     // 获取统计
