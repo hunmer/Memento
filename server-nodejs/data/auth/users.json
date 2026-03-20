@@ -16,7 +16,8 @@
         {
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
-          "createdAt": "2026-03-20T03:59:23.829Z"
+          "createdAt": "2026-03-20T03:59:23.829Z",
+          "lastSyncAt": "2026-03-20T04:44:35.855Z"
         },
         {
           "deviceId": "1773728612517",
@@ -24,8 +25,24 @@
           "createdAt": "2026-03-20T04:02:55.765Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T04:02:55.765Z"
+      "lastLoginAt": "2026-03-20T04:44:35.855Z"
+    },
+    {
+      "id": "fecef7f1-653a-41d0-ae32-485f826cbb50",
+      "username": "user",
+      "passwordHash": "JERakZf6daSDtPrmFyGQ/tJDKi5SiRqFCBE9zlCOCDSMKau6opTKx6a7UKCPC5f0zwUHX6MwRWoPttJmCMpAkg==",
+      "salt": "4TK0dXAQKy5XmA73SZbB4Q==",
+      "createdAt": "2026-03-20T04:43:53.670Z",
+      "devices": [
+        {
+          "deviceId": "admin_panel",
+          "deviceName": "Admin Panel",
+          "createdAt": "2026-03-20T04:43:53.670Z",
+          "lastSyncAt": "2026-03-20T04:43:58.203Z"
+        }
+      ],
+      "lastLoginAt": "2026-03-20T04:43:58.203Z"
     }
   ],
-  "updated_at": "2026-03-20T04:02:55.765Z"
+  "updated_at": "2026-03-20T04:44:35.855Z"
 }

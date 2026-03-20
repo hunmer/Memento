@@ -85,3 +85,4 @@ ios/build/ios/XCBuildData/*
 *-cwd
 server-nodejs/node_modules/
 server-nodejs/data/
+server-nodejs/dist/
