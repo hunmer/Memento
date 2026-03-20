@@ -5,12 +5,19 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 
+/// 密钥验证文件名
+const String _keyVerificationFileName = '.key_verification.json';
+
+/// 密钥验证文件内容
+const String _keyVerificationContent = 'MEMENTO_KEY_VERIFICATION_v1';
+
 /// 端到端加密服务 - 使用 AES-256-GCM
 ///
 /// 此服务负责:
 /// - 从用户密码派生加密密钥 (PBKDF2)
 /// - 加密/解密 JSON 数据
 /// - 计算数据 MD5 (用于版本控制)
+/// - 创建和验证密钥验证文件
 ///
 /// 安全说明:
 /// - 加密密钥永不发送到服务器
@@ -46,6 +53,46 @@ class EncryptionService {
       encrypt.AES(_key!, mode: encrypt.AESMode.gcm),
     );
     _initialized = true;
+  }
+
+  /// 获取密钥验证文件名
+  String get keyVerificationFileName => _keyVerificationFileName;
+
+  /// 创建密钥验证文件内容
+  ///
+  /// 返回加密后的验证文件内容，用于保存到本地并同步到服务器
+  Map<String, dynamic> createKeyVerificationData() {
+    _checkInitialized();
+
+    final verificationData = {
+      'content': _keyVerificationContent,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    final encryptedData = encryptData(verificationData);
+    final md5Hash = computeMd5(verificationData);
+
+    return {
+      'encrypted_data': encryptedData,
+      'md5': md5Hash,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+  }
+
+  /// 验证密钥验证文件
+  ///
+  /// [encryptedData] 加密的验证文件数据
+  /// 返回是否验证成功
+  bool verifyKeyVerificationData(String encryptedData) {
+    _checkInitialized();
+
+    try {
+      final decryptedData = decryptData(encryptedData);
+      final content = decryptedData['content'] as String?;
+      return content == _keyVerificationContent;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// PBKDF2 密钥派生

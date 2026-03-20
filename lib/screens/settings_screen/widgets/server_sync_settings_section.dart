@@ -1000,6 +1000,27 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                                 }
                               },
                             ),
+                            IconButton(
+                              icon: const Icon(Icons.refresh, size: 20),
+                              tooltip: 'server_sync_refreshKey'.tr,
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      if (_syncService == null) return;
+                                      try {
+                                        await _syncService!.refreshKeyVerification();
+                                        if (!mounted) return;
+                                        toastService.showToast(
+                                          'server_sync_keyRefreshed'.tr,
+                                        );
+                                      } catch (e) {
+                                        if (!mounted) return;
+                                        toastService.showToast(
+                                          '${'server_sync_keyRefreshFailed'.tr}: $e',
+                                        );
+                                      }
+                                    },
+                            ),
                           ],
                         ),
                       ),

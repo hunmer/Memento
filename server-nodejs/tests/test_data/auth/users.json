@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "id": "62dea257-badb-4b2b-b059-48a338503291",
+      "username": "admin",
+      "passwordHash": "U75lzkPpebjQk0HHO0fXFJYSkrcmE+iK7Toyxu1e1zcyeU+MbuqigluGr4nmHN+z+6BXOEA7rwNMLaY8e3mT8A==",
+      "salt": "oMeteDbZO72CaU1Ykgf4hg==",
+      "createdAt": "2026-03-20T06:54:55.336Z",
+      "isAdmin": true,
+      "devices": []
+    }
+  ],
+  "updated_at": "2026-03-20T06:54:55.336Z"
+}

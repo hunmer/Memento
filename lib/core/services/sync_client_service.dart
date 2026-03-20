@@ -116,10 +116,13 @@ class SyncClientService {
        _recordService = recordService ?? SyncRecordService();
 
   /// 初始化 (设置认证信息)
+  ///
+  /// [ensureKeyVerification] 是否确保密钥验证文件存在（默认 true）
   Future<void> initialize({
     required String token,
     required String userId,
     required String deviceId,
+    bool ensureKeyVerification = true,
   }) async {
     _token = token;
     _userId = userId;
@@ -130,6 +133,98 @@ class SyncClientService {
 
     // 加载 MD5 快照
     await _loadMd5Snapshots();
+
+    // 确保密钥验证文件存在
+    if (ensureKeyVerification) {
+      await ensureKeyVerificationFile();
+    }
+  }
+
+  /// 确保密钥验证文件存在
+  ///
+  /// 如果本地不存在验证文件，则创建并保存
+  /// 如果服务器不存在验证文件，则上传
+  Future<void> ensureKeyVerificationFile() async {
+    if (!_encryption.isInitialized) return;
+
+    final verificationFileName = _encryption.keyVerificationFileName;
+    final localExists = await _storage.exists(verificationFileName);
+
+    // 如果本地不存在，创建并保存
+    if (!localExists) {
+      await _createAndSaveKeyVerificationFile();
+    }
+
+    // 检查服务器是否存在验证文件
+    final serverExists = await _checkServerKeyVerificationFile();
+
+    // 如果服务器不存在，上传本地验证文件
+    if (!serverExists && localExists) {
+      await _uploadKeyVerificationFile();
+    }
+  }
+
+  /// 刷新密钥验证文件
+  ///
+  /// 重新创建本地验证文件并上传到服务器
+  Future<void> refreshKeyVerification() async {
+    if (!_encryption.isInitialized) {
+      throw StateError('加密服务未初始化');
+    }
+
+    // 创建新的验证文件
+    await _createAndSaveKeyVerificationFile();
+
+    // 上传到服务器
+    await _uploadKeyVerificationFile();
+  }
+
+  /// 创建并保存密钥验证文件到本地
+  Future<void> _createAndSaveKeyVerificationFile() async {
+    final verificationData = _encryption.createKeyVerificationData();
+    final content = jsonEncode(verificationData);
+
+    await _storage.writeString(_encryption.keyVerificationFileName, content);
+  }
+
+  /// 检查服务器是否存在密钥验证文件
+  Future<bool> _checkServerKeyVerificationFile() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$_serverUrl/api/v1/sync/info/${_encryption.keyVerificationFileName}'),
+        headers: _authHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        return data['exists'] == true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 上传密钥验证文件到服务器
+  Future<void> _uploadKeyVerificationFile() async {
+    final fileName = _encryption.keyVerificationFileName;
+    final content = await _storage.readString(fileName);
+
+    if (content == null) return;
+
+    final verificationData = jsonDecode(content) as Map<String, dynamic>;
+    final encryptedData = verificationData['encrypted_data'] as String;
+    final md5Hash = verificationData['md5'] as String;
+
+    await http.post(
+      Uri.parse('$_serverUrl/api/v1/sync/push'),
+      headers: _authHeaders(),
+      body: jsonEncode({
+        'file_path': fileName,
+        'encrypted_data': encryptedData,
+        'new_md5': md5Hash,
+      }),
+    );
   }
 
   /// 加载 MD5 快照到内存
