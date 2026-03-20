@@ -189,7 +189,7 @@ function getStatusClass(plugin: InstalledPlugin): string {
                 上传插件
               </NButton>
             </NSpace>
-          </div>
+          </NSpace>
         </div>
 
         <div v-if="pluginsStore.loading" class="loading-container">
