@@ -86,3 +86,4 @@ ios/build/ios/XCBuildData/*
 server-nodejs/node_modules/
 server-nodejs/data/
 server-nodejs/dist/
+server-nodejs/admin/
