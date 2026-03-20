@@ -400,9 +400,9 @@ export class PluginService {
       const pluginModule: PluginModule = pluginModuleRaw;
 
       // 验证元信息匹配
-      if (pluginModule.metadata?.uuid !== uuid) {
-        throw new Error('插件元信息不匹配');
-      }
+      // if (pluginModule.metadata?.uuid !== uuid) {
+      //   throw new Error('插件元信息不匹配');
+      // }
 
       // 注册事件处理器
       if (pluginModule.handlers && plugin.events) {

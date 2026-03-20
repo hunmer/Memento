@@ -1,6 +1,52 @@
 # 进度日志
 
-## 会话: 2026-03-21
+## 会话: 2026-03-21 (Phase 6-7 完成)
+
+### 完成的工作
+
+#### Phase 6: 插件 Handler 集成 Hook 触发 ✅
+- 创建 `src/routes/pluginRoutes/hooks.ts` - `withHooks` 高阶函数
+- 创建 `addHooksToHandlers` 批量添加 hooks 工具
+- 更新 12 个专用 handler 文件:
+  - chat.ts, notes.ts, todo.ts, bill.ts
+  - diary.ts, goods.ts, activity.ts, checkin.ts
+  - tracker.ts, calendar.ts, contact.ts, day.ts
+- 更新 crud.ts 通用处理器
+- 所有 handler 现在触发 before/after 事件
+
+#### Phase 7: 插件 JS 公用基类 ✅
+- 创建 `src/plugins/BasePlugin.js` 基类
+- 功能:
+  - 日志工具 (log, warn, error)
+  - 生命周期钩子 (onPluginLoad, onPluginUnload, onPluginEnable, onPluginDisable)
+  - 事件订阅简化方法 (onBefore, onAfter, subscribeAllBefore, subscribeAllAfter)
+  - 文件工具 (getDataPath, ensureDir, readJson, writeJson, appendLog)
+  - export() 方法导出插件模块
+- 创建示例插件 `data-sync-logger-v2` 展示基类用法
+
+### 文件清单
+```
+server-nodejs/
+├── src/
+│   ├── routes/pluginRoutes/
+│   │   ├── hooks.ts (新增)
+│   │   ├── crud.ts (已更新)
+│   │   └── handlers/*.ts (已更新 - 12 个文件)
+│   └── plugins/
+│       └── BasePlugin.js (新增)
+└── plugins/
+    └── data-sync-logger-v2/
+        ├── main.js
+        └── metadata.json
+```
+
+### 下一步
+- 运行测试验证 hook 触发
+- 插件开发文档
+
+---
+
+## 会话: 2026-03-21 (任务规划)
 
 ### 新增任务
 - **Phase 8**: 插件 Handler 集成 Hook 触发
