@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import {
   NCard,
   NForm,
@@ -14,6 +14,15 @@ import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { useFilesStore } from '@/stores/files'
 
+const props = defineProps<{
+  prefillUsername?: string
+  prefillPassword?: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'switchToRegister'): void
+}>()
+
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 const filesStore = useFilesStore()
@@ -27,6 +36,16 @@ const form = reactive({
 
 const error = ref('')
 const loading = ref(false)
+
+// 监听预填充凭据变化
+watch(
+  () => [props.prefillUsername, props.prefillPassword],
+  ([username, password]) => {
+    if (username) form.username = username
+    if (password) form.password = password
+  },
+  { immediate: true }
+)
 
 async function handleLogin(): Promise<void> {
   if (!form.username || !form.password) {
@@ -118,6 +137,10 @@ async function checkServerHealth(): Promise<void> {
             @click="handleLogin"
           >
             {{ loading ? '登录中...' : '登录' }}
+          </NButton>
+
+          <NButton text block @click="emit('switchToRegister')">
+            没有账号？立即注册
           </NButton>
 
           <NAlert v-if="error" type="error">

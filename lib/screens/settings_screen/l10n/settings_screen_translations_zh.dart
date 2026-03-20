@@ -133,6 +133,12 @@ const Map<String, String> settingsScreenTranslationsZh = {
   'server_sync_cancel': '取消',
   'server_sync_confirmSync': '确认同步',
 
+  // 清空同步快照
+  'server_sync_clearSnapshots': '清空同步记录',
+  'server_sync_clearSnapshotsConfirm': '确定要清空同步快照记录吗？清空后下次同步将重新上传所有文件。',
+  'server_sync_clearSnapshotsSuccess': '同步记录已清空',
+  'server_sync_clearSnapshotsFailed': '清空同步记录失败',
+
   // 语言选择对话框
   'settingsScreen_selectLanguage': '选择语言',
   'settingsScreen_chinese': '中文',

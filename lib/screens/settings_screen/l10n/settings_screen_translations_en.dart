@@ -133,6 +133,12 @@ const Map<String, String> settingsScreenTranslationsEn = {
   'server_sync_cancel': 'Cancel',
   'server_sync_confirmSync': 'Confirm Sync',
 
+  // Clear sync snapshots
+  'server_sync_clearSnapshots': 'Clear Sync Records',
+  'server_sync_clearSnapshotsConfirm': 'Are you sure you want to clear sync snapshot records? All files will be re-uploaded on next sync.',
+  'server_sync_clearSnapshotsSuccess': 'Sync records cleared',
+  'server_sync_clearSnapshotsFailed': 'Failed to clear sync records',
+
   // Language selection dialog
   'settingsScreen_selectLanguage': 'Select Language',
   'settingsScreen_chinese': '中文',

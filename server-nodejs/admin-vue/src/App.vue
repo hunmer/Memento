@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   NConfigProvider,
   NMessageProvider,
@@ -17,6 +17,7 @@ import NaiveProviderContent from '@/components/common/NaiveProviderContent.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import TabNavigation from '@/components/layout/TabNavigation.vue'
 import LoginForm from '@/components/login/LoginForm.vue'
+import RegisterForm from '@/components/login/RegisterForm.vue'
 import OverviewTab from '@/components/overview/OverviewTab.vue'
 import FilesTab from '@/components/files/FilesTab.vue'
 import ApiKeysTab from '@/components/api-keys/ApiKeysTab.vue'
@@ -26,6 +27,10 @@ import LoadingOverlay from '@/components/common/LoadingOverlay.vue'
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 const filesStore = useFilesStore()
+
+// 登录/注册模式切换
+const authMode = ref<'login' | 'register'>('login')
+const prefillCredentials = ref<{ username: string; password: string } | null>(null)
 
 onMounted(async () => {
   authStore.init()
@@ -54,6 +59,12 @@ async function checkServerHealth(): Promise<void> {
   const isOnline = await apiClient.healthCheck()
   uiStore.setServerStatus(isOnline ? 'online' : 'offline')
 }
+
+// 注册成功后切换到登录页并预填充凭据
+function handleRegistered(username: string, password: string): void {
+  prefillCredentials.value = { username, password }
+  authMode.value = 'login'
+}
 </script>
 
 <template>
@@ -68,8 +79,20 @@ async function checkServerHealth(): Promise<void> {
 
               <!-- Main Content -->
               <NLayoutContent class="main-content">
-                <!-- Login Form -->
-                <LoginForm v-if="!authStore.isLoggedIn" />
+                <!-- Auth Forms -->
+                <template v-if="!authStore.isLoggedIn">
+                  <LoginForm
+                    v-if="authMode === 'login'"
+                    :prefill-username="prefillCredentials?.username"
+                    :prefill-password="prefillCredentials?.password"
+                    @switch-to-register="authMode = 'register'"
+                  />
+                  <RegisterForm
+                    v-else
+                    @switch-to-login="authMode = 'login'"
+                    @registered="handleRegistered"
+                  />
+                </template>
 
                 <!-- Dashboard -->
                 <template v-else>

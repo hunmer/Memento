@@ -164,6 +164,17 @@ class SyncClientService {
     _encryption.reset();
   }
 
+  /// 清空同步快照记录
+  /// 删除 .sync_snapshots.json 文件并清空内存缓存
+  Future<void> clearSyncSnapshots() async {
+    _md5Snapshots.clear();
+    try {
+      await _storage.delete(_snapshotFilePath);
+    } catch (e) {
+      // 文件可能不存在，静默失败
+    }
+  }
+
   /// 同步单个文件
   ///
   /// [filePath] 相对于用户数据目录的文件路径

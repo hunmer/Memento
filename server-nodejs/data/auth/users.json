@@ -17,10 +17,15 @@
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
           "createdAt": "2026-03-20T03:59:23.829Z"
+        },
+        {
+          "deviceId": "1773728612517",
+          "deviceName": "DESKTOP-SST5KQC",
+          "createdAt": "2026-03-20T04:02:55.765Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T03:59:23.829Z"
+      "lastLoginAt": "2026-03-20T04:02:55.765Z"
     }
   ],
-  "updated_at": "2026-03-20T03:59:23.830Z"
+  "updated_at": "2026-03-20T04:02:55.765Z"
 }

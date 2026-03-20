@@ -116,6 +116,12 @@ const Map<String, String> settingsScreenTranslationsJp = {
   'server_sync_wsConnected': 'リアルタイム同期接続済み',
   'server_sync_wsDisconnected': 'リアルタイム同期未接続',
 
+  // Clear sync snapshots
+  'server_sync_clearSnapshots': '同期記録をクリア',
+  'server_sync_clearSnapshotsConfirm': '同期スナップショット記録をクリアしますか？次回の同期ですべてのファイルが再アップロードされます。',
+  'server_sync_clearSnapshotsSuccess': '同期記録がクリアされました',
+  'server_sync_clearSnapshotsFailed': '同期記録のクリアに失敗しました',
+
   // Language selection dialog
   'settingsScreen_selectLanguage': '言語を選択',
   'settingsScreen_chinese': '中文',

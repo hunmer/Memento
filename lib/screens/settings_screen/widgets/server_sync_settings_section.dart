@@ -710,6 +710,56 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
     }
   }
 
+  /// 清空同步快照记录
+  Future<void> _clearSyncSnapshots() async {
+    if (_syncService == null) {
+      toastService.showToast('server_sync_notLoggedIn'.tr);
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('server_sync_clearSnapshots'.tr),
+        content: Text('server_sync_clearSnapshotsConfirm'.tr),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('cancel'.tr),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text('confirm'.tr),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _syncService!.clearSyncSnapshots();
+      if (!mounted) return;
+      toastService.showToast('server_sync_clearSnapshotsSuccess'.tr);
+    } catch (e) {
+      if (!mounted) return;
+      toastService.showToast(
+        '${'server_sync_clearSnapshotsFailed'.tr}: ${e.toString()}',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -1061,6 +1111,25 @@ class _ServerSyncSettingsSectionState extends State<ServerSyncSettingsSection> {
                       onPressed: _isLoading ? null : _performSync,
                       icon: const Icon(Icons.sync),
                       label: Text('server_sync_syncNow'.tr),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // 清空同步快照按钮
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _clearSyncSnapshots,
+                      icon: const Icon(Icons.cleaning_services),
+                      label: Text('server_sync_clearSnapshots'.tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ),
                 ],

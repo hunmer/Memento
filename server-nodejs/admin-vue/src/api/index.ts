@@ -146,6 +146,15 @@ export const authApi = {
       body: JSON.stringify(data)
     }),
 
+  getRegisterStatus: (): Promise<{ success: boolean; allow_register: boolean }> =>
+    apiClient.request('/api/v1/auth/register-status'),
+
+  register: (data: LoginRequest): Promise<LoginResponse> =>
+    apiClient.request('/api/v1/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
   hasEncryptionKey: (): Promise<{ success: boolean; has_key: boolean }> =>
     apiClient.request('/api/v1/auth/has-encryption-key'),
 

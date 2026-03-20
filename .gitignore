@@ -84,3 +84,4 @@ ios/build/ios/XCBuildData/*
 .DS_Store
 *-cwd
 server-nodejs/node_modules/
+server-nodejs/data/
