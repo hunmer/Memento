@@ -117,10 +117,31 @@ export class MementoClient {
   }
 
   /**
+   * 获取单个频道
+   */
+  async getChannel(id: string) {
+    return this.get(`/api/v1/plugins/chat/channels/${id}`);
+  }
+
+  /**
    * 创建频道
    */
   async createChannel(data: { name: string; description?: string; avatar?: string }) {
     return this.post('/api/v1/plugins/chat/channels', data);
+  }
+
+  /**
+   * 更新频道
+   */
+  async updateChannel(id: string, data: { name?: string; description?: string; avatar?: string }) {
+    return this.put(`/api/v1/plugins/chat/channels/${id}`, data);
+  }
+
+  /**
+   * 删除频道
+   */
+  async deleteChannel(id: string) {
+    return this.delete(`/api/v1/plugins/chat/channels/${id}`);
   }
 
   /**
@@ -141,6 +162,40 @@ export class MementoClient {
     metadata?: Record<string, unknown>;
   }) {
     return this.post(`/api/v1/plugins/chat/channels/${channelId}/messages`, data);
+  }
+
+  /**
+   * 删除消息
+   */
+  async deleteMessage(channelId: string, messageId: string) {
+    return this.delete(`/api/v1/plugins/chat/channels/${channelId}/messages/${messageId}`);
+  }
+
+  /**
+   * 搜索消息
+   */
+  async searchMessages(params: { field?: string; value: string; channelId?: string; findAll?: boolean; fuzzy?: boolean; offset?: number; count?: number }) {
+    const queryParams: Record<string, string> = { value: params.value };
+    if (params.field) queryParams.field = params.field;
+    if (params.channelId) queryParams.channelId = params.channelId;
+    if (params.findAll !== undefined) queryParams.findAll = String(params.findAll);
+    if (params.fuzzy !== undefined) queryParams.fuzzy = String(params.fuzzy);
+    if (params.offset !== undefined) queryParams.offset = String(params.offset);
+    if (params.count !== undefined) queryParams.count = String(params.count);
+    return this.get('/api/v1/plugins/chat/find/message', queryParams);
+  }
+
+  /**
+   * 搜索频道
+   */
+  async searchChannels(params: { field?: string; value: string; findAll?: boolean; fuzzy?: boolean; offset?: number; count?: number }) {
+    const queryParams: Record<string, string> = { value: params.value };
+    if (params.field) queryParams.field = params.field;
+    if (params.findAll !== undefined) queryParams.findAll = String(params.findAll);
+    if (params.fuzzy !== undefined) queryParams.fuzzy = String(params.fuzzy);
+    if (params.offset !== undefined) queryParams.offset = String(params.offset);
+    if (params.count !== undefined) queryParams.count = String(params.count);
+    return this.get('/api/v1/plugins/chat/find/channel', queryParams);
   }
 
   // ==================== Notes API ====================
@@ -177,6 +232,13 @@ export class MementoClient {
   }
 
   /**
+   * 删除笔记
+   */
+  async deleteNote(id: string) {
+    return this.delete(`/api/v1/plugins/notes/notes/${id}`);
+  }
+
+  /**
    * 搜索笔记
    */
   async searchNotes(keyword: string, params?: { offset?: number; count?: number }) {
@@ -207,6 +269,29 @@ export class MementoClient {
     mood?: number;
   }) {
     return this.post('/api/v1/plugins/activity/activities', data);
+  }
+
+  /**
+   * 更新活动
+   */
+  async updateActivity(id: string, data: {
+    startTime?: string;
+    endTime?: string;
+    title?: string;
+    tags?: string[];
+    description?: string;
+    mood?: number;
+    date?: string;
+  }) {
+    return this.put(`/api/v1/plugins/activity/activities/${id}`, data);
+  }
+
+  /**
+   * 删除活动
+   */
+  async deleteActivity(id: string, date?: string) {
+    const params = date ? { date } : undefined;
+    return this.delete(`/api/v1/plugins/activity/activities/${id}`, params as Record<string, string>);
   }
 
   /**
@@ -247,6 +332,27 @@ export class MementoClient {
   }
 
   /**
+   * 更新物品
+   */
+  async updateItem(id: string, data: {
+    name?: string;
+    description?: string;
+    quantity?: number;
+    category?: string;
+    tags?: string[];
+  }) {
+    return this.put(`/api/v1/plugins/goods/items/${id}`, data);
+  }
+
+  /**
+   * 删除物品
+   */
+  async deleteItem(id: string, warehouseId?: string) {
+    const params = warehouseId ? { warehouseId } : undefined;
+    return this.delete(`/api/v1/plugins/goods/items/${id}`, params as Record<string, string>);
+  }
+
+  /**
    * 搜索物品
    */
   async searchItems(keyword: string, params?: { warehouseId?: string }) {
@@ -281,6 +387,27 @@ export class MementoClient {
     tags?: string[];
   }) {
     return this.post(`/api/v1/plugins/bill/accounts/${accountId}/bills`, data);
+  }
+
+  /**
+   * 更新账单
+   */
+  async updateBill(id: string, data: {
+    type?: 'income' | 'expense' | 'transfer';
+    amount?: number;
+    category?: string;
+    description?: string;
+    date?: string;
+    tags?: string[];
+  }) {
+    return this.put(`/api/v1/plugins/bill/bills/${id}`, data);
+  }
+
+  /**
+   * 删除账单
+   */
+  async deleteBill(id: string) {
+    return this.delete(`/api/v1/plugins/bill/bills/${id}`);
   }
 
   /**

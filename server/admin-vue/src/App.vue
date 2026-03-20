@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import {
   NConfigProvider,
   NMessageProvider,
@@ -9,6 +10,8 @@ import {
 } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
+import { useFilesStore } from '@/stores/files'
+import { apiClient } from '@/api'
 
 import NaiveProviderContent from '@/components/common/NaiveProviderContent.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
@@ -22,6 +25,35 @@ import LoadingOverlay from '@/components/common/LoadingOverlay.vue'
 
 const authStore = useAuthStore()
 const uiStore = useUIStore()
+const filesStore = useFilesStore()
+
+onMounted(async () => {
+  authStore.init()
+
+  if (authStore.isLoggedIn) {
+    try {
+      await loadDashboardData()
+    } catch (error) {
+      console.log('Initial load failed:', error)
+    }
+  }
+
+  // 定期检查服务器状态
+  setInterval(checkServerHealth, 30000)
+})
+
+async function loadDashboardData(): Promise<void> {
+  await Promise.all([
+    checkServerHealth(),
+    filesStore.loadFiles(),
+    authStore.loadApiKeys()
+  ])
+}
+
+async function checkServerHealth(): Promise<void> {
+  const isOnline = await apiClient.healthCheck()
+  uiStore.setServerStatus(isOnline ? 'online' : 'offline')
+}
 </script>
 
 <template>

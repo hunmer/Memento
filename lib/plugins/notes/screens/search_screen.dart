@@ -207,7 +207,9 @@ class _SearchScreenState extends State<SearchScreen> {
                 itemCount: _searchResults.length,
                 itemBuilder: (context, index) {
                   final note = _searchResults[index];
-                  final folder = widget.controller.getFolder(note.folderId);
+                  final folder = note.folderId != null
+                      ? widget.controller.getFolder(note.folderId!)
+                      : null;
                   return SearchNoteItem(
                     note: note,
                     folderName:

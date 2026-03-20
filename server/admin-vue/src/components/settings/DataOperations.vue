@@ -4,7 +4,8 @@ import {
   NButton,
   NSpace,
   NPopconfirm,
-  NAlert
+  NAlert,
+  useMessage
 } from 'naive-ui'
 import { useFilesStore } from '@/stores/files'
 import { useUIStore } from '@/stores/ui'
@@ -12,6 +13,7 @@ import { syncApi } from '@/api'
 
 const filesStore = useFilesStore()
 const uiStore = useUIStore()
+const message = useMessage()
 
 async function handleExport(): Promise<void> {
   uiStore.setLoading(true, '导出 ZIP 文件...')
@@ -28,7 +30,7 @@ async function handleExport(): Promise<void> {
       a.click()
       URL.revokeObjectURL(url)
 
-      window.$message?.success(
+      message.success(
         `数据导出成功 (${data.metadata?.file_count} 个文件, ${data.metadata?.total_size_mb} MB)`
       )
       uiStore.addActivity('export', `导出了 ${data.metadata?.file_count} 个文件`)
@@ -36,7 +38,7 @@ async function handleExport(): Promise<void> {
       throw new Error(data.error || '导出失败')
     }
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '导出失败')
+    message.error(err instanceof Error ? err.message : '导出失败')
   } finally {
     uiStore.setLoading(false)
   }
@@ -50,10 +52,10 @@ async function handleClearData(): Promise<void> {
       await syncApi.deleteFile(file.path)
     }
     await filesStore.loadFiles()
-    window.$message?.success('服务器数据已清空')
+    message.success('服务器数据已清空')
     uiStore.addActivity('delete', '清空了服务器数据')
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '清空失败')
+    message.error(err instanceof Error ? err.message : '清空失败')
   } finally {
     uiStore.setLoading(false)
   }

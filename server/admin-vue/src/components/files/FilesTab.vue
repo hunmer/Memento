@@ -8,7 +8,8 @@ import {
   NIcon,
   NSpace,
   NPopconfirm,
-  type TreeOption
+  type TreeOption,
+  useMessage
 } from 'naive-ui'
 import {
   FolderOutline,
@@ -25,6 +26,7 @@ import { formatSize, formatTime } from '@/utils/format'
 const filesStore = useFilesStore()
 const authStore = useAuthStore()
 const uiStore = useUIStore()
+const message = useMessage()
 
 // 选中的键（用于文件操作）
 const checkedKeys = ref<string[]>([])
@@ -266,9 +268,9 @@ async function handleRefresh(): Promise<void> {
     loadedDirectories.clear()
     expandedKeysRef.value = []
     await loadRootFiles()
-    window.$message?.success('文件列表已刷新')
+    message.success('文件列表已刷新')
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '刷新失败')
+    message.error(err instanceof Error ? err.message : '刷新失败')
   } finally {
     uiStore.setLoading(false)
   }
@@ -289,7 +291,7 @@ function isBinaryFile(filePath: string): boolean {
 
 async function handleDownload(filePath: string): Promise<void> {
   if (!authStore.encryptionKey) {
-    window.$message?.error('请先设置加密密钥')
+    message.error('请先设置加密密钥')
     return
   }
 
@@ -320,10 +322,10 @@ async function handleDownload(filePath: string): Promise<void> {
       URL.revokeObjectURL(url)
     }
 
-    window.$message?.success('下载成功（已解密）')
+    message.success('下载成功（已解密）')
     uiStore.addActivity('download', `下载了文件 ${filePath}`)
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '下载失败')
+    message.error(err instanceof Error ? err.message : '下载失败')
   } finally {
     uiStore.setLoading(false)
   }
@@ -334,10 +336,10 @@ async function handleDelete(filePath: string): Promise<void> {
   try {
     await filesStore.deleteFile(filePath)
     await handleRefresh()
-    window.$message?.success('文件已删除')
+    message.success('文件已删除')
     uiStore.addActivity('delete', `删除了文件 ${filePath}`)
   } catch (err) {
-    window.$message?.error(err instanceof Error ? err.message : '删除失败')
+    message.error(err instanceof Error ? err.message : '删除失败')
   } finally {
     uiStore.setLoading(false)
   }
@@ -374,12 +376,12 @@ async function handleUpdateCheckedKeys(
 // 批量下载选中的文件（打包成 ZIP）
 async function handleBatchDownload(): Promise<void> {
   if (!authStore.encryptionKey) {
-    window.$message?.error('请先设置加密密钥')
+    message.error('请先设置加密密钥')
     return
   }
 
   if (selectedFiles.value.length === 0) {
-    window.$message?.warning('请先选择要下载的文件')
+    message.warning('请先选择要下载的文件')
     return
   }
 
@@ -417,7 +419,7 @@ async function handleBatchDownload(): Promise<void> {
 
   if (successCount === 0) {
     uiStore.setLoading(false)
-    window.$message?.error('所有文件下载失败')
+    message.error('所有文件下载失败')
     return
   }
 
@@ -435,14 +437,14 @@ async function handleBatchDownload(): Promise<void> {
     uiStore.setLoading(false)
 
     if (failCount === 0) {
-      window.$message?.success(`成功下载 ${successCount} 个文件（已打包）`)
+      message.success(`成功下载 ${successCount} 个文件（已打包）`)
     } else {
-      window.$message?.warning(`下载完成：${successCount} 个成功，${failCount} 个失败（已打包）`)
+      message.warning(`下载完成：${successCount} 个成功，${failCount} 个失败（已打包）`)
     }
     uiStore.addActivity('download', `批量下载了 ${successCount} 个文件`)
   } catch (err) {
     uiStore.setLoading(false)
-    window.$message?.error('打包失败')
+    message.error('打包失败')
   }
 
   checkedKeys.value = []
@@ -451,7 +453,7 @@ async function handleBatchDownload(): Promise<void> {
 // 批量删除选中的文件
 async function handleBatchDelete(): Promise<void> {
   if (selectedFiles.value.length === 0) {
-    window.$message?.warning('请先选择要删除的文件')
+    message.warning('请先选择要删除的文件')
     return
   }
 
@@ -472,11 +474,11 @@ async function handleBatchDelete(): Promise<void> {
   uiStore.setLoading(false)
 
   if (successCount > 0 && failCount === 0) {
-    window.$message?.success(`成功删除 ${successCount} 个文件`)
+    message.success(`成功删除 ${successCount} 个文件`)
   } else if (successCount > 0 && failCount > 0) {
-    window.$message?.warning(`删除完成：${successCount} 个成功，${failCount} 个失败`)
+    message.warning(`删除完成：${successCount} 个成功，${failCount} 个失败`)
   } else {
-    window.$message?.error('所有文件删除失败')
+    message.error('所有文件删除失败')
   }
 
   checkedKeys.value = []

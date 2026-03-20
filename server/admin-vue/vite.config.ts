@@ -30,6 +30,7 @@ export default defineConfig(({ command }) => {
   const isProduction = command === 'build'
 
   return {
+    base: '/admin/',
     plugins: [vue(),
     // 只在开发环境启用 Vue DevTools
     ...(isProduction ? [] : [vueDevTools({
@@ -54,7 +55,8 @@ export default defineConfig(({ command }) => {
       }
     },
     build: {
-      outDir: 'dist',
+      outDir: '../admin',
+      emptyOutDir: true,
       assetsDir: 'assets'
     }
   }

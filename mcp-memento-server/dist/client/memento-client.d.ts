@@ -37,6 +37,10 @@ export declare class MementoClient {
         count?: number;
     }): Promise<ApiResponse<unknown>>;
     /**
+     * 获取单个频道
+     */
+    getChannel(id: string): Promise<ApiResponse<unknown>>;
+    /**
      * 创建频道
      */
     createChannel(data: {
@@ -44,6 +48,18 @@ export declare class MementoClient {
         description?: string;
         avatar?: string;
     }): Promise<ApiResponse<unknown>>;
+    /**
+     * 更新频道
+     */
+    updateChannel(id: string, data: {
+        name?: string;
+        description?: string;
+        avatar?: string;
+    }): Promise<ApiResponse<unknown>>;
+    /**
+     * 删除频道
+     */
+    deleteChannel(id: string): Promise<ApiResponse<unknown>>;
     /**
      * 获取消息列表
      */
@@ -60,6 +76,33 @@ export declare class MementoClient {
         senderName: string;
         type?: string;
         metadata?: Record<string, unknown>;
+    }): Promise<ApiResponse<unknown>>;
+    /**
+     * 删除消息
+     */
+    deleteMessage(channelId: string, messageId: string): Promise<ApiResponse<unknown>>;
+    /**
+     * 搜索消息
+     */
+    searchMessages(params: {
+        field?: string;
+        value: string;
+        channelId?: string;
+        findAll?: boolean;
+        fuzzy?: boolean;
+        offset?: number;
+        count?: number;
+    }): Promise<ApiResponse<unknown>>;
+    /**
+     * 搜索频道
+     */
+    searchChannels(params: {
+        field?: string;
+        value: string;
+        findAll?: boolean;
+        fuzzy?: boolean;
+        offset?: number;
+        count?: number;
     }): Promise<ApiResponse<unknown>>;
     /**
      * 获取笔记列表
@@ -88,6 +131,10 @@ export declare class MementoClient {
         tags?: string[];
     }): Promise<ApiResponse<unknown>>;
     /**
+     * 删除笔记
+     */
+    deleteNote(id: string): Promise<ApiResponse<unknown>>;
+    /**
      * 搜索笔记
      */
     searchNotes(keyword: string, params?: {
@@ -113,6 +160,22 @@ export declare class MementoClient {
         description?: string;
         mood?: number;
     }): Promise<ApiResponse<unknown>>;
+    /**
+     * 更新活动
+     */
+    updateActivity(id: string, data: {
+        startTime?: string;
+        endTime?: string;
+        title?: string;
+        tags?: string[];
+        description?: string;
+        mood?: number;
+        date?: string;
+    }): Promise<ApiResponse<unknown>>;
+    /**
+     * 删除活动
+     */
+    deleteActivity(id: string, date?: string): Promise<ApiResponse<unknown>>;
     /**
      * 获取今日统计
      */
@@ -144,6 +207,20 @@ export declare class MementoClient {
         tags?: string[];
     }): Promise<ApiResponse<unknown>>;
     /**
+     * 更新物品
+     */
+    updateItem(id: string, data: {
+        name?: string;
+        description?: string;
+        quantity?: number;
+        category?: string;
+        tags?: string[];
+    }): Promise<ApiResponse<unknown>>;
+    /**
+     * 删除物品
+     */
+    deleteItem(id: string, warehouseId?: string): Promise<ApiResponse<unknown>>;
+    /**
      * 搜索物品
      */
     searchItems(keyword: string, params?: {
@@ -174,6 +251,21 @@ export declare class MementoClient {
         date?: string;
         tags?: string[];
     }): Promise<ApiResponse<unknown>>;
+    /**
+     * 更新账单
+     */
+    updateBill(id: string, data: {
+        type?: 'income' | 'expense' | 'transfer';
+        amount?: number;
+        category?: string;
+        description?: string;
+        date?: string;
+        tags?: string[];
+    }): Promise<ApiResponse<unknown>>;
+    /**
+     * 删除账单
+     */
+    deleteBill(id: string): Promise<ApiResponse<unknown>>;
     /**
      * 获取账单统计
      */

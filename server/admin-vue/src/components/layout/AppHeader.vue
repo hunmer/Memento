@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { NLayoutHeader, NButton, NSpace, NText, NTag } from 'naive-ui'
+import { NLayoutHeader, NButton, NSpace, NText, NTag, useDialog, useMessage } from 'naive-ui'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 
 const authStore = useAuthStore()
 const uiStore = useUIStore()
+const dialog = useDialog()
+const message = useMessage()
 
 function handleLogout(): void {
-  window.$dialog?.warning({
+  dialog.warning({
     title: '确认退出',
     content: '确定要退出登录吗？',
     positiveText: '退出',
     negativeText: '取消',
     onPositiveClick: () => {
       authStore.logout()
-      window.$message?.success('已退出登录')
+      message.success('已退出登录')
     }
   })
 }

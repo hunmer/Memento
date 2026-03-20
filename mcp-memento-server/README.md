@@ -103,8 +103,12 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 |--------|------|
 | `memento_chat_getChannels` | 获取聊天频道列表 |
 | `memento_chat_createChannel` | 创建新的聊天频道 |
+| `memento_chat_updateChannel` | 更新频道信息 |
+| `memento_chat_deleteChannel` | 删除频道 |
 | `memento_chat_getMessages` | 获取指定频道的消息列表 |
 | `memento_chat_sendMessage` | 向频道发送消息 |
+| `memento_chat_deleteMessage` | 删除消息 |
+| `memento_chat_searchMessages` | 搜索消息 |
 
 ### Notes 插件
 
@@ -113,6 +117,7 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 | `memento_notes_getNotes` | 获取笔记列表 |
 | `memento_notes_createNote` | 创建新笔记 |
 | `memento_notes_updateNote` | 更新笔记 |
+| `memento_notes_deleteNote` | 删除笔记 |
 | `memento_notes_searchNotes` | 搜索笔记 |
 
 ### Todo 插件
@@ -136,7 +141,9 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 | `memento_diary_getEntry` | 获取指定日期的日记 |
 | `memento_diary_createEntry` | 创建日记 |
 | `memento_diary_updateEntry` | 更新日记 |
+| `memento_diary_deleteEntry` | 删除日记 |
 | `memento_diary_searchEntries` | 搜索日记 |
+| `memento_diary_getStats` | 获取日记统计 |
 
 ### Activity 插件
 
@@ -144,6 +151,8 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 |--------|------|
 | `memento_activity_getActivities` | 获取活动记录列表 |
 | `memento_activity_createActivity` | 创建活动记录 |
+| `memento_activity_updateActivity` | 更新活动记录 |
+| `memento_activity_deleteActivity` | 删除活动记录 |
 | `memento_activity_getTodayStats` | 获取今日活动统计 |
 
 ### Bill 插件
@@ -153,6 +162,8 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 | `memento_bill_getAccounts` | 获取账户列表 |
 | `memento_bill_getBills` | 获取账单列表 |
 | `memento_bill_createBill` | 创建账单 |
+| `memento_bill_updateBill` | 更新账单 |
+| `memento_bill_deleteBill` | 删除账单 |
 | `memento_bill_getStats` | 获取账单统计 |
 
 ### Goods 插件
@@ -162,6 +173,8 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 | `memento_goods_getWarehouses` | 获取仓库列表 |
 | `memento_goods_getItems` | 获取物品列表 |
 | `memento_goods_createItem` | 创建物品 |
+| `memento_goods_updateItem` | 更新物品 |
+| `memento_goods_deleteItem` | 删除物品 |
 | `memento_goods_searchItems` | 搜索物品 |
 
 ### Checkin 插件
@@ -170,6 +183,8 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 |--------|------|
 | `memento_checkin_getItems` | 获取签到项目列表 |
 | `memento_checkin_createItem` | 创建签到项目 |
+| `memento_checkin_updateItem` | 更新签到项目 |
+| `memento_checkin_deleteItem` | 删除签到项目 |
 | `memento_checkin_addRecord` | 添加签到记录 |
 | `memento_checkin_getStats` | 获取签到统计 |
 
@@ -180,7 +195,9 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 | `memento_calendar_getEvents` | 获取日历事件 |
 | `memento_calendar_createEvent` | 创建事件 |
 | `memento_calendar_updateEvent` | 更新事件 |
+| `memento_calendar_deleteEvent` | 删除事件 |
 | `memento_calendar_completeEvent` | 完成事件 |
+| `memento_calendar_searchEvents` | 搜索事件 |
 
 ### Contact 插件
 
@@ -188,7 +205,10 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 |--------|------|
 | `memento_contact_getContacts` | 获取联系人列表 |
 | `memento_contact_createContact` | 创建联系人 |
+| `memento_contact_updateContact` | 更新联系人 |
+| `memento_contact_deleteContact` | 删除联系人 |
 | `memento_contact_searchContacts` | 搜索联系人 |
+| `memento_contact_getStats` | 获取联系人统计 |
 
 ### Tracker 插件
 
@@ -196,15 +216,21 @@ $env:MEMENTO_ENCRYPTION_KEY="your_base64_encryption_key"
 |--------|------|
 | `memento_tracker_getGoals` | 获取目标列表 |
 | `memento_tracker_createGoal` | 创建目标 |
+| `memento_tracker_updateGoal` | 更新目标 |
+| `memento_tracker_deleteGoal` | 删除目标 |
 | `memento_tracker_addRecord` | 添加记录 |
+| `memento_tracker_getStats` | 获取追踪统计 |
 
 ### Day 插件
 
 | 工具名 | 描述 |
 |--------|------|
-| `memento_day_getDays` | 获取纪念日列表 |
-| `memento_day_createDay` | 创建纪念日 |
-| `memento_day_searchDays` | 搜索纪念日 |
+| `memento_day_getMemorialDays` | 获取纪念日列表 |
+| `memento_day_createMemorialDay` | 创建纪念日 |
+| `memento_day_updateMemorialDay` | 更新纪念日 |
+| `memento_day_deleteMemorialDay` | 删除纪念日 |
+| `memento_day_searchMemorialDays` | 搜索纪念日 |
+| `memento_day_getStats` | 获取纪念日统计 |
 
 ## 开发
 

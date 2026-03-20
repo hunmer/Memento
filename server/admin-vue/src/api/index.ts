@@ -133,6 +133,7 @@ interface SyncFileInfo {
   path: string
   size: number
   updated_at: string
+  is_folder?: boolean
   is_binary?: boolean
   md5?: string
 }

@@ -304,7 +304,8 @@ void main(List<String> args) async {
     pluginPipeline().addHandler(trackerRoutes.router.call),
   );
 
-  logger.info('已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
+  logger.info(
+      '已挂载 19 个插件路由: chat, notes, activity, goods, bill, todo, agent_chat, calendar_album, calendar, checkin, contact, database, day, diary, nodes, openai, store, timer, tracker');
 
   // 管理界面静态文件服务
   final scriptDir = path.dirname(Platform.script.toFilePath());
@@ -335,20 +336,38 @@ void main(List<String> args) async {
 
   // 管理界面静态资源
   router.get('/admin/<file|.*>', (Request request, String file) async {
+    logger.info('静态文件请求: $file');
+
     // 安全检查：防止路径遍历攻击
     if (file.contains('..')) {
+      logger.warning('路径遍历攻击检测: $file');
       return Response.forbidden('Invalid path');
     }
 
     final filePath = path.join(adminDir, file);
+    logger.info('文件完整路径: $filePath');
     final targetFile = File(filePath);
 
     if (await targetFile.exists()) {
       final content = await targetFile.readAsBytes();
       final mimeType = _getMimeType(file);
+      logger.info('返回文件: $file, MIME: $mimeType, 大小: ${content.length}');
       return Response.ok(
         content,
-        headers: {'Content-Type': mimeType},
+        headers: {
+          'Content-Type': mimeType,
+        },
+      );
+    }
+
+    logger.warning('文件不存在: $filePath');
+
+    // 如果文件不存在，返回 index.html（SPA 路由支持）
+    final indexFile = File(path.join(adminDir, 'index.html'));
+    if (await indexFile.exists()) {
+      return Response.ok(
+        await indexFile.readAsString(),
+        headers: {'Content-Type': 'text/html; charset=utf-8'},
       );
     }
 
@@ -366,7 +385,8 @@ void main(List<String> args) async {
           headers: {
             ACCESS_CONTROL_ALLOW_ORIGIN: config.corsOrigins.join(','),
             ACCESS_CONTROL_ALLOW_METHODS: 'GET, POST, PUT, DELETE, OPTIONS',
-            ACCESS_CONTROL_ALLOW_HEADERS: 'Origin, Content-Type, Authorization, X-API-Key, X-Encryption-Key',
+            ACCESS_CONTROL_ALLOW_HEADERS:
+                'Origin, Content-Type, Authorization, X-API-Key, X-Encryption-Key',
           },
         ))
         .addMiddleware(logRequests())
@@ -552,8 +572,10 @@ Handler _createAuthenticatedWebSocketHandler({
     }));
 
     // 注册到 WebSocket 管理器（传递已有订阅）
-    webSocketManager.registerChannel(userId, deviceId, channel, subscription: subscription);
-    logger.info('WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
+    webSocketManager.registerChannel(userId, deviceId, channel,
+        subscription: subscription);
+    logger.info(
+        'WebSocket 已注册: userId=$userId, 当前连接数: ${webSocketManager.connectionCount}');
   });
 }
 

@@ -41,7 +41,15 @@
       "Bash(cd:*)",
       "Bash(ls:*)",
       "mcp__memento__memento_chat_getChannels",
-      "mcp__memento__memento_todo_getTasks"
+      "mcp__memento__memento_todo_getTasks",
+      "mcp__memento__memento_notes_createNote",
+      "mcp__memento__memento_chat_createChannel",
+      "mcp__memento__memento_notes_updateNote",
+      "mcp__memento__memento_chat_sendMessage",
+      "mcp__memento__memento_chat_getMessages",
+      "mcp__memento__memento_notes_getNotes",
+      "mcp__memento__memento_activity_getActivities",
+      "mcp__memento__memento_activity_createActivity"
     ],
     "deny": [],
     "ask": []
