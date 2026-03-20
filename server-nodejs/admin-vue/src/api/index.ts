@@ -1,4 +1,4 @@
-import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse, PluginListResponse, StoreListResponse, PluginOperationResponse, StoreConfigResponse, StoreConfig, InstalledPlugin } from './types'
+import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse } from './types'
 
 const DEFAULT_SERVER = 'http://localhost:8874'
 
@@ -192,6 +192,13 @@ export const authApi = {
     apiClient.request('/api/v1/auth/api-access', {
       method: 'PUT',
       body: JSON.stringify({ enabled })
+    }),
+
+  // 验证加密密钥
+  verifyEncryptionKey: (key: string): Promise<{ success: boolean; valid: boolean; error?: string }> =>
+    apiClient.request('/api/v1/auth/verify-encryption-key', {
+      method: 'POST',
+      body: JSON.stringify({ key })
     })
 }
 

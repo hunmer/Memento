@@ -6,24 +6,11 @@ import { useUIStore } from '@/stores/ui'
 import { useFilesStore } from '@/stores/files'
 import { apiClient } from '@/api'
 
-// 全局类型声明
+// 全局类型声明 - 使用 ReturnType 避免导入不存在的类型
 declare global {
   interface Window {
-    $message?: {
-      success: (msg: string) => void
-      error: (msg: string) => void
-      warning: (msg: string) => void
-      info: (msg: string) => void
-    }
-    $dialog?: {
-      warning: (options: {
-        title: string
-        content: string
-        positiveText: string
-        negativeText: string
-        onPositiveClick?: () => void
-      }) => boolean
-    }
+    $message?: ReturnType<typeof useMessage>
+    $dialog?: ReturnType<typeof useDialog>
   }
 }
 

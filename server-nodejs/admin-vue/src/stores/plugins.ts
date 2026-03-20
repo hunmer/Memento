@@ -1,7 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiClient } from '../api'
-import type { InstalledPlugin, StorePlugin, StoreConfig } from '../api/types'
+import type {
+  InstalledPlugin,
+  StorePlugin,
+  StoreConfig,
+  PluginListResponse,
+  StoreListResponse,
+  StoreConfigResponse,
+  PluginOperationResponse
+} from '../api/types'
 
 export const usePluginsStore = defineStore('plugins', () => {
   // 状态

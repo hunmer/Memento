@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import {
   NTabs, NTabPane, NCard, NButton, NSpace, NIcon, NEmpty, NSpin, NModal, NInput, useDialog, useMessage }
  from 'naive-ui'
@@ -13,21 +13,20 @@ import {
 } from '@vicons/ionicons5'
 import { usePluginsStore } from '@/stores/plugins'
 import type { InstalledPlugin, StorePlugin } from '@/api/types'
-import { useUIStore } from '@/stores/ui'
-import type { TabId } from '@/stores/ui'
 
-const uiStore = useUIStore()
+type PluginSubTab = 'installed' | 'store'
+
 const pluginsStore = usePluginsStore()
 const message = useMessage()
 const dialog = useDialog()
 
-const fileInput = ref<HTMLInputElement | null>(null)
-const activeSubTab = ref<TabId>('installed')
+const fileInput = ref<File | null>(null)
+const activeSubTab = ref<PluginSubTab>('installed')
 const showConfigModal = ref(false)
 const storeConfigURL = ref('')
 const syncInterval = ref(0)
 
-const pluginTabs: { id: TabId; label: string; icon: typeof ExtensionPuzzleOutline }[] = [
+const pluginTabs: { id: PluginSubTab; label: string; icon: typeof ExtensionPuzzleOutline }[] = [
   { id: 'installed', label: '已安装', icon: ExtensionPuzzleOutline },
   { id: 'store', label: '插件商店', icon: CloudDownloadOutline },
 ]
@@ -41,7 +40,7 @@ onMounted(async () => {
 })
 
 // 切换子标签页
-function handleSubTabChange(value: TabId): void {
+function handleSubTabChange(value: PluginSubTab): void {
   activeSubTab.value = value
 }
 
@@ -124,7 +123,7 @@ async function handleDisable(plugin: InstalledPlugin): Promise<void> {
 }
 
 // 卸载插件
-function handleUninstall(plugin: InstalledPlugin): Promise<void> {
+async function handleUninstall(plugin: InstalledPlugin): Promise<void> {
   dialog.warning({
     title: '确认卸载',
     content: `确定要卸载 "${plugin.title}" 吗？此操作不可恢复。`,
@@ -372,6 +371,7 @@ function getStatusClass(plugin: InstalledPlugin): string {
         </div>
       </NSpace>
     </NModal>
+  </div>
 </template>
 
 <style scoped>
