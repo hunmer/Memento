@@ -1,55 +1,21 @@
 {
   "users": [
     {
-      "id": "e672683b-0dcd-4b52-9c0c-c86d5ab8c64e",
+      "id": "9385bf1a-0720-4f51-b59f-f2da3cbeda60",
       "username": "admin",
-      "passwordHash": "XEk1PKxzCqcSHf1w61gzeBHeE4S/u8GDjFje92ZeWaOY0Th5QiDtm8FJySialEAvIqGwuCPI0Gv9lKJVlFCXxA==",
-      "salt": "K4p2Gu6Srd0CSMa6f4dSWQ==",
-      "createdAt": "2026-03-20T03:57:27.214Z",
+      "passwordHash": "XdzHZSLnw34JpWvU36+AoNHNR4VZi3kEEEZcNtNIgkRH4SokPpMOP6kRn0WSLSLUZoDevq17AI5ViqdoAdsidQ==",
+      "salt": "j97v5LOeB2RFoY1wyE2Vhw==",
+      "createdAt": "2026-03-20T16:31:12.832Z",
       "isAdmin": true,
       "devices": [
         {
-          "deviceId": "test",
-          "deviceName": "test",
-          "createdAt": "2026-03-20T03:57:29.007Z",
-          "lastSyncAt": "2026-03-20T11:11:05.009Z"
-        },
-        {
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
-          "createdAt": "2026-03-20T03:59:23.829Z",
-          "lastSyncAt": "2026-03-20T15:22:04.110Z"
-        },
-        {
-          "deviceId": "1773728612517",
-          "deviceName": "DESKTOP-SST5KQC",
-          "createdAt": "2026-03-20T04:02:55.765Z",
-          "lastSyncAt": "2026-03-20T06:07:14.104Z"
-        },
-        {
-          "deviceId": "test-script",
-          "deviceName": "Test Script",
-          "createdAt": "2026-03-20T11:12:22.224Z"
+          "createdAt": "2026-03-20T16:32:07.061Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T15:22:04.110Z"
-    },
-    {
-      "id": "fecef7f1-653a-41d0-ae32-485f826cbb50",
-      "username": "user",
-      "passwordHash": "JERakZf6daSDtPrmFyGQ/tJDKi5SiRqFCBE9zlCOCDSMKau6opTKx6a7UKCPC5f0zwUHX6MwRWoPttJmCMpAkg==",
-      "salt": "4TK0dXAQKy5XmA73SZbB4Q==",
-      "createdAt": "2026-03-20T04:43:53.670Z",
-      "devices": [
-        {
-          "deviceId": "admin_panel",
-          "deviceName": "Admin Panel",
-          "createdAt": "2026-03-20T04:43:53.670Z",
-          "lastSyncAt": "2026-03-20T04:43:58.203Z"
-        }
-      ],
-      "lastLoginAt": "2026-03-20T04:43:58.203Z"
+      "lastLoginAt": "2026-03-20T16:32:07.061Z"
     }
   ],
-  "updated_at": "2026-03-20T15:22:04.111Z"
+  "updated_at": "2026-03-20T16:32:07.061Z"
 }
