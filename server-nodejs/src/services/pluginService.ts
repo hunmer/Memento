@@ -399,6 +399,11 @@ export class PluginService {
 
       const pluginModule: PluginModule = pluginModuleRaw;
 
+      // 调试输出
+      console.log(`[PluginService] 加载插件: ${plugin.title}`);
+      console.log(`[PluginService]   plugin.events:`, plugin.events);
+      console.log(`[PluginService]   pluginModule.handlers keys:`, pluginModule.handlers ? Object.keys(pluginModule.handlers) : 'undefined');
+
       // 验证元信息匹配
       // if (pluginModule.metadata?.uuid !== uuid) {
       //   throw new Error('插件元信息不匹配');
@@ -406,11 +411,15 @@ export class PluginService {
 
       // 注册事件处理器
       if (pluginModule.handlers && plugin.events) {
+        console.log(`[PluginService]   开始注册 ${Object.keys(pluginModule.handlers).length} 个处理器`);
         const unsubs = pluginEventEmitter.registerHandlers(
           plugin.events,
           pluginModule.handlers,
         );
         this.unsubscribers.set(uuid, unsubs);
+        console.log(`[PluginService]   注册完成，返回 ${unsubs.length} 个取消函数`);
+      } else {
+        console.log(`[PluginService]   跳过注册: handlers=${!!pluginModule.handlers}, events=${!!plugin.events}`);
       }
 
       // 调用 onLoad
