@@ -33,11 +33,14 @@ import 'screens/settings_screen/controllers/auto_update_controller.dart';
 // 从 app_initializer 导入全局变量
 
 void main() async {
-  // 0. 注册 FCM 后台消息处理器（必须在 Firebase.initializeApp 之前）
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  // 0. 确保 WidgetsFlutterBinding 初始化（必须在任何平台通道操作之前）
+  WidgetsFlutterBinding.ensureInitialized();
 
   // 0.1 初始化 Firebase（必须在其他代码之前）
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // 0.2 注册 FCM 后台消息处理器（必须在 Firebase.initializeApp 之后）
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   // 1. 捕获 Flutter Framework 错误（如 widget build 错误）
   FlutterError.onError = (FlutterErrorDetails details) {
