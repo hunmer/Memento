@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "726933167202",
+    "project_id": "test-3f050",
+    "storage_bucket": "test-3f050.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:726933167202:android:5571b7be2f51964723853b",
+        "android_client_info": {
+          "package_name": "github.hunmer.memento"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA77l-270PNx_skoHu-hhsI0kQt8Vx_4Ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
