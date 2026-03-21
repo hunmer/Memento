@@ -102,6 +102,8 @@ dependencies:
   flutter_markdown: ^0.7.4  # For agent_chat plugin Markdown rendering
   flutter_tts: ^3.8.0  # Text-to-Speech for TTS plugin
   home_widget: ^0.6.0  # Desktop widgets for Android/iOS
+  firebase_core: ^3.0.0
+  firebase_messaging: ^15.0.0
   wheel_picker: ^0.2.2  # Wheel picker for time selection
   lpinyin: ^2.0.3  # Chinese pinyin conversion for tag filtering
   watch_connectivity: ^0.2.8  # Watch connectivity for watchOS communication

@@ -35,6 +35,7 @@ import 'services/log_service.dart';
 import 'api_forwarding/api_forwarding_config.dart';
 import 'api_forwarding/api_forwarding_service.dart';
 import 'services/speech_recognition_config_service.dart';
+import 'services/fcm_service.dart';
 import 'data_migration_controller.dart';
 
 /// 应用启动状态管理
@@ -315,6 +316,15 @@ Future<void> _initializeBackgroundServices() async {
 
     // 初始化 API 转发服务（如果配置了自动连接）
     unawaited(_initializeApiForwardingService());
+
+    // 初始化 FCM 推送服务
+    unawaited(
+      FcmService.instance.initialize().then((_) {
+        debugPrint('FCM 推送服务初始化成功');
+      }).catchError((e) {
+        debugPrint('FCM 推送服务初始化失败: $e');
+      }),
+    );
 
     // 延迟执行权限检查和小组件同步
     WidgetsBinding.instance.addPostFrameCallback((_) async {

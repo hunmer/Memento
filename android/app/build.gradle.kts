@@ -6,6 +6,8 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // ADD: Google Services plugin for FCM
+    id("com.google.gms.google-services")
 }
 
 // 读取key.properties文件
@@ -82,4 +84,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.play:core:1.10.3")
     implementation("com.google.android.play:core-ktx:1.8.1")
+    // ADD: Firebase BOM
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
 }

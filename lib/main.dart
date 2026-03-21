@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:Memento/core/app_widgets/page_transitions.dart';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/services/log_service.dart';
+import 'package:Memento/core/services/fcm_service.dart';
+import 'package:Memento/firebase_options.dart';
 
 // GetX 统一翻译导入
 import 'package:Memento/l10n/unified_translations.dart';
@@ -29,6 +33,12 @@ import 'screens/settings_screen/controllers/auto_update_controller.dart';
 // 从 app_initializer 导入全局变量
 
 void main() async {
+  // 0. 注册 FCM 后台消息处理器（必须在 Firebase.initializeApp 之前）
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // 0.1 初始化 Firebase（必须在其他代码之前）
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   // 1. 捕获 Flutter Framework 错误（如 widget build 错误）
   FlutterError.onError = (FlutterErrorDetails details) {
     // 记录到日志服务
