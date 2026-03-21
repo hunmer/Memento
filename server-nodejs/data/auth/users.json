@@ -11,16 +11,23 @@
         {
           "deviceId": "admin_panel",
           "deviceName": "Admin Panel",
-          "createdAt": "2026-03-20T16:32:07.061Z"
+          "createdAt": "2026-03-20T16:32:07.061Z",
+          "lastSyncAt": "2026-03-21T01:21:46.742Z"
         },
         {
           "deviceId": "1774024797604",
           "deviceName": "MacBook Pro",
           "createdAt": "2026-03-20T16:39:57.622Z"
+        },
+        {
+          "deviceId": "1773728612517",
+          "deviceName": "DESKTOP-SST5KQC",
+          "createdAt": "2026-03-21T01:31:16.409Z",
+          "lastSyncAt": "2026-03-21T01:32:39.797Z"
         }
       ],
-      "lastLoginAt": "2026-03-20T16:39:57.622Z"
+      "lastLoginAt": "2026-03-21T01:32:39.797Z"
     }
   ],
-  "updated_at": "2026-03-20T16:39:57.622Z"
+  "updated_at": "2026-03-21T01:32:39.797Z"
 }
