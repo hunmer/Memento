@@ -48,8 +48,14 @@ class FcmService {
       await _requestPermission();
 
       // 获取 FCM Token
-      _token = await _messaging!.getToken();
-      debugPrint('[FCM] Token: $_token');
+      debugPrint('[FCM] 正在获取 Token...');
+      try {
+        _token = await _messaging!.getToken();
+        debugPrint('[FCM] Token: $_token');
+      } catch (tokenError) {
+        debugPrint('[FCM] 获取 Token 失败: $tokenError');
+        // 继续初始化，不因为 Token 获取失败而中断
+      }
 
       // 监听 Token 刷新
       _messaging!.onTokenRefresh.listen((newToken) {
