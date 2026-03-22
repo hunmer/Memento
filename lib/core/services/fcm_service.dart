@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -23,6 +25,11 @@ class FcmService {
   String? get token => _token;
   bool get isInitialized => _initialized;
 
+  /// Token 获取配置
+  static const int _maxRetries = 3;
+  static const Duration _retryBaseDelay = Duration(seconds: 2);
+  static const Duration _tokenTimeout = Duration(seconds: 30);
+
   /// 初始化 FCM
   Future<void> initialize() async {
     // 仅在移动端启用
@@ -47,14 +54,13 @@ class FcmService {
       // 请求通知权限
       await _requestPermission();
 
-      // 获取 FCM Token
+      // 获取 FCM Token（带重试）
       debugPrint('[FCM] 正在获取 Token...');
-      try {
-        _token = await _messaging!.getToken();
+      _token = await _getTokenWithRetry();
+      if (_token != null) {
         debugPrint('[FCM] Token: $_token');
-      } catch (tokenError) {
-        debugPrint('[FCM] 获取 Token 失败: $tokenError');
-        // 继续初始化，不因为 Token 获取失败而中断
+      } else {
+        debugPrint('[FCM] Token 获取失败，将在后台继续尝试');
       }
 
       // 监听 Token 刷新
@@ -79,6 +85,63 @@ class FcmService {
       debugPrint('[FCM] 初始化失败: $e');
       debugPrint('[FCM] 堆栈: $stack');
     }
+  }
+
+  /// 带重试的 Token 获取
+  Future<String?> _getTokenWithRetry() async {
+    for (int attempt = 1; attempt <= _maxRetries; attempt++) {
+      try {
+        final token = await _messaging!.getToken().timeout(
+          _tokenTimeout,
+          onTimeout: () => throw TimeoutException('获取 Token 超时'),
+        );
+        debugPrint('[FCM] Token 获取成功 (第 $attempt 次)');
+        return token;
+      } catch (e) {
+        debugPrint('[FCM] 获取 Token 失败 (第 $attempt/$_maxRetries 次): $e');
+
+        if (attempt < _maxRetries) {
+          // 指数退避：2s, 4s, 6s...
+          final delay = Duration(
+            seconds: _retryBaseDelay.inSeconds * attempt,
+          );
+          debugPrint('[FCM] ${delay.inSeconds} 秒后重试...');
+          await Future.delayed(delay);
+        }
+      }
+    }
+
+    // 所有重试失败后，启动后台重试
+    _startBackgroundRetry();
+    return null;
+  }
+
+  /// 后台持续重试获取 Token
+  void _startBackgroundRetry() {
+    debugPrint('[FCM] 启动后台 Token 重试...');
+
+    // 延迟 30 秒后开始后台重试
+    Future.delayed(const Duration(seconds: 30), () async {
+      if (_token != null) return; // 已获取到 Token，无需重试
+
+      int retryCount = 0;
+      while (_token == null && retryCount < 10) {
+        retryCount++;
+        try {
+          final token = await _messaging!.getToken().timeout(_tokenTimeout);
+          _token = token;
+          debugPrint('[FCM] 后台重试成功，Token: $token');
+          return;
+        } catch (e) {
+          debugPrint('[FCM] 后台重试失败 ($retryCount/10): $e');
+          await Future.delayed(const Duration(minutes: 1));
+        }
+      }
+
+      if (_token == null) {
+        debugPrint('[FCM] 后台重试已达上限，放弃获取 Token');
+      }
+    });
   }
 
   Future<void> _requestPermission() async {
