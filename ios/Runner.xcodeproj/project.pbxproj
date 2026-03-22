@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -32,6 +32,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		B484A26E41DCCB60F6FADC10 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A58AC4AD02C9E3AB8837333B /* Pods_Runner.framework */; };
+		F585244C619371CEFA3778FA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 59485A7025FB3D9FB5674122 /* GoogleService-Info.plist */; };
 		FF96134040E0346952FDEF3A /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34D46EAEC8305CCB9E9A97C /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -137,6 +138,7 @@
 		4B954C1B2EFD8DD9005F06E5 /* CreateTaskIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTaskIntent.swift; sourceTree = "<group>"; };
 		4B954C932EFD9899005F06E5 /* ShortcutResultStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutResultStorage.swift; sourceTree = "<group>"; };
 		4B954D752F0039F9005F06E5 /* AppShortcutsProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppShortcutsProvider.swift; sourceTree = "<group>"; };
+		59485A7025FB3D9FB5674122 /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Runner/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -156,14 +158,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4B8276512F607D5600DF8056 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		4B8276512F607D5600DF8056 /* Exceptions for "memento Watch App" folder in "memento Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 4B8276222F607D5400DF8056 /* memento Watch App */;
 		};
-		4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -173,10 +175,52 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4B8276242F607D5400DF8056 /* memento Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B8276512F607D5600DF8056 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "memento Watch App"; sourceTree = "<group>"; };
-		4B8276322F607D5500DF8056 /* memento Watch AppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "memento Watch AppTests"; sourceTree = "<group>"; };
-		4B82763C2F607D5500DF8056 /* memento Watch AppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "memento Watch AppUITests"; sourceTree = "<group>"; };
-		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = MyAppWidget; sourceTree = "<group>"; };
+		4B8276242F607D5400DF8056 /* memento Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4B8276512F607D5600DF8056 /* Exceptions for "memento Watch App" folder in "memento Watch App" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = "memento Watch App";
+			sourceTree = "<group>";
+		};
+		4B8276322F607D5500DF8056 /* memento Watch AppTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = "memento Watch AppTests";
+			sourceTree = "<group>";
+		};
+		4B82763C2F607D5500DF8056 /* memento Watch AppUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = "memento Watch AppUITests";
+			sourceTree = "<group>";
+		};
+		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4B9549202EFAD220005F06E5 /* Exceptions for "MyAppWidget" folder in "MyAppWidgetExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = MyAppWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -275,6 +319,7 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				4BF3C3E7338630C25B3992C9 /* Pods */,
 				D7A782C01DA3F248DAAA5138 /* Frameworks */,
+				59485A7025FB3D9FB5674122 /* GoogleService-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -564,6 +609,7 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				F585244C619371CEFA3778FA /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,13 +640,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -652,13 +694,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
