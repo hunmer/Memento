@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
 import 'package:Memento/core/services/toast_service.dart';
-import 'package:memento_foreground_service/memento_foreground_service.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_foreground_task/models/notification_button.dart';
@@ -109,7 +108,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
 
     String title = 'AI 语音通话';
     String content = _getStatusText();
-    List<ServiceNotificationButton> buttons = [];
+    List<NotificationButton> buttons = [];
 
     switch (_currentState) {
       case VoiceCallState.recording:
