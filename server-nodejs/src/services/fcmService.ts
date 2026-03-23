@@ -112,6 +112,13 @@ export async function sendMulticast(
     }));
 
     console.log(`[FCM] 批量消息发送完成: 成功 ${response.successCount}, 失败 ${response.failureCount}`);
+    if (response.failureCount > 0) {
+      response.responses.forEach((res, idx) => {
+        if (!res.success) {
+          console.error(`[FCM] Token ${idx} 失败:`, res.error?.message);
+        }
+      });
+    }
 
     return {
       success: response.successCount,
