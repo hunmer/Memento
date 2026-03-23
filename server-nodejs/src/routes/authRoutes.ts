@@ -440,6 +440,20 @@ export function createAuthRoutes(
         return;
       }
 
+      // 忽略 admin_panel 的设备注册请求
+      if (data.platform === 'admin_panel' || data.device_id === 'admin_panel') {
+        res.json({
+          success: true,
+          message: '设备注册已忽略 (admin_panel)',
+          device: {
+            device_id: data.device_id,
+            device_name: data.device_name || 'Admin Panel',
+          },
+          timestamp: new Date().toISOString(),
+        });
+        return;
+      }
+
       const device = await authService.registerDevice({
         userId,
         deviceId: data.device_id,

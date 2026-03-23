@@ -180,24 +180,26 @@ export class AuthService {
       return { success: false, error: '用户名或密码错误' };
     }
 
-    // 更新设备信息
+    // 更新设备信息（忽略 admin_panel）
     const now = new Date();
-    const deviceIndex = user.devices.findIndex((d: { deviceId: string }) => d.deviceId === request.deviceId);
+    if (request.deviceId !== 'admin_panel') {
+      const deviceIndex = user.devices.findIndex((d: { deviceId: string }) => d.deviceId === request.deviceId);
 
-    if (deviceIndex >= 0) {
-      // 更新现有设备
-      user.devices[deviceIndex] = {
-        ...user.devices[deviceIndex],
-        deviceName: request.deviceName || user.devices[deviceIndex].deviceName,
-        lastSyncAt: now,
-      };
-    } else {
-      // 添加新设备
-      user.devices.push({
-        deviceId: request.deviceId,
-        deviceName: request.deviceName || 'Unknown Device',
-        createdAt: now,
-      });
+      if (deviceIndex >= 0) {
+        // 更新现有设备
+        user.devices[deviceIndex] = {
+          ...user.devices[deviceIndex],
+          deviceName: request.deviceName || user.devices[deviceIndex].deviceName,
+          lastSyncAt: now,
+        };
+      } else {
+        // 添加新设备
+        user.devices.push({
+          deviceId: request.deviceId,
+          deviceName: request.deviceName || 'Unknown Device',
+          createdAt: now,
+        });
+      }
     }
 
     // 更新用户信息
