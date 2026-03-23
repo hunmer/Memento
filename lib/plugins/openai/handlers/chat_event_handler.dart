@@ -154,9 +154,7 @@ class ChatEventHandler {
       // 添加AI消息到频道
       final channelId = originalMessage.channelId as String;
       await _plugin.channelService.addMessage(channelId, typingMessage);
-      // 添加短暂延迟，确保消息已被存储到频道中
-      await Future.delayed(const Duration(milliseconds: 300));
-      _plugin.notifyListeners();
+      _plugin.refresh();
 
       developer.log('已创建AI回复消息: ${typingMessage.id}', name: 'ChatEventHandler');
 
@@ -174,35 +172,11 @@ class ChatEventHandler {
         final contextCount = originalMessage.metadata!['contextCount'] as int;
         developer.log('请求的上下文数量: $contextCount', name: 'ChatEventHandler');
         if (contextCount > 0) {
-          // 实现重试机制，最多重试5次，每次延迟500ms
-          int retryCount = 0;
-          const maxRetries = 5;
-          const retryDelay = Duration(milliseconds: 500);
-          List<Message> previousMessages = [];
+          // 直接获取频道中最近的消息，不需要等待或重试
+          final previousMessages = ChatPlugin.instance.channelService
+              .getRecentMessages(channelId, contextCount);
 
-          while (retryCount < maxRetries) {
-            previousMessages = ChatPlugin.instance.channelService
-                .getMessagesBefore(
-                  originalMessage.id,
-                  contextCount,
-                  channelId: channelId,
-                );
-
-            developer.log(
-              '获取历史消息 (尝试 ${retryCount + 1}/$maxRetries): '
-              '找到 ${previousMessages.length} 条消息',
-              name: 'ChatEventHandler',
-            );
-
-            // 如果获取到了消息，就跳出循环
-            if (previousMessages.isNotEmpty) {
-              break;
-            }
-
-            // 如果没有获取到消息，等待500ms后重试
-            await Future.delayed(retryDelay);
-            retryCount++;
-          }
+          developer.log('获取历史消息: 找到 ${previousMessages.length} 条消息', name: 'ChatEventHandler');
 
           // 过滤掉typing消息和当前消息
           final filteredMessages =

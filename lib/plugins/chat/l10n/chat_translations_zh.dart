@@ -102,7 +102,7 @@ class ChatTranslationsZh {
     'chat_updateFailed': '更新失败: @e',
     'chat_showAll': '显示全部',
     'chat_singleFile': '1个文件',
-    'chat_contextRange': '上下文: ',
+    'chat_contextRange': '上下文',
     'chat_setContextRange': '设置上下文范围',
     'chat_currentRange': '当前范围: @currentValue',
     'chat_titleCannotBeEmpty': '标题不能为空',

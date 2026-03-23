@@ -102,7 +102,7 @@ class ChatTranslationsJp {
     'chat_updateFailed': '更新に失敗しました: @e',
     'chat_showAll': 'すべて表示',
     'chat_singleFile': '1ファイル',
-    'chat_contextRange': 'コンテキスト: ',
+    'chat_contextRange': 'コンテキスト',
     'chat_setContextRange': 'コンテキスト範囲を設定',
     'chat_currentRange': '現在の範囲: @currentValue',
     'chat_titleCannotBeEmpty': 'タイトルを入力必須です',

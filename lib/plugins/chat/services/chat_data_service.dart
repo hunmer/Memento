@@ -607,6 +607,25 @@ class ChatDataService {
     return [];
   }
 
+  /// 获取频道中最近的 N 条消息（按时间倒序，最新的在前）
+  List<Message> getRecentMessages(String channelId, int count) {
+    final channelIndex = _channels.indexWhere((c) => c.id == channelId);
+    if (channelIndex == -1) return [];
+
+    final channel = _channels[channelIndex];
+    if (channel.messages.isEmpty) return [];
+
+    // 复制消息列表并按时间倒序排序
+    final sortedMessages = List<Message>.from(channel.messages)
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    // 取最近的 count 条
+    final result = sortedMessages.take(count).toList();
+    // 按时间正序返回（用于构建上下文）
+    result.sort((a, b) => a.date.compareTo(b.date));
+    return result;
+  }
+
   Future<Message?> loadReplyMessage(String? replyToId) async {
     if (replyToId == null) return null;
     return getMessageById(replyToId);
