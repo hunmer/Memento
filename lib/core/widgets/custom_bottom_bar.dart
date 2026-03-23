@@ -278,8 +278,8 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
               } else if (widget.fabLocation == Alignment.topRight ||
                   widget.fabLocation == Alignment.centerRight ||
                   widget.fabLocation == Alignment.bottomRight) {
-                // 右侧
-                right = horizontalPadding;
+                // 右侧，再向右偏移一半（28）
+                right = horizontalPadding - 28;
               } else {
                 // 左侧
                 left = horizontalPadding;
