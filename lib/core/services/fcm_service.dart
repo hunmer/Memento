@@ -62,6 +62,8 @@ class FcmService {
       _token = await _getTokenWithRetry();
       if (_token != null) {
         debugPrint('[FCM] Token: $_token');
+        // 获取成功后立即调用回调（用于首次获取时上传）
+        onTokenRefresh?.call(_token!);
       } else {
         debugPrint('[FCM] Token 获取失败，将在后台继续尝试');
       }

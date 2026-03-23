@@ -116,19 +116,30 @@ class DeviceRegistrationService {
   }
 
   /// 初始化服务并设置 FCM Token 回调
+  ///
+  /// 正确的流程：
+  /// 1. 检查本地是否有 fcmToken
+  /// 2. 有 -> 跳过
+  /// 3. 没有 -> 自动获取 -> 上传到服务器
   Future<void> initialize() async {
     // 设置 FCM Token 刷新回调
     FcmService.instance.onTokenRefresh = (newToken) {
       updateFcmToken(newToken);
     };
 
-    // 如果已有 Token，立即同步
+    final config = await ServerSyncConfig.load();
+
+    // 如果本地已有 fcmToken，跳过
+    if (config.fcmToken != null && config.fcmToken!.isNotEmpty) {
+      print('[DeviceRegistration] 本地已有 FCM Token，跳过自动获取');
+      return;
+    }
+
+    // 本地没有 fcmToken，获取并上传
     final fcmToken = FcmService.instance.token;
-    if (fcmToken != null) {
-      final config = await ServerSyncConfig.load();
-      if (config.isLoggedIn) {
-        await registerDevice(fcmToken: fcmToken);
-      }
+    if (fcmToken != null && config.isLoggedIn) {
+      print('[DeviceRegistration] 自动获取到 FCM Token，上传到服务器');
+      await registerDevice(fcmToken: fcmToken);
     }
   }
 }
