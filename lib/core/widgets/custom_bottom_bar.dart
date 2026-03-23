@@ -225,6 +225,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       onBottomBarShown: () {},
       body:
           (context, controller) => Stack(
+            clipBehavior: Clip.none,
             children: [
               Positioned.fill(
                 child: Padding(
@@ -241,6 +242,13 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
                   color: colorScheme.surface,
                 ),
               ),
+              // FAB 放在外层 Stack，不受 BottomBar Stack 边界限制
+              if (widget.fab != null)
+                Positioned(
+                  bottom: _bottomBarHeight - 28,
+                  right: MediaQuery.of(context).size.width * (1 - widget.widthRatio) / 2,
+                  child: widget.fab!,
+                ),
             ],
           ),
       child: Stack(
@@ -249,12 +257,6 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         clipBehavior: Clip.none,
         children: [
           _buildTabBar(),
-          if (widget.fab != null)
-            Positioned(
-              top: -25,
-              right: 28,
-              child: widget.fab!,
-            ),
           if (widget.extraChildren != null)
             ...widget.extraChildren!(context, widget.currentIndex),
         ],
