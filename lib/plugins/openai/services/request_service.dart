@@ -140,7 +140,7 @@ String _formatMessagesForLog(List<ChatCompletionMessage> messages) {
 class RequestService {
   /// 获取有效的系统提示词
   /// 如果 agent 设置了 promptPresetId，则返回预设的内容
-  /// 否则返回 agent 原有的 systemPrompt
+  /// 否则返回 agent 的 effectiveSystemPrompt（从 messages 中获取 system 类型的消息）
   static Future<String> getEffectiveSystemPrompt(AIAgent agent) async {
     developer.log(
       '检查 Agent ${agent.name} 的 Prompt 预设: promptPresetId=${agent.promptPresetId}',
@@ -163,17 +163,18 @@ class RequestService {
         return presetContent;
       } else {
         developer.log(
-          '⚠ 预设 ${agent.promptPresetId} 未找到或为空，使用原始 systemPrompt',
+          '⚠ 预设 ${agent.promptPresetId} 未找到或为空，使用 agent 的 effectiveSystemPrompt',
           name: 'RequestService',
         );
       }
-    } else {
-      developer.log(
-        '未设置预设，使用原始 systemPrompt (长度: ${agent.systemPrompt.length}字符)',
-        name: 'RequestService',
-      );
     }
-    return agent.systemPrompt;
+    // 使用 effectiveSystemPrompt，它会从 messages 中获取 system 类型的消息
+    final effectivePrompt = agent.effectiveSystemPrompt;
+    developer.log(
+      '使用 agent 的 effectiveSystemPrompt (长度: ${effectivePrompt.length}字符)',
+      name: 'RequestService',
+    );
+    return effectivePrompt;
   }
 
   /// 处理思考内容，将 `<think>` 标签转换为Markdown格式

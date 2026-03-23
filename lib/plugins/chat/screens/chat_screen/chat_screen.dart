@@ -264,7 +264,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.toggleMultiSelectMode();
   }
 
-
   /// 删除多条选中的消息
   Future<void> _deleteSelectedMessages() async {
     final selectedMessages =
@@ -282,9 +281,7 @@ class _ChatScreenState extends State<ChatScreen> {
       builder:
           (context) => AlertDialog(
             title: Text('chat_deleteMessages'.tr),
-            content: Text(
-              '确定要删除选中的 ${selectedMessages.length} 条消息吗？此操作不可撤销。',
-            ),
+            content: Text('确定要删除选中的 ${selectedMessages.length} 条消息吗？此操作不可撤销。'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),

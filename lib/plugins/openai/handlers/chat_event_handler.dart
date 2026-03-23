@@ -158,6 +158,12 @@ class ChatEventHandler {
 
       developer.log('已创建AI回复消息: ${typingMessage.id}', name: 'ChatEventHandler');
 
+      // 立即广播消息更新事件，让UI显示占位消息
+      eventManager.broadcast(
+        'chat_message_updated',
+        ValuesEventArgs(typingMessage, typingMessage.id),
+      );
+
       // 准备消息列表，首先添加system消息（使用 getEffectiveSystemPrompt 获取可能包含预设的系统提示词）
       final effectiveSystemPrompt = await RequestService.getEffectiveSystemPrompt(agent);
       developer.log('系统提示词长度: ${effectiveSystemPrompt.length}字符', name: 'ChatEventHandler');
