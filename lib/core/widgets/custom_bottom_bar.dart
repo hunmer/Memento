@@ -252,13 +252,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
           if (widget.fab != null)
             Positioned(
               top: -25,
-              right: -28,
-              child: OverflowBox(
-                alignment: Alignment.center,
-                minWidth: 56,
-                minHeight: 56,
-                maxWidth: 56,
-                maxHeight: 56,
+              right: 0,
+              child: Transform.translate(
+                offset: const Offset(28, 0),
                 child: widget.fab!,
               ),
             ),
