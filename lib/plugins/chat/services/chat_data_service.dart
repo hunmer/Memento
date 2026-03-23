@@ -593,16 +593,12 @@ class ChatDataService {
 
       final index = channel.messages.indexWhere((msg) => msg.id == messageId);
       if (index != -1) {
-        final index1 = index;
-        final index2 = index1 - count;
-        final startIndex = min(index1, index2);
-        final endIndex = max(index1, index2);
+        // 获取当前消息之前的 count 条消息（不包括当前消息）
+        final startIndex = max(0, index - count);
+        final endIndex = index; // 不包括当前消息
         final messages =
             channel.messages
-                .sublist(
-                  max(0, startIndex),
-                  min(endIndex, channel.messages.length - 1),
-                )
+                .sublist(startIndex, endIndex)
                 .toList();
         messages.sort((a, b) => a.date.compareTo(b.date));
         return messages;

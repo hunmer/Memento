@@ -60,8 +60,7 @@ class ChatTranslationsJp {
     'chat_settings': '設定',
     'chat_editMessage': 'メッセージを編集',
     'chat_deleteMessage': 'メッセージを削除',
-    'chat_deleteMessageConfirmation':
-        'このメッセージを削除してもよろしいですか？この操作は取り消せません。',
+    'chat_deleteMessageConfirmation': 'このメッセージを削除してもよろしいですか？この操作は取り消せません。',
     'chat_copiedToClipboard': 'クリップボードにコピーしました',
     'chat_createChannelFailed': 'チャンネルの作成に失敗しました: @e',
     'chat_noMessagesYet': 'メッセージがありません',
@@ -78,8 +77,7 @@ class ChatTranslationsJp {
     // Recording and file related
     'chat_recordingFailed': '録音に失敗しました',
     'chat_gotIt': '了解',
-    'chat_recordingStopError':
-        '録音を停止中にエラーが発生しました。録音が保存されていない可能性があります。',
+    'chat_recordingStopError': '録音を停止中にエラーが発生しました。録音が保存されていない可能性があります。',
     'chat_selectDate': '日付を選択',
     'chat_invalidAudioMessage': '無効な音声メッセージ',
     'chat_fileNotAccessible': 'ファイルが存在しないか、アクセスできません',
@@ -90,10 +88,8 @@ class ChatTranslationsJp {
     'chat_imageProcessingFailed': '画像の処理に失敗しました: @e',
     'chat_imageSelectionFailed': '画像の選択に失敗しました: @e',
     'chat_clearAllMessages': 'すべてのメッセージをクリア',
-    'chat_confirmClearAllMessages':
-        'すべてのメッセージをクリアしてもよろしいですか？この操作は取り消せません。',
-    'chat_videoNotSupportedOnWeb':
-        'Webプラットフォームでは動画録画はサポートされていません',
+    'chat_confirmClearAllMessages': 'すべてのメッセージをクリアしてもよろしいですか？この操作は取り消せません。',
+    'chat_videoNotSupportedOnWeb': 'Webプラットフォームでは動画録画はサポートされていません',
     'chat_videoNotExist': '動画ファイルが存在しません',
     'chat_videoProcessingFailed': '動画の処理に失敗しました: @processingError',
     'chat_videoSelectionFailed': '動画の選択に失敗しました: @e',
@@ -106,7 +102,7 @@ class ChatTranslationsJp {
     'chat_updateFailed': '更新に失敗しました: @e',
     'chat_showAll': 'すべて表示',
     'chat_singleFile': '1ファイル',
-    'chat_contextRange': 'コンテキスト: @contextRange',
+    'chat_contextRange': 'コンテキスト: ',
     'chat_setContextRange': 'コンテキスト範囲を設定',
     'chat_currentRange': '現在の範囲: @currentValue',
     'chat_titleCannotBeEmpty': 'タイトルを入力必須です',

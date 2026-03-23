@@ -106,7 +106,7 @@ class ChatTranslationsEn {
     'chat_updateFailed': 'Update failed: @e',
     'chat_showAll': 'Show all',
     'chat_singleFile': '1 file',
-    'chat_contextRange': 'Context: @contextRange',
+    'chat_contextRange': 'Context: ',
     'chat_setContextRange': 'Set Context Range',
     'chat_currentRange': 'Current range: @currentValue',
     'chat_titleCannotBeEmpty': 'Title cannot be empty',

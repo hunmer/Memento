@@ -160,14 +160,19 @@ class ChatEventHandler {
 
       developer.log('已创建AI回复消息: ${typingMessage.id}', name: 'ChatEventHandler');
 
-      // 准备消息列表，首先添加system消息
+      // 准备消息列表，首先添加system消息（使用 getEffectiveSystemPrompt 获取可能包含预设的系统提示词）
+      final effectiveSystemPrompt = await RequestService.getEffectiveSystemPrompt(agent);
+      developer.log('系统提示词长度: ${effectiveSystemPrompt.length}字符', name: 'ChatEventHandler');
+
       List<ChatCompletionMessage> contextMessages = [
-        ChatCompletionMessage.system(content: agent.systemPrompt),
+        ChatCompletionMessage.system(content: effectiveSystemPrompt),
       ];
 
       // 获取历史上下文消息
+      developer.log('检查 contextCount: metadata = ${originalMessage.metadata}', name: 'ChatEventHandler');
       if (originalMessage.metadata?.containsKey('contextCount') == true) {
         final contextCount = originalMessage.metadata!['contextCount'] as int;
+        developer.log('请求的上下文数量: $contextCount', name: 'ChatEventHandler');
         if (contextCount > 0) {
           // 实现重试机制，最多重试5次，每次延迟500ms
           int retryCount = 0;
@@ -182,6 +187,12 @@ class ChatEventHandler {
                   contextCount,
                   channelId: channelId,
                 );
+
+            developer.log(
+              '获取历史消息 (尝试 ${retryCount + 1}/$maxRetries): '
+              '找到 ${previousMessages.length} 条消息',
+              name: 'ChatEventHandler',
+            );
 
             // 如果获取到了消息，就跳出循环
             if (previousMessages.isNotEmpty) {
@@ -216,7 +227,10 @@ class ChatEventHandler {
               );
             }
           }
+          developer.log('添加了 ${filteredMessages.length} 条历史消息到上下文', name: 'ChatEventHandler');
         }
+      } else {
+        developer.log('contextCount 未设置或为 0，不加载历史消息', name: 'ChatEventHandler');
       }
 
       // 最后添加当前用户的消息
@@ -227,6 +241,8 @@ class ChatEventHandler {
           ),
         ),
       );
+
+      developer.log('最终上下文消息数量: ${contextMessages.length} 条', name: 'ChatEventHandler');
 
       await RequestService.streamResponseWithRetry(
         agent: agent,

@@ -86,7 +86,9 @@ class MessageInputState {
         if (selectedAgents.isNotEmpty &&
             !metadata.containsKey('contextCount')) {
           metadata['contextCount'] = 20; // 默认上下文数量
+          debugPrint('[MessageInputState] 设置默认 contextCount: 20');
         }
+        debugPrint('[MessageInputState] 最终 metadata: $metadata');
         // 创建用户对象
         final user = ChatPlugin.instance.userService.currentUser;
         // 创建消息对象
