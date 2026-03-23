@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
+import 'package:Memento/plugins/agent_chat/models/voice_call_config.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';

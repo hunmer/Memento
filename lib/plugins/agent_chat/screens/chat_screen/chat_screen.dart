@@ -16,6 +16,7 @@ import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_detail_service.dart';
 import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
+import 'package:Memento/plugins/agent_chat/models/voice_call_config.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_call_screen.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
@@ -35,7 +36,6 @@ import 'components/agent_chain_config_dialog.dart';
 import 'components/tool_agents_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
-import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
@@ -112,34 +112,41 @@ class _ChatScreenState extends State<ChatScreen> {
     _initializeVoiceCall();
   }
 
-  /// 加载聊天设置
+  /// 加载聊天设置（从会话配置中加载）
   void _loadChatSettings() {
-    final settings = widget.getSettings?.call() ?? {};
-
-    // 加载 TTS 自动朗读设置
-    _autoReadEnabled = settings['autoReadEnabled'] as bool? ?? false;
-    _selectedTTSServiceId = settings['autoTTSServiceId'] as String?;
-
-    // 加载语音通话配置
-    final voiceCallConfigJson = settings['voiceCallConfig'] as Map<String, dynamic>?;
-    if (voiceCallConfigJson != null) {
-      _voiceCallConfig = VoiceCallConfig.fromJson(voiceCallConfigJson);
+    // 从会话中加载 TTS 配置
+    final ttsConfig = widget.conversation.ttsConfig;
+    if (ttsConfig != null) {
+      _autoReadEnabled = ttsConfig.enabled;
+      _selectedTTSServiceId = ttsConfig.serviceId;
     }
 
-    debugPrint('📖 已加载聊天设置: autoReadEnabled=$_autoReadEnabled, autoTTSServiceId=$_selectedTTSServiceId');
+    // 从会话中加载语音通话配置
+    final voiceCallConfig = widget.conversation.voiceCallConfig;
+    if (voiceCallConfig != null) {
+      _voiceCallConfig = voiceCallConfig;
+    }
+
+    debugPrint('📖 已加载会话设置: autoReadEnabled=$_autoReadEnabled, voiceCallConfig=${voiceCallConfig != null}');
   }
 
-  /// 保存聊天设置
+  /// 保存聊天设置（保存到会话配置）
   Future<void> _saveChatSettings() async {
     try {
-      await AgentChatPlugin.instance.updateSettings({
-        'autoReadEnabled': _autoReadEnabled,
-        'autoTTSServiceId': _selectedTTSServiceId,
-        'voiceCallConfig': _voiceCallConfig.toJson(),
-      });
-      debugPrint('💾 已保存聊天设置');
+      // 更新会话配置
+      final updatedConversation = widget.conversation.copyWith(
+        ttsConfig: TTSConfig(
+          enabled: _autoReadEnabled,
+          serviceId: _selectedTTSServiceId,
+        ),
+        voiceCallConfig: _voiceCallConfig,
+      );
+
+      // 保存会话
+      await _controller.conversationService.updateConversation(updatedConversation);
+      debugPrint('💾 已保存会话设置到 conversation');
     } catch (e) {
-      debugPrint('❌ 保存聊天设置失败: $e');
+      debugPrint('❌ 保存会话设置失败: $e');
     }
   }
 
@@ -419,23 +426,6 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
-  }
-
-  /// 打开语音通话配置对话框
-  Future<void> _openVoiceCallConfig() async {
-    final result = await showVoiceCallConfigDialog(
-      context,
-      initialConfig: _voiceCallConfig,
-    );
-
-    if (result != null) {
-      setState(() {
-        _voiceCallConfig = result;
-      });
-      _voiceCallManager?.updateConfig(result);
-      await _saveChatSettings();
-      toastService.showToast('语音通话配置已保存');
-    }
   }
 
   /// 启动语音通话前台服务

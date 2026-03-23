@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:Memento/plugins/agent_chat/models/voice_call_config.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
