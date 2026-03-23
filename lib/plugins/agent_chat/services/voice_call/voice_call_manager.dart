@@ -102,6 +102,36 @@ class VoiceCallConfig {
       backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
     );
   }
+
+  /// 从 JSON 创建
+  factory VoiceCallConfig.fromJson(Map<String, dynamic> json) {
+    return VoiceCallConfig(
+      ttsServiceId: json['ttsServiceId'] as String?,
+      autoContinue: json['autoContinue'] as bool? ?? true,
+      autoRecordAfterSpeaking: json['autoRecordAfterSpeaking'] as bool? ?? true,
+      maxTurns: json['maxTurns'] as int? ?? 0,
+      recordingTimeout: json['recordingTimeout'] as int? ?? 30,
+      autoSendTimeout: json['autoSendTimeout'] as int? ?? 3,
+      enableWelcomeMessage: json['enableWelcomeMessage'] as bool? ?? false,
+      welcomeMessage: json['welcomeMessage'] as String? ?? '您好，我是AI助手，请开始说话',
+      backgroundImagePath: json['backgroundImagePath'] as String?,
+    );
+  }
+
+  /// 转换为 JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'ttsServiceId': ttsServiceId,
+      'autoContinue': autoContinue,
+      'autoRecordAfterSpeaking': autoRecordAfterSpeaking,
+      'maxTurns': maxTurns,
+      'recordingTimeout': recordingTimeout,
+      'autoSendTimeout': autoSendTimeout,
+      'enableWelcomeMessage': enableWelcomeMessage,
+      'welcomeMessage': welcomeMessage,
+      'backgroundImagePath': backgroundImagePath,
+    };
+  }
 }
 
 /// 语音通话管理器

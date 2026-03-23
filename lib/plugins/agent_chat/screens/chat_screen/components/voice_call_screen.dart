@@ -15,12 +15,14 @@ class VoiceCallScreen extends StatefulWidget {
   final VoiceCallManager manager;
   final VoidCallback? onExit;
   final AIAgent? agent;
+  final Future<void> Function(VoiceCallConfig config)? onConfigChanged;
 
   const VoiceCallScreen({
     super.key,
     required this.manager,
     this.onExit,
     this.agent,
+    this.onConfigChanged,
   });
 
   @override
@@ -293,6 +295,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     if (result != null) {
       // 更新管理器的配置
       widget.manager.updateConfig(result);
+      // 调用回调保存配置
+      await widget.onConfigChanged?.call(result);
       // 刷新界面以应用背景图
       setState(() {});
     }

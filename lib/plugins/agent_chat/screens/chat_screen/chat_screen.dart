@@ -35,6 +35,7 @@ import 'components/agent_chain_config_dialog.dart';
 import 'components/tool_agents_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_management_screen/tool_management_screen.dart';
 import 'package:Memento/plugins/agent_chat/screens/tool_template_screen/tool_template_screen.dart';
+import 'package:Memento/plugins/agent_chat/agent_chat_plugin.dart';
 
 /// 聊天界面
 class ChatScreen extends StatefulWidget {
@@ -107,7 +108,39 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _initializeController();
     _loadSuggestedQuestions();
+    _loadChatSettings(); // 加载聊天设置（TTS、语音通话配置）
     _initializeVoiceCall();
+  }
+
+  /// 加载聊天设置
+  void _loadChatSettings() {
+    final settings = widget.getSettings?.call() ?? {};
+
+    // 加载 TTS 自动朗读设置
+    _autoReadEnabled = settings['autoReadEnabled'] as bool? ?? false;
+    _selectedTTSServiceId = settings['autoTTSServiceId'] as String?;
+
+    // 加载语音通话配置
+    final voiceCallConfigJson = settings['voiceCallConfig'] as Map<String, dynamic>?;
+    if (voiceCallConfigJson != null) {
+      _voiceCallConfig = VoiceCallConfig.fromJson(voiceCallConfigJson);
+    }
+
+    debugPrint('📖 已加载聊天设置: autoReadEnabled=$_autoReadEnabled, autoTTSServiceId=$_selectedTTSServiceId');
+  }
+
+  /// 保存聊天设置
+  Future<void> _saveChatSettings() async {
+    try {
+      await AgentChatPlugin.instance.updateSettings({
+        'autoReadEnabled': _autoReadEnabled,
+        'autoTTSServiceId': _selectedTTSServiceId,
+        'voiceCallConfig': _voiceCallConfig.toJson(),
+      });
+      debugPrint('💾 已保存聊天设置');
+    } catch (e) {
+      debugPrint('❌ 保存聊天设置失败: $e');
+    }
   }
 
   Future<void> _initializeController() async {
@@ -317,6 +350,9 @@ class _ChatScreenState extends State<ChatScreen> {
         },
       );
 
+      // 应用从设置加载的配置
+      _voiceCallManager!.updateConfig(_voiceCallConfig);
+
       await _voiceCallManager!.initialize();
       debugPrint('✅ 语音通话管理器初始化完成');
     } catch (e) {
@@ -374,6 +410,12 @@ class _ChatScreenState extends State<ChatScreen> {
               Navigator.of(context).pop();
             }
           },
+          onConfigChanged: (config) async {
+            setState(() {
+              _voiceCallConfig = config;
+            });
+            await _saveChatSettings();
+          },
         ),
       ),
     );
@@ -391,6 +433,7 @@ class _ChatScreenState extends State<ChatScreen> {
         _voiceCallConfig = result;
       });
       _voiceCallManager?.updateConfig(result);
+      await _saveChatSettings();
       toastService.showToast('语音通话配置已保存');
     }
   }
@@ -512,6 +555,9 @@ class _ChatScreenState extends State<ChatScreen> {
         _autoReadEnabled = result.enabled;
         _selectedTTSServiceId = result.serviceId;
       });
+
+      // 保存设置到插件配置
+      await _saveChatSettings();
 
       // 显示提示
       if (mounted) {
