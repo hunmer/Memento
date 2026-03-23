@@ -119,6 +119,9 @@ class VoiceCallManager {
   StreamSubscription<String>? _aiMessageSubscription;
   StreamSubscription<SpeechRecognitionState>? _stateSubscription;
 
+  // 状态流控制器（用于UI监听）
+  final _stateController = StreamController<VoiceCallState>.broadcast();
+
   // TTS控制
   bool _isTTSPlaying = false;
 
@@ -141,6 +144,9 @@ class VoiceCallManager {
 
   /// 获取当前状态
   VoiceCallState get state => _state;
+
+  /// 状态流（用于UI监听）
+  Stream<VoiceCallState> get stateStream => _stateController.stream;
 
   /// 获取当前配置
   VoiceCallConfig get config => _config;
@@ -401,6 +407,7 @@ class VoiceCallManager {
     if (_state != newState) {
       _state = newState;
       onStateChanged?.call(newState);
+      _stateController.add(newState); // 发送状态到流
       debugPrint('🔄 状态变更: $newState');
     }
   }
@@ -423,6 +430,7 @@ class VoiceCallManager {
     _recognitionSubscription?.cancel();
     _aiMessageSubscription?.cancel();
     _stateSubscription?.cancel();
+    _stateController.close();
 
     // 停止所有服务
     recognitionService.dispose();

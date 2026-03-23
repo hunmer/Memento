@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
-import 'dart:isolate';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,6 +19,7 @@ import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manage
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_call_screen.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
@@ -27,6 +27,7 @@ import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
 import 'package:memento_foreground_service/memento_foreground_service.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
@@ -86,7 +87,6 @@ class _ChatScreenState extends State<ChatScreen> {
   VoiceCallManager? _voiceCallManager;
   VoiceCallConfig _voiceCallConfig = const VoiceCallConfig();
   final StreamController<String> _aiMessageStreamController = StreamController<String>.broadcast();
-  StreamSubscription? _foregroundDataSubscription;
 
   @override
   void initState() {
@@ -295,15 +295,19 @@ class _ChatScreenState extends State<ChatScreen> {
       }
 
       final recognitionService = TencentASRService(
-        secretId: asrConfig['secretId'] ?? '',
-        secretKey: asrConfig['secretKey'] ?? '',
-        appId: asrConfig['appId'] ?? '',
+        config: TencentASRConfig(
+          appId: asrConfig['appId'] ?? '',
+          secretId: asrConfig['secretId'] ?? '',
+          secretKey: asrConfig['secretKey'] ?? '',
+        ),
       );
 
       _voiceCallManager = VoiceCallManager(
         recognitionService: recognitionService,
         onUserMessage: (text) async {
-          await _controller.sendMessage(text);
+          // 设置输入框文本并发送
+          _controller.setInputText(text);
+          await _controller.sendMessage();
         },
         aiMessageStream: _aiMessageStreamController.stream,
         onStateChanged: (state) {
@@ -321,36 +325,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
       await _voiceCallManager!.initialize();
       debugPrint('✅ 语音通话管理器初始化完成');
-
-      // 监听前台服务事件
-      _listenToForegroundService();
     } catch (e) {
       debugPrint('❌ 语音通话管理器初始化失败: $e');
     }
-  }
-
-  /// 监听前台服务事件
-  void _listenToForegroundService() {
-    if (!UniversalPlatform.isAndroid) return;
-
-    _foregroundDataSubscription = FlutterForegroundTask.getDataStream.listen((data) {
-      if (data is Map<String, dynamic>) {
-        final event = data['event'];
-
-        switch (event) {
-          case 'pause_call':
-            _voiceCallManager?.pauseCall();
-            break;
-          case 'resume_call':
-            _voiceCallManager?.resumeCall();
-            break;
-          case 'end_call':
-            _voiceCallManager?.endCall();
-            Navigator.of(context).pop(); // 退出语音通话界面
-            break;
-        }
-      }
-    });
   }
 
   /// 检查并发送AI消息到语音通话管理器
@@ -431,8 +408,8 @@ class _ChatScreenState extends State<ChatScreen> {
           notificationTitle: 'AI 语音通话',
           notificationText: '正在通话中...',
           notificationButtons: [
-            const ServiceNotificationButton(key: 'pause', label: '暂停'),
-            const ServiceNotificationButton(key: 'end', label: '结束'),
+            NotificationButton(text: '暂停', id: 'pause'),
+            NotificationButton(text: '结束', id: 'end'),
           ],
           callback: startVoiceCallTaskCallback,
         );
@@ -553,7 +530,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _voiceCallManager?.dispose();
     _aiMessageStreamController.close();
-    _foregroundDataSubscription?.cancel();
     _controller.removeListener(_onControllerChanged);
     _controller.messageService.removeListener(_onControllerChanged);
     _controller.dispose();
@@ -1665,7 +1641,7 @@ class VoiceCallTaskHandler extends TaskHandler {
   static String notificationText = '正在通话中...';
 
   @override
-  Future<void> onStart(DateTime timestamp, SendPort? sendPort) async {
+  Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     debugPrint('🚀 语音通话前台服务已启动');
   }
 
@@ -1675,7 +1651,7 @@ class VoiceCallTaskHandler extends TaskHandler {
   }
 
   @override
-  Future<void> onDestroy(DateTime timestamp, SendPort? sendPort) async {
+  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     debugPrint('🗑️ 语音通话前台服务已销毁');
   }
 

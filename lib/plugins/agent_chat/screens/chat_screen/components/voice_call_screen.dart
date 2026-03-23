@@ -6,6 +6,8 @@ import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manage
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:memento_foreground_service/memento_foreground_service.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:flutter_foreground_task/models/notification_button.dart';
 
 /// 语音通话界面
 ///
@@ -32,18 +34,16 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   int _currentTurn = 0;
   String _lastRecognizedText = '';
   String _lastAIMessage = '';
+  StreamSubscription<VoiceCallState>? _stateSubscription;
 
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-
-  // 前台服务相关
-  bool _isForegroundServiceRunning = false;
 
   @override
   void initState() {
     super.initState();
     _initializeAnimation();
-    _initializeManager();
+    _listenToManager();
 
     // 自动开始通话
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -53,6 +53,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
 
   @override
   void dispose() {
+    _stateSubscription?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -72,30 +73,20 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     );
   }
 
-  /// 初始化管理器
-  void _initializeManager() {
-    widget.manager.onStateChanged = (state) {
+  /// 监听管理器状态变化
+  void _listenToManager() {
+    _currentState = widget.manager.state;
+    _currentTurn = widget.manager.currentTurn;
+
+    _stateSubscription = widget.manager.stateStream.listen((state) {
       if (mounted) {
         setState(() {
           _currentState = state;
+          _currentTurn = widget.manager.currentTurn;
           _updateAnimation();
         });
       }
-    };
-
-    widget.manager.onPhaseChanged = (phase) {
-      if (mounted) {
-        setState(() {
-          _currentPhase = phase;
-        });
-      }
-    };
-
-    widget.manager.onError = (error) {
-      if (mounted) {
-        toastService.showToast(error);
-      }
-    };
+    });
   }
 
   /// 更新动画状态
@@ -123,21 +114,21 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     switch (_currentState) {
       case VoiceCallState.recording:
         buttons = [
-          const ServiceNotificationButton(key: 'pause', label: '暂停'),
-          const ServiceNotificationButton(key: 'end', label: '结束'),
+          NotificationButton(text: '暂停', id: 'pause'),
+          NotificationButton(text: '结束', id: 'end'),
         ];
         break;
       case VoiceCallState.paused:
         buttons = [
-          const ServiceNotificationButton(key: 'resume', label: '继续'),
-          const ServiceNotificationButton(key: 'end', label: '结束'),
+          NotificationButton(text: '继续', id: 'resume'),
+          NotificationButton(text: '结束', id: 'end'),
         ];
         break;
       case VoiceCallState.idle:
         break;
       default:
         buttons = [
-          const ServiceNotificationButton(key: 'end', label: '结束'),
+          NotificationButton(text: '结束', id: 'end'),
         ];
     }
 
