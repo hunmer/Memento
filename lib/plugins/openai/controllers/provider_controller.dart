@@ -226,6 +226,20 @@ class ProviderController {
         defaultModel: 'MiniMax-M2.5',
         apiFormat: 'openai',
       ),
+      ServiceProvider(
+        id: 'glm-codingplan',
+        label: 'GLM CodingPlan',
+        baseUrl: 'https://open.bigmodel.cn/api/anthropic',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+        apiFormat: 'anthropic',
+      ),
+      ServiceProvider(
+        id: 'minimax-codingplan',
+        label: 'MiniMax CodingPlan',
+        baseUrl: 'https://api.minimaxi.com/anthropic',
+        headers: {'Authorization': 'Bearer YOUR_API_KEY'},
+        apiFormat: 'anthropic',
+      ),
     ];
   }
 }
