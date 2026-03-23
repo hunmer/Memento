@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
+import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -283,43 +285,81 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     }
   }
 
+  /// 打开设置
+  Future<void> _openSettings() async {
+    final result = await showDialog<VoiceCallConfig>(
+      context: context,
+      builder: (context) => VoiceCallConfigDialog(
+        initialConfig: widget.manager.config,
+      ),
+    );
+
+    if (result != null) {
+      // 更新管理器的配置
+      widget.manager.updateConfig(result);
+      // 刷新界面以应用背景图
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // 更新前台通知
     _updateForegroundNotification();
 
+    final backgroundImage = widget.manager.config.backgroundImagePath;
+    final hasBackgroundImage = backgroundImage != null && File(backgroundImage).existsSync();
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // 顶部栏
-            _buildTopBar(),
+      body: Container(
+        decoration: hasBackgroundImage
+            ? BoxDecoration(
+                image: DecorationImage(
+                  image: FileImage(File(backgroundImage!)),
+                  fit: BoxFit.cover,
+                ),
+              )
+            : null,
+        child: Container(
+          // 添加半透明遮罩以提高可读性
+          decoration: hasBackgroundImage
+              ? BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                )
+              : null,
+          child: SafeArea(
+            child: Column(
+              children: [
+                // 顶部栏
+                _buildTopBar(),
 
-            // 主要内容区
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // 状态指示器
-                  _buildStatusIndicator(),
+                // 主要内容区
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 状态指示器
+                      _buildStatusIndicator(),
 
-                  const SizedBox(height: 48),
+                      const SizedBox(height: 48),
 
-                  // 动画圆圈
-                  _buildPulsingCircle(),
+                      // 动画圆圈
+                      _buildPulsingCircle(),
 
-                  const SizedBox(height: 48),
+                      const SizedBox(height: 48),
 
-                  // 对话信息
-                  _buildConversationInfo(),
-                ],
-              ),
+                      // 对话信息
+                      _buildConversationInfo(),
+                    ],
+                  ),
+                ),
+
+                // 底部控制区
+                _buildBottomControls(),
+              ],
             ),
-
-            // 底部控制区
-            _buildBottomControls(),
-          ],
+          ),
         ),
       ),
     );
@@ -363,9 +403,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
           ),
           // 设置按钮
           IconButton(
-            onPressed: () {
-              // TODO: 打开设置
-            },
+            onPressed: _openSettings,
             icon: const Icon(Icons.settings, color: Colors.white),
             style: IconButton.styleFrom(backgroundColor: Colors.white10),
           ),

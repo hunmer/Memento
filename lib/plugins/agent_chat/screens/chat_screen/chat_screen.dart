@@ -626,9 +626,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 case 'clear_messages':
                   _showClearMessagesConfirm();
                   break;
-                case 'voice_call_config':
-                  _openVoiceCallConfig();
-                  break;
                 case 'settings':
                   _showSettings();
                   break;
@@ -673,16 +670,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         const Icon(Icons.settings),
                         const SizedBox(width: 12),
                         Text('agent_chat_conversationSettings'.tr),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'voice_call_config',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.settings_voice),
-                        const SizedBox(width: 12),
-                        Text('语音通话设置'),
                       ],
                     ),
                   ),

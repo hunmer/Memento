@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/plugins/tts/models/tts_service_config.dart';
 import 'package:Memento/plugins/tts/models/tts_service_type.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 /// 语音通话配置对话框
 class VoiceCallConfigDialog extends StatefulWidget {
@@ -27,6 +30,7 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
   late int _recordingTimeout;
   late int _autoSendTimeout;
   late String _welcomeMessage;
+  String? _backgroundImagePath;
 
   List<TTSServiceConfig> _ttsServices = [];
   bool _isLoadingServices = true;
@@ -42,6 +46,7 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
     _recordingTimeout = _config.recordingTimeout;
     _autoSendTimeout = _config.autoSendTimeout;
     _welcomeMessage = _config.welcomeMessage;
+    _backgroundImagePath = _config.backgroundImagePath;
     _loadTTSServices();
   }
 
@@ -201,6 +206,11 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
                   },
                 ),
               ),
+
+            const Divider(height: 32),
+
+            // 背景图设置
+            _buildBackgroundImageSelector(),
           ],
         ),
       ),
@@ -220,6 +230,7 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
               autoSendTimeout: _autoSendTimeout,
               enableWelcomeMessage: _enableWelcomeMessage,
               welcomeMessage: _welcomeMessage,
+              backgroundImagePath: _backgroundImagePath,
             );
             Navigator.pop(context, config);
           },
@@ -227,6 +238,100 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
         ),
       ],
     );
+  }
+
+  /// 构建背景图选择器
+  Widget _buildBackgroundImageSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          '背景图',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(8),
+              image: _backgroundImagePath != null
+                  ? DecorationImage(
+                      image: FileImage(File(_backgroundImagePath!)),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: _backgroundImagePath == null
+                ? const Icon(Icons.image, color: Colors.grey)
+                : null,
+          ),
+          title: Text(
+            _backgroundImagePath != null
+                ? path.basename(_backgroundImagePath!)
+                : '未设置',
+          ),
+          subtitle: Text(
+            _backgroundImagePath != null ? '点击更换背景图' : '点击选择背景图',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          ),
+          trailing: _backgroundImagePath != null
+              ? IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.red),
+                  onPressed: () {
+                    setState(() {
+                      _backgroundImagePath = null;
+                    });
+                  },
+                )
+              : null,
+          onTap: _pickBackgroundImage,
+        ),
+      ],
+    );
+  }
+
+  /// 选择背景图
+  Future<void> _pickBackgroundImage() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowCompression: false,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final sourcePath = result.files.single.path!;
+
+        // 将图片复制到应用目录
+        final appDir = await getApplicationDocumentsDirectory();
+        final voiceCallDir = Directory('${appDir.path}/voice_call_bg');
+        if (!await voiceCallDir.exists()) {
+          await voiceCallDir.create(recursive: true);
+        }
+
+        final fileName = 'bg_${DateTime.now().millisecondsSinceEpoch}${path.extension(sourcePath)}';
+        final destPath = '${voiceCallDir.path}/$fileName';
+
+        await File(sourcePath).copy(destPath);
+
+        setState(() {
+          _backgroundImagePath = destPath;
+        });
+      }
+    } catch (e) {
+      debugPrint('选择背景图失败: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('选择背景图失败: $e')),
+        );
+      }
+    }
   }
 
   /// 构建TTS服务选择器

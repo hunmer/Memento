@@ -64,6 +64,9 @@ class VoiceCallConfig {
   /// 欢迎语
   final String welcomeMessage;
 
+  /// 背景图路径
+  final String? backgroundImagePath;
+
   const VoiceCallConfig({
     this.ttsServiceId,
     this.autoContinue = true,
@@ -73,6 +76,7 @@ class VoiceCallConfig {
     this.autoSendTimeout = 3,
     this.enableWelcomeMessage = false,
     this.welcomeMessage = '您好，我是AI助手，请开始说话',
+    this.backgroundImagePath,
   });
 
   VoiceCallConfig copyWith({
@@ -84,6 +88,7 @@ class VoiceCallConfig {
     int? autoSendTimeout,
     bool? enableWelcomeMessage,
     String? welcomeMessage,
+    String? backgroundImagePath,
   }) {
     return VoiceCallConfig(
       ttsServiceId: ttsServiceId ?? this.ttsServiceId,
@@ -94,6 +99,7 @@ class VoiceCallConfig {
       autoSendTimeout: autoSendTimeout ?? this.autoSendTimeout,
       enableWelcomeMessage: enableWelcomeMessage ?? this.enableWelcomeMessage,
       welcomeMessage: welcomeMessage ?? this.welcomeMessage,
+      backgroundImagePath: backgroundImagePath ?? this.backgroundImagePath,
     );
   }
 }
