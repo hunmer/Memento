@@ -1,16 +1,6 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-// @ts-ignore - global-agent 没有类型定义
-import { bootstrap } from 'global-agent';
-
-// 全局代理配置 - 必须在其他模块加载前设置
-const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
-process.env.GLOBAL_AGENT_HTTP_PROXY = proxyUrl;
-// 禁用 SSL 证书验证（代理使用自签名证书）
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-process.env.GLOBAL_AGENT_FORCE_GLOBAL_AGENT = 'true';
-bootstrap();
 
 let firebaseApp: admin.app.App | null = null;
 
@@ -43,7 +33,7 @@ function initializeFirebase(): admin.app.App {
 
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
-  console.log(`[FCM] 代理配置: ${proxyUrl}`);
+  console.log(`[FCM] 代理配置: ${process.env.GLOBAL_AGENT_HTTP_PROXY || '未设置'}`);
 
   firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
