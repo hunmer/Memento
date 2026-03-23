@@ -1,8 +1,8 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-// @ts-ignore - https-proxy-agent 的类型定义在当前 moduleResolution 下无法正确解析
-import { HttpsProxyAgent } from 'https-proxy-agent';
+// @ts-ignore - proxy-agent 的类型定义
+import { ProxyAgent } from 'proxy-agent';
 
 let firebaseApp: admin.app.App | null = null;
 
@@ -35,18 +35,18 @@ function initializeFirebase(): admin.app.App {
 
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
-  // 配置代理
-  const proxy = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
-  const proxyAgent = new HttpsProxyAgent(proxy);
+  // 配置代理 - proxy-agent 会自动读取 HTTP_PROXY/HTTPS_PROXY 环境变量
+  const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
+  const proxyAgent = new ProxyAgent(proxyUrl);
 
-  console.log(`[FCM] 代理配置: ${proxy}`);
+  console.log(`[FCM] 代理配置: ${proxyUrl}`);
 
   firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount, proxyAgent as any),
     httpAgent: proxyAgent as any,
   });
 
-  console.log(`[FCM] Firebase Admin SDK 初始化成功 (代理: ${proxy ? '已配置' : '未配置'})`);
+  console.log(`[FCM] Firebase Admin SDK 初始化成功 (代理: 已配置)`);
   return firebaseApp;
 }
 
