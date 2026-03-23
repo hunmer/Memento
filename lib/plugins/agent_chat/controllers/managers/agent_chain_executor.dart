@@ -367,6 +367,7 @@ class AgentChainExecutor {
     String? userInput,
   }) async {
     final buffer = StringBuffer();
+    final thinkingBuffer = StringBuffer(); // 单独收集思考内容
     int tokenCount = 0;
     bool isCollectingToolCall = false;
 
@@ -395,6 +396,16 @@ class AgentChainExecutor {
             aiMessageId,
             content,
             count,
+          );
+        },
+        onThinking: (thinking) {
+          debugPrint('🧠 [链式调用-Agent ${agent.name}] 收到思考内容: ${thinking.length} 字符');
+          thinkingBuffer.write(thinking);
+          // 实时更新消息的 thinkingContent 字段
+          context.messageService.updateAIMessageThinking(
+            context.conversationId,
+            aiMessageId,
+            thinkingBuffer.toString(),
           );
         },
         onError: (error) {
@@ -644,6 +655,7 @@ class AgentChainExecutor {
       ];
 
       final buffer = StringBuffer();
+      final thinkingBuffer = StringBuffer(); // 单独收集思考内容
       int tokenCount = 0;
 
       // 流式请求总结回复（带重试机制，最多10次重试）
@@ -662,6 +674,16 @@ class AgentChainExecutor {
             summaryMessageId,
             buffer.toString(),
             tokenCount,
+          );
+        },
+        onThinking: (thinking) {
+          debugPrint('🧠 [链式调用-总结] 收到思考内容: ${thinking.length} 字符');
+          thinkingBuffer.write(thinking);
+          // 实时更新消息的 thinkingContent 字段
+          context.messageService.updateAIMessageThinking(
+            context.conversationId,
+            summaryMessageId,
+            thinkingBuffer.toString(),
           );
         },
         onComplete: () {
