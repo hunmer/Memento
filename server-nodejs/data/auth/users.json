@@ -15,10 +15,15 @@
           "lastSyncAt": "2026-03-23T05:27:43.870Z",
           "fcmToken": "chetw-CnQsWq7fI21_WXnn:APA91bHn2lUcbKz1Y9D9aobCHfy5a2K_Moi8P5PKPgABlVd7tuPP4_7t0-Jq9iX6O6CDkvNWpilGEiJWe_HOzKbwH1sv2ITvBz8ME6l6PKFS9F5KVMsD1Sk",
           "platform": "Android"
+        },
+        {
+          "deviceId": "admin_panel",
+          "deviceName": "Admin Panel",
+          "createdAt": "2026-03-23T05:45:01.746Z"
         }
       ],
-      "lastLoginAt": "2026-03-23T05:18:30.500Z"
+      "lastLoginAt": "2026-03-23T05:45:01.746Z"
     }
   ],
-  "updated_at": "2026-03-23T05:27:43.871Z"
+  "updated_at": "2026-03-23T05:45:01.747Z"
 }
