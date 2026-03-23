@@ -170,9 +170,12 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
   Widget _buildFabPosition(double screenWidth) {
     return Align(
       alignment: widget.fabLocation,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: widget.offset),
-        child: widget.fab!,
+      child: SizedBox(
+        width: screenWidth * widget.widthRatio,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: widget.offset),
+          child: widget.fab!,
+        ),
       ),
     );
   }
