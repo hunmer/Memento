@@ -259,22 +259,37 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         ),
         // FAB 容器：与 BottomBar 相同宽度，居中对齐
         if (widget.fab != null)
-          Positioned(
-            bottom: widget.offset + 28,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: SizedBox(
-                width: mediaQuery.size.width * widget.widthRatio,
-                height: 1, // 最小高度，FAB 会溢出
-                child: OverflowBox(
-                  maxWidth: mediaQuery.size.width * widget.widthRatio,
-                  maxHeight: 56,
-                  alignment: widget.fabLocation,
-                  child: widget.fab!,
-                ),
-              ),
-            ),
+          Builder(
+            builder: (context) {
+              final screenWidth = mediaQuery.size.width;
+              final barWidth = screenWidth * widget.widthRatio;
+              final horizontalPadding = (screenWidth - barWidth) / 2;
+
+              double? left;
+              double? right;
+
+              if (widget.fabLocation == Alignment.topCenter ||
+                  widget.fabLocation == Alignment.center ||
+                  widget.fabLocation == Alignment.bottomCenter) {
+                // 居中
+                left = horizontalPadding + barWidth / 2 - 28;
+              } else if (widget.fabLocation == Alignment.topRight ||
+                  widget.fabLocation == Alignment.centerRight ||
+                  widget.fabLocation == Alignment.bottomRight) {
+                // 右侧
+                right = horizontalPadding;
+              } else {
+                // 左侧
+                left = horizontalPadding;
+              }
+
+              return Positioned(
+                bottom: widget.offset,
+                left: left,
+                right: right,
+                child: widget.fab!,
+              );
+            },
           ),
       ],
     );
