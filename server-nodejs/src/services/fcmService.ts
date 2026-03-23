@@ -1,6 +1,8 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
+// @ts-ignore
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 let firebaseApp: admin.app.App | null = null;
 
@@ -33,10 +35,15 @@ function initializeFirebase(): admin.app.App {
 
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
-  console.log(`[FCM] 代理配置: ${process.env.GLOBAL_AGENT_HTTP_PROXY || '未设置'}`);
+  // 配置代理 - 与 fcm_send 保持一致
+  const proxy = process.env.HTTP_PROXY || 'http://127.0.0.1:7890';
+  const proxyAgent = new HttpsProxyAgent(proxy);
+
+  console.log(`[FCM] 代理配置: ${proxy}`);
 
   firebaseApp = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(serviceAccount, proxyAgent),
+    httpAgent: proxyAgent,
   });
 
   console.log(`[FCM] Firebase Admin SDK 初始化成功 (代理: 已配置)`);
