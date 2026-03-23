@@ -285,12 +285,12 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
                 left = horizontalPadding;
               }
 
-              // 垂直位置：top 表示在 BottomBar 上方
+              // 垂直位置：top 表示 FAB 一半在 BottomBar 上方
               if (widget.fabLocation == Alignment.topLeft ||
                   widget.fabLocation == Alignment.topCenter ||
                   widget.fabLocation == Alignment.topRight) {
-                // FAB 底部对齐 BottomBar 顶部
-                bottomOffset = widget.offset + 60; // 60 是 BottomBar 大致高度
+                // FAB 中心对齐 BottomBar 顶部（假设 FAB 高度 56，一半是 28）
+                bottomOffset = widget.offset - 28;
               } else {
                 bottomOffset = widget.offset;
               }
