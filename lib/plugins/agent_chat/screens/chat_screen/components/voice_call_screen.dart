@@ -34,9 +34,19 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   String _lastRecognizedText = '';
   String _lastAIMessage = '';
   StreamSubscription<VoiceCallState>? _stateSubscription;
+  StreamSubscription<String>? _recognizedTextSubscription;
+  StreamSubscription<int>? _countdownSubscription;
 
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // 文本编辑控制器
+  final TextEditingController _textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  // 自动发送相关
+  int _countdownSeconds = 0;
+  bool _autoSendCancelled = false;
 
   @override
   void initState() {
@@ -53,7 +63,11 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
   @override
   void dispose() {
     _stateSubscription?.cancel();
+    _recognizedTextSubscription?.cancel();
+    _countdownSubscription?.cancel();
     _pulseController.dispose();
+    _textController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -77,12 +91,44 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     _currentState = widget.manager.state;
     _currentTurn = widget.manager.currentTurn;
 
+    // 监听状态变化
     _stateSubscription = widget.manager.stateStream.listen((state) {
       if (mounted) {
         setState(() {
           _currentState = state;
           _currentTurn = widget.manager.currentTurn;
+          _autoSendCancelled = widget.manager.autoSendCancelled;
           _updateAnimation();
+
+          // 进入 processing 状态时清空文本框（消息已发送）
+          if (state == VoiceCallState.processing) {
+            _textController.clear();
+            _countdownSeconds = 0;
+          }
+        });
+      }
+    });
+
+    // 监听识别文本（实时更新）
+    _recognizedTextSubscription = widget.manager.recognizedTextStream.listen((text) {
+      if (mounted) {
+        setState(() {
+          _textController.text = text;
+          // 保持光标在末尾
+          if (_textController.selection.baseOffset == -1) {
+            _textController.selection = TextSelection.fromPosition(
+              TextPosition(offset: text.length),
+            );
+          }
+        });
+      }
+    });
+
+    // 监听倒计时
+    _countdownSubscription = widget.manager.countdownStream.listen((seconds) {
+      if (mounted) {
+        setState(() {
+          _countdownSeconds = seconds;
         });
       }
     });
@@ -394,12 +440,9 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
-          // 用户说的话
-          if (_lastRecognizedText.isNotEmpty)
-            _buildMessageBubble(
-              _lastRecognizedText,
-              isUser: true,
-            ),
+          // 录音时显示可编辑的输入框和倒计时
+          if (_currentState == VoiceCallState.recording)
+            _buildRecordingInput(),
           const SizedBox(height: 16),
 
           // AI的回复
@@ -409,6 +452,181 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
               isUser: false,
             ),
         ],
+      ),
+    );
+  }
+
+  /// 构建录音输入区域
+  Widget _buildRecordingInput() {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 150),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _getStatusColor(),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 标题栏
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: _getStatusColor().withOpacity(0.2),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                topRight: Radius.circular(14),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.mic, color: _getStatusColor(), size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  '正在录音',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                // 倒计时显示
+                if (!_autoSendCancelled && _countdownSeconds > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.timer, size: 12, color: Colors.white),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$_countdownSeconds',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // 文本输入区
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: TextField(
+                controller: _textController,
+                focusNode: _focusNode,
+                maxLines: null,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                decoration: const InputDecoration(
+                  hintText: '正在识别...',
+                  hintStyle: TextStyle(color: Colors.white38),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ),
+
+          // 底部操作区
+          if (_textController.text.isNotEmpty || _autoSendCancelled)
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  // 取消/编辑按钮
+                  if (!_autoSendCancelled)
+                    Expanded(
+                      child: _buildActionButton(
+                        icon: Icons.edit,
+                        label: '编辑',
+                        color: Colors.orange,
+                        onTap: () {
+                          widget.manager.cancelAutoSend();
+                          _focusNode.requestFocus(); // 聚焦到输入框
+                        },
+                      ),
+                    ),
+                  // 手动发送按钮
+                  Expanded(
+                    child: _buildActionButton(
+                      icon: Icons.send,
+                      label: '发送',
+                      color: Colors.green,
+                      onTap: () {
+                        final text = _textController.text.trim();
+                        if (text.isNotEmpty) {
+                          widget.manager.manualSend(text);
+                        }
+                      },
+                    ),
+                  ),
+                  // 删除按钮
+                  Expanded(
+                    child: _buildActionButton(
+                      icon: Icons.delete,
+                      label: '删除',
+                      color: Colors.red,
+                      onTap: () {
+                        setState(() {
+                          _textController.clear();
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建操作按钮
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color, width: 1),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

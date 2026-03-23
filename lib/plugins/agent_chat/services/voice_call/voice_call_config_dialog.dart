@@ -25,6 +25,7 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
   late bool _enableWelcomeMessage;
   late int _maxTurns;
   late int _recordingTimeout;
+  late int _autoSendTimeout;
   late String _welcomeMessage;
 
   List<TTSServiceConfig> _ttsServices = [];
@@ -39,6 +40,7 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
     _enableWelcomeMessage = _config.enableWelcomeMessage;
     _maxTurns = _config.maxTurns;
     _recordingTimeout = _config.recordingTimeout;
+    _autoSendTimeout = _config.autoSendTimeout;
     _welcomeMessage = _config.welcomeMessage;
     _loadTTSServices();
   }
@@ -148,6 +150,27 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
               ),
             ),
 
+            // 自动发送超时
+            ListTile(
+              title: const Text('自动发送超时'),
+              subtitle: Text('停止说话后 $_autoSendTimeout 秒自动发送'),
+              trailing: SizedBox(
+                width: 120,
+                child: Slider(
+                  value: _autoSendTimeout.toDouble(),
+                  min: 1,
+                  max: 10,
+                  divisions: 9,
+                  label: '$_autoSendTimeout 秒',
+                  onChanged: (value) {
+                    setState(() {
+                      _autoSendTimeout = value.round();
+                    });
+                  },
+                ),
+              ),
+            ),
+
             const Divider(height: 32),
 
             // 欢迎语
@@ -194,6 +217,7 @@ class _VoiceCallConfigDialogState extends State<VoiceCallConfigDialog> {
               autoRecordAfterSpeaking: _autoRecordAfterSpeaking,
               maxTurns: _maxTurns,
               recordingTimeout: _recordingTimeout,
+              autoSendTimeout: _autoSendTimeout,
               enableWelcomeMessage: _enableWelcomeMessage,
               welcomeMessage: _welcomeMessage,
             );

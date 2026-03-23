@@ -55,6 +55,9 @@ class VoiceCallConfig {
   /// 录音超时时间（秒）
   final int recordingTimeout;
 
+  /// 自动发送超时时间（秒，距离上一个单词后自动发送）
+  final int autoSendTimeout;
+
   /// 是否播报欢迎语
   final bool enableWelcomeMessage;
 
@@ -67,6 +70,7 @@ class VoiceCallConfig {
     this.autoRecordAfterSpeaking = true,
     this.maxTurns = 0,
     this.recordingTimeout = 30,
+    this.autoSendTimeout = 3,
     this.enableWelcomeMessage = false,
     this.welcomeMessage = '您好，我是AI助手，请开始说话',
   });
@@ -77,6 +81,7 @@ class VoiceCallConfig {
     bool? autoRecordAfterSpeaking,
     int? maxTurns,
     int? recordingTimeout,
+    int? autoSendTimeout,
     bool? enableWelcomeMessage,
     String? welcomeMessage,
   }) {
@@ -86,6 +91,7 @@ class VoiceCallConfig {
       autoRecordAfterSpeaking: autoRecordAfterSpeaking ?? this.autoRecordAfterSpeaking,
       maxTurns: maxTurns ?? this.maxTurns,
       recordingTimeout: recordingTimeout ?? this.recordingTimeout,
+      autoSendTimeout: autoSendTimeout ?? this.autoSendTimeout,
       enableWelcomeMessage: enableWelcomeMessage ?? this.enableWelcomeMessage,
       welcomeMessage: welcomeMessage ?? this.welcomeMessage,
     );
@@ -115,6 +121,8 @@ class VoiceCallManager {
   String? _lastAIMessage;
   String? _pendingRecognizedText; // 待发送的识别文本（等待识别完成后发送）
   bool _isStoppingRecording = false; // 是否正在停止录音（防止重复处理）
+  bool _autoSendCancelled = false; // 是否取消了自动发送
+  DateTime? _lastRecognitionTime; // 上次识别结果的时间
 
   // 订阅
   StreamSubscription<String>? _recognitionSubscription;
@@ -123,12 +131,15 @@ class VoiceCallManager {
 
   // 状态流控制器（用于UI监听）
   final _stateController = StreamController<VoiceCallState>.broadcast();
+  final _recognizedTextController = StreamController<String>.broadcast(); // 识别文本流
+  final _countdownController = StreamController<int>.broadcast(); // 倒计时流
 
   // TTS控制
   bool _isTTSPlaying = false;
 
   // 定时器
   Timer? _recordingTimeoutTimer;
+  Timer? _autoSendTimer; // 自动发送倒计时定时器
 
   // 回调
   final Function(VoiceCallState)? onStateChanged;
@@ -150,6 +161,12 @@ class VoiceCallManager {
   /// 状态流（用于UI监听）
   Stream<VoiceCallState> get stateStream => _stateController.stream;
 
+  /// 识别文本流（用于UI实时显示）
+  Stream<String> get recognizedTextStream => _recognizedTextController.stream;
+
+  /// 倒计时流（用于UI显示自动发送倒计时）
+  Stream<int> get countdownStream => _countdownController.stream;
+
   /// 获取当前配置
   VoiceCallConfig get config => _config;
 
@@ -168,6 +185,12 @@ class VoiceCallManager {
   /// 是否正在播报
   bool get isSpeaking => _state == VoiceCallState.speaking;
 
+  /// 获取待发送的识别文本
+  String? get pendingText => _pendingRecognizedText;
+
+  /// 是否已取消自动发送
+  bool get autoSendCancelled => _autoSendCancelled;
+
   /// 更新配置
   void updateConfig(VoiceCallConfig config) {
     _config = config;
@@ -180,8 +203,19 @@ class VoiceCallManager {
     // 监听识别结果（实时更新显示，但不发送）
     _recognitionSubscription = recognitionService.recognitionStream.listen((text) {
       if (_state == VoiceCallState.recording) {
-        // 保存最新的识别结果，但不立即发送
+        // 保存最新的识别结果
         _pendingRecognizedText = text;
+        _lastRecognitionTime = DateTime.now();
+        _autoSendCancelled = false; // 重置取消标志
+
+        // 发送到UI显示
+        _recognizedTextController.add(text);
+
+        // 如果没有取消自动发送，启动倒计时
+        if (!_autoSendCancelled) {
+          _startAutoSendCountdown();
+        }
+
         debugPrint('🎤 识别中: $text');
       }
     });
@@ -276,9 +310,44 @@ class VoiceCallManager {
     if (_state != VoiceCallState.recording) return;
 
     _isStoppingRecording = true;
+    _autoSendTimer?.cancel();
     try {
       await recognitionService.stopRecording();
       _recordingTimeoutTimer?.cancel();
+    } finally {
+      _isStoppingRecording = false;
+    }
+  }
+
+  /// 取消自动发送（进入手动编辑模式）
+  void cancelAutoSend() {
+    _autoSendCancelled = true;
+    _autoSendTimer?.cancel();
+    _countdownController.add(0); // 清除倒计时
+    debugPrint('⏸️ 已取消自动发送，进入手动编辑模式');
+  }
+
+  /// 手动发送（使用当前识别的文本）
+  Future<void> manualSend(String text) async {
+    if (_state != VoiceCallState.recording || _isStoppingRecording) return;
+
+    _isStoppingRecording = true;
+    _autoSendTimer?.cancel();
+
+    try {
+      // 先停止录音
+      await recognitionService.stopRecording();
+      _recordingTimeoutTimer?.cancel();
+
+      // 更新待发送文本
+      _pendingRecognizedText = text;
+
+      // 等待一小段时间确保状态更新
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // 发送结果
+      _onRecognized(text);
+      _pendingRecognizedText = null;
     } finally {
       _isStoppingRecording = false;
     }
@@ -293,6 +362,35 @@ class VoiceCallManager {
   }
 
   // ========== 私有方法 ==========
+
+  /// 启动自动发送倒计时
+  void _startAutoSendCountdown() {
+    // 取消之前的倒计时
+    _autoSendTimer?.cancel();
+
+    final timeoutSeconds = _config.autoSendTimeout;
+    int remainingSeconds = timeoutSeconds;
+
+    // 立即发送初始倒计时
+    _countdownController.add(remainingSeconds);
+
+    // 启动倒计时定时器
+    _autoSendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      remainingSeconds--;
+
+      if (remainingSeconds > 0) {
+        _countdownController.add(remainingSeconds);
+        debugPrint('⏳ 自动发送倒计时: $remainingSeconds 秒');
+      } else {
+        // 倒计时结束，自动发送
+        timer.cancel();
+        if (_state == VoiceCallState.recording && !_autoSendCancelled) {
+          debugPrint('⏰ 倒计时结束，自动发送');
+          _stopRecordingAndSend();
+        }
+      }
+    });
+  }
 
   /// 开始录音
   Future<void> _startRecording() async {
@@ -454,10 +552,13 @@ class VoiceCallManager {
   /// 释放资源
   void dispose() {
     _recordingTimeoutTimer?.cancel();
+    _autoSendTimer?.cancel();
     _recognitionSubscription?.cancel();
     _aiMessageSubscription?.cancel();
     _stateSubscription?.cancel();
     _stateController.close();
+    _recognizedTextController.close();
+    _countdownController.close();
 
     // 停止所有服务
     recognitionService.dispose();
