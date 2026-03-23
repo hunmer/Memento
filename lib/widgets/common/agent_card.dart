@@ -250,13 +250,14 @@ class _AgentCardWidgetState extends State<AgentCardWidget> {
         height: iconSize,
         child: Container(
           decoration: BoxDecoration(
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: effectiveColor.withValues(alpha: 0.5),
               width: 2,
             ),
           ),
-          child: ClipOval(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
             child: AdaptiveImage(
               imagePath: widget.avatarUrl,
               width: iconSize,
@@ -274,7 +275,7 @@ class _AgentCardWidgetState extends State<AgentCardWidget> {
         width: iconSize,
         height: iconSize,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(12),
           color: effectiveColor,
         ),
         child: Icon(
@@ -295,7 +296,7 @@ class _AgentCardWidgetState extends State<AgentCardWidget> {
       width: iconSize,
       height: iconSize,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(12),
         color: effectiveColor,
       ),
       child: Icon(
