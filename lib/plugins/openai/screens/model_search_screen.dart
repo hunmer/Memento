@@ -6,8 +6,13 @@ import '../../../../core/services/toast_service.dart';
 
 class ModelSearchScreen extends StatefulWidget {
   final String? initialModelId;
+  final String? initialProvider;
 
-  const ModelSearchScreen({super.key, this.initialModelId});
+  const ModelSearchScreen({
+    super.key,
+    this.initialModelId,
+    this.initialProvider,
+  });
 
   @override
   State<ModelSearchScreen> createState() => _ModelSearchScreenState();
@@ -47,6 +52,8 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
 
       if (widget.initialModelId != null) {
         _findInitialModel();
+      } else if (widget.initialProvider != null) {
+        _findInitialProvider();
       }
     } catch (e) {
       if (mounted) {
@@ -73,6 +80,15 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
         }
       }
       if (_selectedModel != null) break;
+    }
+  }
+
+  void _findInitialProvider() {
+    for (int i = 0; i < _modelGroups.length; i++) {
+      if (_modelGroups[i].id == widget.initialProvider) {
+        _tabController.animateTo(i);
+        break;
+      }
     }
   }
 

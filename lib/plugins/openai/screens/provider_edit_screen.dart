@@ -87,9 +87,13 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
   }
 
   Future<void> _selectDefaultModel() async {
+    final providerId = _matchProviderFromUrl(_baseUrlController.text.trim());
     final selectedModel = await NavigationHelper.push<LLMModel>(
       context,
-      ModelSearchScreen(initialModelId: _defaultModelController.text),
+      ModelSearchScreen(
+        initialModelId: _defaultModelController.text,
+        initialProvider: providerId,
+      ),
     );
 
     if (selectedModel != null) {
@@ -97,6 +101,62 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
         _defaultModelController.text = selectedModel.id;
       });
     }
+  }
+
+  /// 根据 baseUrl 匹配对应的服务商 ID
+  String? _matchProviderFromUrl(String baseUrl) {
+    if (baseUrl.isEmpty) return null;
+
+    final lowerUrl = baseUrl.toLowerCase();
+
+    // 定义 URL 模式到服务商 ID 的映射
+    final Map<String, String> urlPatterns = {
+      // OpenAI
+      'api.openai.com': 'openai',
+      // DeepSeek
+      'api.deepseek.com': 'deepseek',
+      // Anthropic
+      'api.anthropic.com': 'anthropic',
+      // Google
+      'generativelanguage.googleapis.com': 'google',
+      // 智谱 AI
+      'open.bigmodel.cn': 'zhipu',
+      'bigmodel.cn': 'zhipu',
+      // 阿里云通义千问
+      'dashscope.aliyuncs.com': 'alibaba-qwen',
+      // 月之暗面
+      'api.moonshot.cn': 'moonshot',
+      'moonshot.cn': 'moonshot',
+      // 讯飞星火
+      'spark-api.xf-yun.com': 'xfyun',
+      'xfyun.cn': 'xfyun',
+      // MiniMax
+      'api.minimax.chat': 'minimax',
+      'minimax.chat': 'minimax',
+      // Perplexity
+      'api.perplexity.ai': 'perplexity',
+      'perplexity.ai': 'perplexity',
+      // xAI
+      'api.x.ai': 'xai',
+      'x.ai': 'xai',
+      // Mistral
+      'api.mistral.ai': 'mistral',
+      'mistral.ai': 'mistral',
+      // Cohere
+      'api.cohere.ai': 'cohere',
+      'cohere.ai': 'cohere',
+      // Qwen (通义)
+      'qwen-api.cn': 'qwen',
+    };
+
+    // 尝试匹配 URL 中的关键词
+    for (final entry in urlPatterns.entries) {
+      if (lowerUrl.contains(entry.key)) {
+        return entry.value;
+      }
+    }
+
+    return null;
   }
 
   Future<void> _saveProvider() async {
