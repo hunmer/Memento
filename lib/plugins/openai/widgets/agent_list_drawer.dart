@@ -258,8 +258,6 @@ class _AgentListDrawerState extends State<AgentListDrawer>
         return Colors.orange;
       case 'deepseek':
         return Colors.purple;
-      case 'minimax':
-        return Colors.indigo;
       default:
         return Colors.grey;
     }

@@ -3,8 +3,7 @@
 /// 定义支持的 LLM API 格式类型
 enum ApiFormat {
   openai('openai', 'OpenAI'),
-  anthropic('anthropic', 'Anthropic (Claude)'),
-  minimax('minimax', 'MiniMax');
+  anthropic('anthropic', 'Anthropic (Claude)');
 
   final String value;
   final String label;

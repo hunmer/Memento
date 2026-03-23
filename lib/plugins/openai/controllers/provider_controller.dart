@@ -224,7 +224,7 @@ class ProviderController {
         baseUrl: 'https://api.minimax.chat/v1',
         headers: {'Authorization': 'Bearer YOUR_API_KEY'},
         defaultModel: 'MiniMax-M2.5',
-        apiFormat: 'minimax',
+        apiFormat: 'openai',
       ),
     ];
   }

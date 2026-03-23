@@ -206,7 +206,7 @@ final Map<String, String> openaiTranslationsZh = {
   // Prompt Preset
   'openai_promptPresetManagement': 'Prompt 预设管理',
   'openai_promptPresetManagementDescription': '管理可复用的系统提示词模板',
-  'openai_promptPreset': 'Prompt',
+  'openai_promptPreset': '提示词',
   'openai_selectPromptPreset': '选择 Prompt 预设',
   'openai_noPreset': '无预设',
   'openai_promptPresetActiveHint': '已选择预设,此字段内容将被忽略',

@@ -82,8 +82,6 @@ class _AgentEditScreenState extends State<AgentEditScreen> {
         return Colors.orange;
       case 'deepseek':
         return Colors.purple;
-      case 'minimax':
-        return Colors.indigo;
       default:
         return Colors.grey;
     }

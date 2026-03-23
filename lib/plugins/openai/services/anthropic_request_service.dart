@@ -72,7 +72,7 @@ class AnthropicRequestService {
 
       developer.log('发送 Anthropic 流式请求: ${agent.model}', name: 'AnthropicRequestService');
 
-      // 处理 baseUrl，自动添加 /v1（如 MiniMax 风格）
+      // 处理 baseUrl，自动添加 /v1（某些 API 需要此后缀）
       String baseUrl = agent.baseUrl;
       if (baseUrl.isNotEmpty) {
         // 移除末尾的斜杠
