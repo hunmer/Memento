@@ -42,6 +42,10 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
       _headers = Map<String, String>.from(widget.provider!.headers);
       _defaultModelController.text = widget.provider!.defaultModel ?? '';
       _apiFormat = widget.provider!.apiFormat;
+      // 检查 apiFormat 是否有效，如果无效则使用默认值
+      if (!ApiFormat.values.any((f) => f.value == _apiFormat)) {
+        _apiFormat = 'openai';
+      }
     }
   }
 
