@@ -173,15 +173,15 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
 
     // 计算左右边距（BottomBar 居中时的偏移）
     final horizontalPadding = screenWidth * (1 - widget.widthRatio) / 2;
+    final barWidth = screenWidth * widget.widthRatio;
 
     // 默认居中位置
     double? left;
     double? right;
 
     if (alignment == Alignment.topCenter || alignment == Alignment.center || alignment == Alignment.bottomCenter) {
-      // 居中
-      left = (screenWidth - screenWidth * widget.widthRatio) / 2 + (screenWidth * widget.widthRatio) / 2 - 28;
-      right = (screenWidth - screenWidth * widget.widthRatio) / 2 + (screenWidth * widget.widthRatio) / 2 - 28;
+      // 居中：FAB 中心对齐 BottomBar 中心
+      left = horizontalPadding + barWidth / 2 - 28;
     } else if (alignment == Alignment.topRight || alignment == Alignment.centerRight || alignment == Alignment.bottomRight) {
       // 右侧
       right = horizontalPadding;
