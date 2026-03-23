@@ -367,6 +367,7 @@ class _ChatScreenState extends State<ChatScreen> {
       MaterialPageRoute(
         builder: (context) => VoiceCallScreen(
           manager: _voiceCallManager!,
+          agent: _currentAgent,
           onExit: () async {
             await _stopVoiceCallForegroundService();
             if (mounted) {

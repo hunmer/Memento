@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
-import 'package:Memento/core/services/toast_service.dart';
+import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:flutter_foreground_task/models/notification_button.dart';
 
 /// 语音通话界面
 ///
@@ -17,11 +14,13 @@ import 'package:flutter_foreground_task/models/notification_button.dart';
 class VoiceCallScreen extends StatefulWidget {
   final VoiceCallManager manager;
   final VoidCallback? onExit;
+  final AIAgent? agent;
 
   const VoiceCallScreen({
     super.key,
     required this.manager,
     this.onExit,
+    this.agent,
   });
 
   @override
@@ -31,10 +30,7 @@ class VoiceCallScreen extends StatefulWidget {
 class _VoiceCallScreenState extends State<VoiceCallScreen>
     with SingleTickerProviderStateMixin {
   VoiceCallState _currentState = VoiceCallState.idle;
-  String _currentPhase = 'user';
   int _currentTurn = 0;
-  String _lastRecognizedText = '';
-  String _lastAIMessage = '';
   StreamSubscription<VoiceCallState>? _stateSubscription;
   StreamSubscription<String>? _recognizedTextSubscription;
   StreamSubscription<int>? _countdownSubscription;
@@ -316,7 +312,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         decoration: hasBackgroundImage
             ? BoxDecoration(
                 image: DecorationImage(
-                  image: FileImage(File(backgroundImage!)),
+                  image: FileImage(File(backgroundImage)),
                   fit: BoxFit.cover,
                 ),
               )
@@ -331,29 +327,19 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
           child: SafeArea(
             child: Column(
               children: [
-                // 顶部栏
+                // 顶部栏（包含状态指示器在右上角）
                 _buildTopBar(),
 
-                // 主要内容区
+                // 主要内容区 - 中间显示 Agent 头像/图标
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // 状态指示器
-                      _buildStatusIndicator(),
-
-                      const SizedBox(height: 48),
-
-                      // 动画圆圈
-                      _buildPulsingCircle(),
-
-                      const SizedBox(height: 48),
-
-                      // 对话信息
-                      _buildConversationInfo(),
-                    ],
+                  child: Center(
+                    child: _buildAgentAvatar(),
                   ),
                 ),
+
+                // 录音输入区（在底部控制区上方）
+                if (_currentState == VoiceCallState.recording)
+                  _buildRecordingInputCompact(),
 
                 // 底部控制区
                 _buildBottomControls(),
@@ -384,8 +370,8 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI 语音通话',
-                  style: TextStyle(
+                  widget.agent?.name ?? 'AI 语音通话',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -393,7 +379,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
                 ),
                 Text(
                   '第 $_currentTurn 轮',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white60,
                     fontSize: 12,
                   ),
@@ -401,6 +387,9 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
               ],
             ),
           ),
+          // 右上角状态指示器（小标）
+          _buildStatusIndicatorSmall(),
+          const SizedBox(width: 8),
           // 设置按钮
           IconButton(
             onPressed: _openSettings,
@@ -412,13 +401,13 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     );
   }
 
-  /// 构建状态指示器
-  Widget _buildStatusIndicator() {
+  /// 构建右上角小型状态指示器
+  Widget _buildStatusIndicatorSmall() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: _getStatusColor().withOpacity(0.2),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _getStatusColor(), width: 1),
       ),
       child: Row(
@@ -427,14 +416,14 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
           Icon(
             _getStatusIcon(),
             color: _getStatusColor(),
-            size: 20,
+            size: 14,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           Text(
             _getStatusText(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -443,164 +432,156 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     );
   }
 
-  /// 构建脉冲圆圈
-  Widget _buildPulsingCircle() {
-    return AnimatedBuilder(
-      animation: _pulseAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _pulseAnimation.value,
-          child: Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _getStatusColor().withOpacity(0.3),
-              border: Border.all(
-                color: _getStatusColor(),
-                width: 3,
-              ),
-            ),
-            child: Icon(
-              _getStatusIcon(),
-              color: Colors.white,
-              size: 48,
-            ),
+  /// 构建 Agent 头像/图标
+  Widget _buildAgentAvatar() {
+    final agent = widget.agent;
+    final statusColor = _getStatusColor();
+
+    // 构建头像内容
+    Widget avatarContent;
+    if (agent?.avatarUrl != null && agent!.avatarUrl!.isNotEmpty) {
+      // 如果有头像URL，显示网络图片
+      avatarContent = ClipOval(
+        child: Image.network(
+          agent.avatarUrl!,
+          width: 120,
+          height: 120,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _buildDefaultAvatarIcon(agent),
+        ),
+      );
+    } else {
+      avatarContent = _buildDefaultAvatarIcon(agent);
+    }
+
+    return Container(
+      width: 120,
+      height: 120,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: statusColor,
+          width: 3,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: statusColor.withOpacity(0.3),
+            blurRadius: 20,
+            spreadRadius: 5,
           ),
-        );
-      },
-    );
-  }
-
-  /// 构建对话信息
-  Widget _buildConversationInfo() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
-      child: Column(
-        children: [
-          // 录音时显示可编辑的输入框和倒计时
-          if (_currentState == VoiceCallState.recording)
-            _buildRecordingInput(),
-          const SizedBox(height: 16),
-
-          // AI的回复
-          if (_lastAIMessage.isNotEmpty)
-            _buildMessageBubble(
-              _lastAIMessage,
-              isUser: false,
-            ),
         ],
       ),
+      child: avatarContent,
     );
   }
 
-  /// 构建录音输入区域
-  Widget _buildRecordingInput() {
+  /// 构建默认头像图标
+  Widget _buildDefaultAvatarIcon(AIAgent? agent) {
+    final icon = agent?.icon ?? Icons.smart_toy;
+    final iconColor = agent?.iconColor ?? Colors.white;
+
     return Container(
-      constraints: const BoxConstraints(maxHeight: 150),
+      width: 120,
+      height: 120,
       decoration: BoxDecoration(
+        shape: BoxShape.circle,
         color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _getStatusColor(),
-          width: 2,
-        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 标题栏
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: _getStatusColor().withOpacity(0.2),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                topRight: Radius.circular(14),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.mic, color: _getStatusColor(), size: 16),
-                const SizedBox(width: 8),
-                Text(
-                  '正在录音',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                // 倒计时显示
-                if (!_autoSendCancelled && _countdownSeconds > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor(),
-                      borderRadius: BorderRadius.circular(12),
+      child: Icon(
+        icon,
+        color: iconColor,
+        size: 56,
+      ),
+    );
+  }
+
+  /// 构建精简版录音输入区域（底部控制区上方）
+  Widget _buildRecordingInputCompact() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      child: Container(
+        constraints: const BoxConstraints(maxHeight: 100),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: _getStatusColor(),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 文本输入区 + 倒计时
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 麦克风图标
+                    Icon(Icons.mic, color: _getStatusColor(), size: 18),
+                    const SizedBox(width: 10),
+                    // 文本输入
+                    Expanded(
+                      child: TextField(
+                        controller: _textController,
+                        focusNode: _focusNode,
+                        maxLines: 2,
+                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        decoration: const InputDecoration(
+                          hintText: '正在识别...',
+                          hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          isDense: true,
+                        ),
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.timer, size: 12, color: Colors.white),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$_countdownSeconds',
+                    // 倒计时
+                    if (!_autoSendCancelled && _countdownSeconds > 0)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '$_countdownSeconds s',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // 文本输入区
-          Flexible(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextField(
-                controller: _textController,
-                focusNode: _focusNode,
-                maxLines: null,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
-                decoration: const InputDecoration(
-                  hintText: '正在识别...',
-                  hintStyle: TextStyle(color: Colors.white38),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
+                      ),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          // 底部操作区
-          if (_textController.text.isNotEmpty || _autoSendCancelled)
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  // 取消/编辑按钮
-                  if (!_autoSendCancelled)
-                    Expanded(
-                      child: _buildActionButton(
+            // 底部操作按钮（精简版）
+            if (_textController.text.isNotEmpty || _autoSendCancelled)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // 编辑按钮
+                    if (!_autoSendCancelled)
+                      _buildCompactActionButton(
                         icon: Icons.edit,
                         label: '编辑',
                         color: Colors.orange,
                         onTap: () {
                           widget.manager.cancelAutoSend();
-                          _focusNode.requestFocus(); // 聚焦到输入框
+                          _focusNode.requestFocus();
                         },
                       ),
-                    ),
-                  // 手动发送按钮
-                  Expanded(
-                    child: _buildActionButton(
+                    const SizedBox(width: 8),
+                    // 发送按钮
+                    _buildCompactActionButton(
                       icon: Icons.send,
                       label: '发送',
                       color: Colors.green,
@@ -611,12 +592,11 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
                         }
                       },
                     ),
-                  ),
-                  // 删除按钮
-                  Expanded(
-                    child: _buildActionButton(
-                      icon: Icons.delete,
-                      label: '删除',
+                    const SizedBox(width: 8),
+                    // 删除按钮
+                    _buildCompactActionButton(
+                      icon: Icons.close,
+                      label: '清除',
                       color: Colors.red,
                       onTap: () {
                         setState(() {
@@ -624,17 +604,17 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
                         });
                       },
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  /// 构建操作按钮
-  Widget _buildActionButton({
+  /// 构建精简版操作按钮
+  Widget _buildCompactActionButton({
     required IconData icon,
     required String label,
     required Color color,
@@ -644,22 +624,21 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: color.withOpacity(0.2),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color, width: 1),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 16),
+            Icon(icon, color: color, size: 14),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -669,72 +648,15 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
     );
   }
 
-  /// 构建消息气泡
-  Widget _buildMessageBubble(String text, {required bool isUser}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isUser ? Colors.blue.withOpacity(0.3) : Colors.green.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isUser ? Icons.person : Icons.smart_toy,
-            color: Colors.white70,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   /// 构建底部控制区
   Widget _buildBottomControls() {
     return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // 静音按钮（预留）
-          _buildControlButton(
-            icon: Icons.mic_off,
-            label: '静音',
-            onTap: () {
-              // TODO: 静音功能
-            },
-          ),
-
-          // 主控制按钮
-          _buildMainControlButton(),
-
-          // 扬声器按钮（预留）
-          _buildControlButton(
-            icon: Icons.volume_up,
-            label: '外放',
-            onTap: () {
-              // TODO: 切换扬声器
-            },
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      child: _buildMainControlButton(),
     );
   }
 
-  /// 构建主控制按钮
+  /// 构建主控制按钮（带脉冲动画）
   Widget _buildMainControlButton() {
     IconData icon;
     Color color;
@@ -762,64 +684,33 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         onTap = _exit;
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color,
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.4),
-              blurRadius: 20,
-              spreadRadius: 5,
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: 32,
-        ),
-      ),
-    );
-  }
-
-  /// 构建控制按钮
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      children: [
-        GestureDetector(
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return GestureDetector(
           onTap: onTap,
           child: Container(
-            width: 56,
-            height: 56,
+            width: 72,
+            height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white10,
+              color: color,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.4 * _pulseAnimation.value),
+                  blurRadius: 20 * _pulseAnimation.value,
+                  spreadRadius: 5 * _pulseAnimation.value,
+                ),
+              ],
             ),
             child: Icon(
               icon,
               color: Colors.white,
-              size: 24,
+              size: 32,
             ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white60,
-            fontSize: 12,
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
