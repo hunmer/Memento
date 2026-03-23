@@ -168,33 +168,12 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
 
   /// 构建 FAB 位置
   Widget _buildFabPosition(double screenWidth) {
-    // 根据 fabLocation 计算位置
-    final alignment = widget.fabLocation;
-
-    // 计算左右边距（BottomBar 居中时的偏移）
-    final horizontalPadding = screenWidth * (1 - widget.widthRatio) / 2;
-    final barWidth = screenWidth * widget.widthRatio;
-
-    // 默认居中位置
-    double? left;
-    double? right;
-
-    if (alignment == Alignment.topCenter || alignment == Alignment.center || alignment == Alignment.bottomCenter) {
-      // 居中：FAB 中心对齐 BottomBar 中心
-      left = horizontalPadding + barWidth / 2 - 28;
-    } else if (alignment == Alignment.topRight || alignment == Alignment.centerRight || alignment == Alignment.bottomRight) {
-      // 右侧
-      right = horizontalPadding;
-    } else {
-      // 左侧
-      left = horizontalPadding;
-    }
-
-    return Positioned(
-      bottom: widget.offset,
-      left: left,
-      right: right,
-      child: widget.fab!,
+    return Align(
+      alignment: widget.fabLocation,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: widget.offset),
+        child: widget.fab!,
+      ),
     );
   }
 
