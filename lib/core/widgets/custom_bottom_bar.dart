@@ -249,7 +249,19 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         clipBehavior: Clip.none,
         children: [
           _buildTabBar(),
-          if (widget.fab != null) Positioned(top: -25, right: -28, child: widget.fab!),
+          if (widget.fab != null)
+            Positioned(
+              top: -25,
+              right: -28,
+              child: OverflowBox(
+                alignment: Alignment.center,
+                minWidth: 56,
+                minHeight: 56,
+                maxWidth: 56,
+                maxHeight: 56,
+                child: widget.fab!,
+              ),
+            ),
           if (widget.extraChildren != null)
             ...widget.extraChildren!(context, widget.currentIndex),
         ],
