@@ -9,7 +9,6 @@ import 'package:Memento/core/navigation/navigation_helper.dart';
 import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
 import './controllers/settings_screen_controller.dart';
 import './widgets/webdav_settings_dialog.dart';
-import './widgets/server_sync_settings_section.dart';
 import './widgets/api_forwarding_settings_dialog.dart';
 import './widgets/speech_recognition_settings_dialog.dart';
 import './controllers/webdav_controller.dart';

@@ -6,7 +6,7 @@ import 'package:Memento/core/services/fcm_service.dart';
 import 'package:Memento/core/services/device_registration_service.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 import 'package:Memento/screens/settings_screen/widgets/server_sync_settings_section.dart';
-import 'package:Memento/widgets/toast_service.dart';
+import 'package:Memento/core/services/toast_service.dart';
 
 /// 设备同步设置页面
 ///
