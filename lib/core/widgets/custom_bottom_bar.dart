@@ -166,17 +166,30 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
     );
   }
 
-  /// 构建 FAB 位置
+  /// 构建 FAB 位置（与 BottomBar 在同一容器内）
   Widget _buildFabPosition(double screenWidth) {
-    return Align(
-      alignment: widget.fabLocation,
-      child: SizedBox(
-        width: screenWidth * widget.widthRatio,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: widget.offset),
-          child: widget.fab!,
-        ),
-      ),
+    // 计算水平方向的对齐
+    final alignment = widget.fabLocation;
+    double left = 0;
+    double right = 0;
+
+    if (alignment == Alignment.topCenter ||
+        alignment == Alignment.center ||
+        alignment == Alignment.bottomCenter) {
+      // 居中
+    } else if (alignment == Alignment.topRight ||
+        alignment == Alignment.centerRight ||
+        alignment == Alignment.bottomRight) {
+      right = 28;
+    } else {
+      left = 28;
+    }
+
+    return Positioned(
+      top: -28,
+      left: left,
+      right: right,
+      child: widget.fab!,
     );
   }
 
@@ -271,9 +284,24 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
             ],
           ),
         ),
-        // FAB 放在最外层 Stack，确保 z-index 最高
+        // FAB 容器：与 BottomBar 相同宽度，居中对齐
         if (widget.fab != null)
-          _buildFabPosition(mediaQuery.size.width),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: SizedBox(
+                width: mediaQuery.size.width * widget.widthRatio,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildFabPosition(mediaQuery.size.width),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
