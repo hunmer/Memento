@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import archiver from 'archiver';
-import { FileInfo, FolderNode, FileIndex, EncryptedFile } from '../types';
+import { FileInfo, FolderNode, FileIndex, EncryptedFile, UserInfo } from '../types';
 
 /** 索引文件名 */
 const INDEX_FILE_NAME = '.file_index.json';
@@ -468,7 +468,7 @@ export class FileStorageService {
   /**
    * 读取所有用户
    */
-  async readAllUsers(): Promise<any[]> {
+  async readAllUsers(): Promise<UserInfo[]> {
     const file = this.usersFilePath;
     if (!fs.existsSync(file)) return [];
 
@@ -497,7 +497,7 @@ export class FileStorageService {
   /**
    * 根据用户名查找用户
    */
-  async findUserByUsername(username: string): Promise<any | null> {
+  async findUserByUsername(username: string): Promise<UserInfo | null> {
     const users = await this.readAllUsers();
     return users.find(u => u.username === username) || null;
   }
@@ -505,7 +505,7 @@ export class FileStorageService {
   /**
    * 根据 ID 查找用户
    */
-  async findUserById(userId: string): Promise<any | null> {
+  async findUserById(userId: string): Promise<UserInfo | null> {
     const users = await this.readAllUsers();
     return users.find(u => u.id === userId) || null;
   }
@@ -513,7 +513,7 @@ export class FileStorageService {
   /**
    * 添加用户
    */
-  async addUser(user: any): Promise<void> {
+  async addUser(user: UserInfo): Promise<void> {
     const users = await this.readAllUsers();
     users.push(user);
     await this.saveAllUsers(users);
@@ -522,7 +522,7 @@ export class FileStorageService {
   /**
    * 更新用户
    */
-  async updateUser(updatedUser: any): Promise<void> {
+  async updateUser(updatedUser: UserInfo): Promise<void> {
     const users = await this.readAllUsers();
     const index = users.findIndex(u => u.id === updatedUser.id);
     if (index >= 0) {

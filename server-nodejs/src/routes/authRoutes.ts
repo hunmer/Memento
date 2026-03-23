@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { AuthService, PasswordHashUtils } from '../services/authService';
 import { FileStorageService } from '../services/fileStorageService';
 import { PluginDataService } from '../services/pluginDataService';
+import { sendMulticast } from '../services/fcmService';
 
 /**
  * 认证路由
@@ -518,13 +519,16 @@ export function createAuthRoutes(
         return;
       }
 
-      // TODO: 集成 Firebase Admin SDK 发送推送
-      // 目前返回模拟响应
+      // 发送 FCM 推送
+      const result = await sendMulticast(fcmTokens, title, body, data);
+
       res.json({
-        success: true,
-        message: '推送请求已接收（待集成 FCM）',
-        sent_count: fcmTokens.length,
-        target_devices: device_id ? 1 : fcmTokens.length,
+        success: result.success > 0,
+        message: `成功发送 ${result.success} 条，失败 ${result.failure} 条`,
+        sent_count: result.success,
+        failure_count: result.failure,
+        target_devices: fcmTokens.length,
+        results: result.results,
         timestamp: new Date().toISOString(),
       });
     } catch (e) {
