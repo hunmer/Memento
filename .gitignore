@@ -87,3 +87,6 @@ server-nodejs/node_modules/
 server-nodejs/data/
 server-nodejs/dist/
 server-nodejs/admin/
+
+# Service account credentials
+server-nodejs/service-account.json
