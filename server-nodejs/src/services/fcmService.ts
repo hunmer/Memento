@@ -1,8 +1,8 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-// @ts-ignore - proxy-agent 的类型定义
-import { ProxyAgent } from 'proxy-agent';
+// @ts-ignore
+import tunnel from 'tunnel';
 
 let firebaseApp: admin.app.App | null = null;
 
@@ -35,11 +35,18 @@ function initializeFirebase(): admin.app.App {
 
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
-  // 配置代理 - proxy-agent 会自动读取 HTTP_PROXY/HTTPS_PROXY 环境变量
+  // 配置代理
   const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
-  const proxyAgent = new ProxyAgent(proxyUrl);
+  const proxyUrlObj = new URL(proxyUrl);
 
-  console.log(`[FCM] 代理配置: ${proxyUrl}`);
+  const proxyAgent = tunnel.httpsOverHttp({
+    proxy: {
+      host: proxyUrlObj.hostname,
+      port: parseInt(proxyUrlObj.port) || 8080,
+    },
+  });
+
+  console.log(`[FCM] 代理配置: ${proxyUrl} -> ${proxyUrlObj.hostname}:${proxyUrlObj.port}`);
 
   firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount, proxyAgent as any),
