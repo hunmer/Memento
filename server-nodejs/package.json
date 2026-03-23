@@ -4,7 +4,7 @@
   "description": "Memento 同步服务器 - Node.js + TypeScript 版本",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/plugins dist/",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "jest --runInBand",

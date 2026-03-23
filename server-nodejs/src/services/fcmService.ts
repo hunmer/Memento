@@ -1,10 +1,15 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-// @ts-ignore
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
 let firebaseApp: admin.app.App | null = null;
+let cachedCredential: admin.credential.Credential | null = null;
+let cachedProjectId: string | null = null;
+
+// 代理配置
+const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY || 'http://127.0.0.1:7890';
+const proxyAgent = new HttpsProxyAgent(proxy);
 
 export interface FcmMessageResult {
   success: boolean;
@@ -21,33 +26,95 @@ export interface FcmSendResult {
 /**
  * 初始化 Firebase Admin SDK
  */
-function initializeFirebase(): admin.app.App {
-  if (firebaseApp) {
-    return firebaseApp;
+async function initializeFirebase(): Promise<string> {
+  console.log(`[FCM] initializeFirebase 检查: firebaseApp=${typeof firebaseApp}, cachedCredential=${typeof cachedCredential}, cachedProjectId=${cachedProjectId}`);
+
+  if (firebaseApp && cachedCredential && cachedProjectId) {
+    console.log('[FCM] 使用缓存的 Firebase App');
+    return cachedProjectId;
   }
 
-  // 读取 service account 文件
   const serviceAccountPath = path.join(process.cwd(), 'service-account.json');
 
+  console.log(`[FCM] 当前工作目录: ${process.cwd()}`);
+  console.log(`[FCM] Service Account 路径: ${serviceAccountPath}`);
+  console.log(`[FCM] 代理配置: ${proxy}`);
+
   if (!fs.existsSync(serviceAccountPath)) {
-    throw new Error('service-account.json 文件不存在');
+    throw new Error(`service-account.json 文件不存在: ${serviceAccountPath}`);
   }
 
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
-
-  // 配置代理 - 与 fcm_send 保持一致
-  const proxy = process.env.HTTP_PROXY || 'http://127.0.0.1:7890';
-  const proxyAgent = new HttpsProxyAgent(proxy);
-
-  console.log(`[FCM] 代理配置: ${proxy}`);
+  const credential = admin.credential.cert(serviceAccount);
 
   firebaseApp = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount, proxyAgent),
-    httpAgent: proxyAgent,
+    credential,
   });
 
-  console.log(`[FCM] Firebase Admin SDK 初始化成功 (代理: 已配置)`);
-  return firebaseApp;
+  cachedCredential = credential;
+  cachedProjectId = serviceAccount.project_id;
+  console.log('[FCM] Firebase Admin SDK 初始化成功');
+  console.log(`[FCM] firebaseApp 类型: ${typeof firebaseApp}, projectId: ${cachedProjectId}`);
+
+  return cachedProjectId;
+}
+
+/**
+ * 通过 FCM HTTP v1 API 发送单条消息
+ * v1 API 支持 OAuth token，可以通过 HTTP 代理
+ */
+async function sendViaV1Api(projectId: string, message: any): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const https = await import('https');
+
+  console.log(`[FCM] sendViaV1Api firebaseApp状态: ${typeof firebaseApp}, ${firebaseApp ? '有值' : '为空'}`);
+
+  // 获取 access token - 使用缓存的 credential
+  if (!cachedCredential) {
+    console.error(`[FCM] Credential 未初始化`);
+    return { success: false, error: 'Firebase credential not initialized' };
+  }
+  const accessToken = await cachedCredential.getAccessToken();
+  const token = accessToken.access_token;
+
+  const messageData = JSON.stringify(message);
+
+  return new Promise((resolve) => {
+    const req = https.request({
+      host: 'fcm.googleapis.com',
+      port: 443,
+      path: `/v1/projects/${projectId}/messages:send`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(messageData),
+        'Authorization': `Bearer ${token}`,
+      },
+      agent: proxyAgent,
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode === 200) {
+          const response = JSON.parse(data);
+          resolve({ success: true, messageId: response.name });
+        } else {
+          try {
+            const error = JSON.parse(data);
+            resolve({ success: false, error: error.error?.message || `HTTP ${res.statusCode}` });
+          } catch {
+            resolve({ success: false, error: `HTTP ${res.statusCode}` });
+          }
+        }
+      });
+    });
+
+    req.on('error', (err) => {
+      resolve({ success: false, error: err.message });
+    });
+
+    req.write(messageData);
+    req.end();
+  });
 }
 
 /**
@@ -59,31 +126,44 @@ export async function sendToDevice(
   body: string,
   data?: Record<string, string>
 ): Promise<FcmMessageResult> {
-  try {
-    initializeFirebase();
+  console.log(`[FCM] sendToDevice 开始, token: ${token.substring(0, 20)}...`);
 
-    const message: admin.messaging.Message = {
-      notification: {
-        title,
-        body,
+  try {
+    const projectId = await initializeFirebase();
+    console.log('[FCM] Firebase 初始化完成，开始发送消息...');
+
+    console.log(`[FCM] firebaseApp 状态: ${firebaseApp ? '已初始化' : '未初始化'}`);
+    console.log(`[FCM] projectId: ${projectId}`);
+
+    const message = {
+      message: {
+        token,
+        notification: { title, body },
+        data: data || {},
       },
-      data: data || {},
-      token,
     };
 
-    const messageId = await admin.messaging().send(message);
-    console.log(`[FCM] 消息发送成功: ${token.substring(0, 20)}... -> ${messageId}`);
+    const result = await sendViaV1Api(projectId, message);
 
-    return { success: true, messageId };
+    if (result.success) {
+      console.log(`[FCM] 消息发送成功: ${result.messageId}`);
+      return { success: true, messageId: result.messageId };
+    } else {
+      console.error(`[FCM] 消息发送失败: ${result.error}`);
+      return { success: false, error: result.error };
+    }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error(`[FCM] 消息发送失败: ${token.substring(0, 20)}...`, errorMsg);
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error(`[FCM] 消息发送失败: ${errorMsg}`);
+    console.error(`[FCM] 错误堆栈: ${errorStack}`);
     return { success: false, error: errorMsg };
   }
 }
 
 /**
  * 批量发送消息到多个设备
+ * v1 API 需要逐条发送
  */
 export async function sendMulticast(
   tokens: string[],
@@ -91,43 +171,55 @@ export async function sendMulticast(
   body: string,
   data?: Record<string, string>
 ): Promise<FcmSendResult> {
+  console.log(`[FCM] sendMulticast 开始, tokens 数量: ${tokens.length}`);
+
   try {
-    initializeFirebase();
+    const projectId = await initializeFirebase();
+    console.log('[FCM] Firebase 初始化完成，开始发送批量消息...');
 
-    const message: admin.messaging.MulticastMessage = {
-      notification: {
-        title,
-        body,
-      },
-      data: data || {},
-      tokens,
-    };
+    console.log(`[FCM] firebaseApp 状态: ${firebaseApp ? '已初始化' : '未初始化'}`);
+    console.log(`[FCM] projectId: ${projectId}`);
 
-    const response = await admin.messaging().sendEachForMulticast(message);
+    const results: FcmMessageResult[] = [];
+    let successCount = 0;
+    let failureCount = 0;
 
-    const results: FcmMessageResult[] = response.responses.map((res) => ({
-      success: res.success,
-      messageId: res.messageId,
-      error: res.error?.message,
-    }));
+    // v1 API 需要逐条发送
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
 
-    console.log(`[FCM] 批量消息发送完成: 成功 ${response.successCount}, 失败 ${response.failureCount}`);
-    if (response.failureCount > 0) {
-      response.responses.forEach((res, idx) => {
-        if (!res.success) {
-          console.error(`[FCM] Token ${idx} 失败:`, res.error?.message);
-        }
-      });
+      const message = {
+        message: {
+          token,
+          notification: { title, body },
+          data: data || {},
+        },
+      };
+
+      const result = await sendViaV1Api(projectId, message);
+
+      if (result.success) {
+        successCount++;
+        results.push({ success: true, messageId: result.messageId });
+      } else {
+        failureCount++;
+        results.push({ success: false, error: result.error });
+        console.error(`[FCM] Token ${i} 失败: ${result.error}`);
+      }
+
+      // 每 100 条打印进度
+      if ((i + 1) % 100 === 0) {
+        console.log(`[FCM] 进度: ${i + 1}/${tokens.length}`);
+      }
     }
 
-    return {
-      success: response.successCount,
-      failure: response.failureCount,
-      results,
-    };
+    console.log(`[FCM] 批量消息发送完成: 成功 ${successCount}, 失败 ${failureCount}`);
+    return { success: successCount, failure: failureCount, results };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error('[FCM] 批量消息发送失败:', errorMsg);
+    const errorStack = error instanceof Error ? error.stack : '';
+    console.error(`[FCM] 批量消息发送失败: ${errorMsg}`);
+    console.error(`[FCM] 错误堆栈: ${errorStack}`);
     return {
       success: 0,
       failure: tokens.length,
@@ -145,25 +237,32 @@ export async function sendToTopic(
   body: string,
   data?: Record<string, string>
 ): Promise<FcmMessageResult> {
-  try {
-    initializeFirebase();
+  console.log(`[FCM] sendToTopic 开始, topic: ${topic}`);
 
-    const message: admin.messaging.Message = {
-      notification: {
-        title,
-        body,
+  try {
+    const projectId = await initializeFirebase();
+    console.log('[FCM] Firebase 初始化完成，开始发送主题消息...');
+
+    const message = {
+      message: {
+        topic,
+        notification: { title, body },
+        data: data || {},
       },
-      data: data || {},
-      topic,
     };
 
-    const messageId = await admin.messaging().send(message);
-    console.log(`[FCM] 主题消息发送成功: ${topic} -> ${messageId}`);
+    const result = await sendViaV1Api(projectId, message);
 
-    return { success: true, messageId };
+    if (result.success) {
+      console.log(`[FCM] 主题消息发送成功: ${topic} -> ${result.messageId}`);
+      return { success: true, messageId: result.messageId };
+    } else {
+      console.error(`[FCM] 主题消息发送失败: ${result.error}`);
+      return { success: false, error: result.error };
+    }
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error(`[FCM] 主题消息发送失败: ${topic}`, errorMsg);
+    console.error(`[FCM] 主题消息发送失败: ${errorMsg}`);
     return { success: false, error: errorMsg };
   }
 }
