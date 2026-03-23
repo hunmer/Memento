@@ -22,6 +22,7 @@ import OverviewTab from '@/components/overview/OverviewTab.vue'
 import FilesTab from '@/components/files/FilesTab.vue'
 import ApiKeysTab from '@/components/api-keys/ApiKeysTab.vue'
 import PluginsTab from '@/components/plugins/PluginsTab.vue'
+import DevicesTab from '@/components/devices/DevicesTab.vue'
 import SettingsTab from '@/components/settings/SettingsTab.vue'
 import LoadingOverlay from '@/components/common/LoadingOverlay.vue'
 
@@ -104,6 +105,7 @@ function handleRegistered(username: string, password: string): void {
                     <FilesTab v-show="uiStore.activeTab === 'files'" />
                     <ApiKeysTab v-show="uiStore.activeTab === 'apikeys'" />
                     <PluginsTab v-show="uiStore.activeTab === 'plugins'" />
+                    <DevicesTab v-show="uiStore.activeTab === 'devices'" />
                     <SettingsTab v-show="uiStore.activeTab === 'settings'" />
                   </div>
                 </template>

@@ -1,4 +1,4 @@
-import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse } from './types'
+import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse, DevicesListResponse, RegisterDeviceRequest, RegisterDeviceResponse, PushMessageRequest, PushMessageResponse } from './types'
 
 const DEFAULT_SERVER = 'http://localhost:8874'
 
@@ -199,6 +199,29 @@ export const authApi = {
     apiClient.request('/api/v1/auth/verify-encryption-key', {
       method: 'POST',
       body: JSON.stringify({ key })
+    })
+}
+
+// 设备管理 API
+export const devicesApi = {
+  getDevices: (): Promise<DevicesListResponse> =>
+    apiClient.request('/api/v1/auth/devices'),
+
+  registerDevice: (data: RegisterDeviceRequest): Promise<RegisterDeviceResponse> =>
+    apiClient.request('/api/v1/auth/devices', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+
+  deleteDevice: (deviceId: string): Promise<{ success: boolean; message: string; device_id: string }> =>
+    apiClient.request(`/api/v1/auth/devices/${deviceId}`, {
+      method: 'DELETE'
+    }),
+
+  pushMessage: (data: PushMessageRequest): Promise<PushMessageResponse> =>
+    apiClient.request('/api/v1/auth/devices/push', {
+      method: 'POST',
+      body: JSON.stringify(data)
     })
 }
 

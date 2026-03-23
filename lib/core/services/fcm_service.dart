@@ -22,6 +22,9 @@ class FcmService {
   String? _token;
   bool _initialized = false;
 
+  /// Token 刷新回调
+  void Function(String newToken)? onTokenRefresh;
+
   String? get token => _token;
   bool get isInitialized => _initialized;
 
@@ -67,7 +70,8 @@ class FcmService {
       _messaging!.onTokenRefresh.listen((newToken) {
         _token = newToken;
         debugPrint('[FCM] Token 刷新: $newToken');
-        // TODO: 上传新 Token 到服务器
+        // 调用回调
+        onTokenRefresh?.call(newToken);
       });
 
       // 设置前台消息处理

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type TabId = 'overview' | 'files' | 'apikeys' | 'plugins' | 'settings'
+export type TabId = 'overview' | 'files' | 'apikeys' | 'plugins' | 'devices' | 'settings'
 export type ServerStatus = 'online' | 'offline'
 
 export interface Activity {

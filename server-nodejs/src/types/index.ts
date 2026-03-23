@@ -5,6 +5,8 @@ export interface DeviceInfo {
   deviceName: string;
   createdAt: Date;
   lastSyncAt?: Date;
+  fcmToken?: string;       // FCM 推送 Token
+  platform?: string;       // 平台：iOS/Android/Web/Desktop
 }
 
 export interface UserInfo {
@@ -84,6 +86,42 @@ export interface ApiKeySafe {
   expiresAt?: Date;
   isRevoked: boolean;
   isExpired: boolean;
+}
+
+// ==================== 设备管理类型 ====================
+
+export interface DevicesListResponse {
+  success: boolean;
+  devices: DeviceInfo[];
+  count: number;
+}
+
+export interface RegisterDeviceRequest {
+  device_id: string;
+  device_name: string;
+  fcm_token?: string;
+  platform?: string;
+}
+
+export interface RegisterDeviceResponse {
+  success: boolean;
+  message?: string;
+  device?: DeviceInfo;
+  error?: string;
+}
+
+export interface PushMessageRequest {
+  device_id?: string;      // 可选，不指定则推送到所有设备
+  title: string;
+  body: string;
+  data?: Record<string, string>;
+}
+
+export interface PushMessageResponse {
+  success: boolean;
+  message?: string;
+  sent_count?: number;
+  error?: string;
 }
 
 // ==================== 文件相关类型 ====================

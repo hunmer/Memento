@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { NTabs, NTabPane, NIcon } from 'naive-ui'
+import { NTabs, NTabPane, NIcon, NSpace } from 'naive-ui'
 import {
   HomeOutline,
   FolderOutline,
   KeyOutline,
   ExtensionPuzzleOutline,
-  SettingsOutline
+  SettingsOutline,
+  PhonePortraitOutline
 } from '@vicons/ionicons5'
 import { useUIStore, type TabId } from '@/stores/ui'
 
@@ -16,6 +17,7 @@ const tabs: { id: TabId; label: string; icon: typeof HomeOutline }[] = [
   { id: 'files', label: '文件管理', icon: FolderOutline },
   { id: 'apikeys', label: 'API Keys', icon: KeyOutline },
   { id: 'plugins', label: '插件商店', icon: ExtensionPuzzleOutline },
+  { id: 'devices', label: '设备管理', icon: PhonePortraitOutline },
   { id: 'settings', label: '设置', icon: SettingsOutline }
 ]
 

@@ -213,3 +213,55 @@ export interface StoreConfigResponse {
   config: StoreConfig
   timestamp: string
 }
+
+// ==================== 设备管理相关 ====================
+
+/** 设备信息 */
+export interface Device {
+  device_id: string
+  device_name: string
+  created_at: string
+  last_sync_at?: string
+  fcm_token?: string
+  platform?: string
+}
+
+/** 设备列表响应 */
+export interface DevicesListResponse {
+  success: boolean
+  devices: Device[]
+  count: number
+  timestamp?: string
+}
+
+/** 注册设备请求 */
+export interface RegisterDeviceRequest {
+  device_id: string
+  device_name: string
+  fcm_token?: string
+  platform?: string
+}
+
+/** 注册设备响应 */
+export interface RegisterDeviceResponse {
+  success: boolean
+  message?: string
+  device?: Device
+  error?: string
+}
+
+/** 推送消息请求 */
+export interface PushMessageRequest {
+  device_id?: string
+  title: string
+  body: string
+  data?: Record<string, string>
+}
+
+/** 推送消息响应 */
+export interface PushMessageResponse {
+  success: boolean
+  message?: string
+  sent_count?: number
+  error?: string
+}

@@ -388,6 +388,150 @@ export function createAuthRoutes(
     }
   });
 
+  // ==================== 设备管理 ====================
+
+  /**
+   * GET /devices - 获取设备列表
+   */
+  router.get('/devices', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = getUserIdFromRequest(req);
+      if (!userId) {
+        errorResponse(res, 401, '未认证或 Token 无效');
+        return;
+      }
+
+      const devices = await authService.getDevices(userId);
+
+      res.json({
+        success: true,
+        devices: devices.map(d => ({
+          device_id: d.deviceId,
+          device_name: d.deviceName,
+          created_at: new Date(d.createdAt).toISOString(),
+          last_sync_at: d.lastSyncAt ? new Date(d.lastSyncAt).toISOString() : undefined,
+          fcm_token: d.fcmToken ? `${d.fcmToken.substring(0, 10)}...` : undefined, // 只返回前缀
+          platform: d.platform,
+        })),
+        count: devices.length,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
+  /**
+   * POST /devices - 注册/更新设备
+   */
+  router.post('/devices', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = getUserIdFromRequest(req);
+      if (!userId) {
+        errorResponse(res, 401, '未认证或 Token 无效');
+        return;
+      }
+
+      const data = req.body;
+
+      if (!data.device_id) {
+        errorResponse(res, 400, '设备 ID 不能为空');
+        return;
+      }
+
+      const device = await authService.registerDevice({
+        userId,
+        deviceId: data.device_id,
+        deviceName: data.device_name || 'Unknown Device',
+        fcmToken: data.fcm_token,
+        platform: data.platform,
+      });
+
+      res.json({
+        success: true,
+        message: '设备注册成功',
+        device: {
+          device_id: device.deviceId,
+          device_name: device.deviceName,
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
+  /**
+   * DELETE /devices/:deviceId - 删除设备
+   */
+  router.delete('/devices/:deviceId', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = getUserIdFromRequest(req);
+      if (!userId) {
+        errorResponse(res, 401, '未认证或 Token 无效');
+        return;
+      }
+
+      const deviceId = req.params.deviceId;
+
+      await authService.deleteDevice(userId, deviceId);
+
+      res.json({
+        success: true,
+        message: '设备已删除',
+        device_id: deviceId,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (errorMessage.includes('不存在')) {
+        errorResponse(res, 404, errorMessage);
+      } else {
+        errorResponse(res, 500, `服务器错误: ${e}`);
+      }
+    }
+  });
+
+  /**
+   * POST /devices/push - 推送消息到设备
+   */
+  router.post('/devices/push', async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = getUserIdFromRequest(req);
+      if (!userId) {
+        errorResponse(res, 401, '未认证或 Token 无效');
+        return;
+      }
+
+      const { device_id, title, body, data } = req.body;
+
+      if (!title || !body) {
+        errorResponse(res, 400, '标题和内容不能为空');
+        return;
+      }
+
+      // 获取目标设备的 FCM Tokens
+      const fcmTokens = await authService.getDeviceFcmTokens(userId, device_id);
+
+      if (fcmTokens.length === 0) {
+        errorResponse(res, 400, '没有可用的设备或设备未注册 FCM Token');
+        return;
+      }
+
+      // TODO: 集成 Firebase Admin SDK 发送推送
+      // 目前返回模拟响应
+      res.json({
+        success: true,
+        message: '推送请求已接收（待集成 FCM）',
+        sent_count: fcmTokens.length,
+        target_devices: device_id ? 1 : fcmTokens.length,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      errorResponse(res, 500, `服务器错误: ${e}`);
+    }
+  });
+
   // ==================== API 访问控制 ====================
 
   /**

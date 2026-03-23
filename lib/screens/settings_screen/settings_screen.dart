@@ -16,6 +16,7 @@ import './controllers/webdav_controller.dart';
 import 'package:Memento/core/floating_ball/settings_screen.dart';
 import 'package:Memento/core/floating_ball/floating_ball_manager.dart';
 import 'package:Memento/screens/settings_screen/screens/data_management_screen.dart';
+import 'package:Memento/screens/settings_screen/screens/device_sync_screen.dart';
 import 'package:Memento/screens/about_screen/about_screen.dart';
 import 'package:Memento/screens/settings_screen/models/server_sync_config.dart';
 import 'package:Memento/screens/settings_screen/controllers/permission_controller.dart';
@@ -185,29 +186,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       // 重新检查WebDAV状态
       await _checkWebDAVConfig();
     }
-  }
-
-  // 显示服务器同步设置对话框
-  Future<void> _showServerSyncSettings() async {
-    await SmoothBottomSheet.show(
-      context: context,
-      isScrollControlled: true,
-      builder:
-          (context) => SizedBox(
-            height: MediaQuery.of(context).size.height * 0.85,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: const ServerSyncSettingsSection(),
-              ),
-            ),
-          ),
-    );
-
-    // 重新检查服务器同步状态
-    await _checkServerSyncConfig();
   }
 
   // 显示定位 API Key 设置对话框
@@ -459,10 +437,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing:
                 _isServerSyncLoggedIn
                     ? const Icon(Icons.check_circle, color: Colors.green)
-                    : null,
+                    : const Icon(Icons.chevron_right),
             onTap: () {
               if (mounted) {
-                _showServerSyncSettings();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const DeviceSyncScreen()),
+                ).then((_) => _checkServerSyncConfig());
               }
             },
           ),

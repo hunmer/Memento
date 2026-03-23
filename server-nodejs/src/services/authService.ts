@@ -4,7 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { FileStorageService } from './fileStorageService';
-import { RegisterRequest, LoginRequest, RefreshTokenRequest, AuthResponse, UserInfo, ApiKey, ApiKeyValidationResult, ApiKeyExpiry } from '../types';
+import { RegisterRequest, LoginRequest, RefreshTokenRequest, AuthResponse, UserInfo, ApiKey, ApiKeyValidationResult, ApiKeyExpiry, DeviceInfo } from '../types';
 
 /**
  * 密码哈希工具
@@ -456,6 +456,134 @@ export class AuthService {
     this.saveApiKeys(userId, keys);
 
     return true;
+  }
+
+  // ==================== 设备管理 ====================
+
+  /**
+   * 获取用户的所有设备
+   */
+  async getDevices(userId: string): Promise<DeviceInfo[]> {
+    const user = await this.storageService.findUserById(userId);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+    return user.devices || [];
+  }
+
+  /**
+   * 注册或更新设备
+   */
+  async registerDevice(params: {
+    userId: string;
+    deviceId: string;
+    deviceName: string;
+    fcmToken?: string;
+    platform?: string;
+  }): Promise<DeviceInfo> {
+    const user = await this.storageService.findUserById(params.userId);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    const now = new Date();
+    const deviceIndex = user.devices.findIndex(d => d.deviceId === params.deviceId);
+
+    let device: DeviceInfo;
+
+    if (deviceIndex >= 0) {
+      // 更新现有设备
+      device = {
+        ...user.devices[deviceIndex],
+        deviceName: params.deviceName || user.devices[deviceIndex].deviceName,
+        lastSyncAt: now,
+      };
+
+      // 更新 FCM Token
+      if (params.fcmToken !== undefined) {
+        device.fcmToken = params.fcmToken;
+      }
+
+      // 更新平台信息
+      if (params.platform !== undefined) {
+        device.platform = params.platform;
+      }
+
+      user.devices[deviceIndex] = device;
+    } else {
+      // 添加新设备
+      device = {
+        deviceId: params.deviceId,
+        deviceName: params.deviceName || 'Unknown Device',
+        createdAt: now,
+        lastSyncAt: now,
+        fcmToken: params.fcmToken,
+        platform: params.platform,
+      };
+      user.devices.push(device);
+    }
+
+    await this.storageService.updateUser(user);
+    return device;
+  }
+
+  /**
+   * 删除设备
+   */
+  async deleteDevice(userId: string, deviceId: string): Promise<boolean> {
+    const user = await this.storageService.findUserById(userId);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    const initialLength = user.devices.length;
+    user.devices = user.devices.filter(d => d.deviceId !== deviceId);
+
+    if (user.devices.length === initialLength) {
+      throw new Error('设备不存在');
+    }
+
+    await this.storageService.updateUser(user);
+    return true;
+  }
+
+  /**
+   * 更新设备的 FCM Token
+   */
+  async updateDeviceFcmToken(userId: string, deviceId: string, fcmToken: string): Promise<boolean> {
+    const user = await this.storageService.findUserById(userId);
+    if (!user) {
+      throw new Error('用户不存在');
+    }
+
+    const device = user.devices.find(d => d.deviceId === deviceId);
+    if (!device) {
+      throw new Error('设备不存在');
+    }
+
+    device.fcmToken = fcmToken;
+    device.lastSyncAt = new Date();
+
+    await this.storageService.updateUser(user);
+    return true;
+  }
+
+  /**
+   * 获取用户设备的 FCM Tokens（用于推送）
+   */
+  async getDeviceFcmTokens(userId: string, deviceId?: string): Promise<string[]> {
+    const user = await this.storageService.findUserById(userId);
+    if (!user) {
+      return [];
+    }
+
+    const devices = deviceId
+      ? user.devices.filter(d => d.deviceId === deviceId)
+      : user.devices;
+
+    return devices
+      .filter(d => d.fcmToken)
+      .map(d => d.fcmToken!);
   }
 
   // ==================== API 访问控制 ====================
