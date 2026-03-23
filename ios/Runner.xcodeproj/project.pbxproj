@@ -491,7 +491,6 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				4B9549252EFAD220005F06E5 /* Embed Foundation Extensions */,
-				4B8276442F607D5500DF8056 /* Embed Watch Content */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				4AE8A1978CD30745B08A5AE6 /* [CP] Embed Pods Frameworks */,
 				B11ED12BEB185A74B1F0CA9E /* [CP] Copy Pods Resources */,
@@ -500,7 +499,6 @@
 			);
 			dependencies = (
 				4B95491E2EFAD220005F06E5 /* PBXTargetDependency */,
-				4B8276422F607D5500DF8056 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;

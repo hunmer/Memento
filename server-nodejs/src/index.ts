@@ -249,7 +249,7 @@ async function main() {
   }
 
   // 管理界面静态文件服务
-  const adminDir = path.join(__dirname, '..', 'admin');
+  const adminDir = path.join(__dirname, 'admin');
   console.log(`管理界面目录: ${adminDir}`);
 
   // 检查管理界面目录
