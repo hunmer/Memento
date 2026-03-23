@@ -58,7 +58,8 @@ class CustomBottomBar extends StatefulWidget {
   final Decoration? indicator;
 
   /// 额外的 children（在 TabBar 后面）
-  final List<Widget> Function(BuildContext context, int currentIndex)? extraChildren;
+  final List<Widget> Function(BuildContext context, int currentIndex)?
+  extraChildren;
 
   const CustomBottomBar({
     super.key,
@@ -106,7 +107,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
   void _scheduleBottomBarHeightMeasurement() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && widget.bottomBarKey?.currentContext != null) {
-        final renderBox = widget.bottomBarKey!.currentContext!.findRenderObject() as RenderBox;
+        final renderBox =
+            widget.bottomBarKey!.currentContext!.findRenderObject()
+                as RenderBox;
         final newHeight = renderBox.size.height;
         if (_bottomBarHeight != newHeight) {
           setState(() {
@@ -143,10 +146,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
     return BoxDecoration(
       color: color.withOpacity(0.1),
       borderRadius: BorderRadius.circular(25),
-      border: Border.all(
-        color: color.withOpacity(0.3),
-        width: 1,
-      ),
+      border: Border.all(color: color.withOpacity(0.3), width: 1),
     );
   }
 
@@ -176,13 +176,12 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       controller: widget.tabController,
       dividerColor: Colors.transparent,
       overlayColor: WidgetStateProperty.all(Colors.transparent),
-      indicatorPadding: widget.indicatorPadding ?? const EdgeInsets.fromLTRB(6, 0, 6, 0),
-      indicator: widget.indicator ??
+      indicatorPadding:
+          widget.indicatorPadding ?? const EdgeInsets.fromLTRB(6, 0, 6, 0),
+      indicator:
+          widget.indicator ??
           UnderlineTabIndicator(
-            borderSide: BorderSide(
-              color: color,
-              width: 4,
-            ),
+            borderSide: BorderSide(color: color, width: 4),
             insets: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           ),
       labelColor: color,
@@ -215,7 +214,8 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       reverse: false,
       barDecoration: _buildBarDecoration(),
       iconDecoration: _buildIconDecoration(),
-      hideOnScroll: widget.hideOnScroll &&
+      hideOnScroll:
+          widget.hideOnScroll &&
           !kIsWeb &&
           defaultTargetPlatform != TargetPlatform.macOS &&
           defaultTargetPlatform != TargetPlatform.windows &&
@@ -223,36 +223,33 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
       scrollOpposite: false,
       onBottomBarHidden: () {},
       onBottomBarShown: () {},
-      body: (context, controller) => Stack(
-        children: [
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: _bottomBarHeight),
-              child: widget.body(context, controller),
-            ),
+      body:
+          (context, controller) => Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                  child: widget.body(context, controller),
+                ),
+              ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: _bottomBarHeight,
+                  color: colorScheme.surface,
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: _bottomBarHeight,
-              color: colorScheme.surface,
-            ),
-          ),
-        ],
-      ),
       child: Stack(
         key: widget.bottomBarKey,
-        alignment: Alignment.center,
+        alignment: widget.fabLocation,
         clipBehavior: Clip.none,
         children: [
           _buildTabBar(),
-          if (widget.fab != null)
-            Positioned(
-              top: -25,
-              child: widget.fab!,
-            ),
+          if (widget.fab != null) Positioned(top: -25, child: widget.fab!),
           if (widget.extraChildren != null)
             ...widget.extraChildren!(context, widget.currentIndex),
         ],

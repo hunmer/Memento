@@ -168,6 +168,7 @@ class _ChatBottomBarState extends State<ChatBottomBar>
         ],
       ),
       fab: _buildFab(),
+      fabLocation: Alignment.topRight,
       children: [
         Tab(
           icon: const Icon(Icons.chat_bubble_outline),
