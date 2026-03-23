@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'dart:isolate';
 import 'package:Memento/plugins/openai/models/ai_agent.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,11 +16,17 @@ import 'package:Memento/plugins/agent_chat/services/conversation_service.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_detail_service.dart';
 import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
+import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
+import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
+import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_call_screen.dart';
+import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
 import 'package:Memento/core/services/toast_service.dart';
 import 'package:Memento/plugins/openai/widgets/agent_list_drawer.dart';
+import 'package:memento_foreground_service/memento_foreground_service.dart';
+import 'package:universal_platform/universal_platform.dart';
 import 'components/message_bubble.dart';
 import 'components/message_input.dart';
 import 'components/save_tool_dialog.dart';
@@ -74,6 +82,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final SuggestedQuestionsService _suggestionsService =
       SuggestedQuestionsService();
 
+  // 语音通话相关
+  VoiceCallManager? _voiceCallManager;
+  VoiceCallConfig _voiceCallConfig = const VoiceCallConfig();
+  final StreamController<String> _aiMessageStreamController = StreamController<String>.broadcast();
+  StreamSubscription? _foregroundDataSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +106,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _initializeController();
     _loadSuggestedQuestions();
+    _initializeVoiceCall();
   }
 
   Future<void> _initializeController() async {
@@ -208,6 +223,9 @@ class _ChatScreenState extends State<ChatScreen> {
       if (_autoReadEnabled) {
         _checkAndReadNewAIMessage();
       }
+
+      // 检查是否需要发送AI消息到语音通话管理器
+      _checkAndSendAIMessageToVoiceCall();
     }
   }
 
@@ -260,6 +278,194 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       debugPrint('调用TTS朗读失败: $e');
     }
+  }
+
+  // ========== 语音通话相关方法 ==========
+
+  /// 初始化语音通话功能
+  Future<void> _initializeVoiceCall() async {
+    try {
+      // 从设置中获取ASR配置
+      final settings = widget.getSettings?.call();
+      final asrConfig = settings?['speechRecognition'] as Map<String, dynamic>?;
+
+      if (asrConfig == null) {
+        debugPrint('⚠️ 未配置ASR服务，语音通话功能将不可用');
+        return;
+      }
+
+      final recognitionService = TencentASRService(
+        secretId: asrConfig['secretId'] ?? '',
+        secretKey: asrConfig['secretKey'] ?? '',
+        appId: asrConfig['appId'] ?? '',
+      );
+
+      _voiceCallManager = VoiceCallManager(
+        recognitionService: recognitionService,
+        onUserMessage: (text) async {
+          await _controller.sendMessage(text);
+        },
+        aiMessageStream: _aiMessageStreamController.stream,
+        onStateChanged: (state) {
+          debugPrint('语音通话状态变更: $state');
+        },
+        onPhaseChanged: (phase) {
+          debugPrint('语音通话阶段: $phase');
+        },
+        onError: (error) {
+          if (mounted) {
+            toastService.showToast('语音通话错误: $error');
+          }
+        },
+      );
+
+      await _voiceCallManager!.initialize();
+      debugPrint('✅ 语音通话管理器初始化完成');
+
+      // 监听前台服务事件
+      _listenToForegroundService();
+    } catch (e) {
+      debugPrint('❌ 语音通话管理器初始化失败: $e');
+    }
+  }
+
+  /// 监听前台服务事件
+  void _listenToForegroundService() {
+    if (!UniversalPlatform.isAndroid) return;
+
+    _foregroundDataSubscription = FlutterForegroundTask.getDataStream.listen((data) {
+      if (data is Map<String, dynamic>) {
+        final event = data['event'];
+
+        switch (event) {
+          case 'pause_call':
+            _voiceCallManager?.pauseCall();
+            break;
+          case 'resume_call':
+            _voiceCallManager?.resumeCall();
+            break;
+          case 'end_call':
+            _voiceCallManager?.endCall();
+            Navigator.of(context).pop(); // 退出语音通话界面
+            break;
+        }
+      }
+    });
+  }
+
+  /// 检查并发送AI消息到语音通话管理器
+  void _checkAndSendAIMessageToVoiceCall() {
+    if (_voiceCallManager == null || !_voiceCallManager!.isCallActive) return;
+
+    try {
+      final messages = _controller.messages;
+      if (messages.isEmpty) return;
+
+      // 获取最新的AI消息
+      for (int i = messages.length - 1; i >= 0; i--) {
+        final message = messages[i];
+
+        // 只处理AI消息，且消息已完成(非生成中)
+        if (!message.isUser && !message.isGenerating) {
+          _voiceCallManager?.handleAIMessage(message.content);
+          break;
+        }
+      }
+    } catch (e) {
+      debugPrint('发送AI消息到语音通话管理器失败: $e');
+    }
+  }
+
+  /// 打开语音通话界面
+  Future<void> _openVoiceCall() async {
+    if (_voiceCallManager == null) {
+      toastService.showToast('语音通话功能未初始化，请先配置ASR服务');
+      return;
+    }
+
+    // 启动前台服务
+    await _startVoiceCallForegroundService();
+
+    // 打开语音通话全屏界面
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => VoiceCallScreen(
+          manager: _voiceCallManager!,
+          onExit: () async {
+            await _stopVoiceCallForegroundService();
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  /// 打开语音通话配置对话框
+  Future<void> _openVoiceCallConfig() async {
+    final result = await showVoiceCallConfigDialog(
+      context,
+      initialConfig: _voiceCallConfig,
+    );
+
+    if (result != null) {
+      setState(() {
+        _voiceCallConfig = result;
+      });
+      _voiceCallManager?.updateConfig(result);
+      toastService.showToast('语音通话配置已保存');
+    }
+  }
+
+  /// 启动语音通话前台服务
+  Future<void> _startVoiceCallForegroundService() async {
+    if (!UniversalPlatform.isAndroid) return;
+
+    try {
+      final isRunning = await FlutterForegroundTask.isRunningService;
+
+      if (!isRunning) {
+        await FlutterForegroundTask.startService(
+          serviceId: 258, // 使用不同的ID避免与聊天前台服务冲突
+          notificationTitle: 'AI 语音通话',
+          notificationText: '正在通话中...',
+          notificationButtons: [
+            const ServiceNotificationButton(key: 'pause', label: '暂停'),
+            const ServiceNotificationButton(key: 'end', label: '结束'),
+          ],
+          callback: startVoiceCallTaskCallback,
+        );
+        debugPrint('✅ 语音通话前台服务已启动');
+      }
+    } catch (e) {
+      debugPrint('❌ 启动语音通话前台服务失败: $e');
+    }
+  }
+
+  /// 停止语音通话前台服务
+  Future<void> _stopVoiceCallForegroundService() async {
+    if (!UniversalPlatform.isAndroid) return;
+
+    try {
+      if (await FlutterForegroundTask.isRunningService) {
+        await FlutterForegroundTask.stopService();
+        debugPrint('✅ 语音通话前台服务已停止');
+      }
+    } catch (e) {
+      debugPrint('❌ 停止语音通话前台服务失败: $e');
+    }
+  }
+
+  /// 显示语音通话配置对话框的便捷方法
+  Future<VoiceCallConfig?> showVoiceCallConfigDialog(
+    BuildContext context, {
+    required VoiceCallConfig initialConfig,
+  }) {
+    return showDialog<VoiceCallConfig>(
+      context: context,
+      builder: (context) => VoiceCallConfigDialog(initialConfig: initialConfig),
+    );
   }
 
   /// 加载建议问题
@@ -345,6 +551,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
+    _voiceCallManager?.dispose();
+    _aiMessageStreamController.close();
+    _foregroundDataSubscription?.cancel();
     _controller.removeListener(_onControllerChanged);
     _controller.messageService.removeListener(_onControllerChanged);
     _controller.dispose();
@@ -421,6 +630,12 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: _openTTSSettings,
             tooltip: '语音播报设置',
           ),
+          // 语音通话按钮
+          IconButton(
+            icon: const Icon(Icons.phone_in_talk),
+            onPressed: _openVoiceCall,
+            tooltip: '语音通话',
+          ),
           // 更多菜单
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -435,6 +650,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   break;
                 case 'clear_messages':
                   _showClearMessagesConfirm();
+                  break;
+                case 'voice_call_config':
+                  _openVoiceCallConfig();
                   break;
                 case 'settings':
                   _showSettings();
@@ -480,6 +698,16 @@ class _ChatScreenState extends State<ChatScreen> {
                         const Icon(Icons.settings),
                         const SizedBox(width: 12),
                         Text('agent_chat_conversationSettings'.tr),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'voice_call_config',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.settings_voice),
+                        const SizedBox(width: 12),
+                        Text('语音通话设置'),
                       ],
                     ),
                   ),
@@ -1417,6 +1645,68 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (confirm == true) {
       await _controller.deleteMessage(messageId);
+    }
+  }
+}
+
+// ========== 前台服务回调 ==========
+
+/// 语音通话前台服务启动回调
+///
+/// 必须是顶层函数，用于前台服务启动
+@pragma('vm:entry-point')
+void startVoiceCallTaskCallback() {
+  FlutterForegroundTask.setTaskHandler(VoiceCallTaskHandler());
+}
+
+/// 语音通话前台服务任务处理器
+class VoiceCallTaskHandler extends TaskHandler {
+  static String notificationTitle = 'AI 语音通话';
+  static String notificationText = '正在通话中...';
+
+  @override
+  Future<void> onStart(DateTime timestamp, SendPort? sendPort) async {
+    debugPrint('🚀 语音通话前台服务已启动');
+  }
+
+  @override
+  void onRepeatEvent(DateTime timestamp) {
+    // 定期任务（可选）
+  }
+
+  @override
+  Future<void> onDestroy(DateTime timestamp, SendPort? sendPort) async {
+    debugPrint('🗑️ 语音通话前台服务已销毁');
+  }
+
+  @override
+  void onButtonPressed(String id) {
+    debugPrint('🔔 通知按钮被点击: $id');
+    // 发送事件到主应用
+    switch (id) {
+      case '0': // 第一个按钮
+        FlutterForegroundTask.sendDataToTask({'event': 'pause_call'});
+        break;
+      case '1': // 第二个按钮
+        FlutterForegroundTask.sendDataToTask({'event': 'end_call'});
+        break;
+    }
+  }
+
+  @override
+  void onReceiveData(Object data) {
+    // 接收来自主应用的数据
+    if (data is Map<String, dynamic>) {
+      final action = data['action'];
+      if (action == 'update_notification') {
+        notificationTitle = data['title'] ?? notificationTitle;
+        notificationText = data['content'] ?? notificationText;
+
+        FlutterForegroundTask.updateService(
+          notificationTitle: notificationTitle,
+          notificationText: notificationText,
+        );
+      }
     }
   }
 }
