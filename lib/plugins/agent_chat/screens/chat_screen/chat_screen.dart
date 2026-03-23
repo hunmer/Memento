@@ -114,15 +114,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
   /// 加载聊天设置（从会话配置中加载）
   void _loadChatSettings() {
+    // 从 ConversationService 获取最新的会话对象（而非 widget.conversation）
+    final latestConversation = _controller.conversationService
+        .getConversation(widget.conversation.id);
+
     // 从会话中加载 TTS 配置
-    final ttsConfig = widget.conversation.ttsConfig;
+    final ttsConfig = latestConversation?.ttsConfig;
     if (ttsConfig != null) {
       _autoReadEnabled = ttsConfig.enabled;
       _selectedTTSServiceId = ttsConfig.serviceId;
     }
 
     // 从会话中加载语音通话配置
-    final voiceCallConfig = widget.conversation.voiceCallConfig;
+    final voiceCallConfig = latestConversation?.voiceCallConfig;
     if (voiceCallConfig != null) {
       _voiceCallConfig = voiceCallConfig;
     }
