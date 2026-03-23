@@ -245,7 +245,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
               // FAB 放在外层 Stack，不受 BottomBar Stack 边界限制
               if (widget.fab != null)
                 Positioned(
-                  bottom: _bottomBarHeight - 28,
+                  bottom: _bottomBarHeight + widget.offset - 28,
                   right: MediaQuery.of(context).size.width * (1 - widget.widthRatio) / 2,
                   child: widget.fab!,
                 ),
