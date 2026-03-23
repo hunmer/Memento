@@ -252,11 +252,8 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
           if (widget.fab != null)
             Positioned(
               top: -25,
-              right: 0,
-              child: Transform.translate(
-                offset: const Offset(28, 0),
-                child: widget.fab!,
-              ),
+              right: 28,
+              child: widget.fab!,
             ),
           if (widget.extraChildren != null)
             ...widget.extraChildren!(context, widget.currentIndex),
