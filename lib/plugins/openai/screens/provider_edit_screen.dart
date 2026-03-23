@@ -272,9 +272,25 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
                 },
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Headers',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Headers',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  _HeaderQuickSelect(
+                    onSelected: (headerKey) {
+                      _headerKeyController.text = headerKey;
+                      // 自动聚焦到 value 输入框
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      // 延迟聚焦，确保文本已填充
+                      Future.delayed(const Duration(milliseconds: 100), () {
+                        // 这里可以添加聚焦逻辑
+                      });
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Card(
@@ -366,5 +382,99 @@ class _ProviderEditScreenState extends State<ProviderEditScreen> {
         ),
       ),
     );
+  }
+}
+
+/// 快捷选择常见 Header 类型的下拉选择器
+class _HeaderQuickSelect extends StatefulWidget {
+  final Function(String) onSelected;
+
+  const _HeaderQuickSelect({required this.onSelected});
+
+  @override
+  State<_HeaderQuickSelect> createState() => _HeaderQuickSelectState();
+}
+
+class _HeaderQuickSelectState extends State<_HeaderQuickSelect> {
+  String? _selectedValue;
+
+  // 常见的 Header 类型
+  static const Map<String, String> _commonHeaders = {
+    'Authorization': 'Authorization',
+    'x-api-key': 'x-api-key',
+    'api-key': 'api-key',
+    'Content-Type': 'Content-Type',
+    'Accept': 'Accept',
+    'User-Agent': 'User-Agent',
+    'Bearer': 'Authorization: Bearer',
+    'Custom': '',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).colorScheme.outline),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedValue,
+          hint: const Text('快捷选择', style: TextStyle(fontSize: 14)),
+          icon: const Icon(Icons.arrow_drop_down, size: 20),
+          isDense: true,
+          style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
+          items: _commonHeaders.entries.map((entry) {
+            return DropdownMenuItem<String>(
+              value: entry.key,
+              child: Text(
+                _getDisplayLabel(entry.key),
+                style: const TextStyle(fontSize: 14),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                _selectedValue = value;
+              });
+              widget.onSelected(_commonHeaders[value] ?? value);
+              // 重置选择，方便下次使用
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (mounted) {
+                  setState(() {
+                    _selectedValue = null;
+                  });
+                }
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  String _getDisplayLabel(String key) {
+    switch (key) {
+      case 'Authorization':
+        return 'Authorization';
+      case 'x-api-key':
+        return 'x-api-key';
+      case 'api-key':
+        return 'api-key';
+      case 'Content-Type':
+        return 'Content-Type';
+      case 'Accept':
+        return 'Accept';
+      case 'User-Agent':
+        return 'User-Agent';
+      case 'Bearer':
+        return 'Bearer Token';
+      case 'Custom':
+        return '自定义';
+      default:
+        return key;
+    }
   }
 }
