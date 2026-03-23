@@ -84,10 +84,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
         .where(
           (model) =>
               model.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-              (model.description?.toLowerCase().contains(
-                    _searchQuery.toLowerCase(),
-                  ) ??
-                  false),
+              model.group.toLowerCase().contains(_searchQuery.toLowerCase()),
         )
         .toList();
   }
@@ -162,10 +159,7 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
 
                               return ListTile(
                                 title: Text(model.name),
-                                subtitle:
-                                    model.description != null
-                                        ? Text(model.description!)
-                                        : null,
+                                subtitle: Text(model.group),
                                 trailing:
                                     isSelected
                                         ? const Icon(
@@ -180,43 +174,27 @@ class _ModelSearchScreenState extends State<ModelSearchScreen>
                                   });
                                 },
                                 onLongPress: () {
-                                  if (model.url != null) {
-                                    // 显示模型详情
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => AlertDialog(
-                                            title: Text(model.name),
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                if (model.description != null)
-                                                  Text(
-                                                    '描述: ${model.description}',
-                                                  ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  '${'openai_modelUrlLabel'.tr}: ${model.url}',
-                                                ),
-                                              ],
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.of(
-                                                          context,
-                                                        ).pop(),
-                                                child: Text(
-                                                  'openai_close'.tr,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-                                  }
+                                  // 显示模型详情
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(model.name),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text('分组: ${model.group}'),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(),
+                                          child: Text('openai_close'.tr),
+                                        ),
+                                      ],
+                                    ),
+                                  );
                                 },
                               );
                             },

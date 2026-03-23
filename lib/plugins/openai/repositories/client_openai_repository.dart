@@ -495,8 +495,6 @@ class ClientOpenAIRepository implements IOpenAIRepository {
     return OpenAIModelDto(
       id: model.id,
       name: model.name,
-      description: model.description,
-      url: model.url,
       group: model.group,
     );
   }
