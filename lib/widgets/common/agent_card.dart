@@ -241,67 +241,72 @@ class _AgentCardWidgetState extends State<AgentCardWidget> {
   }
 
   Widget _buildAgentIcon(Color effectiveColor, HomeWidgetSize size) {
-    final iconSize = _getIconContainerSize(size);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableSize = constraints.maxWidth < constraints.maxHeight
+            ? constraints.maxWidth
+            : constraints.maxHeight;
 
-    // 如果有头像，优先显示头像
-    if (widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty) {
-      return SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: effectiveColor.withValues(alpha: 0.5),
-              width: 2,
+        // 如果有头像，优先显示头像
+        if (widget.avatarUrl != null && widget.avatarUrl!.isNotEmpty) {
+          return SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: effectiveColor.withValues(alpha: 0.5),
+                  width: 2,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: AdaptiveImage(
+                  imagePath: widget.avatarUrl,
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: AdaptiveImage(
-              imagePath: widget.avatarUrl,
-              width: iconSize,
-              height: iconSize,
-              fit: BoxFit.cover,
+          );
+        }
+
+        // 如果有自定义图标，使用自定义图标
+        if (widget.iconCodePoint != null) {
+          return Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: effectiveColor,
             ),
-          ),
-        ),
-      );
-    }
+            child: Icon(
+              IconData(widget.iconCodePoint!, fontFamily: 'MaterialIcons'),
+              size: availableSize * 0.5,
+              color: Colors.white,
+            ),
+          );
+        }
 
-    // 如果有自定义图标，使用自定义图标
-    if (widget.iconCodePoint != null) {
-      return Container(
-        width: iconSize,
-        height: iconSize,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: effectiveColor,
-        ),
-        child: Icon(
-          IconData(widget.iconCodePoint!, fontFamily: 'MaterialIcons'),
-          size: _getIconSize(size),
-          color: Colors.white,
-        ),
-      );
-    }
-
-    // 默认图标
-    return _buildDefaultIcon(effectiveColor, size);
+        // 默认图标
+        return _buildDefaultIcon(effectiveColor, availableSize);
+      },
+    );
   }
 
-  Widget _buildDefaultIcon(Color effectiveColor, HomeWidgetSize size) {
-    final iconSize = _getIconContainerSize(size);
+  Widget _buildDefaultIcon(Color effectiveColor, double availableSize) {
     return Container(
-      width: iconSize,
-      height: iconSize,
+      width: double.infinity,
+      height: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: effectiveColor,
       ),
       child: Icon(
         Icons.smart_toy,
-        size: _getIconSize(size),
+        size: availableSize * 0.5,
         color: Colors.white,
       ),
     );
