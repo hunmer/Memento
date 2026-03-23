@@ -1,7 +1,6 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-import https from 'https';
 // @ts-ignore - https-proxy-agent 的类型定义在当前 moduleResolution 下无法正确解析
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
@@ -37,15 +36,10 @@ function initializeFirebase(): admin.app.App {
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
   // 配置代理
-  const proxy = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || '';
-  const proxyAgent = proxy ? new HttpsProxyAgent(proxy) : undefined;
+  const proxy = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
+  const proxyAgent = new HttpsProxyAgent(proxy);
 
-  console.log(`[FCM] 代理配置: ${proxy || '未设置'}`);
-
-  // 设置全局代理 agent
-  if (proxyAgent) {
-    https.globalAgent = proxyAgent as any;
-  }
+  console.log(`[FCM] 代理配置: ${proxy}`);
 
   firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount, proxyAgent as any),
