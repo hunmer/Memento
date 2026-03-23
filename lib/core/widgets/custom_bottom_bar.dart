@@ -196,71 +196,75 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
     final colorScheme = Theme.of(context).colorScheme;
     final mediaQuery = MediaQuery.of(context);
 
-    return BottomBar(
-      fit: StackFit.expand,
-      icon: _buildScrollToTopIcon,
-      borderRadius: BorderRadius.circular(25),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.decelerate,
-      showIcon: true,
-      width: mediaQuery.size.width * widget.widthRatio,
-      barColor: colorScheme.surface,
-      start: 2,
-      end: 0,
-      offset: widget.offset,
-      barAlignment: Alignment.bottomCenter,
-      iconHeight: 35,
-      iconWidth: 35,
-      reverse: false,
-      barDecoration: _buildBarDecoration(),
-      iconDecoration: _buildIconDecoration(),
-      hideOnScroll:
-          widget.hideOnScroll &&
-          !kIsWeb &&
-          defaultTargetPlatform != TargetPlatform.macOS &&
-          defaultTargetPlatform != TargetPlatform.windows &&
-          defaultTargetPlatform != TargetPlatform.linux,
-      scrollOpposite: false,
-      onBottomBarHidden: () {},
-      onBottomBarShown: () {},
-      body:
-          (context, controller) => Stack(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        BottomBar(
+          fit: StackFit.expand,
+          icon: _buildScrollToTopIcon,
+          borderRadius: BorderRadius.circular(25),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.decelerate,
+          showIcon: true,
+          width: mediaQuery.size.width * widget.widthRatio,
+          barColor: colorScheme.surface,
+          start: 2,
+          end: 0,
+          offset: widget.offset,
+          barAlignment: Alignment.bottomCenter,
+          iconHeight: 35,
+          iconWidth: 35,
+          reverse: false,
+          barDecoration: _buildBarDecoration(),
+          iconDecoration: _buildIconDecoration(),
+          hideOnScroll:
+              widget.hideOnScroll &&
+              !kIsWeb &&
+              defaultTargetPlatform != TargetPlatform.macOS &&
+              defaultTargetPlatform != TargetPlatform.windows &&
+              defaultTargetPlatform != TargetPlatform.linux,
+          scrollOpposite: false,
+          onBottomBarHidden: () {},
+          onBottomBarShown: () {},
+          body:
+              (context, controller) => Stack(
+                children: [
+                  Positioned.fill(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: _bottomBarHeight),
+                      child: widget.body(context, controller),
+                    ),
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      height: _bottomBarHeight,
+                      color: colorScheme.surface,
+                    ),
+                  ),
+                ],
+              ),
+          child: Stack(
+            key: widget.bottomBarKey,
+            alignment: widget.fabLocation,
             clipBehavior: Clip.none,
             children: [
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: _bottomBarHeight),
-                  child: widget.body(context, controller),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  height: _bottomBarHeight,
-                  color: colorScheme.surface,
-                ),
-              ),
-              // FAB 放在外层 Stack，不受 BottomBar Stack 边界限制
-              if (widget.fab != null)
-                Positioned(
-                  bottom: _bottomBarHeight + widget.offset - 28,
-                  right: MediaQuery.of(context).size.width * (1 - widget.widthRatio) / 2,
-                  child: widget.fab!,
-                ),
+              _buildTabBar(),
+              if (widget.extraChildren != null)
+                ...widget.extraChildren!(context, widget.currentIndex),
             ],
           ),
-      child: Stack(
-        key: widget.bottomBarKey,
-        alignment: widget.fabLocation,
-        clipBehavior: Clip.none,
-        children: [
-          _buildTabBar(),
-          if (widget.extraChildren != null)
-            ...widget.extraChildren!(context, widget.currentIndex),
-        ],
-      ),
+        ),
+        // FAB 放在最外层 Stack，确保 z-index 最高
+        if (widget.fab != null)
+          Positioned(
+            bottom: widget.offset,
+            right: mediaQuery.size.width * (1 - widget.widthRatio) / 2,
+            child: widget.fab!,
+          ),
+      ],
     );
   }
 }
