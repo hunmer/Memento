@@ -113,6 +113,8 @@ class VoiceCallManager {
   int _currentTurn = 0;
   String? _lastRecognizedText;
   String? _lastAIMessage;
+  String? _pendingRecognizedText; // 待发送的识别文本（等待识别完成后发送）
+  bool _isStoppingRecording = false; // 是否正在停止录音（防止重复处理）
 
   // 订阅
   StreamSubscription<String>? _recognitionSubscription;
@@ -175,18 +177,22 @@ class VoiceCallManager {
   Future<void> initialize() async {
     await recognitionService.initialize();
 
-    // 监听识别结果
+    // 监听识别结果（实时更新显示，但不发送）
     _recognitionSubscription = recognitionService.recognitionStream.listen((text) {
       if (_state == VoiceCallState.recording) {
-        _onRecognized(text);
+        // 保存最新的识别结果，但不立即发送
+        _pendingRecognizedText = text;
+        debugPrint('🎤 识别中: $text');
       }
     });
 
-    // 监听识别状态
+    // 监听识别状态（状态变为 idle 时才发送最终结果）
     _stateSubscription = recognitionService.stateStream.listen((speechState) {
-      if (speechState == SpeechRecognitionState.idle && _state == VoiceCallState.recording) {
-        // 录音自动停止（超时或静音）
-        _stopRecording();
+      if (speechState == SpeechRecognitionState.idle &&
+          _state == VoiceCallState.recording &&
+          !_isStoppingRecording) {
+        // 识别完成，发送最终结果
+        _stopRecordingAndSend();
       }
     });
 
@@ -269,8 +275,13 @@ class VoiceCallManager {
   Future<void> stopRecording() async {
     if (_state != VoiceCallState.recording) return;
 
-    await recognitionService.stopRecording();
-    _recordingTimeoutTimer?.cancel();
+    _isStoppingRecording = true;
+    try {
+      await recognitionService.stopRecording();
+      _recordingTimeoutTimer?.cancel();
+    } finally {
+      _isStoppingRecording = false;
+    }
   }
 
   /// 跳过当前TTS播报
@@ -298,7 +309,7 @@ class VoiceCallManager {
       _recordingTimeoutTimer?.cancel();
       _recordingTimeoutTimer = Timer(
         Duration(seconds: _config.recordingTimeout),
-        () => _stopRecording(),
+        () => _stopRecordingAndSend(),
       );
 
       debugPrint('🎤 开始录音');
@@ -307,13 +318,32 @@ class VoiceCallManager {
     }
   }
 
-  /// 停止录音
-  Future<void> _stopRecording() async {
-    _recordingTimeoutTimer?.cancel();
+  /// 停止录音并发送识别结果
+  Future<void> _stopRecordingAndSend() async {
+    if (_state != VoiceCallState.recording || _isStoppingRecording) return;
 
-    if (_state != VoiceCallState.recording) return;
+    _isStoppingRecording = true;
 
-    await recognitionService.stopRecording();
+    try {
+      // 先停止录音
+      await recognitionService.stopRecording();
+
+      // 等待一小段时间确保状态更新
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // 发送最终识别结果
+      if (_pendingRecognizedText != null && _pendingRecognizedText!.trim().isNotEmpty) {
+        _onRecognized(_pendingRecognizedText!);
+        _pendingRecognizedText = null;
+      } else {
+        // 没有识别到文本，重新开始录音
+        if (isCallActive) {
+          await _startRecording();
+        }
+      }
+    } finally {
+      _isStoppingRecording = false;
+    }
   }
 
   /// 识别完成处理
@@ -322,10 +352,7 @@ class VoiceCallManager {
 
     _lastRecognizedText = text;
     _setState(VoiceCallState.recognized);
-    debugPrint('📝 识别完成: $text');
-
-    // 停止录音
-    _stopRecording();
+    debugPrint('📝 识别完成，准备发送: $text');
 
     // 发送给AI
     _sendToAI(text);
