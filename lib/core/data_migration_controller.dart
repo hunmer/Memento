@@ -41,12 +41,13 @@ class DataMigrationController {
         return;
       }
 
-      debugPrint('[DataMigration] 开始扫描目录: ${appDataDir.path}');
       await _scanDirectory(appDataDir);
 
-      debugPrint(
-        '[DataMigration] 迁移完成 - 重命名: $_renamedCount, 跳过: $_skippedCount, 错误: $_errorCount',
-      );
+      if (_renamedCount > 0 || _skippedCount > 0 || _errorCount > 0) {
+        debugPrint(
+          '[DataMigration] 迁移完成 - 重命名: $_renamedCount, 跳过: $_skippedCount, 错误: $_errorCount',
+        );
+      }
     } catch (e, stack) {
       debugPrint('[DataMigration] 迁移过程出错: $e');
       debugPrint('[DataMigration] 堆栈: $stack');

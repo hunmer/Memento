@@ -137,7 +137,9 @@ class JSBridgeManager {
 
     print('正在处理 ${_pendingRegistrations.length} 个延迟注册的插件...');
 
-    final registrations = List<PendingPluginRegistration>.from(_pendingRegistrations);
+    final registrations = List<PendingPluginRegistration>.from(
+      _pendingRegistrations,
+    );
     _pendingRegistrations.clear();
 
     for (final registration in registrations) {
@@ -320,7 +322,6 @@ class JSBridgeManager {
   ) async {
     // 如果尚未初始化，先加入延迟注册队列
     if (!_initialized || _engine == null) {
-      print('[${plugin.id}] JS Bridge 未初始化，添加到延迟注册队列');
       _pendingRegistrations.add(
         PendingPluginRegistration(plugin: plugin, apis: apis),
       );
@@ -352,11 +353,13 @@ class JSBridgeManager {
     // 否则加入延迟执行队列
     print('[JSBridge] JS Bridge 未初始化，脚本加入延迟队列: ${description ?? '(未命名)'}');
     final completer = Completer<JSResult>();
-    _pendingScripts.add(_PendingScript(
-      code: code,
-      description: description,
-      completer: completer,
-    ));
+    _pendingScripts.add(
+      _PendingScript(
+        code: code,
+        description: description,
+        completer: completer,
+      ),
+    );
     return completer.future;
   }
 
@@ -726,28 +729,26 @@ class JSBridgeManager {
         late String subscriptionId;
 
         // 生成唯一的订阅 ID
-        subscriptionId = EventManager.instance.subscribe(
-          eventName,
-          (args) {
-            // 将事件参数序列化并传递给 JavaScript
-            final eventData = {
-              'eventName': args.eventName,
-              'whenOccurred': args.whenOccurred.toIso8601String(),
-              'data': args is ItemEventArgs
-                  ? {
+        subscriptionId = EventManager.instance.subscribe(eventName, (args) {
+          // 将事件参数序列化并传递给 JavaScript
+          final eventData = {
+            'eventName': args.eventName,
+            'whenOccurred': args.whenOccurred.toIso8601String(),
+            'data':
+                args is ItemEventArgs
+                    ? {
                       'itemId': args.itemId,
                       'title': args.title,
                       'action': args.action,
                     }
-                  : {},
-            };
+                    : {},
+          };
 
-            // 调用 JavaScript 回调
-            // 注意: 这里需要通过事件队列机制来触发 JS 回调
-            // 当前实现仅返回订阅 ID,实际回调需要在 JS 端轮询事件队列
-            _eventQueue.putIfAbsent(subscriptionId, () => []).add(eventData);
-          },
-        );
+          // 调用 JavaScript 回调
+          // 注意: 这里需要通过事件队列机制来触发 JS 回调
+          // 当前实现仅返回订阅 ID,实际回调需要在 JS 端轮询事件队列
+          _eventQueue.putIfAbsent(subscriptionId, () => []).add(eventData);
+        });
 
         return subscriptionId;
       } catch (e) {
@@ -757,9 +758,7 @@ class JSBridgeManager {
     });
 
     // 2. events.off - 取消订阅
-    await _engine!.registerFunction('Memento_events_off', ([
-      dynamic a,
-    ]) async {
+    await _engine!.registerFunction('Memento_events_off', ([dynamic a]) async {
       try {
         final subscriptionId = a as String?;
 

@@ -24,7 +24,6 @@ class AppShortcutManager {
   /// 初始化快捷方式监听
   void initialize() {
     if (!isSupported) {
-      debugPrint('Shortcut功能在当前平台不支持，已跳过初始化');
       return;
     }
 
@@ -87,7 +86,6 @@ class AppShortcutManager {
     ShortcutIconAsset iconAsset = ShortcutIconAsset.flutterAsset,
   }) {
     if (!isSupported) {
-      debugPrint('Shortcut功能在当前平台不支持');
       return;
     }
 
@@ -116,7 +114,6 @@ class AppShortcutManager {
     ShortcutIconAsset? iconAsset,
   }) {
     if (!isSupported) {
-      debugPrint('Shortcut功能在当前平台不支持');
       return;
     }
 
@@ -139,7 +136,6 @@ class AppShortcutManager {
   /// 批量设置快捷方式
   void setShortcuts(List<ShortcutItem> items) {
     if (!isSupported) {
-      debugPrint('Shortcut功能在当前平台不支持');
       return;
     }
 
@@ -154,7 +150,6 @@ class AppShortcutManager {
   /// 清除所有快捷方式
   void clearShortcuts() {
     if (!isSupported) {
-      debugPrint('Shortcut功能在当前平台不支持');
       return;
     }
 

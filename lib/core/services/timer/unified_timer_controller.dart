@@ -46,11 +46,8 @@ class UnifiedTimerController {
   /// [onTimerUpdate] 可选的计时器更新回调
   Future<void> initialize({Function(TimerState)? onTimerUpdate}) async {
     if (_initialized) {
-      print('UnifiedTimerController already initialized');
       return;
     }
-
-    print('Initializing UnifiedTimerController...');
 
     // 加载活动计时器
     await _loadActiveTimers();
@@ -59,7 +56,6 @@ class UnifiedTimerController {
     _startGlobalUpdateTimer();
 
     _initialized = true;
-    print('UnifiedTimerController initialized successfully');
   }
 
   /// 启动计时器

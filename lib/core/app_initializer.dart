@@ -197,7 +197,6 @@ Future<void> initializeApp() async {
     try {
       final timerController = UnifiedTimerController();
       await timerController.clearAll();
-      debugPrint('[AppInitializer] 已清理所有活动计时器');
     } catch (e) {
       debugPrint('[AppInitializer] 清理计时器状态失败（可能尚未初始化）: $e');
     }
@@ -215,8 +214,6 @@ Future<void> initializeApp() async {
         debugPrint('[AppInitializer] 停止前台服务失败: $e');
       }
     }
-
-    debugPrint('[AppInitializer] 已清理所有历史通知、计时器状态和前台服务');
 
     // 初始化通知控制器（设置监听器和配置）
     AppStartupState.instance._setLoadingMessage('正在初始化通知服务...');
@@ -319,11 +316,14 @@ Future<void> _initializeBackgroundServices() async {
 
     // 初始化 FCM 推送服务
     unawaited(
-      FcmService.instance.initialize().then((_) {
-        debugPrint('FCM 推送服务初始化成功');
-      }).catchError((e) {
-        debugPrint('FCM 推送服务初始化失败: $e');
-      }),
+      FcmService.instance
+          .initialize()
+          .then((_) {
+            debugPrint('FCM 推送服务初始化成功');
+          })
+          .catchError((e) {
+            debugPrint('FCM 推送服务初始化失败: $e');
+          }),
     );
 
     // 延迟执行权限检查和小组件同步

@@ -32,38 +32,39 @@ import 'screens/settings_screen/controllers/auto_update_controller.dart';
 
 // 从 app_initializer 导入全局变量
 
-void main() async {
-  // 0. 确保 WidgetsFlutterBinding 初始化（必须在任何平台通道操作之前）
-  WidgetsFlutterBinding.ensureInitialized();
-
-  // 0.1 初始化 Firebase（必须在其他代码之前）
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  // 0.2 注册 FCM 后台消息处理器（必须在 Firebase.initializeApp 之后）
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-  // 1. 捕获 Flutter Framework 错误（如 widget build 错误）
-  FlutterError.onError = (FlutterErrorDetails details) {
-    // 记录到日志服务
-    final logService = LogService.instance;
-    if (logService.isEnabled && logService.isInitialized) {
-      logService.error(
-        'FlutterError: ${details.exception}',
-        error: details.exception,
-        stackTrace: details.stack,
-      );
-    }
-
-    // 在调试模式下仍然显示错误界面
-    if (kDebugMode) {
-      FlutterError.presentError(details);
-    }
-  };
-
-  // 2. 使用 runZonedGuarded 捕获所有未处理的异步异常
+void main() {
+  // 使用 runZonedGuarded 捕获所有未处理的异步异常
   runZonedGuarded(
     () async {
-      // 3. 重写 debugPrint，让所有日志输出路由到 LogService
+      // 0. 确保 WidgetsFlutterBinding 初始化（必须在任何平台通道操作之前）
+      // 必须在 runZonedGuarded 内部调用，以避免 Zone 不匹配错误
+      WidgetsFlutterBinding.ensureInitialized();
+
+      // 0.1 初始化 Firebase（必须在其他代码之前）
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+      // 0.2 注册 FCM 后台消息处理器（必须在 Firebase.initializeApp 之后）
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+      // 1. 捕获 Flutter Framework 错误（如 widget build 错误）
+      FlutterError.onError = (FlutterErrorDetails details) {
+        // 记录到日志服务
+        final logService = LogService.instance;
+        if (logService.isEnabled && logService.isInitialized) {
+          logService.error(
+            'FlutterError: ${details.exception}',
+            error: details.exception,
+            stackTrace: details.stack,
+          );
+        }
+
+        // 在调试模式下仍然显示错误界面
+        if (kDebugMode) {
+          FlutterError.presentError(details);
+        }
+      };
+
+      // 2. 重写 debugPrint，让所有日志输出路由到 LogService
       // 这样无需修改现有的 debugPrint 调用
       final originalDebugPrint = debugPrint;
       debugPrint = (String? message, {int? wrapWidth}) {

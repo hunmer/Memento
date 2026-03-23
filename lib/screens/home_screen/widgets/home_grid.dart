@@ -1100,17 +1100,6 @@ class _HomeGridState extends State<HomeGrid> {
               color: Theme.of(context).disabledColor,
             ),
           ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await _showQuickCreateLayoutDialog(context);
-              if (result != null && widget.onQuickCreateLayout != null) {
-                widget.onQuickCreateLayout!(result);
-              }
-            },
-            icon: const Icon(Icons.add_circle_outline),
-            label: Text('screens_quickCreateLayout'.tr),
-          ),
         ],
       ),
     );
