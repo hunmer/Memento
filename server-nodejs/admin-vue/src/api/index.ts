@@ -1,5 +1,7 @@
 import type { ApiResponse, LoginRequest, LoginResponse, UserInfoResponse, DevicesListResponse, RegisterDeviceRequest, RegisterDeviceResponse, PushMessageRequest, PushMessageResponse } from './types'
 
+// 优先级: localStorage > 环境变量 > 默认值
+const ENV_SERVER = import.meta.env.VITE_API_BASE_URL || ''
 const DEFAULT_SERVER = 'http://localhost:8874'
 
 // API 客户端类
@@ -8,7 +10,9 @@ class ApiClient {
   private _token: string | null = null
 
   constructor() {
-    this._baseUrl = localStorage.getItem('serverUrl') || DEFAULT_SERVER
+    // 优先使用 localStorage（用户手动配置），其次环境变量，最后默认值
+    const storedUrl = localStorage.getItem('serverUrl')
+    this._baseUrl = storedUrl || ENV_SERVER || DEFAULT_SERVER
     this._token = localStorage.getItem('token')
   }
 
