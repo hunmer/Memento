@@ -104,6 +104,7 @@ dependencies:
   home_widget: ^0.6.0  # Desktop widgets for Android/iOS
   firebase_core: ^3.0.0
   firebase_messaging: ^15.0.0
+  flutter_foreground_task: ^9.1.0  # Foreground task for voice call
   wheel_picker: ^0.2.2  # Wheel picker for time selection
   lpinyin: ^2.0.3  # Chinese pinyin conversion for tag filtering
   watch_connectivity: ^0.2.8  # Watch connectivity for watchOS communication

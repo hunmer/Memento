@@ -16,7 +16,7 @@ import 'package:Memento/plugins/agent_chat/services/tool_template_service.dart';
 import 'package:Memento/plugins/agent_chat/services/message_detail_service.dart';
 import 'package:Memento/plugins/agent_chat/services/suggested_questions_service.dart';
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manager.dart';
-import 'package:Memento/plugins/agent_chat/models/voice_call_config.dart';
+import 'package:Memento/plugins/agent_chat/models/voice_call_config.dart' show VoiceCallConfig, TTSConfig;
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_call_screen.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
@@ -637,21 +637,24 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: _openToolTemplateManagement,
             tooltip: '工具模板',
           ),
-          // 自动朗读设置按钮
-          IconButton(
-            icon: Icon(
-              _autoReadEnabled ? Icons.volume_up : Icons.volume_off,
-              color: _autoReadEnabled ? Colors.blue : null,
+          // 语音相关按钮（仅在设置了 Agent 时显示）
+          if (_currentAgent != null) ...[
+            // 自动朗读设置按钮
+            IconButton(
+              icon: Icon(
+                _autoReadEnabled ? Icons.volume_up : Icons.volume_off,
+                color: _autoReadEnabled ? Colors.blue : null,
+              ),
+              onPressed: _openTTSSettings,
+              tooltip: '语音播报设置',
             ),
-            onPressed: _openTTSSettings,
-            tooltip: '语音播报设置',
-          ),
-          // 语音通话按钮
-          IconButton(
-            icon: const Icon(Icons.phone_in_talk),
-            onPressed: _openVoiceCall,
-            tooltip: '语音通话',
-          ),
+            // 语音通话按钮
+            IconButton(
+              icon: const Icon(Icons.phone_in_talk),
+              onPressed: _openVoiceCall,
+              tooltip: '语音通话',
+            ),
+          ],
           // 更多菜单
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
@@ -1682,7 +1685,6 @@ class VoiceCallTaskHandler extends TaskHandler {
     debugPrint('🗑️ 语音通话前台服务已销毁');
   }
 
-  @override
   void onButtonPressed(String id) {
     debugPrint('🔔 通知按钮被点击: $id');
     // 发送事件到主应用

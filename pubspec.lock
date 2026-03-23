@@ -559,7 +559,7 @@ packages:
     source: hosted
     version: "1.3.0"
   flutter_foreground_task:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_foreground_task
       sha256: "9f1b25a81db95d7119d2c5cffc654048cbdd49d4056183e1beadc1a6a38f3e29"
