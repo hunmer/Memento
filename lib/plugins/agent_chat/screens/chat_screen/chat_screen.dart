@@ -19,7 +19,7 @@ import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_manage
 import 'package:Memento/plugins/agent_chat/services/voice_call/voice_call_config_dialog.dart';
 import 'package:Memento/plugins/agent_chat/screens/chat_screen/components/voice_call_screen.dart';
 import 'package:Memento/plugins/agent_chat/services/speech/tencent_asr_service.dart';
-import 'package:Memento/plugins/agent_chat/services/speech/speech_recognition_config.dart';
+import 'package:Memento/core/services/speech_recognition_config_service.dart';
 import 'package:Memento/core/storage/storage_manager.dart';
 import 'package:Memento/core/js_bridge/js_bridge_manager.dart';
 import 'package:Memento/plugins/tts/tts_plugin.dart';
@@ -285,22 +285,15 @@ class _ChatScreenState extends State<ChatScreen> {
   /// 初始化语音通话功能
   Future<void> _initializeVoiceCall() async {
     try {
-      // 从设置中获取ASR配置
-      final settings = widget.getSettings?.call();
-      final asrConfig = settings?['speechRecognition'] as Map<String, dynamic>?;
+      // 从全局配置服务获取ASR配置
+      final asrConfig = SpeechRecognitionConfigService.instance.config;
 
-      if (asrConfig == null) {
+      if (asrConfig == null || !asrConfig.isValid()) {
         debugPrint('⚠️ 未配置ASR服务，语音通话功能将不可用');
         return;
       }
 
-      final recognitionService = TencentASRService(
-        config: TencentASRConfig(
-          appId: asrConfig['appId'] ?? '',
-          secretId: asrConfig['secretId'] ?? '',
-          secretKey: asrConfig['secretKey'] ?? '',
-        ),
-      );
+      final recognitionService = TencentASRService(config: asrConfig);
 
       _voiceCallManager = VoiceCallManager(
         recognitionService: recognitionService,
