@@ -64,6 +64,27 @@ final llmModelGroups = [
     name: 'DeepSeek',
     models: [
       LLMModel(
+        id: 'deepseek-v4',
+        name: 'DeepSeek-V4',
+        description: 'Next generation DeepSeek model',
+        url: 'https://www.deepseek.com/',
+        group: 'deepseek',
+      ),
+      LLMModel(
+        id: 'deepseek-v3.2',
+        name: 'DeepSeek-V3.2',
+        description: 'Enhanced V3 with improved performance',
+        url: 'https://www.deepseek.com/',
+        group: 'deepseek',
+      ),
+      LLMModel(
+        id: 'deepseek-v3',
+        name: 'DeepSeek-V3',
+        description: 'Powerful open-source model',
+        url: 'https://www.deepseek.com/',
+        group: 'deepseek',
+      ),
+      LLMModel(
         id: 'deepseek-v3.1',
         name: 'DeepSeek-V3.1',
         description:
@@ -148,6 +169,41 @@ final llmModelGroups = [
     name: 'Qwen',
     models: [
       LLMModel(
+        id: 'qwen3.5-235b',
+        name: 'Qwen3.5-235B',
+        description: 'Large-scale Qwen 3.5 model',
+        url: 'https://qwenlm.github.io/',
+        group: 'qwen',
+      ),
+      LLMModel(
+        id: 'qwen3.5-122b',
+        name: 'Qwen3.5-122B',
+        description: 'Mid-scale Qwen 3.5 model',
+        url: 'https://qwenlm.github.io/',
+        group: 'qwen',
+      ),
+      LLMModel(
+        id: 'qwen3.5-72b',
+        name: 'Qwen3.5-72B',
+        description: 'Balanced performance Qwen 3.5 model',
+        url: 'https://qwenlm.github.io/',
+        group: 'qwen',
+      ),
+      LLMModel(
+        id: 'qwen3.5-32b',
+        name: 'Qwen3.5-32B',
+        description: 'Compact Qwen 3.5 model',
+        url: 'https://qwenlm.github.io/',
+        group: 'qwen',
+      ),
+      LLMModel(
+        id: 'qwen3-max',
+        name: 'Qwen3 Max',
+        description: 'Maximum capability Qwen model',
+        url: 'https://qwenlm.github.io/',
+        group: 'qwen',
+      ),
+      LLMModel(
         id: 'qwen3-235b-a22b',
         name: 'Qwen3-235B-A22B',
         description: 'Hybrid model with thinking and non-thinking modes',
@@ -188,6 +244,27 @@ final llmModelGroups = [
     id: 'meta',
     name: 'Meta',
     models: [
+      LLMModel(
+        id: 'llama-4-405b',
+        name: 'Llama 4 405B',
+        description: 'Massive scale Llama 4 model',
+        url: 'https://ai.meta.com/blog/llama-4-multimodal-intelligence/',
+        group: 'meta',
+      ),
+      LLMModel(
+        id: 'llama-4-70b',
+        name: 'Llama 4 70B',
+        description: 'Large-scale Llama 4 model',
+        url: 'https://ai.meta.com/blog/llama-4-multimodal-intelligence/',
+        group: 'meta',
+      ),
+      LLMModel(
+        id: 'llama-4-family',
+        name: 'Llama 4 Family',
+        description: 'Complete Llama 4 model family',
+        url: 'https://ai.meta.com/blog/llama-4-multimodal-intelligence/',
+        group: 'meta',
+      ),
       LLMModel(
         id: 'llama-4-scout',
         name: 'Llama 4 Scout',
@@ -252,6 +329,27 @@ final llmModelGroups = [
     name: 'Mistral AI',
     models: [
       LLMModel(
+        id: 'mistral-large-3',
+        name: 'Mistral Large 3',
+        description: 'Latest flagship model with top performance',
+        url: 'https://mistral.ai/',
+        group: 'mistral',
+      ),
+      LLMModel(
+        id: 'mistral-small-4',
+        name: 'Mistral Small 4',
+        description: 'Efficient small model with strong capabilities',
+        url: 'https://mistral.ai/',
+        group: 'mistral',
+      ),
+      LLMModel(
+        id: 'mistral-large-2',
+        name: 'Mistral Large 2',
+        description: 'High-performance large model',
+        url: 'https://mistral.ai/',
+        group: 'mistral',
+      ),
+      LLMModel(
         id: 'mistral-medium-3',
         name: 'Mistral Medium 3',
         description: 'State-of-the-art performance at lower cost',
@@ -309,6 +407,34 @@ final llmModelGroups = [
     name: 'OpenAI',
     models: [
       LLMModel(
+        id: 'gpt-5.4',
+        name: 'GPT-5.4',
+        description: 'Latest GPT-5 series model with enhanced capabilities',
+        url: 'https://openai.com/',
+        group: 'openai',
+      ),
+      LLMModel(
+        id: 'gpt-5.3',
+        name: 'GPT-5.3',
+        description: 'Advanced reasoning and multimodal capabilities',
+        url: 'https://openai.com/',
+        group: 'openai',
+      ),
+      LLMModel(
+        id: 'gpt-5.3-codex',
+        name: 'GPT-5.3 Codex',
+        description: 'Specialized for code generation and analysis',
+        url: 'https://openai.com/',
+        group: 'openai',
+      ),
+      LLMModel(
+        id: 'gpt-5.2',
+        name: 'GPT-5.2',
+        description: 'Enhanced version of GPT-5 series',
+        url: 'https://openai.com/',
+        group: 'openai',
+      ),
+      LLMModel(
         id: 'gpt-5.1',
         name: 'GPT-5.1',
         description:
@@ -358,6 +484,41 @@ final llmModelGroups = [
     name: 'Anthropic',
     models: [
       LLMModel(
+        id: 'claude-4.6-opus',
+        name: 'Claude 4.6 Opus',
+        description: 'Most capable Claude model for complex tasks',
+        url: 'https://www.anthropic.com/',
+        group: 'anthropic',
+      ),
+      LLMModel(
+        id: 'claude-4.6-sonnet',
+        name: 'Claude 4.6 Sonnet',
+        description: 'Latest Sonnet with enhanced coding and reasoning',
+        url: 'https://www.anthropic.com/',
+        group: 'anthropic',
+      ),
+      LLMModel(
+        id: 'claude-4.5-sonnet',
+        name: 'Claude 4.5 Sonnet',
+        description: 'Best coding model, strongest for agents',
+        url: 'https://www.anthropic.com/news/claude-sonnet-4-5',
+        group: 'anthropic',
+      ),
+      LLMModel(
+        id: 'claude-4.5-haiku',
+        name: 'Claude 4.5 Haiku',
+        description: 'Fast and efficient model for everyday tasks',
+        url: 'https://www.anthropic.com/',
+        group: 'anthropic',
+      ),
+      LLMModel(
+        id: 'claude-4-opus',
+        name: 'Claude 4 Opus',
+        description: 'High-performance model for complex reasoning',
+        url: 'https://www.anthropic.com/',
+        group: 'anthropic',
+      ),
+      LLMModel(
         id: 'claude-sonnet-4.5',
         name: 'Claude Sonnet 4.5',
         description: 'Best coding model, strongest for agents',
@@ -406,6 +567,27 @@ final llmModelGroups = [
     name: 'Google',
     models: [
       LLMModel(
+        id: 'gemini-3.1-pro',
+        name: 'Gemini 3.1 Pro',
+        description: 'Latest Gemini Pro with enhanced capabilities',
+        url: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+        group: 'google',
+      ),
+      LLMModel(
+        id: 'gemini-3.1-flash',
+        name: 'Gemini 3.1 Flash',
+        description: 'Fast and efficient for high-volume tasks',
+        url: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+        group: 'google',
+      ),
+      LLMModel(
+        id: 'gemini-3-family',
+        name: 'Gemini 3 Family',
+        description: 'Complete Gemini 3 model family',
+        url: 'https://ai.google.dev/gemini-api/docs/models/gemini',
+        group: 'google',
+      ),
+      LLMModel(
         id: 'gemini-3-pro',
         name: 'Gemini 3 Pro',
         description: 'Best for multimodal understanding',
@@ -439,6 +621,34 @@ final llmModelGroups = [
     id: 'zhipu',
     name: '智谱 AI',
     models: [
+      LLMModel(
+        id: 'glm-5',
+        name: 'GLM-5',
+        description: 'Latest flagship model with advanced capabilities',
+        url: 'https://open.bigmodel.cn/',
+        group: 'zhipu',
+      ),
+      LLMModel(
+        id: 'glm-5-turbo',
+        name: 'GLM-5 Turbo',
+        description: 'Fast inference version of GLM-5',
+        url: 'https://open.bigmodel.cn/',
+        group: 'zhipu',
+      ),
+      LLMModel(
+        id: 'glm-4.7',
+        name: 'GLM-4.7',
+        description: 'Enhanced GLM-4 series model',
+        url: 'https://open.bigmodel.cn/',
+        group: 'zhipu',
+      ),
+      LLMModel(
+        id: 'glm-4.6',
+        name: 'GLM-4.6',
+        description: 'Improved GLM-4 series model',
+        url: 'https://open.bigmodel.cn/',
+        group: 'zhipu',
+      ),
       LLMModel(
         id: 'glm-4.5',
         name: 'GLM-4.5',
@@ -480,6 +690,27 @@ final llmModelGroups = [
     id: 'moonshot',
     name: '月之暗面',
     models: [
+      LLMModel(
+        id: 'kimi-k2.5',
+        name: 'Kimi K2.5',
+        description: 'Latest Kimi model with enhanced capabilities',
+        url: 'https://www.moonshot.cn/',
+        group: 'moonshot',
+      ),
+      LLMModel(
+        id: 'kimi-k2',
+        name: 'Kimi K2',
+        description: 'Advanced reasoning and long-context model',
+        url: 'https://www.moonshot.cn/',
+        group: 'moonshot',
+      ),
+      LLMModel(
+        id: 'kimi-pro',
+        name: 'Kimi Pro',
+        description: 'Professional version with enhanced features',
+        url: 'https://www.moonshot.cn/',
+        group: 'moonshot',
+      ),
       LLMModel(
         id: 'kimi-k2-thinking',
         name: 'Kimi K2 Thinking',
@@ -631,9 +862,23 @@ final llmModelGroups = [
     name: 'Perplexity',
     models: [
       LLMModel(
+        id: 'sonar-pro',
+        name: 'Sonar Pro',
+        description: 'Enhanced search with deeper reasoning',
+        url: 'https://www.perplexity.ai/',
+        group: 'perplexity',
+      ),
+      LLMModel(
         id: 'sonar',
         name: 'Sonar',
         description: 'Optimized for answer quality and user experience',
+        url: 'https://www.perplexity.ai/',
+        group: 'perplexity',
+      ),
+      LLMModel(
+        id: 'pplx-70b-online',
+        name: 'PPLX 70B Online',
+        description: 'Online model with real-time information',
         url: 'https://www.perplexity.ai/',
         group: 'perplexity',
       ),
@@ -644,9 +889,23 @@ final llmModelGroups = [
     name: 'xAI',
     models: [
       LLMModel(
+        id: 'grok-4.20',
+        name: 'Grok 4.20',
+        description: 'Latest Grok with massive scale capabilities',
+        url: 'https://x.ai/',
+        group: 'xai',
+      ),
+      LLMModel(
         id: 'grok-4.1',
         name: 'Grok 4.1',
         description: 'Latest Grok model with enhanced capabilities',
+        url: 'https://x.ai/',
+        group: 'xai',
+      ),
+      LLMModel(
+        id: 'grok-4',
+        name: 'Grok 4',
+        description: 'Advanced AI assistant with real-time information',
         url: 'https://x.ai/',
         group: 'xai',
       ),
@@ -697,6 +956,27 @@ final llmModelGroups = [
     id: 'minimax',
     name: 'MiniMax',
     models: [
+      LLMModel(
+        id: 'MiniMax-M2.7',
+        name: 'MiniMax-M2.7',
+        description: 'Latest MiniMax model with enhanced capabilities',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'MiniMax-M2-her',
+        name: 'MiniMax-M2-HER',
+        description: 'High efficiency reasoning model',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
+      LLMModel(
+        id: 'MiniMax-M1-80k',
+        name: 'MiniMax-M1-80K',
+        description: 'M1 model with 80K context window',
+        url: 'https://www.minimaxi.com/',
+        group: 'minimax',
+      ),
       LLMModel(
         id: 'MiniMax-M2.5',
         name: 'MiniMax-M2.5',
