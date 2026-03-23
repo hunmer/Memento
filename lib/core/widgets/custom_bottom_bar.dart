@@ -166,6 +166,38 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
     );
   }
 
+  /// 构建 FAB 位置
+  Widget _buildFabPosition(double screenWidth) {
+    // 根据 fabLocation 计算位置
+    final alignment = widget.fabLocation;
+
+    // 计算左右边距（BottomBar 居中时的偏移）
+    final horizontalPadding = screenWidth * (1 - widget.widthRatio) / 2;
+
+    // 默认居中位置
+    double? left;
+    double? right;
+
+    if (alignment == Alignment.topCenter || alignment == Alignment.center || alignment == Alignment.bottomCenter) {
+      // 居中
+      left = (screenWidth - screenWidth * widget.widthRatio) / 2 + (screenWidth * widget.widthRatio) / 2 - 28;
+      right = (screenWidth - screenWidth * widget.widthRatio) / 2 + (screenWidth * widget.widthRatio) / 2 - 28;
+    } else if (alignment == Alignment.topRight || alignment == Alignment.centerRight || alignment == Alignment.bottomRight) {
+      // 右侧
+      right = horizontalPadding;
+    } else {
+      // 左侧
+      left = horizontalPadding;
+    }
+
+    return Positioned(
+      bottom: widget.offset,
+      left: left,
+      right: right,
+      child: widget.fab!,
+    );
+  }
+
   /// 构建 TabBar
   Widget _buildTabBar() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -259,11 +291,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         ),
         // FAB 放在最外层 Stack，确保 z-index 最高
         if (widget.fab != null)
-          Positioned(
-            bottom: widget.offset,
-            right: mediaQuery.size.width * (1 - widget.widthRatio) / 2,
-            child: widget.fab!,
-          ),
+          _buildFabPosition(mediaQuery.size.width),
       ],
     );
   }
