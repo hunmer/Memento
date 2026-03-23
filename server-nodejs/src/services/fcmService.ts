@@ -7,6 +7,9 @@ import { bootstrap } from 'global-agent';
 // 全局代理配置 - 必须在其他模块加载前设置
 const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
 process.env.GLOBAL_AGENT_HTTP_PROXY = proxyUrl;
+// 禁用 SSL 证书验证（代理使用自签名证书）
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+process.env.GLOBAL_AGENT_FORCE_GLOBAL_AGENT = 'true';
 bootstrap();
 
 let firebaseApp: admin.app.App | null = null;
