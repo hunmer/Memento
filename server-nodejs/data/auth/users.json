@@ -7,9 +7,15 @@
       "salt": "j97v5LOeB2RFoY1wyE2Vhw==",
       "createdAt": "2026-03-20T16:31:12.832Z",
       "isAdmin": true,
-      "devices": [],
-      "lastLoginAt": "2026-03-21T01:32:39.797Z"
+      "devices": [
+        {
+          "deviceId": "1774243114739",
+          "deviceName": "google Pixel 7 Pro",
+          "createdAt": "2026-03-23T05:18:30.500Z"
+        }
+      ],
+      "lastLoginAt": "2026-03-23T05:18:30.500Z"
     }
   ],
-  "updated_at": "2026-03-23T05:04:06.372Z"
+  "updated_at": "2026-03-23T05:18:30.500Z"
 }

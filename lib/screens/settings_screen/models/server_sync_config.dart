@@ -15,6 +15,7 @@ class ServerSyncConfig {
   static const String _keyUserId = 'sync_user_id';
   static const String _keySalt = 'sync_salt';
   static const String _keySyncDirs = 'sync_dirs';
+  static const String _keyFcmToken = 'sync_fcm_token';
 
   String server;
   String username;
@@ -28,6 +29,7 @@ class ServerSyncConfig {
   String? token;
   String? userId;
   String? salt;
+  String? fcmToken;
   List<String> syncDirs;
 
   ServerSyncConfig({
@@ -43,6 +45,7 @@ class ServerSyncConfig {
     this.token,
     this.userId,
     this.salt,
+    this.fcmToken,
     List<String>? syncDirs,
   }) : syncDirs = syncDirs ??
             [
@@ -92,6 +95,7 @@ class ServerSyncConfig {
       token: prefs.getString(_keyToken),
       userId: prefs.getString(_keyUserId),
       salt: prefs.getString(_keySalt),
+      fcmToken: prefs.getString(_keyFcmToken),
       syncDirs: prefs.getStringList(_keySyncDirs),
     );
   }
@@ -118,6 +122,16 @@ class ServerSyncConfig {
     if (salt != null) {
       await prefs.setString(_keySalt, salt!);
     }
+    if (fcmToken != null) {
+      await prefs.setString(_keyFcmToken, fcmToken!);
+    }
+  }
+
+  /// 保存 FCM Token
+  Future<void> saveFcmToken(String token) async {
+    fcmToken = token;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyFcmToken, token);
   }
 
   /// 保存认证信息
@@ -161,6 +175,7 @@ class ServerSyncConfig {
     await prefs.remove(_keyToken);
     await prefs.remove(_keyUserId);
     await prefs.remove(_keySalt);
+    await prefs.remove(_keyFcmToken);
     await prefs.remove(_keySyncDirs);
   }
 
@@ -188,6 +203,7 @@ class ServerSyncConfig {
     String? token,
     String? userId,
     String? salt,
+    String? fcmToken,
     List<String>? syncDirs,
   }) {
     return ServerSyncConfig(
@@ -203,6 +219,7 @@ class ServerSyncConfig {
       token: token ?? this.token,
       userId: userId ?? this.userId,
       salt: salt ?? this.salt,
+      fcmToken: fcmToken ?? this.fcmToken,
       syncDirs: syncDirs ?? List.from(this.syncDirs),
     );
   }

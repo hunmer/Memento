@@ -67,6 +67,9 @@ class DeviceRegistrationService {
         return false;
       }
 
+      // 如果没有传入 fcmToken，使用配置中保存的
+      final tokenToRegister = fcmToken ?? config.fcmToken;
+
       final deviceName = await getDeviceName();
       final platform = getPlatformName();
 
@@ -79,7 +82,7 @@ class DeviceRegistrationService {
         body: jsonEncode({
           'device_id': config.deviceId,
           'device_name': deviceName,
-          'fcm_token': fcmToken,
+          'fcm_token': tokenToRegister,
           'platform': platform,
         }),
       );
@@ -88,6 +91,10 @@ class DeviceRegistrationService {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
           print('[DeviceRegistration] 设备注册成功: ${config.deviceId}');
+          // 保存 fcmToken 到配置
+          if (tokenToRegister != null) {
+            await config.saveFcmToken(tokenToRegister);
+          }
           return true;
         }
       }

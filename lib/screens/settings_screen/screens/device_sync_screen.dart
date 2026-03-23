@@ -34,7 +34,8 @@ class _DeviceSyncScreenState extends State<DeviceSyncScreen> {
     setState(() => _isLoading = true);
 
     _config = await ServerSyncConfig.load();
-    _fcmToken = FcmService.instance.token;
+    // 优先使用配置中保存的 token，否则使用 FCM 服务中的 token
+    _fcmToken = _config?.fcmToken ?? FcmService.instance.token;
 
     setState(() => _isLoading = false);
   }
@@ -43,18 +44,23 @@ class _DeviceSyncScreenState extends State<DeviceSyncScreen> {
     setState(() => _isLoadingToken = true);
 
     try {
-      // 重新获取 Token
-      await FcmService.instance.deleteToken();
+      // 重新获取 Token（不删除旧 token）
       await FcmService.instance.initialize();
-
       _fcmToken = FcmService.instance.token;
 
-      if (_fcmToken != null && _config?.isLoggedIn == true) {
-        // 同步到服务器
-        await DeviceRegistrationService.instance.updateFcmToken(_fcmToken!);
-        toastService.showToast('FCM Token 已更新并同步到服务器');
-      } else if (_fcmToken != null) {
-        toastService.showToast('FCM Token 已更新');
+      if (_fcmToken != null) {
+        // 保存到配置
+        if (_config != null) {
+          await _config!.saveFcmToken(_fcmToken!);
+        }
+
+        // 如果已登录，同步到服务器
+        if (_config?.isLoggedIn == true) {
+          await DeviceRegistrationService.instance.updateFcmToken(_fcmToken!);
+          toastService.showToast('FCM Token 已更新并同步到服务器');
+        } else {
+          toastService.showToast('FCM Token 已更新');
+        }
       } else {
         toastService.showToast('获取 FCM Token 失败');
       }
