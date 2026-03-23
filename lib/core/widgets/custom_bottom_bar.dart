@@ -257,7 +257,7 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
             ],
           ),
         ),
-        // FAB 容器：与 BottomBar 相同宽度，居中对齐
+        // FAB 容器：与 BottomBar 相同宽度，FAB 在 BottomBar 上方
         if (widget.fab != null)
           Builder(
             builder: (context) {
@@ -267,7 +267,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
 
               double? left;
               double? right;
+              double bottomOffset;
 
+              // 水平位置
               if (widget.fabLocation == Alignment.topCenter ||
                   widget.fabLocation == Alignment.center ||
                   widget.fabLocation == Alignment.bottomCenter) {
@@ -283,8 +285,18 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
                 left = horizontalPadding;
               }
 
+              // 垂直位置：top 表示在 BottomBar 上方
+              if (widget.fabLocation == Alignment.topLeft ||
+                  widget.fabLocation == Alignment.topCenter ||
+                  widget.fabLocation == Alignment.topRight) {
+                // FAB 底部对齐 BottomBar 顶部
+                bottomOffset = widget.offset + 60; // 60 是 BottomBar 大致高度
+              } else {
+                bottomOffset = widget.offset;
+              }
+
               return Positioned(
-                bottom: widget.offset,
+                bottom: bottomOffset,
                 left: left,
                 right: right,
                 child: widget.fab!,
