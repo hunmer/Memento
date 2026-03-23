@@ -166,33 +166,6 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
     );
   }
 
-  /// 构建 FAB 位置（与 BottomBar 在同一容器内）
-  Widget _buildFabPosition(double screenWidth) {
-    // 计算水平方向的对齐
-    final alignment = widget.fabLocation;
-    double left = 0;
-    double right = 0;
-
-    if (alignment == Alignment.topCenter ||
-        alignment == Alignment.center ||
-        alignment == Alignment.bottomCenter) {
-      // 居中
-    } else if (alignment == Alignment.topRight ||
-        alignment == Alignment.centerRight ||
-        alignment == Alignment.bottomRight) {
-      right = 28;
-    } else {
-      left = 28;
-    }
-
-    return Positioned(
-      top: -28,
-      left: left,
-      right: right,
-      child: widget.fab!,
-    );
-  }
-
   /// 构建 TabBar
   Widget _buildTabBar() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -287,17 +260,18 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
         // FAB 容器：与 BottomBar 相同宽度，居中对齐
         if (widget.fab != null)
           Positioned(
-            bottom: 0,
+            bottom: widget.offset + 28,
             left: 0,
             right: 0,
             child: Center(
               child: SizedBox(
                 width: mediaQuery.size.width * widget.widthRatio,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    _buildFabPosition(mediaQuery.size.width),
-                  ],
+                height: 1, // 最小高度，FAB 会溢出
+                child: OverflowBox(
+                  maxWidth: mediaQuery.size.width * widget.widthRatio,
+                  maxHeight: 56,
+                  alignment: widget.fabLocation,
+                  child: widget.fab!,
                 ),
               ),
             ),
