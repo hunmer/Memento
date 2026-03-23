@@ -123,8 +123,12 @@ class _ChatBottomBarState extends State<ChatBottomBar>
     );
   }
 
-  /// 构建 FAB
-  Widget _buildFab() {
+  /// 构建 FAB（根据当前 tab 决定是否显示）
+  Widget? _buildFab() {
+    // 只有在频道 tab 时才显示 FAB
+    if (_currentPage != 0) {
+      return null;
+    }
     return FloatingActionButton(
       backgroundColor: widget.plugin.color,
       elevation: 4,
