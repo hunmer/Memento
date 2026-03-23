@@ -511,6 +511,10 @@ class VoiceCallManager {
 
     await _speak(text);
 
+    // 等待TTS真正完成后再继续
+    // 给一些额外时间确保音频播放完毕
+    await Future.delayed(const Duration(milliseconds: 500));
+
     // 播报完成后，决定是否继续
     if (_config.autoContinue && _config.autoRecordAfterSpeaking) {
       _setState(VoiceCallState.recording);
@@ -526,6 +530,9 @@ class VoiceCallManager {
       _isTTSPlaying = true;
       debugPrint('🔊 开始播报: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
 
+      // 创建一个Completer来等待真正的完成
+      final completer = Completer<void>();
+
       await TTSPlugin.instance.speak(
         text,
         serviceId: _config.ttsServiceId,
@@ -535,12 +542,21 @@ class VoiceCallManager {
         onComplete: () {
           debugPrint('✅ TTS完成');
           _isTTSPlaying = false;
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
         },
         onError: (error) {
           debugPrint('❌ TTS错误: $error');
           _isTTSPlaying = false;
+          if (!completer.isCompleted) {
+            completer.completeError(error);
+          }
         },
       );
+
+      // 等待真正的完成回调
+      await completer.future;
     } catch (e) {
       _setError('TTS播报失败: $e');
       _isTTSPlaying = false;
