@@ -136,7 +136,7 @@ class _VoiceCallScreenState extends State<VoiceCallScreen>
         'action': 'update_notification',
         'title': title,
         'content': content,
-        'buttons': buttons.map((b) => b.label).toList(),
+        'buttons': buttons.map((b) => b.text).toList(),
       });
     } catch (e) {
       debugPrint('更新前台通知失败: $e');
