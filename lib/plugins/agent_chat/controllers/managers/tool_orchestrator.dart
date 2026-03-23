@@ -51,6 +51,7 @@ class ToolOrchestrator {
     required Function(String content, int count) onUpdateMessage,
     required Function(String error) onError,
     required Function(String firstResponse) onFirstPhaseComplete,
+    Function(String)? onThinking,
   }) async {
     // 第一阶段：工具需求识别
     final toolRequest = await _executeFirstPhase(
@@ -63,6 +64,7 @@ class ToolOrchestrator {
       isCollectingToolCall: isCollectingToolCall,
       onUpdateMessage: onUpdateMessage,
       onError: onError,
+      onThinking: onThinking,
     );
 
     // ⚠️ 关键修复：检查第一阶段是否直接返回了工具调用代码（steps格式）
@@ -90,6 +92,7 @@ class ToolOrchestrator {
       files: files,
       onUpdateMessage: onUpdateMessage,
       onError: onError,
+      onThinking: onThinking,
     );
 
     // 如果第二阶段成功生成工具调用代码，通知调用者
@@ -112,6 +115,7 @@ class ToolOrchestrator {
     required bool isCollectingToolCall,
     required Function(String content, int count) onUpdateMessage,
     required Function(String error) onError,
+    Function(String)? onThinking,
   }) async {
     // 处理图片文件
     final imageFiles =
@@ -210,6 +214,7 @@ class ToolOrchestrator {
 
         firstPhaseCompleter.complete(toolRequest);
       },
+      onThinking: onThinking,
       onError: (error) {
         debugPrint('❌ 第一阶段 Agent 响应错误: $error');
 
@@ -238,6 +243,7 @@ class ToolOrchestrator {
     required List<File> files,
     required Function(String content, int count) onUpdateMessage,
     required Function(String error) onError,
+    Function(String)? onThinking,
   }) async {
     // 从最新会话中获取工具执行agent配置
     final toolExecutionConfig = conversation.toolExecutionConfig;
@@ -359,6 +365,7 @@ class ToolOrchestrator {
         // 返回第二阶段响应
         secondPhaseCompleter.complete(secondBuffer.toString());
       },
+      onThinking: onThinking,
       maxRetries: 10,
       retryDelay: 1000,
     );

@@ -60,6 +60,9 @@ class ChatMessage {
   /// 是否为最终总结消息（工具调用后的AI总结回复）
   bool isFinalSummary;
 
+  /// 思考过程内容（Claude 的 thinking block，单独存储不混合在主文本中）
+  String? thinkingContent;
+
   ChatMessage({
     required this.id,
     required this.conversationId,
@@ -79,6 +82,7 @@ class ChatMessage {
     this.chainStepIndex,
     this.chainExecutionId,
     this.isFinalSummary = false,
+    this.thinkingContent,
   });
 
   /// 创建用户消息
@@ -174,6 +178,7 @@ class ChatMessage {
       chainStepIndex: json['chainStepIndex'] as int?,
       chainExecutionId: json['chainExecutionId'] as String?,
       isFinalSummary: json['isFinalSummary'] as bool? ?? false,
+      thinkingContent: json['thinkingContent'] as String?,
     );
   }
 
@@ -199,6 +204,7 @@ class ChatMessage {
       if (chainStepIndex != null) 'chainStepIndex': chainStepIndex,
       if (chainExecutionId != null) 'chainExecutionId': chainExecutionId,
       'isFinalSummary': isFinalSummary,
+      if (thinkingContent != null) 'thinkingContent': thinkingContent,
     };
   }
 
@@ -218,6 +224,7 @@ class ChatMessage {
     int? chainStepIndex,
     String? chainExecutionId,
     bool? isFinalSummary,
+    String? thinkingContent,
   }) {
     return ChatMessage(
       id: id,
@@ -238,6 +245,7 @@ class ChatMessage {
       chainStepIndex: chainStepIndex ?? this.chainStepIndex,
       chainExecutionId: chainExecutionId ?? this.chainExecutionId,
       isFinalSummary: isFinalSummary ?? this.isFinalSummary,
+      thinkingContent: thinkingContent ?? this.thinkingContent,
     );
   }
 

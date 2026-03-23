@@ -308,6 +308,28 @@ class MessageService extends ChangeNotifier {
     }
   }
 
+  /// 更新AI消息的思考过程内容（Claude thinking block）
+  Future<void> updateAIMessageThinking(
+    String conversationId,
+    String messageId,
+    String thinkingContent,
+  ) async {
+    final message = getMessage(conversationId, messageId);
+    if (message != null && !message.isUser) {
+      final messages = _messageCache[conversationId];
+      if (messages != null) {
+        final index = messages.indexWhere((m) => m.id == messageId);
+        if (index != -1) {
+          // 只更新内存，不保存到磁盘（避免频繁I/O）
+          messages[index] = message.copyWith(
+            thinkingContent: thinkingContent,
+          );
+          notifyListeners();
+        }
+      }
+    }
+  }
+
   /// 完成AI消息生成
   Future<void> completeAIMessage(
     String conversationId,

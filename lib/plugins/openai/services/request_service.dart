@@ -460,10 +460,12 @@ class RequestService {
   /// [responseFormat] - 响应格式（用于 Structured Outputs）
   /// [shouldCancel] - 检查是否应该取消的函数
   /// [additionalPrompts] - 额外的 prompt 部分，使用占位符替换（如 {tool_templates}, {tool_brief}）
+  /// [onThinking] - 思考内容回调（Claude thinking block）
   static Future<void> streamResponse({
     required AIAgent agent,
     String? prompt,
     required Function(String) onToken,
+    Function(String)? onThinking,
     required Function(String) onError,
     required Function() onComplete,
     bool vision = true,
@@ -485,6 +487,7 @@ class RequestService {
         agent: agent,
         prompt: prompt,
         onToken: onToken,
+        onThinking: onThinking,
         onError: onError,
         onComplete: onComplete,
         filePath: filePath,
@@ -826,12 +829,14 @@ class RequestService {
   /// [responseFormat] - 响应格式（用于 Structured Outputs）
   /// [shouldCancel] - 检查是否应该取消的函数
   /// [additionalPrompts] - 额外的 prompt 部分，使用占位符替换（如 {tool_templates}, {tool_brief}）
+  /// [onThinking] - 思考内容回调（Claude thinking block）
   /// [maxRetries] - 最大重试次数，默认为 10
   /// [retryDelay] - 每次重试之间的延迟（毫秒），默认为 1000ms
   static Future<void> streamResponseWithRetry({
     required AIAgent agent,
     String? prompt,
     required Function(String) onToken,
+    Function(String)? onThinking,
     required Function(String) onError,
     required Function() onComplete,
     bool vision = true,
@@ -870,6 +875,7 @@ class RequestService {
           agent: agent,
           prompt: prompt,
           onToken: onToken,
+          onThinking: onThinking,
           onError: (error) {
             currentError = error;
             developer.log(
@@ -1077,6 +1083,7 @@ class RequestService {
     required AIAgent agent,
     String? prompt,
     required Function(String) onToken,
+    Function(String)? onThinking,
     required Function(String) onError,
     required Function() onComplete,
     String? filePath,
@@ -1198,6 +1205,7 @@ class RequestService {
         systemPrompt: effectiveSystemPrompt,
         messages: messages,
         onToken: onToken,
+        onThinking: onThinking,
         onError: onError,
         onComplete: onComplete,
         filePath: filePath,

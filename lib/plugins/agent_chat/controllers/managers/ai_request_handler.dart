@@ -73,6 +73,7 @@ class AIRequestHandler {
     if (currentAgent == null) return;
 
     final buffer = StringBuffer();
+    final thinkingBuffer = StringBuffer(); // 单独收集思考内容
     int tokenCount = 0;
     bool isCollectingToolCall = false;
 
@@ -133,6 +134,7 @@ class AIRequestHandler {
 
           // 清空 buffer
           buffer.clear();
+          thinkingBuffer.clear();
           tokenCount = 0;
 
           // 使用 Completer 等待 onComplete 完成
@@ -156,6 +158,15 @@ class AIRequestHandler {
             onToken: (token) {
               buffer.write(token);
               tokenCount++;
+            },
+            onThinking: (thinking) {
+              thinkingBuffer.write(thinking);
+              // 实时更新消息的 thinkingContent 字段
+              context.messageService.updateAIMessageThinking(
+                context.conversationId,
+                aiMessageId,
+                thinkingBuffer.toString(),
+              );
             },
             onComplete: () async {
               try {
@@ -305,6 +316,15 @@ class AIRequestHandler {
             aiMessageId,
             processedContent,
             count,
+          );
+        },
+        onThinking: (thinking) {
+          thinkingBuffer.write(thinking);
+          // 实时更新消息的 thinkingContent 字段
+          context.messageService.updateAIMessageThinking(
+            context.conversationId,
+            aiMessageId,
+            thinkingBuffer.toString(),
           );
         },
         onError: (error) {

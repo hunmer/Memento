@@ -174,6 +174,34 @@ class MessageBubble extends StatelessWidget {
                       ),
                     ),
 
+                    // 显示思考过程按钮（仅当有思考内容且不是用户消息时显示）
+                    if (!isUser &&
+                        message.thinkingContent != null &&
+                        message.thinkingContent!.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () => _showThinkingDialog(context),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.psychology_outlined,
+                              size: 12,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '显示思考过程',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
                     // 已编辑标记
                     if (message.editedAt != null) ...[
                       const SizedBox(width: 4),
@@ -1449,6 +1477,37 @@ class MessageBubble extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 显示思考过程对话框
+  void _showThinkingDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.psychology_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            const Text('思考过程'),
+          ],
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: MarkdownContent(content: message.thinkingContent ?? ''),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
       ),
     );
   }

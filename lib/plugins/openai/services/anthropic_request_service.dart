@@ -15,7 +15,8 @@ class AnthropicRequestService {
   /// [agent] - AI 助手配置
   /// [systemPrompt] - 系统提示词
   /// [messages] - 消息列表（不包含 system）
-  /// [onToken] - 每接收到一个 token 时的回调
+  /// [onToken] - 每接收到一个 text token 时的回调
+  /// [onThinking] - 每接收到一个 thinking token 时的回调
   /// [onError] - 发生错误时的回调
   /// [onComplete] - 完成时的回调
   /// [filePath] - 图片文件路径（vision 模式）
@@ -28,6 +29,7 @@ class AnthropicRequestService {
     required String systemPrompt,
     required List<Map<String, dynamic>> messages,
     required Function(String) onToken,
+    Function(String)? onThinking,
     required Function(String) onError,
     required Function() onComplete,
     String? filePath,
@@ -40,6 +42,7 @@ class AnthropicRequestService {
       systemPrompt: systemPrompt,
       messages: messages,
       onToken: onToken,
+      onThinking: onThinking,
       onError: onError,
       onComplete: onComplete,
       filePath: filePath,
@@ -57,6 +60,7 @@ class AnthropicRequestService {
     required String systemPrompt,
     required List<Map<String, dynamic>> messages,
     required Function(String) onToken,
+    Function(String)? onThinking,
     required Function(String) onError,
     required Function() onComplete,
     String? filePath,
@@ -65,12 +69,16 @@ class AnthropicRequestService {
   }) async {
     try {
       // 从 headers 中提取 API 密钥
-      final apiKey = agent.headers['x-api-key'] ??
+      final apiKey =
+          agent.headers['x-api-key'] ??
           agent.headers['X-Api-Key'] ??
           agent.headers['Authorization']?.replaceAll('Bearer ', '') ??
           '';
 
-      developer.log('发送 Anthropic 流式请求: ${agent.model}', name: 'AnthropicRequestService');
+      developer.log(
+        '发送 Anthropic 流式请求: ${agent.model}',
+        name: 'AnthropicRequestService',
+      );
 
       // 处理 baseUrl，自动添加 /v1（某些 API 需要此后缀）
       String baseUrl = agent.baseUrl;
@@ -88,23 +96,31 @@ class AnthropicRequestService {
       }
 
       developer.log('baseUrl: $baseUrl', name: 'AnthropicRequestService');
-      developer.log('系统提示词长度: ${systemPrompt.length}字符', name: 'AnthropicRequestService');
+      developer.log(
+        '系统提示词长度: ${systemPrompt.length}字符',
+        name: 'AnthropicRequestService',
+      );
 
       // 转换消息格式为 Anthropic 格式
       final anthropicMessages = await _convertMessages(messages, filePath);
 
-      developer.log('消息数量: ${anthropicMessages.length}条', name: 'AnthropicRequestService');
+      developer.log(
+        '消息数量: ${anthropicMessages.length}条',
+        name: 'AnthropicRequestService',
+      );
 
       // 构建请求体
       final requestBody = {
         'model': agent.model,
         'messages': anthropicMessages,
-        'max_tokens': maxTokens ?? (agent.maxLength > 0 ? agent.maxLength : 4096),
+        'max_tokens':
+            maxTokens ?? (agent.maxLength > 0 ? agent.maxLength : 4096),
         'stream': true,
         if (systemPrompt.isNotEmpty) 'system': systemPrompt,
         if (agent.temperature > 0) 'temperature': agent.temperature,
         if (agent.topP > 0) 'top_p': agent.topP,
-        if (agent.stop != null && agent.stop!.isNotEmpty) 'stop_sequences': agent.stop,
+        if (agent.stop != null && agent.stop!.isNotEmpty)
+          'stop_sequences': agent.stop,
       };
 
       final url = Uri.parse('$baseUrl/messages');
@@ -174,10 +190,14 @@ class AnthropicRequestService {
 
           switch (type) {
             case 'content_block_start':
-              final contentBlock = json['content_block'] as Map<String, dynamic>?;
+              final contentBlock =
+                  json['content_block'] as Map<String, dynamic>?;
               if (contentBlock != null) {
                 final blockType = contentBlock['type'] as String?;
-                developer.log('内容块开始: $blockType', name: 'AnthropicRequestService');
+                developer.log(
+                  '内容块开始: $blockType',
+                  name: 'AnthropicRequestService',
+                );
               }
               break;
 
@@ -191,16 +211,20 @@ class AnthropicRequestService {
                   content = delta['text'] as String?;
                 } else if (deltaType == 'thinking_delta') {
                   content = delta['thinking'] as String?;
-                  // 可选：为思考内容添加前缀
-                  // if (content != null && content.isNotEmpty) {
-                  //   content = '> $content';
-                  // }
                 }
 
                 if (content != null && content.isNotEmpty) {
                   totalChars += content.length;
                   chunkCount++;
-                  onToken(content);
+
+                  // 根据类型调用不同的回调
+                  if (deltaType == 'thinking_delta') {
+                    // 思考内容使用单独的回调
+                    onThinking?.call(content);
+                  } else {
+                    // 普通文本内容
+                    onToken(content);
+                  }
 
                   if (chunkCount % 10 == 0) {
                     developer.log(
@@ -291,16 +315,10 @@ class AnthropicRequestService {
                 ],
               });
             } else {
-              result.add({
-                'role': 'user',
-                'content': content,
-              });
+              result.add({'role': 'user', 'content': content});
             }
           } else {
-            result.add({
-              'role': 'user',
-              'content': content,
-            });
+            result.add({'role': 'user', 'content': content});
           }
         } else if (content is List) {
           // 多部分内容
@@ -309,7 +327,10 @@ class AnthropicRequestService {
             if (part is Map) {
               final type = part['type'] as String?;
               if (type == 'text') {
-                blocks.add({'type': 'text', 'text': part['text'] as String? ?? ''});
+                blocks.add({
+                  'type': 'text',
+                  'text': part['text'] as String? ?? '',
+                });
               } else if (type == 'image_url') {
                 final imageUrl = part['image_url'] as Map?;
                 final url = imageUrl?['url'] as String?;
@@ -323,10 +344,7 @@ class AnthropicRequestService {
               }
             }
           }
-          result.add({
-            'role': 'user',
-            'content': blocks,
-          });
+          result.add({'role': 'user', 'content': blocks});
         }
       } else if (role == 'assistant') {
         // 处理助手消息
@@ -342,10 +360,7 @@ class AnthropicRequestService {
             }
           }
         }
-        result.add({
-          'role': 'assistant',
-          'content': textContent,
-        });
+        result.add({'role': 'assistant', 'content': textContent});
       }
     }
 
@@ -402,9 +417,8 @@ class AnthropicRequestService {
 
         // 解析 media type
         final mediaTypeEnd = header.indexOf(';');
-        final mediaTypeStr = mediaTypeEnd > 0
-            ? header.substring(0, mediaTypeEnd)
-            : header;
+        final mediaTypeStr =
+            mediaTypeEnd > 0 ? header.substring(0, mediaTypeEnd) : header;
 
         return {
           'type': 'image',
@@ -418,11 +432,7 @@ class AnthropicRequestService {
       // 不支持外部 URL，返回 null
       return null;
     } catch (e) {
-      developer.log(
-        '转换图片URL失败',
-        name: 'AnthropicRequestService',
-        error: e,
-      );
+      developer.log('转换图片URL失败', name: 'AnthropicRequestService', error: e);
       return null;
     }
   }
