@@ -59,7 +59,9 @@ struct TimerListView: View {
                     TimerRowView(timer: timer)
                 }
             }
+            #if os(watchOS)
             .listStyle(.elliptical)
+            #endif
             .refreshable {
                 await viewModel.loadTimers()
             }
