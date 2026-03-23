@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_24x24_2x.png",
       "idiom" : "watch",
       "role" : "notificationCenter",
       "scale" : "2x",
@@ -9,7 +9,7 @@
       "subtype" : "38mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_27.5x27.5_2x.png",
       "idiom" : "watch",
       "role" : "notificationCenter",
       "scale" : "2x",
@@ -17,21 +17,7 @@
       "subtype" : "42mm"
     },
     {
-      "filename" : "AppIcon.png",
-      "idiom" : "watch",
-      "role" : "companionSettings",
-      "scale" : "2x",
-      "size" : "29x29"
-    },
-    {
-      "filename" : "AppIcon.png",
-      "idiom" : "watch",
-      "role" : "companionSettings",
-      "scale" : "3x",
-      "size" : "29x29"
-    },
-    {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_33x33_2x.png",
       "idiom" : "watch",
       "role" : "notificationCenter",
       "scale" : "2x",
@@ -39,7 +25,29 @@
       "subtype" : "45mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_29x29_2x.png",
+      "idiom" : "watch",
+      "role" : "companionSettings",
+      "scale" : "2x",
+      "size" : "29x29"
+    },
+    {
+      "filename" : "icon_29x29_3x.png",
+      "idiom" : "watch",
+      "role" : "companionSettings",
+      "scale" : "3x",
+      "size" : "29x29"
+    },
+    {
+      "filename" : "icon_38x38_2x.png",
+      "idiom" : "watch",
+      "role" : "appLauncher",
+      "scale" : "2x",
+      "size" : "38x38",
+      "subtype" : "38mm"
+    },
+    {
+      "filename" : "icon_40x40_2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
@@ -47,7 +55,7 @@
       "subtype" : "38mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_44x44_2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
@@ -55,7 +63,7 @@
       "subtype" : "40mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_46x46_2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
@@ -63,7 +71,7 @@
       "subtype" : "41mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_50x50_2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
@@ -71,7 +79,7 @@
       "subtype" : "44mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_51x51_2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
@@ -79,7 +87,7 @@
       "subtype" : "45mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_54x54_2x.png",
       "idiom" : "watch",
       "role" : "appLauncher",
       "scale" : "2x",
@@ -87,7 +95,7 @@
       "subtype" : "49mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_86x86_2x.png",
       "idiom" : "watch",
       "role" : "quickLook",
       "scale" : "2x",
@@ -95,7 +103,7 @@
       "subtype" : "38mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_98x98_2x.png",
       "idiom" : "watch",
       "role" : "quickLook",
       "scale" : "2x",
@@ -103,7 +111,7 @@
       "subtype" : "42mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_108x108_2x.png",
       "idiom" : "watch",
       "role" : "quickLook",
       "scale" : "2x",
@@ -111,7 +119,7 @@
       "subtype" : "44mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_117x117_2x.png",
       "idiom" : "watch",
       "role" : "quickLook",
       "scale" : "2x",
@@ -119,7 +127,7 @@
       "subtype" : "45mm"
     },
     {
-      "filename" : "AppIcon.png",
+      "filename" : "icon_129x129_2x.png",
       "idiom" : "watch",
       "role" : "quickLook",
       "scale" : "2x",
@@ -131,14 +139,6 @@
       "idiom" : "watch-marketing",
       "scale" : "1x",
       "size" : "1024x1024"
-    },
-    {
-      "filename" : "AppIcon.png",
-      "idiom" : "watch",
-      "role" : "appLauncher",
-      "scale" : "2x",
-      "size" : "38x38",
-      "subtype" : "38mm"
     }
   ],
   "info" : {
