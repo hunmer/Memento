@@ -202,7 +202,7 @@ class VoiceCallManager {
 
     // 监听识别结果（实时更新显示，但不发送）
     _recognitionSubscription = recognitionService.recognitionStream.listen((text) {
-      if (_state == VoiceCallState.recording) {
+      if (_state == VoiceCallState.recording && !_isStoppingRecording) {
         // 保存最新的识别结果
         _pendingRecognizedText = text;
         _lastRecognitionTime = DateTime.now();
@@ -365,6 +365,9 @@ class VoiceCallManager {
 
   /// 启动自动发送倒计时
   void _startAutoSendCountdown() {
+    // 如果正在停止录音，不启动倒计时
+    if (_isStoppingRecording) return;
+
     // 取消之前的倒计时
     _autoSendTimer?.cancel();
 
@@ -384,7 +387,7 @@ class VoiceCallManager {
       } else {
         // 倒计时结束，自动发送
         timer.cancel();
-        if (_state == VoiceCallState.recording && !_autoSendCancelled) {
+        if (_state == VoiceCallState.recording && !_autoSendCancelled && !_isStoppingRecording) {
           debugPrint('⏰ 倒计时结束，自动发送');
           _stopRecordingAndSend();
         }
@@ -395,6 +398,11 @@ class VoiceCallManager {
   /// 开始录音
   Future<void> _startRecording() async {
     try {
+      // 重置停止录音标志
+      _isStoppingRecording = false;
+      _autoSendCancelled = false;
+      _pendingRecognizedText = null;
+
       _setPhase(VoiceCallPhase.userSpeaking);
 
       final success = await recognitionService.startRecording();
@@ -423,6 +431,13 @@ class VoiceCallManager {
     _isStoppingRecording = true;
 
     try {
+      // 立即更新状态，防止状态监听器重复触发
+      _setState(VoiceCallState.recognized);
+
+      // 取消所有倒计时
+      _autoSendTimer?.cancel();
+      _countdownController.add(0);
+
       // 先停止录音
       await recognitionService.stopRecording();
 
@@ -436,11 +451,16 @@ class VoiceCallManager {
       } else {
         // 没有识别到文本，重新开始录音
         if (isCallActive) {
+          _isStoppingRecording = false;
           await _startRecording();
         }
       }
     } finally {
-      _isStoppingRecording = false;
+      // 只有在成功发送或有错误时才重置标志
+      // 如果进入新的一轮录音，由 _startRecording 重置
+      if (_state == VoiceCallState.recording) {
+        _isStoppingRecording = false;
+      }
     }
   }
 
