@@ -314,6 +314,7 @@ class MessageService extends ChangeNotifier {
     String messageId,
     String thinkingContent,
   ) async {
+    debugPrint('🧠 [updateAIMessageThinking] 开始更新思考内容, 长度: ${thinkingContent.length}');
     final message = getMessage(conversationId, messageId);
     if (message != null && !message.isUser) {
       final messages = _messageCache[conversationId];
@@ -324,9 +325,16 @@ class MessageService extends ChangeNotifier {
           messages[index] = message.copyWith(
             thinkingContent: thinkingContent,
           );
+          debugPrint('🧠 [updateAIMessageThinking] 更新完成, 新的 thinkingContent 长度: ${messages[index].thinkingContent?.length ?? 0}');
           notifyListeners();
+        } else {
+          debugPrint('⚠️ [updateAIMessageThinking] 未找到消息索引');
         }
+      } else {
+        debugPrint('⚠️ [updateAIMessageThinking] 消息列表为空');
       }
+    } else {
+      debugPrint('⚠️ [updateAIMessageThinking] 消息为 null 或是用户消息');
     }
   }
 

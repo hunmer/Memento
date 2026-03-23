@@ -220,6 +220,10 @@ class AnthropicRequestService {
                   // 根据类型调用不同的回调
                   if (deltaType == 'thinking_delta') {
                     // 思考内容使用单独的回调
+                    developer.log(
+                      '收到思考内容: ${content.length} 字符',
+                      name: 'AnthropicRequestService',
+                    );
                     onThinking?.call(content);
                   } else {
                     // 普通文本内容

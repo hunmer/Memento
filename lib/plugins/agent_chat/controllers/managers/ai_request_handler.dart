@@ -319,6 +319,7 @@ class AIRequestHandler {
           );
         },
         onThinking: (thinking) {
+          debugPrint('🧠 [思考内容] 收到: ${thinking.length} 字符');
           thinkingBuffer.write(thinking);
           // 实时更新消息的 thinkingContent 字段
           context.messageService.updateAIMessageThinking(
@@ -326,6 +327,7 @@ class AIRequestHandler {
             aiMessageId,
             thinkingBuffer.toString(),
           );
+          debugPrint('🧠 [思考内容] 已更新，当前总长度: ${thinkingBuffer.length}');
         },
         onError: (error) {
           final errorMessage =
