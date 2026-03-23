@@ -490,6 +490,12 @@ class VoiceCallManager {
 
   /// AI回复完成处理（需要外部调用）
   void handleAIMessage(String message) {
+    // 如果当前正在播放TTS，忽略新消息（防止重复处理）
+    if (_state == VoiceCallState.speaking) {
+      debugPrint('⚠️ 当前正在播放TTS，忽略新的AI消息');
+      return;
+    }
+
     _lastAIMessage = message;
 
     if (!isCallActive) return;

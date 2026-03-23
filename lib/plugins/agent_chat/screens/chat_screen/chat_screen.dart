@@ -70,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _autoReadEnabled = false; // 自动朗读开关
   String? _selectedTTSServiceId; // 选择的TTS服务ID
   String? _lastReadMessageId; // 上次朗读的消息ID
+  String? _lastVoiceCallMessageId; // 上次发送到语音通话的消息ID（防止重复处理）
   bool _isListReady = false; // 列表是否准备好显示（滚动到底部后）
 
   // Agent 选择状态 - 由 ChatScreen 自己管理
@@ -337,7 +338,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
         // 只处理AI消息，且消息已完成(非生成中)
         if (!message.isUser && !message.isGenerating) {
-          _voiceCallManager?.handleAIMessage(message.content);
+          // 检查是否是新消息（避免重复处理）
+          if (_lastVoiceCallMessageId != message.id &&
+              message.content.trim().isNotEmpty) {
+            _lastVoiceCallMessageId = message.id;
+            _voiceCallManager?.handleAIMessage(message.content);
+          }
           break;
         }
       }
