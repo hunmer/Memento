@@ -1,8 +1,13 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-// @ts-ignore
-import tunnel from 'tunnel';
+// @ts-ignore - global-agent 没有类型定义
+import { bootstrap } from 'global-agent';
+
+// 全局代理配置 - 必须在其他模块加载前设置
+const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
+process.env.GLOBAL_AGENT_HTTP_PROXY = proxyUrl;
+bootstrap();
 
 let firebaseApp: admin.app.App | null = null;
 
@@ -35,22 +40,10 @@ function initializeFirebase(): admin.app.App {
 
   const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf-8'));
 
-  // 配置代理
-  const proxyUrl = process.env.HTTP_PROXY || process.env.HTTPS_PROXY || 'http://127.0.0.1:7890';
-  const proxyUrlObj = new URL(proxyUrl);
-
-  const proxyAgent = tunnel.httpsOverHttp({
-    proxy: {
-      host: proxyUrlObj.hostname,
-      port: parseInt(proxyUrlObj.port) || 8080,
-    },
-  });
-
-  console.log(`[FCM] 代理配置: ${proxyUrl} -> ${proxyUrlObj.hostname}:${proxyUrlObj.port}`);
+  console.log(`[FCM] 代理配置: ${proxyUrl}`);
 
   firebaseApp = admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount, proxyAgent as any),
-    httpAgent: proxyAgent as any,
+    credential: admin.credential.cert(serviceAccount),
   });
 
   console.log(`[FCM] Firebase Admin SDK 初始化成功 (代理: 已配置)`);
