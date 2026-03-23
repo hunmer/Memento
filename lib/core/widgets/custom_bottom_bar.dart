@@ -289,8 +289,9 @@ class _CustomBottomBarState extends State<CustomBottomBar> {
               if (widget.fabLocation == Alignment.topLeft ||
                   widget.fabLocation == Alignment.topCenter ||
                   widget.fabLocation == Alignment.topRight) {
-                // FAB 中心对齐 BottomBar 顶部（假设 FAB 高度 56，一半是 28）
-                bottomOffset = widget.offset - 28;
+                // FAB 中心对齐 BottomBar 顶部
+                // bottomOffset = offset + (BottomBar高度) - 28
+                bottomOffset = widget.offset + _bottomBarHeight - 28;
               } else {
                 bottomOffset = widget.offset;
               }
