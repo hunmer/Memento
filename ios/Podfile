@@ -31,9 +31,6 @@ target 'Runner' do
   use_frameworks!
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  target 'RunnerTests' do
-    inherit! :search_paths
-  end
 end
 
 # 需要保留模块接口的 Pod 列表（因为它们内部有跨文件类型引用）
