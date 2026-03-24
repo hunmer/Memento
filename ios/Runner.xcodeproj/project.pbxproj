@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
-		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		4B8276432F607D5500DF8056 /* memento Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 4B8276232F607D5400DF8056 /* memento Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4B854B812F61D0FA00D90D6C /* WCSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B854B802F61D0FA00D90D6C /* WCSessionManager.swift */; };
@@ -33,31 +32,9 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		B484A26E41DCCB60F6FADC10 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A58AC4AD02C9E3AB8837333B /* Pods_Runner.framework */; };
 		F585244C619371CEFA3778FA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 59485A7025FB3D9FB5674122 /* GoogleService-Info.plist */; };
-		FF96134040E0346952FDEF3A /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34D46EAEC8305CCB9E9A97C /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		331C8085294A63A400263BE5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
-			remoteInfo = Runner;
-		};
-		4B8276302F607D5500DF8056 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4B8276222F607D5400DF8056;
-			remoteInfo = "memento Watch App";
-		};
-		4B82763A2F607D5500DF8056 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4B8276222F607D5400DF8056;
-			remoteInfo = "memento Watch App";
-		};
 		4B8276412F607D5500DF8056 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
@@ -113,13 +90,9 @@
 		0C0A40C1C6B14D70B13C7D3D /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
-		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
-		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		4ACC8550CC39FBD01EB2F17E /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		4B8276232F607D5400DF8056 /* memento Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "memento Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4B82762F2F607D5500DF8056 /* memento Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "memento Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4B8276392F607D5500DF8056 /* memento Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "memento Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B854B802F61D0FA00D90D6C /* WCSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WCSessionManager.swift; sourceTree = "<group>"; };
 		4B9549052EFAD1D0005F06E5 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		4B95490A2EFAD21F005F06E5 /* MyAppWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MyAppWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -176,35 +149,11 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4B8276242F607D5400DF8056 /* memento Watch App */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B8276512F607D5600DF8056 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "memento Watch App"; sourceTree = "<group>"; };
-		4B8276322F607D5500DF8056 /* memento Watch AppTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "memento Watch AppTests"; sourceTree = "<group>"; };
-		4B82763C2F607D5500DF8056 /* memento Watch AppUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "memento Watch AppUITests"; sourceTree = "<group>"; };
 		4B95490F2EFAD21F005F06E5 /* MyAppWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (4B9549202EFAD220005F06E5 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = MyAppWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		226422590511C998F43F4D97 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				FF96134040E0346952FDEF3A /* Pods_RunnerTests.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4B8276202F607D5400DF8056 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4B82762C2F607D5500DF8056 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4B8276362F607D5500DF8056 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -231,14 +180,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		331C8082294A63A400263BE5 /* RunnerTests */ = {
-			isa = PBXGroup;
-			children = (
-				331C807B294A618700263BE5 /* RunnerTests.swift */,
-			);
-			path = RunnerTests;
-			sourceTree = "<group>";
-		};
 		4BF3C3E7338630C25B3992C9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,10 +212,7 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				4B95490F2EFAD21F005F06E5 /* MyAppWidget */,
 				4B8276242F607D5400DF8056 /* memento Watch App */,
-				4B8276322F607D5500DF8056 /* memento Watch AppTests */,
-				4B82763C2F607D5500DF8056 /* memento Watch AppUITests */,
 				97C146EF1CF9000F007C117D /* Products */,
-				331C8082294A63A400263BE5 /* RunnerTests */,
 				4BF3C3E7338630C25B3992C9 /* Pods */,
 				D7A782C01DA3F248DAAA5138 /* Frameworks */,
 				59485A7025FB3D9FB5674122 /* GoogleService-Info.plist */,
@@ -285,11 +223,8 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
-				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
 				4B95490A2EFAD21F005F06E5 /* MyAppWidgetExtension.appex */,
 				4B8276232F607D5400DF8056 /* memento Watch App.app */,
-				4B82762F2F607D5500DF8056 /* memento Watch AppTests.xctest */,
-				4B8276392F607D5500DF8056 /* memento Watch AppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -337,25 +272,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		331C8080294A63A400263BE5 /* RunnerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
-			buildPhases = (
-				73E5083B9FE1ACF336E1F2B2 /* [CP] Check Pods Manifest.lock */,
-				331C807D294A63A400263BE5 /* Sources */,
-				331C807F294A63A400263BE5 /* Resources */,
-				226422590511C998F43F4D97 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				331C8086294A63A400263BE5 /* PBXTargetDependency */,
-			);
-			name = RunnerTests;
-			productName = RunnerTests;
-			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		4B8276222F607D5400DF8056 /* memento Watch App */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B82764E2F607D5500DF8056 /* Build configuration list for PBXNativeTarget "memento Watch App" */;
@@ -375,48 +291,6 @@
 			productName = "memento Watch App";
 			productReference = 4B8276232F607D5400DF8056 /* memento Watch App.app */;
 			productType = "com.apple.product-type.application";
-		};
-		4B82762E2F607D5500DF8056 /* memento Watch AppTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4B82764F2F607D5500DF8056 /* Build configuration list for PBXNativeTarget "memento Watch AppTests" */;
-			buildPhases = (
-				4B82762B2F607D5500DF8056 /* Sources */,
-				4B82762C2F607D5500DF8056 /* Frameworks */,
-				4B82762D2F607D5500DF8056 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				4B8276312F607D5500DF8056 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				4B8276322F607D5500DF8056 /* memento Watch AppTests */,
-			);
-			name = "memento Watch AppTests";
-			productName = "memento Watch AppTests";
-			productReference = 4B82762F2F607D5500DF8056 /* memento Watch AppTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		4B8276382F607D5500DF8056 /* memento Watch AppUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4B8276502F607D5500DF8056 /* Build configuration list for PBXNativeTarget "memento Watch AppUITests" */;
-			buildPhases = (
-				4B8276352F607D5500DF8056 /* Sources */,
-				4B8276362F607D5500DF8056 /* Frameworks */,
-				4B8276372F607D5500DF8056 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				4B82763B2F607D5500DF8056 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				4B82763C2F607D5500DF8056 /* memento Watch AppUITests */,
-			);
-			name = "memento Watch AppUITests";
-			productName = "memento Watch AppUITests";
-			productReference = 4B8276392F607D5500DF8056 /* memento Watch AppUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		4B9549092EFAD21F005F06E5 /* MyAppWidgetExtension */ = {
 			isa = PBXNativeTarget;
@@ -476,20 +350,8 @@
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
 				TargetAttributes = {
-					331C8080294A63A400263BE5 = {
-						CreatedOnToolsVersion = 14.0;
-						TestTargetID = 97C146ED1CF9000F007C117D;
-					};
 					4B8276222F607D5400DF8056 = {
 						CreatedOnToolsVersion = 26.2;
-					};
-					4B82762E2F607D5500DF8056 = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 4B8276222F607D5400DF8056;
-					};
-					4B8276382F607D5500DF8056 = {
-						CreatedOnToolsVersion = 26.2;
-						TestTargetID = 4B8276222F607D5400DF8056;
 					};
 					4B9549092EFAD21F005F06E5 = {
 						CreatedOnToolsVersion = 16.2;
@@ -514,38 +376,14 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
-				331C8080294A63A400263BE5 /* RunnerTests */,
 				4B9549092EFAD21F005F06E5 /* MyAppWidgetExtension */,
 				4B8276222F607D5400DF8056 /* memento Watch App */,
-				4B82762E2F607D5500DF8056 /* memento Watch AppTests */,
-				4B8276382F607D5500DF8056 /* memento Watch AppUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		331C807F294A63A400263BE5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4B8276212F607D5400DF8056 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4B82762D2F607D5500DF8056 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4B8276372F607D5500DF8056 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -611,28 +449,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		73E5083B9FE1ACF336E1F2B2 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-RunnerTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 		9740EEB61CF901F6004384FC /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -694,29 +510,7 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		331C807D294A63A400263BE5 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4B82761F2F607D5400DF8056 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4B82762B2F607D5500DF8056 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4B8276352F607D5500DF8056 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -755,21 +549,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		331C8086294A63A400263BE5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 97C146ED1CF9000F007C117D /* Runner */;
-			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
-		};
-		4B8276312F607D5500DF8056 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4B8276222F607D5400DF8056 /* memento Watch App */;
-			targetProxy = 4B8276302F607D5500DF8056 /* PBXContainerItemProxy */;
-		};
-		4B82763B2F607D5500DF8056 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4B8276222F607D5400DF8056 /* memento Watch App */;
-			targetProxy = 4B82763A2F607D5500DF8056 /* PBXContainerItemProxy */;
-		};
 		4B8276422F607D5500DF8056 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4B8276222F607D5400DF8056 /* memento Watch App */;
@@ -889,62 +668,6 @@
 			};
 			name = Profile;
 		};
-		331C8088294A63A400263BE5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0C0A40C1C6B14D70B13C7D3D /* Pods-RunnerTests.debug.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento.RunnerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
-			};
-			name = Debug;
-		};
-		331C8089294A63A400263BE5 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 947717B0FBC8693163092CCD /* Pods-RunnerTests.release.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento.RunnerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
-			};
-			name = Release;
-		};
-		331C808A294A63A400263BE5 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = B3FB8F940E4CCE85E082CE5A /* Pods-RunnerTests.profile.xcconfig */;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento.RunnerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
-			};
-			name = Profile;
-		};
 		4B8276452F607D5500DF8056 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -952,6 +675,7 @@
 					arm64_32,
 					arm64,
 				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -991,6 +715,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Debug;
 		};
@@ -1001,6 +726,7 @@
 					arm64_32,
 					arm64,
 				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -1037,6 +763,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Release;
 		};
@@ -1047,6 +774,7 @@
 					arm64_32,
 					arm64,
 				);
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -1083,207 +811,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
-			};
-			name = Profile;
-		};
-		4B8276482F607D5500DF8056 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hunmer.memento-Watch-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/memento Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/memento Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Debug;
-		};
-		4B8276492F607D5500DF8056 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hunmer.memento-Watch-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/memento Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/memento Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Release;
-		};
-		4B82764A2F607D5500DF8056 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hunmer.memento-Watch-AppTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/memento Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/memento Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Profile;
-		};
-		4B82764B2F607D5500DF8056 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hunmer.memento-Watch-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "memento Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Debug;
-		};
-		4B82764C2F607D5500DF8056 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hunmer.memento-Watch-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "memento Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Release;
-		};
-		4B82764D2F607D5500DF8056 /* Profile */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QVP92822D5;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GENERATE_INFOPLIST_FILE = YES;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.hunmer.memento-Watch-AppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "memento Watch App";
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Profile;
 		};
@@ -1322,6 +850,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento.MyAppWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -1364,6 +895,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento.MyAppWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1404,6 +938,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = github.hunmer.memento.MyAppWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1595,42 +1132,12 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				331C8088294A63A400263BE5 /* Debug */,
-				331C8089294A63A400263BE5 /* Release */,
-				331C808A294A63A400263BE5 /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		4B82764E2F607D5500DF8056 /* Build configuration list for PBXNativeTarget "memento Watch App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4B8276452F607D5500DF8056 /* Debug */,
 				4B8276462F607D5500DF8056 /* Release */,
 				4B8276472F607D5500DF8056 /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4B82764F2F607D5500DF8056 /* Build configuration list for PBXNativeTarget "memento Watch AppTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4B8276482F607D5500DF8056 /* Debug */,
-				4B8276492F607D5500DF8056 /* Release */,
-				4B82764A2F607D5500DF8056 /* Profile */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4B8276502F607D5500DF8056 /* Build configuration list for PBXNativeTarget "memento Watch AppUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4B82764B2F607D5500DF8056 /* Debug */,
-				4B82764C2F607D5500DF8056 /* Release */,
-				4B82764D2F607D5500DF8056 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
