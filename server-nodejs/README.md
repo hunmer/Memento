@@ -27,7 +27,38 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 方式一：npm 全局安装（推荐）
+
+```bash
+# 全局安装
+npm install -g @hunmer/memento-server
+
+# 启动服务器
+memento-server
+
+# 指定端口启动
+PORT=8080 memento-server
+```
+
+首次启动会在当前目录创建 `data` 文件夹存储数据。
+
+#### 环境变量配置
+
+全局安装时可通过环境变量配置：
+
+```bash
+# Linux/macOS
+PORT=8080 DATA_DIR=/var/memento-data memento-server
+
+# Windows PowerShell
+$env:PORT=8080; $env:DATA_DIR="C:\memento-data"; memento-server
+
+# 或创建 .env 文件在运行目录
+```
+
+### 方式二：从源码运行
+
+#### 1. 安装依赖
 
 ```bash
 cd server-nodejs
