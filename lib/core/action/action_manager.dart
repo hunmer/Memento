@@ -1,6 +1,7 @@
 /// 动作管理器
 /// 单例模式，管理所有动作的注册、验证和执行
 library;
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -260,105 +261,6 @@ class ActionManager {
 
   // === 自定义动作注册方法 ===
 
-  /// 注册JavaScript动作
-  void registerJavaScriptAction({
-    required String id,
-    required String title,
-    required String script,
-    String? description,
-    IconData? icon,
-  }) {
-    final action = ActionDefinition(
-      id: id,
-      title: title,
-      description: description,
-      icon: icon ?? Icons.code,
-      category: ActionCategory.custom,
-      executor: CustomActionExecutor(
-        script: script,
-        scriptType: 'javascript',
-        actionId: id,
-      ),
-      isBuiltIn: false,
-    );
-    registerAction(action);
-  }
-
-  /// 注册Dart动作
-  void registerDartAction({
-    required String id,
-    required String title,
-    required String script,
-    String? description,
-    IconData? icon,
-  }) {
-    final action = ActionDefinition(
-      id: id,
-      title: title,
-      description: description,
-      icon: icon ?? Icons.code_off,
-      category: ActionCategory.custom,
-      executor: CustomActionExecutor(script: script, scriptType: 'dart'),
-      isBuiltIn: false,
-    );
-    registerAction(action);
-  }
-
-  /// 注册表达式动作
-  void registerExpressionAction({
-    required String id,
-    required String title,
-    required String expression,
-    String? description,
-    IconData? icon,
-  }) {
-    final action = ActionDefinition(
-      id: id,
-      title: title,
-      description: description,
-      icon: icon ?? Icons.calculate,
-      category: ActionCategory.custom,
-      executor: CustomActionExecutor(script: expression, scriptType: 'expression'),
-      isBuiltIn: false,
-    );
-    registerAction(action);
-  }
-
-  /// 创建并注册临时JavaScript动作
-  Future<ExecutionResult> executeJavaScript(
-    BuildContext context,
-    String script, {
-    Map<String, dynamic>? data,
-    String? actionId,
-  }) async {
-    final executor = CustomActionExecutor(
-      script: script,
-      scriptType: 'javascript',
-      actionId: actionId,
-    );
-    return await executor.execute(context, data);
-  }
-
-  /// 创建并注册临时Dart动作
-  Future<ExecutionResult> executeDart(
-    BuildContext context,
-    String script, {
-    Map<String, dynamic>? data,
-  }) async {
-    final executor = CustomActionExecutor(script: script, scriptType: 'dart');
-    return await executor.execute(context, data);
-  }
-
-  /// 创建并注册临时表达式动作
-  Future<ExecutionResult> executeExpression(
-    BuildContext context,
-    String expression, {
-    Map<String, dynamic>? data,
-  }) async {
-    final executor = CustomActionExecutor(script: expression, scriptType: 'expression');
-    return await executor.execute(context, data);
-  }
-
   /// 执行动作
   Future<ExecutionResult> execute(
     String actionId,
@@ -574,7 +476,9 @@ class ActionManager {
   Future<void> _loadConfig() async {
     try {
       // 加载手势动作配置
-      final gestureActionsData = await globalStorage.read('floating_ball_gesture_actions');
+      final gestureActionsData = await globalStorage.read(
+        'floating_ball_gesture_actions.json',
+      );
       if (gestureActionsData != null && gestureActionsData is Map) {
         _gestureActions.clear();
         for (final entry in gestureActionsData.entries) {
@@ -591,7 +495,9 @@ class ActionManager {
       }
 
       // 加载动作组配置
-      final groupsData = await globalStorage.read('floating_ball_action_groups');
+      final groupsData = await globalStorage.read(
+        'floating_ball_action_groups',
+      );
       if (groupsData != null && groupsData is Map) {
         _actionGroups.clear();
         for (final entry in groupsData.entries) {
@@ -614,7 +520,10 @@ class ActionManager {
         gestureActionsData[entry.key.name] = entry.value.toJson();
       }
 
-      await globalStorage.write('floating_ball_gesture_actions', gestureActionsData);
+      await globalStorage.write(
+        'floating_ball_gesture_actions.json',
+        gestureActionsData,
+      );
     } catch (e) {
       print('Error saving gesture actions: $e');
     }
@@ -749,9 +658,7 @@ class ActionManager {
       if (configData['actionGroups'] != null) {
         final groups = configData['actionGroups'] as List;
         for (final groupJson in groups) {
-          final group = ActionGroup.fromJson(
-            groupJson as Map<String, dynamic>,
-          );
+          final group = ActionGroup.fromJson(groupJson as Map<String, dynamic>);
           if (group.id != null) {
             _actionGroups[group.id!] = group;
           }
