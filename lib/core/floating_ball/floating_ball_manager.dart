@@ -274,10 +274,9 @@ class FloatingBallManager {
     }
 
     // 为tap手势设置默认动作（如果没有配置的话）
+    // 注意：回调会在 setActionContext 中被正确设置，这里只是占位
     if (!_actions.containsKey(FloatingBallGesture.tap)) {
-      _actions[FloatingBallGesture.tap] = ActionInfo('选择打开插件', () {
-        // 这个回调会在setActionContext中被正确设置
-      });
+      _actions[FloatingBallGesture.tap] = ActionInfo('选择打开插件', () {});
     }
   }
 

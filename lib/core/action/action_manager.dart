@@ -506,8 +506,25 @@ class ActionManager {
           _actionGroups[groupId] = ActionGroup.fromJson(groupData);
         }
       }
+
+      // 为 tap 手势设置默认动作（如果没有配置的话）
+      _ensureDefaultTapAction();
     } catch (e) {
       print('Error loading gesture actions: $e');
+    }
+  }
+
+  /// 确保 tap 手势有默认动作
+  void _ensureDefaultTapAction() {
+    if (!_gestureActions.containsKey(FloatingBallGesture.tap) ||
+        _gestureActions[FloatingBallGesture.tap]!.isEmpty) {
+      _gestureActions[FloatingBallGesture.tap] = GestureActionConfig(
+        gesture: FloatingBallGesture.tap,
+        singleAction: ActionInstance.create(
+          actionId: BuiltInActions.selectPlugin,
+          data: {},
+        ),
+      );
     }
   }
 
