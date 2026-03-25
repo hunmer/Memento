@@ -1,0 +1,36 @@
+# 源代码
+src/
+tsconfig.json
+
+# 开发配置
+.eslintrc*
+.prettierrc*
+jest.config.*
+
+# 测试文件
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+
+# 开发依赖目录
+node_modules/
+
+# IDE 配置
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 日志和临时文件
+*.log
+*.tmp
+.DS_Store
+
+# 管理界面源码（只发布构建后的 admin/）
+admin-vue/
+
+# 环境配置（可能包含敏感信息）
+.env
+.env.*
+!.env.example
