@@ -188,19 +188,13 @@ class FloatingWidgetController {
         final List<dynamic> dataList = jsonDecode(buttonDataJson);
         final List<FloatingBallButtonData> loadedButtons = [];
 
-        // 优先加载已压缩的按钮图片
-        final compressedButtonImage = prefs.getString('floating_ball_button_image_compressed');
-
         for (final item in dataList) {
           final map = item as Map<String, dynamic>;
           String? imageBase64 = map['image'] as String?;
 
-          // 优先使用已压缩的图片
-          if (compressedButtonImage != null && compressedButtonImage.isNotEmpty) {
-            imageBase64 = compressedButtonImage;
-          } else if (imageBase64 != null && imageBase64.length > 50 * 1024) {
-            // 如果图片过大（超过 50KB），进行压缩并保存
-            imageBase64 = await _compressAndSaveButtonImage(imageBase64);
+          // 如果图片过大（超过 50KB），进行压缩
+          if (imageBase64 != null && imageBase64.length > 50 * 1024) {
+            imageBase64 = await _compressButtonImage(imageBase64);
           }
 
           loadedButtons.add(FloatingBallButtonData(
@@ -219,8 +213,8 @@ class FloatingWidgetController {
     }
   }
 
-  /// 压缩按钮图片并保存到本地
-  Future<String?> _compressAndSaveButtonImage(String base64Image) async {
+  /// 压缩单个按钮图片（不保存到 SharedPreferences，只返回压缩结果）
+  Future<String?> _compressButtonImage(String base64Image) async {
     try {
       final imageBytes = base64Decode(base64Image);
       // 按钮更小，使用 120x120 像素
@@ -237,16 +231,13 @@ class FloatingWidgetController {
       final compressedBase64 = base64Encode(compressedBytes);
       print('按钮图片压缩: ${base64Image.length} -> ${compressedBase64.length} chars');
 
-      // 保存压缩后的图片到 SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('floating_ball_button_image_compressed', compressedBase64);
-
       return compressedBase64;
     } catch (e) {
       print('按钮图片压缩失败: $e');
       return base64Image;
     }
   }
+
 
   /// 保存按钮数据
   Future<void> _saveButtonData() async {
@@ -255,14 +246,8 @@ class FloatingWidgetController {
     final buttonDataJson = jsonEncode(dataList);
     await prefs.setString('floating_ball_buttons', buttonDataJson);
 
-    // 保存按钮压缩图片（如果有的话）
-    final firstButtonWithImage = _buttonData.firstWhere(
-      (button) => button.image != null && button.image!.isNotEmpty,
-      orElse: () => FloatingBallButtonData(title: '', icon: '', data: null),
-    );
-    if (firstButtonWithImage.image != null && firstButtonWithImage.image!.isNotEmpty) {
-      await prefs.setString('floating_ball_button_image_compressed', firstButtonWithImage.image!);
-    }
+    // 清除旧的压缩图片缓存（已废弃，每个按钮的图片保存在各自的 image 字段中）
+    await prefs.remove('floating_ball_button_image_compressed');
   }
 
   /// 保存设置

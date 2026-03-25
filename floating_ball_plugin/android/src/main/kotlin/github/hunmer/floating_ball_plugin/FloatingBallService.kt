@@ -385,8 +385,14 @@ class FloatingBallService : Service() {
         val buttonCount = buttons.size
 
         // 计算角度
+        // 注意：当 endAngle < startAngle 时（如左边缘 270° -> 90°），需要跨 360° 边界
         val angleStep = if (isHalfCircle) {
-            (endAngle - startAngle) / buttonCount
+            val angleDiff = if (endAngle < startAngle) {
+                endAngle + 360f - startAngle  // 跨边界：如 90 + 360 - 270 = 180
+            } else {
+                endAngle - startAngle
+            }
+            angleDiff / buttonCount
         } else {
             360f / buttonCount
         }
