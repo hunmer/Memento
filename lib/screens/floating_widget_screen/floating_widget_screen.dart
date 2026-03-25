@@ -114,23 +114,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
       appBar: AppBar(title: Text('screens_floatingBallSettings'.tr)),
       body: ListView(
         children: [
-          // 悬浮球状态
-          ListTile(
-            leading: Icon(
-              _controller.isRunning
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
-              color: _controller.isRunning ? Colors.green : Colors.grey,
-            ),
-            title: Text('screens_floatingBallStatus'.tr),
-            trailing: Text(
-              _controller.isRunning ? 'screens_running'.tr : 'screens_stopped'.tr,
-              style: TextStyle(
-                color: _controller.isRunning ? Colors.green : Colors.grey,
-              ),
-            ),
-          ),
-          const Divider(height: 1),
           // 悬浮窗权限
           ListTile(
             leading: Icon(
@@ -168,139 +151,142 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
               await _controller.toggleFloatingBall();
             },
           ),
-          const Divider(height: 1),
-          // 应用内自动隐藏
-          ListTile(
-            leading: const Icon(Icons.visibility_off),
-            title: Text('screens_autoHideInApp'.tr),
-            subtitle: Text('screens_autoHideInAppDescription'.tr),
-            trailing: AdaptiveSwitch(
-              value: _controller.autoHideInApp,
-              onChanged: (value) {
-                _controller.setAutoHideInApp(value);
-                setState(() {});
-              },
-            ),
-          ),
-          const Divider(height: 16, thickness: 8),
-          // 选择图片
-          ListTile(
-            leading: const Icon(Icons.image),
-            title: Text('screens_selectImageAsFloatingBall'.tr),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: _pickAndSetImage,
-          ),
-          const Divider(height: 1),
-          // 大小设置
-          ListTile(
-            leading: const Icon(Icons.straighten),
-            title: Text('screens_sizeColon'.tr),
-            trailing: Text(
-              'screens_ballSizeDp'.trParams({
-                'size': _controller.ballSize.round().toString(),
-              }),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 72.0, right: 16.0),
-            child: Slider(
-              value: _controller.ballSize,
-              min: 50,
-              max: 150,
-              divisions: 10,
-              onChanged: (value) {
-                _controller.setBallSize(value);
-                setState(() {});
-              },
-              onChangeEnd: (value) async {
-                await _controller.updateConfig();
-              },
-            ),
-          ),
-          const Divider(height: 1),
-          // 吸附阈值
-          ListTile(
-            leading: const Icon(Icons.vertical_align_center),
-            title: Text('screens_snapThresholdColon'.tr),
-            trailing: Text(
-              'screens_snapThresholdPx'.trParams({
-                'threshold': _controller.snapThreshold.toString(),
-              }),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 72.0, right: 16.0),
-            child: Slider(
-              value: _controller.snapThreshold.toDouble(),
-              min: 20,
-              max: 100,
-              divisions: 8,
-              onChanged: (value) {
-                _controller.setSnapThreshold(value.toInt());
-                setState(() {});
-              },
-              onChangeEnd: (value) async {
-                await _controller.updateConfig();
-              },
-            ),
-          ),
-          const Divider(height: 1),
-          // 自动恢复状态
-          ListTile(
-            leading: const Icon(Icons.restore),
-            title: Text('screens_autoRestoreFloatingBallState'.tr),
-            trailing: AdaptiveSwitch(
-              value: _controller.autoRestore,
-              onChanged: (value) {
-                _controller.setAutoRestore(value);
-                setState(() {});
-              },
-            ),
-          ),
-          const Divider(height: 1),
-          // 按钮管理
-          ListTile(
-            leading: const Icon(Icons.touch_app),
-            title: Text('screens_manageFloatingButtons'.tr),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'screens_buttonCount'.trParams({
-                    'count': _controller.buttonData.length.toString(),
-                  }),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.chevron_right),
-              ],
-            ),
-            onTap: () {
-              NavigationHelper.push(
-                context,
-                const FloatingButtonManagerScreen(),
-              ).then((_) => setState(() {}));
-            },
-          ),
-          // 位置信息
-          if (_controller.lastPosition != null) ...[
-            const Divider(height: 16, thickness: 8),
+          // 其他选项只在悬浮球开启时显示
+          if (_controller.isRunning) ...[
+            const Divider(height: 1),
+            // 应用内自动隐藏
             ListTile(
-              leading: const Icon(Icons.location_on),
-              title: Text('screens_currentPosition'.tr),
-              subtitle: Text(
-                'screens_xPositionYPosition'.trParams({
-                  'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0),
-                  'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(0),
-                }),
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  _controller.clearPosition();
+              leading: const Icon(Icons.visibility_off),
+              title: Text('screens_autoHideInApp'.tr),
+              subtitle: Text('screens_autoHideInAppDescription'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.autoHideInApp,
+                onChanged: (value) {
+                  _controller.setAutoHideInApp(value);
                   setState(() {});
                 },
               ),
             ),
+            const Divider(height: 16, thickness: 8),
+            // 选择图片
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: Text('screens_selectImageAsFloatingBall'.tr),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _pickAndSetImage,
+            ),
+            const Divider(height: 1),
+            // 大小设置
+            ListTile(
+              leading: const Icon(Icons.straighten),
+              title: Text('screens_sizeColon'.tr),
+              trailing: Text(
+                'screens_ballSizeDp'.trParams({
+                  'size': _controller.ballSize.round().toString(),
+                }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 72.0, right: 16.0),
+              child: Slider(
+                value: _controller.ballSize,
+                min: 50,
+                max: 150,
+                divisions: 10,
+                onChanged: (value) {
+                  _controller.setBallSize(value);
+                  setState(() {});
+                },
+                onChangeEnd: (value) async {
+                  await _controller.updateConfig();
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 吸附阈值
+            ListTile(
+              leading: const Icon(Icons.vertical_align_center),
+              title: Text('screens_snapThresholdColon'.tr),
+              trailing: Text(
+                'screens_snapThresholdPx'.trParams({
+                  'threshold': _controller.snapThreshold.toString(),
+                }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 72.0, right: 16.0),
+              child: Slider(
+                value: _controller.snapThreshold.toDouble(),
+                min: 20,
+                max: 100,
+                divisions: 8,
+                onChanged: (value) {
+                  _controller.setSnapThreshold(value.toInt());
+                  setState(() {});
+                },
+                onChangeEnd: (value) async {
+                  await _controller.updateConfig();
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 自动恢复状态
+            ListTile(
+              leading: const Icon(Icons.restore),
+              title: Text('screens_autoRestoreFloatingBallState'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.autoRestore,
+                onChanged: (value) {
+                  _controller.setAutoRestore(value);
+                  setState(() {});
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 按钮管理
+            ListTile(
+              leading: const Icon(Icons.touch_app),
+              title: Text('screens_manageFloatingButtons'.tr),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'screens_buttonCount'.trParams({
+                      'count': _controller.buttonData.length.toString(),
+                    }),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+              onTap: () {
+                NavigationHelper.push(
+                  context,
+                  const FloatingButtonManagerScreen(),
+                ).then((_) => setState(() {}));
+              },
+            ),
+            // 位置信息
+            if (_controller.lastPosition != null) ...[
+              const Divider(height: 16, thickness: 8),
+              ListTile(
+                leading: const Icon(Icons.location_on),
+                title: Text('screens_currentPosition'.tr),
+                subtitle: Text(
+                  'screens_xPositionYPosition'.trParams({
+                    'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0),
+                    'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(0),
+                  }),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () {
+                    _controller.clearPosition();
+                    setState(() {});
+                  },
+                ),
+              ),
+            ],
           ],
         ],
       ),
