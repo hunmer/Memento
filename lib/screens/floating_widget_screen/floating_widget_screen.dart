@@ -121,19 +121,19 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
               color: _controller.hasPermission ? Colors.green : Colors.red,
             ),
             title: Text('screens_floatingWindowPermission'.tr),
-            trailing: _controller.hasPermission
-                ? Text(
-                    'screens_granted'.tr,
-                    style: const TextStyle(color: Colors.green),
-                  )
-                : TextButton(
-                    onPressed: () async {
-                      await _controller.requestPermission();
-                    },
-                    child: Text('screens_requestPermission'.tr),
-                  ),
+            trailing:
+                _controller.hasPermission
+                    ? Text(
+                      'screens_granted'.tr,
+                      style: const TextStyle(color: Colors.green),
+                    )
+                    : TextButton(
+                      onPressed: () async {
+                        await _controller.requestPermission();
+                      },
+                      child: Text('screens_requestPermission'.tr),
+                    ),
           ),
-          const Divider(height: 1),
           // 开启/禁用悬浮球
           ListTile(
             leading: Icon(
@@ -274,8 +274,12 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 title: Text('screens_currentPosition'.tr),
                 subtitle: Text(
                   'screens_xPositionYPosition'.trParams({
-                    'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0),
-                    'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(0),
+                    'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(
+                      0,
+                    ),
+                    'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(
+                      0,
+                    ),
                   }),
                 ),
                 trailing: IconButton(

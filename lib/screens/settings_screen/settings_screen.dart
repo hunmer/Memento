@@ -441,7 +441,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (mounted) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DeviceSyncScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const DeviceSyncScreen(),
+                  ),
                 ).then((_) => _checkServerSyncConfig());
               }
             },
@@ -479,6 +481,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                 },
               );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.touch_app),
+            title: Text('screens_floatingBallSettings'.tr),
+            subtitle: Text('screens_manageSystemFloatingBall'.tr),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.pushNamed(context, '/floating_ball');
             },
           ),
           ListTile(
@@ -649,7 +660,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Syncfusion 日历封装组件测试'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.pushNamed(context, '/widgets_gallery/memento_sf_calendar');
+              Navigator.pushNamed(
+                context,
+                '/widgets_gallery/memento_sf_calendar',
+              );
             },
           ),
           ListTile(
@@ -746,15 +760,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
               Navigator.pushNamed(context, '/notification_test');
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.touch_app),
-            title: Text('screens_floatingBallSettings'.tr),
-            subtitle: Text('screens_manageSystemFloatingBall'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(context, '/floating_ball');
             },
           ),
           ListTile(

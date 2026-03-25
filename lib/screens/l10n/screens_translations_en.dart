@@ -8,10 +8,11 @@ final Map<String, String> screensTranslationsEn = {
   'screens_errorHabitNotFound': 'Error: Habit not found with id: @id',
 
   // floating_widget_screen
-  'screens_floatingBallSettings': 'Floating Ball Settings',
+  'screens_floatingBallSettings': 'System Floating Ball',
   'screens_requestPermission': 'Request Permission',
   'screens_floatingBallConfig': 'Floating Ball Configuration',
-  'screens_customizeFloatingBallAppearanceBehavior': 'Customize the appearance and behavior of the floating ball',
+  'screens_customizeFloatingBallAppearanceBehavior':
+      'Customize the appearance and behavior of the floating ball',
   'screens_selectImageAsFloatingBall': 'Select image as floating ball',
   'screens_sizeColon': 'Size: ',
   'screens_ballSizeDp': '@sizedp',
@@ -32,7 +33,8 @@ final Map<String, String> screensTranslationsEn = {
   'screens_gridSettings': 'Grid Settings',
   'screens_clearLayout': 'Clear Layout',
   'screens_confirmClear': 'Confirm Clear',
-  'screens_confirmClearAllWidgets': 'Are you sure you want to clear all widgets? This action cannot be undone.',
+  'screens_confirmClearAllWidgets':
+      'Are you sure you want to clear all widgets? This action cannot be undone.',
   'screens_cancel': 'Cancel',
   'screens_confirm': 'Confirm',
   'screens_adjustSize': 'Adjust Size',
@@ -88,7 +90,8 @@ final Map<String, String> screensTranslationsEn = {
 
   // layout_manager_dialog
   'screens_renameLayout': 'Rename Layout',
-  'screens_confirmDeleteLayout': 'Are you sure you want to delete layout "@layoutName"? This action cannot be undone.',
+  'screens_confirmDeleteLayout':
+      'Are you sure you want to delete layout "@layoutName"? This action cannot be undone.',
   'screens_layoutManagement': 'Layout Management',
   'screens_layoutInfo': '@items widgets · @columns columns grid',
   'screens_switchToThisLayout': 'Switch to this layout',
@@ -106,13 +109,16 @@ final Map<String, String> screensTranslationsEn = {
   'screens_useDefault': 'Use Default',
   'screens_backgroundColor': 'Background Color',
   'screens_effectWhenNoBackgroundImage': 'Effective when no background image',
-  'screens_customColorWithTransparency': 'Custom color (with transparency support)',
+  'screens_customColorWithTransparency':
+      'Custom color (with transparency support)',
 
   // intent_test_screen
   'screens_quickRegisterIntent': 'Quick Register Intent',
-  'screens_selectPresetIntentType': 'Select a preset Intent type for quick registration',
+  'screens_selectPresetIntentType':
+      'Select a preset Intent type for quick registration',
   'screens_mementoTest': 'Memento Test (memento:///test)',
-  'screens_mementoComplete': 'Memento Complete (memento://app.example.com/open)',
+  'screens_mementoComplete':
+      'Memento Complete (memento://app.example.com/open)',
   'screens_customApp': 'Custom App (myapp://custom.host)',
   'screens_intentTest': 'Intent Test',
   'screens_quickRegister': 'Quick Register',
@@ -141,8 +147,10 @@ final Map<String, String> screensTranslationsEn = {
   'screens_testAndPreviewDynamicUI': 'Test and preview dynamic UI components',
   'screens_testIOSStyleNavigation': 'Test iOS style navigation bar component',
   'screens_notificationTest': 'Notification Test',
-  'screens_manageSystemFloatingBall': 'Manage system-level floating ball functionality',
-  'screens_testDynamicIntentAndDeepLink': 'Test dynamic Intent registration and deep linking',
+  'screens_manageSystemFloatingBall':
+      'Manage system-level floating ball functionality',
+  'screens_testDynamicIntentAndDeepLink':
+      'Test dynamic Intent registration and deep linking',
 
   // base_settings_controller
   'screens_selectLanguage': 'Select Language',
@@ -200,7 +208,8 @@ final Map<String, String> screensTranslationsEn = {
   'screens_xPositionYPosition': 'X: @x, Y: @y',
 
   // Additional home screen messages
-  'screens_confirmDeleteSelectedItems': 'Are you sure you want to delete the selected @count items?',
+  'screens_confirmDeleteSelectedItems':
+      'Are you sure you want to delete the selected @count items?',
   'screens_widgetSize': '@width×@height',
   'screens_smallSize': 'Small (Icon)',
   'screens_mediumSize': 'Medium (Horizontal Card)',
@@ -223,13 +232,16 @@ final Map<String, String> screensTranslationsEn = {
   'screens_layoutNameHint': 'e.g., Work Layout, Entertainment Layout',
   'screens_deleted': 'deleted',
   'screens_itemsDeleted': 'Deleted @count items',
-  'screens_noAvailableFolders': 'No available folders, please create a folder first',
+  'screens_noAvailableFolders':
+      'No available folders, please create a folder first',
   'screens_itemsMovedToFolder': 'Moved @count items to folder',
   'screens_gridSize': 'Grid Size',
-  'screens_gridSizeDescription': 'Select the number of columns for the home grid (1-10)',
+  'screens_gridSizeDescription':
+      'Select the number of columns for the home grid (1-10)',
   'screens_gridColumns': '@count columns',
   'screens_displayPosition': 'Display Position',
-  'screens_displayPositionDescription': 'Choose the alignment of widgets on the screen',
+  'screens_displayPositionDescription':
+      'Choose the alignment of widgets on the screen',
   'screens_backgroundImageSet': 'Background image set',
   'screens_backgroundImageNotSet': 'Background image not set',
   'screens_customBackgroundImage': 'Custom background image set',
@@ -243,14 +255,18 @@ final Map<String, String> screensTranslationsEn = {
 
   // background_settings_page
   'screens_widgetOverallOpacity': 'Widget Overall Opacity',
-  'screens_widgetOverallOpacityDescription': 'Adjust the opacity of the entire widget (including text and content)',
+  'screens_widgetOverallOpacityDescription':
+      'Adjust the opacity of the entire widget (including text and content)',
   'screens_backgroundColorOpacity': 'Background Color Opacity',
-  'screens_backgroundColorOpacityDescription': 'Adjust only the background color opacity, does not affect text',
-  'screens_layoutBackgroundSettingsDescription': 'Set background images for each layout individually, priority higher than global background image',
+  'screens_backgroundColorOpacityDescription':
+      'Adjust only the background color opacity, does not affect text',
+  'screens_layoutBackgroundSettingsDescription':
+      'Set background images for each layout individually, priority higher than global background image',
   'screens_noSavedLayouts': 'No saved layouts',
   'screens_saveLayoutFirst': 'Please save a layout on the home page first',
   'screens_clearUseGlobalBackground': 'Clear (Use Global Background)',
-  'screens_customBackgroundHasPriority': 'Individually set background images have priority over global background images',
+  'screens_customBackgroundHasPriority':
+      'Individually set background images have priority over global background images',
   'screens_zeroPercentFullyTransparent': '0% (Fully Transparent)',
   'screens_oneHundredPercentOpaque': '100% (Opaque)',
 
@@ -271,7 +287,8 @@ final Map<String, String> screensTranslationsEn = {
   'screens_loadLayoutFailed': 'Failed to load layout',
   'screens_switchedToLayout': 'Switched to',
   'screens_switchFailed': 'Failed to switch',
-  'screens_saveFirstLayoutHint': 'Click "Save Current Layout" in the top right menu to create your first layout configuration',
+  'screens_saveFirstLayoutHint':
+      'Click "Save Current Layout" in the top right menu to create your first layout configuration',
 
   // layout_manager_dialog
   'screens_renameSuccess': 'Rename successful',
@@ -288,20 +305,24 @@ final Map<String, String> screensTranslationsEn = {
   'screens_locationApiKeyHint': 'Please enter Amap API Key',
   'screens_apiKeyLabel': 'API Key',
   'screens_apiKeyInputHint': 'Enter API Key',
-  'screens_locationApiKeyGuide': 'How to get API Key:\n1. Visit Amap Open Platform\n2. Register and create application\n3. Get Web Service API Key',
+  'screens_locationApiKeyGuide':
+      'How to get API Key:\n1. Visit Amap Open Platform\n2. Register and create application\n3. Get Web Service API Key',
 
   // unstack
   'screens_unstackCurrent': 'Unstack @widget widget',
   'screens_unstackAll': 'Unstack all widgets',
   'screens_confirmUnstack': 'Confirm Unstack',
-  'screens_confirmUnstackItem': 'Are you sure you want to unstack the "@widget" widget?',
-  'screens_confirmUnstackAll': 'Are you sure you want to unstack all @count widgets?',
+  'screens_confirmUnstackItem':
+      'Are you sure you want to unstack the "@widget" widget?',
+  'screens_confirmUnstackAll':
+      'Are you sure you want to unstack all @count widgets?',
   'screens_unstack': 'Unstack',
   'screens_unstackSuccess': 'Unstacked "@widget" widget',
   'screens_unstackAllSuccess': 'Unstacked @count widgets',
 
   // stack merge
-  'screens_cannotMergeDifferentSizes': 'Cannot merge widgets of different sizes',
+  'screens_cannotMergeDifferentSizes':
+      'Cannot merge widgets of different sizes',
   'screens_mergeFailed': 'Merge failed',
   'screens_mergeSuccess': 'Merge successful',
 };
