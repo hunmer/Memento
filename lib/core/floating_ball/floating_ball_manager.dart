@@ -169,7 +169,7 @@ class FloatingBallManager {
       'actions': {},
       'size_scale': 0.6,
       'position': {'x': 21.0, 'y': 99.0},
-      'enabled': true,
+      'enabled': false,
     };
   }
 
@@ -325,7 +325,7 @@ class FloatingBallManager {
   Future<bool> isEnabled() async {
     await _ensureInitialized();
     final data = await _readData();
-    return (data['enabled'] as bool?) ?? true;
+    return (data['enabled'] as bool?) ?? false;
   }
 
   // 保存悬浮球启用状态
