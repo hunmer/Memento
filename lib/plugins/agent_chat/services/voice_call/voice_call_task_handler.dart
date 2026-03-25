@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:memento_foreground_service/memento_foreground_service.dart';
@@ -118,10 +119,7 @@ class VoiceCallTaskHandler extends TaskHandler {
   /// 构建通知按钮
   List<ServiceNotificationButton> _buildNotificationButtons() {
     return notificationButtons.map((label) {
-      return ServiceNotificationButton(
-        key: label,
-        label: label,
-      );
+      return ServiceNotificationButton(key: label, label: label);
     }).toList();
   }
 }

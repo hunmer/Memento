@@ -2,7 +2,6 @@
 /// 负责执行各种动作类型的逻辑
 library;
 import 'dart:async';
-import 'dart:convert';
 import 'package:Memento/core/app_initializer.dart';
 import 'package:Memento/core/event/event.dart';
 import 'package:Memento/core/event/plugin_action_event_args.dart';
@@ -731,9 +730,6 @@ class CustomActionExecutor implements ActionExecutor {
 
     try {
       switch (scriptType) {
-        case 'javascript':
-          return await _executeJavaScript(context, data, stopwatch);
-
         case 'dart':
           return await _executeDart(context, data, stopwatch);
 
@@ -753,190 +749,6 @@ class CustomActionExecutor implements ActionExecutor {
         executionTimeMs: stopwatch.elapsedMilliseconds,
       );
     }
-  }
-
-  Future<ExecutionResult> _executeJavaScript(
-    BuildContext context,
-    Map<String, dynamic>? data,
-    Stopwatch stopwatch,
-  ) async {
-    // 获取脚本和输入数据
-    String userScript = script;
-    Map<String, dynamic>? inputData = data;
-
-    // 如果是 js_custom_executor 且没有提供脚本，检查配置数据
-    if (actionId == 'js_custom_executor') {
-      // 从配置数据中获取脚本和输入数据
-      if (data != null) {
-        if (data.containsKey('script') && (data['script'] as String?) != null && (data['script'] as String).isNotEmpty) {
-          userScript = data['script'] as String;
-        }
-        if (data.containsKey('inputData')) {
-          final inputDataStr = data['inputData'] as String?;
-          if (inputDataStr != null && inputDataStr.trim().isNotEmpty) {
-            try {
-              inputData = jsonDecode(inputDataStr);
-            } catch (e) {
-              stopwatch.stop();
-              return ExecutionResult.failure(
-                error: 'Invalid JSON in inputData: $e',
-                executionTimeMs: stopwatch.elapsedMilliseconds,
-              );
-            }
-          }
-        }
-      }
-
-      // 如果还是没有脚本，则显示输入对话框
-      if (userScript.trim().isEmpty) {
-        return await _showJavaScriptInputDialog(context, data, stopwatch);
-      }
-    }
-
-    // 使用 JavaScript 引擎执行脚本
-    // TODO: 集成 JavaScript 引擎库
-
-    try {
-      // 临时实现：返回脚本内容供外部处理
-      stopwatch.stop();
-      return ExecutionResult.success(
-        data: {
-          'script': userScript,
-          'scriptType': scriptType,
-          'inputData': inputData,
-          'message': 'JavaScript execution ready - integrate JS engine',
-        },
-        executionTimeMs: stopwatch.elapsedMilliseconds,
-      );
-    } catch (e, stack) {
-      stopwatch.stop();
-      return ExecutionResult.failure(
-        error: e.toString(),
-        stackTrace: stack.toString(),
-        executionTimeMs: stopwatch.elapsedMilliseconds,
-      );
-    }
-  }
-
-  /// 显示JavaScript代码输入对话框
-  Future<ExecutionResult> _showJavaScriptInputDialog(
-    BuildContext context,
-    Map<String, dynamic>? data,
-    Stopwatch stopwatch,
-  ) async {
-    // 如果上下文未挂载，返回失败
-    if (!context.mounted) {
-      stopwatch.stop();
-      return ExecutionResult.failure(
-        error: 'Context not mounted',
-        executionTimeMs: stopwatch.elapsedMilliseconds,
-      );
-    }
-
-    final scriptController = TextEditingController();
-    final inputDataController = TextEditingController(
-      text: data?.toString() ?? '',
-    );
-
-    // 显示对话框
-    final result = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('core_inputJavaScriptCode'.tr),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: scriptController,
-                decoration: const InputDecoration(
-                  labelText: 'JavaScript代码',
-                  hintText: '在这里输入您的JavaScript代码',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 8,
-                minLines: 5,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: inputDataController,
-                decoration: const InputDecoration(
-                  labelText: '输入数据（JSON格式，可选）',
-                  hintText: '{"key": "value"}',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '提示：使用 inputData 访问输入数据，返回格式：{ success: true, ... }',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('core_cancel'.tr),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context, {
-                'script': scriptController.text,
-                'data': inputDataController.text,
-              });
-            },
-            child: Text('core_execute'.tr),
-          ),
-        ],
-      ),
-    );
-
-    // 如果用户取消，返回失败
-    if (result == null) {
-      stopwatch.stop();
-      return ExecutionResult.failure(
-        error: 'User cancelled',
-        executionTimeMs: stopwatch.elapsedMilliseconds,
-      );
-    }
-
-    // 执行用户输入的JavaScript代码
-    final userScript = result['script'] ?? '';
-    if (userScript.trim().isEmpty) {
-      stopwatch.stop();
-      return ExecutionResult.failure(
-        error: 'JavaScript code cannot be empty',
-        executionTimeMs: stopwatch.elapsedMilliseconds,
-      );
-    }
-
-    // 解析输入数据
-    Map<String, dynamic>? inputData;
-    try {
-      if (result['data']?.trim().isNotEmpty == true) {
-        inputData = jsonDecode(result['data']!);
-      }
-    } catch (e) {
-      // 如果解析失败，使用原始字符串作为输入数据
-      inputData = {'rawData': result['data']};
-    }
-
-    // 临时实现：返回用户输入的代码信息
-    stopwatch.stop();
-    return ExecutionResult.success(
-      data: {
-        'script': userScript,
-        'scriptType': 'javascript',
-        'inputData': inputData,
-        'userInput': true,
-        'message': 'JavaScript code received - ready for execution',
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-      executionTimeMs: stopwatch.elapsedMilliseconds,
-    );
   }
 
   Future<ExecutionResult> _executeDart(

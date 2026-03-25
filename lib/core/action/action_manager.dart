@@ -56,14 +56,7 @@ class ActionManager {
 
   /// 注册默认的自定义动作
   void _registerDefaultCustomActions() {
-    // 注册一个默认的JavaScript执行动作（无预设代码）
-    registerJavaScriptAction(
-      id: 'js_custom_executor',
-      title: '自定义执行JavaScript代码',
-      description: '允许用户输入并执行自定义的JavaScript代码',
-      script: '', // 空脚本，用户可以修改
-      icon: Icons.code,
-    );
+    // 预留：可以在此注册默认的自定义动作
   }
 
   /// 注册内置动作
