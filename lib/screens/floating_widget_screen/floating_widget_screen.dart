@@ -192,82 +192,56 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
           ),
           const Divider(height: 1),
           // 大小设置
+          ListTile(
+            leading: const Icon(Icons.straighten),
+            title: Text('screens_sizeColon'.tr),
+            trailing: Text(
+              'screens_ballSizeDp'.trParams({
+                'size': _controller.ballSize.round().toString(),
+              }),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.straighten, size: 24),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('screens_sizeColon'.tr),
-                      Slider(
-                        value: _controller.ballSize,
-                        min: 50,
-                        max: 150,
-                        divisions: 10,
-                        label: 'screens_ballSizeDp'.trParams({
-                          'size': _controller.ballSize.round().toString(),
-                        }),
-                        onChanged: (value) {
-                          _controller.setBallSize(value);
-                          setState(() {});
-                        },
-                        onChangeEnd: (value) async {
-                          await _controller.updateConfig();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  'screens_ballSizeDp'.trParams({
-                    'size': _controller.ballSize.round().toString(),
-                  }),
-                ),
-              ],
+            padding: const EdgeInsets.only(left: 72.0, right: 16.0),
+            child: Slider(
+              value: _controller.ballSize,
+              min: 50,
+              max: 150,
+              divisions: 10,
+              onChanged: (value) {
+                _controller.setBallSize(value);
+                setState(() {});
+              },
+              onChangeEnd: (value) async {
+                await _controller.updateConfig();
+              },
             ),
           ),
           const Divider(height: 1),
           // 吸附阈值
+          ListTile(
+            leading: const Icon(Icons.vertical_align_center),
+            title: Text('screens_snapThresholdColon'.tr),
+            trailing: Text(
+              'screens_snapThresholdPx'.trParams({
+                'threshold': _controller.snapThreshold.toString(),
+              }),
+            ),
+          ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.vertical_align_center, size: 24),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('screens_snapThresholdColon'.tr),
-                      Slider(
-                        value: _controller.snapThreshold.toDouble(),
-                        min: 20,
-                        max: 100,
-                        divisions: 8,
-                        label: 'screens_snapThresholdPx'.trParams({
-                          'threshold': _controller.snapThreshold.toString(),
-                        }),
-                        onChanged: (value) {
-                          _controller.setSnapThreshold(value.toInt());
-                          setState(() {});
-                        },
-                        onChangeEnd: (value) async {
-                          await _controller.updateConfig();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  'screens_snapThresholdPx'.trParams({
-                    'threshold': _controller.snapThreshold.toString(),
-                  }),
-                ),
-              ],
+            padding: const EdgeInsets.only(left: 72.0, right: 16.0),
+            child: Slider(
+              value: _controller.snapThreshold.toDouble(),
+              min: 20,
+              max: 100,
+              divisions: 8,
+              onChanged: (value) {
+                _controller.setSnapThreshold(value.toInt());
+                setState(() {});
+              },
+              onChangeEnd: (value) async {
+                await _controller.updateConfig();
+              },
             ),
           ),
           const Divider(height: 1),
