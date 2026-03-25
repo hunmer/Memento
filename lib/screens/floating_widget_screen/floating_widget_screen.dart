@@ -312,32 +312,36 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
     );
   }
 
-  /// 选择并设置图片
+  /// 选择并设置图片（先显示预设对话框）
   Future<void> _pickAndSetImage() async {
+    if (!mounted) return;
+
+    // 先显示预设对话框
+    final selectedStyle = await _showPresetStyleDialog();
+    if (selectedStyle == null) return; // 用户取消
+
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
+      Uint8List? bytes;
 
-      if (image == null) return;
-
-      final Uint8List bytes = await image.readAsBytes();
-
-      if (!mounted) return;
-
-      // 显示预设样式选择对话框
-      final selectedStyle = await _showPresetStyleDialog();
-      if (selectedStyle == null) return; // 用户取消
-
-      // 根据选择的样式处理图片
-      Uint8List processedBytes = bytes;
-      if (selectedStyle != 'original') {
-        processedBytes = await _applyPresetStyle(bytes, selectedStyle);
+      if (selectedStyle == 'pick_from_gallery') {
+        // 从相册选择
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 80,
+        );
+        if (image == null) return;
+        bytes = await image.readAsBytes();
+      } else if (selectedStyle.startsWith('preset_')) {
+        // 使用预设图片
+        final presetPath = 'assets/floating_ball_icons/${selectedStyle.replaceFirst('preset_', '')}.png';
+        final byteData = await rootBundle.load(presetPath);
+        bytes = byteData.buffer.asUint8List();
       }
 
+      if (bytes == null || !mounted) return;
+
       // 设置悬浮球图片
-      final result = await _controller.setCustomImage(processedBytes);
+      final result = await _controller.setCustomImage(bytes);
       if (result != null && mounted) {
         _showMessage(result);
       } else if (mounted) {
@@ -365,10 +369,10 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             children: [
-              // 原图选项
-              _buildPresetItem('original', 'screens_originalImage'.tr, null),
-              // 预设样式
-              _buildPresetItem('preset1', '预设1', 'assets/floating_ball_icons/1.png'),
+              // 预设图片
+              _buildPresetItem('preset_1', '预设1', 'assets/floating_ball_icons/1.png'),
+              // 最后一个：从相册选择
+              _buildPresetItem('pick_from_gallery', 'screens_fromGallery'.tr, null, isGallery: true),
             ],
           ),
         ),
@@ -383,7 +387,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   }
 
   /// 构建预设样式选项
-  Widget _buildPresetItem(String id, String label, String? assetPath) {
+  Widget _buildPresetItem(String id, String label, String? assetPath, {bool isGallery = false}) {
     return GestureDetector(
       onTap: () => Navigator.pop(context, id),
       child: Column(
@@ -394,8 +398,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: assetPath == null
-                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+              color: isGallery
+                  ? Theme.of(context).colorScheme.primaryContainer
                   : null,
               border: Border.all(
                 color: Theme.of(context).colorScheme.outline,
@@ -417,9 +421,11 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                     ),
                   )
                 : Icon(
-                    Icons.image,
+                    isGallery ? Icons.photo_library : Icons.image,
                     size: 30,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: isGallery
+                        ? Theme.of(context).colorScheme.onPrimaryContainer
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
           ),
           const SizedBox(height: 4),
@@ -431,22 +437,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
         ],
       ),
     );
-  }
-
-  /// 应用预设样式（目前预设样式直接返回预设图片）
-  Future<Uint8List> _applyPresetStyle(Uint8List originalBytes, String styleId) async {
-    // 预设样式目前直接返回预设图片
-    // 后续可以扩展为对原图进行各种处理（如裁剪成圆形、添加边框等）
-    if (styleId == 'preset1') {
-      try {
-        final byteData = await rootBundle.load('assets/floating_ball_icons/1.png');
-        return byteData.buffer.asUint8List();
-      } catch (e) {
-        print('加载预设样式失败: $e');
-        return originalBytes;
-      }
-    }
-    return originalBytes;
   }
 
   /// 显示消息
