@@ -330,8 +330,8 @@ class FloatingBallService : Service() {
         val availableTop = ballY
         val availableBottom = screenHeight - ballY - ballSize
 
-        // 菜单参数
-        val menuRadius = 200  // 菜单半径
+        // 菜单参数 - 半径与悬浮球大小成比例
+        val menuRadius = (ballSize * 2).coerceAtLeast(120)  // 菜单半径，最小120
         val buttonSize = ballSize
 
         // 决定布局：全圆或半圆
