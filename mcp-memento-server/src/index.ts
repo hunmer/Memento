@@ -43,7 +43,7 @@ async function main() {
   // 创建 MCP 服务器
   const server = new Server(
     {
-      name: 'mcp-memento-server',
+      name: '@hunmer/mcp-memento-server',
       version: '1.0.0',
     },
     {
