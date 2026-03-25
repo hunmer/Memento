@@ -57,6 +57,11 @@ class FloatingBallService : Service() {
         fun setButtonImage(index: Int, imageBase64: String) {
             instance?.setButtonImageInternal(index, imageBase64)
         }
+
+        /// 重置悬浮球位置到默认位置（静态方法，供插件主类调用）
+        fun resetPosition() {
+            instance?.resetPositionInternal()
+        }
     }
 
     private lateinit var windowManager: WindowManager
@@ -643,6 +648,24 @@ class FloatingBallService : Service() {
                 mutableButtons[index] = button
                 buttonData = mutableButtons
             }
+        }
+    }
+
+    /// 重置悬浮球位置到默认位置的内部方法
+    private fun resetPositionInternal() {
+        val view = floatingView ?: return
+        if (!view.isAttachedToWindow) return
+
+        // 重置到默认位置（屏幕右侧中间）
+        startX = screenWidth - ballSize
+        startY = screenHeight / 2 - ballSize / 2
+
+        params?.let { p ->
+            p.x = startX
+            p.y = startY
+            windowManager.updateViewLayout(view, p)
+            // 通知位置变化
+            sendPosition(p.x, p.y)
         }
     }
 }

@@ -677,6 +677,11 @@ class FloatingWidgetController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('floating_ball_x');
     await prefs.remove('floating_ball_y');
+
+    // 通知 Android 原生端重置位置
+    if (_isRunning && !UniversalPlatform.isWeb) {
+      await FloatingBallPlugin.resetPosition();
+    }
   }
 
   /// 清除压缩图片数据

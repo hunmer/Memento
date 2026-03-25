@@ -175,6 +175,35 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
               trailing: const Icon(Icons.chevron_right),
               onTap: _pickAndSetImage,
             ),
+
+            const Divider(height: 1),
+            // 自动恢复状态
+            ListTile(
+              leading: const Icon(Icons.restore),
+              title: Text('screens_autoRestoreFloatingBallState'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.autoRestore,
+                onChanged: (value) {
+                  _controller.setAutoRestore(value);
+                  setState(() {});
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 展开/合上动画
+            ListTile(
+              leading: const Icon(Icons.animation),
+              title: Text('screens_expandAnimation'.tr),
+              subtitle: Text('screens_expandAnimationDescription'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.expandAnimationEnabled,
+                onChanged: (value) async {
+                  _controller.setExpandAnimationEnabled(value);
+                  await _controller.updateConfig();
+                  setState(() {});
+                },
+              ),
+            ),
             const Divider(height: 1),
             // 大小设置
             ListTile(
@@ -226,34 +255,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 },
                 onChangeEnd: (value) async {
                   await _controller.updateConfig();
-                },
-              ),
-            ),
-            const Divider(height: 1),
-            // 自动恢复状态
-            ListTile(
-              leading: const Icon(Icons.restore),
-              title: Text('screens_autoRestoreFloatingBallState'.tr),
-              trailing: AdaptiveSwitch(
-                value: _controller.autoRestore,
-                onChanged: (value) {
-                  _controller.setAutoRestore(value);
-                  setState(() {});
-                },
-              ),
-            ),
-            const Divider(height: 1),
-            // 展开/合上动画
-            ListTile(
-              leading: const Icon(Icons.animation),
-              title: Text('screens_expandAnimation'.tr),
-              subtitle: Text('screens_expandAnimationDescription'.tr),
-              trailing: AdaptiveSwitch(
-                value: _controller.expandAnimationEnabled,
-                onChanged: (value) async {
-                  _controller.setExpandAnimationEnabled(value);
-                  await _controller.updateConfig();
-                  setState(() {});
                 },
               ),
             ),
@@ -333,7 +334,8 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
         bytes = await image.readAsBytes();
       } else if (selectedStyle.startsWith('preset_')) {
         // 使用预设图片
-        final presetPath = 'assets/floating_ball_icons/${selectedStyle.replaceFirst('preset_', '')}.png';
+        final presetPath =
+            'assets/floating_ball_icons/${selectedStyle.replaceFirst('preset_', '')}.png';
         final byteData = await rootBundle.load(presetPath);
         bytes = byteData.buffer.asUint8List();
       }
@@ -359,35 +361,50 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   Future<String?> _showPresetStyleDialog() async {
     return showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('screens_selectPresetStyle'.tr),
-        content: SizedBox(
-          width: 300,
-          child: GridView.count(
-            shrinkWrap: true,
-            crossAxisCount: 3,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            children: [
-              // 预设图片
-              _buildPresetItem('preset_1', '预设1', 'assets/floating_ball_icons/1.png'),
-              // 最后一个：从相册选择
-              _buildPresetItem('pick_from_gallery', 'screens_fromGallery'.tr, null, isGallery: true),
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_selectPresetStyle'.tr),
+            content: SizedBox(
+              width: 300,
+              child: GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 3,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                children: [
+                  // 预设图片
+                  _buildPresetItem(
+                    'preset_1',
+                    '预设1',
+                    'assets/floating_ball_icons/1.png',
+                  ),
+                  // 最后一个：从相册选择
+                  _buildPresetItem(
+                    'pick_from_gallery',
+                    'screens_fromGallery'.tr,
+                    null,
+                    isGallery: true,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('screens_cancel'.tr),
-          ),
-        ],
-      ),
     );
   }
 
   /// 构建预设样式选项
-  Widget _buildPresetItem(String id, String label, String? assetPath, {bool isGallery = false}) {
+  Widget _buildPresetItem(
+    String id,
+    String label,
+    String? assetPath, {
+    bool isGallery = false,
+  }) {
     return GestureDetector(
       onTap: () => Navigator.pop(context, id),
       child: Column(
@@ -398,35 +415,39 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
             height: 60,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isGallery
-                  ? Theme.of(context).colorScheme.primaryContainer
-                  : null,
+              color:
+                  isGallery
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null,
               border: Border.all(
                 color: Theme.of(context).colorScheme.outline,
                 width: 1,
               ),
             ),
-            child: assetPath != null
-                ? ClipOval(
-                    child: Image.asset(
-                      assetPath,
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        size: 30,
-                        color: Theme.of(context).colorScheme.outline,
+            child:
+                assetPath != null
+                    ? ClipOval(
+                      child: Image.asset(
+                        assetPath,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (context, error, stackTrace) => Icon(
+                              Icons.image_not_supported,
+                              size: 30,
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
                       ),
+                    )
+                    : Icon(
+                      isGallery ? Icons.photo_library : Icons.image,
+                      size: 30,
+                      color:
+                          isGallery
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                  )
-                : Icon(
-                    isGallery ? Icons.photo_library : Icons.image,
-                    size: 30,
-                    color: isGallery
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
           ),
           const SizedBox(height: 4),
           Text(

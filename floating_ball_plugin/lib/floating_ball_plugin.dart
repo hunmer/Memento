@@ -247,4 +247,14 @@ class FloatingBallPlugin {
       return 'Failed to set button image';
     }
   }
+
+  /// 重置悬浮球位置到默认位置
+  static Future<String?> resetPosition() async {
+    try {
+      final String? result = await _channel.invokeMethod('resetPosition');
+      return result;
+    } on PlatformException {
+      return 'Failed to reset position';
+    }
+  }
 }
