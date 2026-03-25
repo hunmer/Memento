@@ -1,5 +1,8 @@
 package github.hunmer.floating_ball_plugin
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -12,6 +15,8 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -70,6 +75,7 @@ class FloatingBallService : Service() {
     private var snapThreshold: Int = 50
     private var buttonData: List<Map<String, Any>>? = null // 按钮数据数组
     private var customImageBytes: ByteArray? = null // 持久化存储自定义图片
+    private var expandAnimationEnabled: Boolean = true // 展开/合上动画开关
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -142,6 +148,8 @@ class FloatingBallService : Service() {
                 }
 
                 snapThreshold = (cfg["snapThreshold"] as? Double)?.toInt() ?: 50
+                // 获取展开动画开关（默认开启）
+                expandAnimationEnabled = cfg["expandAnimationEnabled"] as? Boolean ?: true
                 // 获取按钮数据数组
                 buttonData = cfg["buttonData"] as? List<Map<String, Any>>
             }
@@ -448,12 +456,81 @@ class FloatingBallService : Service() {
 
             windowManager.addView(buttonView, buttonParams)
             expandedButtons.add(buttonView)
+
+            // 如果启用动画，执行展开动画
+            if (expandAnimationEnabled) {
+                buttonView.scaleX = 0f
+                buttonView.scaleY = 0f
+                buttonView.alpha = 0f
+
+                // 延迟启动每个按钮的动画，形成依次展开效果
+                buttonView.postDelayed({
+                    animateButtonExpand(buttonView)
+                }, index * 50L)
+            }
         }
     }
 
+    /// 按钮展开动画
+    private fun animateButtonExpand(buttonView: View) {
+        val animator = ValueAnimator.ofFloat(0f, 1f)
+        animator.duration = 250
+        animator.interpolator = OvershootInterpolator(1.5f)
+
+        animator.addUpdateListener { animation ->
+            val value = animation.animatedValue as Float
+            buttonView.scaleX = value
+            buttonView.scaleY = value
+            buttonView.alpha = value
+        }
+
+        animator.start()
+    }
+
     private fun closeExpandedButtons() {
-        expandedButtons.forEach { windowManager.removeView(it) }
-        expandedButtons.clear()
+        if (expandAnimationEnabled && expandedButtons.isNotEmpty()) {
+            // 启用动画时，执行合上动画
+            expandedButtons.forEachIndexed { index, buttonView ->
+                buttonView.postDelayed({
+                    animateButtonCollapse(buttonView, index == expandedButtons.size - 1)
+                }, index * 30L)
+            }
+        } else {
+            // 未启用动画时，直接移除
+            expandedButtons.forEach { windowManager.removeView(it) }
+            expandedButtons.clear()
+        }
+    }
+
+    /// 按钮合上动画
+    private fun animateButtonCollapse(buttonView: View, isLast: Boolean) {
+        val animator = ValueAnimator.ofFloat(1f, 0f)
+        animator.duration = 150
+        animator.interpolator = AccelerateDecelerateInterpolator()
+
+        animator.addUpdateListener { animation ->
+            val value = animation.animatedValue as Float
+            buttonView.scaleX = value
+            buttonView.scaleY = value
+            buttonView.alpha = value
+        }
+
+        animator.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                try {
+                    if (buttonView.isAttachedToWindow) {
+                        windowManager.removeView(buttonView)
+                    }
+                } catch (e: Exception) {
+                    // 忽略移除错误
+                }
+                if (isLast) {
+                    expandedButtons.clear()
+                }
+            }
+        })
+
+        animator.start()
     }
 
     /// 内部配置更新方法
@@ -481,6 +558,11 @@ class FloatingBallService : Service() {
 
         config["snapThreshold"]?.let {
             snapThreshold = (it as? Double)?.toInt() ?: snapThreshold
+        }
+
+        // 更新展开动画开关
+        config["expandAnimationEnabled"]?.let { enabled ->
+            expandAnimationEnabled = enabled as? Boolean ?: true
         }
 
         // 更新图标

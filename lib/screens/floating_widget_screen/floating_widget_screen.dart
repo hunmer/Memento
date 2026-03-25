@@ -167,7 +167,6 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                 },
               ),
             ),
-            const Divider(height: 16, thickness: 8),
             // 选择图片
             ListTile(
               leading: const Icon(Icons.image),
@@ -243,6 +242,21 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
               ),
             ),
             const Divider(height: 1),
+            // 展开/合上动画
+            ListTile(
+              leading: const Icon(Icons.animation),
+              title: Text('screens_expandAnimation'.tr),
+              subtitle: Text('screens_expandAnimationDescription'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.expandAnimationEnabled,
+                onChanged: (value) async {
+                  _controller.setExpandAnimationEnabled(value);
+                  await _controller.updateConfig();
+                  setState(() {});
+                },
+              ),
+            ),
+            const Divider(height: 1),
             // 按钮管理
             ListTile(
               leading: const Icon(Icons.touch_app),
@@ -268,7 +282,7 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
             ),
             // 位置信息
             if (_controller.lastPosition != null) ...[
-              const Divider(height: 16, thickness: 8),
+              const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.location_on),
                 title: Text('screens_currentPosition'.tr),

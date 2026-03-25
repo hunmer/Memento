@@ -56,6 +56,7 @@ class FloatingWidgetController {
   bool _autoRestore = true;
   bool _autoHideInApp = false;
   bool _runningInBackground = false;
+  bool _expandAnimationEnabled = true;
   Uint8List? _customImageBytes;
   List<FloatingBallButtonData> _buttonData = [];
 
@@ -69,6 +70,7 @@ class FloatingWidgetController {
   bool get autoRestore => _autoRestore;
   bool get autoHideInApp => _autoHideInApp;
   bool get runningInBackground => _runningInBackground;
+  bool get expandAnimationEnabled => _expandAnimationEnabled;
   Uint8List? get customImageBytes => _customImageBytes;
   List<FloatingBallButtonData> get buttonData => List.unmodifiable(_buttonData);
 
@@ -138,6 +140,7 @@ class FloatingWidgetController {
     _autoRestore = prefs.getBool('floating_ball_auto_restore') ?? true;
     _autoHideInApp = prefs.getBool('floating_ball_auto_hide_in_app') ?? false;
     _runningInBackground = prefs.getBool('floating_ball_running_in_background') ?? false;
+    _expandAnimationEnabled = prefs.getBool('floating_ball_expand_animation_enabled') ?? true;
 
     final x = prefs.getInt('floating_ball_x');
     final y = prefs.getInt('floating_ball_y');
@@ -271,6 +274,7 @@ class FloatingWidgetController {
     await prefs.setBool('floating_ball_auto_restore', _autoRestore);
     await prefs.setBool('floating_ball_auto_hide_in_app', _autoHideInApp);
     await prefs.setBool('floating_ball_running_in_background', _runningInBackground);
+    await prefs.setBool('floating_ball_expand_animation_enabled', _expandAnimationEnabled);
     await prefs.setBool('floating_ball_enabled', _isRunning);
 
     if (_customImageBytes != null) {
@@ -390,6 +394,7 @@ class FloatingWidgetController {
         startY: _lastPosition?.y,
         snapThreshold: _snapThreshold,
         buttonData: _getButtonDataWithoutImages(),
+        expandAnimationEnabled: _expandAnimationEnabled,
       );
 
       result = await FloatingBallPlugin.startFloatingBall(config: config);
@@ -439,6 +444,7 @@ class FloatingWidgetController {
       startY: _lastPosition?.y,
       snapThreshold: _snapThreshold,
       buttonData: _getButtonDataWithoutImages(),
+      expandAnimationEnabled: _expandAnimationEnabled,
     );
 
     final result = await FloatingBallPlugin.startFloatingBall(config: config);
@@ -513,6 +519,7 @@ class FloatingWidgetController {
       size: _ballSize,
       snapThreshold: _snapThreshold,
       buttonData: _buttonData,
+      expandAnimationEnabled: _expandAnimationEnabled,
     );
 
     final result = await FloatingBallPlugin.updateConfig(config);
@@ -612,6 +619,11 @@ class FloatingWidgetController {
     _runningInBackground = runningInBackground;
   }
 
+  /// 设置展开/合上动画是否启用
+  void setExpandAnimationEnabled(bool enabled) {
+    _expandAnimationEnabled = enabled;
+  }
+
   /// 添加按钮
   void addButton(FloatingBallButtonData button) {
     _buttonData.add(button);
@@ -704,6 +716,7 @@ class FloatingWidgetController {
     await prefs.remove('floating_ball_auto_restore');
     await prefs.remove('floating_ball_auto_hide_in_app');
     await prefs.remove('floating_ball_running_in_background');
+    await prefs.remove('floating_ball_expand_animation_enabled');
     await prefs.remove('floating_ball_enabled');
   }
 

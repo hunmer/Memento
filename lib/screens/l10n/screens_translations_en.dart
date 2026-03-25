@@ -204,6 +204,8 @@ final Map<String, String> screensTranslationsEn = {
   'screens_clickToStart': 'Click to Start',
   'screens_autoHideInApp': 'Auto Hide In App',
   'screens_autoHideInAppDescription': 'Auto hide overlay floating ball in app',
+  'screens_expandAnimation': 'Expand Animation',
+  'screens_expandAnimationDescription': 'Show animation effect when expanding/collapsing floating ball',
   'screens_clickedButton': 'Clicked: @buttonName',
   'screens_xPositionYPosition': 'X: @x, Y: @y',
 

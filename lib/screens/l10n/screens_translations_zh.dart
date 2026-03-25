@@ -196,6 +196,8 @@ final Map<String, String> screensTranslationsZh = {
   'screens_clickToStart': '点击开启',
   'screens_autoHideInApp': '应用内自动隐藏',
   'screens_autoHideInAppDescription': '在应用内自动隐藏overlay悬浮球',
+  'screens_expandAnimation': '展开动画',
+  'screens_expandAnimationDescription': '悬浮球展开/合上时显示动画效果',
   'screens_clickedButton': '点击了: @buttonName',
   'screens_xPositionYPosition': 'X: @x, Y: @y',
 
