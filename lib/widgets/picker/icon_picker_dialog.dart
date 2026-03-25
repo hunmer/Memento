@@ -8,11 +8,13 @@ import 'package:Memento/constants/app_icons.dart';
 class IconPickerDialog extends StatefulWidget {
   final IconData currentIcon;
   final bool enableIconToImage; // 是否启用图标转图片功能
+  final bool forceConvertToImage; // 是否强制转换为图片（不可取消）
 
   const IconPickerDialog({
     super.key,
     required this.currentIcon,
     this.enableIconToImage = true,
+    this.forceConvertToImage = false,
   });
 
   @override
@@ -42,6 +44,10 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
     allIcons = AppIcons.predefinedIcons.values.toList();
     _iconNames = AppIcons.predefinedIcons.keys.toList();
     _iconData = AppIcons.predefinedIcons.values.toList();
+    // 如果强制转换为图片，则初始化为 true
+    if (widget.forceConvertToImage) {
+      _convertToImage = true;
+    }
     _updateFilteredIcons();
   }
 
@@ -177,11 +183,13 @@ class _IconPickerDialogState extends State<IconPickerDialog> {
               children: [
                 Checkbox(
                   value: _convertToImage,
-                  onChanged: (value) {
-                    setState(() {
-                      _convertToImage = value ?? false;
-                    });
-                  },
+                  onChanged: widget.forceConvertToImage
+                      ? null
+                      : (value) {
+                          setState(() {
+                            _convertToImage = value ?? false;
+                          });
+                        },
                 ),
                 Expanded(child: Text('widget_convertIconToImage'.tr)),
                 IconButton(
@@ -327,6 +335,7 @@ Future<dynamic> showIconPickerDialog(
   BuildContext context,
   IconData currentIcon, {
   bool enableIconToImage = true,
+  bool forceConvertToImage = false,
 }) {
   // 使用原生showDialog，但确保使用rootNavigator以保证在最上层显示
   return showDialog<dynamic>(
@@ -339,6 +348,7 @@ Future<dynamic> showIconPickerDialog(
         (context) => IconPickerDialog(
           currentIcon: currentIcon,
           enableIconToImage: enableIconToImage,
+          forceConvertToImage: forceConvertToImage,
         ),
   );
 }

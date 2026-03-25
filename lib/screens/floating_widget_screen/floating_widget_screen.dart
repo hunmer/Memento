@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -313,10 +314,139 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
 
   /// 选择并设置图片
   Future<void> _pickAndSetImage() async {
-    final result = await _controller.pickAndSetImage(_picker);
-    if (result != null && mounted) {
-      _showMessage(result);
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (image == null) return;
+
+      final Uint8List bytes = await image.readAsBytes();
+
+      if (!mounted) return;
+
+      // 显示预设样式选择对话框
+      final selectedStyle = await _showPresetStyleDialog();
+      if (selectedStyle == null) return; // 用户取消
+
+      // 根据选择的样式处理图片
+      Uint8List processedBytes = bytes;
+      if (selectedStyle != 'original') {
+        processedBytes = await _applyPresetStyle(bytes, selectedStyle);
+      }
+
+      // 设置悬浮球图片
+      final result = await _controller.setCustomImage(processedBytes);
+      if (result != null && mounted) {
+        _showMessage(result);
+      } else if (mounted) {
+        _showMessage('screens_floatingBallImageSet'.tr);
+        setState(() {}); // 刷新UI
+      }
+    } catch (e) {
+      if (mounted) {
+        _showMessage('选择图片失败: $e');
+      }
     }
+  }
+
+  /// 显示预设样式选择对话框
+  Future<String?> _showPresetStyleDialog() async {
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('screens_selectPresetStyle'.tr),
+        content: SizedBox(
+          width: 300,
+          child: GridView.count(
+            shrinkWrap: true,
+            crossAxisCount: 3,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            children: [
+              // 原图选项
+              _buildPresetItem('original', 'screens_originalImage'.tr, null),
+              // 预设样式
+              _buildPresetItem('preset1', '预设1', 'assets/floating_ball_icons/1.png'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('screens_cancel'.tr),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 构建预设样式选项
+  Widget _buildPresetItem(String id, String label, String? assetPath) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context, id),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: assetPath == null
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : null,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline,
+                width: 1,
+              ),
+            ),
+            child: assetPath != null
+                ? ClipOval(
+                    child: Image.asset(
+                      assetPath,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.image_not_supported,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.image,
+                    size: 30,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 应用预设样式（目前预设样式直接返回预设图片）
+  Future<Uint8List> _applyPresetStyle(Uint8List originalBytes, String styleId) async {
+    // 预设样式目前直接返回预设图片
+    // 后续可以扩展为对原图进行各种处理（如裁剪成圆形、添加边框等）
+    if (styleId == 'preset1') {
+      try {
+        final byteData = await rootBundle.load('assets/floating_ball_icons/1.png');
+        return byteData.buffer.asUint8List();
+      } catch (e) {
+        print('加载预设样式失败: $e');
+        return originalBytes;
+      }
+    }
+    return originalBytes;
   }
 
   /// 显示消息
