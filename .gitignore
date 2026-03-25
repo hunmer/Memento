@@ -90,3 +90,4 @@ server-nodejs/admin/
 
 # Service account credentials
 server-nodejs/service-account.json
+ios/build/*
