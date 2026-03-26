@@ -416,6 +416,27 @@ class HomeScreenController extends ChangeNotifier {
       return;
     }
 
+    // 检查插件是否已初始化完成
+    if (!AppStartupState.instance.pluginsReady) {
+      // 插件还未初始化完成，监听初始化完成事件
+      debugPrint('[HomeScreenController] 插件尚未初始化完成，等待中...');
+      VoidCallback? listener;
+      listener = () {
+        if (AppStartupState.instance.pluginsReady) {
+          AppStartupState.instance.removeListener(listener!);
+          debugPrint('[HomeScreenController] 插件初始化完成，现在打开最后的插件');
+          _openLastPlugin(context);
+        }
+      };
+      AppStartupState.instance.addListener(listener);
+    } else {
+      // 插件已初始化完成，直接打开
+      _openLastPlugin(context);
+    }
+  }
+
+  /// 内部方法：打开最后的插件（确保插件已初始化）
+  void _openLastPlugin(BuildContext context) {
     final lastPlugin = globalPluginManager.getLastOpenedPlugin();
     if (lastPlugin != null) {
       globalPluginManager.openPlugin(context, lastPlugin);
