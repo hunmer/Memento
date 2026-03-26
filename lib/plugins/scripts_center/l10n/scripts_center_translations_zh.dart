@@ -18,6 +18,8 @@ const Map<String, String> scriptsCenterTranslationsZh = {
   'scripts_center_fill_all_fields': '请填写所有字段',
   'scripts_center_source_added': '源已添加',
   'scripts_center_installed_only': '只显示已安装',
+  'scripts_center_installed_status': '安装状态',
+  'scripts_center_not_installed': '未安装',
   'scripts_center_no_scripts_found': '未找到脚本',
   'scripts_center_downloading': '下载中',
   'scripts_center_installing': '安装中',
