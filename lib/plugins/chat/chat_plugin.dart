@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:Memento/plugins/chat/models/channel.dart';
 import 'package:Memento/plugins/chat/models/message.dart';
@@ -179,11 +181,13 @@ class ChatPlugin extends BasePlugin with ChangeNotifier, JSBridgePlugin {
     // 注册 JS API（最后一步）
     await registerJSAPI();
 
-    // 初始化手表连接
-    try {
-      await WatchConnectivityManager().initialize();
-    } catch (e) {
-      debugPrint('Failed to initialize watch connectivity: $e');
+    // 初始化手表连接（仅限 iOS 平台）
+    if (!kIsWeb && Platform.isIOS) {
+      try {
+        await WatchConnectivityManager().initialize();
+      } catch (e) {
+        debugPrint('Failed to initialize watch connectivity: $e');
+      }
     }
   }
 
