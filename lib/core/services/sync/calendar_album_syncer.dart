@@ -9,7 +9,9 @@ class CalendarAlbumSyncer extends PluginWidgetSyncer {
   @override
   Future<void> sync() async {
     await syncSafely('calendar_album', () async {
-      final plugin = PluginManager.instance.getPlugin('calendar_album') as CalendarAlbumPlugin?;
+      final plugin =
+          PluginManager.instance.getPlugin('calendar_album')
+              as CalendarAlbumPlugin?;
       if (plugin == null) return;
 
       final totalPhotos = plugin.getTotalPhotosCount();
@@ -36,11 +38,7 @@ class CalendarAlbumSyncer extends PluginWidgetSyncer {
             highlight: todayPhotos > 0,
             colorValue: todayPhotos > 0 ? Colors.green.value : null,
           ),
-          WidgetStatItem(
-            id: 'tags',
-            label: '标签数',
-            value: '$tagsCount',
-          ),
+          WidgetStatItem(id: 'tags', label: '标签数', value: '$tagsCount'),
         ],
       );
     });
@@ -50,7 +48,6 @@ class CalendarAlbumSyncer extends PluginWidgetSyncer {
   Future<void> syncCalendarAlbumWeeklyWidget() async {
     await syncSafely('calendar_album_weekly', () async {
       // 每周相册小组件使用自定义同步逻辑，不需要通过 updateWidget
-      debugPrint('每周相册小组件数据已更新');
     });
   }
 }

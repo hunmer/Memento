@@ -11,11 +11,26 @@ class ChannelListController extends ChangeNotifier {
   late SharedPreferences prefs;
   List<String> availableGroups = ["all", "ungrouped"]; // 可用的频道组列表
   String searchQuery = ""; // 搜索关键词
+  bool _isInitialized = false; // 标记是否初始化完成
 
   ChannelListController({required this.channels, required this.chatPlugin}) {
-    _initializePrefs();
-    _updateAvailableGroups();
+    _initialize();
     chatPlugin.addListener(_onChannelsUpdated);
+  }
+
+  /// 统一初始化方法,确保异步操作完成后再更新 UI
+  Future<void> _initialize() async {
+    // 1. 先加载用户偏好设置
+    await _initializePrefs();
+
+    // 2. 再更新可用分组和排序后的频道
+    _updateAvailableGroups();
+
+    // 3. 标记初始化完成
+    _isInitialized = true;
+
+    // 4. 通知 UI 更新
+    notifyListeners();
   }
 
   @override
@@ -25,15 +40,15 @@ class ChannelListController extends ChangeNotifier {
   }
 
   void _onChannelsUpdated() {
-    _updateSortedChannels();
+    // 当频道数据更新时,重新计算可用分组和排序
+    _updateAvailableGroups();
     notifyListeners();
   }
 
   Future<void> _initializePrefs() async {
     prefs = await SharedPreferences.getInstance();
     selectedGroup = prefs.getString('selectedGroup') ?? "all";
-    _updateSortedChannels();
-    notifyListeners();
+    // 不在这里调用 notifyListeners(),由 _initialize() 统一调用
   }
 
   Future<void> loadSelectedGroup() async {
