@@ -139,7 +139,8 @@ class MobileJSEngine implements JSEngine {
             message: String(message),
             duration: (options && options.duration) || 'short',
             gravity: (options && options.gravity) || 'bottom',
-            type: (options && options.type) || 'normal'
+            type: (options && options.type) || 'normal',
+            global: (options && options.global) || false
           };
 
           sendMessage('_flutterToast', JSON.stringify({ callId: callId, config: config }));
@@ -299,13 +300,14 @@ class MobileJSEngine implements JSEngine {
             durationValue is String ? durationValue : durationValue.toString();
         final gravity = config['gravity'] as String;
         final type = config['type'] as String? ?? 'normal';
+        final global = config['global'] as bool? ?? false;
 
         print(
-          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity, type: $type)',
+          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity, type: $type, global: $global)',
         );
 
         // 调用 Flutter Toast（需要在 UI 线程执行）
-        _showToast(message, duration, gravity, type);
+        _showToast(message, duration, gravity, type, global);
       } catch (e) {
         print('[JS Bridge] Toast 错误: $e');
       }
@@ -1019,20 +1021,32 @@ class MobileJSEngine implements JSEngine {
 
   // ==================== UI 显示方法 ====================
 
-  /// 显示 Toast - 直接使用全局 Toast 服务
-  void _showToast(String message, String duration, String gravity, String type) {
-    print('[JS Bridge] Toast: $message');
+  /// 显示 Toast
+  /// [global] 为 true 时使用全局 Toast（可在 app 外显示），否则使用默认 Toast
+  void _showToast(String message, String duration, String gravity, String type, bool global) {
+    print('[JS Bridge] Toast: $message (global: $global)');
     try {
       final durationMs = _parseDuration(duration);
       final toastGravity = _parseToastGravity(gravity);
       final toastType = _parseToastType(type);
 
-      Toast.showGlobal(
-        message,
-        duration: Duration(milliseconds: durationMs),
-        gravity: toastGravity,
-        type: toastType,
-      );
+      if (global) {
+        // 全局 Toast，可在 app 外显示
+        Toast.showGlobal(
+          message,
+          duration: Duration(milliseconds: durationMs),
+          gravity: toastGravity,
+          type: toastType,
+        );
+      } else {
+        // 默认 Toast
+        Toast.show(
+          message,
+          duration: Duration(milliseconds: durationMs),
+          gravity: toastGravity,
+          type: toastType,
+        );
+      }
     } catch (e) {
       print('[JS Bridge] Toast 显示失败: $e');
     }
