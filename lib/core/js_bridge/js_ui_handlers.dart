@@ -7,36 +7,20 @@ import 'package:location/location.dart';
 import 'platform/mobile_js_engine_stub.dart'
     if (dart.library.io) 'platform/mobile_js_engine.dart';
 import 'package:Memento/widgets/picker/location_picker.dart';
-import 'package:Memento/core/services/toast_service.dart';
 
 /// JavaScript Bridge UI 处理器
-/// 提供默认的 Toast/Alert/Dialog 实现
+/// 提供 Alert/Dialog/Location 的实现（Toast 已在 MobileJSEngine 中直接处理）
 class JSUIHandlers {
   final BuildContext context;
 
   JSUIHandlers(this.context);
 
-  /// 注册所有 UI 处理器到 JSEngine
+  /// 注册 UI 处理器到 JSEngine
+  /// 注意：Toast 已在 MobileJSEngine 中直接处理，这里只注册 Alert/Dialog/Location
   void register(MobileJSEngine engine) {
-    engine.setToastHandler(_handleToast);
     engine.setAlertHandler(_handleAlert);
     engine.setDialogHandler(_handleDialog);
     engine.setLocationHandler(_handleLocation);
-  }
-
-  /// Toast 处理器
-  void _handleToast(String message, String duration, String gravity, String type) {
-    // 使用新的 toast_service.dart API
-    final durationMs = _parseDuration(duration);
-    final toastGravity = _parseToastGravity(gravity);
-    final toastType = _parseToastType(type);
-
-    Toast.show(
-      message,
-      duration: Duration(milliseconds: durationMs),
-      gravity: toastGravity,
-      type: toastType,
-    );
   }
 
   /// Alert 处理器
@@ -89,7 +73,6 @@ class JSUIHandlers {
           content: content != null ? Text(content) : null,
           actions: actions.map((action) {
             final text = action['text'] as String? ?? '';
-            // value 可以是任意类型（布尔值、数字、字符串等）
             final value = action['value'];
             final isDestructive = action['isDestructive'] as bool? ?? false;
 
@@ -108,51 +91,6 @@ class JSUIHandlers {
     );
 
     return result;
-  }
-
-  // ==================== 辅助方法 ====================
-
-  /// 解析 duration 参数
-  int _parseDuration(String duration) {
-    switch (duration.toLowerCase()) {
-      case 'short':
-        return 2000;
-      case 'long':
-        return 4000;
-      default:
-        // 尝试解析为数字
-        return int.tryParse(duration) ?? 2000;
-    }
-  }
-
-  /// 解析 gravity 参数，返回 ToastGravity
-  ToastGravity _parseToastGravity(String gravity) {
-    switch (gravity.toLowerCase()) {
-      case 'top':
-        return ToastGravity.TOP;
-      case 'center':
-        return ToastGravity.CENTER;
-      case 'bottom':
-      default:
-        return ToastGravity.BOTTOM;
-    }
-  }
-
-  /// 解析 type 参数，返回 ToastType
-  ToastType _parseToastType(String type) {
-    switch (type.toLowerCase()) {
-      case 'success':
-        return ToastType.success;
-      case 'error':
-        return ToastType.error;
-      case 'warning':
-        return ToastType.warning;
-      case 'info':
-        return ToastType.info;
-      case 'normal':
-      default:
-        return ToastType.normal;
-    }
   }
 
   /// Location 处理器
@@ -203,7 +141,6 @@ class JSUIHandlers {
             final pois = regeocode['pois'] as List?;
 
             if (pois != null && pois.isNotEmpty) {
-              // 返回第一个 POI
               final firstPoi = pois[0];
               return {
                 'name': firstPoi['name'],
@@ -213,7 +150,6 @@ class JSUIHandlers {
                 'longitude': longitude,
               };
             } else {
-              // 没有 POI，返回当前位置的地址
               return {
                 'name': '当前位置',
                 'address': regeocode['formatted_address'],
@@ -225,7 +161,6 @@ class JSUIHandlers {
           }
         }
 
-        // 如果 API 调用失败，返回基本位置信息
         return {
           'name': '当前位置',
           'address': '',
@@ -254,14 +189,13 @@ class JSUIHandlers {
       );
 
       if (selectedLocation != null) {
-        // 返回选中的位置信息
         return {
           'name': selectedLocation,
           'address': selectedLocation,
         };
       }
 
-      return null; // 用户取消
+      return null;
     }
   }
 }

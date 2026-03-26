@@ -15,8 +15,7 @@ class MobileJSEngine implements JSEngine {
   bool _initialized = false;
   final Map<String, Function> _registeredFunctions = {};
 
-  // UI 回调函数（由外部注入，用于显示 Toast/Alert/Dialog）
-  Function(String message, String duration, String gravity, String type)? _onToast;
+  // UI 回调函数（Alert/Dialog 由外部注入）
   Future<bool> Function(
     String message, {
     String? title,
@@ -41,11 +40,6 @@ class MobileJSEngine implements JSEngine {
 
   @override
   bool get isSupported => true; // Android/iOS/Desktop 都支持
-
-  /// 设置 Toast 回调
-  void setToastHandler(Function(String, String, String, String) handler) {
-    _onToast = handler;
-  }
 
   /// 设置 Alert 回调
   void setAlertHandler(
@@ -1025,27 +1019,22 @@ class MobileJSEngine implements JSEngine {
 
   // ==================== UI 显示方法 ====================
 
-  /// 显示 Toast
+  /// 显示 Toast - 直接使用全局 Toast 服务
   void _showToast(String message, String duration, String gravity, String type) {
-    if (_onToast != null) {
-      _onToast!(message, duration, gravity, type);
-    } else {
-      // 如果没有注册处理器，直接使用全局 ToastService
-      print('[JS Bridge] Toast 未设置处理器，使用全局 ToastService: $message');
-      try {
-        final durationMs = _parseDuration(duration);
-        final toastGravity = _parseToastGravity(gravity);
-        final toastType = _parseToastType(type);
+    print('[JS Bridge] Toast: $message');
+    try {
+      final durationMs = _parseDuration(duration);
+      final toastGravity = _parseToastGravity(gravity);
+      final toastType = _parseToastType(type);
 
-        Toast.showGlobal(
-          message,
-          duration: Duration(milliseconds: durationMs),
-          gravity: toastGravity,
-          type: toastType,
-        );
-      } catch (e) {
-        print('[JS Bridge] ToastService 显示失败: $e');
-      }
+      Toast.showGlobal(
+        message,
+        duration: Duration(milliseconds: durationMs),
+        gravity: toastGravity,
+        type: toastType,
+      );
+    } catch (e) {
+      print('[JS Bridge] Toast 显示失败: $e');
     }
   }
 
