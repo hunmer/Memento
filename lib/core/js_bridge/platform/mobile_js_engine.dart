@@ -8,14 +8,14 @@ import 'package:Memento/plugins/agent_chat/models/tool_config.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_config_manager.dart';
 import 'package:Memento/plugins/agent_chat/services/tool_service.dart';
 import 'package:Memento/core/app_initializer.dart'; // 用于访问 globalStorage
+import 'package:Memento/core/services/toast_service.dart'; // Toast 服务
 
 class MobileJSEngine implements JSEngine {
   late JavascriptRuntime _runtime;
   bool _initialized = false;
   final Map<String, Function> _registeredFunctions = {};
 
-  // UI 回调函数（由外部注入，用于显示 Toast/Alert/Dialog）
-  Function(String message, String duration, String gravity, String type)? _onToast;
+  // UI 回调函数（Alert/Dialog 由外部注入）
   Future<bool> Function(
     String message, {
     String? title,
@@ -40,11 +40,6 @@ class MobileJSEngine implements JSEngine {
 
   @override
   bool get isSupported => true; // Android/iOS/Desktop 都支持
-
-  /// 设置 Toast 回调
-  void setToastHandler(Function(String, String, String, String) handler) {
-    _onToast = handler;
-  }
 
   /// 设置 Alert 回调
   void setAlertHandler(
@@ -144,7 +139,8 @@ class MobileJSEngine implements JSEngine {
             message: String(message),
             duration: (options && options.duration) || 'short',
             gravity: (options && options.gravity) || 'bottom',
-            type: (options && options.type) || 'normal'
+            type: (options && options.type) || 'normal',
+            global: (options && options.global) || false
           };
 
           sendMessage('_flutterToast', JSON.stringify({ callId: callId, config: config }));
@@ -304,13 +300,14 @@ class MobileJSEngine implements JSEngine {
             durationValue is String ? durationValue : durationValue.toString();
         final gravity = config['gravity'] as String;
         final type = config['type'] as String? ?? 'normal';
+        final global = config['global'] as bool? ?? false;
 
         print(
-          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity, type: $type)',
+          '[JS Bridge] Toast: $message (duration: $duration, gravity: $gravity, type: $type, global: $global)',
         );
 
         // 调用 Flutter Toast（需要在 UI 线程执行）
-        _showToast(message, duration, gravity, type);
+        _showToast(message, duration, gravity, type, global);
       } catch (e) {
         print('[JS Bridge] Toast 错误: $e');
       }
@@ -1025,11 +1022,76 @@ class MobileJSEngine implements JSEngine {
   // ==================== UI 显示方法 ====================
 
   /// 显示 Toast
-  void _showToast(String message, String duration, String gravity, String type) {
-    if (_onToast != null) {
-      _onToast!(message, duration, gravity, type);
-    } else {
-      print('[JS Bridge] Toast 未设置处理器: $message');
+  /// [global] 为 true 时使用全局 Toast（可在 app 外显示），否则使用默认 Toast
+  void _showToast(String message, String duration, String gravity, String type, bool global) {
+    print('[JS Bridge] Toast: $message (global: $global)');
+    try {
+      final durationMs = _parseDuration(duration);
+      final toastGravity = _parseToastGravity(gravity);
+      final toastType = _parseToastType(type);
+
+      if (global) {
+        // 全局 Toast，可在 app 外显示
+        Toast.showGlobal(
+          message,
+          duration: Duration(milliseconds: durationMs),
+          gravity: toastGravity,
+          type: toastType,
+        );
+      } else {
+        // 默认 Toast
+        Toast.show(
+          message,
+          duration: Duration(milliseconds: durationMs),
+          gravity: toastGravity,
+          type: toastType,
+        );
+      }
+    } catch (e) {
+      print('[JS Bridge] Toast 显示失败: $e');
+    }
+  }
+
+  /// 解析 duration 参数
+  int _parseDuration(String duration) {
+    switch (duration.toLowerCase()) {
+      case 'short':
+        return 2000;
+      case 'long':
+        return 4000;
+      default:
+        // 尝试解析为数字
+        return int.tryParse(duration) ?? 2000;
+    }
+  }
+
+  /// 解析 gravity 参数，返回 ToastGravity
+  ToastGravity _parseToastGravity(String gravity) {
+    switch (gravity.toLowerCase()) {
+      case 'top':
+        return ToastGravity.TOP;
+      case 'center':
+        return ToastGravity.CENTER;
+      case 'bottom':
+      default:
+        return ToastGravity.BOTTOM;
+    }
+  }
+
+  /// 解析 type 参数，返回 ToastType
+  ToastType _parseToastType(String type) {
+    switch (type.toLowerCase()) {
+      case 'success':
+        return ToastType.success;
+      case 'error':
+        return ToastType.error;
+      case 'warning':
+        return ToastType.warning;
+      case 'info':
+        return ToastType.info;
+      case 'normal':
+      default:
+        return ToastType.normal;
     }
   }
 

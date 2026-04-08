@@ -14,13 +14,7 @@
     // 获取触发的事件
     const eventName = args.event;
     const eventData = args.eventData;
-
-    // 检查该事件是否已启用
-    if (!config.enabledEvents || !config.enabledEvents.includes(eventName)) {
-      console.log(`事件 ${eventName} 未在启用列表中`, 'info');
-      return { success: true, message: '事件未启用' };
-    }
-
+    
     // 预设的事件解析
     const eventParsers = {
       'chat_message_sent': () => {

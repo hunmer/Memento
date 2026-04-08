@@ -139,13 +139,13 @@ class FloatingBallManager {
           Toast.error('工具模板服务未初始化');
           break;
         }
-        await NavigationHelper.push(context, ToolTemplateScreen(
-                  templateService: templateService,),
+        await NavigationHelper.push(
+          context,
+          ToolTemplateScreen(templateService: templateService),
         );
         break;
       case 'tool_management':
-        await NavigationHelper.push(context, const ToolManagementScreen(),
-        );
+        await NavigationHelper.push(context, const ToolManagementScreen());
         break;
       default:
         if (context.mounted) {
@@ -169,7 +169,7 @@ class FloatingBallManager {
       'actions': {},
       'size_scale': 0.6,
       'position': {'x': 21.0, 'y': 99.0},
-      'enabled': true,
+      'enabled': false,
     };
   }
 
@@ -262,22 +262,18 @@ class FloatingBallManager {
   Future<void> _loadActions() async {
     final data = await _readData();
     final actionsData = data['actions'];
-    final Map<String, dynamic> actions = actionsData is Map<String, dynamic>
-        ? actionsData
-        : (actionsData is Map ? Map<String, dynamic>.from(actionsData) : {});
+    final Map<String, dynamic> actions =
+        actionsData is Map<String, dynamic>
+            ? actionsData
+            : (actionsData is Map
+                ? Map<String, dynamic>.from(actionsData)
+                : {});
 
     for (var gesture in FloatingBallGesture.values) {
       final actionTitle = actions[gesture.name];
       if (actionTitle != null) {
         _actions[gesture] = ActionInfo(actionTitle.toString(), () {});
       }
-    }
-
-    // 为tap手势设置默认动作（如果没有配置的话）
-    if (!_actions.containsKey(FloatingBallGesture.tap)) {
-      _actions[FloatingBallGesture.tap] = ActionInfo('选择打开插件', () {
-        // 这个回调会在setActionContext中被正确设置
-      });
     }
   }
 
@@ -289,9 +285,12 @@ class FloatingBallManager {
     await _ensureInitialized();
     final data = await _readData();
     final actionsData = data['actions'];
-    final Map<String, dynamic> actions = actionsData is Map<String, dynamic>
-        ? actionsData
-        : (actionsData is Map ? Map<String, dynamic>.from(actionsData) : {});
+    final Map<String, dynamic> actions =
+        actionsData is Map<String, dynamic>
+            ? actionsData
+            : (actionsData is Map
+                ? Map<String, dynamic>.from(actionsData)
+                : {});
     if (actionTitle != null) {
       actions[gesture.name] = actionTitle;
     } else {
@@ -326,7 +325,7 @@ class FloatingBallManager {
   Future<bool> isEnabled() async {
     await _ensureInitialized();
     final data = await _readData();
-    return (data['enabled'] as bool?) ?? true;
+    return (data['enabled'] as bool?) ?? false;
   }
 
   // 保存悬浮球启用状态
@@ -347,9 +346,12 @@ class FloatingBallManager {
     await _ensureInitialized();
     final data = await _readData();
     final positionData = data['position'];
-    final Map<String, dynamic> position = positionData is Map<String, dynamic>
-        ? positionData
-        : (positionData is Map ? Map<String, dynamic>.from(positionData) : {});
+    final Map<String, dynamic> position =
+        positionData is Map<String, dynamic>
+            ? positionData
+            : (positionData is Map
+                ? Map<String, dynamic>.from(positionData)
+                : {});
     final double x = (position['x'] as num?)?.toDouble() ?? 20;
     final double y = (position['y'] as num?)?.toDouble() ?? 100;
     _position = Offset(x, y);

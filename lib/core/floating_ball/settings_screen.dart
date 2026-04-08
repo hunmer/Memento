@@ -21,7 +21,7 @@ class _FloatingBallSettingsScreenState
   final FloatingBallManager _manager = FloatingBallManager();
   final ActionManager _actionManager = ActionManager();
   double _sizeScale = 1.0;
-  bool _isEnabled = true;
+  bool _isEnabled = false;
   final Map<FloatingBallGesture, GestureActionConfig?> _selectedActions = {};
 
   @override
@@ -217,7 +217,10 @@ class _FloatingBallSettingsScreenState
               subtitle: Text(
                 displayText,
                 style: TextStyle(
-                  color: displayText == 'floating_ball_notSet'.tr ? Colors.grey[600] : null,
+                  color:
+                      displayText == 'floating_ball_notSet'.tr
+                          ? Colors.grey[600]
+                          : null,
                 ),
               ),
               trailing: const Icon(Icons.chevron_right),

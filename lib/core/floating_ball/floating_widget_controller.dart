@@ -56,6 +56,7 @@ class FloatingWidgetController {
   bool _autoRestore = true;
   bool _autoHideInApp = false;
   bool _runningInBackground = false;
+  bool _expandAnimationEnabled = true;
   Uint8List? _customImageBytes;
   List<FloatingBallButtonData> _buttonData = [];
 
@@ -69,6 +70,7 @@ class FloatingWidgetController {
   bool get autoRestore => _autoRestore;
   bool get autoHideInApp => _autoHideInApp;
   bool get runningInBackground => _runningInBackground;
+  bool get expandAnimationEnabled => _expandAnimationEnabled;
   Uint8List? get customImageBytes => _customImageBytes;
   List<FloatingBallButtonData> get buttonData => List.unmodifiable(_buttonData);
 
@@ -138,6 +140,7 @@ class FloatingWidgetController {
     _autoRestore = prefs.getBool('floating_ball_auto_restore') ?? true;
     _autoHideInApp = prefs.getBool('floating_ball_auto_hide_in_app') ?? false;
     _runningInBackground = prefs.getBool('floating_ball_running_in_background') ?? false;
+    _expandAnimationEnabled = prefs.getBool('floating_ball_expand_animation_enabled') ?? true;
 
     final x = prefs.getInt('floating_ball_x');
     final y = prefs.getInt('floating_ball_y');
@@ -185,19 +188,13 @@ class FloatingWidgetController {
         final List<dynamic> dataList = jsonDecode(buttonDataJson);
         final List<FloatingBallButtonData> loadedButtons = [];
 
-        // 优先加载已压缩的按钮图片
-        final compressedButtonImage = prefs.getString('floating_ball_button_image_compressed');
-
         for (final item in dataList) {
           final map = item as Map<String, dynamic>;
           String? imageBase64 = map['image'] as String?;
 
-          // 优先使用已压缩的图片
-          if (compressedButtonImage != null && compressedButtonImage.isNotEmpty) {
-            imageBase64 = compressedButtonImage;
-          } else if (imageBase64 != null && imageBase64.length > 50 * 1024) {
-            // 如果图片过大（超过 50KB），进行压缩并保存
-            imageBase64 = await _compressAndSaveButtonImage(imageBase64);
+          // 如果图片过大（超过 50KB），进行压缩
+          if (imageBase64 != null && imageBase64.length > 50 * 1024) {
+            imageBase64 = await _compressButtonImage(imageBase64);
           }
 
           loadedButtons.add(FloatingBallButtonData(
@@ -216,8 +213,8 @@ class FloatingWidgetController {
     }
   }
 
-  /// 压缩按钮图片并保存到本地
-  Future<String?> _compressAndSaveButtonImage(String base64Image) async {
+  /// 压缩单个按钮图片（不保存到 SharedPreferences，只返回压缩结果）
+  Future<String?> _compressButtonImage(String base64Image) async {
     try {
       final imageBytes = base64Decode(base64Image);
       // 按钮更小，使用 120x120 像素
@@ -234,16 +231,13 @@ class FloatingWidgetController {
       final compressedBase64 = base64Encode(compressedBytes);
       print('按钮图片压缩: ${base64Image.length} -> ${compressedBase64.length} chars');
 
-      // 保存压缩后的图片到 SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('floating_ball_button_image_compressed', compressedBase64);
-
       return compressedBase64;
     } catch (e) {
       print('按钮图片压缩失败: $e');
       return base64Image;
     }
   }
+
 
   /// 保存按钮数据
   Future<void> _saveButtonData() async {
@@ -252,14 +246,8 @@ class FloatingWidgetController {
     final buttonDataJson = jsonEncode(dataList);
     await prefs.setString('floating_ball_buttons', buttonDataJson);
 
-    // 保存按钮压缩图片（如果有的话）
-    final firstButtonWithImage = _buttonData.firstWhere(
-      (button) => button.image != null && button.image!.isNotEmpty,
-      orElse: () => FloatingBallButtonData(title: '', icon: '', data: null),
-    );
-    if (firstButtonWithImage.image != null && firstButtonWithImage.image!.isNotEmpty) {
-      await prefs.setString('floating_ball_button_image_compressed', firstButtonWithImage.image!);
-    }
+    // 清除旧的压缩图片缓存（已废弃，每个按钮的图片保存在各自的 image 字段中）
+    await prefs.remove('floating_ball_button_image_compressed');
   }
 
   /// 保存设置
@@ -271,6 +259,7 @@ class FloatingWidgetController {
     await prefs.setBool('floating_ball_auto_restore', _autoRestore);
     await prefs.setBool('floating_ball_auto_hide_in_app', _autoHideInApp);
     await prefs.setBool('floating_ball_running_in_background', _runningInBackground);
+    await prefs.setBool('floating_ball_expand_animation_enabled', _expandAnimationEnabled);
     await prefs.setBool('floating_ball_enabled', _isRunning);
 
     if (_customImageBytes != null) {
@@ -390,6 +379,7 @@ class FloatingWidgetController {
         startY: _lastPosition?.y,
         snapThreshold: _snapThreshold,
         buttonData: _getButtonDataWithoutImages(),
+        expandAnimationEnabled: _expandAnimationEnabled,
       );
 
       result = await FloatingBallPlugin.startFloatingBall(config: config);
@@ -439,6 +429,7 @@ class FloatingWidgetController {
       startY: _lastPosition?.y,
       snapThreshold: _snapThreshold,
       buttonData: _getButtonDataWithoutImages(),
+      expandAnimationEnabled: _expandAnimationEnabled,
     );
 
     final result = await FloatingBallPlugin.startFloatingBall(config: config);
@@ -513,6 +504,7 @@ class FloatingWidgetController {
       size: _ballSize,
       snapThreshold: _snapThreshold,
       buttonData: _buttonData,
+      expandAnimationEnabled: _expandAnimationEnabled,
     );
 
     final result = await FloatingBallPlugin.updateConfig(config);
@@ -612,6 +604,11 @@ class FloatingWidgetController {
     _runningInBackground = runningInBackground;
   }
 
+  /// 设置展开/合上动画是否启用
+  void setExpandAnimationEnabled(bool enabled) {
+    _expandAnimationEnabled = enabled;
+  }
+
   /// 添加按钮
   void addButton(FloatingBallButtonData button) {
     _buttonData.add(button);
@@ -680,6 +677,11 @@ class FloatingWidgetController {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('floating_ball_x');
     await prefs.remove('floating_ball_y');
+
+    // 通知 Android 原生端重置位置
+    if (_isRunning && !UniversalPlatform.isWeb) {
+      await FloatingBallPlugin.resetPosition();
+    }
   }
 
   /// 清除压缩图片数据
@@ -704,6 +706,7 @@ class FloatingWidgetController {
     await prefs.remove('floating_ball_auto_restore');
     await prefs.remove('floating_ball_auto_hide_in_app');
     await prefs.remove('floating_ball_running_in_background');
+    await prefs.remove('floating_ball_expand_animation_enabled');
     await prefs.remove('floating_ball_enabled');
   }
 

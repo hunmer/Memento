@@ -7,6 +7,8 @@ import 'package:Memento/plugins/scripts_center/services/script_manager.dart';
 import 'package:Memento/plugins/scripts_center/services/script_store_manager.dart';
 import 'package:Memento/plugins/scripts_center/services/script_download_manager.dart';
 import 'package:Memento/widgets/smooth_bottom_sheet.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper.dart';
+import 'package:Memento/widgets/super_cupertino_navigation_wrapper/index.dart';
 import 'package:Memento/core/services/toast_service.dart';
 
 /// 脚本商场主界面
@@ -18,79 +20,148 @@ class ScriptStoreScreen extends StatefulWidget {
 }
 
 class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final List<String> _selectedTags = [];
-  bool _showInstalledOnly = false;
+  /// 搜索关键词
+  String _searchKeyword = '';
+
+  /// 多条件过滤状态
+  final MultiFilterState _multiFilterState = MultiFilterState();
+
+  @override
+  void dispose() {
+    _multiFilterState.dispose();
+    super.dispose();
+  }
+
+  /// 构建多条件过滤项
+  List<FilterItem> _buildFilterItems(ScriptStoreManager manager) {
+    final allTags = manager.getAllTags();
+
+    return [
+      // 1. 标签多选过滤
+      if (allTags.isNotEmpty)
+        FilterItem(
+          id: 'tags',
+          title: 'scripts_center_tags'.tr,
+          type: FilterType.tagsMultiple,
+          builder: (context, currentValue, onChanged) {
+            return FilterBuilders.buildTagsFilter(
+              context: context,
+              currentValue: currentValue,
+              onChanged: onChanged,
+              availableTags: allTags,
+            );
+          },
+          getBadge: FilterBuilders.tagsBadge,
+        ),
+
+      // 2. 已安装状态过滤
+      FilterItem(
+        id: 'installedStatus',
+        title: 'scripts_center_installed_status'.tr,
+        type: FilterType.checkbox,
+        builder: (context, currentValue, onChanged) {
+          return FilterBuilders.buildCheckboxFilter(
+            context: context,
+            currentValue: currentValue,
+            onChanged: onChanged,
+            options: {
+              'installed': 'scripts_center_installed_only'.tr,
+              'notInstalled': 'scripts_center_not_installed'.tr,
+            },
+          );
+        },
+        getBadge: FilterBuilders.checkboxBadge,
+        initialValue: {
+          'installed': false,
+          'notInstalled': false,
+        },
+      ),
+    ];
+  }
+
+  /// 处理搜索
+  void _onSearchChanged(String keyword) {
+    setState(() {
+      _searchKeyword = keyword;
+    });
+  }
+
+  /// 获取过滤后的脚本列表
+  List<ScriptStoreItem> _getFilteredScripts(ScriptStoreManager manager) {
+    final filters = _multiFilterState.getAllValues();
+
+    // 解析标签过滤
+    List<String>? tags;
+    if (filters['tags'] != null && (filters['tags'] as List).isNotEmpty) {
+      tags = (filters['tags'] as List).cast<String>();
+    }
+
+    // 解析安装状态过滤
+    bool? installedOnly;
+    if (filters['installedStatus'] != null) {
+      final status = filters['installedStatus'] as Map<String, bool>;
+      final showInstalled = status['installed'] ?? false;
+      final showNotInstalled = status['notInstalled'] ?? false;
+
+      if (showInstalled && !showNotInstalled) {
+        installedOnly = true;
+      } else if (!showInstalled && showNotInstalled) {
+        installedOnly = false;
+      }
+      // 如果两者都选或都不选，则不过滤
+    }
+
+    return manager.searchScripts(
+      _searchKeyword,
+      tags: tags,
+      installedOnly: installedOnly,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final scriptStoreManager = context.watch<ScriptStoreManager>();
     final downloadManager = context.watch<ScriptDownloadManager>();
 
-    final filteredScripts = scriptStoreManager.searchScripts(
-      _searchController.text,
-      tags: _selectedTags.isEmpty ? null : _selectedTags,
-      installedOnly: _showInstalledOnly ? true : null,
-    );
+    final filteredScripts = _getFilteredScripts(scriptStoreManager);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('scripts_center_scriptStore'.tr),
-        actions: [
-          // 源切换按钮
-          IconButton(
-            icon: const Icon(Icons.source),
-            tooltip:
-                scriptStoreManager.currentSource?.name ??
-                'scripts_center_select_source'.tr,
-            onPressed: () => _showSourcePicker(context),
-          ),
-          // 源管理按钮
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'scripts_center_manage_sources'.tr,
-            onPressed: () => _showSourceManagement(context),
-          ),
-        ],
-      ),
+    return SuperCupertinoNavigationWrapper(
+      title: Text('scripts_center_scriptStore'.tr),
+      largeTitle: 'scripts_center_scriptStore'.tr,
+      automaticallyImplyLeading: true,
+
+      // 启用搜索栏
+      enableSearchBar: true,
+      searchPlaceholder: 'search'.tr,
+      onSearchChanged: _onSearchChanged,
+
+      // 启用多条件过滤
+      enableMultiFilter: true,
+      multiFilterItems: _buildFilterItems(scriptStoreManager),
+      multiFilterBarHeight: 50,
+      onMultiFilterChanged: (filters) {
+        setState(() {});
+      },
+
+      // 导航栏操作按钮
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.source),
+          tooltip:
+              scriptStoreManager.currentSource?.name ??
+              'scripts_center_select_source'.tr,
+          onPressed: () => _showSourcePicker(context),
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: 'scripts_center_manage_sources'.tr,
+          onPressed: () => _showSourceManagement(context),
+        ),
+      ],
+
+      // 主体内容
       body: Column(
         children: [
-          // 搜索栏
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'search'.tr,
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
-
-          // 标签过滤器
-          _buildTagFilter(scriptStoreManager),
-
-          // 已安装过滤器
-          SwitchListTile(
-            title: Text('scripts_center_installed_only'.tr),
-            value: _showInstalledOnly,
-            onChanged: (value) {
-              setState(() {
-                _showInstalledOnly = value;
-              });
-            },
-          ),
-
-          const Divider(height: 1),
-
           // 脚本列表
           Expanded(
             child:
@@ -113,41 +184,6 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
           if (downloadManager.isInstalling)
             _buildInstallProgress(downloadManager.currentTask!),
         ],
-      ),
-    );
-  }
-
-  /// 标签过滤器
-  Widget _buildTagFilter(ScriptStoreManager manager) {
-    final allTags = manager.getAllTags();
-    if (allTags.isEmpty) return const SizedBox.shrink();
-
-    return SizedBox(
-      height: 50,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: allTags.length,
-        itemBuilder: (context, index) {
-          final tag = allTags[index];
-          final isSelected = _selectedTags.contains(tag);
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilterChip(
-              label: Text(tag),
-              selected: isSelected,
-              onSelected: (selected) {
-                setState(() {
-                  if (selected) {
-                    _selectedTags.add(tag);
-                  } else {
-                    _selectedTags.remove(tag);
-                  }
-                });
-              },
-            ),
-          );
-        },
       ),
     );
   }
@@ -466,7 +502,9 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
                         builder: (confirmContext) {
                           return AlertDialog(
                             title: Text('scripts_center_delete_source'.tr),
-                            content: Text('${'scripts_center_delete_source_confirm'.tr} ${source.name}?'),
+                            content: Text(
+                              '${'scripts_center_delete_source_confirm'.tr} ${source.name}?',
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(confirmContext),
@@ -557,13 +595,15 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
                 }
 
                 final manager = context.read<ScriptStoreManager>();
-                await manager.addSource(ScriptStoreSource(
-                  id: const Uuid().v4(),
-                  name: nameController.text,
-                  url: urlController.text,
-                  baseUrl: baseUrlController.text,
-                  createdAt: DateTime.now(),
-                ));
+                await manager.addSource(
+                  ScriptStoreSource(
+                    id: const Uuid().v4(),
+                    name: nameController.text,
+                    url: urlController.text,
+                    baseUrl: baseUrlController.text,
+                    createdAt: DateTime.now(),
+                  ),
+                );
 
                 Navigator.pop(dialogContext);
                 Toast.success('scripts_center_source_added'.tr);
@@ -584,166 +624,185 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
 
     SmoothBottomSheet.show(
       context: context,
-      builder: (sheetContext) => SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Column(
-              children: [
-                // 头部
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      _buildScriptIcon(script.icon, size: 64),
-                      const SizedBox(width: 16),
-                      Expanded(
+      builder:
+          (sheetContext) => SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: StatefulBuilder(
+              builder: (context, setSheetState) {
+                return Column(
+                  children: [
+                    // 头部
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          _buildScriptIcon(script.icon, size: 64),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  script.name,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'v${script.version}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                if (script.author != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${'scripts_center_author'.tr}: ${script.author}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    // 内容
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            if (script.description != null &&
+                                script.description!.isNotEmpty) ...[
+                              Text(
+                                'scripts_center_description'.tr,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(script.description!),
+                              const SizedBox(height: 16),
+                            ],
                             Text(
-                              script.name,
+                              'scripts_center_tags'.tr,
                               style: const TextStyle(
-                                fontSize: 20,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'v${script.version}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children:
+                                  script.tags.map((tag) {
+                                    return Chip(
+                                      label: Text(tag),
+                                      backgroundColor: Colors.purple[50],
+                                    );
+                                  }).toList(),
                             ),
-                            if (script.author != null) ...[
-                              const SizedBox(height: 4),
+                            if (script.permissions.isNotEmpty) ...[
+                              const SizedBox(height: 16),
                               Text(
-                                '${'scripts_center_author'.tr}: ${script.author}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
+                                'scripts_center_permissions'.tr,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ...script.permissions.map(
+                                (p) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.warning,
+                                        size: 16,
+                                        color: Colors.orange,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(child: Text(p)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1),
-                // 内容
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (script.description != null && script.description!.isNotEmpty) ...[
-                          Text(
-                            'scripts_center_description'.tr,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(script.description!),
-                          const SizedBox(height: 16),
-                        ],
-                        Text(
-                          'scripts_center_tags'.tr,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children:
-                              script.tags.map((tag) {
-                                return Chip(
-                                  label: Text(tag),
-                                  backgroundColor: Colors.purple[50],
-                                );
-                              }).toList(),
-                        ),
-                        if (script.permissions.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          Text(
-                            'scripts_center_permissions'.tr,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...script.permissions.map((p) => Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.warning, size: 16, color: Colors.orange),
-                                const SizedBox(width: 8),
-                                Expanded(child: Text(p)),
-                              ],
-                            ),
-                          )),
-                        ],
-                      ],
                     ),
-                  ),
-                ),
-                // 底部按钮
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      if (script.isInstalled) ...[
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () async {
-                              await scriptStoreManager.uninstallScript(script.id);
-                              await scriptManager.loadScripts();
-                              Toast.success('scripts_center_uninstalled'.tr);
-                            },
-                            icon: const Icon(Icons.delete),
-                            label: Text('scripts_center_uninstall'.tr),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
+                    // 底部按钮
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          if (script.isInstalled) ...[
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  await scriptStoreManager.uninstallScript(
+                                    script.id,
+                                  );
+                                  await scriptManager.loadScripts();
+                                  Toast.success(
+                                    'scripts_center_uninstalled'.tr,
+                                  );
+                                },
+                                icon: const Icon(Icons.delete),
+                                label: Text('scripts_center_uninstall'.tr),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ] else ...[
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: downloadManager.isInstalling
-                                ? null
-                                : () async {
-                              try {
-                                await downloadManager.installScript(script);
-                                Toast.success('scripts_center_installed'.tr);
-                                Navigator.pop(sheetContext);
-                              } catch (e) {
-                                Toast.error('${'scripts_center_install_failed'.tr}: $e');
-                              }
-                            },
-                            icon: const Icon(Icons.download),
-                            label: Text('scripts_center_install'.tr),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
+                          ] else ...[
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed:
+                                    downloadManager.isInstalling
+                                        ? null
+                                        : () async {
+                                          try {
+                                            await downloadManager.installScript(
+                                              script,
+                                            );
+                                            Toast.success(
+                                              'scripts_center_installed'.tr,
+                                            );
+                                            Navigator.pop(sheetContext);
+                                          } catch (e) {
+                                            Toast.error(
+                                              '${'scripts_center_install_failed'.tr}: $e',
+                                            );
+                                          }
+                                        },
+                                icon: const Icon(Icons.download),
+                                label: Text('scripts_center_install'.tr),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
     );
   }
 
@@ -779,22 +838,17 @@ class _ScriptStoreScreenState extends State<ScriptStoreScreen> {
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(8),
         ),
-        child: icon != null && icon.isNotEmpty
-            ? Center(
-              child: Text(
-                icon,
-                style: TextStyle(fontSize: size * 0.6),
-                textAlign: TextAlign.center,
-              ),
-            )
-            : Icon(Icons.code, size: size / 2),
+        child:
+            icon != null && icon.isNotEmpty
+                ? Center(
+                  child: Text(
+                    icon,
+                    style: TextStyle(fontSize: size * 0.6),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+                : Icon(Icons.code, size: size / 2),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 }

@@ -44,6 +44,8 @@ class FloatingBallConfig {
   final int? snapThreshold;
   /// 子按钮数组（替代 subButtonCount）
   final List<FloatingBallButtonData>? buttonData;
+  /// 展开/合上动画是否启用（默认 true）
+  final bool? expandAnimationEnabled;
 
   const FloatingBallConfig({
     this.iconName,
@@ -52,6 +54,7 @@ class FloatingBallConfig {
     this.startY,
     this.snapThreshold,
     this.buttonData,
+    this.expandAnimationEnabled,
   });
 
   /// 转换为 Map 传递给原生端
@@ -63,6 +66,7 @@ class FloatingBallConfig {
       'startY': startY,
       'snapThreshold': snapThreshold,
       'buttonData': buttonData?.map((button) => button.toMap()).toList(),
+      'expandAnimationEnabled': expandAnimationEnabled,
     };
   }
 }
@@ -241,6 +245,16 @@ class FloatingBallPlugin {
       return result;
     } on PlatformException {
       return 'Failed to set button image';
+    }
+  }
+
+  /// 重置悬浮球位置到默认位置
+  static Future<String?> resetPosition() async {
+    try {
+      final String? result = await _channel.invokeMethod('resetPosition');
+      return result;
+    } on PlatformException {
+      return 'Failed to reset position';
     }
   }
 }

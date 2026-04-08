@@ -27,13 +27,6 @@
       "validationMessage": "请选择 AI 助手"
     },
     {
-      "name": "enabledEvents",
-      "type": "eventMultiSelect",
-      "labelText": "监听的事件",
-      "required": true,
-      "validationMessage": "请选择至少一个事件"
-    },
-    {
       "name": "promptTemplate",
       "type": "textArea",
       "labelText": "提示词模板",

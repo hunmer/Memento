@@ -33,8 +33,16 @@ target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
-# 需要保留模块接口的 Pod 列表（因为它们内部有跨文件类型引用）
-PODS_NEED_MODULE_INTERFACE = ['IosAwnCore', 'home_widget', 'flutter_foreground_task']
+# 需要显式开启模块接口的 Pod 列表。
+# Xcode 16 的显式模块构建下，这些 Swift Pod 需要生成可分发模块接口，
+# 否则其依赖链在 Runner 编译阶段可能无法被正确导入。
+PODS_NEED_MODULE_INTERFACE = [
+  'IosAwnCore',
+  'home_widget',
+  'flutter_foreground_task',
+  'intelligence',
+  'SQLite.swift',
+]
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
@@ -45,8 +53,10 @@ post_install do |installer|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
       config.build_settings['ENABLE_BITCODE'] = 'NO'
 
-      # 对于需要模块接口的 Pod，不禁用
-      unless PODS_NEED_MODULE_INTERFACE.include?(target.name)
+      if PODS_NEED_MODULE_INTERFACE.include?(target.name)
+        config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+        config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'YES'
+      else
         config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
         config.build_settings['SWIFT_EMIT_MODULE_INTERFACE'] = 'NO'
       end

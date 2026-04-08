@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dart_date/dart_date.dart';
+import 'package:get/get.dart';
 import 'platform/js_engine_interface.dart';
 import 'platform/js_engine_factory.dart';
 // 条件导入：默认 Web 平台存根，有 IO 库时（移动/桌面）使用真实实现
@@ -77,6 +78,9 @@ class JSBridgeManager {
       _initialized = true;
       print('JS Bridge 初始化成功');
 
+      // 使用 Get.context 全局注册 UI 处理器
+      _registerUIHandlersGlobal();
+
       // 处理延迟注册的插件
       await _processPendingRegistrations();
 
@@ -86,6 +90,31 @@ class JSBridgeManager {
       print('JS Bridge 初始化失败: $e');
       _initialized = false;
     }
+  }
+
+  /// 使用 Get.context 全局注册 UI 处理器
+  void _registerUIHandlersGlobal() {
+    if (!_initialized || _engine == null) {
+      print('警告: JS Bridge 未初始化，无法注册 UI 处理器');
+      return;
+    }
+
+    // 只有 MobileJSEngine 需要注册 UI 处理器
+    if (_engine is! MobileJSEngine) {
+      print('跳过 UI 处理器注册 (Web 平台)');
+      return;
+    }
+
+    // 尝试获取全局 context
+    final context = Get.context;
+    if (context == null) {
+      print('警告: Get.context 不可用，UI 处理器将在首次调用时延迟注册');
+      return;
+    }
+
+    final handlers = JSUIHandlers(context);
+    handlers.register(_engine as MobileJSEngine);
+    print('✓ UI 处理器已全局注册 (Toast/Alert/Dialog)');
   }
 
   /// 检查是否支持

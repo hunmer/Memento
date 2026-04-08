@@ -8,7 +8,7 @@ final Map<String, String> screensTranslationsZh = {
   'screens_errorHabitNotFound': 'Error: Habit not found with id: @id',
 
   // floating_widget_screen
-  'screens_floatingBallSettings': '悬浮球设置',
+  'screens_floatingBallSettings': '系统悬浮球',
   'screens_requestPermission': '申请权限',
   'screens_floatingBallConfig': '悬浮球配置',
   'screens_customizeFloatingBallAppearanceBehavior': '自定义悬浮球的外观和行为',
@@ -196,6 +196,8 @@ final Map<String, String> screensTranslationsZh = {
   'screens_clickToStart': '点击开启',
   'screens_autoHideInApp': '应用内自动隐藏',
   'screens_autoHideInAppDescription': '在应用内自动隐藏overlay悬浮球',
+  'screens_expandAnimation': '展开动画',
+  'screens_expandAnimationDescription': '悬浮球展开/合上时显示动画效果',
   'screens_clickedButton': '点击了: @buttonName',
   'screens_xPositionYPosition': 'X: @x, Y: @y',
 

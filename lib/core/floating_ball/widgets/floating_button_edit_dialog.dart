@@ -187,6 +187,7 @@ class _FloatingButtonEditDialogState extends State<FloatingButtonEditDialog> {
       context,
       currentIcon,
       enableIconToImage: true,
+      forceConvertToImage: true,
     );
 
     if (result != null) {

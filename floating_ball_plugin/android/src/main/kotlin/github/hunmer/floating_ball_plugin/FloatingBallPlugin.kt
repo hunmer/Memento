@@ -99,6 +99,10 @@ class FloatingBallPlugin: FlutterPlugin, MethodCallHandler {
           result.error("INVALID_DATA", "Missing index or imageBase64", null)
         }
       }
+      "resetPosition" -> {
+        FloatingBallService.resetPosition()
+        result.success("Position reset")
+      }
       else -> result.notImplemented()
     }
   }

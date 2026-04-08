@@ -441,7 +441,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (mounted) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DeviceSyncScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const DeviceSyncScreen(),
+                  ),
                 ).then((_) => _checkServerSyncConfig());
               }
             },
@@ -481,6 +483,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
           ),
+          if (UniversalPlatform.isAndroid)
+            ListTile(
+              leading: const Icon(Icons.touch_app),
+              title: Text('screens_floatingBallSettings'.tr),
+              subtitle: Text('screens_manageSystemFloatingBall'.tr),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(context, '/floating_ball');
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.schedule),
             title: Text('settings_screen_autoBackupTitle'.tr),
@@ -649,7 +661,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text('Syncfusion 日历封装组件测试'),
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () {
-              Navigator.pushNamed(context, '/widgets_gallery/memento_sf_calendar');
+              Navigator.pushNamed(
+                context,
+                '/widgets_gallery/memento_sf_calendar',
+              );
             },
           ),
           ListTile(
@@ -749,15 +764,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.touch_app),
-            title: Text('screens_floatingBallSettings'.tr),
-            subtitle: Text('screens_manageSystemFloatingBall'.tr),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(context, '/floating_ball');
-            },
-          ),
-          ListTile(
             leading: const Icon(Icons.link),
             title: Text('screens_intentTest'.tr),
             subtitle: Text('screens_testDynamicIntentAndDeepLink'.tr),
@@ -766,15 +772,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/intent_test');
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications_active),
-            title: const Text('Live Activities 测试'),
-            subtitle: const Text('测试实时活动通知'),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.pushNamed(context, '/live_activities_test');
-            },
-          ),
+          if (UniversalPlatform.isIOS)
+            ListTile(
+              leading: const Icon(Icons.notifications_active),
+              title: const Text('Live Activities 测试'),
+              subtitle: const Text('测试实时活动通知'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(context, '/live_activities_test');
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.input),
             title: const Text('表单字段组件测试'),

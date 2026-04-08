@@ -18,6 +18,8 @@ const Map<String, String> scriptsCenterTranslationsEn = {
   'scripts_center_fill_all_fields': 'Please fill all fields',
   'scripts_center_source_added': 'Source added',
   'scripts_center_installed_only': 'Installed Only',
+  'scripts_center_installed_status': 'Installation Status',
+  'scripts_center_not_installed': 'Not Installed',
   'scripts_center_no_scripts_found': 'No scripts found',
   'scripts_center_downloading': 'Downloading',
   'scripts_center_installing': 'Installing',

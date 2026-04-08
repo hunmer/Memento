@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:floating_ball_plugin/floating_ball_plugin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:Memento/widgets/adaptive_switch.dart';
 import 'package:get/get.dart';
 import 'package:Memento/core/navigation/navigation_helper.dart';
@@ -41,7 +42,12 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   void _setupListeners() {
     _runningSubscription = _controller.runningChanges.listen((isRunning) {
       if (mounted) {
-        setState(() {});        _showMessage(isRunning ? 'screens_floatingBallStarted'.tr : 'screens_floatingBallStopped'.tr);
+        setState(() {});
+        _showMessage(
+          isRunning
+              ? 'screens_floatingBallStarted'.tr
+              : 'screens_floatingBallStopped'.tr,
+        );
       }
     });
 
@@ -49,7 +55,12 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
       hasPermission,
     ) {
       if (mounted) {
-        setState(() {});        _showMessage(hasPermission ? 'screens_permissionGranted'.tr : 'screens_permissionDenied'.tr);
+        setState(() {});
+        _showMessage(
+          hasPermission
+              ? 'screens_permissionGranted'.tr
+              : 'screens_permissionDenied'.tr,
+        );
       }
     });
 
@@ -61,7 +72,10 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
 
     _buttonSubscription = _controller.buttonEvents.listen((event) {
       print('收到按钮事件: ${event.title}, data: ${event.data}');
-      if (mounted) {        _showMessage('screens_clickedButton'.trParams({'buttonName': event.title}));
+      if (mounted) {
+        _showMessage(
+          'screens_clickedButton'.trParams({'buttonName': event.title}),
+        );
         _handleButtonEvent(event);
       }
     });
@@ -96,323 +110,193 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {    return Scaffold(
+  Widget build(BuildContext context) {
+    return Scaffold(
       appBar: AppBar(title: Text('screens_floatingBallSettings'.tr)),
       body: ListView(
         children: [
-          // 第一行：悬浮球状态、悬浮窗权限、开启/禁用悬浮球
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Row(
-              children: [
-                // 悬浮球状态卡片
-                Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _controller.isRunning
-                                ? Icons.radio_button_checked
-                                : Icons.radio_button_unchecked,
-                            color: _controller.isRunning ? Colors.green : Colors.grey,
-                            size: 32,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'screens_floatingBallStatus'.tr,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _controller.isRunning ? 'screens_running'.tr : 'screens_stopped'.tr,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _controller.isRunning
-                                  ? Colors.green
-                                  : Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // 悬浮窗权限卡片
-                Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _controller.hasPermission
-                                ? Icons.check_circle
-                                : Icons.error,
-                            color: _controller.hasPermission
-                                ? Colors.green
-                                : Colors.red,
-                            size: 32,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'screens_floatingWindowPermission'.tr,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _controller.hasPermission ? 'screens_granted'.tr : 'screens_notGranted'.tr,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _controller.hasPermission
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                          ),
-                          if (!_controller.hasPermission) ...[
-                            const SizedBox(height: 8),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                await _controller.requestPermission();
-                              },
-                              icon: const Icon(Icons.security, size: 16),
-                              label: Text('screens_requestPermission'.tr, style: TextStyle(fontSize: 12)),
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // 开启/禁用悬浮球卡片
-                Expanded(
-                  child: Card(
-                    color: _controller.isRunning
-                        ? Colors.red.shade50
-                        : Colors.green.shade50,
-                    child: InkWell(
-                      onTap: () async {
-                        await _controller.toggleFloatingBall();
-                      },
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _controller.isRunning ? Icons.stop : Icons.play_arrow,
-                              color: _controller.isRunning
-                                  ? Colors.red
-                                  : Colors.green,
-                              size: 32,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'screens_floatingBallSwitch'.tr,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _controller.isRunning ? 'screens_clickToStop'.tr : 'screens_clickToStart'.tr,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _controller.isRunning
-                                    ? Colors.red
-                                    : Colors.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          // 悬浮窗权限
+          ListTile(
+            leading: Icon(
+              _controller.hasPermission ? Icons.check_circle : Icons.error,
+              color: _controller.hasPermission ? Colors.green : Colors.red,
             ),
-          ),
-          // 应用内自动隐藏overlay悬浮球选项
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'screens_autoHideInApp'.tr,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'screens_autoHideInAppDescription'.tr,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    AdaptiveSwitch(
-                      value: _controller.autoHideInApp,
-                      onChanged: (value) {
-                        _controller.setAutoHideInApp(value);
-                        setState(() {});
+            title: Text('screens_floatingWindowPermission'.tr),
+            trailing:
+                _controller.hasPermission
+                    ? Text(
+                      'screens_granted'.tr,
+                      style: const TextStyle(color: Colors.green),
+                    )
+                    : TextButton(
+                      onPressed: () async {
+                        await _controller.requestPermission();
                       },
+                      child: Text('screens_requestPermission'.tr),
                     ),
-                  ],
-                ),
+          ),
+          // 开启/禁用悬浮球
+          ListTile(
+            leading: Icon(
+              _controller.isRunning ? Icons.stop : Icons.play_arrow,
+              color: _controller.isRunning ? Colors.red : Colors.green,
+            ),
+            title: Text('screens_floatingBallSwitch'.tr),
+            trailing: AdaptiveSwitch(
+              value: _controller.isRunning,
+              onChanged: (_) async {
+                await _controller.toggleFloatingBall();
+              },
+            ),
+            onTap: () async {
+              await _controller.toggleFloatingBall();
+            },
+          ),
+          // 其他选项只在悬浮球开启时显示
+          if (_controller.isRunning) ...[
+            const Divider(height: 1),
+            // 应用内自动隐藏
+            ListTile(
+              leading: const Icon(Icons.visibility_off),
+              title: Text('screens_autoHideInApp'.tr),
+              subtitle: Text('screens_autoHideInAppDescription'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.autoHideInApp,
+                onChanged: (value) {
+                  _controller.setAutoHideInApp(value);
+                  setState(() {});
+                },
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          // 配置参数卡片
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.tune),
-                  title: Text('screens_floatingBallConfig'.tr),
-                  subtitle: Text('screens_customizeFloatingBallAppearanceBehavior'.tr),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: _pickAndSetImage,
-                    icon: const Icon(Icons.image),
-                    label: Text('screens_selectImageAsFloatingBall'.tr),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                    ),
+            // 选择图片
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: Text('screens_selectImageAsFloatingBall'.tr),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: _pickAndSetImage,
+            ),
+
+            const Divider(height: 1),
+            // 自动恢复状态
+            ListTile(
+              leading: const Icon(Icons.restore),
+              title: Text('screens_autoRestoreFloatingBallState'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.autoRestore,
+                onChanged: (value) {
+                  _controller.setAutoRestore(value);
+                  setState(() {});
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 展开/合上动画
+            ListTile(
+              leading: const Icon(Icons.animation),
+              title: Text('screens_expandAnimation'.tr),
+              subtitle: Text('screens_expandAnimationDescription'.tr),
+              trailing: AdaptiveSwitch(
+                value: _controller.expandAnimationEnabled,
+                onChanged: (value) async {
+                  _controller.setExpandAnimationEnabled(value);
+                  await _controller.updateConfig();
+                  setState(() {});
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 大小设置
+            ListTile(
+              leading: const Icon(Icons.straighten),
+              title: Text('screens_sizeColon'.tr),
+              trailing: Text(
+                'screens_ballSizeDp'.trParams({
+                  'size': _controller.ballSize.round().toString(),
+                }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 72.0, right: 16.0),
+              child: Slider(
+                value: _controller.ballSize,
+                min: 50,
+                max: 150,
+                divisions: 10,
+                onChanged: (value) {
+                  _controller.setBallSize(value);
+                  setState(() {});
+                },
+                onChangeEnd: (value) async {
+                  await _controller.updateConfig();
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 吸附阈值
+            ListTile(
+              leading: const Icon(Icons.vertical_align_center),
+              title: Text('screens_snapThresholdColon'.tr),
+              trailing: Text(
+                'screens_snapThresholdPx'.trParams({
+                  'threshold': _controller.snapThreshold.toString(),
+                }),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 72.0, right: 16.0),
+              child: Slider(
+                value: _controller.snapThreshold.toDouble(),
+                min: 20,
+                max: 100,
+                divisions: 8,
+                onChanged: (value) {
+                  _controller.setSnapThreshold(value.toInt());
+                  setState(() {});
+                },
+                onChangeEnd: (value) async {
+                  await _controller.updateConfig();
+                },
+              ),
+            ),
+            const Divider(height: 1),
+            // 按钮管理
+            ListTile(
+              leading: const Icon(Icons.touch_app),
+              title: Text('screens_manageFloatingButtons'.tr),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'screens_buttonCount'.trParams({
+                      'count': _controller.buttonData.length.toString(),
+                    }),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Text('screens_sizeColon'.tr),
-                      Expanded(
-                        child: Slider(
-                          value: _controller.ballSize,
-                          min: 50,
-                          max: 150,
-                          divisions: 10,
-                          label: 'screens_ballSizeDp'.trParams({'size': _controller.ballSize.round().toString()}),
-                          onChanged: (value) {
-                            _controller.setBallSize(value);
-                            setState(() {});
-                          },
-                          onChangeEnd: (value) async {
-                            await _controller.updateConfig();
-                          }
-                        ),
-                      ),
-                      Text('screens_ballSizeDp'.trParams({'size': _controller.ballSize.round().toString()}))
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Text('screens_snapThresholdColon'.tr),
-                      Expanded(
-                        child: Slider(
-                          value: _controller.snapThreshold.toDouble(),
-                          min: 20,
-                          max: 100,
-                          divisions: 8,
-                          label: 'screens_snapThresholdPx'.trParams({'threshold': _controller.snapThreshold.toString()}),
-                          onChanged: (value) {
-                            _controller.setSnapThreshold(value.toInt());
-                            setState(() {});
-                          },
-                          onChangeEnd: (value) async {
-                            await _controller.updateConfig();
-                          },
-                        ),
-                      ),
-                      Text('screens_snapThresholdPx'.trParams({'threshold': _controller.snapThreshold.toString()})),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Expanded(child: Text('screens_autoRestoreFloatingBallState'.tr)),
-                      AdaptiveSwitch(
-                        value: _controller.autoRestore,
-                        onChanged: (value) {
-                          _controller.setAutoRestore(value);
-                          setState(() {});
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                // 按钮管理
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text('screens_buttonCountColon'.tr),
-                          Text('screens_buttonCount'.trParams({'count': _controller.buttonData.length.toString()})),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          NavigationHelper.push(context, const FloatingButtonManagerScreen(),
-                          ).then((_) => setState(() {}));
-                        },
-                        icon: const Icon(Icons.touch_app),
-                        label: Text('screens_manageFloatingButtons'.tr),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          ),
-          // 位置信息
-          if (_controller.lastPosition != null)
-            Card(
-              child: ListTile(
+                  const SizedBox(width: 8),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+              onTap: () {
+                NavigationHelper.push(
+                  context,
+                  const FloatingButtonManagerScreen(),
+                ).then((_) => setState(() {}));
+              },
+            ),
+            // 位置信息
+            if (_controller.lastPosition != null) ...[
+              const Divider(height: 1),
+              ListTile(
                 leading: const Icon(Icons.location_on),
                 title: Text('screens_currentPosition'.tr),
                 subtitle: Text(
-                  'screens_xPositionYPosition'.trParams({'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(0), 'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(0)})
+                  'screens_xPositionYPosition'.trParams({
+                    'x': _controller.lastPosition!.x.toDouble().toStringAsFixed(
+                      0,
+                    ),
+                    'y': _controller.lastPosition!.y.toDouble().toStringAsFixed(
+                      0,
+                    ),
+                  }),
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.refresh),
@@ -422,18 +306,158 @@ class _FloatingBallScreenState extends State<FloatingBallScreen> {
                   },
                 ),
               ),
-            ),
+            ],
+          ],
         ],
       ),
     );
   }
 
-  /// 选择并设置图片
+  /// 选择并设置图片（先显示预设对话框）
   Future<void> _pickAndSetImage() async {
-    final result = await _controller.pickAndSetImage(_picker);
-    if (result != null && mounted) {
-      _showMessage(result);
+    if (!mounted) return;
+
+    // 先显示预设对话框
+    final selectedStyle = await _showPresetStyleDialog();
+    if (selectedStyle == null) return; // 用户取消
+
+    try {
+      Uint8List? bytes;
+
+      if (selectedStyle == 'pick_from_gallery') {
+        // 从相册选择
+        final XFile? image = await _picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 80,
+        );
+        if (image == null) return;
+        bytes = await image.readAsBytes();
+      } else if (selectedStyle.startsWith('preset_')) {
+        // 使用预设图片
+        final presetPath =
+            'assets/floating_ball_icons/${selectedStyle.replaceFirst('preset_', '')}.png';
+        final byteData = await rootBundle.load(presetPath);
+        bytes = byteData.buffer.asUint8List();
+      }
+
+      if (bytes == null || !mounted) return;
+
+      // 设置悬浮球图片
+      final result = await _controller.setCustomImage(bytes);
+      if (result != null && mounted) {
+        _showMessage(result);
+      } else if (mounted) {
+        _showMessage('screens_floatingBallImageSet'.tr);
+        setState(() {}); // 刷新UI
+      }
+    } catch (e) {
+      if (mounted) {
+        _showMessage('选择图片失败: $e');
+      }
     }
+  }
+
+  /// 显示预设样式选择对话框
+  Future<String?> _showPresetStyleDialog() async {
+    return showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('screens_selectPresetStyle'.tr),
+            content: SizedBox(
+              width: 300,
+              child: GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 3,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                children: [
+                  // 预设图片
+                  _buildPresetItem(
+                    'preset_1',
+                    '预设1',
+                    'assets/floating_ball_icons/1.png',
+                  ),
+                  // 最后一个：从相册选择
+                  _buildPresetItem(
+                    'pick_from_gallery',
+                    'screens_fromGallery'.tr,
+                    null,
+                    isGallery: true,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('screens_cancel'.tr),
+              ),
+            ],
+          ),
+    );
+  }
+
+  /// 构建预设样式选项
+  Widget _buildPresetItem(
+    String id,
+    String label,
+    String? assetPath, {
+    bool isGallery = false,
+  }) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context, id),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color:
+                  isGallery
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null,
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline,
+                width: 1,
+              ),
+            ),
+            child:
+                assetPath != null
+                    ? ClipOval(
+                      child: Image.asset(
+                        assetPath,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (context, error, stackTrace) => Icon(
+                              Icons.image_not_supported,
+                              size: 30,
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      ),
+                    )
+                    : Icon(
+                      isGallery ? Icons.photo_library : Icons.image,
+                      size: 30,
+                      color:
+                          isGallery
+                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 
   /// 显示消息

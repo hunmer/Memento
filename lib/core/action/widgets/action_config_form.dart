@@ -122,13 +122,6 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
       ];
     }
 
-    // 为 js_custom_executor 动作显示JavaScript代码输入框
-    if (widget.actionDefinition.id == 'js_custom_executor') {
-      return [
-        _buildJavaScriptCodeField(),
-      ];
-    }
-
     // 默认显示空提示
     return [
       Padding(
@@ -142,72 +135,6 @@ class _ActionConfigFormState extends State<ActionConfigForm> {
         ),
       ),
     ];
-  }
-
-  /// 构建JavaScript代码输入字段
-  Widget _buildJavaScriptCodeField() {
-    final scriptController = TextEditingController(
-      text: _formData['script'] as String? ?? '',
-    );
-
-    scriptController.addListener(() {
-      _updateField('script', scriptController.text);
-    });
-
-    final inputDataController = TextEditingController(
-      text: _formData['inputData'] as String? ?? '',
-    );
-
-    inputDataController.addListener(() {
-      _updateField('inputData', inputDataController.text);
-    });
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'JavaScript代码',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: scriptController,
-            decoration: const InputDecoration(
-              hintText: '在这里输入您的JavaScript代码',
-              border: OutlineInputBorder(),
-              helperText: '使用 inputData 访问输入数据，返回格式：{ success: true, ... }',
-              helperMaxLines: 2,
-            ),
-            maxLines: 10,
-            minLines: 5,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            '输入数据（JSON格式，可选）',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: inputDataController,
-            decoration: const InputDecoration(
-              hintText: '{"key": "value"}',
-              border: OutlineInputBorder(),
-              helperText: '可选：输入要传递给JavaScript的数据',
-              helperMaxLines: 2,
-            ),
-            maxLines: 3,
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildFormField(String fieldName, FormFieldConfig config) {
