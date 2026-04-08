@@ -1,15 +1,17 @@
 {
   "name": "memento-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Memento 同步服务器 - Node.js + TypeScript 版本",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc && cp -r src/plugins dist/",
+    "build:admin": "cd admin-vue && npm install && npm run build",
+    "build": "npm run build:admin && tsc && node -e \"const fs=require('fs');const p=require('path');['plugins','admin'].forEach(d=>{const s=p.join('.',d),t=p.join('dist',d);if(fs.existsSync(s)){fs.cpSync(s,t,{recursive:true})}})\"",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "test": "jest --runInBand",
     "test:coverage": "jest --coverage --runInBand",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "memento",

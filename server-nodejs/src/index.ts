@@ -310,7 +310,7 @@ async function main() {
   server.listen(config.port, () => {
     console.log('');
     console.log('服务器启动成功!');
-    console.log(`  http://0.0.0.0:${config.port}`);
+    console.log(`  http://127.0.0.1:${config.port}`);
     console.log('');
     console.log('可用端点:');
     console.log('  GET  /                    - 服务信息');

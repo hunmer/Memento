@@ -315,17 +315,6 @@ npm run test:coverage
 node test-api.mjs
 ```
 
-### 插件系统测试结果
-
-| 测试 | 状态 |
-|------|------|
-| 登录获取 Token | ✅ |
-| 获取已安装插件列表 | ✅ |
-| 获取/更新商店配置 | ✅ |
-| 上传插件 (ZIP) | ✅ |
-| 启用/禁用插件 | ✅ |
-| 卸载插件 | ✅ |
-
 ## 开发
 
 ```bash
@@ -334,20 +323,7 @@ npm run dev
 
 # 编译
 npm run build
-
-# 代码检查
-npm run lint
 ```
-
-## 与 Dart 版本的兼容性
-
-此 Node.js 版本与原 Dart 服务器完全兼容：
-
-- ✅ 相同的 API 端点和响应格式
-- ✅ 相同的加密格式（AES-256-GCM）
-- ✅ 相同的 JWT Token 格式
-- ✅ 相同的文件存储结构
-- ✅ 相同的 WebSocket 协议
 
 ## 许可证
 
