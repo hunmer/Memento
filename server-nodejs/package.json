@@ -1,8 +1,14 @@
 {
-  "name": "memento-server",
-  "version": "1.0.1",
+  "name": "@hunmer/memento-server",
+  "version": "1.0.2",
   "description": "Memento 同步服务器 - Node.js + TypeScript 版本",
   "main": "dist/index.js",
+  "bin": {
+    "memento-server": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:admin": "cd admin-vue && npm install && npm run build",
     "build": "npm run build:admin && tsc && node -e \"const fs=require('fs');const p=require('path');['plugins','admin'].forEach(d=>{const s=p.join('.',d),t=p.join('dist',d);if(fs.existsSync(s)){fs.cpSync(s,t,{recursive:true})}})\"",
