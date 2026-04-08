@@ -1,6 +1,6 @@
 {
   "name": "@hunmer/memento-server",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Memento 同步服务器 - Node.js + TypeScript 版本",
   "main": "dist/index.js",
   "bin": {
